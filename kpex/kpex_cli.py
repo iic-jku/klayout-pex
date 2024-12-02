@@ -29,11 +29,13 @@ PROGRAM_NAME = "kpex"
 
 
 def render_enum_help(topic: str,
-                     enum_cls: Type[Enum]) -> str:
+                     enum_cls: Type[Enum],
+                     print_default: bool = True) -> str:
     if not hasattr(enum_cls, 'DEFAULT'):
         raise ValueError("Enum must declare case 'DEFAULT'")
-    enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}." \
-                f"\nDefaults to '{enum_cls.DEFAULT.value}'"
+    enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}"
+    if print_default:
+        enum_help += f".\nDefaults to '{enum_cls.DEFAULT.name.lower()}'"
     return enum_help
 
 
@@ -73,6 +75,13 @@ def validate_args(args: argparse.Namespace):
         error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
         found_errors = True
 
+    try:
+        args.log_level = LogLevel[args.log_level.upper()]
+    except KeyError:
+        error(f"Requested log level {args.log_level.lower()} does not exist, "
+              f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
+        found_errors = True
+
     if found_errors:
         sys.exit(1)
 
@@ -81,8 +90,7 @@ def main():
     args = parse_args()
     validate_args(args)
 
-    log_level = LogLevel[args.log_level.upper()]
-    set_log_level(log_level)
+    set_log_level(args.log_level)
 
     tech_info = TechInfo.from_json(args.tech_pbjson_path)
 
