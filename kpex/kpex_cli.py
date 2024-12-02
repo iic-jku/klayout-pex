@@ -258,6 +258,7 @@ def main():
 
     lvsdb = kdb.LayoutVsSchematic()
 
+    os.makedirs(args.output_dir_path, exist_ok=True)
 
     match args.input_mode:
         case InputMode.LVSDB:
