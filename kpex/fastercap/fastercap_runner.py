@@ -21,10 +21,12 @@ def run_fastercap(exe_path: str,
                   lst_file_path: str,
                   log_path: str,
                   tolerance: float,
+                  d_coeff: float,
+                  mesh_refinement_value: float,
+                  ooc_condition: Optional[int],
                   auto_preconditioner: bool,
                   galerkin_scheme: bool,
-                  d_coeff: float,
-                  mesh_refinement_value: float):
+                  jacobi_preconditioner: bool):
     args = [
         exe_path,
         '-b',                          # console mode, without GUI
@@ -35,11 +37,17 @@ def run_fastercap(exe_path: str,
         f"-m{mesh_refinement_value}",  # Mesh relative refinement value
     ]
 
+    if ooc_condition is not None:
+        args += [f"-f{ooc_condition}"]
+    
+    if auto_preconditioner:
+        args += ['-ap']
+
     if galerkin_scheme:
         args += ['-g']
 
-    if auto_preconditioner:
-        args += ['-ap']
+    if jacobi_preconditioner:
+        args += ['-pj']
 
     args += [
         lst_file_path

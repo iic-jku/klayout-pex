@@ -105,17 +105,10 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=bool, default=False,
                                  help=f"Validate geometries before passing to FasterCap "
                                       f"(default is False)")
+
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
                                  help="FasterCap -aX error tolerance (default is 0.05)")
-    group_fastercap.add_argument("--auto-preconditioner", dest="fastercap_auto_preconditioner",
-                                 type=bool, default=True,
-                                 help=f"FasterCap -ap Automatic preconditioner usage "
-                                      f"(default is True)")
-    group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
-                                 type=bool, default=True,
-                                 help=f"FasterCap -g Use Galerkin scheme "
-                                      f"(default is True)")
     group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
                                  type=float, default=0.5,
                                  help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
@@ -124,6 +117,22 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=float, default=0.5,
                                  help=f"FasterCap -m Mesh relative refinement value "
                                       f"(default is 0.5)")
+    group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
+                                 type=float, default=2,
+                                 help="FasterCap -f out-of-core free memory to link memory condition "
+                                      "(0 = don't go OOC, default is 2)")
+    group_fastercap.add_argument("--auto_precond", dest="fastercap_auto_preconditioner",
+                                 type=bool, default=True,
+                                 help=f"FasterCap -ap Automatic preconditioner usage "
+                                      f"(default is True)")
+    group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
+                                 action='store_true', default=False,
+                                 help=f"FasterCap -g Use Galerkin scheme "
+                                      f"(default is False)")
+    group_fastercap.add_argument("--jacobi", dest="fastercap_jacobi_preconditioner",
+                                 action='store_true', default=False,
+                                 help=f"FasterCap -pj Use Jacobi Preconditioner "
+                                      f"(default is False)")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -228,10 +237,12 @@ def run_fastercap_extraction(args: argparse.Namespace,
                   lst_file_path=lst_file,
                   log_path=log_path,
                   tolerance=args.fastercap_tolerance,
+                  d_coeff=args.fastercap_d_coeff,
+                  mesh_refinement_value=args.fastercap_mesh_refinement_value,
+                  ooc_condition=args.fastercap_ooc_condition,
                   auto_preconditioner=args.fastercap_auto_preconditioner,
                   galerkin_scheme=args.fastercap_galerkin_scheme,
-                  d_coeff=args.fastercap_d_coeff,
-                  mesh_refinement_value=args.fastercap_mesh_refinement_value)
+                  jacobi_preconditioner=args.fastercap_jacobi_preconditioner)
 
     cap_matrix = fastercap_parse_capacitance_matrix(log_path)
     cap_matrix.write_csv(raw_csv_path)
