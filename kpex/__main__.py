@@ -1,4 +1,6 @@
-from .kpex_cli import main
+from .kpex_cli import KpexCLI
+import sys
 
 if __name__ == '__main__':
-    main()
+    cli = KpexCLI()
+    cli.main(sys.argv)
