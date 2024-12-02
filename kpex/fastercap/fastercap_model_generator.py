@@ -684,18 +684,13 @@ class FasterCapModelGenerator:
                              cond_name: Optional[str]):
         info(f"Writing FasterCap geo file: {output_path}")
         with open(output_path, "w") as f:
-            title = f"0 file #{file_number}"
-            if cond_name:
-                title += f" (net {cond_name}"
-            title += '\n'
-            f.write(title)
             for t in data:
                 f.write(f"T {file_number}")
                 for p in t:
                     f.write(' ' + ' '.join(map(lambda c: '%.12g' % c, p)))
                 f.write('\n')
             if cond_name:
-                f.write(f"N {file_number} {cond_name}")
+                f.write(f"N {file_number} {cond_name}\n")
 
     def check(self):
         info("Checking …")
