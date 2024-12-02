@@ -13,7 +13,8 @@ from ..log import (
     debug,
     info,
     warning,
-    error
+    error,
+    rule
 )
 
 from ..tech_info import TechInfo
@@ -94,6 +95,12 @@ class KLayoutExtractionContext:
         extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
                                                                          tech=tech,
                                                                          blackbox_devices=blackbox_devices)
+
+        rule('Non-empty layers in LVS database:')
+        for gds_pair, layer_info in extracted_layers.items():
+            names = [l.lvs_layer_name for l in layer_info.source_layers]
+            info(f"{gds_pair} -> ({' '.join(names)})")
+        rule()
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
