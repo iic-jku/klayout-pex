@@ -48,5 +48,25 @@ void addComputedLayer(kpex::tech::Technology *tech,
                       uint32_t gds_datatype,
                       const std::string &description);
 
+void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
+                     const std::string &layer_name,
+                     float area_cap,
+                     float perimeter_cap);
+
+void addOverlapCap(kpex::tech::CapacitanceInfo *ci,
+                   const std::string &top_layer,
+                   const std::string &bottom_layer,
+                   float cap);
+
+void addSidewallCap(kpex::tech::CapacitanceInfo *ci,
+                    const std::string &layer_name,
+                    float cap,
+                    float offset);
+
+void addSidewallOverlapCap(kpex::tech::CapacitanceInfo *ci,
+                           const std::string &in_layer,
+                           const std::string &out_layer,
+                           float cap);
+
 #endif
 

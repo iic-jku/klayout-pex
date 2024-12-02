@@ -120,3 +120,48 @@ void addComputedLayer(kpex::tech::Technology *tech,
     layer->set_gds_layer(gds_layer);
     layer->set_gds_datatype(gds_datatype);
 }
+
+void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
+                     const std::string &layer_name,
+                     float area_cap,
+                     float perimeter_cap)
+{
+    kpex::tech::CapacitanceInfo::SubstrateCapacitance *sc = ci->add_substrates();
+    sc->set_layer_name(layer_name);
+    sc->set_area_capacitance(area_cap);
+    sc->set_perimeter_capacitance(perimeter_cap);
+}
+
+void addOverlapCap(kpex::tech::CapacitanceInfo *ci,
+                   const std::string &top_layer,
+                   const std::string &bottom_layer,
+                   float cap)
+{
+    kpex::tech::CapacitanceInfo::OverlapCapacitance *oc = ci->add_overlaps();
+    oc->set_top_layer_name(top_layer);
+    oc->set_bottom_layer_name(bottom_layer);
+    oc->set_capacitance(cap);
+}
+
+void addSidewallCap(kpex::tech::CapacitanceInfo *ci,
+                    const std::string &layer_name,
+                    float cap,
+                    float offset)
+{
+    kpex::tech::CapacitanceInfo::SidewallCapacitance *swc = ci->add_sidewalls();
+    swc->set_layer_name(layer_name);
+    swc->set_capacitance(cap);
+    swc->set_offset(offset);
+}
+
+void addSidewallOverlapCap(kpex::tech::CapacitanceInfo *ci,
+                           const std::string &in_layer,
+                           const std::string &out_layer,
+                           float cap)
+{
+    kpex::tech::CapacitanceInfo::SideOverlapCapacitance *soc = ci->add_sideoverlaps();
+    soc->set_in_layer_name(in_layer);
+    soc->set_out_layer_name(out_layer);
+    soc->set_capacitance(cap);
+}
+
