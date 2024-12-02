@@ -106,6 +106,10 @@ class TechInfo:
         return found_layers[0]
 
     def simple_dielectric_above_metal(self, layer_name: str) -> Tuple[process_stack_pb2.ProcessStackInfo.LayerInfo, float]:
+        """
+        Returns a tuple of the dielectric layer and it's (maximum) height.
+        Maximum would be the case where no metal and other dielectrics are present.
+        """
         found_layer: Optional[process_stack_pb2.ProcessStackInfo.LayerInfo] = None
         diel_lyr: Optional[process_stack_pb2.ProcessStackInfo.LayerInfo] = None
         for lyr in self.tech.process_stack.layers:
@@ -117,4 +121,4 @@ class TechInfo:
                 # search for next metal or end of stack
                 if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
                     return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
-        return diel_lyr, 10.0   # air TODO
+        return diel_lyr, 5.0   # air TODO
