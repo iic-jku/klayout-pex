@@ -504,18 +504,20 @@ class KpexCLI:
         extraction_results = extractor.extract()
 
         with open(netlist_csv_path, 'w') as f:
-            f.write('Device;Net1;Net2;Capacitance [F];Capacitance [fF]\n')
+            f.write('Device;Net1;Net2;Capacitance [fF]\n')
+            # f.write('Device;Net1;Net2;Capacitance [F];Capacitance [fF]\n')
             summary = extraction_results.summarize()
             for idx, (key, cap_value) in enumerate(summary.capacitances.items()):
-                f.write(f"C{idx + 1};{key.net1};{key.net2};{cap_value / 1e15};{cap_value}\n")
+                # f.write(f"C{idx + 1};{key.net1};{key.net2};{cap_value / 1e15};{round(cap_value, 3)}\n")
+                f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)}\n")
 
         rule("kpex/2.5D extracted netlist (CSV format):")
         with open(netlist_csv_path, 'r') as f:
             for line in f.readlines():
                 subproc(line[:-1])  # abusing subproc, simply want verbatim
 
-        rule()
-        info(f"Wrote extracted netlist CSV to: {netlist_csv_path}")
+        rule("Extracted netlist CSV")
+        subproc(f"{netlist_csv_path}")
 
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
@@ -689,7 +691,7 @@ class KpexCLI:
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")
             report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
-            netlist_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_netlist.csv")
+            netlist_csv_path = os.path.abspath(os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_netlist.csv"))
 
             self._rcx25_extraction_results = self.run_kpex_2_5d_engine(  # NOTE: store for test case
                 args=args,
@@ -699,11 +701,19 @@ class KpexCLI:
                 netlist_csv_path=netlist_csv_path
             )
 
+            self._rcx25_extracted_csv_path = netlist_csv_path
+
     @property
     def rcx25_extraction_results(self) -> ExtractionResults:
         if not hasattr(self, '_rcx25_extraction_results'):
             raise Exception('rcx25_extraction_results is not initialized, was run_kpex_2_5d_engine called?')
         return self._rcx25_extraction_results
+
+    @property
+    def rcx25_extracted_csv_path(self) -> str:
+        if not hasattr(self, '_rcx25_extracted_csv_path'):
+            raise Exception('rcx25_extracted_csv_path is not initialized, was run_kpex_2_5d_engine called?')
+        return self._rcx25_extracted_csv_path
 
 
 if __name__ == "__main__":
