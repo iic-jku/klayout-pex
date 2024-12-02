@@ -26,6 +26,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 ### Prerequisites
 
 - cmake
+   - NOTE: `cmake/CPM.cmake` will handle C++ dependencies
 - protobuf
 - python3 with pip packages:
    - poetry (will manage additional dependencies)
@@ -81,3 +82,12 @@ To quickly run a PEX example with KPEX/2.5D and KPEX/FasterCap engines:
 In your debugging configuration, set:
 - `Modify Options` > `Emulate terminal in output console`
 - Add environmental variable `COLUMNS=120`
+
+## Credits
+
+**Thanks to**
+
+- [Protocol Buffers](https://github.com/protocolbuffers/protobuf) for (de)serialization of data and shared data
+  structures
+- [CMake](https://cmake.org/), for building on multiple platforms
+- [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) for making CMake dependency management easier
