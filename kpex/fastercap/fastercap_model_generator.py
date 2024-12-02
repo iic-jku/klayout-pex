@@ -604,8 +604,6 @@ class FasterCapModelGenerator:
 
         self.diel_data = dk
 
-    # TODO: STL part is missing
-
     def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
