@@ -226,9 +226,6 @@ def build_fastercap_input(args: argparse.Namespace,
                                                     delaunay_b=args.delaunay_b)
     gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
-    if args.geometry_check:
-        gen.check()
-
     faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
     os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
@@ -238,6 +235,9 @@ def build_fastercap_input(args: argparse.Namespace,
     os.makedirs(geometry_dir_path, exist_ok=True)
     gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
 
+    if args.geometry_check:
+        gen.check()
+    
     return lst_file
 
 
