@@ -96,6 +96,10 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_fastercap.add_argument("--delaunay_b", "-b", dest="delaunay_b",
                                  type=float, default=0.5,
                                  help="Delaunay triangulation b (default is 0.5)")
+    group_fastercap.add_argument("--geo_check", dest="geometry_check",
+                                 type=bool, default=False,
+                                 help=f"Validate geometries before passing to FasterCap "
+                                      f"(default is False)")
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
                                  help="FasterCap -aX error tolerance (default is 0.05)")
@@ -195,7 +199,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
     #                          file_provider=provide_fastcap_file,
     #                          sub_file_strategy=FasterCapSubFileStrategy.MULTI_FILE)
 
-    gen.check()
+    if args.geometry_check:
+        gen.check()
 
     os.makedirs(args.output_dir_path, exist_ok=True)
 
