@@ -25,16 +25,16 @@ class TechInfo:
     @classmethod
     def from_json(cls,
                   jsonpb_path: str,
-                  dielectric_filter: MultipleChoicePattern) -> TechInfo:
+                  dielectric_filter: Optional[MultipleChoicePattern]) -> TechInfo:
         tech = cls.parse_tech_def(jsonpb_path=jsonpb_path)
         return TechInfo(tech=tech,
                         dielectric_filter=dielectric_filter)
 
     def __init__(self,
                  tech: tech_pb2.Technology,
-                 dielectric_filter: MultipleChoicePattern):
+                 dielectric_filter: Optional[MultipleChoicePattern]):
         self.tech = tech
-        self.dielectric_filter = dielectric_filter
+        self.dielectric_filter = dielectric_filter or MultipleChoicePattern(pattern='all')
 
     @cached_property
     def gds_pair_for_computed_layer_name(self) -> Dict[str, GDSPair]:
