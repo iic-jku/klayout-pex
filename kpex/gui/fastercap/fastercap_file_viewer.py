@@ -7,7 +7,7 @@ import sys
 import vtk
 
 from kpex.fastercap.fastercap_file_reader import *
-from kpex.logging import (
+from kpex.log import (
     # console,
     # debug,
     # info,
