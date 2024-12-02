@@ -419,9 +419,11 @@ def run_fastcap_extraction(args: argparse.Namespace,
 
 def run_kpex_2_5d_engine(args: argparse.Namespace,
                          pex_context: KLayoutExtractionContext,
-                         tech_info: TechInfo):
+                         tech_info: TechInfo,
+                         report_path: str):
     extractor = RCExtractor(pex_context=pex_context,
-                            tech_info=tech_info)
+                            tech_info=tech_info,
+                            report_path=report_path)
     extractor.extract()
 
 
@@ -576,9 +578,11 @@ def main():
                                    lst_file=lst_file)
 
     rule("kpex 2.5D PEX Engine")
+    report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
     run_kpex_2_5d_engine(args=args,
                          pex_context=pex_context,
-                         tech_info=tech_info)
+                         tech_info=tech_info,
+                         report_path=report_path)
 
 
 if __name__ == "__main__":
