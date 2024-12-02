@@ -30,7 +30,7 @@ from .log import (
     # console,
     # debug,
     info,
-    # warning,
+    warning,
     subproc,
     error,
     rule
@@ -80,12 +80,17 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
                                  help="Schematic SPICE netlist path (for LVS)")
     group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
-    group_pex_input.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
+    group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
+                                 help="Cell (default is the top cell)")
     default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk', 'sky130A', 'kpex', 'sky130.lvs'))
 
     group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
                                  default=default_lvs_script_path,
                                  help=f"Path to KLayout LVS script (default is {default_lvs_script_path})")
+    group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
+                                 type=true_or_false, default=True,
+                                 help="Used cached LVSDB (for given input GDS)"
+                                      "(default is true)")
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
@@ -173,11 +178,46 @@ def validate_args(args: argparse.Namespace):
         if not os.path.isfile(args.gds_path):
             error(f"Can't read GDS file (LVS input) at path {args.gds_path}")
             found_errors = True
-        if not args.schematic_path:
-            info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
-        elif not os.path.isfile(args.schematic_path):
-            error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
-            found_errors = True
+        else:
+            args.layout = kdb.Layout()
+            args.layout.read(args.gds_path)
+
+            top_cells = args.layout.top_cells()
+
+            if args.cell_name:  # explicit user-specified cell name
+                args.effective_cell_name = args.cell_name
+
+                found_cell: Optional[kdb.Cell] = None
+                for cell in args.layout.cells('*'):
+                    if cell.name == args.effective_cell_name:
+                        found_cell = cell
+                        break
+                if not found_cell:
+                    error(f"Could not find cell {args.cell_name} in GDS {args.gds_path}")
+                    found_errors = True
+
+                is_only_top_cell = len(top_cells) == 1 and top_cells[0].name == args.cell_name
+                if is_only_top_cell:
+                    info(f"Found cell {args.cell_name} in GDS {args.gds_path} (only top cell)")
+                else:  # there are other cells => extract the top cell to a tmp layout
+                    args.effective_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
+                    info(f"Found cell {args.cell_name} in GDS {args.gds_path}, "
+                         f"but it is not the only top cell, "
+                         f"so layout is exported to: {args.effective_gds_path}")
+
+                    found_cell.write(args.effective_gds_path)
+            else:  # find top cell
+                if len(top_cells) == 1:
+                    args.effective_cell_name = top_cells[0].name
+                    info(f"No explicit top cell specified, using top cell '{args.effective_cell_name}'")
+                else:
+                    args.effective_cell_name = 'TOP'
+                    error(f"Could not determine the default top cell in GDS {args.gds_path}, "
+                          f"there are multiple: {', '.join([c.name for c in top_cells])}. "
+                          f"Use --cell to specify the cell")
+                    found_errors = True
+
+            args.effective_gds_path = args.gds_path
     else:
         info(f"LVSDB input file passed, bypassing LVS")
         args.input_mode = InputMode.LVSDB
@@ -187,6 +227,38 @@ def validate_args(args: argparse.Namespace):
         elif not os.path.isfile(args.lvsdb_path):
             error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
             found_errors = True
+
+    def input_file_stem(path: str):
+        # could be *.gds, or *.gds.gz, so remove all extensions
+        return os.path.basename(path).split(sep='.')[0]
+
+    run_dir_id: str
+    match args.input_mode:
+        case InputMode.GDS:
+            run_dir_id = f"{input_file_stem(args.gds_path)}__{args.effective_cell_name}"
+        case InputMode.LVSDB:
+            run_dir_id = f"{input_file_stem(args.lvsdb_path)}__{args.effective_cell_name}"
+        case _:
+            raise NotImplementedError(f"Unknown input mode {args.input_mode}")
+
+    args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
+
+    if args.input_mode == InputMode.GDS:
+        if args.schematic_path:
+            args.effective_schematic_path = args.schematic_path
+            if not os.path.isfile(args.schematic_path):
+                error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
+                found_errors = True
+        else:
+            info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
+            args.effective_schematic_path = os.path.join(args.output_dir_path,
+                                                         f"{args.effective_cell_name}_dummy_schematic.spice")
+            with open(args.effective_schematic_path, 'w') as f:
+                f.writelines([
+                    f".subckt {args.effective_cell_name} VDD VSS",
+                    '.ends',
+                    '.end'
+                ])
 
     try:
         args.log_level = LogLevel[args.log_level.upper()]
@@ -201,20 +273,6 @@ def validate_args(args: argparse.Namespace):
     except ValueError as e:
         error("Failed to parse --diel arg", e)
         found_errors = True
-
-    def input_file_stem(path: str):
-        # could be *.gds, or *.gds.gz, so remove all extensions
-        return os.path.basename(path).split(sep='.')[0]
-
-    run_dir_id: str
-    match args.input_mode:
-        case InputMode.GDS:
-            run_dir_id = f"{input_file_stem(args.gds_path)}__{args.cell_name}"
-        case InputMode.LVSDB:
-            run_dir_id = f"{input_file_stem(args.lvsdb_path)}__{args.cell_name}"
-        case _:
-            run_dir_id = args.cell_name
-    args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
 
     if found_errors:
         raise Exception("Argument validation failed")
@@ -255,12 +313,14 @@ def run_fastercap_extraction(args: argparse.Namespace,
     os.environ['OMP_NUM_THREADS'] = f"{num_threads}"
 
     exe_path = "FasterCap"
-    log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
-    raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Raw.csv")
-    avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Avg.csv")
-    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Expanded_Netlist.cir")
-    expanded_netlist_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Expanded_Netlist.csv")
-    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Reduced_Netlist.cir")
+    log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Output.txt")
+    raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Result_Matrix_Raw.csv")
+    avg_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Result_Matrix_Avg.csv")
+    expanded_netlist_path = os.path.join(args.output_dir_path,
+                                         f"{args.effective_cell_name}_FasterCap_Expanded_Netlist.cir")
+    expanded_netlist_csv_path = os.path.join(args.output_dir_path,
+                                             f"{args.effective_cell_name}_FasterCap_Expanded_Netlist.csv")
+    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Reduced_Netlist.cir")
 
     run_fastercap(exe_path=exe_path,
                   lst_file_path=lst_file,
@@ -318,11 +378,13 @@ def run_fastcap_extraction(args: argparse.Namespace,
                            pex_context: KLayoutExtractionContext,
                            lst_file: str):
     exe_path = "fastcap"
-    log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Output.txt")
-    raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Result_Matrix_Raw.csv")
-    avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Result_Matrix_Avg.csv")
-    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Expanded_Netlist.cir")
-    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Reduced_Netlist.cir")
+    log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
+    raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Raw.csv")
+    avg_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Avg.csv")
+    expanded_netlist_path = os.path.join(args.output_dir_path,
+                                         f"{args.effective_cell_name}_FastCap2_Expanded_Netlist.cir")
+    reduced_netlist_path = os.path.join(args.output_dir_path,
+                                        f"{args.effective_cell_name}_FastCap2_Reduced_Netlist.cir")
 
     run_fastcap(exe_path=exe_path,
                 lst_file_path=lst_file,
@@ -409,6 +471,11 @@ def setup_logging(args: argparse.Namespace):
     set_log_level(args.log_level)
 
 
+def modification_date(filename: str) -> datetime:
+    t = os.path.getmtime(filename)
+    return datetime.fromtimestamp(t)
+
+
 def create_lvsdb(args: argparse.Namespace) -> kdb.LayoutVsSchematic:
     lvsdb = kdb.LayoutVsSchematic()
 
@@ -416,51 +483,24 @@ def create_lvsdb(args: argparse.Namespace) -> kdb.LayoutVsSchematic:
         case InputMode.LVSDB:
             lvsdb.read(args.lvsdb_path)
         case InputMode.GDS:
-            layout = kdb.Layout()
-            layout.read(args.gds_path)
+            lvs_log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_lvs.log")
+            lvsdb_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}.lvsdb.gz")
 
-            found_cell: Optional[kdb.Cell] = None
-            for cell in layout.cells('*'):
-                if cell.name == args.cell_name:
-                    found_cell = cell
-                    break
-            if not found_cell:
-                error(f"Could not find cell {args.cell_name} in GDS {args.gds_path}")
-                sys.exit(1)
+            lvs_needed = True
 
-            effective_gds_path = args.gds_path
+            if os.path.exists(lvsdb_path) and args.cache_lvs:
+                if modification_date(lvsdb_path) > modification_date(args.gds_path):
+                    warning(f"Reusing cached LVSDB at {lvsdb_path}")
+                    lvs_needed = False
 
-            top_cells = layout.top_cells()
-            is_only_top_cell = len(top_cells) == 1 and top_cells[0].name == args.cell_name
-            if is_only_top_cell:
-                info(f"Found cell {args.cell_name} in GDS {args.gds_path} (only top cell)")
-            else:  # there are other cells => extract the top cell to a tmp layout
-                effective_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
-                info(f"Found cell {args.cell_name} in GDS {args.gds_path}, "
-                     f"but it is not the only top cell, "
-                     f"so layout is exported to: {effective_gds_path}")
-
-                found_cell.write(effective_gds_path)
-
-            effective_schematic_path = args.schematic_path
-            if not args.schematic_path:
-                effective_schematic_path = os.path.join(args.output_dir_path, f"{args.cell_name}_dummy_schematic.spice")
-                with open(effective_schematic_path, 'w') as f:
-                    f.writelines([
-                        f".subckt {args.cell_name} VDD VSS",
-                        '.ends',
-                        '.end'
-                    ])
-
-            lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
-            lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}.lvsdb.gz")
-            lvs_runner = LVSRunner()
-            lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
-                                       lvs_script=args.lvs_script_path,
-                                       gds_path=effective_gds_path,
-                                       schematic_path=effective_schematic_path,
-                                       log_path=lvs_log_path,
-                                       lvsdb_path=lvsdb_path)
+            if lvs_needed:
+                lvs_runner = LVSRunner()
+                lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
+                                           lvs_script=args.lvs_script_path,
+                                           gds_path=args.effective_gds_path,
+                                           schematic_path=args.effective_schematic_path,
+                                           log_path=lvs_log_path,
+                                           lvsdb_path=lvsdb_path)
             lvsdb.read(lvsdb_path)
     return lvsdb
 
@@ -479,14 +519,14 @@ def main():
 
     lvsdb = create_lvsdb(args)
 
-    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name,
+    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.effective_cell_name,
                                                               lvsdb=lvsdb,
                                                               tech=tech_info,
                                                               blackbox_devices=args.blackbox_devices)
-    gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
+    gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.gds.gz")
     pex_context.target_layout.write(gds_path)
 
-    gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_internal.gds.gz")
+    gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.gds.gz")
     pex_context.lvsdb.internal_layout().write(gds_path)
 
     def dump_layers(cell: str,
@@ -505,17 +545,17 @@ def main():
         layout.write(layout_dump_path)
 
     if len(pex_context.unnamed_layers) >= 1:
-        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_unnamed_LVS_layers.gds.gz")
-        dump_layers(cell=args.cell_name,
+        layout_dump_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_unnamed_LVS_layers.gds.gz")
+        dump_layers(cell=args.effective_cell_name,
                     layers=pex_context.unnamed_layers,
                     layout_dump_path=layout_dump_path)
 
     if len(pex_context.extracted_layers) >= 1:
-        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_nonempty_LVS_layers.gds.gz")
+        layout_dump_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_nonempty_LVS_layers.gds.gz")
         nonempty_layers = [l \
                            for layers in pex_context.extracted_layers.values() \
                            for l in layers.source_layers]
-        dump_layers(cell=args.cell_name,
+        dump_layers(cell=args.effective_cell_name,
                     layers=nonempty_layers,
                     layout_dump_path=layout_dump_path)
     else:
