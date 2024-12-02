@@ -16,7 +16,7 @@ class LogLevel(IntEnum):
     WARNING = 30
     ERROR = 40
     CRICITAL = 50
-    DEFAULT = logging.INFO
+    DEFAULT = SUBPROCESS
 
     @classmethod
     @cached_property
