@@ -11,8 +11,7 @@ PROTOBUF_SOURCES = \
 	protos/tech.proto \
 	protos/extract.proto \
 	protos/units.proto \
-	protos/process_stack.proto \
-        protos/fastercap_file_format.proto
+	protos/process_stack.proto
 
 python_api: $(PROTOBUF_SOURCES)
 	@echo "---------------------------------------------------------"

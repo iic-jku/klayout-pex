@@ -9,7 +9,6 @@ import sys
 
 import klayout.db as kdb
 
-from .fastercap.fastercap_file_writer import *
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
