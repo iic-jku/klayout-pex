@@ -37,6 +37,7 @@
 from __future__ import annotations
 
 import base64
+from collections import defaultdict
 import hashlib
 import os
 from typing import *
@@ -627,14 +628,15 @@ class FasterCapModelGenerator:
             outside = outside if outside else '(void)'
             inside = inside if inside else '(void)'
 
-            lst_file.append(f"* Dielectric interface: outside={outside}, inside={inside}")
+            # lst_file.append(f"* Dielectric interface: outside={outside}, inside={inside}")
 
             fn = f"{prefix}{file_num}_outside={outside}_inside={inside}.geo"
             output_path = os.path.join(output_dir_path, fn)
-            self._write_fastercap_geo(file_number=file_num,
-                                      output_path=output_path,
+            self._write_fastercap_geo(output_path=output_path,
                                       data=data,
-                                      cond_name=None)
+                                      cond_name=None,
+                                      cond_number=file_num,
+                                      rename_conductor=False)
 
             # compute one reference point "outside"
             t0 = data[0]
@@ -648,31 +650,52 @@ class FasterCapModelGenerator:
             rp_s = ' '.join(map(lambda c: f"{'%.12g' % c}", rp))
             lst_file.append(f"D {fn} {'%.12g' % k_outside} {'%.12g' % k_inside} 0 0 0 {rp_s}")
 
-        for k, data in self.cond_data.items():
+        #
+        # Feedback from FastFieldSolvers:
+        #
+        # - using the '+' trailing statements (conductor collation),
+        #   only the same conductor should be collated
+        #
+        # - renaming different conductor numbers ('N' rule line) is not allowed (currently a bug)
+        #   - Example: 1->VDD (1.geo) and 2->VDD (2.geo) is not possible
+        #   - Both conductor *.geo files should have the same number
+        #   - only the last conductor *.geo file should contain the 'N' rule
+        #
+        # - reference points
+        #
+        cond_data_grouped_by_net = defaultdict(list)
+        for (nn, outside), data in self.cond_data.items():
             if len(data) == 0:
                 continue
+            cond_data_grouped_by_net[nn].append((outside, data))
 
-            file_num += 1
-            nn, outside = k
-            k_outside = self.materials[outside] if outside else self.k_void
+        cond_num = file_num
 
-            outside = outside if outside else '(void)'
-            lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
-            fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
-            if len(fn) > max_filename_length:
-                warning(f"Unusual long net name detected: {nn}")
-                d = hashlib.md5(nn.encode('utf-8')).digest()
-                h = base64.urlsafe_b64encode(d).decode('utf-8').rstrip('=')
-                remaining_len = len(f"{prefix}_{file_num}_outside={outside}_net=.geo")
-                short_nn = nn[0: (max_filename_length - remaining_len - len(h) - 1)] + f"_{h}"
-                fn = f"{prefix}{file_num}_outside={outside}_net={short_nn}.geo"
-            output_path = os.path.join(output_dir_path, fn)
-            self._write_fastercap_geo(file_number=file_num,
-                                      output_path=output_path,
-                                      data=data,
-                                      cond_name=nn)
+        for nn, cond_list in cond_data_grouped_by_net.items():
+            cond_num += 1
+            last_cond_index = len(cond_list) - 1
+            for idx, (outside, data) in enumerate(cond_list):
+                file_num += 1
+                k_outside = self.materials[outside] if outside else self.k_void
 
-            lst_file.append(f"C {fn}  {'%.12g' % k_outside}  0 0 0  +")
+                outside = outside if outside else '(void)'
+                # lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
+                fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
+                if len(fn) > max_filename_length:
+                    warning(f"Unusual long net name detected: {nn}")
+                    d = hashlib.md5(nn.encode('utf-8')).digest()
+                    h = base64.urlsafe_b64encode(d).decode('utf-8').rstrip('=')
+                    remaining_len = len(f"{prefix}_{file_num}_outside={outside}_net=.geo")
+                    short_nn = nn[0: (max_filename_length - remaining_len - len(h) - 1)] + f"_{h}"
+                    fn = f"{prefix}{file_num}_outside={outside}_net={short_nn}.geo"
+                output_path = os.path.join(output_dir_path, fn)
+                self._write_fastercap_geo(output_path=output_path,
+                                          data=data,
+                                          cond_number=cond_num,
+                                          cond_name=nn,
+                                          rename_conductor=(idx == last_cond_index))
+                collation_operator = '' if idx == last_cond_index else ' +'
+                lst_file.append(f"C {fn}  {'%.12g' % k_outside}  0 0 0{collation_operator}")
 
         info(f"Writing FasterCap list file: {lst_fn}")
         with open(lst_fn, "w") as f:
@@ -682,20 +705,21 @@ class FasterCapModelGenerator:
         return lst_fn
 
     @staticmethod
-    def _write_fastercap_geo(file_number: int,
-                             output_path: str,
+    def _write_fastercap_geo(output_path: str,
                              data: List[Tuple[float, float, float]],
-                             cond_name: Optional[str]):
+                             cond_number: int,
+                             cond_name: Optional[str],
+                             rename_conductor: bool):
         info(f"Writing FasterCap geo file: {output_path}")
         with open(output_path, "w") as f:
             f.write(f"0 GEO File\n")
             for t in data:
-                f.write(f"T {file_number}")
+                f.write(f"T {cond_number}")
                 for p in t:
                     f.write(' ' + ' '.join(map(lambda c: '%.12g' % c, p)))
                 f.write('\n')
-            if cond_name:
-                f.write(f"N {file_number} {cond_name}\n")
+            if cond_name and rename_conductor:
+                f.write(f"N {cond_number} {cond_name}\n")
 
     def check(self):
         info("Checking …")
