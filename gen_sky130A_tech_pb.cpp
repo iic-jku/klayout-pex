@@ -423,7 +423,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     ml->set_reference_above("nild5");
 
     double capm_thickness = 0.1;
-    double capild_k = 4.0;
+    double capild_k = 4.52;  // to match design cap_mim_m3_w18p9_l5p1_no_interconnect to 200fF
     double capild_thickness = 0.02;
     
     li = psi->add_layers();
