@@ -2,11 +2,15 @@
 
 import argparse
 from dataclasses import dataclass
+from functools import cached_property
 import os
 import os.path
+import re
 import shlex
 import sys
 from typing import *
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
 
 import klayout.db as kdb
 
@@ -16,7 +20,9 @@ from kpex.log import (
     # debug,
     info,
     # warning,
-    error, warning
+    error,
+    warning,
+    rule
 )
 from kpex.version import __version__
 from kpex.util.argparse_helpers import render_enum_help
@@ -35,6 +41,33 @@ class GDSPair:
         return f"{self.layer}/{self.datatype}"
 
 
+@dataclass(frozen=True)
+class Layer:
+    layer: str
+    purpose: Optional[str]
+    gds_pair: GDSPair
+
+    @property
+    def lpp(self) -> str:
+        if self.purpose:
+            return f"{self.layer}.{self.purpose}"
+        else:
+            return self.layer
+
+
+@dataclass(frozen=True)
+class LayerList:
+    layers: List[Layer]
+
+    @cached_property
+    def gds_pair_by_lpp(self) -> Dict[str, GDSPair]:
+        d = {}
+        for l in self.layers:
+            d[l.lpp] = l.gds_pair
+        return d
+
+
+
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                       f"KLayout-based Layer Mapping Tool",
@@ -43,7 +76,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special = main_parser.add_argument_group("Special options")
     group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
-    group_special.add_argument("--log_level", dest='log_level', default='subprocess',
+    group_special.add_argument("--log_level", dest='log_level', default='SUBPROCESS',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
 
     group_pex_input = main_parser.add_argument_group("Conversion")
@@ -62,7 +95,7 @@ def validate_args(args: argparse.Namespace):
     found_errors = False
 
     if not os.path.isfile(args.input_gds_path):
-        error(f"Can't read GDS input file at path {args.gds_path}")
+        error(f"Can't read GDS input file at path {args.input_gds_path}")
         found_errors = True
 
     try:
@@ -77,12 +110,60 @@ def validate_args(args: argparse.Namespace):
 
 
 def setup_logging(args: argparse.Namespace):
-    try:
-        validate_args(args)
-    except Exception:
-        sys.exit(1)
-
     set_log_level(args.log_level)
+
+
+def map_gds_layers(layout: kdb.Layout,
+                   from_tech: str,
+                   to_tech: str,
+                   gds_layer_mapping: Dict[GDSPair, GDSPair]):
+    layer_infos = [layout.layer_infos()[idx] for idx in layout.layer_indexes()]
+    for li in layer_infos:
+        gds_pair = GDSPair(li.layer, li.datatype)
+        dest_gds_pair = gds_layer_mapping.get(gds_pair, None)
+        if not dest_gds_pair:
+            dest_gds_pair = GDSPair(1000 + li.layer, li.datatype)
+            error(f"Unable to map layer {gds_pair} from PDK {from_tech} to {to_tech}, "
+                  f"mapping to dummy layer {dest_gds_pair}")
+        info(f"Mapping layer {gds_pair} -> {dest_gds_pair}")
+        lyr = layout.layer(li)
+        layout.set_info(lyr, kdb.LayerInfo(dest_gds_pair.layer, dest_gds_pair.datatype))
+
+
+def parse_layers(lyp_path: str) -> LayerList:
+    lyp = ET.parse(lyp_path)
+    lyp_root = lyp.getroot()
+    layers = []
+    layer_props = lyp_root.findall('./properties')
+    for lp in layer_props:
+        name = lp.find('./name').text
+        source = lp.find('./source').text
+        # print(f"name: {name}, source: {source}")
+        layer_name: str = ""
+        purpose: str = ""
+        gds_layer: int = 0
+        gds_datatype: int = 0
+
+        try:
+            name_match = re.match(r'^(?P<layer>\w+)(\.(?P<purpose>\w+))?(\s.*)?$', name)
+            layer_name = name_match.group('layer')
+            purpose = name_match.group('purpose')
+        except Exception:
+            error(f"Failed to parse layer name: {name} from {lyp_path}")
+
+        try:
+            source_match = re.match(r'^(?P<gds_layer>\d+)/(?P<gds_datatype>\d+).*$', source)
+            gds_layer = int(source_match.group('gds_layer'))
+            gds_datatype = int(source_match.group('gds_datatype'))
+        except Exception:
+            error(f"Failed to parse layer source: {source} from {lyp_path}")
+
+        layer = Layer(layer=layer_name,
+                      purpose=purpose,
+                      gds_pair=GDSPair(gds_layer, gds_datatype))
+        layers.append(layer)
+
+    return LayerList(layers)
 
 
 def main():
@@ -92,11 +173,19 @@ def main():
     from_tech = "sky130A"
     to_tech = "sg13g2"
 
+    dir = os.path.dirname(os.path.realpath(__file__))
+    from_lyp_path = os.path.join(dir, "pdk", "sky130A", "kpex", "sky130A.lyp")
+    to_lyp_path = os.path.join(dir, "pdk", "ihp_sg13g2", "kpex", "sg13g2.lyp")
+
     warning(f"At the moment, only conversion from PDK {from_tech} -> {to_tech} is supported!")
 
     args = parse_args()
-
     setup_logging(args)
+
+    try:
+        validate_args(args)
+    except Exception:
+        sys.exit(1)
 
     layout = kdb.Layout()
 
@@ -111,56 +200,60 @@ def main():
             True  # prune orthan cells
         )
 
-    layer_mapping = {
-        (65, 20):  (1, 0),    # diff.drawing -> Activ.drawing
-        (64, 20):  (31, 0),   # nwell.drawing -> NWell.drawing
-        (122, 16): (46, 2),   # pwell.pin    -> PWell.pin
-        # (64, 59):  None,    # pwell.label  -> -     # TODO
-        (93, 44): (7, 0),     # nsdm.drawing -> nSD.drawing
-        (94, 20): (14, 0),    # psdm.drawing -> pSD.drawing
-        (66, 20):  (5, 0),    # poly.drawing -> GatPoly.drawing
-        (66, 44):  (6, 0),    # licon1.drawing -> Cont.drawing
-        (67, 20):  (8, 0),    # li1.drawing  -> Metal1.drawing
-        (67, 16):  (8, 2),    # li1.pin      -> Metal1.pin
-        (67, 5):   (8, 25),   # li1.label    -> Metal1.text
-        (67, 44):  (19, 0),   # mcon.drawing -> Via1.drawing
-        (68, 20):  (10, 0),   # met1.drawing -> Metal2.drawing
-        (68, 16):  (10, 2),   # met1.pin     -> Metal2.pin
-        (68, 5):   (10, 25),  # met1.label   -> Metal2.text
-        (68, 44):  (29, 0),   # via.drawing  -> Via2.drawing
-        (69, 20):  (30, 0),   # met2.drawing -> Metal3.drawing
-        (69, 16):  (30, 2),   # met2.pin     -> Metal3.pin
-        (69, 5):   (30, 25),  # met2.label   -> Metal3.text
-        (69, 44):  (49, 0),   # via2.drawing -> Via3.drawing
-        (70, 20):  (50, 0),   # met3.drawing -> Metal4.drawing
-        (70, 16):  (50, 2),   # met3.pin     -> Metal4.pin
-        (70, 5):   (50, 25),  # met3.label   -> Metal4.text
-        (70, 44):  (66, 0),   # via3.drawing -> Via4.drawing
-        (71, 20):  (67, 0),   # met4.drawing -> Metal5.drawing
-        (71, 16):  (67, 2),   # met4.pin     -> Metal5.pin
-        (71, 5):   (67, 25),  # met4.label   -> Metal5.text
-        (71, 44):  (125, 0),  # via4.drawing -> TopVia1.drawing
-        (72, 20):  (126, 0),  # met5.drawing -> TopMetal1.drawing
-        (72, 16):  (126, 2),  # met5.pin     -> TopMetal1.pin
-        (72, 5):   (126, 25), # met5.label   -> TopMetal1.text
-        (82, 64):  (99, 39),  # capacitor.drawing -> Recog.mom
-        (236, 0):  (189, 4),  # boundary -> prBoundary.boundary
-        (97, 44):  (36, 0),   # capm2.drawing -> MIM.drawing
+    lpp_mapping = {
+        'boundary':          'prBoundary.boundary',
+        'diff.drawing':      'Activ.drawing',
+        'nwell.drawing':     'NWell.drawing',
+        'nwell.label':       'NWell.label',
+        'pwell.drawing':     'PWell.drawing',
+        'pwell.label':       'PWell.label',
+        'pwell.pin':         'PWell.pin',
+        'nsdm.drawing':      'nSD.drawing',
+        'psdm.drawing':      'pSD.drawing',
+        'poly.drawing':      'GatPoly.drawing',
+        'licon1.drawing':    'Cont.drawing',
+        'li1.drawing':       'Metal1.drawing',
+        'li1.pin':           'Metal1.pin',
+        'li1.label':         'Metal1.text',
+        'mcon.drawing':      'Via1.drawing',
+        'met1.drawing':      'Metal2.drawing',
+        'met1.pin':          'Metal2.pin',
+        'met1.label':        'Metal2.text',
+        'via.drawing':       'Via2.drawing',
+        'met2.drawing':      'Metal3.drawing',
+        'met2.pin':          'Metal3.pin',
+        'met2.label':        'Metal3.text',
+        'via2.drawing':      'Via3.drawing',
+        'met3.drawing':      'Metal4.drawing',
+        'met3.pin':          'Metal4.pin',
+        'met3.label':        'Metal4.text',
+        'via3.drawing':      'Via4.drawing',
+        'met4.drawing':      'Metal5.drawing',
+        'met4.pin':          'Metal5.pin',
+        'met4.label':        'Metal5.text',
+        'via4.drawing':      'TopVia1.drawing',
+        'met5.drawing':      'TopMetal1.drawing',
+        'met5.pin':          'TopMetal1.pin',
+        'met5.label':        'TopMetal1.text',
+        'capacitor.drawing': 'Recog.mom',
+        'capm2.drawing':     'MIM.drawing',
     }
-    layer_mapping = {GDSPair(*k): GDSPair(*v) for k, v in layer_mapping.items()}
 
-    layer_infos = [layout.layer_infos()[idx] for idx in layout.layer_indexes()]
-    for li in layer_infos:
-        gds_pair = GDSPair(li.layer, li.datatype)
-        dest_gds_pair = layer_mapping.get(gds_pair, None)
-        if not dest_gds_pair:
-            dest_gds_pair = GDSPair(1000 + li.layer, li.datatype)
-            error(f"Unable to map layer {gds_pair} from PDK {from_tech} to {to_tech}, "
-                  f"mapping to dummy layer {dest_gds_pair}")
-        info(f"Mapping layer {gds_pair} -> {dest_gds_pair}")
-        lyr = layout.layer(li)
-        layout.set_info(lyr, kdb.LayerInfo(dest_gds_pair.layer, dest_gds_pair.datatype))
+    from_layers = parse_layers(from_lyp_path)
+    to_layers = parse_layers(to_lyp_path)
+    rule(from_lyp_path)
+    info([layer.lpp for layer in from_layers.layers])
+    rule(to_lyp_path)
+    info([layer.lpp for layer in to_layers.layers])
 
+    gds_mapping = {from_layers.gds_pair_by_lpp[from_lpp]: to_layers.gds_pair_by_lpp[to_lpp] \
+                   for from_lpp, to_lpp in lpp_mapping.items()}
+    rule("Map GDS layers")
+    map_gds_layers(layout,
+                   from_tech,
+                   to_tech,
+                   gds_mapping)
+    
     info(f"Writing layout to {args.output_gds_path}")
     layout.write(args.output_gds_path)
 
