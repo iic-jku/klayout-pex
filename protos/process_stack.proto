@@ -19,9 +19,25 @@ message ProcessStackInfo {
         LAYER_TYPE_METAL = 6;
     }
 
+    message Contact { // Contact/Via
+        // because contact name do not uniquely describe
+        // the connected layers and the height,
+        // these are used as part of a MetalLayer
+        // for example, sky130 has
+        //     * field poly <-> licon <-> li1 (height 0.4299)
+        //     * diffusion <-> licon <-> li1 (height 0.9361)
+        //     * cap2m <-> via4 <-> metal5
+        //     * metal5 <-> via4 <-> metal5
+
+        string name = 1;
+        string metal_above = 10;
+        double thickness = 20;
+    }
+
     message DiffusionLayer { // Diffusion type (used for substrate, well, or diffusion)
         double height = 1;     // height in µm (of the layer bottom) above the substrate
         string reference = 30; // name of the dielectric type above the substrate
+        Contact contact_above = 40;
     }
 
     message FieldOxideLayer { // Field oxide type, which is directly above the substrate
@@ -46,21 +62,6 @@ message ProcessStackInfo {
         double height_above_metal = 20; // might be 0 if none
         double width_outside_sidewall = 21;
         string reference = 30;
-    }
-
-    message Contact { // Contact/Via
-        // because contact name do not uniquely describe
-        // the connected layers and the height,
-        // these are used as part of a MetalLayer
-        // for example, sky130 has
-        //     * field poly <-> licon <-> li1 (height 0.4299)
-        //     * diffusion <-> licon <-> li1 (height 0.9361)
-        //     * cap2m <-> via4 <-> metal5
-        //     * metal5 <-> via4 <-> metal5
-
-        string name = 1;
-        string metal_above = 10;
-        double thickness = 20;
     }
 
     message MetalLayer { // Metal

@@ -230,13 +230,21 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
     dl->set_height(0.0);
     dl->set_reference("fox");
-    
+    kpex::tech::ProcessStackInfo::Contact *co = dl->mutable_contact_above();
+    co->set_name("licon1");
+    co->set_metal_above("li1");
+    co->set_thickness(0.9361);
+
     li = psi->add_layers();
     li->set_name("nwell");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
     dl = li->mutable_diffusion_layer();
     dl->set_height(0.0);
     dl->set_reference("fox");
+    co = dl->mutable_contact_above();
+    co->set_name("licon1");
+    co->set_metal_above("li1");
+    co->set_thickness(0.9361);
 
     li = psi->add_layers();
     li->set_name("diff");
@@ -244,7 +252,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     dl = li->mutable_diffusion_layer();
     dl->set_height(0.323);
     dl->set_reference("fox");
-    
+    co = dl->mutable_contact_above();
+    co->set_name("licon1");
+    co->set_metal_above("li1");
+    co->set_thickness(0.9361);
+
 //    li = psi->add_layers();
 //    li->set_name("mvdiff");
 //    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
@@ -267,7 +279,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     ml->set_reference_below("fox");
     ml->set_reference_above("psg");
 
-    kpex::tech::ProcessStackInfo::Contact *co = ml->mutable_contact_above();
+    co = ml->mutable_contact_above();
     co->set_name("licon1");
     co->set_metal_above("li1");
     co->set_thickness(0.4299);
