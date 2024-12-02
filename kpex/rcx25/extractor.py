@@ -3,6 +3,7 @@ import math
 from asyncio import shield
 from collections import defaultdict
 from dataclasses import dataclass, field
+from rich import pretty
 from typing import *
 
 import klayout.db as kdb
@@ -490,11 +491,13 @@ class RCExtractor:
                             distance_near_um = distance_near * dbu
                             distance_far_um = distance_far * dbu
 
-                            alpha_c = self.overlap_cap_spec.capacitance
+                            # NOTE: overlap scaling is 1/50  (see MAGIC ExtTech)
+                            alpha_scale_factor = 0.02 * 0.01 * 0.5 * 200.0
+                            alpha_c = self.overlap_cap_spec.capacitance * alpha_scale_factor
 
                             # see Magic ExtCouple.c L1164
-                            cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um / edge_interval_length_um)
-                            cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um / edge_interval_length_um)
+                            cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um)
+                            cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um)
 
                             # "cfrac" is the fractional portion of the fringe cap seen
                             # by tile tp along its length.  This is independent of the
@@ -506,10 +509,10 @@ class RCExtractor:
                             sfrac: float
 
                             # see Magic ExtCouple.c L1198
-                            alpha_s = self.substrate_cap_spec.area_capacitance
+                            alpha_s = self.substrate_cap_spec.area_capacitance / alpha_scale_factor
                             if alpha_s != alpha_c:
-                                snear = (2.0 / math.pi) * math.atan(alpha_s * distance_near_um / edge_interval_length_um)
-                                sfar = (2.0 / math.pi) * math.atan(alpha_s * distance_far_um / edge_interval_length_um)
+                                snear = (2.0 / math.pi) * math.atan(alpha_s * distance_near_um)
+                                sfar = (2.0 / math.pi) * math.atan(alpha_s * distance_far_um)
                                 sfrac = sfar - snear
                             else:
                                 sfrac = cfrac
@@ -539,30 +542,6 @@ class RCExtractor:
                             # TODO: shielding
 
                             # TODO: fringe portion extracted from substrate
-
-                            pass
-                            # avg_length = (edge1.length() + edge2.length()) / 2 * dbu
-                            # avg_distance = (edge_pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2 * dbu
-
-                            #     info(f"(side overlap) EDGES: layers {top_layer_name}-{bot_layer_name}: "
-                            #          f"EdgePair {edge_pair}, "
-                            #          f"Nets {net_top} <-> {net_bot}: "
-                            #          f"distance {avg_distance}, length {avg_length}")
-                            #
-                            # sub_frac = (2.0 / math.pi) * math.atan(side_overlap_cap_spec.capacitance * avg_distance)
-                            #     #
-                            #     # perimeter_not_shielded += sub_frac * avg_length / 1000.0 # aF -> fF
-                            #     #
-                            #     # shielded_frac = 1.0 - sub_frac
-                            #     # perimeter_shielded += sub_frac * avg_length / 1000.0  # aF -> fF
-                            #
-                            # # area_um2 = overlapping_side_halo_shapes.area() * dbu**2
-                            # # cap_femto = area_um2 * side_overlap_cap_spec.capacitance / 1000.0
-                            # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
-                            # #      f"Nets {net_top} <-> {net_bot}: {area_um2} µm^2, "
-                            # #      f"cap: {round(cap_femto, 2)} fF")
-                            #
-
 
         for inside_layer_name in layer2net2regions.keys():
             inside_net2regions = layer2net2regions.get(inside_layer_name, None)
