@@ -79,20 +79,24 @@ def assert_expected_matches_obtained(*path_components,
                                      expected_csv_content: str):
     result, csv, preview_png = _run_rcx25d_single_cell(*path_components)
     allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
-    allure.attach.file(preview_png, name='layout_preview.png', attachment_type=allure.attachment_type.PNG)
+    allure.attach.file(preview_png, name='📸 layout_preview.png', attachment_type=allure.attachment_type.PNG)
     expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
     with open(csv, 'r') as f:
         obtained_csv = csv_diff.load_csv(f, key='Device')
         diff = csv_diff.compare(expected_csv, obtained_csv, show_unchanged=False)
-        print(csv_diff.human_text(diff))
+        human_diff = csv_diff.human_text(
+            diff, current=obtained_csv, extras=(('Net1','{Net1}'),('Net2','{Net2}'))
+        )
         allure.attach(expected_csv_content, name='pex_expected.csv', attachment_type=allure.attachment_type.CSV)
         allure.attach(json.dumps(diff, sort_keys=True, indent='    ').encode("utf8"),
                       name='pex_diff.json', attachment_type=allure.attachment_type.JSON)
-        assert diff['added'] == []
-        assert diff['removed'] == []
-        assert diff['changed'] == []
-        assert diff['columns_added'] == []
-        assert diff['columns_removed'] == []
+        allure.attach(human_diff.encode("utf8"), name='‼️ pex_diff.txt', attachment_type=allure.attachment_type.TEXT)
+        # assert diff['added'] == []
+        # assert diff['removed'] == []
+        # assert diff['changed'] == []
+        # assert diff['columns_added'] == []
+        # assert diff['columns_removed'] == []
+        assert human_diff == '', 'Diff detected'
 
 
 @allure.parent_suite(parent_suite)
