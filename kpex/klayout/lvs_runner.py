@@ -15,7 +15,9 @@ from kpex.log import (
     debug,
     info,
     warning,
-    error
+    error,
+    subproc,
+    rule
 )
 
 
@@ -48,7 +50,7 @@ class LVSRunner:
             '-rd', 'purge_nets=true',
         ]
         info(f"Calling {' '.join(args)}, output file: {log_path}")
-
+        rule()
         start = time.time()
 
         proc = subprocess.Popen(args,
@@ -62,10 +64,13 @@ class LVSRunner:
                 line = proc.stdout.readline()
                 if not line:
                     break
+                subproc(line[:-1])  # remove newline
                 f.writelines([line])
         proc.wait()
 
         duration = time.time() - start
+
+        rule()
 
         if proc.returncode == 0:
             info(f"klayout LVS succeeded after {'%.4g' % duration}s")

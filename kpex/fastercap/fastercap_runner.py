@@ -10,7 +10,9 @@ from kpex.log import (
     debug,
     info,
     # warning,
-    error
+    error,
+    rule,
+    subproc,
 )
 from .capacitance_matrix import CapacitanceMatrix
 
@@ -27,6 +29,7 @@ def run_fastercap(exe_path: str,
     ]
     info(f"Calling {' '.join(args)}, output file: {log_path}")
 
+    rule()
     start = time.time()
 
     proc = subprocess.Popen(args,
@@ -40,10 +43,13 @@ def run_fastercap(exe_path: str,
             line = proc.stdout.readline()
             if not line:
                 break
+            subproc(line[:-1])  # remove newline
             f.writelines([line])
     proc.wait()
 
     duration = time.time() - start
+
+    rule()
 
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
