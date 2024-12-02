@@ -6,6 +6,9 @@ from enum import StrEnum
 import logging
 import os
 import os.path
+import rich.console
+import rich.markdown
+import rich.text
 from rich_argparse import RichHelpFormatter
 import shlex
 import shutil
@@ -60,13 +63,19 @@ class KpexCLI:
     @staticmethod
     def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
         # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
-        epilog = """Environmental variables:
-        PDKPATH  (e.g. $HOME/.volare)
-        PDK      (e.g. sky130A)
-        """
+        epilog = """
+| Variable | Example              |
+| -------- | -------------------- |
+| PDKPATH  | (e.g. $HOME/.volare) |
+| PDK      | (e.g. sky130A)       |
+"""
+        epilog_md = rich.console.Group(
+            rich.text.Text('Environmental variables:', style='argparse.groups'),
+            rich.markdown.Markdown(epilog, style='argparse.text')
+        )
         main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                           f"KLayout-integrated Parasitic Extraction Tool",
-                                              epilog=epilog,
+                                              epilog=epilog_md,
                                               add_help=False,
                                               formatter_class=RichHelpFormatter)
 
@@ -175,14 +184,14 @@ class KpexCLI:
                                  help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
         group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
                                  type=float, default=0.01,
-                                 help="Threshold for ignored parasitic capacitances (default is %(default)s1)")
+                                 help="Threshold for ignored parasitic capacitances (default is %(default)s)")
         group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
                                  type=float, default=100.0,
                                  help="Threshold for ignored parasitic resistances (default is %(default)s)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance in µm "
-                                      "(MAGIC command: extract halo <value>) (default is no custom command")
+                                      "(MAGIC command: extract halo <value>) (default is no custom halo)")
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
 
