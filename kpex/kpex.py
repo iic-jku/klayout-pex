@@ -1,45 +1,71 @@
 #! /usr/bin/env python3
 
-import io
+import argparse
 import os.path
-import rich.console
+import sys
 
 import klayout.db as kdb
 
-from fastercap.fastercap_input_builder import FasterCapInputBuilder
 from fastercap.fastercap_file_writer import *
-from tech_info import TechInfo
+from fastercap.fastercap_input_builder import FasterCapInputBuilder
+
 from klayout.lvsdb_extractor import KLayoutExtractionContext
+from .tech_info import TechInfo
+from .version import __version__
 
 # ------------------------------------------------------------------------------------
 
+PROGRAM_NAME = "kpex"
 
-console = rich.console.Console()
+
+def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
+    main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
+                                                       "KLayout-integrated Parasitic Extraction Tool",
+                                          epilog=f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand",
+                                          add_help=False)
+    group_special = main_parser.add_argument_group("Special options")
+    group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
+    group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
+
+    group_pex = main_parser.add_argument_group("Parasitic Extraction")
+    group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", default=None,
+                           help="Technology Protocol Buffer path (*.pb.json)")
+    group_pex.add_argument("--out_dir", "-o", dest="output_dir_path", default=None,
+                           help="Output directory path")
+    group_pex.add_argument("--lvsdb", "-l", dest="lvsdb_path", default=None, help="KLayout LVSDB path")
+    group_pex.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
+
+    if arg_list is None:
+        arg_list = sys.argv[1:]
+    args = main_parser.parse_args(arg_list)
+    return args
 
 
-def main():
-    jsonpb_path = os.path.realpath(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                     "..",
-                     "build",
-                     "sky130A_tech.pb.json")
-    )
+def validate_args(args: argparse.Namespace):
+    if not args.tech_pbjson_path:
 
-    # cell = "inv"
-    # cell = "inverter2"
-    cell = "nmos_diode2"
-    lvsdb_path = f"{cell}.lvsdb.gz"
-    gds_path = f"{cell}_l2ndb.gds.gz"
 
-    output_dir_path = os.path.realpath(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), "output")
-    )
 
-    tech_info = TechInfo.from_json(jsonpb_path)
+def main(args: argparse.Namespace):
+    # jsonpb_path = os.path.realpath(
+    #     os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                  "..",
+    #                  "build",
+    #                  "sky130A_tech.pb.json")
+    # )
+    # cell = "nmos_diode2"
+    # lvsdb_path = f"{cell}.lvsdb.gz"
+    # gds_path = f"{cell}_l2ndb.gds.gz"
+    #
+    # output_dir_path = os.path.realpath(
+    #     os.path.join(os.path.dirname(os.path.realpath(__file__)), "output")
+    # )
+
+    tech_info = TechInfo.from_json(args.tech_pbjson_path)
 
     # NOTE: can be L2N database for pure extracted information
     lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(lvsdb_path)
+    lvsdb.read(args.lvsdb_path)
 
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell, lvsdb=lvsdb)
     pex_context.target_layout.write(gds_path)
@@ -64,7 +90,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    validate_args(args)
+    main(args)
 
 # # NOTE: this only works from within klayout
 # # class Display:
