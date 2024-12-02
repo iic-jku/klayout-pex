@@ -423,7 +423,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
     ex->set_side_halo(8);
     ex->set_fringe_shield_halo(8);
-
+    
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
     kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
     lr->set_layer_name("ndiffres");
@@ -434,39 +434,147 @@ void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
     lr->set_layer_name("poly");
     lr->set_resistance(48200);
     //...
-
+    
     kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
     vr->set_via_name("mcon");
     vr->set_resistance(9300);
     //...
-
+    
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
-    kpex::tech::CapacitanceInfo::SubstrateCapacitance *sc = ci->add_substrates();
-    sc->set_layer_name("poly");
-    sc->set_area_capacitance(106.13);
-    sc->set_perimeter_capacitance(55.27);
-
-    kpex::tech::CapacitanceInfo::OverlapCapacitance *oc = ci->add_overlaps();
-    oc->set_top_layer_name("poly");
-    oc->set_bottom_layer_name("active");
-    oc->set_capacitance(106.13);
-    // ...
-    oc = ci->add_overlaps();
-    oc->set_top_layer_name("met1");
-    oc->set_bottom_layer_name("poly");
-    oc->set_capacitance(44.81);
-
-    kpex::tech::CapacitanceInfo::SidewallCapacitance *swc = ci->add_sidewalls();
-    swc->set_layer_name("met1");
-    swc->set_capacitance(44);
-    swc->set_offset(0.25);
-    // ...
-
-    kpex::tech::CapacitanceInfo::SideOverlapCapacitance *soc = ci->add_sideoverlaps();
-    soc->set_in_layer_name("met1");
-    soc->set_out_layer_name("poly");
-    soc->set_capacitance(46.72);
-    // ...
+    
+    //                  layer,  area_cap,  perimeter_cap
+    // addSubstrateCap(ci, "dnwell", 120.0,   0.0); // TODO
+    addSubstrateCap(ci, "poly", 106.13,    55.27);
+    addSubstrateCap(ci, "li1",  36.99,     40.7);
+    addSubstrateCap(ci, "met1", 25.78,     40.57);
+    addSubstrateCap(ci, "met2", 17.5,      37.76);
+    addSubstrateCap(ci, "met3", 12.37,     40.99);
+    addSubstrateCap(ci, "met4", 8.42,      36.68);
+    addSubstrateCap(ci, "met5", 6.32,      38.85);
+    
+    const std::string diff_nonfet = "diff"; // TODO: diff must be non-fet!
+    const std::string poly_nonres = "poly"; // TODO: poly must be non-res!
+    const std::string all_active = "diff";   // TODO: must be allactive
+    
+    //                top_layer,  bottom_layer,  cap
+    // addOverlapCap(ci, "pwell", "dnwell",     120.0); // TODO
+    addOverlapCap(ci, "pwell",    "dnwell",     120.0); // TODO
+    addOverlapCap(ci, "poly",     "nwell",      106.13);
+    addOverlapCap(ci, "poly",     "pwell",      106.13);
+    addOverlapCap(ci, "li1",      "pwell",      36.99);
+    addOverlapCap(ci, "li1",      "nwell",      36.99);
+    addOverlapCap(ci, "li1",      "nwell",      36.99);
+    addOverlapCap(ci, "li1",      diff_nonfet,  55.3);
+    addOverlapCap(ci, "li1",      "poly",       94.16);
+    addOverlapCap(ci, "met1",     "pwell",      25.78);
+    addOverlapCap(ci, "met1",     "nwell",      25.78);
+    addOverlapCap(ci, "met1",     diff_nonfet,  33.6);
+    addOverlapCap(ci, "met1",     poly_nonres,  44.81);
+    addOverlapCap(ci, "met1",     "li1",        114.20);
+    addOverlapCap(ci, "met2",     "nwell",      17.5);
+    addOverlapCap(ci, "met2",     "pwell",      17.5);
+    addOverlapCap(ci, "met2",     diff_nonfet,  20.8);
+    addOverlapCap(ci, "met2",     poly_nonres,  24.50);
+    addOverlapCap(ci, "met2",     "li1",        37.56);
+    addOverlapCap(ci, "met2",     "met1",       133.86);
+    addOverlapCap(ci, "met3",     "nwell",      12.37);
+    addOverlapCap(ci, "met3",     "pwell",      12.37);
+    addOverlapCap(ci, "met3",     all_active,   14.2);
+    addOverlapCap(ci, "met3",     poly_nonres,  16.06);
+    addOverlapCap(ci, "met3",     "li1",        20.79);
+    addOverlapCap(ci, "met3",     "met1",       34.54);
+    addOverlapCap(ci, "met3",     "met2",       86.19);
+    addOverlapCap(ci, "met4",     "nwell",      8.42);
+    addOverlapCap(ci, "met4",     "pwell",      8.42);
+    addOverlapCap(ci, "met4",     all_active,   9.41);
+    addOverlapCap(ci, "met4",     poly_nonres,  10.01);
+    addOverlapCap(ci, "met4",     "li1",        11.67);
+    addOverlapCap(ci, "met4",     "met1",       15.03);
+    addOverlapCap(ci, "met4",     "met2",       20.33);
+    addOverlapCap(ci, "met4",     "met3",       84.03);
+    addOverlapCap(ci, "met5",     "nwell",      6.32);
+    addOverlapCap(ci, "met5",     "pwell",      6.32);
+    addOverlapCap(ci, "met5",     all_active,   6.88);
+    addOverlapCap(ci, "met5",     poly_nonres,  7.21);
+    addOverlapCap(ci, "met5",     "li1",        8.03);
+    addOverlapCap(ci, "met5",     "met1",       9.48);
+    addOverlapCap(ci, "met5",     "met2",       11.34);
+    addOverlapCap(ci, "met5",     "met3",       19.63);
+    addOverlapCap(ci, "met5",     "met4",       68.33);
+    
+    //                 layer_name, cap,  offset
+    addSidewallCap(ci, "poly",     16.0, 0.0);
+    addSidewallCap(ci, "li1",      25.5, 0.14);
+    addSidewallCap(ci, "met1",     44,   0.25);
+    addSidewallCap(ci, "met2",     50,   0.3);
+    addSidewallCap(ci, "met3",     74.0, 0.4);
+    addSidewallCap(ci, "met4",     94.0, 0.57);
+    addSidewallCap(ci, "met5",     155,  0.5);
+    
+    //                        in_layer,    out_layer,   cap
+    addSidewallOverlapCap(ci, "poly",      "nwell",     55.27);
+    addSidewallOverlapCap(ci, "poly",      "pwell",     55.27);
+    addSidewallOverlapCap(ci, "li1",       "nwell",     40.70);
+    addSidewallOverlapCap(ci, "li1",       "pwell",     40.70);
+    addSidewallOverlapCap(ci, "li1",       diff_nonfet, 44.27);
+    addSidewallOverlapCap(ci, "li1",       poly_nonres, 51.85);
+    addSidewallOverlapCap(ci, "poly",      "li1",       25.14);
+    addSidewallOverlapCap(ci, "met1",      "nwell",     40.57);
+    addSidewallOverlapCap(ci, "met1",      "pwell",     40.57);
+    addSidewallOverlapCap(ci, "met1",      diff_nonfet, 43.10);
+    addSidewallOverlapCap(ci, "met1",      poly_nonres, 46.72);
+    addSidewallOverlapCap(ci, "poly",      "met1",      16.69);
+    addSidewallOverlapCap(ci, "met1",      "li1",       59.50);
+    addSidewallOverlapCap(ci, "li1",       "met1",      34.70);
+    addSidewallOverlapCap(ci, "met2",      "nwell",     37.76);
+    addSidewallOverlapCap(ci, "met2",      "pwell",     37.76);
+    addSidewallOverlapCap(ci, "met2",      diff_nonfet, 39.54);
+    addSidewallOverlapCap(ci, "met2",      poly_nonres, 41.22);
+    addSidewallOverlapCap(ci, "poly",      "met2",      11.17);
+    addSidewallOverlapCap(ci, "met2",      "li1",       46.28);
+    addSidewallOverlapCap(ci, "li1",       "met2",      21.74);
+    addSidewallOverlapCap(ci, "met2",      "met1",      67.05);
+    addSidewallOverlapCap(ci, "met1",      "met2",      48.19);
+    addSidewallOverlapCap(ci, "met3",      "nwell",     40.99);
+    addSidewallOverlapCap(ci, "met3",      "pwell",     40.99);
+    addSidewallOverlapCap(ci, "met3",      all_active,  42.25);
+    addSidewallOverlapCap(ci, "met3",      poly_nonres, 43.53);
+    addSidewallOverlapCap(ci, "poly",      "met3",      9.18);
+    addSidewallOverlapCap(ci, "met3",      "li1",       46.71);
+    addSidewallOverlapCap(ci, "li1",       "met3",      15.08);
+    addSidewallOverlapCap(ci, "met3",      "met1",      54.81);
+    addSidewallOverlapCap(ci, "met1",      "met3",      26.68);
+    addSidewallOverlapCap(ci, "met3",      "met2",      69.85);
+    addSidewallOverlapCap(ci, "met2",      "met3",      44.43);
+    addSidewallOverlapCap(ci, "met4",      "nwell",     36.68);
+    addSidewallOverlapCap(ci, "met4",      "pwell",     36.68);
+    addSidewallOverlapCap(ci, "met4",      diff_nonfet, 37.57);
+    addSidewallOverlapCap(ci, "met4",      poly_nonres, 38.11);
+    addSidewallOverlapCap(ci, "poly",      "met4",      6.35);
+    addSidewallOverlapCap(ci, "met4",      "li1",       39.71);
+    addSidewallOverlapCap(ci, "li1",       "met4",      10.14);
+    addSidewallOverlapCap(ci, "met4",      "met1",      42.56);
+    addSidewallOverlapCap(ci, "met1",      "met4",      16.42);
+    addSidewallOverlapCap(ci, "met4",      "met2",      46.38);
+    addSidewallOverlapCap(ci, "met2",      "met4",      22.33);
+    addSidewallOverlapCap(ci, "met4",      "met3",      70.52);
+    addSidewallOverlapCap(ci, "met3",      "met4",      42.64);
+    
+    addSidewallOverlapCap(ci, "met5",      "nwell",     38.85);
+    addSidewallOverlapCap(ci, "met5",      "pwell",     38.85);
+    addSidewallOverlapCap(ci, "met5",      diff_nonfet, 39.52);
+    addSidewallOverlapCap(ci, "met5",      poly_nonres, 39.91);
+    addSidewallOverlapCap(ci, "poly",      "met5",      6.49);
+    addSidewallOverlapCap(ci, "met5",      "li1",       41.15);
+    addSidewallOverlapCap(ci, "li1",       "met5",      7.64);
+    addSidewallOverlapCap(ci, "met5",      "met1",      43.19);
+    addSidewallOverlapCap(ci, "met1",      "met5",      12.02);
+    addSidewallOverlapCap(ci, "met5",      "met2",      45.59);
+    addSidewallOverlapCap(ci, "met2",      "met5",      15.69);
+    addSidewallOverlapCap(ci, "met5",      "met3",      54.15);
+    addSidewallOverlapCap(ci, "met3",      "met5",      27.84);
+    addSidewallOverlapCap(ci, "met5",      "met4",      82.82);
+    addSidewallOverlapCap(ci, "met4",      "met5",      46.98);
 }
 
 void buildTech(kpex::tech::Technology &tech) {
