@@ -415,7 +415,6 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 
 void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
     ex->set_side_halo(8);
-    ex->set_fringe_shield_halo(8);
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
     kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
