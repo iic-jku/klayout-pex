@@ -182,7 +182,7 @@ class FasterCapInputBuilder:
         diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
         for d in diffusion_regions:
             substrate_region -= d.sized(diffusion_margin)
-        model_builder.add_conductor(net_name="0",
+        model_builder.add_conductor(net_name="VSUBS",
                                     layer=substrate_region,
                                     z=0 - substrate_layer.height - substrate_layer.thickness,
                                     height=substrate_layer.thickness)

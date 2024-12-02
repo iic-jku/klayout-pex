@@ -3,114 +3,60 @@
 .SUBCKT nmos_diode2
 * net 1 VDD
 * net 2 VSS
-* net 3 0
-* device instance $1 r0 *1 -0.025,0.01 sky130_fd_pr__nfet_01v8
+* net 3 FC_GND
 M$1 2 1 1 2 sky130_fd_pr__nfet_01v8 L=0.15U W=0.42U AS=0.126P AD=0.126P
 + PS=1.44U PD=1.44U
-* device instance Cext_2_1 r0 *1 0,0 PEX_CAP
 CCext_2_1 1 3 2.65903e-16 PEX_CAP
-* device instance Cext_3_1 r0 *1 0,0 PEX_CAP
 CCext_3_1 2 3 8.2303e-17 PEX_CAP
-* device instance Cext_4_1 r0 *1 0,0 PEX_CAP
 CCext_4_1 1 3 4.06155e-16 PEX_CAP
-* device instance Cext_5_1 r0 *1 0,0 PEX_CAP
 CCext_5_1 1 3 1.97712e-17 PEX_CAP
-* device instance Cext_6_1 r0 *1 0,0 PEX_CAP
 CCext_6_1 2 3 4.04627e-16 PEX_CAP
-* device instance Cext_7_1 r0 *1 0,0 PEX_CAP
 CCext_7_1 1 3 1.76903e-15 PEX_CAP
-* device instance Cext_8_1 r0 *1 0,0 PEX_CAP
 CCext_8_1 1 3 1.0594e-16 PEX_CAP
-* device instance Cext_9_1 r0 *1 0,0 PEX_CAP
 CCext_9_1 2 3 3.33088e-15 PEX_CAP
-* device instance Cext_10_1 r0 *1 0,0 PEX_CAP
 CCext_10_1 1 3 2.29669e-17 PEX_CAP
-* device instance Cext_1_1 r0 *1 0,0 PEX_CAP
 CCext_1_1 3 3 6.75208e-15 PEX_CAP
-* device instance Cext_3_2 r0 *1 0,0 PEX_CAP
 CCext_3_2 2 1 2.16515e-17 PEX_CAP
-* device instance Cext_4_2 r0 *1 0,0 PEX_CAP
 CCext_4_2 1 1 1.37011e-17 PEX_CAP
-* device instance Cext_5_2 r0 *1 0,0 PEX_CAP
 CCext_5_2 1 1 3.52123e-16 PEX_CAP
-* device instance Cext_6_2 r0 *1 0,0 PEX_CAP
 CCext_6_2 2 1 6.98344e-17 PEX_CAP
-* device instance Cext_7_2 r0 *1 0,0 PEX_CAP
 CCext_7_2 1 1 5.24525e-17 PEX_CAP
-* device instance Cext_8_2 r0 *1 0,0 PEX_CAP
 CCext_8_2 1 1 3.77997e-15 PEX_CAP
-* device instance Cext_9_2 r0 *1 0,0 PEX_CAP
 CCext_9_2 2 1 1.09871e-16 PEX_CAP
-* device instance Cext_10_2 r0 *1 0,0 PEX_CAP
 CCext_10_2 1 1 9.28985e-16 PEX_CAP
-* device instance Cext_2_2 r0 *1 0,0 PEX_CAP
 CCext_2_2 1 3 5.83749e-15 PEX_CAP
-* device instance Cext_4_3 r0 *1 0,0 PEX_CAP
 CCext_4_3 1 2 1.1836e-17 PEX_CAP
-* device instance Cext_5_3 r0 *1 0,0 PEX_CAP
 CCext_5_3 1 2 9.10449e-18 PEX_CAP
-* device instance Cext_6_3 r0 *1 0,0 PEX_CAP
 CCext_6_3 2 2 6.65061e-16 PEX_CAP
-* device instance Cext_7_3 r0 *1 0,0 PEX_CAP
 CCext_7_3 1 2 9.53052e-19 PEX_CAP
-* device instance Cext_8_3 r0 *1 0,0 PEX_CAP
 CCext_8_3 1 2 4.05989e-18 PEX_CAP
-* device instance Cext_9_3 r0 *1 0,0 PEX_CAP
 CCext_9_3 2 2 3.27382e-19 PEX_CAP
-* device instance Cext_3_3 r0 *1 0,0 PEX_CAP
 CCext_3_3 2 3 1.11688e-15 PEX_CAP
-* device instance Cext_5_4 r0 *1 0,0 PEX_CAP
 CCext_5_4 1 1 2.99169e-17 PEX_CAP
-* device instance Cext_6_4 r0 *1 0,0 PEX_CAP
 CCext_6_4 2 1 1.42485e-16 PEX_CAP
-* device instance Cext_7_4 r0 *1 0,0 PEX_CAP
 CCext_7_4 1 1 2.55853e-17 PEX_CAP
-* device instance Cext_8_4 r0 *1 0,0 PEX_CAP
 CCext_8_4 1 1 1.31896e-17 PEX_CAP
-* device instance Cext_10_4 r0 *1 0,0 PEX_CAP
 CCext_10_4 1 1 1.14184e-18 PEX_CAP
-* device instance Cext_4_4 r0 *1 0,0 PEX_CAP
 CCext_4_4 1 3 1.0296e-15 PEX_CAP
-* device instance Cext_6_5 r0 *1 0,0 PEX_CAP
 CCext_6_5 2 1 7.62597e-17 PEX_CAP
-* device instance Cext_7_5 r0 *1 0,0 PEX_CAP
 CCext_7_5 1 1 1.19259e-17 PEX_CAP
-* device instance Cext_8_5 r0 *1 0,0 PEX_CAP
 CCext_8_5 1 1 3.05333e-17 PEX_CAP
-* device instance Cext_9_5 r0 *1 0,0 PEX_CAP
 CCext_9_5 2 1 7.14566e-18 PEX_CAP
-* device instance Cext_10_5 r0 *1 0,0 PEX_CAP
 CCext_10_5 1 1 9.30146e-19 PEX_CAP
-* device instance Cext_5_5 r0 *1 0,0 PEX_CAP
 CCext_5_5 1 3 8.7267e-16 PEX_CAP
-* device instance Cext_7_6 r0 *1 0,0 PEX_CAP
 CCext_7_6 1 2 4.4109e-18 PEX_CAP
-* device instance Cext_8_6 r0 *1 0,0 PEX_CAP
 CCext_8_6 1 2 9.49106e-18 PEX_CAP
-* device instance Cext_9_6 r0 *1 0,0 PEX_CAP
 CCext_9_6 2 2 3.85867e-19 PEX_CAP
-* device instance Cext_10_6 r0 *1 0,0 PEX_CAP
 CCext_10_6 1 2 2.57901e-19 PEX_CAP
-* device instance Cext_6_6 r0 *1 0,0 PEX_CAP
 CCext_6_6 2 3 4.40457e-16 PEX_CAP
-* device instance Cext_8_7 r0 *1 0,0 PEX_CAP
 CCext_8_7 1 1 1.24527e-16 PEX_CAP
-* device instance Cext_9_7 r0 *1 0,0 PEX_CAP
 CCext_9_7 2 1 2.87776e-17 PEX_CAP
-* device instance Cext_10_7 r0 *1 0,0 PEX_CAP
 CCext_10_7 1 1 7.55598e-18 PEX_CAP
-* device instance Cext_7_7 r0 *1 0,0 PEX_CAP
 CCext_7_7 1 3 2.02186e-15 PEX_CAP
-* device instance Cext_9_8 r0 *1 0,0 PEX_CAP
 CCext_9_8 2 1 7.93725e-17 PEX_CAP
-* device instance Cext_10_8 r0 *1 0,0 PEX_CAP
 CCext_10_8 1 1 1.44108e-17 PEX_CAP
-* device instance Cext_8_8 r0 *1 0,0 PEX_CAP
 CCext_8_8 1 3 4.29803e-15 PEX_CAP
-* device instance Cext_10_9 r0 *1 0,0 PEX_CAP
 CCext_10_9 1 2 7.29003e-17 PEX_CAP
-* device instance Cext_9_9 r0 *1 0,0 PEX_CAP
 CCext_9_9 2 3 3.73978e-15 PEX_CAP
-* device instance Cext_10_10 r0 *1 0,0 PEX_CAP
 CCext_10_10 1 3 1.09513e-15 PEX_CAP
 .ENDS nmos_diode2

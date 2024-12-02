@@ -1,16 +1,10 @@
 
 * cell TOP
 .SUBCKT TOP
-* device instance $1 r0 *1 0.17,0.17 sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield
 C$1 C0 C1 SUB 2e-16 sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield
-* device instance Cext_0_1 r0 *1 0,0 PEX_CAP
-CCext_0_1 0 C1 2.71102e-16 PEX_CAP
-* device instance Cext_0_2 r0 *1 0,0 PEX_CAP
-CCext_0_2 0 C0 8.6766e-16 PEX_CAP
-* device instance Cext_1_2 r0 *1 0,0 PEX_CAP
+CCext_0_1 VSUBS C1 2.71102e-16 PEX_CAP
+CCext_0_2 VSUBS C0 8.6766e-16 PEX_CAP
 CCext_1_2 C1 C0 1.28008e-14 PEX_CAP
-* device instance Cext_1_1 r0 *1 0,0 PEX_CAP
-CCext_1_1 C1 0 3.57265e-16 PEX_CAP
-* device instance Cext_2_2 r0 *1 0,0 PEX_CAP
-CCext_2_2 C0 0 1.11752e-16 PEX_CAP
+CCext_1_1 C1 FC_GND 3.57265e-16 PEX_CAP
+CCext_2_2 C0 FC_GND 1.11752e-16 PEX_CAP
 .ENDS TOP

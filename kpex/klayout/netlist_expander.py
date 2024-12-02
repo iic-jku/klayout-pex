@@ -16,6 +16,7 @@ from kpex.log import (
     # error
 )
 from kpex.common.capacitance_matrix import CapacitanceMatrix
+from kpex.tech_info import TechInfo
 
 
 class NetlistExpander:
@@ -36,10 +37,11 @@ class NetlistExpander:
         # create capacitor class
         cap = kdb.DeviceClassCapacitor()
         cap.name = 'PEX_CAP'
-        cap.description = "Extracted by FasterCap PEX"
+        cap.description = "Extracted by kpex/FasterCap PEX"
         expanded_netlist.add(cap)
 
-        top_circuit.create_net('0')  # create GROUND net
+        fc_gnd_net = top_circuit.create_net('FC_GND')  # create GROUND net
+        vsubs_net = top_circuit.create_net("VSUBS")
         nets: List[kdb.Net] = []
 
         # build table: name -> net
@@ -103,18 +105,29 @@ class NetlistExpander:
                                   net1=nets[i], net2=nets[0],
                                   cap_value=cap_ii)
 
-        # for j in range(1, cap_matrix.dimension):
-        #     cap_ii = 0.0
-        #     for i in range(1, cap_matrix.dimension):
-        #         if i == j:
-        #             cap_ii += cap_matrix[i][j]
-        #         elif i > j:
-        #             add_parasitic_cap(i=i, j=j,
-        #                               net1=nets[i], net2=nets[j],
-        #                               cap_value=-cap_matrix[i][j])
-        #     add_parasitic_cap(i=j, j=j,
-        #                       net1=nets[j], net2=nets[0],
-        #                       cap_value=cap_ii)
+        # Short VSUBS and FC_GND together
+        #   VSUBS ... substrate block
+        #   FC_GND ... FasterCap's GND, i.e. the diagonal Cii elements
+        # create capacitor class
+
+        res = kdb.DeviceClassResistor()
+        res.name = 'PEX_RES'
+        res.description = "Extracted by kpex/FasterCap PEX"
+        expanded_netlist.add(res)
+
+        gnd_net = name2net.get('GND', None)
+        if not gnd_net:
+            gnd_net = top_circuit.create_net('GND')  # create GROUND net
+
+        c: kdb.Device = top_circuit.create_device(res, f"Rext_FC_GND_GND")
+        c.connect_terminal('A', fc_gnd_net)
+        c.connect_terminal('B', gnd_net)
+        c.set_parameter('R', 0)
+
+        c: kdb.Device = top_circuit.create_device(res, f"Rext_VSUBS_GND")
+        c.connect_terminal('A', vsubs_net)
+        c.connect_terminal('B', gnd_net)
+        c.set_parameter('R', 0)
 
         return expanded_netlist
 
@@ -124,6 +137,11 @@ class Test(unittest.TestCase):
     def klayout_testdata_dir(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                              'testdata', 'fastercap'))
+
+    @property
+    def tech_info_json_path(self) -> str:
+        return os.path.realpath(os.path.join(__file__, '..', '..', '..',
+                                             'build', 'sky130A_tech.pb.json'))
 
     def test_netlist_expansion(self):
         exp = NetlistExpander()
@@ -138,10 +156,17 @@ class Test(unittest.TestCase):
 
         cap_matrix = CapacitanceMatrix.parse_csv(csv_path, separator=';')
 
-        pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb)
+        tech = TechInfo.from_json(self.tech_info_json_path,
+                                  dielectric_filter=None)
+
+        pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name,
+                                                                  lvsdb=lvsdb,
+                                                                  tech=tech,
+                                                                  blackbox_devices=False)
         expanded_netlist = exp.expand(extracted_netlist=pex_context.lvsdb.netlist(),
                                       top_cell_name=pex_context.top_cell.name,
-                                      cap_matrix=cap_matrix)
+                                      cap_matrix=cap_matrix,
+                                      blackbox_devices=False)
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")
         spice_writer = kdb.NetlistSpiceWriter()
         expanded_netlist.write(out_path, spice_writer)
