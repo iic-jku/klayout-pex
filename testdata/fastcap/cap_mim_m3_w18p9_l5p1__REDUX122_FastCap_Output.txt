@@ -1,0 +1,84 @@
+Running fastcap 2.0
+  Input: FasterCap_Input_.lst
+  Input surfaces:
+   GROUP1
+    FasterCap_Input_1_outside=(void)_inside=capild.geo, dielectric interface
+      title: `Problem with Dielectric k=4 vs k=8'
+      permittivities: 8 (inner) 3.9 (outer)
+      number of panels: 1152
+      number of extra evaluation points: 2304
+      translation: (0 0 0)
+   GROUP2
+    FasterCap_Input_3_outside=(void)_net=$1.geo, conductor
+      title: `Problem with Dielectric k=4 vs k=8'
+      outer permittivity: 3.9
+      number of panels: 34
+      number of extra evaluation points: 0
+      translation: (0 0 0)
+    FasterCap_Input_5_outside=capild_net=$1.geo, conductor
+      title: `Problem with Dielectric k=4 vs k=8'
+      outer permittivity: 8
+      number of panels: 4
+      number of extra evaluation points: 0
+      translation: (0 0 0)
+   GROUP3
+    FasterCap_Input_4_outside=(void)_net=$2.geo, conductor
+      title: `Problem with Dielectric k=4 vs k=8'
+      outer permittivity: 3.9
+      number of panels: 66
+      number of extra evaluation points: 0
+      translation: (0 0 0)
+    FasterCap_Input_6_outside=capild_net=$2.geo, conductor
+      title: `Problem with Dielectric k=4 vs k=8'
+      outer permittivity: 8
+      number of panels: 4
+      number of extra evaluation points: 0
+      translation: (0 0 0)
+  Date: Wed Sep 18 17:58:35 2024
+  Host: MacBook.local
+
+INPUT SUMMARY
+  Expansion order: 3
+  Number of partitioning levels: 0
+  Overall permittivity factor: 1
+  Total number of panels: 1260
+    Number of conductor panels: 108
+    Number of dielectric interface panels: 1152
+    Number of thin conductor on dielectric interface panels: 0
+  Number of conductors: 4
+Percentage of multiplies done by multipole: 76.1%
+
+ITERATION DATA
+Starting on column 1 ($1%GROUP2)
+1 
+Starting on column 2 ($1%GROUP2)
+1 
+Starting on column 3 ($2%GROUP3)
+1 
+Starting on column 4 ($2%GROUP3)
+1 
+mksCapDump: Warning - capacitance matrix has non-negative off-diagonals
+  row 1 col 4
+
+mksCapDump: Warning - capacitance matrix is not strictly diagonally dominant
+  due to row 1
+
+mksCapDump: Warning - capacitance matrix has non-negative off-diagonals
+  row 2 col 3
+
+mksCapDump: Warning - capacitance matrix has non-negative off-diagonals
+  row 3 col 2
+
+mksCapDump: Warning - capacitance matrix is not strictly diagonally dominant
+  due to row 3
+
+mksCapDump: Warning - capacitance matrix has non-negative off-diagonals
+  row 4 col 1
+
+
+CAPACITANCE MATRIX, picofarads
+                    1          2          3          4 
+$1%GROUP2 1       7850      -7277      -2115      54.97
+$1%GROUP2 2      -7277  3.778e+05      130.9 -3.682e+05
+$2%GROUP3 3      -2115      130.9       6792      -5388
+$2%GROUP3 4      54.97 -3.682e+05      -5388  3.753e+05
