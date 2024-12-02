@@ -59,7 +59,7 @@ class CapacitanceMatrix:
                 v1 = self[i][j]
                 v2 = self[j][i]
                 avg = (v1 + v2) / 2
-                print(f"i={i} j={j}, avg({v1}, {v2}) == {avg}")
+                # print(f"i={i} j={j}, avg({v1}, {v2}) == {avg}")
                 c[i][j] = avg
                 c[j][i] = avg
         return c
