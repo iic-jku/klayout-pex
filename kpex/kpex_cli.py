@@ -70,7 +70,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
                            help="Technology Protocol Buffer path (*.pb.json)")
 
-    group_pex.add_argument("--out_dir", "-o", dest="output_dir_path", default=".",
+    group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default=".",
                            help="Output directory path")
 
     group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
@@ -167,6 +167,20 @@ def validate_args(args: argparse.Namespace):
         error(f"Requested log level {args.log_level.lower()} does not exist, "
               f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
         found_errors = True
+
+    def input_file_stem(path: str):
+        # could be *.gds, or *.gds.gz, so remove all extensions
+        return os.path.basename(path).split(sep='.')[0]
+
+    run_dir_id: str
+    match args.input_mode:
+        case InputMode.GDS:
+            run_dir_id = f"{input_file_stem(args.gds_path)}__{args.cell_name}"
+        case InputMode.LVSDB:
+            run_dir_id = f"{input_file_stem(args.lvsdb_path)}__{args.cell_name}"
+        case _:
+            run_dir_id = args.cell_name
+    args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
 
     if found_errors:
         sys.exit(1)
