@@ -68,13 +68,16 @@ class TechInfo:
 
     def sidewall_dielectric_layer(self, layer_name: str) -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
-
         for lyr in self.tech.process_stack.layers:
-            if lyr.layer_type != process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                continue
-
-            if lyr.sidewall_dielectric_layer.reference == layer_name:
-                found_layers.append(lyr)
+            match lyr.layer_type:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                    if lyr.sidewall_dielectric_layer.reference == layer_name:
+                        found_layers.append(lyr)
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                    if lyr.conformal_dielectric_layer.reference == layer_name:
+                        found_layers.append(lyr)
+                case _:
+                    continue
 
         if len(found_layers) == 0:
             return None
