@@ -256,27 +256,28 @@ class FasterCapInputBuilder:
             # add simple dielectric
             #
             simple_dielectric, diel_height = self.tech_info.simple_dielectric_above_metal(metal_layer_name)
-            top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-            diel_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
-            diel_region = kdb.Region()
-            diel_region.insert(diel_block)
-            if sidewall_region:
-                assert sidewall_height >= 0.0
-                diel_region -= sidewall_region
-                model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                             layer=sidewall_region,
-                                             z=metal_z_bottom + sidewall_height,
-                                             height=diel_height - sidewall_height)
-            if no_metal_region:
-                model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                             layer=diel_region,
-                                             z=metal_z_bottom + no_metal_height,
-                                             height=diel_height - no_metal_height)
-            else:
-                model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                             layer=diel_region,
-                                             z=metal_z_bottom,
-                                             height=diel_height)
+            if simple_dielectric:
+                top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+                diel_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                diel_region = kdb.Region()
+                diel_region.insert(diel_block)
+                if sidewall_region:
+                    assert sidewall_height >= 0.0
+                    diel_region -= sidewall_region
+                    model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                                 layer=sidewall_region,
+                                                 z=metal_z_bottom + sidewall_height,
+                                                 height=diel_height - sidewall_height)
+                if no_metal_region:
+                    model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                                 layer=diel_region,
+                                                 z=metal_z_bottom + no_metal_height,
+                                                 height=diel_height - no_metal_height)
+                else:
+                    model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                                 layer=diel_region,
+                                                 z=metal_z_bottom,
+                                                 height=diel_height)
 
         gen = model_builder.generate()
         return gen
