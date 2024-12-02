@@ -290,14 +290,13 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     spice_writer = kdb.NetlistSpiceWriter()
     spice_writer.use_net_names = True
+    spice_writer.with_comments = False
     expanded_netlist.write(expanded_netlist_path, spice_writer)
     info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
     netlist_reducer = NetlistReducer()
     reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
                                              top_cell_name=pex_context.top_cell.name)
-    spice_writer = kdb.NetlistSpiceWriter()
-    spice_writer.use_net_names = True
     reduced_netlist.write(reduced_netlist_path, spice_writer)
     info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
