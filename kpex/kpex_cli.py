@@ -92,6 +92,12 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help="Used cached LVSDB (for given input GDS)"
                                       "(default is true)")
 
+    group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
+    group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
+                                 type=true_or_false, default=False,  # TODO: in the future this should be True by default
+                                 help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
+                                      "(default is False for testing now)")
+    
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
                                  type=float, default=3.9,
@@ -111,10 +117,6 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help=f"Comma separated list of dielectric filter patterns. "
                                       f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
                                       f"(default is all)")
-    group_fastercap.add_argument("--blackbox", dest="blackbox_devices",
-                                 type=true_or_false, default=False,  # TODO: in the future this should be True by default
-                                 help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models"
-                                      "(default is False for testing now)")
 
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
