@@ -1,156 +1,15 @@
 //
-//
-//
 // This creates a technology definition example for sky130A:
 // https://skywater-pdk.readthedocs.io/en/main/_images/metal_stack.svg
+//
 
+#include "protobuf.h"
 
-#include <google/protobuf/io/zero_copy_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/io/printer.h>
-#include <google/protobuf/text_format.h>
-#include <google/protobuf/util/json_util.h>
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-
-#include "tech.pb.h"
-
-enum Format {
-    PROTOBUF_TEXTUAL,
-    PROTOBUF_BINARY,
-    JSON
-};
-
-const char *describeFormat(Format format) {
-    switch (format) {
-        case Format::PROTOBUF_TEXTUAL: return "Protobuf Textual";
-        case Format::PROTOBUF_BINARY: return "Protobuf Binary";
-        case Format::JSON: return "JSON";
-    }
-}
-
-void write(const kpex::tech::Technology &tech,
-           const std::string &outputPath,
-           Format format)
-{
-    std::cout << "Writing technology protobuf message to file '" << outputPath << "' "
-              << "in " << describeFormat(format) << " format." << std::endl;
-    
-    switch (format) {
-        case Format::PROTOBUF_TEXTUAL: {
-            std::ofstream output(outputPath, std::ios::out | std::ios::binary);
-            output << "# proto-file: tech.proto" << std::endl
-                   << "# proto-message: kpex.tech.Technology" << std::endl << std::endl;
-            google::protobuf::io::OstreamOutputStream zcos(&output);
-            google::protobuf::TextFormat::Print(tech, &zcos);
-            break;
-        }
-
-        case Format::PROTOBUF_BINARY: {
-            std::ofstream output(outputPath, std::ios::out | std::ios::binary);
-            tech.SerializeToOstream(&output);
-            break;
-        }
-            
-        case Format::JSON: {
-            std::string jsonString;
-            google::protobuf::util::JsonPrintOptions options;
-            options.add_whitespace = true;
-            options.preserve_proto_field_names = true;
-            auto status =
-                google::protobuf::util::MessageToJsonString(tech, &jsonString, options);
-            std::ofstream output(outputPath, std::ios::out | std::ios::binary);
-            output << jsonString;
-            output.close();
-            break;
-        }
-    }
-}
-
-void read(kpex::tech::Technology *tech,
-          const std::string &inputPath,
-          Format format)
-{
-    std::cout << "Reading technology protobuf message from file '" << inputPath << "' "
-              << "in " << describeFormat(format) << " format." << std::endl;
-    
-    switch (format) {
-        case Format::PROTOBUF_TEXTUAL: {
-            std::fstream input(inputPath, std::ios::in);
-            google::protobuf::io::IstreamInputStream fis(&input);
-            google::protobuf::TextFormat::Parse(&fis, tech);
-            break;
-        }
-            
-        case Format::PROTOBUF_BINARY: {
-            std::fstream input(inputPath, std::ios::in | std::ios::binary);
-            tech->ParseFromIstream(&input);
-            break;
-        }
-        
-        case Format::JSON: {
-            google::protobuf::util::JsonParseOptions options;
-
-            std::fstream input(inputPath, std::ios::in);
-            std::ostringstream buffer;
-            buffer << input.rdbuf();
-            auto status =
-                google::protobuf::util::JsonStringToMessage(buffer.str(), tech, options);
-            break;
-        }
-    }
-}
-
-void convert(const std::string &inputPath,
-             Format inputFormat,
-             const std::string &outputPath,
-             Format outputFormat)
-{
-    std::cout << "Converting ..." << std::endl;
-    
-    kpex::tech::Technology tech;
-    read(&tech, inputPath, inputFormat);
-    write(tech, outputPath, outputFormat);
-}
-
-void addLayer(kpex::tech::Technology *tech,
-              const std::string &name,
-              uint32_t gds_layer,
-              uint32_t gds_datatype,
-              const std::string &description)
-{
-kpex::tech::LayerInfo *layer = tech->add_layers();
-layer->set_name(name);
-layer->set_description(description);
-layer->set_gds_layer(gds_layer);
-layer->set_gds_datatype(gds_datatype);
-}
-
-void addComputedLayer(kpex::tech::Technology *tech,
-                      kpex::tech::ComputedLayerInfo_Kind kind,
-                      const std::string &name,
-                      uint32_t gds_layer,
-                      uint32_t gds_datatype,
-                      const std::string &description)
-{
-    kpex::tech::ComputedLayerInfo *cl = tech->add_lvs_computed_layers();
-    cl->set_kind(kind);
-    kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
-    layer->set_name(name);
-    layer->set_description(description);
-    layer->set_gds_layer(gds_layer);
-    layer->set_gds_datatype(gds_datatype);
-}
-
+namespace sky130A {
 
 void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
     addLayer(tech, "tap",  65, 44, "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
-    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
-    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
     addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
 
     // map this to process stack nwell? (TODO: check this with Matthias)
@@ -610,7 +469,7 @@ void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
     // ...
 }
 
-void buildDemoTech(kpex::tech::Technology &tech) {
+void buildTech(kpex::tech::Technology &tech) {
     tech.set_name("sky130A");
 
     buildLayers(&tech);
@@ -624,29 +483,4 @@ void buildDemoTech(kpex::tech::Technology &tech) {
     buildExtractionInfo(ex);
 }
 
-int main(int argc, char **argv) {
-    // Verify that the version of the library that we linked against is
-    // compatible with the version of the headers we compiled against.
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    kpex::tech::Technology tech;
-    buildDemoTech(tech);
-    
-    write(tech, "build/sky130A_tech.pb.json", Format::JSON);
-    write(tech, "build/sky130A_tech.binpb", Format::PROTOBUF_BINARY);
-    write(tech, "build/sky130A_tech.txtpb", Format::PROTOBUF_TEXTUAL);
-    
-    std::cout << "--------------------------------------------" << std::endl;
-    convert("build/sky130A_tech.pb.json", Format::JSON,
-            "build/sky130A_tech__from_json.txtpb", Format::PROTOBUF_TEXTUAL);
-    std::cout << "--------------------------------------------" << std::endl;
-    convert("build/sky130A_tech.pb.json", Format::JSON,
-            "build/sky130A_tech__from_json.binpb", Format::PROTOBUF_BINARY);
-    std::cout << "--------------------------------------------" << std::endl;
-    convert("build/sky130A_tech.pb.json", Format::JSON,
-            "build/sky130A_tech__from_json.json", Format::JSON);
-
-    // Optional:  Delete all global objects allocated by libprotobuf.
-    google::protobuf::ShutdownProtobufLibrary();
 }
-

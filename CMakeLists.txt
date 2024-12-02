@@ -44,7 +44,14 @@ protobuf_generate(
 
 #_____________________________________________________________________________________________
 
-add_executable(gen_sky130A_tech_pb gen_sky130A_tech_pb.cpp)
-target_link_libraries(gen_sky130A_tech_pb kpex-protobuf)
+include_directories(${PROJECT_SOURCE_DIR}/cxx/gen_tech_pb)
+set(GEN_TECH_PB_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/sky130A.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/ihp_sg13g2.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/protobuf.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/main.cpp
+)
+add_executable(gen_tech_pb ${GEN_TECH_PB_SOURCES})
+target_link_libraries(gen_tech_pb kpex-protobuf)
 
 #_____________________________________________________________________________________________
