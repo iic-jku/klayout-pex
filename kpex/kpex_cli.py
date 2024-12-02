@@ -99,8 +99,8 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help="Schematic SPICE netlist path (for LVS)")
     group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
     group_pex_input.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
-    default_lvs_script_path = os.path.join(os.environ['HOME'],
-                                           '.klayout', 'salt', 'sky130A_el', 'lvs', 'core', 'sky130.lvs')
+    default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk', 'sky130A', 'kpex', 'sky130.lvs'))
+
     group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
                                  default=default_lvs_script_path,
                                  help=f"Path to KLayout LVS script (default is {default_lvs_script_path})")
