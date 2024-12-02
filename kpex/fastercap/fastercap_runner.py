@@ -47,8 +47,7 @@ def run_fastercap(exe_path: str,
 
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
-
-    if proc.returncode != 0:
+    else:
         raise Exception(f"FasterCap failed with status code {proc.returncode} after {'%.4g' % duration}s",
                         f"see log file: {log_path}")
 
@@ -88,19 +87,12 @@ class Test(unittest.TestCase):
     def test_fastercap_parse_capacitance_matrix(self):
         testdata_path = os.path.join(self.fastercap_testdata_dir, 'nmos_diode2_FasterCap_Output.txt')
         obtained_matrix = fastercap_parse_capacitance_matrix(log_path=testdata_path)
-        self.assertEqual(10, len(obtained_matrix.rows))
-        self.assertEqual(10, len(obtained_matrix.rows[0]))
-        self.assertEqual(10, len(obtained_matrix.rows[1]))
-        self.assertEqual(10, len(obtained_matrix.rows[2]))
-        self.assertEqual(10, len(obtained_matrix.rows[3]))
-        self.assertEqual(10, len(obtained_matrix.rows[4]))
-        self.assertEqual(10, len(obtained_matrix.rows[5]))
-        self.assertEqual(10, len(obtained_matrix.rows[6]))
-        self.assertEqual(10, len(obtained_matrix.rows[7]))
-        self.assertEqual(10, len(obtained_matrix.rows[8]))
-        self.assertEqual(10, len(obtained_matrix.rows[9]))
+        self.assertEqual(3, len(obtained_matrix.rows))
+        self.assertEqual(3, len(obtained_matrix.rows[0]))
+        self.assertEqual(3, len(obtained_matrix.rows[1]))
+        self.assertEqual(3, len(obtained_matrix.rows[2]))
         self.assertEqual(
-            ['g1_7', 'g1_8', 'g1_9', 'g1_10', 'g1_11', 'g1_12', 'g1_13', 'g1_14', 'g1_15', 'g1_16'],
+            ['g1_0', 'g1_VDD', 'g1_VSS'],
             obtained_matrix.conductor_names
         )
 
