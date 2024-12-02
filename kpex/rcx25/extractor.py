@@ -78,12 +78,27 @@ class OverlapCap:
     tech_spec: process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance
 
 
+@dataclass(frozen=True)
+class SideOverlapKey:
+    layer_inside: LayerName
+    net_inside: NetName
+    layer_outside: LayerName
+    net_outside: NetName
+
+
+@dataclass
+class SideOverlapCap:
+    key: SideOverlapKey
+    cap_value: float  # femto farad
+
+
 @dataclass
 class CellExtractionResults:
     cell_name: CellName
     # node_regions: Dict[NetName, NodeRegion] = field(default_factory=dict)
     overlap_coupling: Dict[OverlapKey, OverlapCap] = field(default_factory=dict)
     sidewall_table: Dict[SidewallKey, SidewallCap] = field(default_factory=dict)
+    sideoverlap_table: Dict[SideOverlapKey, SideOverlapCap] = field(default_factory=dict)
 
 
 @dataclass
@@ -395,7 +410,7 @@ class RCExtractor:
                     self.overlap_cap_spec = tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
 
                 self.substrate_cap_spec = tech_info.substrate_cap_by_layer_name[inside_layer_name]
-                self.sidewall_cap_spec = tech_info.sidewall_cap_by_layer_name[inside_layer_name]
+                self.sideoverlap_cap_spec = tech_info.side_overlap_cap_by_layer_names[inside_layer_name][outside_layer_name]
 
             def begin_polygon(self,
                               layout: kdb.Layout,
@@ -414,8 +429,8 @@ class RCExtractor:
                         neighborhood: EdgeNeighborhood):
                 #
                 # NOTE: this complex operation will automatically rotate every edge to be on the x-axis
-                # going from 0 to edge.length
-                # so we only have to consider the y-axis to get the near and far distances
+                #       going from 0 to edge.length
+                #       so we only have to consider the y-axis to get the near and far distances
                 #
 
                 # TODO: consider z-shielding!
@@ -439,8 +454,8 @@ class RCExtractor:
                         rdb_cat_outside_net = report.create_category(rdb_cat_edge_interval,
                                                                      f"outside_net={net_name}")
 
-                        poly_str = "/".join([str(p) for p in polygons])
-                        print(f"  {x1},{x2} -> {net_index} ({net_name}): {poly_str}")
+                        # poly_str = "/".join([str(p) for p in polygons])
+                        # print(f"  {x1},{x2} -> {net_index} ({net_name}): {poly_str}")
 
                         # TODO: re-enable this, currently there is a klayout bug when writing / reading the report DB
                         if polygons:
@@ -451,9 +466,7 @@ class RCExtractor:
                                                 original_trans_polygons)
 
                         for p in polygons:
-                            area = p.area()
                             bbox: kdb.Box = p.bbox()
-                            bbox_area = bbox.area()
 
                             if not p.is_box():
                                 warning(f"Side overlap, outside polygon {p} is not a box. "
@@ -477,33 +490,43 @@ class RCExtractor:
                             distance_near_um = distance_near * dbu
                             distance_far_um = distance_far * dbu
 
-                            mult = self.overlap_cap_spec.capacitance
+                            alpha_c = self.overlap_cap_spec.capacitance
 
                             # see Magic ExtCouple.c L1164
-                            snear = (2.0 / math.pi) * math.atan(mult * distance_near_um / edge_interval_length_um)
-                            sfar = (2.0 / math.pi) * math.atan(mult * distance_far_um / edge_interval_length_um)
+                            cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um / edge_interval_length_um)
+                            cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um / edge_interval_length_um)
 
                             # "cfrac" is the fractional portion of the fringe cap seen
                             # by tile tp along its length.  This is independent of the
                             # portion of the boundary length that tile tp occupies.
-                            cfrac = sfar - snear
+                            cfrac = cfar - cnear
 
                             # The fringe portion extracted from the substrate will be
                             # different than the portion added to the coupling layer.
                             sfrac: float
 
                             # see Magic ExtCouple.c L1198
-                            mult2 = self.substrate_cap_spec.area_capacitance
-                            if mult2 != mult:
-                                snear2 = (2.0 / math.pi) * math.atan(mult2 * distance_near_um / edge_interval_length_um)
-                                sfar2 = (2.0 / math.pi) * math.atan(mult2 * distance_far_um / edge_interval_length_um)
-                                sfrac = sfar2 - snear2
+                            alpha_s = self.substrate_cap_spec.area_capacitance
+                            if alpha_s != alpha_c:
+                                snear = (2.0 / math.pi) * math.atan(alpha_s * distance_near_um / edge_interval_length_um)
+                                sfar = (2.0 / math.pi) * math.atan(alpha_s * distance_far_um / edge_interval_length_um)
+                                sfrac = sfar - snear
                             else:
                                 sfrac = cfrac
 
-                            cap_femto = (cfrac * edge_interval_length_um * self.sidewall_cap_spec.capacitance) / \
-                                        (distance_near_um + self.sidewall_cap_spec.offset) / 1000.0
-                            print(cap_femto)
+                            cap_femto = (cfrac * edge_interval_length_um *
+                                         self.sideoverlap_cap_spec.capacitance / 1000.0)
+
+                            sok = SideOverlapKey(layer_inside=self.inside_layer_name,
+                                                 net_inside=self.inside_net_name,
+                                                 layer_outside=self.outside_layer_name,
+                                                 net_outside=net_name)
+                            sov = extraction_results.sideoverlap_table.get(sok, None)
+                            if sov:
+                                sov.cap_value += cap_femto
+                            else:
+                                sov = SideOverlapCap(key=sok, cap_value=cap_femto)
+                                extraction_results.sideoverlap_table[sok] = sov
 
                             # efflength = (cfrac - sov.so_coupfrac) * (double) length;
                             # cap += e->ec_cap * efflength;
@@ -812,6 +835,7 @@ class RCExtractor:
                             # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
                             # #      f"Nets {net_top} <-> {net_bot}: "
                             # #      f"perimeter: {perimeter_shielded}")
+        info(extraction_results.sideoverlap_table.values())
 
         #
         # (4) SUBSTRATE CAPACITANCE
