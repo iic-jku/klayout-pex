@@ -205,7 +205,7 @@ def main():
             True  # prune orthan cells
         )
 
-    lpp_mapping = {
+    lpp_mapping: Dict[str, str] = {
         'boundary':             'prBoundary.boundary',
         'prBoundary.boundary':  'prBoundary.boundary',
         'diff.drawing':         'Activ.drawing',
@@ -220,27 +220,27 @@ def main():
         'licon1.drawing':       'Cont.drawing',
         'li1.drawing':          'Metal1.drawing',
         'li1.pin':              'Metal1.pin',
-        'li1.label':            'Metal1.text',
+        'li1.label':            'Metal1.label',
         'mcon.drawing':         'Via1.drawing',
         'met1.drawing':         'Metal2.drawing',
         'met1.pin':             'Metal2.pin',
-        'met1.label':           'Metal2.text',
+        'met1.label':           'Metal2.label',
         'via.drawing':          'Via2.drawing',
         'met2.drawing':         'Metal3.drawing',
         'met2.pin':             'Metal3.pin',
-        'met2.label':           'Metal3.text',
+        'met2.label':           'Metal3.label',
         'via2.drawing':         'Via3.drawing',
         'met3.drawing':         'Metal4.drawing',
         'met3.pin':             'Metal4.pin',
-        'met3.label':           'Metal4.text',
+        'met3.label':           'Metal4.label',
         'via3.drawing':         'Via4.drawing',
         'met4.drawing':         'Metal5.drawing',
         'met4.pin':             'Metal5.pin',
-        'met4.label':           'Metal5.text',
+        'met4.label':           'Metal5.label',
         'via4.drawing':         'TopVia1.drawing',
         'met5.drawing':         'TopMetal1.drawing',
         'met5.pin':             'TopMetal1.pin',
-        'met5.label':           'TopMetal1.text',
+        'met5.label':           'TopMetal1.label',
         'capacitor.drawing':    'Recog.mom',
         'capm2.drawing':        'MIM.drawing',
     }
