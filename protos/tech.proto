@@ -6,12 +6,25 @@ import "extract.proto";
 import "process_stack.proto";
 
 message Technology {
+    // name of the technology, e.g. "sky130A"
     string name = 1;
-        
+
+    // PEX relevant layers as given in a layout
     repeated LayerInfo layers = 101;
-    
+
+    //  Mapping of layer name to layer/datatype for computed layers (introduced by LVS)
+    //
+    //     NOTE: the names are from computed layers.
+    //     For example in sky130A, the tap original layer is split into ntap and ptap,
+    //     so there is no directly matching layer/datatype combination from original layer space.
+    //     Other layers are mapped to functionally equivalent layers.
+    repeated ComputedLayerInfo lvs_computed_layers = 120;
+
+    // Detailed description of the process stack,
+    // including thicknesses, dielectrics, etc.
     ProcessStackInfo process_stack = 140;
-    
+
+    // WIP: input data for the magic-like PEX engine
     ExtractionInfo extraction = 200;
 }
 
@@ -22,4 +35,18 @@ message LayerInfo {
     
     uint32 gds_layer = 21;
     uint32 gds_datatype = 31;
+}
+
+message ComputedLayerInfo {
+    enum Kind {
+        KIND_UNSPECIFIED = 0;
+        KIND_REGULAR = 1;
+        KIND_DEVICE_CAPACITOR = 2; // e.g. useful to test the PEX engine using cap stdcells
+                                   // (or to ignore those devices in regular end user PEX use cases,
+                                   //  where the SPICE models of the devices already handle this)
+        KIND_DEVICE_RESISTOR = 3;  // same for resistors
+    }
+
+    Kind kind = 10;
+    LayerInfo layer_info = 20;
 }

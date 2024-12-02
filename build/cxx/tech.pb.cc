@@ -50,10 +50,31 @@ struct LayerInfoDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LayerInfoDefaultTypeInternal _LayerInfo_default_instance_;
 
+inline constexpr ComputedLayerInfo::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        layer_info_{nullptr},
+        kind_{static_cast< ::kpex::tech::ComputedLayerInfo_Kind >(0)} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ComputedLayerInfo::ComputedLayerInfo(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ComputedLayerInfoDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ComputedLayerInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ComputedLayerInfoDefaultTypeInternal() {}
+  union {
+    ComputedLayerInfo _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ComputedLayerInfoDefaultTypeInternal _ComputedLayerInfo_default_instance_;
+
 inline constexpr Technology::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
         layers_{},
+        lvs_computed_layers_{},
         name_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
@@ -75,9 +96,8 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TechnologyDefaultTypeInternal _Technology_default_instance_;
 }  // namespace tech
 }  // namespace kpex
-static ::_pb::Metadata file_level_metadata_tech_2eproto[2];
-static constexpr const ::_pb::EnumDescriptor**
-    file_level_enum_descriptors_tech_2eproto = nullptr;
+static ::_pb::Metadata file_level_metadata_tech_2eproto[3];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_tech_2eproto[1];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_tech_2eproto = nullptr;
 const ::uint32_t
@@ -93,8 +113,10 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::kpex::tech::Technology, _impl_.name_),
         PROTOBUF_FIELD_OFFSET(::kpex::tech::Technology, _impl_.layers_),
+        PROTOBUF_FIELD_OFFSET(::kpex::tech::Technology, _impl_.lvs_computed_layers_),
         PROTOBUF_FIELD_OFFSET(::kpex::tech::Technology, _impl_.process_stack_),
         PROTOBUF_FIELD_OFFSET(::kpex::tech::Technology, _impl_.extraction_),
+        ~0u,
         ~0u,
         ~0u,
         0,
@@ -111,28 +133,48 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::kpex::tech::LayerInfo, _impl_.description_),
         PROTOBUF_FIELD_OFFSET(::kpex::tech::LayerInfo, _impl_.gds_layer_),
         PROTOBUF_FIELD_OFFSET(::kpex::tech::LayerInfo, _impl_.gds_datatype_),
+        PROTOBUF_FIELD_OFFSET(::kpex::tech::ComputedLayerInfo, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::kpex::tech::ComputedLayerInfo, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::kpex::tech::ComputedLayerInfo, _impl_.kind_),
+        PROTOBUF_FIELD_OFFSET(::kpex::tech::ComputedLayerInfo, _impl_.layer_info_),
+        ~0u,
+        0,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, 12, -1, sizeof(::kpex::tech::Technology)},
-        {16, -1, -1, sizeof(::kpex::tech::LayerInfo)},
+        {0, 13, -1, sizeof(::kpex::tech::Technology)},
+        {18, -1, -1, sizeof(::kpex::tech::LayerInfo)},
+        {30, 40, -1, sizeof(::kpex::tech::ComputedLayerInfo)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::kpex::tech::_Technology_default_instance_._instance,
     &::kpex::tech::_LayerInfo_default_instance_._instance,
+    &::kpex::tech::_ComputedLayerInfo_default_instance_._instance,
 };
 const char descriptor_table_protodef_tech_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\ntech.proto\022\tkpex.tech\032\rextract.proto\032\023"
-    "process_stack.proto\"\245\001\n\nTechnology\022\014\n\004na"
+    "process_stack.proto\"\340\001\n\nTechnology\022\014\n\004na"
     "me\030\001 \001(\t\022$\n\006layers\030e \003(\0132\024.kpex.tech.Lay"
-    "erInfo\0223\n\rprocess_stack\030\214\001 \001(\0132\033.kpex.te"
-    "ch.ProcessStackInfo\022.\n\nextraction\030\310\001 \001(\013"
-    "2\031.kpex.tech.ExtractionInfo\"W\n\tLayerInfo"
-    "\022\014\n\004name\030\001 \001(\t\022\023\n\013description\030\013 \001(\t\022\021\n\tg"
-    "ds_layer\030\025 \001(\r\022\024\n\014gds_datatype\030\037 \001(\rb\006pr"
-    "oto3"
+    "erInfo\0229\n\023lvs_computed_layers\030x \003(\0132\034.kp"
+    "ex.tech.ComputedLayerInfo\0223\n\rprocess_sta"
+    "ck\030\214\001 \001(\0132\033.kpex.tech.ProcessStackInfo\022."
+    "\n\nextraction\030\310\001 \001(\0132\031.kpex.tech.Extracti"
+    "onInfo\"W\n\tLayerInfo\022\014\n\004name\030\001 \001(\t\022\023\n\013des"
+    "cription\030\013 \001(\t\022\021\n\tgds_layer\030\025 \001(\r\022\024\n\014gds"
+    "_datatype\030\037 \001(\r\"\323\001\n\021ComputedLayerInfo\022/\n"
+    "\004kind\030\n \001(\0162!.kpex.tech.ComputedLayerInf"
+    "o.Kind\022(\n\nlayer_info\030\024 \001(\0132\024.kpex.tech.L"
+    "ayerInfo\"c\n\004Kind\022\024\n\020KIND_UNSPECIFIED\020\000\022\020"
+    "\n\014KIND_REGULAR\020\001\022\031\n\025KIND_DEVICE_CAPACITO"
+    "R\020\002\022\030\n\024KIND_DEVICE_RESISTOR\020\003b\006proto3"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_tech_2eproto_deps[2] =
     {
@@ -143,13 +185,13 @@ static ::absl::once_flag descriptor_table_tech_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_tech_2eproto = {
     false,
     false,
-    324,
+    597,
     descriptor_table_protodef_tech_2eproto,
     "tech.proto",
     &descriptor_table_tech_2eproto_once,
     descriptor_table_tech_2eproto_deps,
     2,
-    2,
+    3,
     schemas,
     file_default_instances,
     TableStruct_tech_2eproto::offsets,
@@ -174,6 +216,28 @@ PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_tech_2ep
 }
 namespace kpex {
 namespace tech {
+const ::google::protobuf::EnumDescriptor* ComputedLayerInfo_Kind_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_tech_2eproto);
+  return file_level_enum_descriptors_tech_2eproto[0];
+}
+PROTOBUF_CONSTINIT const uint32_t ComputedLayerInfo_Kind_internal_data_[] = {
+    262144u, 0u, };
+bool ComputedLayerInfo_Kind_IsValid(int value) {
+  return 0 <= value && value <= 3;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::KIND_UNSPECIFIED;
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::KIND_REGULAR;
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::KIND_DEVICE_CAPACITOR;
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::KIND_DEVICE_RESISTOR;
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::Kind_MIN;
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo::Kind_MAX;
+constexpr int ComputedLayerInfo::Kind_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 // ===================================================================
 
 class Technology::_Internal {
@@ -204,6 +268,7 @@ inline PROTOBUF_NDEBUG_INLINE Technology::Impl_::Impl_(
       : _has_bits_{from._has_bits_},
         _cached_size_{0},
         layers_{visibility, arena, from.layers_},
+        lvs_computed_layers_{visibility, arena, from.lvs_computed_layers_},
         name_(arena, from.name_) {}
 
 Technology::Technology(
@@ -230,6 +295,7 @@ inline PROTOBUF_NDEBUG_INLINE Technology::Impl_::Impl_(
     ::google::protobuf::Arena* arena)
       : _cached_size_{0},
         layers_{visibility, arena},
+        lvs_computed_layers_{visibility, arena},
         name_(arena) {}
 
 inline void Technology::SharedCtor(::_pb::Arena* arena) {
@@ -276,6 +342,7 @@ PROTOBUF_NOINLINE void Technology::Clear() {
   (void) cached_has_bits;
 
   _impl_.layers_.Clear();
+  _impl_.lvs_computed_layers_.Clear();
   _impl_.name_.ClearToEmpty();
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x00000003u) {
@@ -300,7 +367,7 @@ const char* Technology::_InternalParse(
 
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
+const ::_pbi::TcParseTable<3, 5, 4, 33, 19> Technology::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(Technology, _impl_._has_bits_),
     0, // no _extensions_
@@ -308,8 +375,8 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     offsetof(decltype(_table_), field_lookup_table),
     4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
-    3,  // num_aux_entries
+    5,  // num_field_entries
+    4,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_Technology_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
@@ -317,9 +384,9 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     ::_pbi::TcParser::GetTable<::kpex::tech::Technology>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // .kpex.tech.ExtractionInfo extraction = 200;
-    {::_pbi::TcParser::FastMtS2,
-     {3266, 1, 2, PROTOBUF_FIELD_OFFSET(Technology, _impl_.extraction_)}},
+    // repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+    {::_pbi::TcParser::FastMtR2,
+     {1986, 63, 1, PROTOBUF_FIELD_OFFSET(Technology, _impl_.lvs_computed_layers_)}},
     // string name = 1;
     {::_pbi::TcParser::FastUS1,
      {10, 63, 0, PROTOBUF_FIELD_OFFSET(Technology, _impl_.name_)}},
@@ -327,7 +394,7 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     {::_pbi::TcParser::MiniParse, {}},
     // .kpex.tech.ProcessStackInfo process_stack = 140;
     {::_pbi::TcParser::FastMtS2,
-     {2274, 0, 1, PROTOBUF_FIELD_OFFSET(Technology, _impl_.process_stack_)}},
+     {2274, 0, 2, PROTOBUF_FIELD_OFFSET(Technology, _impl_.process_stack_)}},
     // repeated .kpex.tech.LayerInfo layers = 101;
     {::_pbi::TcParser::FastMtR2,
      {1706, 63, 0, PROTOBUF_FIELD_OFFSET(Technology, _impl_.layers_)}},
@@ -335,8 +402,8 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     101, 0, 7,
-    65534, 1, 65535, 2, 65407, 2, 65535, 3, 65535, 3, 65535, 3,
-    65527, 3,
+    65534, 1, 65527, 2, 65407, 3, 65535, 4, 65535, 4, 65535, 4,
+    65527, 4,
     65535, 65535
   }}, {{
     // string name = 1;
@@ -345,14 +412,18 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     // repeated .kpex.tech.LayerInfo layers = 101;
     {PROTOBUF_FIELD_OFFSET(Technology, _impl_.layers_), -1, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+    {PROTOBUF_FIELD_OFFSET(Technology, _impl_.lvs_computed_layers_), -1, 1,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
     // .kpex.tech.ProcessStackInfo process_stack = 140;
-    {PROTOBUF_FIELD_OFFSET(Technology, _impl_.process_stack_), _Internal::kHasBitsOffset + 0, 1,
+    {PROTOBUF_FIELD_OFFSET(Technology, _impl_.process_stack_), _Internal::kHasBitsOffset + 0, 2,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // .kpex.tech.ExtractionInfo extraction = 200;
-    {PROTOBUF_FIELD_OFFSET(Technology, _impl_.extraction_), _Internal::kHasBitsOffset + 1, 2,
+    {PROTOBUF_FIELD_OFFSET(Technology, _impl_.extraction_), _Internal::kHasBitsOffset + 1, 3,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::kpex::tech::LayerInfo>()},
+    {::_pbi::TcParser::GetTable<::kpex::tech::ComputedLayerInfo>()},
     {::_pbi::TcParser::GetTable<::kpex::tech::ProcessStackInfo>()},
     {::_pbi::TcParser::GetTable<::kpex::tech::ExtractionInfo>()},
   }}, {{
@@ -385,6 +456,17 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
     target =
         ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
             101, repfield, repfield.GetCachedSize(),
+            target, stream);
+  }
+
+  // repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+  for (unsigned i = 0, n = static_cast<unsigned>(
+                           this->_internal_lvs_computed_layers_size());
+       i < n; i++) {
+    const auto& repfield = this->_internal_lvs_computed_layers().Get(i);
+    target =
+        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+            120, repfield, repfield.GetCachedSize(),
             target, stream);
   }
 
@@ -423,6 +505,11 @@ const ::_pbi::TcParseTable<3, 4, 3, 33, 19> Technology::_table_ = {
   for (const auto& msg : this->_internal_layers()) {
     total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
+  // repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+  total_size += 2UL * this->_internal_lvs_computed_layers_size();
+  for (const auto& msg : this->_internal_lvs_computed_layers()) {
+    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  }
   // string name = 1;
   if (!this->_internal_name().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -459,6 +546,8 @@ void Technology::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::goog
 
   _this->_internal_mutable_layers()->MergeFrom(
       from._internal_layers());
+  _this->_internal_mutable_lvs_computed_layers()->MergeFrom(
+      from._internal_lvs_computed_layers());
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
@@ -505,6 +594,7 @@ void Technology::InternalSwap(Technology* PROTOBUF_RESTRICT other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.layers_.InternalSwap(&other->_impl_.layers_);
+  _impl_.lvs_computed_layers_.InternalSwap(&other->_impl_.lvs_computed_layers_);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(Technology, _impl_.extraction_)
@@ -814,6 +904,256 @@ void LayerInfo::InternalSwap(LayerInfo* PROTOBUF_RESTRICT other) {
   return ::_pbi::AssignDescriptors(&descriptor_table_tech_2eproto_getter,
                                    &descriptor_table_tech_2eproto_once,
                                    file_level_metadata_tech_2eproto[1]);
+}
+// ===================================================================
+
+class ComputedLayerInfo::_Internal {
+ public:
+  using HasBits = decltype(std::declval<ComputedLayerInfo>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_._has_bits_);
+};
+
+ComputedLayerInfo::ComputedLayerInfo(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:kpex.tech.ComputedLayerInfo)
+}
+inline PROTOBUF_NDEBUG_INLINE ComputedLayerInfo::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0} {}
+
+ComputedLayerInfo::ComputedLayerInfo(
+    ::google::protobuf::Arena* arena,
+    const ComputedLayerInfo& from)
+    : ::google::protobuf::Message(arena) {
+  ComputedLayerInfo* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.layer_info_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::kpex::tech::LayerInfo>(
+                              arena, *from._impl_.layer_info_)
+                        : nullptr;
+  _impl_.kind_ = from._impl_.kind_;
+
+  // @@protoc_insertion_point(copy_constructor:kpex.tech.ComputedLayerInfo)
+}
+inline PROTOBUF_NDEBUG_INLINE ComputedLayerInfo::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void ComputedLayerInfo::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, layer_info_),
+           0,
+           offsetof(Impl_, kind_) -
+               offsetof(Impl_, layer_info_) +
+               sizeof(Impl_::kind_));
+}
+ComputedLayerInfo::~ComputedLayerInfo() {
+  // @@protoc_insertion_point(destructor:kpex.tech.ComputedLayerInfo)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void ComputedLayerInfo::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  delete _impl_.layer_info_;
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+ComputedLayerInfo::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              nullptr,  // OnDemandRegisterArenaDtor
+              PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_._cached_size_),
+              false,
+          },
+          &ComputedLayerInfo::MergeImpl,
+          &ComputedLayerInfo::kDescriptorMethods,
+      };
+  return &_data_;
+}
+PROTOBUF_NOINLINE void ComputedLayerInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:kpex.tech.ComputedLayerInfo)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.layer_info_ != nullptr);
+    _impl_.layer_info_->Clear();
+  }
+  _impl_.kind_ = 0;
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* ComputedLayerInfo::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 2, 1, 0, 2> ComputedLayerInfo::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_._has_bits_),
+    0, // no _extensions_
+    20, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294442495,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_ComputedLayerInfo_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::kpex::tech::ComputedLayerInfo>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // .kpex.tech.LayerInfo layer_info = 20;
+    {::_pbi::TcParser::FastMtS2,
+     {418, 0, 0, PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.layer_info_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    // .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ComputedLayerInfo, _impl_.kind_), 63>(),
+     {80, 63, 0, PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.kind_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+    {PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.kind_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // .kpex.tech.LayerInfo layer_info = 20;
+    {PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.layer_info_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::kpex::tech::LayerInfo>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* ComputedLayerInfo::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:kpex.tech.ComputedLayerInfo)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+  if (this->_internal_kind() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        10, this->_internal_kind(), target);
+  }
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // .kpex.tech.LayerInfo layer_info = 20;
+  if (cached_has_bits & 0x00000001u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        20, *_impl_.layer_info_, _impl_.layer_info_->GetCachedSize(), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:kpex.tech.ComputedLayerInfo)
+  return target;
+}
+
+::size_t ComputedLayerInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:kpex.tech.ComputedLayerInfo)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .kpex.tech.LayerInfo layer_info = 20;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size +=
+        2 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.layer_info_);
+  }
+
+  // .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+  if (this->_internal_kind() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_kind());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void ComputedLayerInfo::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ComputedLayerInfo*>(&to_msg);
+  auto& from = static_cast<const ComputedLayerInfo&>(from_msg);
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:kpex.tech.ComputedLayerInfo)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(from._impl_.layer_info_ != nullptr);
+    if (_this->_impl_.layer_info_ == nullptr) {
+      _this->_impl_.layer_info_ =
+          ::google::protobuf::Message::CopyConstruct<::kpex::tech::LayerInfo>(arena, *from._impl_.layer_info_);
+    } else {
+      _this->_impl_.layer_info_->MergeFrom(*from._impl_.layer_info_);
+    }
+  }
+  if (from._internal_kind() != 0) {
+    _this->_impl_.kind_ = from._impl_.kind_;
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ComputedLayerInfo::CopyFrom(const ComputedLayerInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:kpex.tech.ComputedLayerInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool ComputedLayerInfo::IsInitialized() const {
+  return true;
+}
+
+void ComputedLayerInfo::InternalSwap(ComputedLayerInfo* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.kind_)
+      + sizeof(ComputedLayerInfo::_impl_.kind_)
+      - PROTOBUF_FIELD_OFFSET(ComputedLayerInfo, _impl_.layer_info_)>(
+          reinterpret_cast<char*>(&_impl_.layer_info_),
+          reinterpret_cast<char*>(&other->_impl_.layer_info_));
+}
+
+::google::protobuf::Metadata ComputedLayerInfo::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(&descriptor_table_tech_2eproto_getter,
+                                   &descriptor_table_tech_2eproto_once,
+                                   file_level_metadata_tech_2eproto[2]);
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace tech

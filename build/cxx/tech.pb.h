@@ -27,6 +27,7 @@
 #include "google/protobuf/message.h"
 #include "google/protobuf/repeated_field.h"  // IWYU pragma: export
 #include "google/protobuf/extension_set.h"  // IWYU pragma: export
+#include "google/protobuf/generated_enum_reflection.h"
 #include "google/protobuf/unknown_field_set.h"
 #include "extract.pb.h"
 #include "process_stack.pb.h"
@@ -53,6 +54,9 @@ extern const ::google::protobuf::internal::DescriptorTable
     descriptor_table_tech_2eproto;
 namespace kpex {
 namespace tech {
+class ComputedLayerInfo;
+struct ComputedLayerInfoDefaultTypeInternal;
+extern ComputedLayerInfoDefaultTypeInternal _ComputedLayerInfo_default_instance_;
 class LayerInfo;
 struct LayerInfoDefaultTypeInternal;
 extern LayerInfoDefaultTypeInternal _LayerInfo_default_instance_;
@@ -68,6 +72,41 @@ namespace protobuf {
 
 namespace kpex {
 namespace tech {
+enum ComputedLayerInfo_Kind : int {
+  ComputedLayerInfo_Kind_KIND_UNSPECIFIED = 0,
+  ComputedLayerInfo_Kind_KIND_REGULAR = 1,
+  ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR = 2,
+  ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR = 3,
+  ComputedLayerInfo_Kind_ComputedLayerInfo_Kind_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  ComputedLayerInfo_Kind_ComputedLayerInfo_Kind_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool ComputedLayerInfo_Kind_IsValid(int value);
+extern const uint32_t ComputedLayerInfo_Kind_internal_data_[];
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo_Kind_Kind_MIN = static_cast<ComputedLayerInfo_Kind>(0);
+constexpr ComputedLayerInfo_Kind ComputedLayerInfo_Kind_Kind_MAX = static_cast<ComputedLayerInfo_Kind>(3);
+constexpr int ComputedLayerInfo_Kind_Kind_ARRAYSIZE = 3 + 1;
+const ::google::protobuf::EnumDescriptor*
+ComputedLayerInfo_Kind_descriptor();
+template <typename T>
+const std::string& ComputedLayerInfo_Kind_Name(T value) {
+  static_assert(std::is_same<T, ComputedLayerInfo_Kind>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to Kind_Name().");
+  return ComputedLayerInfo_Kind_Name(static_cast<ComputedLayerInfo_Kind>(value));
+}
+template <>
+inline const std::string& ComputedLayerInfo_Kind_Name(ComputedLayerInfo_Kind value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<ComputedLayerInfo_Kind_descriptor,
+                                                 0, 3>(
+      static_cast<int>(value));
+}
+inline bool ComputedLayerInfo_Kind_Parse(absl::string_view name, ComputedLayerInfo_Kind* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<ComputedLayerInfo_Kind>(
+      ComputedLayerInfo_Kind_descriptor(), name, value);
+}
 
 // ===================================================================
 
@@ -289,6 +328,212 @@ class LayerInfo final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class ComputedLayerInfo final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:kpex.tech.ComputedLayerInfo) */ {
+ public:
+  inline ComputedLayerInfo() : ComputedLayerInfo(nullptr) {}
+  ~ComputedLayerInfo() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ComputedLayerInfo(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline ComputedLayerInfo(const ComputedLayerInfo& from) : ComputedLayerInfo(nullptr, from) {}
+  inline ComputedLayerInfo(ComputedLayerInfo&& from) noexcept
+      : ComputedLayerInfo(nullptr, std::move(from)) {}
+  inline ComputedLayerInfo& operator=(const ComputedLayerInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ComputedLayerInfo& operator=(ComputedLayerInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ComputedLayerInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ComputedLayerInfo* internal_default_instance() {
+    return reinterpret_cast<const ComputedLayerInfo*>(
+        &_ComputedLayerInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(ComputedLayerInfo& a, ComputedLayerInfo& b) { a.Swap(&b); }
+  inline void Swap(ComputedLayerInfo* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ComputedLayerInfo* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ComputedLayerInfo* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<ComputedLayerInfo>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ComputedLayerInfo& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ComputedLayerInfo& from) { ComputedLayerInfo::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(ComputedLayerInfo* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "kpex.tech.ComputedLayerInfo"; }
+
+ protected:
+  explicit ComputedLayerInfo(::google::protobuf::Arena* arena);
+  ComputedLayerInfo(::google::protobuf::Arena* arena, const ComputedLayerInfo& from);
+  ComputedLayerInfo(::google::protobuf::Arena* arena, ComputedLayerInfo&& from) noexcept
+      : ComputedLayerInfo(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::MessageLite::ClassData* GetClassData()
+      const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const final;
+  // nested types ----------------------------------------------------
+  using Kind = ComputedLayerInfo_Kind;
+  static constexpr Kind KIND_UNSPECIFIED = ComputedLayerInfo_Kind_KIND_UNSPECIFIED;
+  static constexpr Kind KIND_REGULAR = ComputedLayerInfo_Kind_KIND_REGULAR;
+  static constexpr Kind KIND_DEVICE_CAPACITOR = ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
+  static constexpr Kind KIND_DEVICE_RESISTOR = ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
+  static inline bool Kind_IsValid(int value) {
+    return ComputedLayerInfo_Kind_IsValid(value);
+  }
+  static constexpr Kind Kind_MIN = ComputedLayerInfo_Kind_Kind_MIN;
+  static constexpr Kind Kind_MAX = ComputedLayerInfo_Kind_Kind_MAX;
+  static constexpr int Kind_ARRAYSIZE = ComputedLayerInfo_Kind_Kind_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* Kind_descriptor() {
+    return ComputedLayerInfo_Kind_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& Kind_Name(T value) {
+    return ComputedLayerInfo_Kind_Name(value);
+  }
+  static inline bool Kind_Parse(absl::string_view name, Kind* value) {
+    return ComputedLayerInfo_Kind_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kLayerInfoFieldNumber = 20,
+    kKindFieldNumber = 10,
+  };
+  // .kpex.tech.LayerInfo layer_info = 20;
+  bool has_layer_info() const;
+  void clear_layer_info() ;
+  const ::kpex::tech::LayerInfo& layer_info() const;
+  PROTOBUF_NODISCARD ::kpex::tech::LayerInfo* release_layer_info();
+  ::kpex::tech::LayerInfo* mutable_layer_info();
+  void set_allocated_layer_info(::kpex::tech::LayerInfo* value);
+  void unsafe_arena_set_allocated_layer_info(::kpex::tech::LayerInfo* value);
+  ::kpex::tech::LayerInfo* unsafe_arena_release_layer_info();
+
+  private:
+  const ::kpex::tech::LayerInfo& _internal_layer_info() const;
+  ::kpex::tech::LayerInfo* _internal_mutable_layer_info();
+
+  public:
+  // .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+  void clear_kind() ;
+  ::kpex::tech::ComputedLayerInfo_Kind kind() const;
+  void set_kind(::kpex::tech::ComputedLayerInfo_Kind value);
+
+  private:
+  ::kpex::tech::ComputedLayerInfo_Kind _internal_kind() const;
+  void _internal_set_kind(::kpex::tech::ComputedLayerInfo_Kind value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:kpex.tech.ComputedLayerInfo)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 2, 1,
+      0, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::kpex::tech::LayerInfo* layer_info_;
+    int kind_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_tech_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Technology final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:kpex.tech.Technology) */ {
  public:
@@ -415,6 +660,7 @@ class Technology final : public ::google::protobuf::Message
   // accessors -------------------------------------------------------
   enum : int {
     kLayersFieldNumber = 101,
+    kLvsComputedLayersFieldNumber = 120,
     kNameFieldNumber = 1,
     kProcessStackFieldNumber = 140,
     kExtractionFieldNumber = 200,
@@ -436,6 +682,23 @@ class Technology final : public ::google::protobuf::Message
   const ::kpex::tech::LayerInfo& layers(int index) const;
   ::kpex::tech::LayerInfo* add_layers();
   const ::google::protobuf::RepeatedPtrField<::kpex::tech::LayerInfo>& layers() const;
+  // repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+  int lvs_computed_layers_size() const;
+  private:
+  int _internal_lvs_computed_layers_size() const;
+
+  public:
+  void clear_lvs_computed_layers() ;
+  ::kpex::tech::ComputedLayerInfo* mutable_lvs_computed_layers(int index);
+  ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>* mutable_lvs_computed_layers();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>& _internal_lvs_computed_layers() const;
+  ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>* _internal_mutable_lvs_computed_layers();
+  public:
+  const ::kpex::tech::ComputedLayerInfo& lvs_computed_layers(int index) const;
+  ::kpex::tech::ComputedLayerInfo* add_lvs_computed_layers();
+  const ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>& lvs_computed_layers() const;
   // string name = 1;
   void clear_name() ;
   const std::string& name() const;
@@ -487,7 +750,7 @@ class Technology final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 4, 3,
+      3, 5, 4,
       33, 19>
       _table_;
   friend class ::google::protobuf::MessageLite;
@@ -506,6 +769,7 @@ class Technology final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedPtrField< ::kpex::tech::LayerInfo > layers_;
+    ::google::protobuf::RepeatedPtrField< ::kpex::tech::ComputedLayerInfo > lvs_computed_layers_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::kpex::tech::ProcessStackInfo* process_stack_;
     ::kpex::tech::ExtractionInfo* extraction_;
@@ -628,6 +892,55 @@ inline ::google::protobuf::RepeatedPtrField<::kpex::tech::LayerInfo>*
 Technology::_internal_mutable_layers() {
   PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
   return &_impl_.layers_;
+}
+
+// repeated .kpex.tech.ComputedLayerInfo lvs_computed_layers = 120;
+inline int Technology::_internal_lvs_computed_layers_size() const {
+  return _internal_lvs_computed_layers().size();
+}
+inline int Technology::lvs_computed_layers_size() const {
+  return _internal_lvs_computed_layers_size();
+}
+inline void Technology::clear_lvs_computed_layers() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.lvs_computed_layers_.Clear();
+}
+inline ::kpex::tech::ComputedLayerInfo* Technology::mutable_lvs_computed_layers(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:kpex.tech.Technology.lvs_computed_layers)
+  return _internal_mutable_lvs_computed_layers()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>* Technology::mutable_lvs_computed_layers()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:kpex.tech.Technology.lvs_computed_layers)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_lvs_computed_layers();
+}
+inline const ::kpex::tech::ComputedLayerInfo& Technology::lvs_computed_layers(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:kpex.tech.Technology.lvs_computed_layers)
+  return _internal_lvs_computed_layers().Get(index);
+}
+inline ::kpex::tech::ComputedLayerInfo* Technology::add_lvs_computed_layers() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::kpex::tech::ComputedLayerInfo* _add = _internal_mutable_lvs_computed_layers()->Add();
+  // @@protoc_insertion_point(field_add:kpex.tech.Technology.lvs_computed_layers)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>& Technology::lvs_computed_layers() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:kpex.tech.Technology.lvs_computed_layers)
+  return _internal_lvs_computed_layers();
+}
+inline const ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>&
+Technology::_internal_lvs_computed_layers() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.lvs_computed_layers_;
+}
+inline ::google::protobuf::RepeatedPtrField<::kpex::tech::ComputedLayerInfo>*
+Technology::_internal_mutable_lvs_computed_layers() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.lvs_computed_layers_;
 }
 
 // .kpex.tech.ProcessStackInfo process_stack = 140;
@@ -960,6 +1273,128 @@ inline void LayerInfo::_internal_set_gds_datatype(::uint32_t value) {
   _impl_.gds_datatype_ = value;
 }
 
+// -------------------------------------------------------------------
+
+// ComputedLayerInfo
+
+// .kpex.tech.ComputedLayerInfo.Kind kind = 10;
+inline void ComputedLayerInfo::clear_kind() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.kind_ = 0;
+}
+inline ::kpex::tech::ComputedLayerInfo_Kind ComputedLayerInfo::kind() const {
+  // @@protoc_insertion_point(field_get:kpex.tech.ComputedLayerInfo.kind)
+  return _internal_kind();
+}
+inline void ComputedLayerInfo::set_kind(::kpex::tech::ComputedLayerInfo_Kind value) {
+  _internal_set_kind(value);
+  // @@protoc_insertion_point(field_set:kpex.tech.ComputedLayerInfo.kind)
+}
+inline ::kpex::tech::ComputedLayerInfo_Kind ComputedLayerInfo::_internal_kind() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return static_cast<::kpex::tech::ComputedLayerInfo_Kind>(_impl_.kind_);
+}
+inline void ComputedLayerInfo::_internal_set_kind(::kpex::tech::ComputedLayerInfo_Kind value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.kind_ = value;
+}
+
+// .kpex.tech.LayerInfo layer_info = 20;
+inline bool ComputedLayerInfo::has_layer_info() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.layer_info_ != nullptr);
+  return value;
+}
+inline void ComputedLayerInfo::clear_layer_info() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (_impl_.layer_info_ != nullptr) _impl_.layer_info_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const ::kpex::tech::LayerInfo& ComputedLayerInfo::_internal_layer_info() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  const ::kpex::tech::LayerInfo* p = _impl_.layer_info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::kpex::tech::LayerInfo&>(::kpex::tech::_LayerInfo_default_instance_);
+}
+inline const ::kpex::tech::LayerInfo& ComputedLayerInfo::layer_info() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:kpex.tech.ComputedLayerInfo.layer_info)
+  return _internal_layer_info();
+}
+inline void ComputedLayerInfo::unsafe_arena_set_allocated_layer_info(::kpex::tech::LayerInfo* value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.layer_info_);
+  }
+  _impl_.layer_info_ = reinterpret_cast<::kpex::tech::LayerInfo*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:kpex.tech.ComputedLayerInfo.layer_info)
+}
+inline ::kpex::tech::LayerInfo* ComputedLayerInfo::release_layer_info() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::kpex::tech::LayerInfo* released = _impl_.layer_info_;
+  _impl_.layer_info_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::kpex::tech::LayerInfo* ComputedLayerInfo::unsafe_arena_release_layer_info() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  // @@protoc_insertion_point(field_release:kpex.tech.ComputedLayerInfo.layer_info)
+
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  ::kpex::tech::LayerInfo* temp = _impl_.layer_info_;
+  _impl_.layer_info_ = nullptr;
+  return temp;
+}
+inline ::kpex::tech::LayerInfo* ComputedLayerInfo::_internal_mutable_layer_info() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (_impl_.layer_info_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::kpex::tech::LayerInfo>(GetArena());
+    _impl_.layer_info_ = reinterpret_cast<::kpex::tech::LayerInfo*>(p);
+  }
+  return _impl_.layer_info_;
+}
+inline ::kpex::tech::LayerInfo* ComputedLayerInfo::mutable_layer_info() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000001u;
+  ::kpex::tech::LayerInfo* _msg = _internal_mutable_layer_info();
+  // @@protoc_insertion_point(field_mutable:kpex.tech.ComputedLayerInfo.layer_info)
+  return _msg;
+}
+inline void ComputedLayerInfo::set_allocated_layer_info(::kpex::tech::LayerInfo* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (message_arena == nullptr) {
+    delete (_impl_.layer_info_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+
+  _impl_.layer_info_ = reinterpret_cast<::kpex::tech::LayerInfo*>(value);
+  // @@protoc_insertion_point(field_set_allocated:kpex.tech.ComputedLayerInfo.layer_info)
+}
+
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif  // __GNUC__
@@ -968,6 +1403,19 @@ inline void LayerInfo::_internal_set_gds_datatype(::uint32_t value) {
 }  // namespace tech
 }  // namespace kpex
 
+
+namespace google {
+namespace protobuf {
+
+template <>
+struct is_proto_enum<::kpex::tech::ComputedLayerInfo_Kind> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::kpex::tech::ComputedLayerInfo_Kind>() {
+  return ::kpex::tech::ComputedLayerInfo_Kind_descriptor();
+}
+
+}  // namespace protobuf
+}  // namespace google
 
 // @@protoc_insertion_point(global_scope)
 
