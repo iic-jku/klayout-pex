@@ -128,9 +128,8 @@ def validate_args(args: argparse.Namespace):
         if not os.path.isfile(args.gds_path):
             error(f"Can't read GDS file (LVS input) at path {args.gds_path}")
             found_errors = True
-        if not hasattr(args, 'schematic_path'):
-            error(f"LVS input schematic not specified (argument --schematic)")
-            found_errors = True
+        if not args.schematic_path:
+            info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
         elif not os.path.isfile(args.schematic_path):
             error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
             found_errors = True
@@ -277,13 +276,23 @@ def main():
 
                 found_cell.write(effective_gds_path)
 
+            effective_schematic_path = args.schematic_path
+            if not args.schematic_path:
+                effective_schematic_path = os.path.join(args.output_dir_path, f"{args.cell_name}_dummy_schematic.spice")
+                with open(effective_schematic_path, 'w') as f:
+                    f.writelines([
+                        f".subckt {args.cell_name} VDD VSS",
+                        '.ends',
+                        '.end'
+                    ])
+
             lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
             lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
             lvs_runner = LVSRunner()
             lvs_runner.run_klayout_lvs(exe_path=klayout_exe_path,
                                        lvs_script=lvs_script_path,
                                        gds_path=effective_gds_path,
-                                       schematic_path=args.schematic_path,
+                                       schematic_path=effective_schematic_path,
                                        log_path=lvs_log_path,
                                        lvsdb_path=lvsdb_path)
             lvsdb.read(lvsdb_path)
