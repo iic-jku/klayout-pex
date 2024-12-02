@@ -26,6 +26,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 ### Prerequisites
 
 - cmake
+   - NOTE: `cmake/CPM.cmake` will handle C++ dependencies
 - protobuf
 - python3 with pip packages:
    - poetry (will manage additional dependencies)
