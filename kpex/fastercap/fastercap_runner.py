@@ -28,21 +28,28 @@ def run_fastercap(exe_path: str,
     info(f"Calling {' '.join(args)}, output file: {log_path}")
 
     start = time.time()
-    proc = subprocess.run(args,
-                          stdin=subprocess.DEVNULL,
-                          stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT,
-                          universal_newlines=True)
-    duration = time.time() - start
 
+    proc = subprocess.Popen(args,
+                            stdin=subprocess.DEVNULL,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            universal_newlines=True,
+                            text=True)
     with open(log_path, 'w') as f:
-        f.write(proc.stdout)
+        while True:
+            line = proc.stdout.readline()
+            if not line:
+                break
+            f.writelines([line])
+    proc.wait()
+
+    duration = time.time() - start
 
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
 
     if proc.returncode != 0:
-        raise Exception(f"FasterCap failed with status code {proc.returncode}, "
+        raise Exception(f"FasterCap failed with status code {proc.returncode} after {'%.4g' % duration}s",
                         f"see log file: {log_path}")
 
 
