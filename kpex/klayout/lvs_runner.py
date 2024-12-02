@@ -75,7 +75,7 @@ class LVSRunner:
         if proc.returncode == 0:
             info(f"klayout LVS succeeded after {'%.4g' % duration}s")
         else:
-            warning(f"klayout LVS failed with status code {proc.returncode} after {'%.4g' % duration}s"
+            warning(f"klayout LVS failed with status code {proc.returncode} after {'%.4g' % duration}s, "
                     f"see log file: {log_path}")
 
 
