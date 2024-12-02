@@ -12,6 +12,7 @@ import sys
 from typing import *
 
 import klayout.db as kdb
+import klayout.rdb as rdb
 
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
@@ -22,6 +23,7 @@ from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedL
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_reducer import NetlistReducer
+from .klayout.repair_rdb import repair_rdb
 from .log import (
     LogLevel,
     set_log_level,
@@ -487,6 +489,16 @@ def run_kpex_2_5d_engine(args: argparse.Namespace,
                             report_path=report_path)
     extractor.extract()
 
+    # NOTE: there was a KLayout bug that some of the categories were lost,
+    #       so that the marker browser could not load the report file
+    try:
+        report = rdb.ReportDatabase('')
+        report.load(report_path)  # try loading rdb
+    except Exception as e:
+        rule("Repair broken marker DB")
+        warning(f"Detected KLayout bug: RDB can't be loaded due to exception {e}")
+        repair_rdb(report_path)
+    
 
 def setup_logging(args: argparse.Namespace):
     def register_log_file_handler(log_path: str,
