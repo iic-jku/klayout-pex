@@ -8,6 +8,7 @@ import sys
 from .fastercap.fastercap_file_writer import *
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
+from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .logging import (
     LogLevel,
@@ -19,6 +20,7 @@ from .logging import (
     error
 )
 from .tech_info import TechInfo
+from .util.capacitance_matrix import CapacitanceMatrix
 from .version import __version__
 
 import klayout.db as kdb
@@ -69,6 +71,9 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_fastercap.add_argument("--delaunay_b", "-b", dest="delaunay_b",
                                  type=float, default=0.5,
                                  help="Delaunay triangulation b (default is 0.5)")
+    group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
+                                 type=float, default=0.05,
+                                 help="FasterCap -aX error tolerance (default is 0.05)")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -129,6 +134,18 @@ def run_fastercap_extraction(args: argparse.Namespace,
                                  prefix=args.cell_name)
 
     gen.dump_stl(output_dir_path=args.output_dir_path)
+
+    exe_path = "FasterCap"
+    log_path = os.path.join(args.output_dir_path, "FasterCap_Output.txt")
+    csv_path = os.path.join(args.output_dir_path, "FasterCap_Result_Matrix.csv")
+
+    run_fastercap(exe_path=exe_path,
+                  lst_file_path=lst_file,
+                  log_path=log_path,
+                  tolerance=args.fastercap_tolerance)
+
+    cap_matrix = fastercap_parse_capacitance_matrix(log_path)
+    cap_matrix.write_csv(csv_path)
 
 
 def main():
