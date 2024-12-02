@@ -11,12 +11,14 @@ message ProcessStackInfo {
 
     enum LayerType {
         LAYER_TYPE_UNSPECIFIED = 0;
-        LAYER_TYPE_DIFFUSION = 1;
-        LAYER_TYPE_FIELD_OXIDE = 2;
-        LAYER_TYPE_SIMPLE_DIELECTRIC = 3;
-        LAYER_TYPE_CONFORMAL_DIELECTRIC = 4;
-        LAYER_TYPE_SIDEWALL_DIELECTRIC = 5;
-        LAYER_TYPE_METAL = 6;
+        LAYER_TYPE_SUBSTRATE = 10;
+        LAYER_TYPE_NWELL = 20;
+        LAYER_TYPE_DIFFUSION = 30;
+        LAYER_TYPE_FIELD_OXIDE = 40;
+        LAYER_TYPE_SIMPLE_DIELECTRIC = 50;
+        LAYER_TYPE_CONFORMAL_DIELECTRIC = 60;
+        LAYER_TYPE_SIDEWALL_DIELECTRIC = 70;
+        LAYER_TYPE_METAL = 80;
     }
 
     message Contact { // Contact/Via
@@ -34,7 +36,19 @@ message ProcessStackInfo {
         double thickness = 20;
     }
 
-    message DiffusionLayer { // Diffusion type (used for substrate, well, or diffusion)
+    message SubstrateLayer {
+        double height = 1;     // height in µm (of the layer bottom) below 0
+        double thickness = 2;  // thickness of the substrate plane
+        string reference = 30; // name of the dielectric type
+    }
+
+    message NWellLayer {
+        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        string reference = 30; // name of the dielectric type above the substrate
+        Contact contact_above = 40;
+    }
+
+    message DiffusionLayer {
         double height = 1;     // height in µm (of the layer bottom) above the substrate
         string reference = 30; // name of the dielectric type above the substrate
         Contact contact_above = 40;
@@ -76,6 +90,8 @@ message ProcessStackInfo {
         string name = 1;
         LayerType layer_type = 2;
         oneof parameters {
+            SubstrateLayer substrate_layer = 90;
+            NWellLayer nwell_layer = 9;
             DiffusionLayer diffusion_layer = 10;
             FieldOxideLayer field_oxide_layer = 11;
             SimpleDielectricLayer simple_dielectric_layer = 12;

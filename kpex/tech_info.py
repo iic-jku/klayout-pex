@@ -53,7 +53,14 @@ class TechInfo:
         }
 
     @cached_property
-    def process_substrate_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+    def process_substrate_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
+        return list(
+            filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE,
+                   self.tech.process_stack.layers)
+        )[0]
+
+    @cached_property
+    def process_diffusion_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return list(
             filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
                    self.tech.process_stack.layers)

@@ -226,22 +226,18 @@ void buildLayers(kpex::tech::Technology *tech) {
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
     li->set_name("subs");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-    kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
-    dl->set_height(0.0);
-    dl->set_reference("fox");
-    kpex::tech::ProcessStackInfo::Contact *co = dl->mutable_contact_above();
-    co->set_name("licon1");
-    co->set_metal_above("li1");
-    co->set_thickness(0.9361);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SUBSTRATE);
+    kpex::tech::ProcessStackInfo::SubstrateLayer *sl = li->mutable_substrate_layer();
+    sl->set_height(0.0);
+    sl->set_reference("fox");
 
     li = psi->add_layers();
     li->set_name("nwell");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-    dl = li->mutable_diffusion_layer();
-    dl->set_height(0.0);
-    dl->set_reference("fox");
-    co = dl->mutable_contact_above();
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_NWELL);
+    kpex::tech::ProcessStackInfo::NWellLayer *wl = li->mutable_nwell_layer();
+    wl->set_height(0.0);
+    wl->set_reference("fox");
+    kpex::tech::ProcessStackInfo::Contact *co = wl->mutable_contact_above();
     co->set_name("licon1");
     co->set_metal_above("li1");
     co->set_thickness(0.9361);
@@ -249,7 +245,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li = psi->add_layers();
     li->set_name("diff");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-    dl = li->mutable_diffusion_layer();
+    kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
     dl->set_height(0.323);
     dl->set_reference("fox");
     co = dl->mutable_contact_above();
