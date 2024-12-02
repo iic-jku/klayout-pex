@@ -247,6 +247,9 @@ class RCExtractor:
                     shapes_top_net: kdb.Region = top_net2regions[net_top].dup()
 
                     for net_bot in bot_net2regions.keys():
+                        if net_top == net_bot:
+                            continue
+
                         shapes_bot_net: kdb.Region = bot_net2regions[net_bot]
 
                         overlapping_shapes = shapes_top_net.__and__(shapes_bot_net)
@@ -480,7 +483,6 @@ class RCExtractor:
 
                     for net_index, polygons in polygons_by_net.items():
                         if net_index == 0: # laterally shielded
-                            print(f"lateral")
                             continue
                         elif net_index == 1:  # ignore "shielded"
                             continue
@@ -641,7 +643,8 @@ class RCExtractor:
                         inside_layer_name=inside_layer_name,
                         inside_net_name=net_inside,
                         outside_layer_name=outside_layer_name,
-                        child_names=[net_inside, 'NEARBY_SHAPES', 'SHIELD_BETWEEN'] + list(outside_net2regions.keys()),
+                        child_names=[net_inside, 'NEARBY_SHAPES', 'SHIELD_BETWEEN'] +
+                                    [k for k in outside_net2regions.keys() if k != net_inside],
                         tech_info=self.tech_info,
                         report_category=rdb_cat_inside_net
                     )
@@ -652,7 +655,8 @@ class RCExtractor:
                                 kdb.CompoundRegionOperationNode.new_secondary(nearby_shapes),
                                 kdb.CompoundRegionOperationNode.new_secondary(shielded_regions_between)] + \
                                [kdb.CompoundRegionOperationNode.new_secondary(region)
-                                for region in list(outside_net2regions.values())]
+                                for net, region in list(outside_net2regions.items())
+                                if net != net_inside]
 
                     node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
                         children,
