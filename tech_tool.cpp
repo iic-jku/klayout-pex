@@ -475,18 +475,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     sdl->set_reference("topnit");
 }
 
-void buildDemoTech(kpex::tech::Technology &tech) {
-    tech.set_name("sky130A");
-
-    buildLayers(&tech);
-
-    kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
-    buildProcessStackInfo(psi);
-
-    kpex::tech::ExtractionInfo *ex = tech.mutable_extraction();
+void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
     ex->set_side_halo(8);
     ex->set_fringe_shield_halo(8);
-    
+
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
     kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
     lr->set_layer_name("ndiffres");
@@ -497,18 +489,18 @@ void buildDemoTech(kpex::tech::Technology &tech) {
     lr->set_layer_name("poly");
     lr->set_resistance(48200);
     //...
-    
+
     kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
     vr->set_via_name("mcon");
     vr->set_resistance(9300);
     //...
-    
+
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
     kpex::tech::CapacitanceInfo::SubstrateCapacitance *sc = ci->add_substrates();
     sc->set_layer_name("poly");
     sc->set_area_capacitance(106.13);
     sc->set_perimeter_capacitance(55.27);
-    
+
     kpex::tech::CapacitanceInfo::OverlapCapacitance *oc = ci->add_overlaps();
     oc->set_top_layer_name("poly");
     oc->set_bottom_layer_name("active");
@@ -518,18 +510,30 @@ void buildDemoTech(kpex::tech::Technology &tech) {
     oc->set_top_layer_name("met1");
     oc->set_bottom_layer_name("poly");
     oc->set_capacitance(44.81);
-    
+
     kpex::tech::CapacitanceInfo::SidewallCapacitance *swc = ci->add_sidewalls();
     swc->set_layer_name("met1");
     swc->set_capacitance(44);
     swc->set_offset(0.25);
     // ...
-    
+
     kpex::tech::CapacitanceInfo::SideOverlapCapacitance *soc = ci->add_sideoverlaps();
     soc->set_in_layer_name("met1");
     soc->set_out_layer_name("poly");
     soc->set_capacitance(46.72);
     // ...
+}
+
+void buildDemoTech(kpex::tech::Technology &tech) {
+    tech.set_name("sky130A");
+
+    buildLayers(&tech);
+
+    kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
+    buildProcessStackInfo(psi);
+
+    kpex::tech::ExtractionInfo *ex = tech.mutable_extraction();
+    buildExtractionInfo(ex);
 }
 
 int main(int argc, char **argv) {
