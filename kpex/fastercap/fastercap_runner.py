@@ -20,11 +20,28 @@ from .capacitance_matrix import CapacitanceMatrix
 def run_fastercap(exe_path: str,
                   lst_file_path: str,
                   log_path: str,
-                  tolerance: float):
+                  tolerance: float,
+                  auto_preconditioner: bool,
+                  galerkin_scheme: bool,
+                  d_coeff: float,
+                  mesh_refinement_value: float):
     args = [
         exe_path,
-        f"-b",                             # console mode, without GUI
-        f"-a{tolerance}",  # stop when relative error lower than threshold
+        '-b',                          # console mode, without GUI
+        '-i',                          # Dump detailed time and memory information
+        '-v',                          # Verbose output
+        f"-a{tolerance}",              # stop when relative error lower than threshold
+        f"-d{d_coeff}",                # Direct potential interaction coefficient to mesh refinement ratio
+        f"-m{mesh_refinement_value}",  # Mesh relative refinement value
+    ]
+
+    if galerkin_scheme:
+        args += ['-g']
+
+    if auto_preconditioner:
+        args += ['-ap']
+
+    args += [
         lst_file_path
     ]
     info(f"Calling {' '.join(args)}, output file: {log_path}")

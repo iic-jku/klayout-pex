@@ -91,6 +91,22 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
                                  help="FasterCap -aX error tolerance (default is 0.05)")
+    group_fastercap.add_argument("--auto-preconditioner", dest="fastercap_auto_preconditioner",
+                                 type=bool, default=True,
+                                 help=f"FasterCap -ap Automatic preconditioner usage "
+                                      f"(default is True)")
+    group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
+                                 type=bool, default=True,
+                                 help=f"FasterCap -g Use Galerkin scheme "
+                                      f"(default is True)")
+    group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
+                                 type=float, default=0.04,
+                                 help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
+                                      f"(default is 0.04)")
+    group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
+                                 type=float, default=0.001,
+                                 help=f"FasterCap -m Mesh relative refinement value "
+                                      f"(default is 0.001)")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -185,7 +201,11 @@ def run_fastercap_extraction(args: argparse.Namespace,
     run_fastercap(exe_path=exe_path,
                   lst_file_path=lst_file,
                   log_path=log_path,
-                  tolerance=args.fastercap_tolerance)
+                  tolerance=args.fastercap_tolerance,
+                  auto_preconditioner=args.fastercap_auto_preconditioner,
+                  galerkin_scheme=args.fastercap_galerkin_scheme,
+                  d_coeff=args.fastercap_d_coeff,
+                  mesh_refinement_value=args.fastercap_mesh_refinement_value)
 
     cap_matrix = fastercap_parse_capacitance_matrix(log_path)
     cap_matrix.write_csv(csv_path)
