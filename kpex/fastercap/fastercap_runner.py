@@ -7,14 +7,12 @@ import subprocess
 import unittest
 
 from kpex.log import (
-    debug,
     info,
     # warning,
-    error,
     rule,
     subproc,
 )
-from .capacitance_matrix import CapacitanceMatrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
 
 
 def run_fastercap(exe_path: str,

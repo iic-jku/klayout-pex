@@ -15,7 +15,7 @@ from kpex.log import (
     warning,
     # error
 )
-from .capacitance_matrix import CapacitanceMatrix
+from kpex.common.capacitance_matrix import CapacitanceMatrix
 
 
 class NetlistExpander:

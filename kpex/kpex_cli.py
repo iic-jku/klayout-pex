@@ -16,9 +16,9 @@ import klayout.db as kdb
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-from .fastercap.netlist_expander import NetlistExpander
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
+from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_reducer import NetlistReducer
 from .log import (
     LogLevel,
