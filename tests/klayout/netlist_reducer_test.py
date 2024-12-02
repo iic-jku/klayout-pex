@@ -1,3 +1,4 @@
+import allure
 import os
 import tempfile
 import unittest
@@ -11,6 +12,8 @@ from kpex.log import (
 from kpex.klayout.netlist_reducer import NetlistReducer
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("Netlist", "Netlist Reduction")
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -33,6 +36,7 @@ class Test(unittest.TestCase):
         spice_writer = kdb.NetlistSpiceWriter()
         reduced_netlist.write(out_path, spice_writer)
         print(f"Wrote reduced netlist to: {out_path}")
+        allure.attach.file(out_path, attachment_type=allure.attachment_type.TEXT)
 
     def test_netlist_reduction_1(self):
         netlist_path = os.path.join(self.klayout_testdata_dir, 'nmos_diode2_Expanded_Netlist.cir')

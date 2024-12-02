@@ -1,9 +1,12 @@
+import allure
 import os
 import unittest
 
 from kpex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
 class Test(unittest.TestCase):
     @property
     def fastercap_testdata_dir(self) -> str:
@@ -23,3 +26,4 @@ class Test(unittest.TestCase):
 
         output_path = os.path.join(self.fastercap_testdata_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
         obtained_matrix.write_csv(output_path=output_path, separator=';')
+        allure.attach.file(output_path, attachment_type=allure.attachment_type.CSV)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import allure
 import os
 import tempfile
 import unittest
@@ -15,6 +16,8 @@ from kpex.common.capacitance_matrix import CapacitanceMatrix
 from kpex.tech_info import TechInfo
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("Netlist", "Netlist Expansion")
 class Test(unittest.TestCase):
     @property
     def klayout_testdata_dir(self) -> str:
@@ -54,3 +57,6 @@ class Test(unittest.TestCase):
         spice_writer = kdb.NetlistSpiceWriter()
         expanded_netlist.write(out_path, spice_writer)
         debug(f"Wrote expanded netlist to: {out_path}")
+
+        allure.attach.file(csv_path, attachment_type=allure.attachment_type.CSV)
+        allure.attach.file(out_path, attachment_type=allure.attachment_type.TEXT)

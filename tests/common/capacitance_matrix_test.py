@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import allure
 import os
 import tempfile
 from typing import *
@@ -8,6 +9,8 @@ import unittest
 from kpex.common.capacitance_matrix import CapacitanceMatrix
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
 class Test(unittest.TestCase):
     @property
     def klayout_testdata_dir(self) -> str:
@@ -40,4 +43,5 @@ class Test(unittest.TestCase):
         avg_matrix = parsed_matrix.averaged_off_diagonals()
         out_path = tempfile.mktemp(prefix='fastercap_matrix_avg__', suffix='.csv')
         avg_matrix.write_csv(output_path=out_path, separator=';')
+        allure.attach.file(out_path, attachment_type=allure.attachment_type.CSV)
         print(f"averaged matrix stored in {out_path}")

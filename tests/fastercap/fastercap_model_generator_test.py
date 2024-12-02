@@ -1,7 +1,11 @@
+import allure
 import os
 import klayout.db as kdb
 from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
 def test_fastercap_model_generator(tmp_path):
     ly = kdb.Layout()
     net1 = ly.create_cell("Net1")

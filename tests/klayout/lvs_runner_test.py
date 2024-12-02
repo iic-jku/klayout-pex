@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import allure
 import os
 import tempfile
 import unittest
@@ -7,6 +8,8 @@ import unittest
 from kpex.klayout.lvs_runner import LVSRunner
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "KLayout")
 @unittest.skip   # NOTE: this is relatively long running!
 class Test(unittest.TestCase):
     @property
