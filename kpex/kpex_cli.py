@@ -118,6 +118,10 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=true_or_false, default=False,
                                  help=f"Validate geometries before passing to FasterCap "
                                       f"(default is False)")
+    group_fastercap.add_argument("--blackbox", dest="blackbox_devices",
+                                 type=true_or_false, default=False,  # TODO: in the future this should be True by default
+                                 help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models"
+                                      "(default is False for testing now)")
 
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
@@ -393,7 +397,8 @@ def main():
 
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name,
                                                               lvsdb=lvsdb,
-                                                              tech=tech_info)
+                                                              tech=tech_info,
+                                                              blackbox_devices=args.blackbox_devices)
     gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
     pex_context.target_layout.write(gds_path)
 

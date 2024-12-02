@@ -35,6 +35,10 @@ class TechInfo:
                 for lyr in self.tech.lvs_computed_layers}
 
     @cached_property
+    def computed_layer_info_by_name(self) -> Dict[str, tech_pb2.ComputedLayerInfo]:
+        return {lyr.layer_info.name: lyr for lyr in self.tech.lvs_computed_layers}
+
+    @cached_property
     def layer_info_by_name(self) -> Dict[str, tech_pb2.LayerInfo]:
         return {lyr.name: lyr for lyr in self.tech.layers}
 

@@ -7,6 +7,7 @@ from rich.pretty import pprint
 
 import klayout.db as kdb
 
+import tech_pb2
 from ..log import (
     console,
     debug,
@@ -50,7 +51,8 @@ class KLayoutExtractionContext:
     def prepare_extraction(cls,
                            lvsdb: kdb.LayoutToNetlist,
                            top_cell: str,
-                           tech: TechInfo) -> KLayoutExtractionContext:
+                           tech: TechInfo,
+                           blackbox_devices: bool) -> KLayoutExtractionContext:
         dbu = lvsdb.internal_layout().dbu
         target_layout = kdb.Layout()
         target_layout.dbu = dbu
@@ -64,9 +66,12 @@ class KLayoutExtractionContext:
         # Creates a cell mapping for copying shapes from the internal layout to the given target layout
         cm = lvsdb.cell_mapping_into(target_layout,  # target layout
                                      top_cell,
-                                     True)  # with_device_cells
+                                     not blackbox_devices)  # with_device_cells
 
-        lm = cls.build_LVS_layer_map(target_layout=target_layout, lvsdb=lvsdb, tech=tech)
+        lm = cls.build_LVS_layer_map(target_layout=target_layout,
+                                     lvsdb=lvsdb,
+                                     tech=tech,
+                                     blackbox_devices=blackbox_devices)
 
         net_name_prop_num = 1
 
@@ -86,7 +91,9 @@ class KLayoutExtractionContext:
             device_cell_name_prefix=None  # "DEVICE_"
         )  # property name to which to attach the net name
 
-        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb, tech=tech)
+        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
+                                                                         tech=tech,
+                                                                         blackbox_devices=blackbox_devices)
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
@@ -102,7 +109,8 @@ class KLayoutExtractionContext:
     @staticmethod
     def build_LVS_layer_map(target_layout: kdb.Layout,
                             lvsdb: kdb.LayoutToNetlist,
-                            tech: TechInfo) -> Dict[int, kdb.LayerInfo]:
+                            tech: TechInfo,
+                            blackbox_devices: bool) -> Dict[int, kdb.LayerInfo]:
         # NOTE: currently, the layer numbers are auto-assigned
         # by the sequence they occur in the LVS script, hence not well defined!
         # build a layer map for the layers that correspond to original ones.
@@ -115,6 +123,14 @@ class KLayoutExtractionContext:
 
         for layer_index in lvsdb.layer_indexes():
             lname = lvsdb.layer_name(layer_index)
+
+            computed_layer_info = tech.computed_layer_info_by_name.get(lname, None)
+            if computed_layer_info and blackbox_devices:
+                match computed_layer_info.kind:
+                    case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_RESISTOR:
+                        continue
+                    case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_CAPACITOR:
+                        continue
 
             gds_pair = tech.gds_pair_for_computed_layer_name.get(lname, None)
             if not gds_pair:
@@ -131,7 +147,8 @@ class KLayoutExtractionContext:
 
     @staticmethod
     def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist,
-                                  tech: TechInfo) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
+                                  tech: TechInfo,
+                                  blackbox_devices: bool) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
 
@@ -140,8 +157,8 @@ class KLayoutExtractionContext:
         for idx, ln in enumerate(lvsdb.layer_names()):
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
-                gds_pair = tech.gds_pair_for_computed_layer_name.get(ln, None)
-                if not gds_pair:
+                computed_layer_info = tech.computed_layer_info_by_name.get(ln, None)
+                if not computed_layer_info:
                     warning(f"Unable to find info about extracted LVS layer '{ln}'")
                     gds_pair = (1000 + idx, 20)
                     linfo = KLayoutExtractedLayerInfo(
@@ -152,6 +169,15 @@ class KLayoutExtractionContext:
                     )
                     unnamed_layers.append(linfo)
                     continue
+
+                if blackbox_devices:
+                    match computed_layer_info.kind:
+                        case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_RESISTOR:
+                            continue
+                        case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_CAPACITOR:
+                            continue
+
+                gds_pair = (computed_layer_info.layer_info.gds_layer, computed_layer_info.layer_info.gds_datatype)
 
                 linfo = KLayoutExtractedLayerInfo(
                     index=idx,
