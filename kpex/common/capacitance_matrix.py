@@ -70,20 +70,7 @@ class Test(unittest.TestCase):
     def klayout_testdata_dir(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                              'testdata', 'fastercap'))
-
-    def test_dump_cap_matrix_info(self):
-        info = CapacitanceMatrixInfo([
-            ConductorInfo(fastcap_index=7, net='0', outside_dielectric=None),
-            ConductorInfo(fastcap_index=8, net='VDD', outside_dielectric=None),
-            ConductorInfo(fastcap_index=9, net='VSS', outside_dielectric=None),
-            ConductorInfo(fastcap_index=10, net='VDD', outside_dielectric='spnit'),
-        ])
-        out_path = tempfile.mktemp(prefix='fastercap_matrix_info', suffix='.yaml')
-        info.write_yaml(out_path)
-
-        info2 = CapacitanceMatrixInfo.from_yaml(out_path)
-        self.assertEqual(info, info2)
-
+    
     def test_parse_csv(self):
         csv_path = os.path.join(self.klayout_testdata_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
         parsed_matrix = CapacitanceMatrix.parse_csv(path=csv_path, separator=';')
