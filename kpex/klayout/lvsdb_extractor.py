@@ -73,7 +73,6 @@ class KLayoutExtractedLayerInfo:
 class KLayoutMergedExtractedLayerInfo:
     source_layers: List[KLayoutExtractedLayerInfo]
     gds_pair: GDSPair
-    region: kdb.Region
 
 
 @dataclass
@@ -211,16 +210,52 @@ class KLayoutExtractionContext:
                 entry = nonempty_layers.get(gds_pair, None)
                 if entry:
                     entry.source_layers.append(linfo)
-                    merged_region = kdb.Region()
-                    merged_region += entry.region
-                    merged_region += layer
-                    merged_region.merge()
-                    entry.region = merged_region
                 else:
                     nonempty_layers[gds_pair] = KLayoutMergedExtractedLayerInfo(
                         source_layers=[linfo],
                         gds_pair=gds_pair,
-                        region=layer,
                     )
 
         return nonempty_layers, unnamed_layers
+
+    def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
+        lyr = self.extracted_layers.get(gds_pair, None)
+        if not lyr:
+            return None
+
+        shapes: kdb.Region
+
+        match len(lyr.source_layers):
+            case 0:
+                raise AssertionError('Internal error: Empty list of source_layers')
+            case 1:
+                shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
+            case _:
+                shapes = kdb.Region()
+                for sl in lyr.source_layers:
+                    shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
+                # shapes.merge()
+
+        return shapes
+
+    def shapes_of_layer(self, gds_pair: GDSPair) -> Optional[kdb.Region]:
+        lyr = self.extracted_layers.get(gds_pair, None)
+        if not lyr:
+            return None
+
+        shapes: kdb.Region
+
+        match len(lyr.source_layers):
+            case 0:
+                raise AssertionError('Internal error: Empty list of source_layers')
+            case 1:
+                shapes = lyr.source_layers[0].region
+            case _:
+                shapes = kdb.Region()
+                for sl in lyr.source_layers:
+                    shapes += sl.region
+                # shapes.merge()
+
+        return shapes
+
+

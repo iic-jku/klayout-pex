@@ -11,7 +11,7 @@ import math
 
 import klayout.db as kdb
 
-from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
+from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 from ..log import (
     console,
@@ -43,18 +43,32 @@ class FasterCapInputBuilder:
     def dbu(self) -> float:
         return self.pex_context.dbu
 
-    def extracted_layer(self, layer_name: str) -> Optional[KLayoutExtractedLayerInfo]:
-        if layer_name not in self.tech_info.gds_pair_for_layer_name:
+    def gds_pair(self, layer_name) -> Optional[GDSPair]:
+        gds_pair = self.tech_info.gds_pair_for_layer_name.get(layer_name, None)
+        if not gds_pair:
             warning(f"Can't find GDS pair for layer {layer_name}")
             return None
+        return gds_pair
 
-        gds_pair = self.tech_info.gds_pair_for_layer_name[layer_name]
-        if gds_pair not in self.pex_context.extracted_layers:
-            debug(f"Nothing extracted for layer {layer_name}")
+    def shapes_of_net(self, layer_name: str, net: kdb.Net) -> Optional[kdb.Region]:
+        gds_pair = self.gds_pair(layer_name=layer_name)
+        if not gds_pair:
             return None
 
-        extracted_layer = self.pex_context.extracted_layers[gds_pair]
-        return extracted_layer
+        shapes = self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net)
+        if not shapes:
+            debug(f"Nothing extracted for layer {layer_name}")
+        return shapes
+
+    def shapes_of_layer(self, layer_name: str) -> Optional[kdb.Region]:
+        gds_pair = self.gds_pair(layer_name=layer_name)
+        if not gds_pair:
+            return None
+
+        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair)
+        if not shapes:
+            debug(f"Nothing extracted for layer {layer_name}")
+        return shapes
 
     def build(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb
@@ -103,9 +117,8 @@ class FasterCapInputBuilder:
                 metal_z_bottom = metal_layer.height
                 metal_z_top = metal_z_bottom + metal_layer.thickness
 
-                extracted_layer = self.extracted_layer(layer_name=metal_layer_name)
-                if extracted_layer:
-                    shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                shapes = self.shapes_of_net(layer_name=metal_layer_name, net=net)
+                if shapes:
                     if shapes.count() >= 1:
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
@@ -179,9 +192,8 @@ class FasterCapInputBuilder:
 
                 if metal_layer.HasField('contact_above'):
                     contact = metal_layer.contact_above
-                    extracted_layer = self.extracted_layer(layer_name=contact.name)
-                    if extracted_layer and not extracted_layer.region.is_empty():
-                        shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                    shapes = self.shapes_of_net(layer_name=contact.name, net=net)
+                    if shapes and not shapes.is_empty():
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
                                                     z=metal_z_top,
@@ -198,25 +210,21 @@ class FasterCapInputBuilder:
             for diffusion_layer in self.tech_info.process_diffusion_layers:
                 diffusion_layer_name = diffusion_layer.name
                 diffusion_layer = diffusion_layer.diffusion_layer
-                extracted_layer = self.extracted_layer(layer_name=diffusion_layer_name)
-                if extracted_layer:
-                    shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
-                    if shapes.count() >= 1:
-                        diffusion_regions.append(shapes)
-                        model_builder.add_conductor(net_name=net_name,
-                                                    layer=shapes,
-                                                    z=0,  # TODO
-                                                    height=0.1)  # TODO: diffusion_layer.height
+                shapes = self.shapes_of_net(layer_name=diffusion_layer_name, net=net)
+                if shapes and not shapes.is_empty():
+                    diffusion_regions.append(shapes)
+                    model_builder.add_conductor(net_name=net_name,
+                                                layer=shapes,
+                                                z=0,  # TODO
+                                                height=0.1)  # TODO: diffusion_layer.height
 
                 contact = diffusion_layer.contact_above
-                extracted_layer = self.extracted_layer(layer_name=contact.name)
-                if extracted_layer and not extracted_layer.region.is_empty():
-                    shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
-                    if shapes.count() >= 1:
-                        model_builder.add_conductor(net_name=net_name,
-                                                    layer=shapes,
-                                                    z=0.0,
-                                                    height=contact.thickness)
+                shapes = self.shapes_of_net(layer_name=contact.name, net=net)
+                if shapes and not shapes.is_empty():
+                    model_builder.add_conductor(net_name=net_name,
+                                                layer=shapes,
+                                                z=0.0,
+                                                height=contact.thickness)
 
                 # diel_above = self.tech_info.process_stack_layer_by_name[diffusion_layer.reference]
                 # if diel_above:
@@ -253,7 +261,7 @@ class FasterCapInputBuilder:
 
             metal_z_bottom = metal_layer.height
 
-            extracted_layer = self.extracted_layer(layer_name=metal_layer_name)
+            extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name)
 
             sidewall_region: Optional[kdb.Region] = None
             sidewall_height = 0
@@ -264,9 +272,9 @@ class FasterCapInputBuilder:
             #
             # add sidewall dielectrics
             #
-            if extracted_layer:
+            if extracted_shapes:
                 sidewall_height = 0
-                sidewall_region = extracted_layer.region
+                sidewall_region = extracted_shapes
                 sidewallee = metal_layer_name
 
                 while True:
