@@ -2,8 +2,8 @@
 The Logging Module
 ------------------
 
-kpex logging handler,
-implemented using the ``logging`` and ``rich`` libraries.
+kpex log handler,
+implemented using the ``log`` and ``rich`` libraries.
 """
 
 from .logger import (
