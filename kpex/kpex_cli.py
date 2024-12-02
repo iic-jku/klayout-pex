@@ -5,12 +5,15 @@ import os
 import os.path
 import sys
 
+import klayout.db as kdb
+
 from .fastercap.fastercap_file_writer import *
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
-from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .fastercap.netlist_expander import NetlistExpander
+from .klayout.lvsdb_extractor import KLayoutExtractionContext
+from .klayout.netlist_reducer import NetlistReducer
 from .log import (
     LogLevel,
     set_log_level,
@@ -22,8 +25,6 @@ from .log import (
 )
 from .tech_info import TechInfo
 from .version import __version__
-
-import klayout.db as kdb
 
 
 # ------------------------------------------------------------------------------------
@@ -141,6 +142,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
     log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
     csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix.csv")
     expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Expanded_Netlist.cir")
+    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Reduced_Netlist.cir")
 
     run_fastercap(exe_path=exe_path,
                   lst_file_path=lst_file,
@@ -152,7 +154,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     netlist_expander = NetlistExpander()
     expanded_netlist = netlist_expander.expand(
-        pex_context=pex_context,
+        extracted_netlist=pex_context.lvsdb.netlist(),
+        top_cell_name=pex_context.top_cell.name,
         cap_matrix=cap_matrix,
         cap_matrix_info=cap_matrix_info
     )
@@ -161,6 +164,12 @@ def run_fastercap_extraction(args: argparse.Namespace,
     expanded_netlist.write(expanded_netlist_path, spice_writer)
     info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
+    netlist_reducer = NetlistReducer()
+    reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
+                                             top_cell_name=pex_context.top_cell.name)
+    spice_writer = kdb.NetlistSpiceWriter()
+    reduced_netlist.write(reduced_netlist_path, spice_writer)
+    info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
 def main():
     args = parse_args()
