@@ -134,6 +134,14 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  action='store_true', default=False,
                                  help=f"FasterCap -pj Use Jacobi Preconditioner "
                                       f"(default is False)")
+    group_fastercap.add_argument("--fastercap", dest="run_fastercap",
+                                 type=true_or_false, default=True,
+                                 help=f"Run FasterCap "
+                                      f"(default is True)")
+    group_fastercap.add_argument("--fastcap", dest="run_fastcap",
+                                 type=true_or_false, default=False,
+                                 help=f"Run FastCap2 "
+                                      f"(default is False)")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -208,13 +216,9 @@ def validate_args(args: argparse.Namespace):
         raise Exception("Argument validation failed")
 
 
-def run_fastercap_extraction(args: argparse.Namespace,
-                             pex_context: KLayoutExtractionContext,
-                             tech_info: TechInfo):
-    num_threads = args.num_threads if args.num_threads > 0 else os.cpu_count() * 4
-    info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {num_threads}")
-    os.environ['OMP_NUM_THREADS'] = f"{num_threads}"
-
+def build_fastercap_input(args: argparse.Namespace,
+                          pex_context: KLayoutExtractionContext,
+                          tech_info: TechInfo) -> str:
     fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
                                                     tech_info=tech_info,
                                                     k_void=args.k_void,
@@ -234,12 +238,22 @@ def run_fastercap_extraction(args: argparse.Namespace,
     os.makedirs(geometry_dir_path, exist_ok=True)
     gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
 
+    return lst_file
+
+
+def run_fastercap_extraction(args: argparse.Namespace,
+                             pex_context: KLayoutExtractionContext,
+                             lst_file: str):
+    num_threads = args.num_threads if args.num_threads > 0 else os.cpu_count() * 4
+    info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {num_threads}")
+    os.environ['OMP_NUM_THREADS'] = f"{num_threads}"
+
     exe_path = "FasterCap"
     log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
     raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Raw.csv")
     avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Avg.csv")
-    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Expanded_Netlist.cir")
-    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Reduced_Netlist.cir")
+    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Expanded_Netlist.cir")
+    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Reduced_Netlist.cir")
 
     run_fastercap(exe_path=exe_path,
                   lst_file_path=lst_file,
@@ -279,14 +293,48 @@ def run_fastercap_extraction(args: argparse.Namespace,
     info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
 
-def main():
-    info("Called with arguments:")
-    info(' '.join(map(shlex.quote, sys.argv)))
+def run_fastcap_extraction(args: argparse.Namespace,
+                           pex_context: KLayoutExtractionContext,
+                           lst_file: str):
+    exe_path = "fastcap"
+    log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Output.txt")
+    raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Result_Matrix_Raw.csv")
+    avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Result_Matrix_Avg.csv")
+    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Expanded_Netlist.cir")
+    reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FastCap2_Reduced_Netlist.cir")
 
-    args = parse_args()
+    run_fastcap(exe_path=exe_path,
+                lst_file_path=lst_file,
+                log_path=log_path)
 
-    os.makedirs(args.output_dir_base_path, exist_ok=True)
+    cap_matrix = fastcap_parse_capacitance_matrix(log_path)
+    cap_matrix.write_csv(raw_csv_path)
 
+    cap_matrix = cap_matrix.averaged_off_diagonals()
+    cap_matrix.write_csv(avg_csv_path)
+
+    netlist_expander = NetlistExpander()
+    expanded_netlist = netlist_expander.expand(
+        extracted_netlist=pex_context.lvsdb.netlist(),
+        top_cell_name=pex_context.top_cell.name,
+        cap_matrix=cap_matrix,
+        blackbox_devices=args.blackbox_devices
+    )
+
+    spice_writer = kdb.NetlistSpiceWriter()
+    spice_writer.use_net_names = True
+    spice_writer.with_comments = False
+    expanded_netlist.write(expanded_netlist_path, spice_writer)
+    info(f"Wrote expanded netlist to: {expanded_netlist_path}")
+
+    netlist_reducer = NetlistReducer()
+    reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
+                                             top_cell_name=pex_context.top_cell.name)
+    reduced_netlist.write(reduced_netlist_path, spice_writer)
+    info(f"Wrote reduced netlist to: {reduced_netlist_path}")
+
+
+def setup_logging(args: argparse.Namespace):
     def register_log_file_handler(log_path: str,
                                   formatter: Optional[logging.Formatter]) -> logging.Handler:
         handler = logging.FileHandler(log_path)
@@ -331,9 +379,8 @@ def main():
 
     set_log_level(args.log_level)
 
-    tech_info = TechInfo.from_json(args.tech_pbjson_path,
-                                   dielectric_filter=args.dielectric_filter)
 
+def create_lvsdb(args: argparse.Namespace) -> kdb.LayoutVsSchematic:
     lvsdb = kdb.LayoutVsSchematic()
 
     match args.input_mode:
@@ -386,6 +433,22 @@ def main():
                                        log_path=lvs_log_path,
                                        lvsdb_path=lvsdb_path)
             lvsdb.read(lvsdb_path)
+    return lvsdb
+
+
+def main():
+    info("Called with arguments:")
+    info(' '.join(map(shlex.quote, sys.argv)))
+
+    args = parse_args()
+
+    os.makedirs(args.output_dir_base_path, exist_ok=True)
+    setup_logging(args)
+
+    tech_info = TechInfo.from_json(args.tech_pbjson_path,
+                                   dielectric_filter=args.dielectric_filter)
+
+    lvsdb = create_lvsdb(args)
 
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name,
                                                               lvsdb=lvsdb,
@@ -410,9 +473,18 @@ def main():
         layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_unnamed_LVS_layers.gds.gz")
         layout.write(layout_dump_path)
 
-    run_fastercap_extraction(args=args,
-                             pex_context=pex_context,
-                             tech_info=tech_info)
+    if args.run_fastcap or args.run_fastercap:
+        lst_file = build_fastercap_input(args=args,
+                                         pex_context=pex_context,
+                                         tech_info=tech_info)
+        if args.run_fastercap:
+            run_fastercap_extraction(args=args,
+                                     pex_context=pex_context,
+                                     lst_file=lst_file)
+        if args.run_fastcap:
+            run_fastcap_extraction(args=args,
+                                   pex_context=pex_context,
+                                   lst_file=lst_file)
 
 
 if __name__ == "__main__":
