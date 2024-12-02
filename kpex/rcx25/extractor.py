@@ -393,10 +393,10 @@ class RCExtractor:
                         markers_net1 = space_markers.interacting(shapes1)
                         sidewall_edge_pairs = markers_net1.interacting(shapes2)
 
-                        rdb_cat_sw_nets = report.create_category(rdb_cat_sw_layer, f"{net1} {net2}") \
+                        rdb_cat_sw_nets = report.create_category(rdb_cat_sw_layer, f"{net1} - {net2}") \
                                           if sidewall_edge_pairs else None
 
-                        for pair in sidewall_edge_pairs:
+                        for idx, pair in enumerate(sidewall_edge_pairs):
                             edge1: kdb.Edge = pair.first
                             edge2: kdb.Edge = pair.second
 
@@ -417,7 +417,7 @@ class RCExtractor:
                             cap_femto = (length_um * sidewall_cap_spec.capacitance) / \
                                         (distance_um + sidewall_cap_spec.offset) / 1000
 
-                            report.create_category(rdb_cat_sw_nets, f"{round(cap_femto, 3)} fF")  # used as info text
+                            rdb_output(rdb_cat_sw_nets, f"Edge Pair {idx}: {round(cap_femto, 3)} fF", pair)
 
                             info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
 
