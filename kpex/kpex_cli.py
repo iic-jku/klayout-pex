@@ -35,6 +35,7 @@ from .log import (
     error,
     rule
 )
+from .rcx25.extractor import RCExtractor
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
 from .util.argparse_helpers import render_enum_help, true_or_false
@@ -354,6 +355,14 @@ def run_fastcap_extraction(args: argparse.Namespace,
     info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
 
+def run_kpex_2_5d_engine(args: argparse.Namespace,
+                         pex_context: KLayoutExtractionContext,
+                         tech_info: TechInfo):
+    extractor = RCExtractor(pex_context=pex_context,
+                            tech_info=tech_info)
+    extractor.extract()
+
+
 def setup_logging(args: argparse.Namespace):
     def register_log_file_handler(log_path: str,
                                   formatter: Optional[logging.Formatter]) -> logging.Handler:
@@ -525,6 +534,11 @@ def main():
             run_fastcap_extraction(args=args,
                                    pex_context=pex_context,
                                    lst_file=lst_file)
+
+    rule("kpex 2.5D PEX Engine")
+    run_kpex_2_5d_engine(args=args,
+                         pex_context=pex_context,
+                         tech_info=tech_info)
 
 
 if __name__ == "__main__":
