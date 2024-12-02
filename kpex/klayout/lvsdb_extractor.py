@@ -214,6 +214,7 @@ class KLayoutExtractionContext:
                     merged_region = kdb.Region()
                     merged_region += entry.region
                     merged_region += layer
+                    merged_region.merge()
                     entry.region = merged_region
                 else:
                     nonempty_layers[gds_pair] = KLayoutMergedExtractedLayerInfo(
