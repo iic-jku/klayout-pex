@@ -448,11 +448,6 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     ml->set_reference_below("nild6");
     ml->set_reference_above("topox");
 
-    co = ml->mutable_contact_above();
-    co->set_name("via4");
-    co->set_metal_above("met5");
-    co->set_thickness(0.505);
-
     li = psi->add_layers();
     li->set_name("topox");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
