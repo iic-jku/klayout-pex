@@ -88,13 +88,12 @@ class FasterCapInputBuilder:
                     diel = pl.sidewall_dielectric_layer
                     model_builder.add_material(pl.name, diel.dielectric_k)
 
-        circuits = list(netlist.each_circuit())
-        if len(circuits) == 0:
-            error(f"Expected 1 circuit in extracted netlist, but got 0")
-        else:
-            warning(f"Expected only 1 circuit in extracted netlist, but got {len(circuits)}")
-        circuit: kdb.Circuit = circuits[0]
+        circuit = netlist.circuit_by_name(self.pex_context.top_cell.name)
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
+        if not circuit:
+            circuits = [c.name for c in netlist.each_circuit()]
+            raise Exception(f"Expected circuit called {self.pex_context.top_cell.name} in extracted netlist, "
+                            f"only available circuits are: {circuits}")
 
         diffusion_regions: List[kdb.Region] = []
 
