@@ -830,15 +830,15 @@ class FasterCapModelGenerator:
                         edges_by_p2[r[1]] = []
                     edges_by_p2[r[1]].append(r)
 
-    def dump_stl(self, output_dir_path: str):
+    def dump_stl(self, output_dir_path: str, prefix: str):
         for mn in self.materials.keys():
             tris = self._collect_diel_tris(mn)
-            output_path = os.path.join(output_dir_path, f"diel_{mn}.stl")
+            output_path = os.path.join(output_dir_path, f"{prefix}_diel_{mn}.stl")
             self._write_as_stl(output_path, tris)
 
         for nn in self.net_names:
             tris = self._collect_cond_tris(nn)
-            output_path = os.path.join(output_dir_path, f"cond_{nn}.stl")
+            output_path = os.path.join(output_dir_path, f"{prefix}_cond_{nn}.stl")
             self._write_as_stl(output_path, tris)
 
     @staticmethod

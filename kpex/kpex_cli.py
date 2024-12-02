@@ -173,7 +173,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
     lst_file = gen.write_fastcap(output_dir_path=args.output_dir_path,
                                  prefix=f"{args.cell_name}_FasterCap_Input")
 
-    gen.dump_stl(output_dir_path=args.output_dir_path)
+    gen.dump_stl(output_dir_path=args.output_dir_path,
+                 prefix=f"{args.cell_name}_Geometry_")
 
     exe_path = "FasterCap"
     log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
