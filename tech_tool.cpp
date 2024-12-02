@@ -122,10 +122,22 @@ void buildLayers(kpex::tech::Technology *tech) {
     
     layer = tech->add_layers();
     layer->set_name("tap");
-    layer->set_description("Active (diffusion) area (i.e., N+ and P+)");
+    layer->set_description("Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
     layer->set_gds_layer(65);
     layer->set_gds_datatype(44);
-    
+
+    layer = tech->add_layers();
+    layer->set_name("nwell"); // map this to process stack nwell? (TODO: check this with Matthias)
+    layer->set_description("KLayout computed layer: ntap_conn");
+    layer->set_gds_layer(65);
+    layer->set_gds_datatype(144);
+
+    layer = tech->add_layers();
+    layer->set_name("subs"); // map this to process stack subs? (TODO: check this with Matthias)
+    layer->set_description("KLayout computed layer: ptap_conn");
+    layer->set_gds_layer(65);
+    layer->set_gds_datatype(244);
+
     layer = tech->add_layers();
     layer->set_name("nwell");
     layer->set_description("N-well region");
@@ -233,13 +245,13 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     dl->set_height(0.323);
     dl->set_reference("fox");
     
-    li = psi->add_layers();
-    li->set_name("mvdiff");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-    dl = li->mutable_diffusion_layer();
-    dl->set_height(0.3152);
-    dl->set_reference("fox");
-
+//    li = psi->add_layers();
+//    li->set_name("mvdiff");
+//    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
+//    dl = li->mutable_diffusion_layer();
+//    dl->set_height(0.3152);
+//    dl->set_reference("fox");
+//
     li = psi->add_layers();
     li->set_name("fox");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_FIELD_OXIDE);
