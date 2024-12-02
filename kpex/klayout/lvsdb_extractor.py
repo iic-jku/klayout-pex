@@ -5,7 +5,7 @@ from rich.pretty import pprint
 
 import klayout.db as kdb
 
-from ..logging import (
+from ..log import (
     console,
     debug,
     info,
@@ -58,12 +58,11 @@ class KLayoutExtractedLayerInfo:
 class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
     dbu: float
-    top_cell: str
+    top_cell: kdb.Cell
     layer_map: Dict[int, kdb.LayerInfo]
     cell_mapping: kdb.CellMapping
     target_layout: kdb.Layout
     extracted_layers: Dict[GDSPair, KLayoutExtractedLayerInfo]
-
 
     @classmethod
     def prepare_extraction(cls,
