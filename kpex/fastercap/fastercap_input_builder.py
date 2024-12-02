@@ -43,7 +43,9 @@ class FasterCapInputBuilder:
         return self.pex_context.dbu
 
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
-        gds_pair = self.tech_info.gds_pair_for_layer_name.get(layer_name, None)
+        gds_pair = self.tech_info.gds_pair_for_computed_layer_name.get(layer_name, None)
+        if not gds_pair:
+            gds_pair = self.tech_info.gds_pair_for_layer_name.get(layer_name, None)
         if not gds_pair:
             warning(f"Can't find GDS pair for layer {layer_name}")
             return None
