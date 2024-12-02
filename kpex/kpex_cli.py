@@ -127,7 +127,7 @@ def validate_args(args: argparse.Namespace):
         found_errors = True
 
     # input mode: LVS or existing LVSDB?
-    if hasattr(args, 'gds_path'):
+    if args.gds_path:
         info(f"GDS input file passed, running in LVS mode")
         args.input_mode = InputMode.GDS
         if not os.path.isfile(args.gds_path):
