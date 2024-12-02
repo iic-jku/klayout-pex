@@ -132,9 +132,9 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                             help='Dump layers and quit')
 
     group_pex_input = main_parser.add_argument_group("Conversion")
-    group_pex_input.add_argument("--in", "-i", dest="input_gds_path", default=None,
+    group_pex_input.add_argument("--in", "-i", dest="input_gds_path", required=True,
                                  help="Input GDS path")
-    group_pex_input.add_argument("--out", "-o", dest="output_gds_path", default=None,
+    group_pex_input.add_argument("--out", "-o", dest="output_gds_path", required=True,
                                  help="Output GDS path")
 
     if arg_list is None:
@@ -273,6 +273,9 @@ def invert_dict(d: Dict[str, Tuple[str]]) -> Dict[str, Tuple[str]]:
 
 
 def main():
+    args = parse_args()
+    setup_logging(args)
+
     info("Called with arguments:")
     info(' '.join(map(shlex.quote, sys.argv)))
 
@@ -283,9 +286,6 @@ def main():
                  os.path.join(dir, "pdk", "ihp_sg13g2", "kpex", "sg13g2.lyp"))
 
     warning(f"At the moment, only conversion between PDKs {tech_names} is supported!")
-
-    args = parse_args()
-    setup_logging(args)
 
     try:
         validate_args(args)
