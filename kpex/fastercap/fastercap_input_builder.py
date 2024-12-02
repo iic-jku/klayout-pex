@@ -7,10 +7,12 @@
 
 from typing import *
 from functools import cached_property
+import math
 
 import klayout.db as kdb
 
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
+from .fastercap_model_generator import FasterCapModelBuilder
 from ..logging import (
     console,
     debug,
@@ -20,6 +22,7 @@ from ..logging import (
 )
 from ..tech_info import TechInfo
 
+import process_stack_pb2
 from fastercap_file_format_pb2 import *
 
 
@@ -177,15 +180,27 @@ class FasterCapInputBuilder:
             d = t.device()
             return f"{d.expanded_name()}/{td.name}/{td.description}"
 
+        model_builder = FasterCapModelBuilder(
+            dbu=self.dbu,
+            k_void=3.5,  # TODO
+            delaunay_amax=0.5,
+            delaunay_b=0.5
+        )
+
+        for pl in self.tech_info.tech.process_stack.layers:
+            match pl.layer_type:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                    diel = pl.simple_dielectric_layer
+                    model_builder.add_material(pl.name, diel.dielectric_k)
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                    diel = pl.conformal_dielectric_layer
+                    model_builder.add_material(pl.name, diel.dielectric_k)
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                    diel = pl.sidewall_dielectric_layer
+                    model_builder.add_material(pl.name, diel.dielectric_k)
+
         for circuit in netlist.each_circuit():
             # https://www.klayout.de/doc-qt5/code/class_Circuit.html
-
-            faster_cap_file = InputFile3D()
-            result_files.append((circuit, faster_cap_file))
-            faster_cap_file.file_name = f"circuit_{circuit.name}.lst"
-            self.add_comment_section(file=faster_cap_file,
-                                     comment=f"FasterCap LST file\n\tCircuit: {circuit.name}",
-                                     separator_char='=')
 
             for net in circuit.each_net():
                 # https://www.klayout.de/doc-qt5/code/class_Net.html
@@ -195,79 +210,105 @@ class FasterCapInputBuilder:
 
                 net_name = net.expanded_name()
 
-                conductor = faster_cap_file.lines.add().conductor
-                conductor.file_name = f"circuit_{circuit.name}__conductor_{net_name}.txt"
-                conductor.relative_permittivity = 4.2   # TODO!!!!
-                conductor.offset_in_space.x = 0.0
-                conductor.offset_in_space.y = 0.0
-                conductor.offset_in_space.z = 0.0
-
-                conductor_file = faster_cap_file.sub_input_files.add()
-                conductor_file.file_name = conductor.file_name
-                self.add_comment_section(file=conductor_file,
-                                         comment=f"FasterCap Conductor File\n"
-                                                 f"\tCircuit: {circuit.name}\n"
-                                                 f"\tNet: {net_name}")
-
                 for metal_layer in metal_layers:
-                    metal_z_bottom = metal_layer.metal_layer.height
-                    metal_z_top = metal_z_bottom + metal_layer.metal_layer.thickness
+                    metal_layer_name = metal_layer.name
+                    metal_layer = metal_layer.metal_layer
 
-                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=metal_layer.name)
-                    if not extracted_layer:
-                        continue
+                    metal_z_bottom = metal_layer.height
+                    metal_z_top = metal_z_bottom + metal_layer.thickness
 
-                    self._add_layer_extrusion(conductor_file=conductor_file,
-                                              net=net,
-                                              net_name=net_name,
-                                              layer_name=metal_layer.name,
-                                              extracted_layer=extracted_layer,
-                                              z_bottom=metal_z_bottom,
-                                              z_top=metal_z_top)
+                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=metal_layer_name)
+                    if extracted_layer:
+                        shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                        if shapes.count() >= 1:
+                            model_builder.add_conductor(net_name=net_name,
+                                                        layer=shapes,
+                                                        z=metal_layer.height,
+                                                        height=metal_layer.thickness)
 
-                    contact = metal_layer.metal_layer.contact_above
-                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=contact.name)
-                    if not extracted_layer:
-                        # there's nothing extracted on top the metal layer, skip
-                        continue
+                            sidewall_height = 0
+                            sidewall_region = extracted_layer.region
+                            sidewallee = metal_layer_name
+                            while True:
+                                sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
+                                if not sidewall:
+                                    break
+                                match sidewall.layer_type:
+                                    case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                                        d = math.floor(sidewall.sidewall_dielectric_layer.width_outside_sidewall / self.dbu)
+                                        sidewall_region = sidewall_region.sized(d)
+                                        h_delta = sidewall.sidewall_dielectric_layer.height_above_metal or metal_layer.thickness
+                                        # if h_delta == 0:
+                                        #     h_delta = metal_layer.thickness
+                                        sidewall_height += h_delta
+                                        model_builder.add_dielectric(material_name=sidewall.name,
+                                                                     layer=sidewall_region,
+                                                                     z=metal_layer.height,
+                                                                     height=sidewall_height)
+                                    case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                                        d = math.floor(sidewall.conformal_dielectric_layer.thickness_sidewall / self.dbu)
+                                        sidewall_region = sidewall_region.sized(d)
+                                        sidewall_height = metal_layer.thickness + sidewall.conformal_dielectric_layer.thickness_over_metal
+                                        model_builder.add_dielectric(material_name=sidewall.name,
+                                                                     layer=sidewall_region,
+                                                                     z=metal_layer.height,
+                                                                     height=sidewall_height)
+                                sidewallee = sidewall.name
 
-                    contact_z_bottom = metal_z_top
-                    contact_z_top = contact_z_bottom + contact.thickness
-                    self._add_layer_extrusion(conductor_file=conductor_file,
-                                              net=net,
-                                              net_name=net_name,
-                                              layer_name=contact.name,
-                                              extracted_layer=extracted_layer,
-                                              z_bottom=contact_z_bottom,
-                                              z_top=contact_z_top)
+                        contact = metal_layer.contact_above
+                        extracted_layer = self.extracted_layer(net_name=net_name, layer_name=contact.name)
+                        if extracted_layer and not extracted_layer.region.is_empty():
+                            shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                            model_builder.add_conductor(net_name=net_name,
+                                                        layer=shapes,
+                                                        z=metal_z_top,
+                                                        height=contact.thickness)
+
+                    diel_above = self.tech_info.process_stack_layer_by_name.get(metal_layer.reference_above, None)
+                    if diel_above:
+                        #model_builder.add_dielectric(material_name=metal_layer.reference_above,
+                        #                             layer=kdb.Region().)
+                        pass
+                    # TODO: add stuff
 
                 #
                 # substrate
                 #
                 for substrate_layer in substrate_layers:
-                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=substrate_layer.name)
-                    debug(f"Substrate layer {substrate_layer.name}, net {net_name}: "
+                    substrate_layer_name = substrate_layer.name
+                    substrate_layer = substrate_layer.diffusion_layer
+                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=substrate_layer_name)
+                    debug(f"Substrate layer {substrate_layer_name}, net {net_name}: "
                           f"Extracted?={extracted_layer is not None}")
-                    if not extracted_layer:
-                        continue
+                    if extracted_layer:
+                        shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                        if shapes.count() >= 1:
+                            model_builder.add_conductor(net_name=net_name,
+                                                        layer=shapes,
+                                                        z=-0.1,
+                                                        height=0.1)  # TODO: substrate_layer.diffusion_layer.height
 
-                    region = extracted_layer.region
-                    if region.count() == 0:
-                        continue
+                    contact = substrate_layer.contact_above
+                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=contact.name)
+                    if extracted_layer and not extracted_layer.region.is_empty():
+                        shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
+                        if shapes.count() >= 1:
+                            model_builder.add_conductor(net_name=net_name,
+                                                        layer=shapes,
+                                                        z=0.0,
+                                                        height=contact.thickness)
 
-                    self.add_comment_section(file=conductor_file,
-                                             comment=f"Net {net_name} / "
-                                                     f"Layer {substrate_layer.name} {extracted_layer.gds_pair}")
+                    diel_above = self.tech_info.process_stack_layer_by_name[substrate_layer.reference]
+                    if diel_above:
+                        pass
 
-                    triangulated_shapes = region.delaunay(0.0, 1.0)
-                    for shape in triangulated_shapes:
-                        self._add_triangle_in_z(
-                            conductor_file=conductor_file,
-                            net_name=net_name,
-                            triangle=shape,
-                            z_list=[0.0]
-                        )
+                    # TODO: add stuff
 
-                print()
+            gen = model_builder.generate()
+            gen.check()
+            gen.dump_stl()
+            gen.write_fastcap("fastercap_")
+
+            print()
 
         return result_files
