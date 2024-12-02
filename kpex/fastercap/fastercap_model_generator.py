@@ -44,6 +44,7 @@ import math
 
 import klayout.db as kdb
 
+from .capacitance_matrix import CapacitanceMatrixInfo, ConductorInfo
 from kpex.log import (
     debug,
     info,
@@ -604,10 +605,13 @@ class FasterCapModelGenerator:
 
         self.diel_data = dk
 
-    def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
+    def write_fastcap(self, output_dir_path: str, prefix: str) -> Tuple[str, CapacitanceMatrixInfo]:
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
         lst_file: List[str] = [f"* k_void={'%.12g' % self.k_void}"]
+
+        cap_matrix_info = CapacitanceMatrixInfo([])
+
         for k, data in self.diel_data.items():
             if len(data) == 0:
                 continue
@@ -619,10 +623,12 @@ class FasterCapModelGenerator:
             k_outside = self.materials[outside] if outside else self.k_void
             k_inside = self.materials[inside] if inside else self.k_void
 
-            lst_file.append(f"* Dielectric interface: outside={outside if outside else '(void)'}, "
-                            f"inside={inside if inside else '(void)'}")
+            outside = outside if outside else '(void)'
+            inside = inside if inside else '(void)'
 
-            fn = f"{prefix}_{file_num}.geo"
+            lst_file.append(f"* Dielectric interface: outside={outside}, inside={inside}")
+
+            fn = f"{prefix}_{file_num}_outside={outside}_inside={inside}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
                                       output_path=output_path,
@@ -648,8 +654,14 @@ class FasterCapModelGenerator:
             file_num += 1
             nn, outside = k
             k_outside = self.materials[outside] if outside else self.k_void
-            lst_file.append(f"* Conductor interface: outside={outside if outside else '(void)'}, net={nn}")
-            fn = f"{prefix}_{file_num}.geo"
+
+            cap_matrix_info.conductors.append(
+                ConductorInfo(fastcap_index=file_num, net=nn, outside_dielectric=outside)
+            )
+
+            outside = outside if outside else '(void)'
+            lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
+            fn = f"{prefix}_{file_num}_outside={outside}_net={nn}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
                                       output_path=output_path,
@@ -663,7 +675,7 @@ class FasterCapModelGenerator:
             f.write('\n'.join(lst_file))
             f.write('\n')
 
-        return lst_fn
+        return lst_fn, cap_matrix_info
 
     @staticmethod
     def _write_fastercap_geo(file_number: int,
