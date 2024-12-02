@@ -7,10 +7,10 @@
 
 from typing import *
 from functools import cached_property
+
 import klayout.db as kdb
 
-from klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
-from tech_info import TechInfo
+from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from ..logging import (
     console,
     debug,
@@ -18,6 +18,8 @@ from ..logging import (
     warning,
     error
 )
+from ..tech_info import TechInfo
+
 from fastercap_file_format_pb2 import *
 
 
@@ -162,10 +164,11 @@ class FasterCapInputBuilder:
 
         conductor_file.lines.add().comment.message = ""
 
-    def build(self) -> InputFile3D:
+    def build(self) -> List[Tuple[kdb.Circuit, InputFile3D]]:
+        result_files: List[Tuple[kdb.Circuit, InputFile3D]] = []
+
         lvsdb = self.pex_context.lvsdb
         netlist = lvsdb.netlist()
-
         substrate_layers = self.tech_info.process_substrate_layers
         metal_layers = self.tech_info.process_metal_layers
 
@@ -178,6 +181,7 @@ class FasterCapInputBuilder:
             # https://www.klayout.de/doc-qt5/code/class_Circuit.html
 
             faster_cap_file = InputFile3D()
+            result_files.append((circuit, faster_cap_file))
             faster_cap_file.file_name = f"circuit_{circuit.name}.lst"
             self.add_comment_section(file=faster_cap_file,
                                      comment=f"FasterCap LST file\n\tCircuit: {circuit.name}",
@@ -266,4 +270,4 @@ class FasterCapInputBuilder:
 
                 print()
 
-        return faster_cap_file
+        return result_files
