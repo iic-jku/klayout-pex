@@ -6,6 +6,7 @@ from enum import StrEnum
 import os
 import os.path
 import sys
+from typing import *
 
 import klayout.db as kdb
 
