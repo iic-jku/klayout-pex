@@ -443,11 +443,12 @@ class RCExtractor:
                         print(f"  {x1},{x2} -> {net_index} ({net_name}): {poly_str}")
 
                         # TODO: re-enable this, currently there is a klayout bug when writing / reading the report DB
-                        # if polygons:
-                        #     report.create_items(rdb_cell.rdb_id(),
-                        #                         rdb_cat_outside_net.rdb_id(),
-                        #                         kdb.CplxTrans(mag=dbu),
-                        #                         polygons)
+                        if polygons:
+                            original_trans_polygons = [self.to_original_trans(edge) * p for p in polygons]
+                            report.create_items(rdb_cell.rdb_id(),
+                                                rdb_cat_outside_net.rdb_id(),
+                                                kdb.CplxTrans(mag=dbu),
+                                                original_trans_polygons)
 
                         for p in polygons:
                             area = p.area()
