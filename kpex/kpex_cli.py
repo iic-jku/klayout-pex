@@ -266,17 +266,14 @@ def main():
             top_cells = layout.top_cells()
             is_only_top_cell = len(top_cells) == 1 and top_cells[0].name == args.cell_name
             if is_only_top_cell:
-                info(f"Found cell {args.cell_name} in GDS {effective_gds_path} (only top cell)")
+                info(f"Found cell {args.cell_name} in GDS {args.gds_path} (only top cell)")
             else:  # there are other cells => extract the top cell to a tmp layout
-                tmp_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
-                info(f"Found cell {args.cell_name} in GDS {effective_gds_path}, "
+                effective_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
+                info(f"Found cell {args.cell_name} in GDS {args.gds_path}, "
                      f"but it is not the only top cell, "
-                     f"so layout is exported to: {tmp_gds_path}")
-                options = kdb.SaveLayoutOptions()
-                options.clear_cells()
-                options.add_cell(found_cell.cell_index())
-                layout.write(tmp_gds_path, options)
-                effective_gds_path = tmp_gds_path
+                     f"so layout is exported to: {effective_gds_path}")
+
+                found_cell.write(effective_gds_path)
 
             lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
             lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
