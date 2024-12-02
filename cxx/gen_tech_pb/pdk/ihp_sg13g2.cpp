@@ -67,7 +67,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KREG, "psd_fet",     14, 0,   "Computed layer for pSD");
 
     addComputedLayer(tech, KREG, "ntap",        65, 144, "Computed layer for ntap");
-    addComputedLayer(tech, KREG, "ptap",        65, 144, "Computed layer for ptap");
+    addComputedLayer(tech, KREG, "ptap",        65, 244, "Computed layer for ptap");
 
     addComputedLayer(tech, KREG, "pwell",       46, 0,   "Computed layer for PWell");
     addComputedLayer(tech, KREG, "pwell_sub",   46, 0,   "Computed layer for PWell");
@@ -108,12 +108,12 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("subs");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SUBSTRATE);
     kpex::tech::ProcessStackInfo::SubstrateLayer *subs = li->mutable_substrate_layer();
-    subs->set_height(0.1); // TODO
-    subs->set_thickness(0.28); // TODO
+    subs->set_height(0.0);
+    subs->set_thickness(0.28); // interpreted negatively (below height 0)
     subs->set_reference("fox");
     
     li = psi->add_layers();
-    li->set_name("NWell");
+    li->set_name("ntap");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_NWELL);
     kpex::tech::ProcessStackInfo::NWellLayer *nwell = li->mutable_nwell_layer();
     nwell->set_height(0.0);
@@ -121,38 +121,38 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::Contact *nwell_cont = nwell->mutable_contact_above();
     nwell_cont->set_name("Cont");
     nwell_cont->set_metal_above("Metal1");
-    nwell_cont->set_thickness(0.64);
+    nwell_cont->set_thickness(0.4 + 0.64);
     
     li = psi->add_layers();
-    li->set_name("Activ");
+    li->set_name("ptap");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
     kpex::tech::ProcessStackInfo::DiffusionLayer *diff = li->mutable_diffusion_layer();
-    diff->set_height(0.323); // TODO
+    diff->set_height(0.0);
     diff->set_reference("fox");
     kpex::tech::ProcessStackInfo::Contact *diff_cont = diff->mutable_contact_above();
     diff_cont->set_name("Cont");
     diff_cont->set_metal_above("Metal1");
-    diff_cont->set_thickness(0.64);
+    diff_cont->set_thickness(0.4 + 0.64);
     
     li = psi->add_layers();
     li->set_name("fox");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_FIELD_OXIDE);
     kpex::tech::ProcessStackInfo::FieldOxideLayer *fl = li->mutable_field_oxide_layer();
-    fl->set_dielectric_k(0.4); // from SG13G2_os_process_spec.pdf p6
+    fl->set_dielectric_k(3.95); // from SG13G2_os_process_spec.pdf p6
     
     li = psi->add_layers();
     li->set_name("GatPoly");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     kpex::tech::ProcessStackInfo::MetalLayer *poly = li->mutable_metal_layer();
-    poly->set_height(0.3262); // TODO
+    poly->set_height(0.4);
     poly->set_thickness(0.16);  // from SG13G2_os_process_spec.pdf p17
     poly->set_reference_below("fox");
-    poly->set_reference_above("psg");
+    poly->set_reference_above("ild0");
     
     kpex::tech::ProcessStackInfo::Contact *poly_cont = poly->mutable_contact_above();
     poly_cont->set_name("Cont");
     poly_cont->set_metal_above("Metal1");
-    poly_cont->set_thickness(0.4299);  // TODO!
+    poly_cont->set_thickness(0.64 - poly->thickness());
     
     li = psi->add_layers();
     li->set_name("nitride"); // TODO
