@@ -332,7 +332,7 @@ def main():
 
     if len(pex_context.unnamed_layers) >= 1:
         layout = kdb.Layout()
-        layout.dbu =lvsdb.internal_layout().dbu
+        layout.dbu = lvsdb.internal_layout().dbu
 
         top_cell = layout.create_cell("TOP")
         for ulyr in pex_context.unnamed_layers:
