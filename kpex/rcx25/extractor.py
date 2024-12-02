@@ -180,11 +180,6 @@ class RCExtractor:
                                 kdb.CplxTrans(mag=dbu),
                                 shapes)
 
-        def format_terminal(t: kdb.NetTerminalRef) -> str:
-            td = t.terminal_def()
-            d = t.device()
-            return f"{d.expanded_name()}/{td.name}/{td.description}"
-
         circuit = netlist.circuit_by_name(self.pex_context.top_cell.name)
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
         if not circuit:
@@ -459,8 +454,6 @@ class RCExtractor:
                         rdb_cat_outside_net = report.create_category(rdb_cat_edge_interval,
                                                                      f"outside_net={net_name}")
 
-                        # poly_str = "/".join([str(p) for p in polygons])
-                        # print(f"  {x1},{x2} -> {net_index} ({net_name}): {poly_str}")
 
                         # TODO: re-enable this, currently there is a klayout bug when writing / reading the report DB
                         if polygons:
@@ -644,17 +637,6 @@ class RCExtractor:
                         area_shapes_unshielded = shapes.dup()
                         area_shapes_unshielded -= regions_below_layer[layer_name]
                         area = area_shapes_unshielded.area() * dbu ** 2  # in µm^2
-
-                        # if (dnear < 0)
-                        #     dnear = 0; /* Don't count underlap */
-                        # mult = ExtCurStyle->exts_overlapMult[ta][0];
-                        # snear = 0.6366 * atan(mult * dnear);
-                        #
-                        # "snear" is the fractional portion of the fringe cap seen by
-                        # the substrate, so (1.0 - snear) is the part that is blocked
-                        #
-                        # subcap = ExtCurStyle->exts_perimCap[ta][tb] * (1.0 - snear) * length;
-                        # rbp->nreg_cap -= subcap;
 
                         edges_unshielded = shapes.edges() - regions_below_layer[layer_name]
                         perimeter_unshielded = edges_unshielded.length() * dbu
