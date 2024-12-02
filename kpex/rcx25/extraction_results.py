@@ -3,8 +3,6 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
-from pydantic import Extra
-
 import process_parasitics_pb2
 
 

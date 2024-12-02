@@ -1,18 +1,9 @@
 from __future__ import annotations
 
-import os
-import re
-import tempfile
-from typing import *
-import unittest
-
 import klayout.db as kdb
 
 from kpex.log import (
-    debug,
     info,
-    warning,
-    # error
 )
 
 

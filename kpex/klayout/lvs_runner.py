@@ -2,14 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
-import tempfile
 import time
-import unittest
-from typing import *
-from dataclasses import dataclass
-from rich.pretty import pprint
-
-import klayout.db as kdb
 
 from kpex.log import (
     debug,
@@ -79,32 +72,3 @@ class LVSRunner:
         else:
             warning(f"klayout LVS failed with status code {proc.returncode} after {'%.4g' % duration}s, "
                     f"see log file: {log_path}")
-
-
-class Test(unittest.TestCase):
-    @property
-    def testdata_dir(self) -> str:
-        return os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
-
-    def test_run_klayout_lvs(self):
-        gds_path = os.path.join(self.testdata_dir, 'nmos_diode2', 'nmos_diode2.gds.gz')
-        schematic_path = os.path.join(self.testdata_dir, 'nmos_diode2', 'nmos_diode2.spice')
-
-        tmp_dir = tempfile.mkdtemp(prefix="lvs_run_")
-        log_path = os.path.join(tmp_dir, "out.log")
-        lvsdb_path = os.path.join(tmp_dir, "out.lvsdb.gz")
-
-        # TODO!
-        # lvs_script = os.path.join(os.environ['PDKPATH'], 'libs.tech', 'klayout', 'lvs', 'sky130.lvs')
-        lvs_script = os.path.join(os.environ['HOME'], '.klayout', 'salt', 'sky130A_el',
-                                  'lvs', 'core', 'sky130.lvs')
-
-        runner = LVSRunner()
-        runner.run_klayout_lvs(exe_path="klayout",
-                               lvs_script=lvs_script,
-                               gds_path=gds_path,
-                               schematic_path=schematic_path,
-                               log_path=log_path,
-                               lvsdb_path=lvsdb_path)
-        print(f"LVS log file: {log_path}")
-        print(f"LVSDB file: {lvsdb_path}")
