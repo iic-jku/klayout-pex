@@ -87,10 +87,10 @@ class KLayoutExtractionContext:
             target=target_layout,  # target layout
             lmap=lm,               # maps: target layer index => net regions
             hier_mode=hier_mode,   # hier mode
-            netname_prop=net_name_prop_num,
+            netname_prop=net_name_prop_num,  # property name to which to attach the net name
             circuit_cell_name_prefix="CIRCUIT_",
             device_cell_name_prefix=None  # "DEVICE_"
-        )  # property name to which to attach the net name
+        )
 
         extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
                                                                          tech=tech,
