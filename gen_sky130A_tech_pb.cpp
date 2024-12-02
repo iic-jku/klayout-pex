@@ -422,12 +422,16 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     ml->set_reference_below("nild4");
     ml->set_reference_above("nild5");
 
+    double capm_thickness = 0.1;
+    double capild_k = 4.0;
+    double capild_thickness = 0.02;
+    
     li = psi->add_layers();
     li->set_name("capild");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
     cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(1.0);
-    cl->set_thickness_over_metal(0.04);
+    cl->set_dielectric_k(capild_k);
+    cl->set_thickness_over_metal(capild_thickness);
     cl->set_thickness_where_no_metal(0.0);
     cl->set_thickness_sidewall(0.0);
     cl->set_reference("met3_cap");
@@ -443,8 +447,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("capm");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     ml = li->mutable_metal_layer();
-    ml->set_height(2.7861 + 0.845 + 0.04); // according to xsection
-    ml->set_thickness(0.06); // according to xsection
+    ml->set_height(2.7861 + 0.845 + capild_thickness); // according to xsection
+    ml->set_thickness(capm_thickness); // according to xsection
     ml->set_reference_below("nild5");
     ml->set_reference_above("nild5");
     
@@ -473,8 +477,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("capild");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
     cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(1.0);
-    cl->set_thickness_over_metal(0.04);
+    cl->set_dielectric_k(capild_k);
+    cl->set_thickness_over_metal(capild_thickness);
     cl->set_thickness_where_no_metal(0.0);
     cl->set_thickness_sidewall(0.0);
     cl->set_reference("met4_cap");
@@ -504,8 +508,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("capm2");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     ml = li->mutable_metal_layer();
-    ml->set_height(4.0211 + 0.845 + 0.04); // according to xsection
-    ml->set_thickness(0.06); // according to xsection
+    ml->set_height(4.0211 + 0.845 + capild_thickness); // according to xsection
+    ml->set_thickness(capm_thickness); // according to xsection
     ml->set_reference_below("nild6"); // PDK mim cap section says capild
     ml->set_reference_above("nild6");
     
