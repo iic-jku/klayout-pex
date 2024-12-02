@@ -8,8 +8,6 @@ from typing import *
 
 import klayout.db as kdb
 import klayout.rdb as rdb
-from shapely.measurement import distance
-from solid import polygon
 
 import process_parasitics_pb2
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
