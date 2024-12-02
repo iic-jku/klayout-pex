@@ -1,7 +1,11 @@
-import process_parasitics_pb2
-
+from __future__ import annotations
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
+
+from pydantic import Extra
+
+import process_parasitics_pb2
 
 
 NetName = str
@@ -72,17 +76,68 @@ class SideOverlapCap:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
 
+@dataclass(frozen=True)
+class NetCoupleKey:
+    net1: NetName
+    net2: NetName
+
+    def __repr__(self) -> str:
+        return f"{self.net1}-{self.net2}"
+
+    # NOTE: we norm net names alphabetically
+    def normed(self) -> NetCoupleKey:
+        if self.net1 < self.net2:
+            return self
+        else:
+            return NetCoupleKey(self.net2, self.net1)
+
+
+@dataclass
+class ExtractionSummary:
+    capacitances: Dict[NetCoupleKey, float]
+
+    @classmethod
+    def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
+        merged_capacitances = defaultdict(float)
+        for s in summaries:
+            for couple_key, cap in s.capacitances.items():
+                merged_capacitances[couple_key.normed()] += cap
+        return ExtractionSummary(merged_capacitances)
+
+
 @dataclass
 class CellExtractionResults:
     cell_name: CellName
-    # node_regions: Dict[NetName, NodeRegion] = field(default_factory=dict)
+
     overlap_coupling: Dict[OverlapKey, OverlapCap] = field(default_factory=dict)
     sidewall_table: Dict[SidewallKey, SidewallCap] = field(default_factory=dict)
     sideoverlap_table: Dict[SideOverlapKey, SideOverlapCap] = field(default_factory=dict)
+
+    def summarize(self) -> ExtractionSummary:
+        overlap_summary = ExtractionSummary({
+            NetCoupleKey(key.net_top, key.net_bot): cap.cap_value
+            for key, cap in self.overlap_coupling.items()
+        })
+
+        sidewall_summary = ExtractionSummary({
+            NetCoupleKey(key.net1, key.net2): cap.cap_value
+            for key, cap in self.sidewall_table.items()
+        })
+
+        sideoverlap_summary = ExtractionSummary({
+            NetCoupleKey(key.net_inside, key.net_outside): cap.cap_value
+            for key, cap in self.sideoverlap_table.items()
+        })
+
+        return ExtractionSummary.merged([
+            overlap_summary, sidewall_summary, sideoverlap_summary
+        ])
 
 
 @dataclass
 class ExtractionResults:
     cell_extraction_results: Dict[CellName, CellExtractionResults] = field(default_factory=dict)
 
-
+    def summarize(self) -> ExtractionSummary:
+        subsummaries = [s.summarize() for s in self.cell_extraction_results.values()]
+        return ExtractionSummary.merged(subsummaries)

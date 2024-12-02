@@ -486,11 +486,27 @@ def run_fastcap_extraction(args: argparse.Namespace,
 def run_kpex_2_5d_engine(args: argparse.Namespace,
                          pex_context: KLayoutExtractionContext,
                          tech_info: TechInfo,
-                         report_path: str):
+                         report_path: str,
+                         netlist_csv_path: str):
     extractor = RCExtractor(pex_context=pex_context,
                             tech_info=tech_info,
                             report_path=report_path)
-    extractor.extract()
+    extraction_results = extractor.extract()
+
+    with open(netlist_csv_path, 'w') as f:
+        f.write('Device;Net1;Net2;Capacitance [F];Capacitance [fF]\n')
+        summary = extraction_results.summarize()
+        for idx, (key, cap_value) in enumerate(summary.capacitances.items()):
+            f.write(f"C{idx + 1};{key.net1};{key.net2};{cap_value / 1e15};{cap_value}\n")
+
+    rule("kpex/2.5D extracted netlist (CSV format):")
+    with open(netlist_csv_path, 'r') as f:
+        for line in f.readlines():
+            subproc(line[:-1])  # abusing subproc, simply want verbatim
+
+    rule()
+    info(f"Wrote extracted netlist CSV to: {netlist_csv_path}")
+
 
     # NOTE: there was a KLayout bug that some of the categories were lost,
     #       so that the marker browser could not load the report file
@@ -662,12 +678,14 @@ def main():
                                    lst_file=lst_file)
 
     if args.run_2_5D:
-        rule("kpex 2.5D PEX Engine")
+        rule("kpex/2.5D PEX Engine")
         report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
+        netlist_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_netlist.csv")
         run_kpex_2_5d_engine(args=args,
                              pex_context=pex_context,
                              tech_info=tech_info,
-                             report_path=report_path)
+                             report_path=report_path,
+                             netlist_csv_path=netlist_csv_path)
 
 
 if __name__ == "__main__":
