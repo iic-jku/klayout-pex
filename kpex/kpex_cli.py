@@ -143,7 +143,8 @@ def main():
     lvsdb.read(args.lvsdb_path)
 
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name, lvsdb=lvsdb)
-    # pex_context.target_layout.write(gds_path)
+    gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
+    pex_context.target_layout.write(gds_path)
 
     run_fastercap_extraction(args=args,
                              pex_context=pex_context,
