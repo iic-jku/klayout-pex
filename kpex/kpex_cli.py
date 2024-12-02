@@ -198,7 +198,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     exe_path = "FasterCap"
     log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
-    csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix.csv")
+    raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Raw.csv")
+    avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Avg.csv")
     expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Expanded_Netlist.cir")
     reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Reduced_Netlist.cir")
 
@@ -212,7 +213,10 @@ def run_fastercap_extraction(args: argparse.Namespace,
                   mesh_refinement_value=args.fastercap_mesh_refinement_value)
 
     cap_matrix = fastercap_parse_capacitance_matrix(log_path)
-    cap_matrix.write_csv(csv_path)
+    cap_matrix.write_csv(raw_csv_path)
+
+    cap_matrix = cap_matrix.averaged_off_diagonals()
+    cap_matrix.write_csv(avg_csv_path)
 
     netlist_expander = NetlistExpander()
     expanded_netlist = netlist_expander.expand(
