@@ -24,7 +24,7 @@ cxx_api: $(PROTOBUF_SOURCES)
 	@echo "Creating C++ Protobuf API"
 	protoc -I=protos --cpp_out=build/cxx $(PROTOBUF_SOURCES)
 
-tech_tool: tech_tool.cpp build/cxx/*.cc
+tech_tool: gen_sky130A_tech_pb.cpp build/cxx/*.cc
 	@echo "---------------------------------------------------------"
 	$(CXX) \
 		-std=c++17 \
@@ -33,9 +33,9 @@ tech_tool: tech_tool.cpp build/cxx/*.cc
 		-lprotobuf \
 		-labsl_cord -labsl_log_internal_proto -labsl_log_internal_check_op -labsl_log_internal_message -labsl_status \
 		build/cxx/*.cc \
-		tech_tool.cpp \
-		-o build/tech_tool
+		gen_sky130A_tech_pb.cpp \
+		-o build/gen_sky130A_tech_pb
 
-dump_example: build/tech_tool
+dump_example: build/gen_sky130A_tech_pb
 	@echo "---------------------------------------------------------"
-	build/tech_tool
+	build/gen_sky130A_tech_pb
