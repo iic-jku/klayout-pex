@@ -112,8 +112,14 @@ def main():
         )
 
     layer_mapping = {
+        (65, 20):  (1, 0),    # diff.drawing -> Activ.drawing
+        (64, 20):  (31, 0),   # nwell.drawing -> NWell.drawing
         (122, 16): (46, 2),   # pwell.pin    -> PWell.pin
-        # (64, 59):  None,      # pwell.label  -> -
+        # (64, 59):  None,    # pwell.label  -> -     # TODO
+        (93, 44): (7, 0),     # nsdm.drawing -> nSD.drawing
+        (94, 20): (14, 0),    # psdm.drawing -> pSD.drawing
+        (66, 20):  (5, 0),    # poly.drawing -> GatPoly.drawing
+        (66, 44):  (6, 0),    # licon1.drawing -> Cont.drawing
         (67, 20):  (8, 0),    # li1.drawing  -> Metal1.drawing
         (67, 16):  (8, 2),    # li1.pin      -> Metal1.pin
         (67, 5):   (8, 25),   # li1.label    -> Metal1.text
@@ -137,7 +143,9 @@ def main():
         (72, 20):  (126, 0),  # met5.drawing -> TopMetal1.drawing
         (72, 16):  (126, 2),  # met5.pin     -> TopMetal1.pin
         (72, 5):   (126, 25), # met5.label   -> TopMetal1.text
-        (82, 64):  (99, 39)   # capacitor.drawing -> Recog.mom
+        (82, 64):  (99, 39),  # capacitor.drawing -> Recog.mom
+        (236, 0):  (189, 4),  # boundary -> prBoundary.boundary
+        (97, 44):  (36, 0),   # capm2.drawing -> MIM.drawing
     }
     layer_mapping = {GDSPair(*k): GDSPair(*v) for k, v in layer_mapping.items()}
 
