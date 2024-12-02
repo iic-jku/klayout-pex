@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package kpex.tech;
+
+import "extract.proto";
+import "process_stack.proto";
+
+message Technology {
+    string name = 1;
+        
+    repeated LayerInfo layers = 101;
+    
+    ProcessStackInfo process_stack = 140;
+    
+    ExtractionInfo extraction = 200;
+}
+
+message LayerInfo {
+    string name = 1;
+    
+    string description = 11;
+    
+    uint32 gds_layer = 21;
+    uint32 gds_datatype = 31;
+}

@@ -1,0 +1,88 @@
+//
+// This file is roughly based on
+// https://github.com/RTimothyEdwards/capiche
+//
+syntax = "proto3";
+
+package kpex.tech;
+
+
+message ProcessStackInfo {
+
+    enum LayerType {
+        LAYER_TYPE_UNSPECIFIED = 0;
+        LAYER_TYPE_DIFFUSION = 1;
+        LAYER_TYPE_FIELD_OXIDE = 2;
+        LAYER_TYPE_SIMPLE_DIELECTRIC = 3;
+        LAYER_TYPE_CONFORMAL_DIELECTRIC = 4;
+        LAYER_TYPE_SIDEWALL_DIELECTRIC = 5;
+        LAYER_TYPE_METAL = 6;
+    }
+
+    message DiffusionLayer { // Diffusion type (used for substrate, well, or diffusion)
+        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        string reference = 30; // name of the dielectric type above the substrate
+    }
+
+    message FieldOxideLayer { // Field oxide type, which is directly above the substrate
+        double dielectric_k = 10;
+    }
+
+    message SimpleDielectricLayer { // Simple dielectric
+        double dielectric_k = 10;
+        string reference = 30;
+    }
+    
+    message ConformalDielectricLayer { // Conformal dielectric
+        double dielectric_k = 10;
+        double thickness_over_metal = 20;
+        double thickness_where_no_metal = 21;
+        double thickness_sidewall = 22;
+        string reference = 30;
+    }
+
+    message SidewallDielectricLayer { // Sidewall dielectric
+        double dielectric_k = 10;
+        double height_above_metal = 20; // might be 0 if none
+        double width_outside_sidewall = 21;
+        string reference = 30;
+    }
+
+    message Contact { // Contact/Via
+        // because contact name do not uniquely describe
+        // the connected layers and the height,
+        // these are used as part of a MetalLayer
+        // for example, sky130 has
+        //     * field poly <-> licon <-> li1 (height 0.4299)
+        //     * diffusion <-> licon <-> li1 (height 0.9361)
+        //     * cap2m <-> via4 <-> metal5
+        //     * metal5 <-> via4 <-> metal5
+
+        string name = 1;
+        string metal_above = 10;
+        double thickness = 20;
+    }
+
+    message MetalLayer { // Metal
+        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        double thickness = 2;  // thickness in µm
+        string reference_below = 30; // dielectric
+        string reference_above = 31; // dielectric
+        Contact contact_above = 40;
+    }
+
+    message LayerInfo {
+        string name = 1;
+        LayerType layer_type = 2;
+        oneof parameters {
+            DiffusionLayer diffusion_layer = 10;
+            FieldOxideLayer field_oxide_layer = 11;
+            SimpleDielectricLayer simple_dielectric_layer = 12;
+            ConformalDielectricLayer conformal_dielectric_layer = 13;
+            SidewallDielectricLayer sidewall_dielectric_layer = 14;
+            MetalLayer metal_layer = 15;
+        }
+    }
+    
+    repeated LayerInfo layers = 100;
+}
