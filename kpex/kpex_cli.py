@@ -53,7 +53,7 @@ def render_enum_help(topic: str,
 
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
-                                                       "KLayout-integrated Parasitic Extraction Tool",
+                                                      f"KLayout-integrated Parasitic Extraction Tool",
                                           epilog=f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand",
                                           add_help=False)
     group_special = main_parser.add_argument_group("Special options")
@@ -114,11 +114,11 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
                                  type=float, default=0.5,
                                  help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
-                                      f"(default is 0.04)")
+                                      f"(default is 0.5)")
     group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
                                  type=float, default=0.5,
                                  help=f"FasterCap -m Mesh relative refinement value "
-                                      f"(default is 0.001)")
+                                      f"(default is 0.5)")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
