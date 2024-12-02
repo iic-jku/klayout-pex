@@ -72,12 +72,7 @@ class FasterCapInputBuilder:
         return shapes
 
     def top_cell_bbox(self) -> kdb.Box:
-        b1: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-        b2: kdb.Box = self.pex_context.lvsdb.internal_layout().top_cell().bbox()
-        if b1.area() > b2.area():
-            return b1
-        else:
-            return b2
+        return self.pex_context.top_cell_bbox()
 
     def build(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb

@@ -203,6 +203,14 @@ class KLayoutExtractionContext:
 
         return nonempty_layers, unnamed_layers
 
+    def top_cell_bbox(self) -> kdb.Box:
+        b1: kdb.Box = self.target_layout.top_cell().bbox()
+        b2: kdb.Box = self.lvsdb.internal_layout().top_cell().bbox()
+        if b1.area() > b2.area():
+            return b1
+        else:
+            return b2
+
     def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
