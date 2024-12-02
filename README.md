@@ -25,17 +25,28 @@ sudo apt install libcurl4-openssl-dev   # required for klayout pip module
 pip3 install protobuf mypy-protobuf rich klayout
 ```
 
+### Building
 
-### What does the Makefile do?
-
-calling 
-```
-make
-```
-
-will 
+Calling `./build.sh release` will: 
 - create Python and C++ Protobuffer APIs for the given schema (present in `protos`)
 - compile `tech_tool.cpp` C++ example showing how to read/write/convert different representations
+
+### Generating KPEX Tech Info JSON files
+
+Calling `./gen_tech_pb` will create the JSON tech info files: 
+   - `build/sky130A_tech.pb.json`
+   - `build/ihp_sg13g2_tech.pb.json`
+
+### Running KPEX
+
+To quickly run a PEX example with KPEX/2.5D and KPEX/FasterCap engines:
+```bash
+./kpex.sh --tech build/sky130A_tech.pb.json \
+  --out_dir output_sky130A \
+  --2.5D yes \
+  --fastercap yes \
+  --gds ../designs/sky130A/test_patterns/sideoverlap_complex_li1_m1.gds.gz
+```
 
 ## Debugging Hints for PyCharm
 
