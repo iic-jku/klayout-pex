@@ -76,7 +76,7 @@ def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CS
 
 
 def assert_expected_matches_obtained(*path_components,
-                                     expected_csv_content: str):
+                                     expected_csv_content: str) -> CellExtractionResults:
     result, csv, preview_png = _run_rcx25d_single_cell(*path_components)
     allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
     allure.attach.file(preview_png, name='📸 layout_preview.png', attachment_type=allure.attachment_type.PNG)
@@ -97,7 +97,7 @@ def assert_expected_matches_obtained(*path_components,
         # assert diff['columns_added'] == []
         # assert diff['columns_removed'] == []
         assert human_diff == '', 'Diff detected'
-
+    return result
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
