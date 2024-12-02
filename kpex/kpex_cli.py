@@ -232,33 +232,34 @@ def validate_args(args: argparse.Namespace):
         # could be *.gds, or *.gds.gz, so remove all extensions
         return os.path.basename(path).split(sep='.')[0]
 
-    run_dir_id: str
-    match args.input_mode:
-        case InputMode.GDS:
-            run_dir_id = f"{input_file_stem(args.gds_path)}__{args.effective_cell_name}"
-        case InputMode.LVSDB:
-            run_dir_id = f"{input_file_stem(args.lvsdb_path)}__{args.effective_cell_name}"
-        case _:
-            raise NotImplementedError(f"Unknown input mode {args.input_mode}")
+    if hasattr(args, 'effective_cell_name'):
+        run_dir_id: str
+        match args.input_mode:
+            case InputMode.GDS:
+                run_dir_id = f"{input_file_stem(args.gds_path)}__{args.effective_cell_name}"
+            case InputMode.LVSDB:
+                run_dir_id = f"{input_file_stem(args.lvsdb_path)}__{args.effective_cell_name}"
+            case _:
+                raise NotImplementedError(f"Unknown input mode {args.input_mode}")
 
-    args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
+        args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
 
-    if args.input_mode == InputMode.GDS:
-        if args.schematic_path:
-            args.effective_schematic_path = args.schematic_path
-            if not os.path.isfile(args.schematic_path):
-                error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
-                found_errors = True
-        else:
-            info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
-            args.effective_schematic_path = os.path.join(args.output_dir_path,
-                                                         f"{args.effective_cell_name}_dummy_schematic.spice")
-            with open(args.effective_schematic_path, 'w') as f:
-                f.writelines([
-                    f".subckt {args.effective_cell_name} VDD VSS",
-                    '.ends',
-                    '.end'
-                ])
+        if args.input_mode == InputMode.GDS:
+            if args.schematic_path:
+                args.effective_schematic_path = args.schematic_path
+                if not os.path.isfile(args.schematic_path):
+                    error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
+                    found_errors = True
+            else:
+                info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
+                args.effective_schematic_path = os.path.join(args.output_dir_path,
+                                                             f"{args.effective_cell_name}_dummy_schematic.spice")
+                with open(args.effective_schematic_path, 'w') as f:
+                    f.writelines([
+                        f".subckt {args.effective_cell_name} VDD VSS",
+                        '.ends',
+                        '.end'
+                    ])
 
     try:
         args.log_level = LogLevel[args.log_level.upper()]
@@ -463,7 +464,7 @@ def setup_logging(args: argparse.Namespace):
     try:
         validate_args(args)
     except Exception:
-        if args.output_dir_path:
+        if hasattr(args, 'output_dir_path'):
             reregister_log_file_handler(file_handler_plain, cli_log_path_plain, None)
             reregister_log_file_handler(file_handler_formatted, cli_log_path_formatted, formatter)
         sys.exit(1)
