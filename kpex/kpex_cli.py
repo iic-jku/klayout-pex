@@ -200,18 +200,6 @@ def run_fastercap_extraction(args: argparse.Namespace,
                                                     delaunay_b=args.delaunay_b)
     gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
-    # def provide_fastcap_file(name: str) -> TextIO:
-    #     if not os.path.isdir(args.output_dir_path):
-    #         os.makedirs(args.output_dir_path, exist_ok=True)
-    #     path = os.path.join(args.output_dir_path, name)
-    #     textio = open(path, mode="w")
-    #     return textio
-    #
-    # writer = FasterCapFileWriter()
-    # for circuit, fastercap_input_content in input_files_by_circuit:
-    #     writer.write_3d_file(input_file=fastercap_input_content,
-    #                          file_provider=provide_fastcap_file,
-    #                          sub_file_strategy=FasterCapSubFileStrategy.MULTI_FILE)
 
     if args.geometry_check:
         gen.check()
