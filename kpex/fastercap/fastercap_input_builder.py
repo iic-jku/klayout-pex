@@ -23,7 +23,6 @@ from ..log import (
 from ..tech_info import TechInfo
 
 import process_stack_pb2
-from fastercap_file_format_pb2 import *
 
 
 class FasterCapInputBuilder:
