@@ -268,22 +268,23 @@ class RCExtractor:
                             info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
                                  f"Unshielded area: {unshielded_area_um2} µm^2, "
                                  f"cap: {round(cap_femto, 2)} fF")
-                            ovk = OverlapKey(layer_top=top_layer_name,
-                                             net_top=net_top,
-                                             layer_bot=bot_layer_name,
-                                             net_bot=net_bot)
-                            cap = OverlapCap(key=ovk,
-                                             cap_value=cap_femto,
-                                             shielded_area=shielded_area_um2,
-                                             unshielded_area=unshielded_area_um2,
-                                             tech_spec=overlap_cap_spec)
-                            report.create_category(  # used as info text
-                                rdb_cat_nets,
-                                f"{round(cap_femto, 3)} fF "
-                                f"({round(shielded_cap_femto, 3)} fF shielded "
-                                f"of total {round(cap_femto+shielded_cap_femto, 3)} fF)"
-                            )
-                            extraction_results.overlap_coupling[ovk] = cap
+                            if cap_femto > 0.0:
+                                ovk = OverlapKey(layer_top=top_layer_name,
+                                                 net_top=net_top,
+                                                 layer_bot=bot_layer_name,
+                                                 net_bot=net_bot)
+                                cap = OverlapCap(key=ovk,
+                                                 cap_value=cap_femto,
+                                                 shielded_area=shielded_area_um2,
+                                                 unshielded_area=unshielded_area_um2,
+                                                 tech_spec=overlap_cap_spec)
+                                report.create_category(  # used as info text
+                                    rdb_cat_nets,
+                                    f"{round(cap_femto, 3)} fF "
+                                    f"({round(shielded_cap_femto, 3)} fF shielded "
+                                    f"of total {round(cap_femto+shielded_cap_femto, 3)} fF)"
+                                )
+                                extraction_results.overlap_coupling[ovk] = cap
 
         # (2) SIDEWALL CAPACITANCE
         #
@@ -554,19 +555,19 @@ class RCExtractor:
 
                             cap_femto = (cfrac * edge_interval_length_um *
                                          self.sideoverlap_cap_spec.capacitance / 1000.0)
+                            if cap_femto > 0.0:
+                                report.create_category(rdb_cat_outside_net, f"{round(cap_femto, 3)} fF")  # used as info text
 
-                            report.create_category(rdb_cat_outside_net, f"{round(cap_femto, 3)} fF")  # used as info text
-
-                            sok = SideOverlapKey(layer_inside=self.inside_layer_name,
-                                                 net_inside=self.inside_net_name,
-                                                 layer_outside=self.outside_layer_name,
-                                                 net_outside=net_name)
-                            sov = extraction_results.sideoverlap_table.get(sok, None)
-                            if sov:
-                                sov.cap_value += cap_femto
-                            else:
-                                sov = SideOverlapCap(key=sok, cap_value=cap_femto)
-                                extraction_results.sideoverlap_table[sok] = sov
+                                sok = SideOverlapKey(layer_inside=self.inside_layer_name,
+                                                     net_inside=self.inside_net_name,
+                                                     layer_outside=self.outside_layer_name,
+                                                     net_outside=net_name)
+                                sov = extraction_results.sideoverlap_table.get(sok, None)
+                                if sov:
+                                    sov.cap_value += cap_femto
+                                else:
+                                    sov = SideOverlapCap(key=sok, cap_value=cap_femto)
+                                    extraction_results.sideoverlap_table[sok] = sov
 
                             # efflength = (cfrac - sov.so_coupfrac) * (double) length;
                             # cap += e->ec_cap * efflength;
