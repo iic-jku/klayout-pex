@@ -304,6 +304,22 @@ def main():
     gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
     pex_context.target_layout.write(gds_path)
 
+    gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_internal.gds.gz")
+    pex_context.lvsdb.internal_layout().write(gds_path)
+
+    if len(pex_context.unnamed_layers) >= 1:
+        layout = kdb.Layout()
+        layout.dbu =lvsdb.internal_layout().dbu
+
+        top_cell = layout.create_cell("TOP")
+        for ulyr in pex_context.unnamed_layers:
+            li = kdb.LayerInfo(*ulyr.gds_pair)
+            layer = layout.insert_layer(li)
+            layout.insert(top_cell.cell_index(), layer, ulyr.region.dup())
+
+        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_unnamed_LVS_layers.gds.gz")
+        layout.write(layout_dump_path)
+
     run_fastercap_extraction(args=args,
                              pex_context=pex_context,
                              tech_info=tech_info)

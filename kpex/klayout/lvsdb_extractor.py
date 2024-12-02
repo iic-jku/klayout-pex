@@ -85,6 +85,7 @@ class KLayoutExtractionContext:
     cell_mapping: kdb.CellMapping
     target_layout: kdb.Layout
     extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
+    unnamed_layers: List[KLayoutExtractedLayerInfo]
 
     @classmethod
     def prepare_extraction(cls,
@@ -125,6 +126,8 @@ class KLayoutExtractionContext:
             device_cell_name_prefix=None  # "DEVICE_"
         )  # property name to which to attach the net name
 
+        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb)
+
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
             dbu=dbu,
@@ -132,7 +135,8 @@ class KLayoutExtractionContext:
             layer_map=lm,
             cell_mapping=cm,
             target_layout=target_layout,
-            extracted_layers=cls.nonempty_extracted_layers(lvsdb=lvsdb)
+            extracted_layers=extracted_layers,
+            unnamed_layers=unnamed_layers
         )
 
     @staticmethod
@@ -174,20 +178,28 @@ class KLayoutExtractionContext:
         return lm
 
     @staticmethod
-    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Dict[GDSPair, KLayoutMergedExtractedLayerInfo]:
+    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
+
+        unnamed_layers: List[KLayoutExtractedLayerInfo] = []
+
         for idx, ln in enumerate(lvsdb.layer_names()):
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
                 if ln not in name_to_lp:
-                    layout_dump_path = tempfile.mktemp(prefix=f"LVS_layer_{ln}", suffix="gds.gz")
                     warning(
                         f"Unable to find info about extracted LVS layer '{ln}'")
-                    # layout = kdb.Layout()
-                    # layout.add_cell("TOP")
-                    #
+                    gds_pair = (1000 + idx, 20)
+                    linfo = KLayoutExtractedLayerInfo(
+                        index=idx,
+                        lvs_layer_name=ln,
+                        gds_pair=gds_pair,
+                        region=layer
+                    )
+                    unnamed_layers.append(linfo)
                     continue
+
                 gds_pair = name_to_lp[ln]
                 linfo = KLayoutExtractedLayerInfo(
                     index=idx,
@@ -199,14 +211,15 @@ class KLayoutExtractionContext:
                 entry = nonempty_layers.get(gds_pair, None)
                 if entry:
                     entry.source_layers.append(linfo)
-                    entry.region += layer
-                    entry.region.merge()
+                    merged_region = kdb.Region()
+                    merged_region += entry.region
+                    merged_region += layer
+                    entry.region = merged_region
                 else:
                     nonempty_layers[gds_pair] = KLayoutMergedExtractedLayerInfo(
                         source_layers=[linfo],
                         gds_pair=gds_pair,
                         region=layer,
                     )
-                print()
 
-        return nonempty_layers
+        return nonempty_layers, unnamed_layers
