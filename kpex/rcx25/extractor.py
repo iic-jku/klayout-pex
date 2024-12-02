@@ -76,22 +76,23 @@ class RCExtractor:
             raise Exception(f"Expected circuit called {self.pex_context.top_cell.name} in extracted netlist, "
                             f"only available circuits are: {circuits}")
 
-        # determine regions
-        # __________________
-        # for all nets
-        #    for all layers
-        #       region
+        #----------------------------------------------------------------------------------------
         layer2net2regions = defaultdict(dict)
         net2layer2regions = defaultdict(dict)
         layer_by_name: Dict[LayerName, process_stack_pb2.ProcessStackInfo.LayerInfo] = {}
 
         layer_regions_by_name: Dict[LayerName, kdb.Region] = {}
         all_region = kdb.Region()
+        regions_below_layer: Dict[LayerName, kdb.Region] = {}
 
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
+            gds_pair = self.gds_pair(layer_name)
+            canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+
             all_layer_shapes = self.shapes_of_layer(layer_name) or kdb.Region()
-            layer_regions_by_name[layer_name] = all_layer_shapes
+            layer_regions_by_name[canonical_layer_name] = all_layer_shapes
+            regions_below_layer[canonical_layer_name] = all_region.dup()
             all_region += all_layer_shapes
 
             for net in circuit.each_net():
@@ -99,11 +100,11 @@ class RCExtractor:
 
                 shapes = self.shapes_of_net(layer_name=layer_name, net=net)
                 if shapes:
-                    gds_pair = self.gds_pair(layer_name)
-                    canonical_layer_name = self.tech_info.layer_info_by_gds_pair.get(gds_pair).name
                     layer2net2regions[canonical_layer_name][net_name] = shapes
                     net2layer2regions[net_name][canonical_layer_name] = shapes
                     layer_by_name[canonical_layer_name] = metal_layer
+
+        #----------------------------------------------------------------------------------------
 
         space_markers = all_region.space_check(
             round(self.tech_info.tech.extraction.side_halo / dbu),  # min space in um
@@ -197,10 +198,7 @@ class RCExtractor:
                             continue
 
                         area_shapes_unshielded = shapes.dup()
-                        for shielding_layer_name, shielding_region in layer_regions_by_name.items():
-                            if layer_name == shielding_layer_name:
-                                break
-                            area_shapes_unshielded -= shielding_region
+                        area_shapes_unshielded -= regions_below_layer[layer_name]
 
                         # (1) SUBSTRATE CAPACITANCE
                         # area caps ... aF/µm^2
