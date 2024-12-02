@@ -182,6 +182,123 @@ class FasterCapModelBuilder:
         return gen
 
 
+@dataclass(frozen=True)
+class HDielKey:
+    outside: Optional[str]
+    inside: Optional[str]
+
+    def __str__(self) -> str:
+        return f"{self.outside or 'void'} <-> {self.inside or 'void'}"
+
+    @property
+    def topic(self) -> str:
+        return 'dielectric'
+
+    def reversed(self) -> HDielKey:
+        return HDielKey(self.inside, self.outside)
+
+
+@dataclass(frozen=True)
+class HCondKey:
+    net_name: str
+    outside: Optional[str]
+
+    def __str__(self) -> str:
+        return f"{self.outside or 'void'} <-> {self.net_name}"
+
+    @property
+    def topic(self) -> str:
+        return 'conductor'
+
+
+@dataclass(frozen=True)
+class VKey:
+    kk: HDielKey | HCondKey
+    p0: kdb.DPoint
+    de: kdb.DVector
+
+
+@dataclass(frozen=True)
+class Point:
+    x: float
+    y: float
+    z: float
+
+    def __sub__(self, other: Point) -> Point:
+        return Point(self.x - other.x, self.y - other.y, self.z - other.z)
+
+    def sq_length(self) -> float:
+        return self.x**2 + self.y**2 + self.z**2
+
+    def to_fastcap(self) -> str:
+        return '%.12g %.12g %.12g' % (self.x, self.y, self.z)
+
+
+def vector_product(a: Point, b: Point) -> Point:
+    vp = Point(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    )
+    return vp
+
+
+def dot_product(a: Point, b: Point) -> float:
+    dp = a.x * b.x + a.y * b.y + a.z * b.z
+    return dp
+
+
+@dataclass(frozen=True)
+class Triangle:
+    p0: Point
+    p1: Point
+    p2: Point
+
+    def reversed(self) -> Triangle:
+        return Triangle(self.p2, self.p1, self.p0)
+
+    def outside_reference_point(self) -> Point:
+        v1 = self.p1 - self.p0
+        v2 = self.p2 - self.p0
+        vp = Point(v1.y  * v2.z - v1.z * v2.y,
+                   -v1.x * v2.z + v1.z * v2.x,
+                   v1.x  * v2.y - v1.y * v2.x)
+        vp_abs = math.sqrt(vp.x ** 2 + vp.y ** 2 + vp.z ** 2)
+        rp = Point(self.p0.x + vp.x / vp_abs,
+                   self.p0.y + vp.y / vp_abs,
+                   self.p0.z + vp.z / vp_abs)
+        return rp
+
+    def to_fastcap(self) -> str:
+        return ' '.join([p.to_fastcap() for p in (self.p0, self.p1, self.p2)])
+
+    def __len__(self):
+        return 3
+
+    def __getitem__(self, i) -> Point:
+        match i:
+            case 0: return self.p0
+            case 1: return self.p1
+            case 2: return self.p2
+            case _: raise IndexError("list index out of range")
+
+
+@dataclass(frozen=True)
+class Edge:
+    p0: Point
+    p1: Point
+
+    def vector_of_edge(self) -> Point:
+        return Point(
+            self.p1.x - self.p0.x,
+            self.p1.y - self.p0.y,
+            self.p1.z - self.p0.z
+        )
+
+    def reversed(self) -> Edge:
+        return Edge(self.p1, self.p0)
+
+
 @dataclass
 class FasterCapModelGenerator:
     dbu: float
@@ -226,10 +343,10 @@ class FasterCapModelGenerator:
         self.layers_out: Dict[str, kdb.Region] = {}
         self.state: Dict[str, kdb.Region] = {}
         self.current: Dict[str, List[kdb.Region]] = {}
-        self.diel_data: Dict[Tuple[Optional[str], Optional[str]], List[Tuple[float, float, float]]] = {}
-        self.diel_vdata: Dict[Tuple[Optional[str], Optional[str], kdb.DPoint, kdb.DVector], kdb.Region] = {}
-        self.cond_data: Dict[Tuple[Optional[str], Optional[str]], List[Tuple[float, float, float]]] = {}
-        self.cond_vdata: Dict[Tuple[Optional[str], Optional[str], kdb.DPoint, kdb.DVector], kdb.Region] = {}
+        self.diel_data: Dict[HDielKey, List[Triangle]] = {}
+        self.diel_vdata: Dict[VKey, kdb.Region] = {}
+        self.cond_data: Dict[HCondKey, List[Triangle]] = {}
+        self.cond_vdata: Dict[VKey, kdb.Region] = {}
 
     def reset(self):
         self.layers_in = {}
@@ -408,11 +525,11 @@ class FasterCapModelGenerator:
                                 d = loutside & linside
                                 for e in d:
                                     # NOTE: we need to swap points as we started from "outside"
-                                    self.generate_vdiel(left=mno, right=mni, edge=e.swapped_points())
+                                    self.generate_vdiel(outside=mno, inside=mni, edge=e.swapped_points())
                             linside -= loutside
 
                 for e in linside:
-                    self.generate_vdiel(left=None, right=mni, edge=e)
+                    self.generate_vdiel(outside=None, inside=mni, edge=e)
 
         for nn in self.net_names:
             mk = f"+{nn}"
@@ -426,10 +543,10 @@ class FasterCapModelGenerator:
                         d = loutside & linside
                         for e in d:
                             # NOTE: we need to swap points as we started from "outside"
-                            self.generate_vcond(net_name=nn, left=mno, edge=e.swapped_points())
+                            self.generate_vcond(net_name=nn, outside=mno, edge=e.swapped_points())
                         linside -= loutside
                 for e in linside:
-                    self.generate_vcond(net_name=nn, left=None, edge=e)
+                    self.generate_vcond(net_name=nn, outside=None, edge=e)
 
         self.z = z
 
@@ -437,31 +554,24 @@ class FasterCapModelGenerator:
                        below: Optional[str],
                        above: Optional[str],
                        layer: kdb.Region):
-        debug(f"Generating horizontal dielectric surface "
-              f"{below if below else '(void)'} <-> {above if above else '(void)'} "
-              f"as {layer}")
-        k = (below, above)
+        k = HDielKey(below, above)
+        debug(f"Generating horizontal dielectric surface {k} as {layer}")
         if k not in self.diel_data:
             self.diel_data[k] = []
         data = self.diel_data[k]
 
         for t in layer.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
             # NOTE: normal is facing downwards (to "below")
-            tri = list(map(lambda pt: (pt.x * self.dbu, pt.y * self.dbu, self.z),
+            pl = list(map(lambda pt: Point(pt.x * self.dbu, pt.y * self.dbu, self.z),
                            t.each_point_hull()))
+            tri = Triangle(*pl)
             data.append(tri)
             debug(f"  {tri}")
 
-    def generate_vdiel(self,
-                       left: Optional[str],
-                       right: Optional[str],
-                       edge: kdb.Edge):
-        debug(f"Generating vertical dielectric surface "
-              f"{left if left else '(void)'} <-> {right if right else '(void)'} "
-              f"with edge {edge}")
-
-        if edge.is_degenerate():
-            return
+    def generate_v_surface(self,
+                           kk: HDielKey | HCondKey,
+                           edge: kdb.Edge) -> Tuple[VKey, kdb.Box]:
+        debug(f"Generating vertical {kk.topic} surface {kk}  with edge {edge}")
 
         el = math.sqrt(edge.sq_length())
         de = kdb.DVector(edge.d().x / el, edge.d().y / el)
@@ -469,31 +579,43 @@ class FasterCapModelGenerator:
         p0 = ne * ne.sprod(kdb.DPoint(edge.p1) - kdb.DPoint()) + kdb.DPoint()
         x1 = (edge.p1 - p0).sprod(de)
         x2 = (edge.p2 - p0).sprod(de)
-        k = (left, right, p0, de)
-        if k not in self.diel_vdata:
-            self.diel_vdata[k] = kdb.Region()
 
-        self.diel_vdata[k].insert(kdb.Box(x1,
-                                          math.floor(self.z / self.dbu + 0.5),
-                                          x2,
-                                          math.floor(self.zz / self.dbu + 0.5)))
+        key = VKey(kk, p0, de)
+        surface = kdb.Box(x1,
+                          math.floor(self.z / self.dbu + 0.5),
+                          x2,
+                          math.floor(self.zz / self.dbu + 0.5))
+        return key, surface
+
+    def generate_vdiel(self,
+                       outside: Optional[str],
+                       inside: Optional[str],
+                       edge: kdb.Edge):
+        if edge.is_degenerate():
+            return
+
+        key, surface = self.generate_v_surface(HDielKey(outside, inside), edge)
+        if key not in self.diel_vdata:
+            self.diel_vdata[key] = kdb.Region()
+
+        self.diel_vdata[key].insert(surface)
 
     def generate_hcond_in(self,
                           net_name: str,
                           below: Optional[str],
                           layer: kdb.Region):
-        debug(f"Generating horizontal bottom conductor surface "
-              f"{below if below else '(void)'} <-> {net_name} as {layer}")
+        k = HCondKey(net_name, below)
+        debug(f"Generating horizontal bottom conductor surface {k} as {layer}")
 
-        k = (net_name, below)
         if k not in self.cond_data:
             self.cond_data[k] = []
         data = self.cond_data[k]
 
         for t in layer.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
             # NOTE: normal is facing downwards (to "below")
-            tri = list(map(lambda pt: [pt.x * self.dbu, pt.y * self.dbu, self.z],
+            pl = list(map(lambda pt: Point(pt.x * self.dbu, pt.y * self.dbu, self.z),
                            t.each_point_hull()))
+            tri = Triangle(*pl)
             data.append(tri)
             debug(f"  {tri}")
 
@@ -501,107 +623,82 @@ class FasterCapModelGenerator:
                            net_name: str,
                            above: Optional[str],
                            layer: kdb.Region):
-        debug(f"Generating horizontal top conductor surface {net_name} <-> "
-              f"{above if above else '(void)'} as {layer}")
+        k = HCondKey(net_name, above)
+        debug(f"Generating horizontal top conductor surface {k} as {layer}")
 
-        k = (net_name, above)
         if k not in self.cond_data:
             self.cond_data[k] = []
         data = self.cond_data[k]
 
         for t in layer.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
             # NOTE: normal is facing downwards (into conductor)
-            tri = list(map(lambda pt: [pt.x * self.dbu, pt.y * self.dbu, self.z],
+            pl = list(map(lambda pt: Point(pt.x * self.dbu, pt.y * self.dbu, self.z),
                            t.each_point_hull()))
+            tri = Triangle(*pl)
             # now it is facing outside (to "above")
-            tri.reverse()
+            tri = tri.reversed()
             data.append(tri)
             debug(f"  {tri}")
 
     def generate_vcond(self,
                        net_name: str,
-                       left: Optional[str],
+                       outside: Optional[str],
                        edge: kdb.Edge):
-        debug(f"Generating vertical conductor surface {net_name} <-> "
-              f"{left if left else '(void)'} with edge {edge}")
-
         if edge.is_degenerate():
             return
 
-        el = math.sqrt(edge.sq_length())
-        de = kdb.DVector(edge.d().x / el, edge.d().y / el)
-        ne = kdb.DVector(edge.d().y / el, -edge.d().x / el)
-        p0 = ne * ne.sprod(kdb.DPoint(edge.p1) - kdb.DPoint()) + kdb.DPoint()
-        x1 = (edge.p1 - p0).sprod(de)
-        x2 = (edge.p2 - p0).sprod(de)
-        k = (net_name, left, p0, de)
-        if k not in self.cond_vdata:
-            self.cond_vdata[k] = kdb.Region()
+        key, surface = self.generate_v_surface(HCondKey(net_name, outside), edge)
+        if key not in self.cond_vdata:
+            self.cond_vdata[key] = kdb.Region()
 
-        self.cond_vdata[k].insert(kdb.Box(x1,
-                                          math.floor(self.z / self.dbu + 0.5),
-                                          x2,
-                                          math.floor(self.zz / self.dbu + 0.5)))
+        self.cond_vdata[key].insert(surface)
+
+    def triangulate(self, p0: kdb.DPoint, de: kdb.DVector, region: kdb.Region, data: List[Triangle]):
+        def convert_point(pt: kdb.Point) -> Point:
+            pxy = (p0 + de * pt.x) * self.dbu
+            pz = pt.y * self.dbu
+            return Point(pxy.x, pxy.y, pz)
+
+        for t in region.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
+            # NOTE: normal is facing outwards (to "left")
+            pl = list(map(convert_point, t.each_point_hull()))
+            tri = Triangle(*pl)
+            # now it is facing outside (to "above")
+            data.append(tri)
+            debug(f"  {tri}")
 
     def finalize(self):
         for k, r in self.diel_vdata.items():
-            left, right, p0, de = k
-            debug(f"Finishing vertical dielectric plane "
-                  f"{left if left else '(void)'} <-> {right if right else '(void)'} "
-                  f"at {p0}/{de}")
+            debug(f"Finishing vertical dielectric plane {k.kk} at {k.p0}/{k.de}")
 
-            kk = (left, right)
-            if kk not in self.diel_data:
-                self.diel_data[kk] = []
-            data = self.diel_data[kk]
+            if k.kk not in self.diel_data:
+                self.diel_data[k.kk] = []
+            data = self.diel_data[k.kk]
 
-            def convert_point(pt) -> Tuple[float, float, float]:
-                pxy = (p0 + de * pt.x) * self.dbu
-                pz = pt.y * self.dbu
-                return pxy.x, pxy.y, pz
-
-            for t in r.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
-                # NOTE: normal is facing outwards (to "left")
-                tri = list(map(convert_point, t.each_point_hull()))
-                # now it is facing outside (to "above")
-                data.append(tri)
-                debug(f"  {tri}")
+            self.triangulate(p0=k.p0, de=k.de, region=r, data=data)
 
         for k, r in self.cond_vdata.items():
-            net_name, left, p0, de = k
-            debug(f"Finishing vertical conductor plane "
-                  f"{net_name} <-> {left if left else '(void)'} at {p0} / {de}")
-            kk = (net_name, left)
-            if kk not in self.cond_data:
-                self.cond_data[kk] = []
-            data = self.cond_data[kk]
+            debug(f"Finishing vertical conductor plane {k.kk} at {k.p0} / {k.de}")
 
-            def convert_point(pt) -> Tuple[float, float, float]:
-                pxy = (p0 + de * pt.x) * self.dbu
-                pz = pt.y * self.dbu
-                return pxy.x, pxy.y, pz
+            if k.kk not in self.cond_data:
+                self.cond_data[k.kk] = []
+            data = self.cond_data[k.kk]
 
-            for t in r.delaunay(self.delaunay_amax / self.dbu ** 2, self.delaunay_b):
-                # NOTE: normal is facing outwards (to "left")
-                tri = list(map(convert_point, t.each_point_hull()))
-                # now it is facing outside (to "above")
-                data.append(tri)
-                debug(f"  {tri}")
+            self.triangulate(p0=k.p0, de=k.de, region=r, data=data)
 
-        dk: Dict[Tuple[Optional[str], Optional[str]], List[Tuple[float, float, float]]] = {}
+        dk: Dict[HDielKey, List[Triangle]] = {}
 
         for k in self.diel_data.keys():
-            kk = (k[1], k[0])
+            kk = k.reversed()
             if kk not in dk:
                 dk[k] = []
             else:
-                debug(f"Combining dielectric surfaces "
-                      f"{kk[0] if kk[0] else 'void'} <-> {kk[1] if kk[1] else 'void'} with reverse")
+                debug(f"Combining dielectric surfaces {kk} with reverse")
 
         for k, v in self.diel_data.items():
-            kk = (k[1], k[0])
+            kk = k.reversed()
             if kk in dk:
-                dk[kk] += list(map(lambda t: list(reversed(t)), v))
+                dk[kk] += list(map(lambda t: t.reversed(), v))
             else:
                 dk[k] += v
 
@@ -620,17 +717,12 @@ class FasterCapModelGenerator:
 
             file_num += 1
 
-            outside, inside = k
-
-            k_outside = self.materials[outside] if outside else self.k_void
-            k_inside = self.materials[inside] if inside else self.k_void
-
-            outside = outside if outside else '(void)'
-            inside = inside if inside else '(void)'
+            k_outside = self.materials[k.outside] if k.outside else self.k_void
+            k_inside = self.materials[k.inside] if k.inside else self.k_void
 
             # lst_file.append(f"* Dielectric interface: outside={outside}, inside={inside}")
 
-            fn = f"{prefix}{file_num}_outside={outside}_inside={inside}.geo"
+            fn = f"{prefix}{file_num}_outside={k.outside or '(void)'}_inside={k.inside or '(void)'}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(output_path=output_path,
                                       data=data,
@@ -640,14 +732,8 @@ class FasterCapModelGenerator:
 
             # compute one reference point "outside"
             t0 = data[0]
-            v1: List[float] = list(map(lambda i: t0[1][i] - t0[0][i], (0, 1, 2)))
-            v2: List[float] = list(map(lambda i: t0[2][i] - t0[0][i], (0, 1, 2)))
-            vp = [v1[1] * v2[2] - v1[2] * v2[1],
-                  -v1[0] * v2[2] + v1[2] * v2[0],
-                  v1[0] * v2[1] - v1[1] * v2[0]]
-            vp_abs = math.sqrt(vp[0] ** 2 + vp[1] ** 2 + vp[2] ** 2)
-            rp: List[float] = list(map(lambda i: t0[0][i] + vp[i] / vp_abs, (0, 1, 2)))
-            rp_s = ' '.join(map(lambda c: f"{'%.12g' % c}", rp))
+            rp = t0.outside_reference_point()
+            rp_s = rp.to_fastcap()
             lst_file.append(f"D {fn} {'%.12g' % k_outside} {'%.12g' % k_inside} 0 0 0 {rp_s}")
 
         #
@@ -664,10 +750,10 @@ class FasterCapModelGenerator:
         # - reference points
         #
         cond_data_grouped_by_net = defaultdict(list)
-        for (nn, outside), data in self.cond_data.items():
+        for k, data in self.cond_data.items():
             if len(data) == 0:
                 continue
-            cond_data_grouped_by_net[nn].append((outside, data))
+            cond_data_grouped_by_net[k.net_name].append((k.outside, data))
 
         cond_num = file_num
 
@@ -678,7 +764,7 @@ class FasterCapModelGenerator:
                 file_num += 1
                 k_outside = self.materials[outside] if outside else self.k_void
 
-                outside = outside if outside else '(void)'
+                outside = outside or '(void)'
                 # lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
                 fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
                 if len(fn) > max_filename_length:
@@ -706,7 +792,7 @@ class FasterCapModelGenerator:
 
     @staticmethod
     def _write_fastercap_geo(output_path: str,
-                             data: List[Tuple[float, float, float]],
+                             data: List[Triangle],
                              cond_number: int,
                              cond_name: Optional[str],
                              rename_conductor: bool):
@@ -715,8 +801,7 @@ class FasterCapModelGenerator:
             f.write(f"0 GEO File\n")
             for t in data:
                 f.write(f"T {cond_number}")
-                for p in t:
-                    f.write(' ' + ' '.join(map(lambda c: '%.12g' % c, p)))
+                f.write(' ' + t.to_fastcap())
                 f.write('\n')
             if cond_name and rename_conductor:
                 f.write(f"N {cond_number} {cond_name}\n")
@@ -740,10 +825,10 @@ class FasterCapModelGenerator:
         else:
             info(f"  {errors} error{'s' if errors >= 2 else ''} found")
 
-    def _check_tris(self, msg: str, triangles: List[Tuple[float, float, float]]) -> int:
+    def _check_tris(self, msg: str, triangles: List[Triangle]) -> int:
         errors = 0
 
-        edge_set: set[Tuple[Tuple[float, float, float], Tuple[float, float, float]]] = set()
+        edge_set: Set[Edge] = set()
         edges = self._normed_edges(triangles)
 
         for e in edges:
@@ -756,115 +841,88 @@ class FasterCapModelGenerator:
         self._split_edges(edge_set)
 
         for e in edge_set:
-            if reversed(e) in edge_set:
+            if e.reversed() not in edge_set:
                 error(f"{msg}: edge {self._edge2s(e)} not connected with reverse edge (open surface)")
                 errors += 1
 
         return errors
 
-    def _normed_edges(self, triangles: List[Tuple[float, float, float]]) -> List[Tuple[Tuple[float, float, float], Tuple[float, float, float]]]:
+    def _normed_edges(self, triangles: List[Triangle]) -> List[Edge]:
         edges = []
+
+        def normed_dbu(p: Point):
+            return Point(*tuple(map(lambda c: math.floor(c / self.dbu + 0.5),
+                                    (p.x, p.y, p.z))))
 
         for t in triangles:
             for i in range(0, 3):
-                p1 = t[i]
-                p2 = t[(i + 1) % 3]
-                p1 = tuple(map(lambda c: math.floor(c / self.dbu + 0.5), p1))
-                p2 = tuple(map(lambda c: math.floor(c / self.dbu + 0.5), p2))
-                edges.append((p1, p2))
+                p1 = normed_dbu(t[i])
+                p2 = normed_dbu(t[(i + 1) % 3])
+                edges.append(Edge(p1, p2))
 
         return edges
 
+    def _point2s(self, p: Point) -> str:
+        return f"(%.12g, %.12g, %.12g)" % (p.x * self.dbu, p.y * self.dbu, p.z * self.dbu)
+
+    def _edge2s(self, e: Edge) -> str:
+        return f"{self._point2s(e.p0)}-{self._point2s(e.p1)}"
+
     @staticmethod
-    def _vector_of_edge(e: Tuple[Tuple[float, float, float], Tuple[float, float, float]]) -> Tuple[float, float, float]:
-        return (
-            e[1][0] - e[0][0],
-            e[1][1] - e[0][2],
-            e[1][2] - e[0][2]
-        )
-
-    def _point2s(self, p: Tuple[float, float, float]) -> str:
-        return f"(%.12g, %.12g, %.12g)" % (p[0] * self.dbu, p[1] * self.dbu, p[2] * self.dbu)
-
-    def _edge2s(self, e: Tuple[Tuple[float, float, float], Tuple[float, float, float]]) -> str:
-        return f"{self._point2s(e[0])}-{self._point2s(e[1])}"
-
-    def _is_antiparallel(self,
-                         a: Tuple[float, float, float],
-                         b: Tuple[float, float, float]) -> bool:
-        # cross product
-        vp: Tuple[float, float, float] = (
-            a[1] * b[2] - a[2] * b[1],
-            a[2] * b[0] - a[0] * b[2],
-            a[0] * b[1] - a[1] * b[0],
-        )
-
-        if abs(self._sq_length(vp)) > 0.5:  # we got normalized!
+    def _is_antiparallel(a: Point,
+                         b: Point) -> bool:
+        vp = vector_product(a, b)
+        if abs(vp.sq_length()) > 0.5:  # we got normalized!
             return False
 
-        # dot product
-        sp = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+        sp = dot_product(a, b)
         return sp < 0
 
-    @staticmethod
-    def _sq_length(edge: Tuple[float, float, float]) -> float:
-        return edge[0]**2 + edge[1]**2 + edge[2]**2
-
-    def _split_edges(self, edges: set[Tuple[Tuple[float, float, float], Tuple[float, float, float]]]):
-        edges_by_p2: Dict = {}
-        edges_by_p1: Dict = {}
+    def _split_edges(self, edges: set[Edge]):
+        edges_by_p2: DefaultDict[Point, List[Edge]] = defaultdict(list)
+        edges_by_p1: DefaultDict[Point, List[Edge]] = defaultdict(list)
         for e in edges:
-            if e[1] not in edges_by_p2:
-                edges_by_p2[e[1]] = []
-            edges_by_p2[e[1]].append(e)
-            if e[0] not in edges_by_p1:
-                edges_by_p1[e[0]] = []
-            edges_by_p1[e[0]].append(e)
+            edges_by_p2[e.p1].append(e)
+            edges_by_p1[e.p0].append(e)
 
+        i = 0
         while True:
-            subst: Dict = {}
+            i += 1
+            subst: DefaultDict[Edge, List[Edge]] = defaultdict(list)
 
             for e in edges:
-                ee = edges_by_p2.get(e[0], [])
+                ee = edges_by_p2.get(e.p0, [])
                 for eee in ee:
-                    ve = self._vector_of_edge(e)
-                    veee = self._vector_of_edge(eee)
+                    ve = e.vector_of_edge()
+                    veee = eee.vector_of_edge()
                     if self._is_antiparallel(ve, veee) and \
-                       self._sq_length(veee) < self._sq_length(ve) - 0.5:
+                       (veee.sq_length() < ve.sq_length() - 0.5):
                         # There is a shorter edge antiparallel ->
                         # this means we need to insert a split point into e
-                        if e not in subst:
-                            subst[e] = []
-                        subst[e].append(((e[0], ee[0]), (ee[0], e[1])))
+                        subst[e] += [Edge(e.p0, eee.p0), Edge(eee.p0, e.p1)]
 
             for e in edges:
-                ee = edges_by_p1.get(e[1], [])
+                ee = edges_by_p1.get(e.p1, [])
                 for eee in ee:
-                    ve = self._vector_of_edge(e)
-                    veee = self._vector_of_edge(eee)
+                    ve = e.vector_of_edge()
+                    veee = eee.vector_of_edge()
                     if self._is_antiparallel(ve, veee) and \
-                       self._sq_length(veee) < self._sq_length(ve) - 0.5:
+                       (veee.sq_length() < ve.sq_length() - 0.5):
                         # There is a shorter edge antiparallel ->
                         # this means we need to insert a split point into e
-                        if e not in subst:
-                            subst[e] = []
-                        subst[e].append(((e[0], ee[1]), (ee[1], e[1])))
+                        subst[e] += [Edge(e.p0, eee.p1), Edge(eee.p1, e.p1)]
 
             if len(subst) == 0:
                 break
 
             for e, replacement in subst.items():
-                edges_by_p1[e[0]].remove(e)
-                edges_by_p2[e[1]].remove(e)
+                edges_by_p1[e.p0].remove(e)
+                edges_by_p2[e.p1].remove(e)
                 edges.remove(e)
                 for r in replacement:
                     edges.add(r)
-                    if r[0] not in edges_by_p1:
-                        edges_by_p1[r[0]] = []
-                    edges_by_p1[r[0]].append(r)
-                    if r[1] not in edges_by_p2:
-                        edges_by_p2[r[1]] = []
-                    edges_by_p2[r[1]].append(r)
+                    edges_by_p1[r.p0].append(r)
+                    edges_by_p2[r.p1].append(r)
 
     def dump_stl(self, output_dir_path: str, prefix: str):
         for mn in self.materials.keys():
@@ -879,7 +937,7 @@ class FasterCapModelGenerator:
 
     @staticmethod
     def _write_as_stl(file_name: str,
-                      tris: List[Tuple[float, float, float]]):
+                      tris: List[Triangle]):
         if len(tris) == 0:
             return
 
@@ -889,10 +947,9 @@ class FasterCapModelGenerator:
             for t in tris:
                 f.write("  facet normal 0 0 0\n")
                 f.write("    outer loop\n")
-                t = list(t)
-                t.reverse()
-                for p in t:
-                    f.write("   vertex %.12g %.12g %.12g\n" % tuple(p))
+                t = t.reversed()
+                for p in (t.p0, t.p1, t.p2):
+                    f.write(f"   vertex {p.to_fastcap()}\n")
                 f.write("  endloop\n")
                 f.write(" endfacet\n")
             f.write("endsolid stl\n")
@@ -931,27 +988,24 @@ class FasterCapModelGenerator:
         lout = past - pyra[0]
         return lin, lout, pyra[0]
 
-    def _collect_diel_tris(self, material_name: str) -> List[Tuple[float, float, float]]:
+    def _collect_diel_tris(self, material_name: str) -> List[Triangle]:
         tris = []
 
         for k, v in self.diel_data.items():
-            outside, inside = k
-            if material_name == outside:
+            if material_name == k.outside:
                 tris += v
-            elif material_name == inside:
-                tris += list(map(lambda t: list(reversed(t)), v))
+            elif material_name == k.inside:
+                tris += [t.reversed() for t in v]
 
         for k, v in self.cond_data.items():
-            nn, outside = k
-            if material_name == outside:
+            if material_name == k.outside:
                 tris += v
 
         return tris
 
-    def _collect_cond_tris(self, net_name: str) -> List[Tuple[float, float, float]]:
+    def _collect_cond_tris(self, net_name: str) -> List[Triangle]:
         tris = []
         for k, v in self.cond_data.items():
-            nn, outside = k
-            if nn == net_name:
-                tris += list(map(lambda t: list(reversed(t)), v))
+            if k.net_name == net_name:
+                tris += [t.reversed() for t in v]
         return tris
