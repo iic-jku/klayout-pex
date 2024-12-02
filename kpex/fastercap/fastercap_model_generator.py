@@ -675,6 +675,7 @@ class FasterCapModelGenerator:
             title = f"0 file #{file_number}"
             if cond_name:
                 title += f" (net {cond_name}"
+            title += '\n'
             f.write(title)
             for t in data:
                 f.write(f"T {file_number}")
