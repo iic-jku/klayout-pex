@@ -625,7 +625,7 @@ class FasterCapModelGenerator:
 
             lst_file.append(f"* Dielectric interface: outside={outside}, inside={inside}")
 
-            fn = f"{prefix}_{file_num}_outside={outside}_inside={inside}.geo"
+            fn = f"{prefix}{file_num}_outside={outside}_inside={inside}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
                                       output_path=output_path,
@@ -654,7 +654,7 @@ class FasterCapModelGenerator:
 
             outside = outside if outside else '(void)'
             lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
-            fn = f"{prefix}_{file_num}_outside={outside}_net={nn}.geo"
+            fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
                                       output_path=output_path,
@@ -833,12 +833,12 @@ class FasterCapModelGenerator:
     def dump_stl(self, output_dir_path: str, prefix: str):
         for mn in self.materials.keys():
             tris = self._collect_diel_tris(mn)
-            output_path = os.path.join(output_dir_path, f"{prefix}_diel_{mn}.stl")
+            output_path = os.path.join(output_dir_path, f"{prefix}diel_{mn}.stl")
             self._write_as_stl(output_path, tris)
 
         for nn in self.net_names:
             tris = self._collect_cond_tris(nn)
-            output_path = os.path.join(output_dir_path, f"{prefix}_cond_{nn}.stl")
+            output_path = os.path.join(output_dir_path, f"{prefix}cond_{nn}.stl")
             self._write_as_stl(output_path, tris)
 
     @staticmethod

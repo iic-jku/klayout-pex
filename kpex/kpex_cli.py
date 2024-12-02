@@ -221,7 +221,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
     faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
     os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
-    lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input')
+    lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
 
     geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
     os.makedirs(geometry_dir_path, exist_ok=True)
