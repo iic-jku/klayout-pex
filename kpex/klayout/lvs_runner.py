@@ -44,7 +44,7 @@ class LVSRunner:
             '-rd', 'verbose=true',
             '-rd', 'schematic_simplify=false',
             '-rd', 'net_only=false',
-            '-rd', 'top_lvl_pins=false',
+            '-rd', 'top_lvl_pins=true',
             '-rd', 'combine=false',
             '-rd', 'combine_devices=false', # IHP
             '-rd', 'purge=false',
