@@ -18,7 +18,7 @@ from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .klayout.lvs_runner import LVSRunner
-from .klayout.lvsdb_extractor import KLayoutExtractionContext
+from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_reducer import NetlistReducer
@@ -480,18 +480,38 @@ def main():
     gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_internal.gds.gz")
     pex_context.lvsdb.internal_layout().write(gds_path)
 
-    if len(pex_context.unnamed_layers) >= 1:
+    def dump_layers(cell: str,
+                    layers: List[KLayoutExtractedLayerInfo],
+                    layout_dump_path: str):
         layout = kdb.Layout()
         layout.dbu = lvsdb.internal_layout().dbu
 
-        top_cell = layout.create_cell("TOP")
-        for ulyr in pex_context.unnamed_layers:
+        top_cell = layout.create_cell(cell)
+        for ulyr in layers:
             li = kdb.LayerInfo(*ulyr.gds_pair)
+            li.name = ulyr.lvs_layer_name
             layer = layout.insert_layer(li)
             layout.insert(top_cell.cell_index(), layer, ulyr.region.dup())
 
-        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_unnamed_LVS_layers.gds.gz")
         layout.write(layout_dump_path)
+
+    if len(pex_context.unnamed_layers) >= 1:
+        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_unnamed_LVS_layers.gds.gz")
+        dump_layers(cell=args.cell_name,
+                    layers=pex_context.unnamed_layers,
+                    layout_dump_path=layout_dump_path)
+
+    if len(pex_context.extracted_layers) >= 1:
+        layout_dump_path = os.path.join(args.output_dir_path, f"{args.cell_name}_nonempty_LVS_layers.gds.gz")
+        nonempty_layers = [l \
+                           for layers in pex_context.extracted_layers.values() \
+                           for l in layers.source_layers]
+        dump_layers(cell=args.cell_name,
+                    layers=nonempty_layers,
+                    layout_dump_path=layout_dump_path)
+    else:
+        error("No extracted layers found")
+        sys.exit(1)
 
     if args.run_fastcap or args.run_fastercap:
         lst_file = build_fastercap_input(args=args,
