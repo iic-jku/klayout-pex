@@ -272,7 +272,7 @@ class RCExtractor:
         side_halo_dbu = int(side_halo_um / dbu) + 1  # add 1 nm to halo
 
         space_markers = all_region.space_check(
-            int(side_halo_um / dbu),  # min space in um
+            side_halo_dbu,  # min space in um
             True,  # whole edges
             kdb.Metrics.Projection,  # metrics
             None,  # ignore angle
@@ -419,7 +419,7 @@ class RCExtractor:
 
                             rdb_output(rdb_cat_sw_nets, f"Edge Pair {idx}: {round(cap_femto, 3)} fF", pair)
 
-                            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
+                            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)} fF")
 
                             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
                             sw_cap = SidewallCap(key=swk,
@@ -772,8 +772,8 @@ class RCExtractor:
 
                         info(f"(Substrate) {layer_name}({net1})-substrate: "
                              f"area {area} µm^2, perimeter {perimeter}, "
-                             f"cap_area {round(cap_area_femto, 2)}fF, "
-                             f"cap_peri {round(cap_perimeter_femto, 2)}fF, "
-                             f"sum {round(cap_area_femto + cap_perimeter_femto, 2)}fF")
+                             f"cap_area {round(cap_area_femto, 2)} fF, "
+                             f"cap_peri {round(cap_perimeter_femto, 2)} fF, "
+                             f"sum {round(cap_area_femto + cap_perimeter_femto, 2)} fF")
 
         return extraction_results
