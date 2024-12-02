@@ -1,14 +1,16 @@
 #! /usr/bin/env python3
 import math
+from asyncio import shield
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import *
 
 import klayout.db as kdb
 import klayout.rdb as rdb
-from gdstk import inside
-from klayout.dbcore import CplxTrans
+from shapely.measurement import distance
+from solid import polygon
 
+import extract_pb2
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
 from ..log import (
     console,
@@ -24,6 +26,69 @@ import process_stack_pb2
 
 NetName = str
 LayerName = str
+CellName = str
+
+
+CoupleKey = Tuple[NetName, NetName]
+
+EdgeInterval = Tuple[float, float]
+ChildIndex = int
+EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.Polygon]]]]
+
+
+@dataclass
+class NodeRegion:
+    layer_name: LayerName
+    net_name: NetName
+    cap_to_gnd: float
+    perimeter: float
+    area: float
+
+
+@dataclass(frozen=True)
+class SidewallKey:
+    layer: LayerName
+    net1: NetName
+    net2: NetName
+
+
+@dataclass
+class SidewallCap:  # see Magic EdgeCap, extractInt.c L444
+    key: SidewallKey
+    cap_value: float   # femto farad
+    distance: float    # distance in µm
+    length: float      # length in µm
+    tech_spec: extract_pb2.CapacitanceInfo.SidewallCapacitance
+
+
+@dataclass(frozen=True)
+class OverlapKey:
+    layer_top: LayerName
+    net_top: NetName
+    layer_bot: LayerName
+    net_bot: NetName
+
+
+@dataclass
+class OverlapCap:
+    key: OverlapKey
+    cap_value: float  # femto farad
+    shielded_area: float  # in µm^2
+    unshielded_area: float  # in µm^2
+    tech_spec: extract_pb2.CapacitanceInfo.OverlapCapacitance
+
+
+@dataclass
+class CellExtractionResults:
+    cell_name: CellName
+    # node_regions: Dict[NetName, NodeRegion] = field(default_factory=dict)
+    overlap_coupling: Dict[OverlapKey, OverlapCap] = field(default_factory=dict)
+    sidewall_table: Dict[SidewallKey, SidewallCap] = field(default_factory=dict)
+
+
+@dataclass
+class ExtractionResults:
+    cell_extraction_results: Dict[CellName, CellExtractionResults] = field(default_factory=dict)
 
 
 class RCExtractor:
@@ -64,13 +129,29 @@ class RCExtractor:
             debug(f"Nothing extracted for layer {layer_name}")
         return shapes
 
-    def extract(self):
+    def extract(self) -> ExtractionResults:
+        extraction_results = ExtractionResults()
+
+        # TODO: for now, we always flatten and have only 1 cell
+        cell_name = self.pex_context.top_cell.name
+        report = rdb.ReportDatabase(f"PEX {cell_name}")
+        cell_extraction_result = self.extract_cell(cell_name=cell_name, report=report)
+        extraction_results.cell_extraction_results[cell_name] = cell_extraction_result
+
+        report.save(self.report_path)
+
+        return extraction_results
+
+    def extract_cell(self,
+                     cell_name: CellName,
+                     report: rdb.ReportDatabase) -> CellExtractionResults:
         lvsdb = self.pex_context.lvsdb
         netlist: kdb.Netlist = lvsdb.netlist()
         dbu = self.pex_context.dbu
 
-        report = rdb.ReportDatabase(f"PEX {self.pex_context.top_cell.name}")
-        rdb_cell = report.create_cell(self.pex_context.top_cell.name)
+        extraction_results = CellExtractionResults(cell_name=cell_name)
+
+        rdb_cell = report.create_cell(cell_name)
         rdb_cat_common = report.create_category("Common")
         rdb_cat_sidewall = report.create_category("Sidewall")
         rdb_cat_overlap = report.create_category("Overlap")
@@ -82,7 +163,7 @@ class RCExtractor:
             rdb_cat = report.create_category(parent_category, category_name)
             report.create_items(rdb_cell.rdb_id(),  ## TODO: if later hierarchical mode is introduced
                                 rdb_cat.rdb_id(),
-                                CplxTrans(mag=dbu),
+                                kdb.CplxTrans(mag=dbu),
                                 shapes)
 
         def format_terminal(t: kdb.NetTerminalRef) -> str:
@@ -108,7 +189,7 @@ class RCExtractor:
         regions_below_and_including_layer: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
         all_layer_names: List[LayerName] = []
         layer_names_below: Dict[LayerName, List[LayerName]] = {}
-
+        shielding_layer_names: Dict[Tuple[LayerName, LayerName], List[LayerName]] = defaultdict(list)
         previous_layer_name: Optional[str] = None
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
@@ -121,6 +202,11 @@ class RCExtractor:
             if previous_layer_name != canonical_layer_name:
                 regions_below_layer[canonical_layer_name] += all_region
                 layer_names_below[canonical_layer_name] = list(all_layer_names)
+                for ln in all_layer_names:
+                    lp = (canonical_layer_name, ln)
+                    shielding_layer_names[lp] = [l for l in all_layer_names
+                                                 if l != ln and l not in layer_names_below[ln]]
+                    shielding_layer_names[ln, canonical_layer_name] = shielding_layer_names[lp]
                 all_layer_names.append(canonical_layer_name)
             all_region += all_layer_shapes
             regions_below_and_including_layer[canonical_layer_name] += all_region
@@ -158,7 +244,79 @@ class RCExtractor:
 
         rdb_output(rdb_cat_sidewall, "All Space Markers", space_markers)
 
-        # (1) SIDEWALL CAPACITANCE
+        shielded_regions_between_layers: Dict[Tuple[LayerName, LayerName], kdb.Region] = {}
+
+        #
+        # (1) OVERLAP CAPACITANCE
+        #
+        for top_layer_name in layer2net2regions.keys():
+            top_net2regions = layer2net2regions.get(top_layer_name, None)
+            if not top_net2regions:
+                continue
+
+            top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
+            if not top_overlap_specs:
+                warning(f"No overlap cap specified for layer top={top_layer_name}")
+                continue
+
+            rdb_cat_top_layer = report.create_category(rdb_cat_overlap, f"top_layer={top_layer_name}")
+
+            shapes_top_layer = layer_regions_by_name[top_layer_name]
+
+            for bot_layer_name in reversed(layer_names_below[top_layer_name]):
+                bot_net2regions = layer2net2regions.get(bot_layer_name, None)
+                if not bot_net2regions:
+                    continue
+
+                overlap_cap_spec = top_overlap_specs.get(bot_layer_name, None)
+                if not overlap_cap_spec:
+                    warning(f"No overlap cap specified for layer top={top_layer_name}/bottom={bot_layer_name}")
+                    continue
+
+                rdb_cat_bot_layer = report.create_category(rdb_cat_top_layer, f"bot_layer={bot_layer_name}")
+
+                shielded_region = kdb.Region()
+                shielding_layers = shielding_layer_names.get((top_layer_name, bot_layer_name), None)
+                if shielding_layers:
+                    for sl in shielding_layers:
+                        shielded_region += layer_regions_by_name[sl].__and__(shapes_top_layer)
+                shielded_regions_between_layers[(top_layer_name, bot_layer_name)] = shielded_region
+
+                rdb_output(rdb_cat_bot_layer, "shielded_region", shielded_region)
+
+                for net_top in top_net2regions.keys():
+                    shapes_top_net: kdb.Region = top_net2regions[net_top].dup()
+
+                    for net_bot in bot_net2regions.keys():
+                        shapes_bot_net: kdb.Region = bot_net2regions[net_bot]
+
+                        overlapping_shapes = shapes_top_net.__and__(shapes_bot_net)
+                        if overlapping_shapes:
+                            rdb_cat_nets = report.create_category(rdb_cat_bot_layer, f"{net_top} {net_bot}")
+                            rdb_output(rdb_cat_nets, "overlapping_shapes", overlapping_shapes)
+
+                            shielded_net_shapes = overlapping_shapes.__and__(shielded_region)
+                            rdb_output(rdb_cat_nets, "shielded_net_shapes", shielded_net_shapes)
+
+                            area_um2 = overlapping_shapes.area() * dbu**2
+                            shielded_area_um2 = shielded_net_shapes.area() * dbu**2
+                            unshielded_area_um2 = area_um2 - shielded_area_um2
+                            cap_femto = unshielded_area_um2 * overlap_cap_spec.capacitance / 1000.0
+                            info(f"(Overlap) layers {top_layer_name}-{bot_layer_name}: "
+                                 f"Nets {net_top} <-> {net_bot}: {unshielded_area_um2} µm^2, "
+                                 f"cap: {round(cap_femto, 2)} fF")
+                            ovk = OverlapKey(layer_top=top_layer_name,
+                                             net_top=net_top,
+                                             layer_bot=bot_layer_name,
+                                             net_bot=net_bot)
+                            cap = OverlapCap(key=ovk,
+                                             cap_value=cap_femto,
+                                             shielded_area=shielded_area_um2,
+                                             unshielded_area=unshielded_area_um2,
+                                             tech_spec=overlap_cap_spec)
+                            extraction_results.overlap_coupling[ovk] = cap
+
+        # (2) SIDEWALL CAPACITANCE
         #
         for layer_name in layer2net2regions.keys():
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name.get(layer_name, None)
@@ -181,7 +339,6 @@ class RCExtractor:
                         markers_net1 = space_markers.interacting(shapes1)
                         sidewall_edge_pairs = markers_net1.interacting(shapes2)
 
-                        info(sidewall_edge_pairs)
                         for pair in sidewall_edge_pairs:
                             edge1: kdb.Edge = pair.first
                             edge2: kdb.Edge = pair.second
@@ -197,52 +354,192 @@ class RCExtractor:
                             # C = Csidewall * l * t / s
                             # C = Csidewall * l / s
 
-                            cap_femto = (avg_length * dbu * sidewall_cap_spec.capacitance) / \
-                                        (avg_distance * dbu + sidewall_cap_spec.offset) / 1000
+                            length_um = avg_length * dbu
+                            distance_um = avg_distance * dbu
 
-                            info(f"Sidewall on {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
+                            cap_femto = (length_um * sidewall_cap_spec.capacitance) / \
+                                        (distance_um + sidewall_cap_spec.offset) / 1000
 
-        #
-        # (2) OVERLAP CAPACITANCE
-        #
-        for top_layer_name in layer2net2regions.keys():
-            top_net2regions = layer2net2regions.get(top_layer_name, None)
-            if not top_net2regions:
-                continue
+                            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
 
-            top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
-            if not top_overlap_specs:
-                warning(f"No overlap cap specified for layer top={top_layer_name}")
-                continue
-
-            for bot_layer_name in reversed(layer_names_below[top_layer_name]):
-                bot_net2regions = layer2net2regions.get(bot_layer_name, None)
-                if not bot_net2regions:
-                    continue
-
-                overlap_cap_spec = top_overlap_specs.get(bot_layer_name, None)
-                if not overlap_cap_spec:
-                    warning(f"No overlap cap specified for layer top={top_layer_name}/bottom={bot_layer_name}")
-                    continue
-
-                for net_top in top_net2regions.keys():
-                    shapes_top_net: kdb.Region = top_net2regions[net_top].dup()
-
-                    for net_bot in bot_net2regions.keys():
-                        shapes_bot_net: kdb.Region = bot_net2regions[net_bot]
-
-                        overlapping_shapes = shapes_top_net.__and__(shapes_bot_net)
-                        if overlapping_shapes:
-                            shapes_top_net -= overlapping_shapes  # blocks layers below!
-                            area_um2 = overlapping_shapes.area() * dbu**2
-                            cap_femto = area_um2 * overlap_cap_spec.capacitance / 1000.0
-                            info(f"(Overlap) layers {top_layer_name}-{bot_layer_name}: "
-                                 f"Nets {net_top} <-> {net_bot}: {area_um2} µm^2, "
-                                 f"cap: {round(cap_femto, 2)} fF")
+                            swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
+                            sw_cap = SidewallCap(key=swk,
+                                                 cap_value=cap_femto,
+                                                 distance=distance_um,
+                                                 length=length_um,
+                                                 tech_spec=sidewall_cap_spec)
+                            extraction_results.sidewall_table[swk] = sw_cap
 
         #
         # (3) FRINGE / SIDE OVERLAP CAPACITANCE
         #
+
+        class FringeEdgeNeighborhoodVisitor(kdb.EdgeNeighborhoodVisitor):
+            def __init__(self,
+                         inside_layer_name: str,
+                         inside_net_name: str,
+                         outside_layer_name: str,
+                         outside_net_names: List[str],
+                         tech_info: TechInfo,
+                         report_category: rdb.RdbCategory):
+                self.inside_layer_name = inside_layer_name
+                self.inside_net_name = inside_net_name
+                self.outside_layer_name = outside_layer_name
+                self.outside_net_names = outside_net_names
+                self.tech_info = tech_info
+                self.report_category = report_category
+
+                # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
+                self.overlap_cap_spec = tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name, None)
+                if not self.overlap_cap_spec:
+                    self.overlap_cap_spec = tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
+
+                self.substrate_cap_spec = tech_info.substrate_cap_by_layer_name[inside_layer_name]
+                self.sidewall_cap_spec = tech_info.sidewall_cap_by_layer_name[inside_layer_name]
+
+            def begin_polygon(self,
+                              layout: kdb.Layout,
+                              cell: kdb.Cell,
+                              polygon: kdb.Polygon):
+                debug(f"----------------------------------------")
+                debug(f"Polygon: {polygon}")
+
+            def end_polygon(self):
+                debug(f"End of polygon")
+
+            def on_edge(self,
+                        layout: kdb.Layout,
+                        cell: kdb.Cell,
+                        edge: kdb.Edge,
+                        neighborhood: EdgeNeighborhood):
+                #
+                # NOTE: this complex operation will automatically rotate every edge to be on the x-axis
+                # going from 0 to edge.length
+                # so we only have to consider the y-axis to get the near and far distances
+                #
+
+                # TODO: consider z-shielding!
+
+                debug(f"inside_layer={self.inside_layer_name}, "
+                      f"inside_net={self.inside_net_name}, "
+                      f"outside_layer={self.outside_layer_name}, "
+                      f"edge = {edge}")
+
+                for (x1, x2), polygons_by_net in neighborhood:
+                    if not polygons_by_net:
+                        continue
+
+                    edge_interval_length = x2 - x1
+                    edge_interval_length_um = edge_interval_length * dbu
+                    rdb_cat_edge_interval = report.create_category(self.report_category,
+                                                                   f"edge_interval={(x1, x2)}")
+
+                    for net_index, polygons in polygons_by_net.items():
+                        net_name = self.outside_net_names[net_index]
+                        rdb_cat_outside_net = report.create_category(rdb_cat_edge_interval,
+                                                                     f"outside_net={net_name}")
+
+                        poly_str = "/".join([str(p) for p in polygons])
+                        print(f"  {x1},{x2} -> {net_index} ({net_name}): {poly_str}")
+
+                        # TODO: re-enable this, currently there is a klayout bug when writing / reading the report DB
+                        # if polygons:
+                        #     report.create_items(rdb_cell.rdb_id(),
+                        #                         rdb_cat_outside_net.rdb_id(),
+                        #                         kdb.CplxTrans(mag=dbu),
+                        #                         polygons)
+
+                        for p in polygons:
+                            area = p.area()
+                            bbox: kdb.Box = p.bbox()
+                            bbox_area = bbox.area()
+
+                            if not p.is_box():
+                                warning(f"Side overlap, outside polygon {p} is not a box. "
+                                        f"Currently, only boxes are supported, will be using bounding box {bbox}")
+                            distance_near = bbox.p1.y  #+ 1
+                            if distance_near < 0:
+                                distance_near = 0
+                            distance_far = bbox.p2.y   #- 2
+                            if distance_far < 0:
+                                distance_far = 0
+                            try:
+                                assert distance_near >= 0
+                                assert distance_far >= distance_near
+                            except AssertionError:
+                                print()
+                                raise
+
+                            if distance_far == distance_near:
+                                continue
+
+                            distance_near_um = distance_near * dbu
+                            distance_far_um = distance_far * dbu
+
+                            mult = self.overlap_cap_spec.capacitance
+
+                            # see Magic ExtCouple.c L1164
+                            snear = (2.0 / math.pi) * math.atan(mult * distance_near_um / edge_interval_length_um)
+                            sfar = (2.0 / math.pi) * math.atan(mult * distance_far_um / edge_interval_length_um)
+
+                            # "cfrac" is the fractional portion of the fringe cap seen
+                            # by tile tp along its length.  This is independent of the
+                            # portion of the boundary length that tile tp occupies.
+                            cfrac = sfar - snear
+
+                            # The fringe portion extracted from the substrate will be
+                            # different than the portion added to the coupling layer.
+                            sfrac: float
+
+                            # see Magic ExtCouple.c L1198
+                            mult2 = self.substrate_cap_spec.area_capacitance
+                            if mult2 != mult:
+                                snear2 = (2.0 / math.pi) * math.atan(mult2 * distance_near_um / edge_interval_length_um)
+                                sfar2 = (2.0 / math.pi) * math.atan(mult2 * distance_far_um / edge_interval_length_um)
+                                sfrac = sfar2 - snear2
+                            else:
+                                sfrac = cfrac
+
+                            cap_femto = (cfrac * edge_interval_length_um * self.sidewall_cap_spec.capacitance) / \
+                                        (distance_near_um + self.sidewall_cap_spec.offset) / 1000.0
+                            print(cap_femto)
+
+                            # efflength = (cfrac - sov.so_coupfrac) * (double) length;
+                            # cap += e->ec_cap * efflength;
+                            #
+                            # subfrac += sov.so_subfrac; / *Just add the shielded fraction * /
+                            # efflength = (sfrac - subfrac) * (double) length;
+                            #
+                            # subcap = ExtCurStyle->exts_perimCap[ta][0] * efflength;
+
+                            # TODO: shielding
+
+                            # TODO: fringe portion extracted from substrate
+
+                            pass
+                            # avg_length = (edge1.length() + edge2.length()) / 2 * dbu
+                            # avg_distance = (edge_pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2 * dbu
+
+                            #     info(f"(side overlap) EDGES: layers {top_layer_name}-{bot_layer_name}: "
+                            #          f"EdgePair {edge_pair}, "
+                            #          f"Nets {net_top} <-> {net_bot}: "
+                            #          f"distance {avg_distance}, length {avg_length}")
+                            #
+                            # sub_frac = (2.0 / math.pi) * math.atan(side_overlap_cap_spec.capacitance * avg_distance)
+                            #     #
+                            #     # perimeter_not_shielded += sub_frac * avg_length / 1000.0 # aF -> fF
+                            #     #
+                            #     # shielded_frac = 1.0 - sub_frac
+                            #     # perimeter_shielded += sub_frac * avg_length / 1000.0  # aF -> fF
+                            #
+                            # # area_um2 = overlapping_side_halo_shapes.area() * dbu**2
+                            # # cap_femto = area_um2 * side_overlap_cap_spec.capacitance / 1000.0
+                            # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
+                            # #      f"Nets {net_top} <-> {net_bot}: {area_um2} µm^2, "
+                            # #      f"cap: {round(cap_femto, 2)} fF")
+                            #
+
+
         for inside_layer_name in layer2net2regions.keys():
             inside_net2regions = layer2net2regions.get(inside_layer_name, None)
             if not inside_net2regions:
@@ -281,208 +578,238 @@ class RCExtractor:
                 if not shapes_outside_layer_within_halo:
                     continue
 
-                # side_halo_space_markers = shapes_top_layer.separation_check(
-                #     side_halo_top.__and__(shapes_bot_layer),
-                #     side_halo_dbu,
-                #     False,  # whole edges
-                #     kdb.Metrics.Projection,  # metrics
-                #     None,  # ignore angle
-                #     None,  # min projection
-                #     None,  # max projection
-                #     True,  # shielding
-                #     kdb.Region.NoOppositeFilter,  # error filter for opposite sides
-                #     kdb.Region.NoRectFilter,  # error filter for rect input shapes
-                #     False,  # negative
-                #     kdb.Region.IgnoreProperties,  # property_constraint
-                #     ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
-                #     ### kdb.Region.NeverIncludeZeroDistance  # zero distance mode
-                # )
-                # side_halo_space_common = side_halo_top.__and__(shapes_bot_layer)
-                # side_halo_space_markers = side_halo_space_common.width_check(
-                #     side_halo_dbu,
-                #     whole_edges=False,  # whole edges
-                #     metrics=kdb.Metrics.Projection,  # metrics
-                #     ignore_angle=None,  # ignore angle
-                #     min_projection=None,  # min projection
-                #     max_projection=None,  # max projection
-                #     shielded=True,  # shielding
-                #     negative=False,
-                #     property_constraint=kdb.Region.IgnoreProperties,  # property_constraint
-                #     zero_distance_mode=kdb.Region.NeverIncludeZeroDistance  ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
-                # )
-                fringe_halo_outside = shapes_outside_layer.sized(side_halo_dbu) - shapes_outside_layer
+                rdb_cat_outside_layer = report.create_category(rdb_cat_inside_layer,
+                                                               f"outside_layer={outside_layer_name}")
 
                 for net_inside in inside_net2regions.keys():
-                    shapes_inside_net: kdb.Region = inside_net2regions[net_inside].dup()
+                    shapes_inside_net: kdb.Region = inside_net2regions[net_inside]
                     if not shapes_inside_net:
                         continue
 
-                    for net_outside in outside_net2regions.keys():
-                        if net_inside == net_outside:
+                    visitor = FringeEdgeNeighborhoodVisitor(inside_layer_name=inside_layer_name,
+                                                            inside_net_name=net_inside,
+                                                            outside_layer_name=outside_layer_name,
+                                                            outside_net_names=[net_inside] + list(outside_net2regions.keys()),
+                                                            tech_info=self.tech_info,
+                                                            report_category=rdb_cat_outside_layer)
+                    children = [kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net)] + \
+                               [kdb.CompoundRegionOperationNode.new_secondary(region)
+                                for region in list(outside_net2regions.values())]
+                    node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
+                        children,
+                        visitor,
+                        0, # bext
+                        0, # eext,
+                        0, # din
+                        side_halo_dbu # dout
+                    )
+
+                    shapes_inside_net.complex_op(node)
+
+
+                def old__remove__TODO():
+                    # side_halo_space_markers = shapes_top_layer.separation_check(
+                    #     side_halo_top.__and__(shapes_bot_layer),
+                    #     side_halo_dbu,
+                    #     False,  # whole edges
+                    #     kdb.Metrics.Projection,  # metrics
+                    #     None,  # ignore angle
+                    #     None,  # min projection
+                    #     None,  # max projection
+                    #     True,  # shielding
+                    #     kdb.Region.NoOppositeFilter,  # error filter for opposite sides
+                    #     kdb.Region.NoRectFilter,  # error filter for rect input shapes
+                    #     False,  # negative
+                    #     kdb.Region.IgnoreProperties,  # property_constraint
+                    #     ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+                    #     ### kdb.Region.NeverIncludeZeroDistance  # zero distance mode
+                    # )
+                    # side_halo_space_common = side_halo_top.__and__(shapes_bot_layer)
+                    # side_halo_space_markers = side_halo_space_common.width_check(
+                    #     side_halo_dbu,
+                    #     whole_edges=False,  # whole edges
+                    #     metrics=kdb.Metrics.Projection,  # metrics
+                    #     ignore_angle=None,  # ignore angle
+                    #     min_projection=None,  # min projection
+                    #     max_projection=None,  # max projection
+                    #     shielded=True,  # shielding
+                    #     negative=False,
+                    #     property_constraint=kdb.Region.IgnoreProperties,  # property_constraint
+                    #     zero_distance_mode=kdb.Region.NeverIncludeZeroDistance  ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+                    # )
+                    fringe_halo_outside = shapes_outside_layer.sized(side_halo_dbu) - shapes_outside_layer
+
+                    for net_inside in inside_net2regions.keys():
+                        shapes_inside_net: kdb.Region = inside_net2regions[net_inside].dup()
+                        if not shapes_inside_net:
                             continue
 
-                        shapes_outside_net: kdb.Region = outside_net2regions[net_outside]
-                        if not shapes_outside_net:
-                            continue
-
-                        shapes_outside_net_within_halo = shapes_outside_net.__and__(fringe_halo_inside)
-                        if not shapes_outside_net_within_halo:
-                            continue
-
-                        rdb_cat_outside = report.create_category(rdb_cat_inside_layer,
-                                                                 f"outside_{outside_layer_name}/{net_outside}")
-                        rdb_output(rdb_cat_outside, "shapes_outside_net_within_halo", shapes_outside_net_within_halo)
-
-                        side_halo_sep_markers = shapes_inside_net.separation_check(
-                            shapes_outside_net_within_halo,
-                            side_halo_dbu,
-                            whole_edges=False,
-                            shielded=False,
-                            metrics=kdb.Metrics.Projection,  # metrics
-                            ignore_angle=None,  # ignore angle
-                            min_projection=None,  # min projection
-                            max_projection=None,  # max projection
-                            zero_distance_mode=kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
-                        )
-                        rdb_output(rdb_cat_outside, "side_halo_sep_markers", side_halo_sep_markers)
-
-                        # space_markers_inside = space_markers.interacting(shapes_inside_net)
-                        # space_markers_between = space_markers_inside.interacting(shapes_outside_net_within_halo)
-                        # rdb_output(rdb_cat_outside, "space_markers_inside", space_markers_inside)
-                        # rdb_output(rdb_cat_outside, "space_markers_between", space_markers_between)
-                        #
-                        # inside_edges_in_halo = space_markers_between.edges().__and__(shapes_inside_net.edges())
-                        # rdb_output(rdb_cat_outside, "inside_edges_in_halo", inside_edges_in_halo)
-
-                        outside_width_markers = shapes_outside_net_within_halo.width_check(
-                            side_halo_dbu,
-                            whole_edges=False,  # whole edges
-                            metrics=kdb.Metrics.Projection,  # metrics
-                            ignore_angle=None,  # ignore angle
-                            min_projection=None,  # min projection
-                            max_projection=None,  # max projection
-                            shielded=True,  # shielding
-                            negative=False,
-                            property_constraint=kdb.Region.IgnoreProperties,  # property_constraint
-                            zero_distance_mode=kdb.Region.NeverIncludeZeroDistance  ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
-                        )
-                        rdb_output(rdb_cat_outside, "outside_width_markers", outside_width_markers)
-
-                        # reduce width markers to polygons
-                        outside_width_cleanup = kdb.Region()
-                        for p in outside_width_markers.polygons():
-                            r = kdb.Region(p)
-                            rest = (r - outside_width_cleanup).__and__(shapes_outside_net_within_halo)
-                            outside_width_cleanup += rest
-                        rdb_output(rdb_cat_outside, "outside_width_cleanup", outside_width_cleanup)
-
-                        @dataclass
-                        class InsideEdgeSegmentJob:
-                            inside_edge: kdb.Edge
-                            outside_near_edge: kdb.Edge  # outside, from sep check
-                            halo_far_edge: kdb.Edge
-
-                        jobs_by_inside_edge: Dict[kdb.Edge, InsideEdgeSegmentJob] = {}
-
-                        inside_segment_halo = kdb.EdgePairs()
-                        for edge_pair in side_halo_sep_markers:
-                            edge_pair: kdb.EdgePair
-                            inside_edge: kdb.Edge = edge_pair.first
-                            outside_near_edge: kdb.Edge = edge_pair.second
-
-                            # vector pointing towards the outside
-                            norm_vec_tmp = ((inside_edge.p1 - inside_edge.p2) / inside_edge.length())
-                            norm_dx = norm_vec_tmp.y
-                            norm_dy = -norm_vec_tmp.x
-
-                            # towards the outside, create polygon of inside_edge + halo
-                            halo_far_edge = inside_edge.moved(norm_dx * side_halo_dbu, norm_dy * side_halo_dbu)
-                            halo_far_edge.swap_points()
-                            inside_segment_halo.insert(kdb.EdgePair(inside_edge, halo_far_edge))
-
-                            jobs_by_inside_edge[inside_edge] = InsideEdgeSegmentJob(
-                                inside_edge=inside_edge,
-                                outside_near_edge=outside_near_edge,
-                                halo_far_edge=halo_far_edge
-                            )
-                        rdb_output(rdb_cat_outside, "inside_segment_halo", inside_segment_halo)
-
-                        unprocessed_outside_polygons = outside_width_cleanup.dup()
-
-                        for inside_edge, job in jobs_by_inside_edge.items():
-                            halo_slice_polygon = kdb.EdgePair(inside_edge, job.outside_near_edge).normalized().polygon(0)
-                            shapes_inside_halo_slice = unprocessed_outside_polygons.__and__(halo_slice_polygon)
-                            unprocessed_outside_polygons -= shapes_inside_halo_slice
-                            if not unprocessed_outside_polygons:
+                        for net_outside in outside_net2regions.keys():
+                            if net_inside == net_outside:
                                 continue
 
-                            rdb_cat_segment_shapes = report.create_category(rdb_cat_outside,
-                                                                            f"segment_shapes_by_edge")
+                            shapes_outside_net: kdb.Region = outside_net2regions[net_outside]
+                            if not shapes_outside_net:
+                                continue
 
-                            item = report.create_item(rdb_cell.rdb_id(),
-                                                      ## TODO: if later hierarchical mode is introduced
-                                                      rdb_cat_segment_shapes.rdb_id())
-                            item.add_value(inside_edge.transformed(CplxTrans(mag=dbu)))
+                            shapes_outside_net_within_halo = shapes_outside_net.__and__(fringe_halo_inside)
+                            if not shapes_outside_net_within_halo:
+                                continue
 
-                            item = report.create_item(rdb_cell.rdb_id(),
-                                                      ## TODO: if later hierarchical mode is introduced
-                                                      rdb_cat_segment_shapes.rdb_id())
-                            item.add_value(halo_slice_polygon.transformed(CplxTrans(mag=dbu)))
-                            item.comment = f"Halo for the Edge {inside_edge}"
+                            rdb_cat_outside = report.create_category(rdb_cat_inside_layer,
+                                                                     f"outside_{outside_layer_name}/{net_outside}")
+                            rdb_output(rdb_cat_outside, "shapes_outside_net_within_halo", shapes_outside_net_within_halo)
 
-                            for idx, polygon in enumerate(shapes_inside_halo_slice):
-                                item = report.create_item(rdb_cell.rdb_id(),  ## TODO: if later hierarchical mode is introduced
+                            side_halo_sep_markers = shapes_inside_net.separation_check(
+                                shapes_outside_net_within_halo,
+                                side_halo_dbu,
+                                whole_edges=False,
+                                shielded=False,
+                                metrics=kdb.Metrics.Projection,  # metrics
+                                ignore_angle=None,  # ignore angle
+                                min_projection=None,  # min projection
+                                max_projection=None,  # max projection
+                                zero_distance_mode=kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+                            )
+                            rdb_output(rdb_cat_outside, "side_halo_sep_markers", side_halo_sep_markers)
+
+                            # space_markers_inside = space_markers.interacting(shapes_inside_net)
+                            # space_markers_between = space_markers_inside.interacting(shapes_outside_net_within_halo)
+                            # rdb_output(rdb_cat_outside, "space_markers_inside", space_markers_inside)
+                            # rdb_output(rdb_cat_outside, "space_markers_between", space_markers_between)
+                            #
+                            # inside_edges_in_halo = space_markers_between.edges().__and__(shapes_inside_net.edges())
+                            # rdb_output(rdb_cat_outside, "inside_edges_in_halo", inside_edges_in_halo)
+
+                            outside_width_markers = shapes_outside_net_within_halo.width_check(
+                                side_halo_dbu,
+                                whole_edges=False,  # whole edges
+                                metrics=kdb.Metrics.Projection,  # metrics
+                                ignore_angle=None,  # ignore angle
+                                min_projection=None,  # min projection
+                                max_projection=None,  # max projection
+                                shielded=True,  # shielding
+                                negative=False,
+                                property_constraint=kdb.Region.IgnoreProperties,  # property_constraint
+                                zero_distance_mode=kdb.Region.NeverIncludeZeroDistance  ### kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+                            )
+                            rdb_output(rdb_cat_outside, "outside_width_markers", outside_width_markers)
+
+                            # reduce width markers to polygons
+                            outside_width_cleanup = kdb.Region()
+                            for p in outside_width_markers.polygons():
+                                r = kdb.Region(p)
+                                rest = (r - outside_width_cleanup).__and__(shapes_outside_net_within_halo)
+                                outside_width_cleanup += rest
+                            rdb_output(rdb_cat_outside, "outside_width_cleanup", outside_width_cleanup)
+
+                            @dataclass
+                            class InsideEdgeSegmentJob:
+                                inside_edge: kdb.Edge
+                                outside_near_edge: kdb.Edge  # outside, from sep check
+                                halo_far_edge: kdb.Edge
+
+                            jobs_by_inside_edge: Dict[kdb.Edge, InsideEdgeSegmentJob] = {}
+
+                            inside_segment_halo = kdb.EdgePairs()
+                            for edge_pair in side_halo_sep_markers:
+                                edge_pair: kdb.EdgePair
+                                inside_edge: kdb.Edge = edge_pair.first
+                                outside_near_edge: kdb.Edge = edge_pair.second
+
+                                # vector pointing towards the outside
+                                norm_vec_tmp = ((inside_edge.p1 - inside_edge.p2) / inside_edge.length())
+                                norm_dx = norm_vec_tmp.y
+                                norm_dy = -norm_vec_tmp.x
+
+                                # towards the outside, create polygon of inside_edge + halo
+                                halo_far_edge = inside_edge.moved(norm_dx * side_halo_dbu, norm_dy * side_halo_dbu)
+                                halo_far_edge.swap_points()
+                                inside_segment_halo.insert(kdb.EdgePair(inside_edge, halo_far_edge))
+
+                                jobs_by_inside_edge[inside_edge] = InsideEdgeSegmentJob(
+                                    inside_edge=inside_edge,
+                                    outside_near_edge=outside_near_edge,
+                                    halo_far_edge=halo_far_edge
+                                )
+                            rdb_output(rdb_cat_outside, "inside_segment_halo", inside_segment_halo)
+
+                            unprocessed_outside_polygons = outside_width_cleanup.dup()
+
+                            for inside_edge, job in jobs_by_inside_edge.items():
+                                halo_slice_polygon = kdb.EdgePair(inside_edge, job.outside_near_edge).normalized().polygon(0)
+                                shapes_inside_halo_slice = unprocessed_outside_polygons.__and__(halo_slice_polygon)
+                                unprocessed_outside_polygons -= shapes_inside_halo_slice
+                                if not unprocessed_outside_polygons:
+                                    continue
+
+                                rdb_cat_segment_shapes = report.create_category(rdb_cat_outside,
+                                                                                f"segment_shapes_by_edge")
+
+                                item = report.create_item(rdb_cell.rdb_id(),
+                                                          ## TODO: if later hierarchical mode is introduced
                                                           rdb_cat_segment_shapes.rdb_id())
-                                item.add_value(polygon.transform(CplxTrans(mag=dbu)))
-                                item.comment = f"Edge {inside_edge} Shape {idx}"
+                                item.add_value(inside_edge.transformed(CplxTrans(mag=dbu)))
 
-                        # sep_width_interactions = side_halo_sep_markers.interacting(outside_width_cleanup)
-                        # rdb_output(rdb_cat_outside, "sep_width_interactions", sep_width_interactions)
+                                item = report.create_item(rdb_cell.rdb_id(),
+                                                          ## TODO: if later hierarchical mode is introduced
+                                                          rdb_cat_segment_shapes.rdb_id())
+                                item.add_value(halo_slice_polygon.transformed(CplxTrans(mag=dbu)))
+                                item.comment = f"Halo for the Edge {inside_edge}"
 
-                        # markers_top_net = side_halo_space_markers.interacting(shapes_top_net)
-                        # #info(f"shapes_bot_net= {shapes_bot_net}")
-                        # info(f"markers_top_net = {markers_top_net}")
-                        # markers_between = markers_top_net.interacting(shapes_bot_net - shapes_top_net)
-                        # info(f"shapes_top_net = {shapes_top_net}")
-                        # info(f"shapes_bot_net - shapes_top_net.sized(1) == {shapes_bot_net - shapes_top_net.sized(1)}")
-                        # info(f"markers_between = {markers_between}")
-                        #
-                        # # overlapping_side_halo_shapes = side_halo_space_markers_top_layer.interacting(shapes_bot)
-                        # # if overlapping_side_halo_shapes:
-                        # #     side_halo_top -= overlapping_side_halo_shapes.polygons()  # blocks layers below!
-                        # #     perimeter_shielded = 0.0
-                        # #     perimeter_not_shielded = 0.0
-                        # for edge_pair in markers_between:
-                        #     edge1: kdb.Edge = edge_pair.first
-                        #     edge2: kdb.Edge = edge_pair.second
-                        #
-                        #     if edge_pair.area() == 0:
-                        #         continue
-                        #
-                        #     avg_length = (edge1.length() + edge2.length()) / 2 * dbu
-                        #     avg_distance = (edge_pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2 * dbu
-                        #
-                        #     info(f"(side overlap) EDGES: layers {top_layer_name}-{bot_layer_name}: "
-                        #          f"EdgePair {edge_pair}, "
-                        #          f"Nets {net_top} <-> {net_bot}: "
-                        #          f"distance {avg_distance}, length {avg_length}")
-                        #
-                        #     # sub_frac = (2.0 / math.pi) * math.atan(side_overlap_cap_spec.capacitance * avg_distance)
-                        #     #
-                        #     # perimeter_not_shielded += sub_frac * avg_length / 1000.0 # aF -> fF
-                        #     #
-                        #     # shielded_frac = 1.0 - sub_frac
-                        #     # perimeter_shielded += sub_frac * avg_length / 1000.0  # aF -> fF
-                        #
-                        # # area_um2 = overlapping_side_halo_shapes.area() * dbu**2
-                        # # cap_femto = area_um2 * side_overlap_cap_spec.capacitance / 1000.0
-                        # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
-                        # #      f"Nets {net_top} <-> {net_bot}: {area_um2} µm^2, "
-                        # #      f"cap: {round(cap_femto, 2)} fF")
-                        #
-                        # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
-                        # #      f"Nets {net_top} <-> {net_bot}: "
-                        # #      f"perimeter: {perimeter_shielded}")
+                                for idx, polygon in enumerate(shapes_inside_halo_slice):
+                                    item = report.create_item(rdb_cell.rdb_id(),  ## TODO: if later hierarchical mode is introduced
+                                                              rdb_cat_segment_shapes.rdb_id())
+                                    item.add_value(polygon.transform(CplxTrans(mag=dbu)))
+                                    item.comment = f"Edge {inside_edge} Shape {idx}"
+
+                            # sep_width_interactions = side_halo_sep_markers.interacting(outside_width_cleanup)
+                            # rdb_output(rdb_cat_outside, "sep_width_interactions", sep_width_interactions)
+
+                            # markers_top_net = side_halo_space_markers.interacting(shapes_top_net)
+                            # #info(f"shapes_bot_net= {shapes_bot_net}")
+                            # info(f"markers_top_net = {markers_top_net}")
+                            # markers_between = markers_top_net.interacting(shapes_bot_net - shapes_top_net)
+                            # info(f"shapes_top_net = {shapes_top_net}")
+                            # info(f"shapes_bot_net - shapes_top_net.sized(1) == {shapes_bot_net - shapes_top_net.sized(1)}")
+                            # info(f"markers_between = {markers_between}")
+                            #
+                            # # overlapping_side_halo_shapes = side_halo_space_markers_top_layer.interacting(shapes_bot)
+                            # # if overlapping_side_halo_shapes:
+                            # #     side_halo_top -= overlapping_side_halo_shapes.polygons()  # blocks layers below!
+                            # #     perimeter_shielded = 0.0
+                            # #     perimeter_not_shielded = 0.0
+                            # for edge_pair in markers_between:
+                            #     edge1: kdb.Edge = edge_pair.first
+                            #     edge2: kdb.Edge = edge_pair.second
+                            #
+                            #     if edge_pair.area() == 0:
+                            #         continue
+                            #
+                            #     avg_length = (edge1.length() + edge2.length()) / 2 * dbu
+                            #     avg_distance = (edge_pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2 * dbu
+                            #
+                            #     info(f"(side overlap) EDGES: layers {top_layer_name}-{bot_layer_name}: "
+                            #          f"EdgePair {edge_pair}, "
+                            #          f"Nets {net_top} <-> {net_bot}: "
+                            #          f"distance {avg_distance}, length {avg_length}")
+                            #
+                            #     # sub_frac = (2.0 / math.pi) * math.atan(side_overlap_cap_spec.capacitance * avg_distance)
+                            #     #
+                            #     # perimeter_not_shielded += sub_frac * avg_length / 1000.0 # aF -> fF
+                            #     #
+                            #     # shielded_frac = 1.0 - sub_frac
+                            #     # perimeter_shielded += sub_frac * avg_length / 1000.0  # aF -> fF
+                            #
+                            # # area_um2 = overlapping_side_halo_shapes.area() * dbu**2
+                            # # cap_femto = area_um2 * side_overlap_cap_spec.capacitance / 1000.0
+                            # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
+                            # #      f"Nets {net_top} <-> {net_bot}: {area_um2} µm^2, "
+                            # #      f"cap: {round(cap_femto, 2)} fF")
+                            #
+                            # # info(f"(Side halo overlap) layers {top_layer_name}-{bot_layer_name}: "
+                            # #      f"Nets {net_top} <-> {net_bot}: "
+                            # #      f"perimeter: {perimeter_shielded}")
 
         #
         # (4) SUBSTRATE CAPACITANCE
@@ -566,4 +893,4 @@ class RCExtractor:
                              f"cap_peri {round(cap_perimeter_femto, 2)}fF, "
                              f"sum {round(cap_area_femto + cap_perimeter_femto, 2)}fF")
 
-        report.save(self.report_path)
+        return extraction_results
