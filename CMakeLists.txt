@@ -26,24 +26,34 @@ SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required (VERSION 3.12)
 project (kpex)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 if(MSVC)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 endif(MSVC)
 
 #_____________________________________________________________________________________________
 
 # add dependencies
 include(cmake/CPM.cmake)
-CPMAddPackage("gh:protocolbuffers/protobuf@29.0")
+CPMAddPackage(
+    NAME protobuf
+    GIT_TAG v29.0
+    GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
+    OPTIONS
+        "protobuf_INSTALL OFF"
+        "protobuf_BUILD_TESTS OFF"
+        "protobuf_BUILD_SHARED_LIBS OFF"
+        "protobuf_BUILD_EXAMPLES OFF"
+        "ABSL_PROPAGATE_CXX_STD ON"
+)
 
 #_____________________________________________________________________________________________
 
 # see https://github.com/protocolbuffers/protobuf/blob/main/docs/cmake_protobuf_generate.md
+include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
+set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
 
-find_package(protobuf CONFIG REQUIRED)
-
-set(PROTOBUF_SOURCES 
+set(PROTOBUF_SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/protos/tech.proto
 	${CMAKE_CURRENT_LIST_DIR}/protos/process_stack.proto
 	${CMAKE_CURRENT_LIST_DIR}/protos/process_parasitics.proto
@@ -86,6 +96,7 @@ set(GEN_TECH_PB_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/main.cpp
 )
 add_executable(gen_tech_pb ${GEN_TECH_PB_SOURCES})
+target_include_directories(gen_tech_pb PUBLIC ${Protobuf_INCLUDE_DIRS})
 target_link_libraries(gen_tech_pb kpex-protobuf)
 
 #_____________________________________________________________________________________________
