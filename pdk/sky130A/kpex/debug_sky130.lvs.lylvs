@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description/>
+ <version/>
+ <category>lvs</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <priority>0</priority>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <group-name>lvs_scripts</group-name>
+ <menu-path>tools_menu.lvs.end</menu-path>
+ <interpreter>dsl</interpreter>
+ <dsl-interpreter-name>lvs-dsl-xml</dsl-interpreter-name>
+ <text>$thr=22
+$run_mode=deep
+$spice_net_names=true
+$spice_comments=false
+$scale=false
+$verbose=true
+$schematic_simplify=false
+$net_only=false
+$top_lvl_pins=true    #false
+$combine=false
+$purge=false
+$purge_nets=false
+
+# NOTE: set $schematic via macro development ruby console!
+## $schematic="/Users/martin/Source/PEX-mjk/designs/single_wire_met1_16x2/single_wire_met1_16x2.spice"
+
+# %include sky130.lvs</text>
+</klayout-macro>
