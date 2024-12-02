@@ -176,6 +176,10 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
                              type=float, default=100.0,
                              help="Threshold for ignored parasitic resistances (default is %(default)s)")
+    group_magic.add_argument("--magic_halo", dest="magic_halo",
+                             type=float, default=None,
+                             help="Custom sidewall halo distance in µm "
+                                  "(MAGIC command: extract halo <value>) (default is no custom command")
     group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                               help="Path to magic executable (default is '%(default)s')")
 
@@ -427,7 +431,8 @@ def run_magic_extraction(args: argparse.Namespace):
                          output_netlist_path=output_netlist_path,
                          pex_mode=args.magic_pex_mode,
                          c_threshold=args.magic_cthresh,
-                         r_threshold=args.magic_rthresh)
+                         r_threshold=args.magic_rthresh,
+                         halo=args.magic_halo)
 
     run_magic(exe_path=args.magic_exe_path,
               magicrc_path=args.magicrc_path,

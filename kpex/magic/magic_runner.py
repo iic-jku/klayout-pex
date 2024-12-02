@@ -29,10 +29,13 @@ def prepare_magic_script(gds_path: str,
                          output_netlist_path: str,
                          pex_mode: MagicPEXMode,
                          c_threshold: float,
-                         r_threshold: float):
+                         r_threshold: float,
+                         halo: Optional[float]):
     gds_path = os.path.abspath(gds_path)
     run_dir_path = os.path.abspath(run_dir_path)
     output_netlist_path = os.path.abspath(output_netlist_path)
+
+    halo_scale = 200.0
 
     script: str = ""
     match pex_mode:
@@ -48,7 +51,7 @@ load {cell_name}_flat
 cellname delete {cell_name} -noprompt
 cellname rename {cell_name}_flat {cell_name}
 select top cell
-extract path {run_dir_path}
+extract path {run_dir_path}{'' if halo is None else f"\nextract halo {round(halo * halo_scale)}"}
 extract all
 ext2spice cthresh {c_threshold}
 ext2spice format ngspice
@@ -66,7 +69,7 @@ load {cell_name}_flat
 cellname delete {cell_name} -noprompt
 cellname rename {cell_name}_flat {cell_name}
 select top cell
-extract path {run_dir_path}
+extract path {run_dir_path}{'' if halo is None else f"\nextract halo {round(halo * halo_scale)}"}
 extract do resistance
 extract all
 ext2sim labels on
