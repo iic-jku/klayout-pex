@@ -100,7 +100,6 @@ class KLayoutExtractionContext:
         for gds_pair, layer_info in extracted_layers.items():
             names = [l.lvs_layer_name for l in layer_info.source_layers]
             info(f"{gds_pair} -> ({' '.join(names)})")
-        rule()
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
