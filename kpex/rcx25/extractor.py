@@ -3,7 +3,7 @@ import math
 from asyncio import shield
 from collections import defaultdict
 from dataclasses import dataclass, field
-from rich import pretty
+from mailcap import subst
 from typing import *
 
 import klayout.db as kdb
@@ -84,11 +84,18 @@ class SideOverlapKey:
     layer_outside: LayerName
     net_outside: NetName
 
+    def __repr__(self) -> str:
+        return f"{self.layer_inside}({self.net_inside})-"\
+               f"{self.layer_outside}({self.net_outside})"
+
 
 @dataclass
 class SideOverlapCap:
     key: SideOverlapKey
     cap_value: float  # femto farad
+
+    def __str__(self) -> str:
+        return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
 
 @dataclass
@@ -170,10 +177,10 @@ class RCExtractor:
         rdb_cat_sidewall = report.create_category("Sidewall")
         rdb_cat_overlap = report.create_category("Overlap")
         rdb_cat_fringe = report.create_category("Fringe / Side Overlap")
-        rdb_cat_substrate = report.create_category("Substrate")
+
         def rdb_output(parent_category: rdb.RdbCategory,
                        category_name: str,
-                       shapes: kdb.Shapes):
+                       shapes: kdb.Shapes | kdb.Region):
             rdb_cat = report.create_category(parent_category, category_name)
             report.create_items(rdb_cell.rdb_id(),  ## TODO: if later hierarchical mode is introduced
                                 rdb_cat.rdb_id(),
@@ -200,6 +207,20 @@ class RCExtractor:
         layer_names_below: Dict[LayerName, List[LayerName]] = {}
         shielding_layer_names: Dict[Tuple[LayerName, LayerName], List[LayerName]] = defaultdict(list)
         previous_layer_name: Optional[str] = None
+
+        substrate_region = kdb.Region()
+        substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(8.0 / dbu))  # 8 µm halo
+        substrate_layer_name = self.tech_info.internal_substrate_layer_name
+        layer_names_below[substrate_layer_name] = []
+        all_layer_names.append(substrate_layer_name)
+        layer2net2regions[substrate_layer_name][substrate_layer_name] = substrate_region
+        net2layer2regions[substrate_layer_name][substrate_layer_name] = substrate_region
+        layer_regions_by_name[substrate_layer_name] = substrate_region
+        # NOTE: substrate not needed for
+        #     - all_region
+        #     - regions_below_layer
+        #     - regions_below_and_including_layer
+
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
             gds_pair = self.gds_pair(layer_name)
@@ -271,6 +292,9 @@ class RCExtractor:
         # (1) OVERLAP CAPACITANCE
         #
         for top_layer_name in layer2net2regions.keys():
+            if top_layer_name == substrate_layer_name:
+                continue
+
             top_net2regions = layer2net2regions.get(top_layer_name, None)
             if not top_net2regions:
                 continue
@@ -296,8 +320,8 @@ class RCExtractor:
 
                 rdb_cat_bot_layer = report.create_category(rdb_cat_top_layer, f"bot_layer={bot_layer_name}")
 
-                shielded_region = shielded_regions_between_layers[(top_layer_name, bot_layer_name)]
-                rdb_output(rdb_cat_bot_layer, "shielded_region", shielded_region)
+                shielded_region = shielded_regions_between_layers[(top_layer_name, bot_layer_name)].and_(shapes_top_layer)
+                rdb_output(rdb_cat_bot_layer, "Shielded Between Layers Region", shielded_region)
 
                 for net_top in top_net2regions.keys():
                     shapes_top_net: kdb.Region = top_net2regions[net_top].dup()
@@ -307,18 +331,22 @@ class RCExtractor:
 
                         overlapping_shapes = shapes_top_net.__and__(shapes_bot_net)
                         if overlapping_shapes:
-                            rdb_cat_nets = report.create_category(rdb_cat_bot_layer, f"{net_top} {net_bot}")
-                            rdb_output(rdb_cat_nets, "overlapping_shapes", overlapping_shapes)
+                            rdb_cat_nets = report.create_category(rdb_cat_bot_layer, f"{net_top} – {net_bot}")
+                            rdb_output(rdb_cat_nets, "Overlapping Shapes", overlapping_shapes)
 
                             shielded_net_shapes = overlapping_shapes.__and__(shielded_region)
-                            rdb_output(rdb_cat_nets, "shielded_net_shapes", shielded_net_shapes)
+                            rdb_output(rdb_cat_nets, "Shielded Shapes", shielded_net_shapes)
+
+                            unshielded_net_shapes = overlapping_shapes - shielded_net_shapes
+                            rdb_output(rdb_cat_nets, "Unshielded Shapes", unshielded_net_shapes)
 
                             area_um2 = overlapping_shapes.area() * dbu**2
                             shielded_area_um2 = shielded_net_shapes.area() * dbu**2
                             unshielded_area_um2 = area_um2 - shielded_area_um2
                             cap_femto = unshielded_area_um2 * overlap_cap_spec.capacitance / 1000.0
-                            info(f"(Overlap) layers {top_layer_name}-{bot_layer_name}: "
-                                 f"Nets {net_top} <-> {net_bot}: {unshielded_area_um2} µm^2, "
+                            shielded_cap_femto = shielded_area_um2 * overlap_cap_spec.capacitance / 1000.0
+                            info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
+                                 f"Unshielded area: {unshielded_area_um2} µm^2, "
                                  f"cap: {round(cap_femto, 2)} fF")
                             ovk = OverlapKey(layer_top=top_layer_name,
                                              net_top=net_top,
@@ -329,11 +357,20 @@ class RCExtractor:
                                              shielded_area=shielded_area_um2,
                                              unshielded_area=unshielded_area_um2,
                                              tech_spec=overlap_cap_spec)
+                            report.create_category(  # used as info text
+                                rdb_cat_nets,
+                                f"{round(cap_femto, 3)} fF "
+                                f"({round(shielded_cap_femto, 3)} fF shielded "
+                                f"of total {round(cap_femto+shielded_cap_femto, 3)} fF)"
+                            )
                             extraction_results.overlap_coupling[ovk] = cap
 
         # (2) SIDEWALL CAPACITANCE
         #
         for layer_name in layer2net2regions.keys():
+            if layer_name == substrate_layer_name:
+                continue
+
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name.get(layer_name, None)
             if not sidewall_cap_spec:
                 warning(f"No sidewall cap specified for layer {layer_name}")
@@ -342,6 +379,8 @@ class RCExtractor:
             net2regions = layer2net2regions.get(layer_name, None)
             if not net2regions:
                 continue
+
+            rdb_cat_sw_layer = report.create_category(rdb_cat_sidewall, f"layer={layer_name}")
 
             for i, net1 in enumerate(net2regions.keys()):
                 for j, net2 in enumerate(net2regions.keys()):
@@ -353,6 +392,9 @@ class RCExtractor:
 
                         markers_net1 = space_markers.interacting(shapes1)
                         sidewall_edge_pairs = markers_net1.interacting(shapes2)
+
+                        rdb_cat_sw_nets = report.create_category(rdb_cat_sw_layer, f"{net1} {net2}") \
+                                          if sidewall_edge_pairs else None
 
                         for pair in sidewall_edge_pairs:
                             edge1: kdb.Edge = pair.first
@@ -375,6 +417,8 @@ class RCExtractor:
                             cap_femto = (length_um * sidewall_cap_spec.capacitance) / \
                                         (distance_um + sidewall_cap_spec.offset) / 1000
 
+                            report.create_category(rdb_cat_sw_nets, f"{round(cap_femto, 3)} fF")  # used as info text
+
                             info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
 
                             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
@@ -394,13 +438,16 @@ class RCExtractor:
                          inside_layer_name: str,
                          inside_net_name: str,
                          outside_layer_name: str,
-                         outside_net_names: List[str],
+                         child_names: List[str],
                          tech_info: TechInfo,
                          report_category: rdb.RdbCategory):
                 self.inside_layer_name = inside_layer_name
                 self.inside_net_name = inside_net_name
                 self.outside_layer_name = outside_layer_name
-                self.outside_net_names = outside_net_names
+                self.child_names = child_names
+                # NOTE: child_names[0] is the inside net (foreign)
+                #       child_names[1] is the shielded net (between layers)
+                #       child_names[2:] are the outside nets
                 self.tech_info = tech_info
                 self.report_category = report_category
 
@@ -411,6 +458,8 @@ class RCExtractor:
 
                 self.substrate_cap_spec = tech_info.substrate_cap_by_layer_name[inside_layer_name]
                 self.sideoverlap_cap_spec = tech_info.side_overlap_cap_by_layer_names[inside_layer_name][outside_layer_name]
+
+                self.category_name_counter: Dict[str, int] = defaultdict(int)
 
             def begin_polygon(self,
                               layout: kdb.Layout,
@@ -446,24 +495,43 @@ class RCExtractor:
 
                     edge_interval_length = x2 - x1
                     edge_interval_length_um = edge_interval_length * dbu
-                    rdb_cat_edge_interval = report.create_category(self.report_category,
-                                                                   f"edge_interval={(x1, x2)}")
+
+                    edge_interval_original = (self.to_original_trans(edge) *
+                                              kdb.Edge(kdb.Point(x1, 0), kdb.Point(x2, 0)))
+                    transformed_category_name = f"Edge interval {(x1, x2)}"
+                    self.category_name_counter[transformed_category_name] += 1
+                    rdb_cat_edge_interval = report.create_category(
+                        self.report_category,
+                        f"{transformed_category_name} ({self.category_name_counter[transformed_category_name]})"
+                    )
+                    rdb_output(rdb_cat_edge_interval, f"Original Section {edge_interval_original}", edge_interval_original)
+                    shielded_polygons = polygons_by_net.get(1, None)
+                    shielded_region = kdb.Region()
+                    if shielded_polygons:
+                        shielded_region.insert(shielded_polygons)
 
                     for net_index, polygons in polygons_by_net.items():
-                        net_name = self.outside_net_names[net_index]
+                        if net_index < 2:  # ignore "self" and "shielded"
+                            continue
+
+                        if not polygons:
+                            continue
+
+                        unshielded_region: kdb.Region = kdb.Region(polygons) - shielded_region
+                        if not unshielded_region:
+                            continue
+
+                        net_name = self.child_names[net_index]
                         rdb_cat_outside_net = report.create_category(rdb_cat_edge_interval,
                                                                      f"outside_net={net_name}")
 
+                        rdb_cat_outside_unshielded = report.create_category(rdb_cat_outside_net, "Unshielded")
+                        report.create_items(rdb_cell.rdb_id(),
+                                            rdb_cat_outside_unshielded.rdb_id(),
+                                            kdb.CplxTrans(mag=dbu),
+                                            kdb.Region([self.to_original_trans(edge) * p for p in unshielded_region]))
 
-                        # TODO: re-enable this, currently there is a klayout bug when writing / reading the report DB
-                        if polygons:
-                            original_trans_polygons = [self.to_original_trans(edge) * p for p in polygons]
-                            report.create_items(rdb_cell.rdb_id(),
-                                                rdb_cat_outside_net.rdb_id(),
-                                                kdb.CplxTrans(mag=dbu),
-                                                original_trans_polygons)
-
-                        for p in polygons:
+                        for p in unshielded_region:
                             bbox: kdb.Box = p.bbox()
 
                             if not p.is_box():
@@ -514,8 +582,13 @@ class RCExtractor:
                             else:
                                 sfrac = cfrac
 
+                            if outside_layer_name == substrate_layer_name:
+                                cfrac = sfrac
+
                             cap_femto = (cfrac * edge_interval_length_um *
                                          self.sideoverlap_cap_spec.capacitance / 1000.0)
+
+                            report.create_category(rdb_cat_outside_net, f"{round(cap_femto, 3)} fF")  # used as info text
 
                             sok = SideOverlapKey(layer_inside=self.inside_layer_name,
                                                  net_inside=self.inside_net_name,
@@ -541,13 +614,16 @@ class RCExtractor:
                             # TODO: fringe portion extracted from substrate
 
         for inside_layer_name in layer2net2regions.keys():
+            if inside_layer_name == substrate_layer_name:
+                continue
+
             inside_net2regions = layer2net2regions.get(inside_layer_name, None)
             if not inside_net2regions:
                 continue
 
             inside_fringe_specs = self.tech_info.side_overlap_cap_by_layer_names.get(inside_layer_name, None)
             if not inside_fringe_specs:
-                warning(f"No fringe / side overlap cap specified for layer top={inside_layer_name}")
+                warning(f"No fringe / side overlap cap specified for layer inside={inside_layer_name}")
                 continue
 
             shapes_inside_layer = layer_regions_by_name[inside_layer_name]
@@ -556,6 +632,7 @@ class RCExtractor:
             rdb_cat_inside_layer = report.create_category(rdb_cat_fringe, f"inside_layer={inside_layer_name}")
             rdb_output(rdb_cat_inside_layer, "fringe_halo_inside", fringe_halo_inside)
 
+            # Side Overlap: metal <-> metal (additionally, substrate)
             for outside_layer_name in layer2net2regions.keys():
                 if inside_layer_name == outside_layer_name:
                     continue
@@ -581,21 +658,32 @@ class RCExtractor:
                 rdb_cat_outside_layer = report.create_category(rdb_cat_inside_layer,
                                                                f"outside_layer={outside_layer_name}")
 
+                shielded_regions = shielded_regions_between_layers[(inside_layer_name, outside_layer_name)]
+                rdb_output(rdb_cat_outside_layer, 'Shielded between layers', shielded_regions)
+
                 for net_inside in inside_net2regions.keys():
                     shapes_inside_net: kdb.Region = inside_net2regions[net_inside]
                     if not shapes_inside_net:
                         continue
 
-                    visitor = FringeEdgeNeighborhoodVisitor(inside_layer_name=inside_layer_name,
-                                                            inside_net_name=net_inside,
-                                                            outside_layer_name=outside_layer_name,
-                                                            outside_net_names=[net_inside] + list(outside_net2regions.keys()),
-                                                            tech_info=self.tech_info,
-                                                            report_category=rdb_cat_outside_layer)
+                    rdb_cat_inside_net = report.create_category(rdb_cat_outside_layer,
+                                                                f"inside_net={net_inside}")
+
+                    visitor = FringeEdgeNeighborhoodVisitor(
+                        inside_layer_name=inside_layer_name,
+                        inside_net_name=net_inside,
+                        outside_layer_name=outside_layer_name,
+                        child_names=[net_inside, 'SHIELDED'] + list(outside_net2regions.keys()),
+                        tech_info=self.tech_info,
+                        report_category=rdb_cat_inside_net
+                    )
+
                     # kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net)
-                    children = [kdb.CompoundRegionOperationNode.new_foreign()] + \
+                    children = [kdb.CompoundRegionOperationNode.new_foreign(),
+                                kdb.CompoundRegionOperationNode.new_secondary(shielded_regions)] + \
                                [kdb.CompoundRegionOperationNode.new_secondary(region)
                                 for region in list(outside_net2regions.values())]
+
                     node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
                         children,
                         visitor,
@@ -607,7 +695,8 @@ class RCExtractor:
 
                     shapes_inside_net.complex_op(node)
 
-        info(extraction_results.sideoverlap_table.values())
+        for so in extraction_results.sideoverlap_table.values():
+            info(so)
 
         #
         # (4) SUBSTRATE CAPACITANCE
@@ -617,7 +706,13 @@ class RCExtractor:
             if not layer2regions:
                 continue
 
+            if net1 == substrate_layer_name:
+                continue
+
             for layer_name in layer2regions.keys():
+                if layer_name == substrate_layer_name:
+                    continue
+
                 shapes: Optional[kdb.Region] = layer2regions.get(layer_name, None)
                 if shapes:
                     if shapes.count() >= 1:
@@ -667,14 +762,15 @@ class RCExtractor:
                                 perimeter_shielded += sub_frac * length
                                 info(f"net {net1} shielded edge, "
                                      f"sidewall interacts with net {net2}: "
-                                     f"{edge_pair}, sep {sep}, len {length}, substrate {sub_frac}, shielded {shielded_frac}")
+                                     f"{edge_pair}, sep {sep}, len {length}, "
+                                     f"substrate {sub_frac}, shielded {shielded_frac}")
 
                         perimeter = perimeter_unshielded - perimeter_shielded
 
                         cap_area_femto = area * substrate_cap_spec.area_capacitance / 1000
                         cap_perimeter_femto = perimeter * substrate_cap_spec.perimeter_capacitance / 1000
 
-                        info(f"net {net1} layer {layer_name}: "
+                        info(f"(Substrate) {layer_name}({net1})-substrate: "
                              f"area {area} µm^2, perimeter {perimeter}, "
                              f"cap_area {round(cap_area_femto, 2)}fF, "
                              f"cap_peri {round(cap_perimeter_femto, 2)}fF, "
