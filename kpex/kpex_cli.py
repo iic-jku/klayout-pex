@@ -32,6 +32,7 @@ from .log import (
     error
 )
 from .tech_info import TechInfo
+from .util.multiple_choice import MultipleChoicePattern
 from .version import __version__
 
 
@@ -118,6 +119,11 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=true_or_false, default=False,
                                  help=f"Validate geometries before passing to FasterCap "
                                       f"(default is False)")
+    group_fastercap.add_argument("--diel", dest="dielectric_filter",
+                                 type=str, default="all",
+                                 help=f"Comma separated list of dielectric filter patterns. "
+                                      f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
+                                      f"(default is all)")
     group_fastercap.add_argument("--blackbox", dest="blackbox_devices",
                                  type=true_or_false, default=False,  # TODO: in the future this should be True by default
                                  help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models"
@@ -197,6 +203,13 @@ def validate_args(args: argparse.Namespace):
     except KeyError:
         error(f"Requested log level {args.log_level.lower()} does not exist, "
               f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
+        found_errors = True
+
+    try:
+        pattern_string: str = args.dielectric_filter
+        args.dielectric_filter = MultipleChoicePattern(pattern=pattern_string)
+    except ValueError as e:
+        error("Failed to parse --diel arg", e)
         found_errors = True
 
     def input_file_stem(path: str):
@@ -340,7 +353,8 @@ def main():
 
     set_log_level(args.log_level)
 
-    tech_info = TechInfo.from_json(args.tech_pbjson_path)
+    tech_info = TechInfo.from_json(args.tech_pbjson_path,
+                                   dielectric_filter=args.dielectric_filter)
 
     lvsdb = kdb.LayoutVsSchematic()
 

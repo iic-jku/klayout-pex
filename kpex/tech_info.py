@@ -5,6 +5,7 @@ from typing import *
 from functools import cached_property
 import google.protobuf.json_format
 
+from .util.multiple_choice import MultipleChoicePattern
 import tech_pb2
 import process_stack_pb2
 
@@ -22,12 +23,18 @@ class TechInfo:
             return tech
 
     @classmethod
-    def from_json(cls, jsonpb_path: str) -> TechInfo:
+    def from_json(cls,
+                  jsonpb_path: str,
+                  dielectric_filter: MultipleChoicePattern) -> TechInfo:
         tech = cls.parse_tech_def(jsonpb_path=jsonpb_path)
-        return TechInfo(tech=tech)
+        return TechInfo(tech=tech,
+                        dielectric_filter=dielectric_filter)
 
-    def __init__(self, tech: tech_pb2.Technology):
+    def __init__(self,
+                 tech: tech_pb2.Technology,
+                 dielectric_filter: MultipleChoicePattern):
         self.tech = tech
+        self.dielectric_filter = dielectric_filter
 
     @cached_property
     def gds_pair_for_computed_layer_name(self) -> Dict[str, GDSPair]:
@@ -83,9 +90,21 @@ class TechInfo:
         )
 
     @cached_property
+    def filtered_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        layers = []
+        for pl in self.tech.process_stack.layers:
+            match pl.layer_type:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC | \
+                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC | \
+                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                    if self.dielectric_filter.is_included(pl.name):
+                        layers.append(pl)
+        return layers
+
+    @cached_property
     def dielectric_by_name(self) -> Dict[str, float]:
         diel_by_name = {}
-        for pl in self.tech.process_stack.layers:
+        for pl in self.filtered_dielectric_layers:
             match pl.layer_type:
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
                     diel_by_name[pl.name] = pl.simple_dielectric_layer.dielectric_k
@@ -97,7 +116,7 @@ class TechInfo:
 
     def sidewall_dielectric_layer(self, layer_name: str) -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
-        for lyr in self.tech.process_stack.layers:
+        for lyr in self.filtered_dielectric_layers:
             match lyr.layer_type:
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
                     if lyr.sidewall_dielectric_layer.reference == layer_name:
@@ -114,7 +133,7 @@ class TechInfo:
             raise Exception(f"found multiple sidewall dielectric layers for {layer_name}")
         return found_layers[0]
 
-    def simple_dielectric_above_metal(self, layer_name: str) -> Tuple[process_stack_pb2.ProcessStackInfo.LayerInfo, float]:
+    def simple_dielectric_above_metal(self, layer_name: str) -> Tuple[Optional[process_stack_pb2.ProcessStackInfo.LayerInfo], float]:
         """
         Returns a tuple of the dielectric layer and it's (maximum) height.
         Maximum would be the case where no metal and other dielectrics are present.
@@ -126,6 +145,8 @@ class TechInfo:
                 found_layer = lyr
             elif found_layer:
                 if not diel_lyr and lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                    if not self.dielectric_filter.is_included(lyr.name):
+                        return None, 0.0
                     diel_lyr = lyr
                 # search for next metal or end of stack
                 if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
