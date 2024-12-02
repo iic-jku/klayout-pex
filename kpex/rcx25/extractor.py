@@ -87,8 +87,8 @@ class RCExtractor:
 
         rdb_cell = report.create_cell(cell_name)
         rdb_cat_common = report.create_category("Common")
-        rdb_cat_sidewall_old = report.create_category("Sidewall (Space)")
-        rdb_cat_sidewall = report.create_category("Sidewall")
+        rdb_cat_sidewall_old = report.create_category("Sidewall (legacy space_check)")
+        rdb_cat_sidewall = report.create_category("Sidewall (EdgeNeighborhoodVisitor)")
         rdb_cat_overlap = report.create_category("Overlap")
         rdb_cat_fringe = report.create_category("Fringe / Side Overlap")
 
@@ -320,13 +320,14 @@ class RCExtractor:
                         markers_net1 = space_markers.interacting(shapes1)
                         sidewall_edge_pairs = markers_net1.interacting(shapes2)
 
-                        rdb_cat_sw_nets = report.create_category(rdb_cat_sw_layer, f"{net1} - {net2}") \
-                                          if sidewall_edge_pairs else None
+                        if not sidewall_edge_pairs:
+                            continue
 
-                        rdb_output(rdb_cat_sw_nets, 'Shapes {net1}', shapes1)
-                        rdb_output(rdb_cat_sw_nets, 'Shapes {net2}', shapes2)
-                        rdb_output(rdb_cat_sw_nets, 'Markers interacting {net1}', markers_net1)
-                        rdb_output(rdb_cat_sw_nets, 'Markers interacting {net1}-{net2}', sidewall_edge_pairs)
+                        rdb_cat_sw_nets = report.create_category(rdb_cat_sidewall_old, f"{net1} - {net2}")
+                        rdb_output(rdb_cat_sw_nets, f"Shapes {net1}", shapes1)
+                        rdb_output(rdb_cat_sw_nets, f"Shapes {net2}", shapes2)
+                        rdb_output(rdb_cat_sw_nets, f"Markers interacting {net1}", markers_net1)
+                        rdb_output(rdb_cat_sw_nets, f"Markers interacting {net1}-{net2}", sidewall_edge_pairs)
 
                         for idx, pair in enumerate(sidewall_edge_pairs):
                             edge1: kdb.Edge = pair.first
