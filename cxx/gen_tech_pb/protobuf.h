@@ -46,6 +46,7 @@ void addComputedLayer(kpex::tech::Technology *tech,
                       const std::string &name,
                       uint32_t gds_layer,
                       uint32_t gds_datatype,
+                      const std::string &original_layer_name,
                       const std::string &description);
 
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,

@@ -46,6 +46,20 @@ class TechInfo:
         return {lyr.layer_info.name: lyr for lyr in self.tech.lvs_computed_layers}
 
     @cached_property
+    def computed_layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.ComputedLayerInfo]:
+        return {
+            (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype): lyr
+            for lyr in self.tech.lvs_computed_layers
+        }
+
+    @cached_property
+    def canonical_layer_name_by_gds_pair(self) -> Dict[GDSPair, str]:
+        return {
+            (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype): lyr.original_layer_name
+            for lyr in self.tech.lvs_computed_layers
+        }
+
+    @cached_property
     def layer_info_by_name(self) -> Dict[str, tech_pb2.LayerInfo]:
         return {lyr.name: lyr for lyr in self.tech.layers}
 

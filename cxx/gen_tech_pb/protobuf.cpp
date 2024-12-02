@@ -110,10 +110,12 @@ void addComputedLayer(kpex::tech::Technology *tech,
                       const std::string &name,
                       uint32_t gds_layer,
                       uint32_t gds_datatype,
+                      const std::string &original_layer_name,
                       const std::string &description)
 {
     kpex::tech::ComputedLayerInfo *cl = tech->add_lvs_computed_layers();
     cl->set_kind(kind);
+    cl->set_original_layer_name(original_layer_name);
     kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
     layer->set_name(name);
     layer->set_description(description);
