@@ -187,8 +187,13 @@ class TechInfo:
         """
         usage: dict[top_layer_name][bottom_layer_name]
         """
-        return {oc.top_layer_name: {oc.bottom_layer_name: oc}
-                for oc in self.tech.extraction.capacitance.overlaps}
+        return {
+            oc.top_layer_name: {
+                oc_bot.bottom_layer_name: oc_bot
+                for oc_bot in self.tech.extraction.capacitance.overlaps if oc_bot.top_layer_name == oc.top_layer_name
+            }
+            for oc in self.tech.extraction.capacitance.overlaps
+        }
 
     @cached_property
     def sidewall_cap_by_layer_name(self) -> Dict[str, extract_pb2.CapacitanceInfo.SidewallCapacitance]:
@@ -199,5 +204,9 @@ class TechInfo:
         """
         usage: dict[in_layer_name][out_layer_name]
         """
-        return {oc.in_layer_name: {oc.out_layer_name: oc}
-                for oc in self.tech.extraction.capacitance.sideoverlaps}
+        return {
+            oc.in_layer_name: {
+                oc_bot.out_layer_name: oc_bot
+                for oc_bot in self.tech.extraction.capacitance.sideoverlaps if oc_bot.in_layer_name == oc.in_layer_name
+            }
+            for oc in self.tech.extraction.capacitance.sideoverlaps}
