@@ -46,17 +46,16 @@ class NetlistReducer:
 
 
 class Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        set_log_level(LogLevel.DEBUG)
+
     @property
     def klayout_testdata_dir(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'testdata', 'klayout'))
+                                             'testdata', 'klayout', 'netlists'))
 
-    def test_netlist_reduction(self):
-        set_log_level(LogLevel.DEBUG)
-
-        cell_name = 'nmos_diode2'
-
-        netlist_path = os.path.join(self.klayout_testdata_dir, f"{cell_name}_Expanded_Netlist.cir")
+    def _test_netlist_reduction(self, netlist_path: str, cell_name: str):
         netlist = kdb.Netlist()
         reader = kdb.NetlistSpiceReader()
         netlist.read(netlist_path, reader)
@@ -67,4 +66,12 @@ class Test(unittest.TestCase):
         out_path = tempfile.mktemp(prefix=f"{cell_name}_Reduced_Netlist_", suffix=".cir")
         spice_writer = kdb.NetlistSpiceWriter()
         reduced_netlist.write(out_path, spice_writer)
-        info(f"Wrote reduced netlist to: {out_path}")
+        print(f"Wrote reduced netlist to: {out_path}")
+
+    def test_netlist_reduction_1(self):
+        netlist_path = os.path.join(self.klayout_testdata_dir, 'nmos_diode2_Expanded_Netlist.cir')
+        self._test_netlist_reduction(netlist_path=netlist_path, cell_name='nmos_diode2')
+
+    def test_netlist_reduction_2(self):
+        netlist_path = os.path.join(self.klayout_testdata_dir, 'cap_vpp_Expanded_Netlist.cir')
+        self._test_netlist_reduction(netlist_path=netlist_path, cell_name='TOP')
