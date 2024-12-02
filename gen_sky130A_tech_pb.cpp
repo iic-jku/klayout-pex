@@ -5,8 +5,8 @@
 // https://skywater-pdk.readthedocs.io/en/main/_images/metal_stack.svg
 
 
-#include "build/cxx/tech.pb.h"
 #include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
@@ -15,6 +15,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+
+#include "tech.pb.h"
 
 enum Format {
     PROTOBUF_TEXTUAL,
