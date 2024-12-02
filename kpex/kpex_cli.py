@@ -59,7 +59,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special = main_parser.add_argument_group("Special options")
     group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
-    group_special.add_argument("--log_level", dest='log_level', default='info',
+    group_special.add_argument("--log_level", dest='log_level', default='subprocess',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
     group_special.add_argument("--threads", dest='num_threads', type=int, default=0,
                                help="number of threads (e.g. for FasterCap)")
