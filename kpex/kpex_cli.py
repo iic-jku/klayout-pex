@@ -20,6 +20,7 @@ from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matri
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .klayout.netlist_expander import NetlistExpander
+from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_reducer import NetlistReducer
 from .log import (
     LogLevel,
@@ -30,7 +31,9 @@ from .log import (
     # debug,
     info,
     # warning,
-    error
+    subproc,
+    error,
+    rule
 )
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -253,6 +256,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
     raw_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Raw.csv")
     avg_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix_Avg.csv")
     expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Expanded_Netlist.cir")
+    expanded_netlist_csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Expanded_Netlist.csv")
     reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Reduced_Netlist.cir")
 
     run_fastercap(exe_path=exe_path,
@@ -279,6 +283,21 @@ def run_fastercap_extraction(args: argparse.Namespace,
         cap_matrix=cap_matrix,
         blackbox_devices=args.blackbox_devices
     )
+
+    # create a nice CSV for reports, useful for spreadsheets
+    netlist_csv_writer = NetlistCSVWriter()
+    netlist_csv_writer.write_csv(netlist=expanded_netlist,
+                                 top_cell_name=pex_context.top_cell.name,
+                                 output_path=expanded_netlist_csv_path)
+
+    info("Extended netlist (CSV format):")
+    rule()
+    with open(expanded_netlist_csv_path, 'r') as f:
+        for line in f.readlines():
+            subproc(line[:-1])  # abusing subproc, simply want verbatim
+    rule()
+
+    info(f"Wrote expanded netlist CSV to: {expanded_netlist_csv_path}")
 
     spice_writer = kdb.NetlistSpiceWriter()
     spice_writer.use_net_names = True
