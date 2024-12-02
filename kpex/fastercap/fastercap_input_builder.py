@@ -238,17 +238,17 @@ class FasterCapInputBuilder:
                                                          layer=sidewall_region,
                                                          z=metal_layer.height,
                                                          height=sidewall_height)
-
-                            top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-                            no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
-                            no_metal_region = kdb.Region()
-                            no_metal_region.insert(no_metal_block)
-                            no_metal_region -= sidewall_region
-                            no_metal_height = conf_diel.thickness_where_no_metal
-                            model_builder.add_dielectric(material_name=sidewall.name,
-                                                         layer=no_metal_region,
-                                                         z=metal_layer.height,
-                                                         height=no_metal_height)
+                            if conf_diel.thickness_where_no_metal > 0.0:
+                                top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+                                no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                                no_metal_region = kdb.Region()
+                                no_metal_region.insert(no_metal_block)
+                                no_metal_region -= sidewall_region
+                                no_metal_height = conf_diel.thickness_where_no_metal
+                                model_builder.add_dielectric(material_name=sidewall.name,
+                                                             layer=no_metal_region,
+                                                             z=metal_layer.height,
+                                                             height=no_metal_height)
 
                     sidewallee = sidewall.name
 
