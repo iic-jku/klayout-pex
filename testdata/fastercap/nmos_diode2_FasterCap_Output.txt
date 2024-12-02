@@ -1,18 +1,18 @@
 Running FasterCap version 6.0.7
 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
 Starting capacitance extraction with the following parameters:
-Input file: output/TOP.lst
-Auto calculation with max error: 0.05
+Input file: output/nmos_diode2_FasterCap_Input.lst
+Auto calculation with max error: 0.1
 Remark: Auto option overrides all other Manual settings
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 
 3D Solver Engine invoked
-Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.05
 Out-of-core free memory to link memory condition (-f): 5
 Potential interaction coefficient to mesh refinement ratio (-d): 1
 Mesh curvature (-mc): 3
-Number of input panels to solver engine: 2249
+Number of input panels to solver engine: 2419
 
 Iteration number #0 ***************************
 
@@ -22,78 +22,94 @@ Refinement completed
 Mesh refinement (-m): 1e+32
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 2249
-Number of links to be computed: 4652
+Number of panels after refinement: 2419
+Number of links to be computed: 5018
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  -7.04302e-09 1.32374e-08 8.13305e-11 7.82251e-10 -6.72916e-10 -2.53096e-12 -3.41531e-10 -4.06603e-09 -1.73038e-09 -2.91943e-10 
-g1_8  -1.08673e-09 3.56793e-09 5.2637e-11 -5.238e-11 -5.48127e-10 1.49849e-12 5.90507e-10 -3.20062e-09 7.76631e-11 -1.38155e-10 
-g1_9  -7.0374e-10 1.42924e-09 -1.59381e-10 -7.51069e-11 -7.95778e-11 3.23148e-11 2.72585e-11 -5.32108e-10 -1.91966e-10 -4.06202e-11 
-g1_10  3.07671e-09 -6.30475e-09 -1.00316e-10 1.71459e-10 3.38382e-10 -6.48154e-12 -7.07825e-11 2.25427e-09 8.53984e-10 1.70226e-10 
-g1_11  -6.86454e-10 1.46447e-09 7.12481e-12 3.56684e-11 2.56532e-10 -1.80463e-13 -4.27392e-11 -4.1103e-10 -2.59094e-10 -3.75726e-11 
-g1_12  4.79933e-10 -1.02521e-09 2.56802e-10 -2.09653e-11 1.39728e-11 -2.67747e-11 1.17425e-11 3.50233e-10 1.28107e-10 2.29998e-11 
-g1_13  5.09844e-09 -1.05699e-08 -8.17119e-11 -7.25923e-10 8.18351e-10 1.13002e-12 2.48097e-10 4.84223e-09 5.44816e-10 2.09165e-10 
-g1_14  -4.12101e-09 1.08297e-08 5.33596e-11 4.61353e-10 -1.08135e-09 -2.89161e-13 -7.51743e-10 -4.1703e-09 -1.28433e-09 -3.42705e-10 
-g1_15  7.01771e-09 -1.71775e-08 -1.11685e-10 -7.69723e-10 1.3742e-09 2.21118e-13 4.42868e-10 6.96296e-09 2.5751e-09 4.70762e-10 
-g1_16  -7.52514e-10 1.62391e-09 8.83675e-12 8.08109e-11 -1.33945e-10 -1.24702e-13 -6.46625e-11 -6.96178e-10 -1.91706e-10 1.53721e-10 
+Dimension 11 x 11
+g1_7  1.2457e-09 8.15488e-10 -5.02605e-10 -2.71717e-11 9.06283e-11 3.82782e-11 -4.31579e-13 2.0827e-11 -4.52198e-10 -2.56261e-10 -7.37493e-11 
+g1_8  3.60862e-08 1.17076e-07 -7.73748e-08 2.14434e-10 2.0274e-08 8.71635e-09 -4.76566e-11 2.15043e-08 -8.91254e-08 4.21625e-09 -3.86711e-09 
+g1_9  7.80471e-09 2.12192e-08 -1.70176e-08 3.9828e-11 4.24382e-09 2.8463e-09 -1.14749e-11 5.83562e-09 -1.73693e-08 1.58847e-09 -6.30633e-10 
+g1_10  -1.11591e-10 8.62006e-11 -5.53857e-11 -1.47647e-10 -4.67425e-11 1.19112e-11 3.08298e-11 -1.89152e-12 2.99431e-11 -1.12833e-11 1.38945e-12 
+g1_11  -1.02221e-08 -3.21581e-08 2.20886e-08 -1.22909e-10 -5.30319e-09 -2.88633e-09 8.74985e-12 -6.5106e-09 2.45972e-08 -1.27297e-09 1.04616e-09 
+g1_12  2.92523e-11 6.83815e-11 -8.46421e-11 -8.02859e-13 -3.47223e-11 3.95222e-10 -3.00035e-13 6.36447e-11 4.89427e-11 -7.78661e-11 -3.42232e-12 
+g1_13  -1.19894e-10 -2.04539e-11 2.93058e-12 2.59168e-10 -2.88245e-11 -2.92422e-11 -2.56072e-11 8.68737e-12 -1.60498e-11 2.4189e-11 1.48192e-12 
+g1_14  -1.88892e-08 -5.69092e-08 3.97807e-08 -1.05683e-10 -1.05301e-08 -4.9943e-09 2.53138e-11 -1.17925e-08 4.52465e-08 -3.32845e-09 1.79881e-09 
+g1_15  3.09353e-09 7.37499e-09 -5.53151e-09 6.0208e-12 1.49612e-09 6.89446e-10 -3.92739e-12 2.4207e-09 -7.50637e-09 1.05624e-09 -2.8327e-10 
+g1_16  -2.82053e-08 -8.72467e-08 5.931e-08 -1.57293e-10 -1.55684e-08 -7.32205e-09 3.75516e-11 -1.78256e-08 6.82981e-08 -3.3832e-09 2.85552e-09 
+g1_17  1.91369e-09 5.68377e-09 -4.06829e-09 8.6512e-12 1.06209e-09 5.31525e-10 -2.66483e-12 1.27211e-09 -4.67099e-09 3.39139e-10 1.69255e-11 
 Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 2
-Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 5
 Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 1
 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 7
 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 11
 Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 11
 Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 1
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 2
 Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 8
 Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 1
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 8
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
 Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 11
 Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 11
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 5
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 7
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 8
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 2
 Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 10
 Warning: capacitance matrix is not diagonally dominant due to row 1
 Warning: capacitance matrix is not diagonally dominant due to row 2
 Warning: capacitance matrix is not diagonally dominant due to row 3
@@ -104,18 +120,19 @@ Warning: capacitance matrix is not diagonally dominant due to row 7
 Warning: capacitance matrix is not diagonally dominant due to row 8
 Warning: capacitance matrix is not diagonally dominant due to row 9
 Warning: capacitance matrix is not diagonally dominant due to row 10
+Warning: capacitance matrix is not diagonally dominant due to row 11
 
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 2249
-Number of potential estimates: 2293
-Number of links: 6901 (uncompressed 5058001, compression ratio is 99.9%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 2419
+Number of potential estimates: 2118
+Number of links: 7437 (uncompressed 5851561, compression ratio is 99.9%)
 Max recursion level: 19
-Max Mesh relative refinement value: 0.132279
-Iteration time: 0.048258s (0 days, 0 hours, 0 mins, 0 s)
-Iteration allocated memory: 17974 kilobytes
+Max Mesh relative refinement value: 0.0289625
+Iteration time: 0.044832s (0 days, 0 hours, 0 mins, 0 s)
+Iteration allocated memory: 18167 kilobytes
 
 Iteration number #1 ***************************
 
@@ -124,83 +141,93 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Delta in refined panel and link count w.r.t. previous iteration less than 10%
-(Panels # 2267, Links # 8548)
+(Panels # 2441, Links # 11542)
 Automatically increasing the refinement parameters
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Delta in refined panel and link count w.r.t. previous iteration less than 10%
-(Panels # 2344, Links # 12752)
+(Panels # 2534, Links # 18782)
 Automatically increasing the refinement parameters
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.046628
+Mesh refinement (-m): 0.0101968
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 2552
-Number of links to be computed: 22638
+Number of panels after refinement: 2798
+Number of links to be computed: 33476
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  3.27824e-09 -3.89067e-10 -6.14037e-11 -6.24504e-11 -3.93903e-10 1.53977e-11 -4.58619e-11 -1.91538e-09 -1.21785e-10 -4.44979e-10 
-g1_8  -2.5284e-10 3.31966e-09 -1.27519e-10 -5.05081e-10 -1.10213e-10 7.47448e-11 -9.28887e-10 -1.08298e-10 -1.8322e-09 -7.06001e-11 
-g1_9  -2.71303e-11 -1.614e-10 5.09705e-10 -2.19081e-12 -1.21252e-11 8.48076e-12 1.5605e-11 5.52737e-12 -1.21357e-11 -4.15923e-12 
-g1_10  -2.41469e-11 -1.92405e-10 -2.59764e-11 6.49355e-10 -9.11606e-12 -1.08953e-12 -2.09365e-11 -1.34107e-11 -6.63656e-12 1.92804e-12 
-g1_11  -1.91651e-10 -2.99906e-12 -1.79685e-11 -2.64004e-11 5.13866e-10 1.34561e-12 1.01815e-12 -1.27738e-11 -6.7185e-12 -2.20706e-12 
-g1_12  -6.13896e-11 4.65711e-10 -2.06774e-10 4.01921e-11 9.41866e-11 -1.07659e-10 -6.37183e-11 -8.56317e-11 1.1076e-10 3.90647e-11 
-g1_13  -3.6204e-11 -9.77301e-10 -3.11935e-11 -5.15396e-11 -1.28939e-11 2.90732e-12 1.1559e-09 -7.91448e-11 -3.72776e-11 -6.16914e-12 
-g1_14  -1.93196e-09 -1.46517e-10 -2.08467e-11 -3.41603e-11 -5.24133e-11 -6.97217e-13 -6.27012e-11 2.39207e-09 -8.53202e-11 -1.593e-11 
-g1_15  -1.22454e-10 -1.73992e-09 4.82376e-12 -2.00431e-11 -8.14573e-12 5.83462e-13 -3.88301e-11 -7.27645e-11 2.14481e-09 -6.02539e-11 
-g1_16  -4.58373e-10 -2.35758e-11 5.43937e-13 2.79734e-12 -1.45502e-12 -6.97613e-14 -7.80302e-12 -1.50255e-11 -6.05629e-11 6.08772e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 8
+Dimension 11 x 11
+g1_7  1.12645e-09 -1.53593e-10 -1.73296e-10 -3.43977e-11 -2.35781e-11 -1.35544e-11 -1.19701e-11 -7.77503e-11 -1.50034e-10 2.76836e-11 9.47561e-12 
+g1_8  -1.70743e-10 3.76183e-09 -3.35097e-10 -4.30415e-10 -3.57958e-10 -5.96157e-11 -1.28729e-11 -1.06271e-09 -1.98237e-10 -1.71639e-09 -2.15828e-11 
+g1_9  -1.84828e-10 -2.43196e-10 3.39413e-09 2.93069e-12 -9.00317e-11 -4.00951e-10 -5.6018e-12 -6.82092e-11 -1.9263e-09 -8.77577e-11 -4.77425e-10 
+g1_10  4.38699e-13 -1.15539e-10 -1.16765e-10 2.69115e-10 8.04617e-11 -2.97944e-12 1.30638e-12 4.69023e-12 -1.23124e-11 1.46762e-11 3.63843e-12 
+g1_11  1.43888e-12 -1.8484e-10 -2.2426e-11 2.25572e-11 6.28722e-10 -3.59795e-12 -1.06121e-11 -4.33785e-11 -2.17801e-11 1.6288e-11 3.87605e-12 
+g1_12  -1.10499e-13 -2.86993e-11 -1.99706e-10 -1.59791e-11 -1.45415e-11 5.20533e-10 1.7762e-12 6.08736e-12 -1.21831e-11 -1.26808e-11 -1.1077e-12 
+g1_13  -3.97111e-12 -3.40799e-11 9.77654e-11 2.14625e-10 -1.72999e-10 3.00495e-11 3.6733e-11 1.05524e-10 5.48086e-11 -1.10295e-10 -1.982e-11 
+g1_14  -5.42194e-11 -1.01333e-09 -3.36552e-11 4.11343e-13 -3.744e-11 1.14648e-11 2.76275e-12 1.2573e-09 -6.68908e-11 -8.57931e-11 -1.08739e-11 
+g1_15  -1.40009e-10 -1.11534e-10 -1.92956e-09 -2.13426e-11 -2.31918e-11 -6.74715e-11 -5.50406e-13 -6.38572e-11 2.43682e-09 -9.90881e-11 -8.87024e-12 
+g1_16  -4.13047e-12 -1.76073e-09 -1.196e-10 -1.11185e-11 -1.268e-11 -1.18704e-11 -5.53932e-13 -7.07683e-11 -6.31584e-11 2.18876e-09 -6.02326e-11 
+g1_17  -1.65202e-12 -3.55269e-11 -4.67685e-10 -9.34981e-13 2.5218e-12 -1.35747e-12 -1.18065e-13 -1.45748e-12 -1.48388e-11 -5.60111e-11 6.19782e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 2
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 5
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
+Warning: capacitance matrix is not diagonally dominant due to row 4
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
+Warning: capacitance matrix is not diagonally dominant due to row 9
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 4.47825
+Weighted Frobenius norm of the difference between capacitance (auto option): 31.522
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 2552
-Number of potential estimates: 9035
-Number of links: 25190 (uncompressed 6512704, compression ratio is 99.6%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 2798
+Number of potential estimates: 18421
+Number of links: 36274 (uncompressed 7828804, compression ratio is 99.5%)
 Max recursion level: 19
-Max Mesh relative refinement value: 0.0466212
-Iteration time: 0.194450s (0 days, 0 hours, 0 mins, 0 s)
-Iteration allocated memory: 19250 kilobytes
+Max Mesh relative refinement value: 0.0101955
+Iteration time: 0.162873s (0 days, 0 hours, 0 mins, 0 s)
+Iteration allocated memory: 19071 kilobytes
 
 Iteration number #2 ***************************
 
@@ -209,74 +236,73 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.0329662
+Mesh refinement (-m): 0.00720927
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 2966
-Number of links to be computed: 41398
+Number of panels after refinement: 3227
+Number of links to be computed: 63046
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  3.49093e-09 -2.99871e-10 -1.09529e-10 -6.07315e-11 -4.93e-10 -1.62593e-11 -3.7553e-11 -2.04708e-09 -1.00687e-10 -4.90333e-10 
-g1_8  -2.62127e-10 3.79752e-09 -3.23595e-10 -5.98461e-10 -1.34082e-11 5.51781e-12 -8.8848e-10 -1.16839e-10 -1.87567e-09 -4.0381e-11 
-g1_9  -3.66828e-11 -6.09367e-11 7.12983e-10 3.15619e-11 2.23687e-12 -3.91939e-11 1.52926e-12 1.26691e-12 -6.07346e-12 -1.37654e-12 
-g1_10  -1.66e-11 -1.99224e-10 1.30985e-11 6.20637e-10 -1.77058e-11 -5.74951e-12 1.67695e-12 -8.891e-12 -3.7519e-13 1.0204e-12 
-g1_11  -2.33606e-10 -2.18277e-11 9.13055e-12 -3.40006e-11 5.92279e-10 1.18323e-12 4.15283e-13 -1.16413e-11 -1e-12 -3.65311e-13 
-g1_12  -4.08918e-11 -7.20689e-11 -2.42677e-10 8.65834e-11 -4.57122e-11 3.35997e-11 -9.08968e-11 -4.85369e-11 -1.03944e-11 2.75359e-12 
-g1_13  -5.72548e-11 -9.67221e-10 -9.1979e-12 -4.37424e-12 -8.05962e-13 5.59221e-12 1.16953e-09 -9.76003e-11 -4.58809e-11 -1.31708e-12 
-g1_14  -2.06394e-09 -1.27505e-10 -1.21535e-11 -2.85681e-11 -2.69208e-11 1.92211e-12 -1.00918e-10 2.54018e-09 -9.29945e-11 -1.59529e-11 
-g1_15  -1.22549e-10 -1.87714e-09 -6.88147e-12 7.84299e-12 5.27809e-12 1.94534e-12 -4.53055e-11 -8.88652e-11 2.30318e-09 -6.95629e-11 
-g1_16  -4.89786e-10 -2.99827e-11 -9.42829e-13 1.84521e-12 -2.41212e-13 -1.60972e-14 -1.89212e-12 -1.29964e-11 -7.9203e-11 6.52278e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 8
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 7
+Dimension 11 x 11
+g1_7  1.12239e-09 -1.79144e-10 -1.70167e-10 -9.6693e-11 -5.47068e-11 -2.74549e-11 -2.40496e-11 -1.86378e-11 -9.75641e-11 -2.77719e-11 -9.80348e-12 
+g1_8  -1.45417e-10 3.84155e-09 -2.15692e-10 5.38918e-11 -6.44097e-10 -1.12323e-11 -1.2507e-10 -9.6799e-10 -9.17339e-11 -1.79968e-09 -3.69517e-11 
+g1_9  -1.70791e-10 -1.05034e-10 3.56203e-09 -5.50785e-10 -2.4332e-10 -5.90475e-10 -2.71695e-11 -3.03769e-11 -1.96643e-09 -1.31018e-10 -4.45414e-10 
+g1_10  -9.92664e-12 -2.18343e-10 -8.37737e-11 1.02959e-09 7.31195e-11 8.07388e-11 -7.84271e-11 -7.51087e-13 7.79121e-12 9.11941e-12 -1.26149e-11 
+g1_11  1.27098e-12 -2.47187e-10 -3.22768e-11 6.47632e-11 7.57355e-10 -1.99891e-11 1.43285e-11 6.34103e-12 -2.08761e-11 -5.68755e-12 -2.84167e-12 
+g1_12  -6.13846e-12 -3.50445e-11 -2.54672e-10 5.34889e-11 -2.39579e-11 6.15111e-10 -4.93538e-13 -3.31969e-13 -1.11654e-11 -5.39462e-12 -2.65269e-12 
+g1_13  -1.0216e-11 -4.31835e-11 -9.34214e-11 -6.47824e-10 1.07911e-10 -9.37355e-12 2.26616e-10 -3.2629e-11 -7.8863e-11 -1.78043e-11 1.03086e-11 
+g1_14  -4.24932e-11 -9.6708e-10 -3.89335e-11 -2.78803e-11 -2.10656e-12 -5.92879e-12 -4.17449e-12 1.18422e-09 -9.7846e-11 -4.20611e-11 -1.06577e-11 
+g1_15  -1.31042e-10 -1.24971e-10 -2.00338e-09 -1.86677e-11 -1.292e-11 -3.6058e-11 6.65965e-13 -9.81623e-11 2.52805e-09 -8.09753e-11 -2.27173e-11 
+g1_16  -3.44194e-11 -1.8009e-09 -1.1182e-10 8.71268e-12 -8.01198e-12 -1.2525e-11 -3.48632e-12 -3.61957e-11 -8.1502e-11 2.22535e-09 -6.52389e-11 
+g1_17  -1.22927e-11 -3.07052e-11 -4.61068e-10 -4.60603e-12 -7.57648e-13 -1.47152e-12 1.38586e-13 -4.7541e-12 -2.03748e-11 -6.5503e-11 6.32273e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 9
 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 8
 Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 7
 Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 7
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
+Warning: capacitance matrix is not diagonally dominant due to row 9
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.121743
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.197399
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 2966
-Number of potential estimates: 17698
-Number of links: 44364 (uncompressed 8797156, compression ratio is 99.5%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 3227
+Number of potential estimates: 26116
+Number of links: 66273 (uncompressed 10413529, compression ratio is 99.4%)
 Max recursion level: 21
-Max Mesh relative refinement value: 0.0329589
-Iteration time: 0.330508s (0 days, 0 hours, 0 mins, 0 s)
-Iteration allocated memory: 19956 kilobytes
+Max Mesh relative refinement value: 0.0072089
+Iteration time: 0.327977s (0 days, 0 hours, 0 mins, 0 s)
+Iteration allocated memory: 20418 kilobytes
 
 Iteration number #3 ***************************
 
@@ -285,79 +311,71 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.0233055
+Mesh refinement (-m): 0.00509746
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 3720
-Number of links to be computed: 80542
+Number of panels after refinement: 4210
+Number of links to be computed: 126388
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
-Error: not converging after 1000 iterations, norm of the residual is 0.180, while targeting 0.025
-
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  3.82116e-09 -2.80173e-10 -9.96629e-12 -4.73045e-11 -5.23999e-10 -2.81187e-11 -3.51124e-11 -2.33989e-09 -1.02333e-10 -5.68777e-10 
-g1_8  -2.47423e-10 4.21632e-09 -4.20045e-09 -5.10709e-10 -9.72456e-11 5.50797e-10 -9.80657e-10 -1.42088e-10 -2.215e-09 -6.89184e-11 
-g1_9  -7.68661e-12 -6.23532e-11 -8.57185e-10 -9.36367e-12 -5.03829e-12 1.98377e-10 2.0232e-11 1.47617e-12 -2.44376e-11 -1.19135e-11 
-g1_10  -1.20681e-11 -2.25873e-10 -1.15349e-10 6.46101e-10 -2.59942e-11 1.55918e-11 -1.56986e-11 -4.10162e-12 2.43107e-12 6.68044e-14 
-g1_11  -2.34426e-10 -2.36424e-11 -1.22393e-11 -3.11837e-11 6.41529e-10 1.54458e-12 -2.5765e-12 -1.69492e-11 5.65383e-13 -8.37104e-14 
-g1_12  -2.7825e-10 1.91383e-10 3.95476e-09 2.47159e-10 -7.07116e-11 -4.47794e-10 -1.59231e-10 -1.19052e-10 -2.64603e-11 3.53844e-11 
-g1_13  -3.45902e-11 -1.05946e-09 2.49186e-11 -3.99311e-11 7.2709e-13 -9.73688e-12 1.28676e-09 -1.15519e-10 -3.72895e-11 -6.95804e-12 
-g1_14  -2.33714e-09 -1.24571e-10 1.28129e-10 -2.06049e-11 -4.94533e-11 -3.24201e-11 -1.15286e-10 2.8363e-09 -9.84358e-11 -1.25281e-11 
-g1_15  -1.11261e-10 -2.1762e-09 3.46026e-12 5.49732e-12 3.16462e-12 -3.47818e-12 -3.3874e-11 -9.99027e-11 2.58164e-09 -6.0692e-11 
-g1_16  -5.66306e-10 -2.67841e-11 9.71941e-12 2.92288e-13 -5.17389e-13 -2.71952e-12 -7.13528e-12 -1.46041e-11 -7.20553e-11 7.24767e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 8
+Dimension 11 x 11
+g1_7  1.1807e-09 -2.6643e-10 -1.47537e-10 1.0813e-10 -2.19881e-11 -2.20052e-11 2.11126e-11 -1.13372e-11 -1.38613e-10 -3.45e-11 -1.17984e-11 
+g1_8  -5.85837e-11 3.80956e-09 -1.37487e-10 3.07957e-11 -4.59524e-10 -3.35982e-11 7.73027e-11 -1.07006e-09 -1.65577e-10 -2.09299e-09 -1.65231e-11 
+g1_9  -1.98381e-10 -1.13902e-10 3.7759e-09 -1.22105e-10 -5.28318e-11 -5.03578e-10 -4.37188e-11 -5.30852e-11 -2.28944e-09 -1.00047e-10 -5.53937e-10 
+g1_10  2.48201e-12 -8.31859e-11 -2.28356e-11 6.52376e-10 -5.2514e-12 9.2003e-12 -3.02333e-11 6.45403e-12 -3.26e-12 -6.63721e-12 -4.92743e-14 
+g1_11  -1.05798e-11 -2.02584e-10 -1.51165e-11 -1.95756e-12 6.23779e-10 -1.93665e-11 -3.94252e-12 -1.12354e-11 -2.47934e-12 1.05971e-12 -7.19765e-13 
+g1_12  -7.65833e-12 -1.59599e-11 -2.35881e-10 -7.99628e-12 -3.44903e-11 6.33826e-10 -2.37303e-12 -9.25711e-13 -1.13432e-11 -3.43044e-12 -1.0808e-12 
+g1_13  -1.61452e-10 3.60492e-10 -1.76457e-10 -7.44683e-10 -1.81738e-11 -2.5154e-11 -4.64474e-11 -2.92272e-11 7.43371e-11 -5.32164e-12 -2.94351e-11 
+g1_14  -2.56489e-11 -1.07791e-09 -4.81277e-11 -1.20156e-11 -2.62343e-11 3.63954e-12 -1.17833e-13 1.30848e-09 -1.00894e-10 -4.21329e-11 -7.6002e-12 
+g1_15  -1.25016e-10 -1.00483e-10 -2.27892e-09 -1.47319e-12 -1.65386e-11 -3.33758e-11 1.13068e-12 -1.00554e-10 2.8088e-09 -1.0791e-10 -1.77498e-11 
+g1_16  -4.01689e-11 -2.08778e-09 -1.19794e-10 2.44624e-12 -2.89162e-12 -1.40884e-12 -4.32407e-13 -3.54918e-11 -9.49083e-11 2.5173e-09 -5.79051e-11 
+g1_17  -1.83137e-11 -3.04288e-11 -5.44754e-10 -6.25893e-14 1.20525e-12 -2.22246e-12 -5.56303e-13 -5.8125e-12 -1.42817e-11 -6.40222e-11 7.08346e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 2
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 7
 Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 5
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
 Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.580674
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.146529
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 3720
-Number of potential estimates: 32882
-Number of links: 84262 (uncompressed 13838400, compression ratio is 99.4%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 4210
+Number of potential estimates: 42231
+Number of links: 130598 (uncompressed 17724100, compression ratio is 99.3%)
 Max recursion level: 23
-Max Mesh relative refinement value: 0.0233047
-Iteration time: 5.354083s (0 days, 0 hours, 0 mins, 5 s)
-Iteration allocated memory: 51309 kilobytes
+Max Mesh relative refinement value: 0.00509738
+Iteration time: 1.655619s (0 days, 0 hours, 0 mins, 1 s)
+Iteration allocated memory: 31391 kilobytes
 
 Iteration number #4 ***************************
 
@@ -366,71 +384,75 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.0164789
+Mesh refinement (-m): 0.00360439
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 5223
-Number of links to be computed: 158100
+Number of panels after refinement: 5618
+Number of links to be computed: 250226
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
-Error: not converging after 1000 iterations, norm of the residual is 0.059, while targeting 0.025
+Error: not converging after 1000 iterations, norm of the residual is 0.060, while targeting 0.050
 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  4.1477e-09 -4.07335e-10 -6.98893e-11 -5.18319e-11 -6.27609e-10 8.83569e-12 -4.75379e-11 -2.53735e-09 -1.12101e-10 -6.19517e-10 
-g1_8  -2.7944e-10 4.55229e-09 -2.31184e-10 -6.42917e-10 -1.01906e-11 -7.3946e-11 -1.1448e-09 -1.23227e-10 -2.30817e-09 -2.75514e-11 
-g1_9  -9.9557e-12 1.49048e-11 7.60476e-10 -3.03353e-11 -6.95095e-12 -6.33524e-11 -2.35043e-12 -6.38847e-13 -3.68965e-12 7.46732e-13 
-g1_10  -1.72837e-11 -2.51407e-10 -2.82496e-11 7.2703e-10 -2.0143e-11 4.70418e-12 -1.47193e-11 -3.84745e-13 -9.58118e-13 -5.05758e-13 
-g1_11  -2.81774e-10 -3.58036e-11 -1.41717e-11 -3.82196e-11 7.53933e-10 3.04072e-12 8.25237e-14 -1.75835e-11 8.46487e-14 -4.88988e-13 
-g1_12  -9.07741e-11 -4.50016e-10 -3.96405e-10 4.62913e-11 -2.9151e-11 1.89903e-10 -7.91143e-12 -1.32964e-11 2.29424e-12 -7.16109e-12 
-g1_13  -4.29276e-11 -1.13406e-09 1.28393e-12 -2.31508e-11 2.7945e-12 -1.40194e-12 1.36263e-09 -1.20038e-10 -4.36317e-11 -7.78834e-12 
-g1_14  -2.53498e-09 -8.43412e-11 1.53164e-11 -1.41615e-12 -4.36753e-11 -1.57345e-11 -1.13189e-10 3.02187e-09 -7.89203e-11 -1.39589e-11 
-g1_15  -1.07614e-10 -2.29317e-09 -1.07019e-11 2.76689e-12 -1.57519e-12 -8.60352e-13 -3.94482e-11 -8.91189e-11 2.71001e-09 -7.19309e-11 
-g1_16  -6.18952e-10 -2.62055e-11 1.37767e-12 -8.86769e-13 -3.89103e-13 -2.68463e-13 -1.13454e-11 -1.42562e-11 -7.15737e-11 7.79482e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 2
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 9
+Dimension 11 x 11
+g1_7  1.16074e-09 -1.81193e-10 -1.91439e-10 -3.16522e-11 -3.12698e-11 -1.27702e-11 7.99045e-12 -2.12884e-11 -1.13324e-10 -3.95739e-11 -2.01908e-11 
+g1_8  -9.39758e-11 5.22677e-09 -4.69004e-10 5.16207e-10 -4.00678e-10 -6.00534e-11 -2.87204e-10 -1.11566e-09 -9.20551e-11 -2.23463e-09 -2.10841e-11 
+g1_9  -1.64892e-10 -4.28825e-10 4.19638e-09 -1.79402e-10 -5.47145e-11 -6.76748e-10 1.16562e-11 -4.94989e-11 -2.45366e-09 -1.0558e-10 -5.88174e-10 
+g1_10  1.39632e-11 -1.80823e-11 7.48737e-12 7.70802e-10 -2.77549e-11 -3.03156e-11 -2.72642e-11 -8.11773e-13 -6.69507e-12 1.93529e-12 -1.25612e-12 
+g1_11  -8.65742e-12 -2.01831e-10 -1.73211e-11 2.07297e-11 7.36326e-10 -2.61191e-11 -1.64658e-11 -1.77001e-11 -3.45099e-12 2.293e-12 7.23552e-13 
+g1_12  -1.02993e-11 -1.52004e-11 -2.65361e-10 -4.74898e-12 -3.33683e-11 7.28274e-10 -2.73299e-12 6.34242e-14 -1.27904e-11 -3.36404e-12 -8.07637e-13 
+g1_13  -7.74227e-11 -9.12039e-10 5.45478e-11 -1.58766e-09 -2.45125e-10 2.29656e-10 3.33927e-10 -8.53191e-11 -2.45225e-11 -3.19037e-11 -1.78754e-11 
+g1_14  -2.50597e-11 -1.12248e-09 -3.82091e-11 -1.89038e-12 -2.23287e-11 -1.7727e-12 -1.55443e-12 1.37253e-09 -1.17926e-10 -4.47581e-11 -7.93479e-12 
+g1_15  -1.23762e-10 -1.15442e-10 -2.4507e-09 -3.20107e-12 -7.13288e-12 -4.02828e-11 -9.85486e-13 -1.12451e-10 2.98798e-09 -9.18027e-11 -1.65888e-11 
+g1_16  -4.34615e-11 -2.22278e-09 -9.74645e-11 7.03236e-13 2.18163e-12 -6.81766e-12 -7.48262e-13 -4.0118e-11 -9.08375e-11 2.65646e-09 -7.91942e-11 
+g1_17  -2.00915e-11 -1.42176e-11 -5.85158e-10 1.08158e-13 6.64053e-13 -6.52521e-14 -3.78228e-14 -8.58098e-12 -1.49214e-11 -7.8566e-11 7.50118e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 8
 Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 3
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 5
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.670927
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.242818
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 5223
-Number of potential estimates: 131759
-Number of links: 163323 (uncompressed 27279729, compression ratio is 99.4%)
-Max recursion level: 26
-Max Mesh relative refinement value: 0.0164789
-Iteration time: 8.743870s (0 days, 0 hours, 0 mins, 8 s)
-Iteration allocated memory: 63793 kilobytes
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 5618
+Number of potential estimates: 86644
+Number of links: 255844 (uncompressed 31561924, compression ratio is 99.2%)
+Max recursion level: 25
+Max Mesh relative refinement value: 0.00360437
+Iteration time: 9.752985s (0 days, 0 hours, 0 mins, 9 s)
+Iteration allocated memory: 67078 kilobytes
 
 Iteration number #5 ***************************
 
@@ -439,77 +461,80 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.0116523
+Mesh refinement (-m): 0.00254868
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 7709
-Number of links to be computed: 316822
+Number of panels after refinement: 8477
+Number of links to be computed: 501624
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
-Error: not converging after 1000 iterations, norm of the residual is 0.044, while targeting 0.025
+Error: not converging after 1000 iterations, norm of the residual is 0.051, while targeting 0.050
 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
-Error: not converging after 1000 iterations, norm of the residual is 0.090, while targeting 0.025
+Error: not converging after 1000 iterations, norm of the residual is 0.101, while targeting 0.050
 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
-Error: not converging after 1000 iterations, norm of the residual is 0.310, while targeting 0.025
-
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
+Error: not converging after 1000 iterations, norm of the residual is 0.086, while targeting 0.050
+
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  4.42367e-09 -2.79856e-10 -1.37652e-10 -2.8884e-11 -5.98403e-10 -3.14365e-11 -3.77593e-11 -2.76626e-09 -1.25646e-10 -7.0174e-10 
-g1_8  -2.63698e-10 5.11457e-09 -7.24919e-10 -7.19904e-10 -4.46034e-11 3.71614e-11 -1.30159e-09 -1.76126e-10 -2.58185e-09 -4.43116e-11 
-g1_9  -7.31436e-11 -1.52331e-11 5.75189e-10 1.06126e-10 3.08483e-11 -1.58118e-10 3.92177e-12 -1.93682e-11 7.27609e-12 3.76422e-12 
-g1_10  -1.21897e-11 -2.72493e-10 2.38866e-12 7.80727e-10 -2.25136e-11 1.83077e-12 -1.42647e-11 -4.92231e-12 1.2679e-12 -1.01996e-12 
-g1_11  -2.80216e-10 -1.86185e-11 -1.03295e-11 -3.30191e-11 7.44323e-10 -1.21956e-12 -5.07827e-12 -1.31311e-11 -2.92341e-12 -8.08177e-13 
-g1_12  8.90185e-11 -3.33775e-10 2.5542e-10 -6.32377e-11 -1.20811e-10 2.06083e-10 -5.95167e-11 2.06369e-11 -2.03223e-11 9.12144e-12 
-g1_13  -4.79552e-11 -1.3101e-09 6.19846e-12 -3.13559e-11 -9.56856e-12 -8.35078e-13 1.52382e-09 -1.11846e-10 -2.38229e-11 -7.34936e-12 
-g1_14  -2.82895e-09 -1.48491e-10 -1.55793e-11 -1.30653e-11 -3.40805e-11 -4.94933e-13 -1.16255e-10 3.31776e-09 -6.62716e-11 -1.07374e-11 
-g1_15  -1.40722e-10 -2.56532e-09 -1.58936e-12 1.14024e-12 -5.35106e-12 -1.77271e-12 -2.12897e-11 -6.54297e-11 2.95565e-09 -6.57427e-11 
-g1_16  -7.22674e-10 -3.31106e-11 -3.86329e-14 -3.72966e-12 -1.36496e-12 5.29793e-13 -7.60757e-12 -6.49557e-12 -6.58498e-11 8.72343e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
+Dimension 11 x 11
+g1_7  9.76016e-10 2.82041e-10 -2.15703e-10 -2.64648e-11 -1.83962e-10 9.62484e-11 -1.55889e-10 -8.93908e-11 -1.50437e-10 -4.38228e-11 -3.33722e-11 
+g1_8  -2.16391e-10 4.89286e-09 -2.50622e-10 -3.81323e-10 -6.98509e-10 -2.91332e-11 -8.76386e-11 -1.18189e-09 -1.28027e-10 -2.33754e-09 -3.90482e-11 
+g1_9  -1.27304e-10 -3.1615e-10 4.54163e-09 5.91023e-11 2.34594e-11 -6.12558e-10 -9.9113e-12 -4.34854e-11 -2.83985e-09 -1.26673e-10 -6.83389e-10 
+g1_10  1.00812e-10 -2.1437e-10 -3.49991e-11 9.93283e-10 1.06583e-10 -7.91912e-12 -4.21826e-11 -8.92575e-12 -5.53835e-12 -2.31717e-12 4.85819e-12 
+g1_11  -8.58384e-13 -2.8796e-10 -1.66835e-11 6.00279e-12 7.8139e-10 -2.76193e-11 -8.49095e-13 -6.34295e-12 -3.25349e-12 -3.26922e-13 -6.36754e-13 
+g1_12  -5.39929e-12 -1.57413e-11 -2.70718e-10 -1.32407e-11 -4.20137e-11 7.37461e-10 -1.52144e-12 -2.22477e-12 -1.30393e-11 -7.48656e-13 -9.72408e-13 
+g1_13  -1.33376e-10 -1.85889e-10 -1.36914e-11 -1.02909e-09 -1.49694e-10 -4.87847e-12 1.9216e-10 -5.75078e-12 2.276e-11 1.50131e-11 -1.08802e-11 
+g1_14  -1.74949e-11 -1.31374e-09 -4.52026e-11 7.78349e-12 -1.3606e-11 -4.40445e-12 -8.93842e-13 1.5496e-09 -1.24074e-10 -3.21322e-11 -6.24973e-12 
+g1_15  -1.16104e-10 -1.14079e-10 -2.74013e-09 7.51175e-12 -6.44794e-12 -4.50174e-11 -1.77436e-12 -1.19688e-10 3.26295e-09 -8.11123e-11 -1.04252e-11 
+g1_16  -4.30795e-11 -2.50731e-09 -1.22193e-10 1.93544e-12 2.60835e-12 4.4269e-14 -1.12415e-12 -2.87815e-11 -7.87367e-11 2.92538e-09 -6.93723e-11 
+g1_17  -2.06765e-11 -2.67852e-11 -6.77854e-10 2.74522e-13 -1.72602e-12 -1.10427e-12 -1.62269e-13 -6.12674e-12 -9.49789e-12 -6.88745e-11 8.3746e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 2
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 1
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 8
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 3
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 4
 Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 5
 Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 4
 Warning: capacitance matrix is not diagonally dominant due to row 1
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.130764
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.177037
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 7709
-Number of potential estimates: 105245
-Number of links: 324531 (uncompressed 59428681, compression ratio is 99.5%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 8477
+Number of potential estimates: 142045
+Number of links: 510101 (uncompressed 71859529, compression ratio is 99.3%)
 Max recursion level: 27
-Max Mesh relative refinement value: 0.011652
-Iteration time: 29.840902s (0 days, 0 hours, 0 mins, 29 s)
-Iteration allocated memory: 84440 kilobytes
+Max Mesh relative refinement value: 0.00254866
+Iteration time: 31.762793s (0 days, 0 hours, 0 mins, 31 s)
+Iteration allocated memory: 90824 kilobytes
 
 Iteration number #6 ***************************
 
@@ -518,63 +543,65 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.00823918
+Mesh refinement (-m): 0.00180218
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 11954
-Number of links to be computed: 638414
+Number of panels after refinement: 12778
+Number of links to be computed: 1005394
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  4.75743e-09 -3.06411e-10 -1.80846e-11 -2.33501e-11 -6.51386e-10 -2.33054e-11 -4.15456e-11 -3.00797e-09 -9.92846e-11 -7.51565e-10 
-g1_8  -3.03542e-10 5.35835e-09 -2.0743e-10 -7.02227e-10 -1.92596e-11 -8.27356e-11 -1.34425e-09 -1.21741e-10 -2.69738e-09 -3.07744e-11 
-g1_9  -1.6216e-11 -7.74546e-11 8.63557e-10 -1.47589e-11 -1.44495e-12 -4.71876e-11 -3.33209e-12 -3.46341e-12 2.06621e-12 1.99275e-13 
-g1_10  -7.2373e-12 -3.14582e-10 -1.82863e-11 8.58631e-10 -1.96055e-11 -7.85172e-13 -1.77545e-11 -8.78386e-12 -2.16775e-13 -5.18947e-13 
-g1_11  -3.01634e-10 -1.96134e-11 -3.14498e-12 -3.42659e-11 7.86704e-10 -9.90356e-13 -5.25157e-12 -1.57545e-11 -2.90205e-12 -4.56177e-13 
-g1_12  -7.18489e-11 -3.15856e-10 -6.22779e-10 -6.50134e-12 -1.10275e-11 1.51192e-10 -8.56119e-12 3.24413e-12 -1.10396e-11 -1.3754e-12 
-g1_13  -4.05753e-11 -1.35012e-09 -3.63516e-12 -4.08805e-11 -1.38896e-11 1.54891e-12 1.60417e-09 -1.21104e-10 -3.73641e-11 -1.00468e-11 
-g1_14  -2.99945e-09 -1.20191e-10 6.2784e-13 -2.48317e-11 -4.90067e-11 1.93612e-12 -1.19066e-10 3.49028e-09 -9.43384e-11 -1.1563e-11 
-g1_15  -1.03804e-10 -2.70444e-09 1.21049e-13 3.15846e-13 -7.816e-12 -8.06578e-13 -3.54193e-11 -9.33819e-11 3.10333e-09 -6.84937e-11 
-g1_16  -7.48899e-10 -2.88368e-11 -5.53347e-13 -7.89089e-13 -9.75107e-13 -5.67544e-13 -1.21829e-11 -1.18453e-11 -6.85205e-11 9.07784e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 10
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 8
-Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 6
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 3
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 4
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Dimension 11 x 11
+g1_7  1.17752e-09 -1.90895e-10 -1.90097e-10 -2.17711e-11 -8.95419e-12 1.29489e-12 -1.40011e-11 -1.70078e-11 -1.10872e-10 -4.11872e-11 -1.89107e-11 
+g1_8  -1.73042e-10 5.43116e-09 -2.58007e-10 -1.77604e-10 -6.3968e-10 7.23125e-12 -1.06413e-10 -1.37119e-09 -1.09943e-10 -2.69076e-09 -2.30104e-11 
+g1_9  -1.8326e-10 -2.59674e-10 4.78136e-09 -1.83134e-11 -1.92077e-11 -6.13874e-10 -1.93746e-11 -4.4927e-11 -2.99243e-09 -1.01151e-10 -7.5256e-10 
+g1_10  -5.20834e-13 -8.32473e-11 -1.286e-11 8.55867e-10 6.52268e-12 9.61425e-12 -5.64573e-11 1.51431e-12 -5.21269e-12 2.42655e-12 -8.27288e-13 
+g1_11  -2.2977e-12 -3.03957e-10 -7.8257e-12 3.84922e-12 8.28953e-10 -1.67706e-11 -1.63063e-12 -1.7434e-11 -8.26855e-12 -1.14812e-12 -1.36909e-12 
+g1_12  -2.13053e-12 -1.84471e-11 -2.8595e-10 -2.54358e-12 -3.20606e-11 7.66387e-10 -1.16207e-14 -7.05362e-12 -1.67981e-11 -3.19754e-12 -5.75809e-13 
+g1_13  -4.17257e-11 -2.85581e-10 -5.90556e-11 -6.17125e-10 -7.5388e-11 -7.63191e-11 2.08269e-10 -1.8684e-11 4.77717e-12 -2.21235e-11 -2.00468e-12 
+g1_14  -2.01789e-11 -1.37714e-09 -4.36277e-11 -1.03316e-11 -4.19248e-11 -1.69569e-11 -4.26612e-14 1.62793e-09 -1.20621e-10 -3.05926e-11 -7.47358e-12 
+g1_15  -1.1606e-10 -1.12432e-10 -2.97381e-09 -4.2496e-12 -1.97958e-11 -4.79009e-11 -8.23048e-13 -1.17742e-10 3.49375e-09 -8.67395e-11 -6.2251e-12 
+g1_16  -4.44178e-11 -2.6984e-09 -1.06039e-10 -8.63092e-13 -4.61812e-14 -7.43526e-12 -1.51276e-12 -2.99821e-11 -8.41707e-11 3.11433e-09 -7.50446e-11 
+g1_17  -2.13671e-11 -2.08839e-11 -7.4734e-10 -7.93307e-13 -2.11153e-12 -8.02941e-13 -3.77122e-13 -8.74431e-12 -6.1827e-12 -7.46868e-11 9.06885e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.117028
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.107815
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 11954
-Number of potential estimates: 362652
-Number of links: 650368 (uncompressed 142898116, compression ratio is 99.5%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 12778
+Number of potential estimates: 332233
+Number of links: 1018172 (uncompressed 163277284, compression ratio is 99.4%)
 Max recursion level: 29
-Max Mesh relative refinement value: 0.00823915
-Iteration time: 5.021200s (0 days, 0 hours, 0 mins, 5 s)
-Iteration allocated memory: 33371 kilobytes
+Max Mesh relative refinement value: 0.00180217
+Iteration time: 7.522791s (0 days, 0 hours, 0 mins, 7 s)
+Iteration allocated memory: 39380 kilobytes
 
 Iteration number #7 ***************************
 
@@ -583,57 +610,77 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.00582596
+Mesh refinement (-m): 0.00127433
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 18995
-Number of links to be computed: 1297668
+Number of panels after refinement: 20501
+Number of links to be computed: 2041036
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 
-Capacitance matrix is:
-Dimension 10 x 10
-g1_7  5.12634e-09 -2.88036e-10 -4.83652e-11 -2.90761e-11 -6.89378e-10 -3.74991e-11 -4.64678e-11 -3.26524e-09 -9.5994e-11 -8.26581e-10 
-g1_8  -3.02902e-10 5.88542e-09 -3.07407e-10 -7.29651e-10 -2.97251e-11 -1.19541e-10 -1.49787e-09 -1.02668e-10 -2.96728e-09 -2.49808e-11 
-g1_9  -1.80604e-11 -7.41263e-11 9.58549e-10 -7.28049e-12 -1.39861e-12 -5.71618e-11 -3.88375e-13 2.42546e-12 -1.11677e-12 4.19899e-14 
-g1_10  -1.11567e-11 -3.42975e-10 -2.5399e-11 8.92092e-10 -2.01713e-11 -1.83475e-12 -5.14158e-12 -7.83038e-12 -2.63997e-12 -3.95622e-13 
-g1_11  -3.22132e-10 -1.78676e-11 -5.35706e-12 -3.08694e-11 8.1386e-10 -1.6962e-12 -6.5642e-12 -1.13305e-11 -4.87661e-12 -6.6754e-13 
-g1_12  -6.66797e-11 -4.04294e-10 -4.96219e-10 -4.6329e-11 -8.93266e-13 2.30011e-10 -1.76067e-11 -2.37147e-11 -3.37771e-12 -2.50588e-12 
-g1_13  -4.5617e-11 -1.50517e-09 -7.05529e-12 -2.55786e-11 -1.2568e-11 -6.60761e-13 1.75423e-09 -1.2586e-10 -3.80844e-11 -9.6295e-12 
-g1_14  -3.26922e-09 -1.18157e-10 -2.07037e-11 -1.69284e-11 -3.90774e-11 -4.48185e-12 -1.21616e-10 3.7524e-09 -9.42651e-11 -1.61083e-11 
-g1_15  -9.62579e-11 -2.96904e-09 -6.32025e-12 -1.96792e-12 -8.92251e-12 -9.17781e-13 -3.77865e-11 -9.30252e-11 3.36692e-09 -7.16946e-11 
-g1_16  -8.27607e-10 -2.44009e-11 -1.29849e-13 -1.14961e-12 -1.39556e-12 -8.67196e-14 -1.01185e-11 -1.64216e-11 -7.1047e-11 9.87677e-10 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 8
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 10
-Warning: capacitance matrix is not diagonally dominant due to row 1
-Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
-Warning: capacitance matrix is not diagonally dominant due to row 7
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 856 857 858 859 860 861 862 863 864 865 866 867 868 869 870 871 872 873 874 875 876 877 878 879 880 881 882 883 884 885 886 887 888 889 890 891 892 893 894 895 896 897 898 899 900 901 902 903 904 905 906 907 908 909 910 911 912 913 914 915 916 917 918 919 920 921 922 923 924 925 926 927 928 929 930 931 932 933 934 935 936 937 938 939 940 941 942 943 944 945 946 947 948 949 950 951 952 953 954 955 956 957 958 959 960 961 962 963 964 965 966 967 968 969 970 971 972 973 974 975 976 977 978 979 980 981 982 983 984 985 986 987 988 989 990 991 992 993 994 995 996 997 998 999 
+Error: not converging after 1000 iterations, norm of the residual is 0.060, while targeting 0.050
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.0839302
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
+Capacitance matrix is:
+Dimension 11 x 11
+g1_7  1.17518e-09 -2.05894e-10 -1.7703e-10 -2.53868e-10 8.13996e-11 2.8099e-11 -1.31344e-10 5.23328e-13 -1.02144e-10 -2.94111e-11 -1.65986e-11 
+g1_8  -1.98724e-10 6.01168e-09 -1.87807e-10 2.31402e-10 -3.04408e-10 1.63344e-11 -4.7109e-10 -1.42753e-09 -1.53645e-10 -3.05729e-09 9.74429e-12 
+g1_9  -1.94935e-10 -2.41449e-10 5.19655e-09 -4.12961e-12 3.93952e-11 -6.53972e-10 -1.02927e-10 -2.76771e-11 -3.29131e-09 -1.05726e-10 -8.14751e-10 
+g1_10  1.55145e-12 -9.34761e-11 -2.75579e-12 8.98869e-10 7.59239e-11 2.35628e-11 -1.54236e-10 1.66329e-11 -9.57205e-13 2.92644e-12 4.56136e-12 
+g1_11  -7.53584e-13 -3.35776e-10 -1.06148e-11 -3.89465e-11 8.94269e-10 -1.71237e-11 -1.26186e-11 -9.41214e-12 -4.71227e-12 -1.922e-12 -1.35495e-13 
+g1_12  -3.02484e-12 -1.65469e-11 -3.07914e-10 -1.68923e-13 -2.12732e-11 8.09716e-10 -1.136e-11 -3.24131e-12 -1.62618e-11 -3.11534e-12 2.13751e-13 
+g1_13  -7.04408e-12 -4.0572e-10 -2.23004e-10 -1.27341e-09 -8.83362e-10 -1.28153e-10 1.00387e-09 -2.15835e-10 9.46158e-11 9.67753e-11 -7.65948e-11 
+g1_14  -1.44669e-11 -1.51769e-09 -3.94886e-11 8.93305e-13 -3.09978e-11 -1.06314e-11 -2.71499e-12 1.78362e-09 -1.34449e-10 -3.87976e-11 -9.62776e-12 
+g1_15  -1.10024e-10 -9.21578e-11 -3.27237e-09 -7.49168e-12 -1.07754e-11 -4.64573e-11 -3.34964e-12 -1.3314e-10 3.79516e-09 -9.02538e-11 -1.66653e-11 
+g1_16  -4.1969e-11 -2.93437e-09 -1.03758e-10 -1.86794e-12 -2.25078e-12 -3.99254e-12 -3.93619e-13 -3.38095e-11 -8.39316e-11 3.33758e-09 -6.65587e-11 
+g1_17  -2.10764e-11 -2.35268e-11 -8.05063e-10 -1.18666e-12 5.94212e-14 -1.56622e-12 -2.93857e-13 -1.12463e-11 -1.50626e-11 -6.81791e-11 9.7221e-10 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 5
+Warning: capacitance matrix is not diagonally dominant due to row 2
+Warning: capacitance matrix is not diagonally dominant due to row 3
+Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
+
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.153179
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 18995
-Number of potential estimates: 685898
-Number of links: 1316663 (uncompressed 360810025, compression ratio is 99.6%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 20501
+Number of potential estimates: 666333
+Number of links: 2061537 (uncompressed 420291001, compression ratio is 99.5%)
 Max recursion level: 31
-Max Mesh relative refinement value: 0.00582595
-Iteration time: 14.658079s (0 days, 0 hours, 0 mins, 14 s)
-Iteration allocated memory: 66690 kilobytes
+Max Mesh relative refinement value: 0.00127433
+Iteration time: 41.517059s (0 days, 0 hours, 0 mins, 41 s)
+Iteration allocated memory: 207075 kilobytes
 
 Iteration number #8 ***************************
 
@@ -642,60 +689,61 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.00411957
+Mesh refinement (-m): 0.000901084
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 29691
-Number of links to be computed: 2590064
+Number of panels after refinement: 31688
+Number of links to be computed: 4094760
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  5.39946e-09 -2.91357e-10 -4.16567e-11 -2.58022e-11 -7.10098e-10 -4.16411e-11 -4.83142e-11 -3.4857e-09 -1.03181e-10 -8.72864e-10 
-g1_8  -2.94137e-10 6.23594e-09 -3.14161e-10 -8.14755e-10 -7.48279e-12 -1.31588e-10 -1.60485e-09 -1.17591e-10 -3.1744e-09 -2.30342e-11 
-g1_9  -1.97085e-11 -8.91306e-11 9.80646e-10 3.0799e-12 2.59391e-12 -6.13085e-11 5.50402e-14 -1.39886e-12 1.01522e-13 -6.08498e-14 
-g1_10  -1.50598e-11 -3.89418e-10 -1.49315e-11 9.78245e-10 -1.89084e-11 -4.60853e-12 -4.14569e-12 -4.33704e-12 -4.46857e-12 -7.94791e-13 
-g1_11  -3.37457e-10 -1.79688e-11 -7.59747e-12 -3.09254e-11 8.3906e-10 -3.03634e-12 -5.8663e-12 -9.29761e-12 -4.18794e-12 -4.8896e-13 
-g1_12  -5.27826e-11 -3.7767e-10 -5.71041e-10 -6.56407e-11 -4.67328e-11 2.76955e-10 -1.84612e-11 -1.05668e-11 -2.0935e-12 -2.18992e-13 
-g1_13  -4.98314e-11 -1.60493e-09 -3.36841e-12 -2.26781e-11 -1.2763e-11 -3.08964e-12 1.84246e-09 -1.22618e-10 -2.84343e-11 -7.6622e-12 
-g1_14  -3.48808e-09 -1.20647e-10 -7.42649e-12 -1.20981e-11 -3.01927e-11 -7.66825e-12 -1.20676e-10 3.96561e-09 -9.0969e-11 -1.35237e-11 
-g1_15  -1.05415e-10 -3.18904e-09 6.14829e-14 -8.23013e-12 -9.41289e-12 -1.66859e-12 -2.68606e-11 -8.98935e-11 3.58765e-09 -7.50382e-11 
-g1_16  -8.74909e-10 -2.14915e-11 -7.6749e-13 -1.06922e-12 -7.63091e-13 -8.86389e-13 -8.2647e-12 -1.34465e-11 -7.63375e-11 1.03209e-09 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
+Dimension 11 x 11
+g1_7  1.16739e-09 -1.96814e-10 -1.70309e-10 -4.2864e-11 -1.85717e-11 6.03711e-12 -3.79021e-11 -1.86769e-11 -1.15912e-10 -4.2899e-11 -2.03876e-11 
+g1_8  -1.87134e-10 6.26964e-09 -2.56883e-10 -2.53782e-10 -7.8149e-10 -1.41118e-11 -1.34277e-10 -1.5951e-09 -9.25149e-11 -3.17037e-09 -1.77388e-11 
+g1_9  -1.82697e-10 -2.42845e-10 5.3855e-09 -1.24061e-11 8.29369e-12 -6.86333e-10 -5.92972e-11 -4.09705e-11 -3.44759e-09 -9.23271e-11 -8.69933e-10 
+g1_10  8.18537e-13 -1.00816e-10 -1.5785e-11 1.02238e-09 -1.05715e-11 -3.35882e-12 -4.21081e-11 -1.93576e-13 -1.52074e-12 -2.17617e-13 -4.96198e-13 
+g1_11  -2.53887e-12 -3.67454e-10 -1.37914e-11 -9.64162e-12 9.55661e-10 -1.43626e-11 -2.41997e-11 -3.70935e-12 -3.97415e-12 -2.18432e-12 -7.07236e-13 
+g1_12  -2.3471e-12 -1.84185e-11 -3.28261e-10 -8.69153e-12 -2.77037e-11 8.24706e-10 -4.71999e-12 -4.46551e-12 -1.05004e-11 -3.86644e-12 -5.29652e-13 
+g1_13  -2.26161e-11 -3.87333e-10 -5.15814e-11 -6.88692e-10 -1.15531e-10 -6.57552e-11 3.62617e-10 -3.67751e-11 -2.25019e-11 -1.27434e-11 -1.84968e-13 
+g1_14  -1.63193e-11 -1.60019e-09 -5.22405e-11 -1.35916e-12 -2.53715e-11 -1.10518e-11 -2.61951e-12 1.86076e-09 -1.25482e-10 -3.40779e-11 -8.12159e-12 
+g1_15  -1.13473e-10 -1.01182e-10 -3.44336e-09 -3.51917e-12 -1.36221e-11 -3.49287e-11 -4.23539e-12 -1.23249e-10 3.96182e-09 -8.86455e-11 -1.28369e-11 
+g1_16  -4.52732e-11 -3.08819e-09 -1.08576e-10 8.11707e-13 -4.90247e-12 -7.0721e-12 -5.65581e-13 -3.04057e-11 -8.35008e-11 3.50448e-09 -7.284e-11 
+g1_17  -2.16335e-11 -1.97799e-11 -8.45808e-10 -4.47299e-13 -7.16229e-13 -1.27366e-12 -1.51571e-13 -9.75075e-12 -1.21208e-11 -7.34699e-11 1.01068e-09 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col 3
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 4
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.0589786
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.124427
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 29691
-Number of potential estimates: 1432314
-Number of links: 2619755 (uncompressed 881555481, compression ratio is 99.7%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 31688
+Number of potential estimates: 1399353
+Number of links: 4126448 (uncompressed 1004129344, compression ratio is 99.6%)
 Max recursion level: 33
-Max Mesh relative refinement value: 0.00411956
-Iteration time: 9.513223s (0 days, 0 hours, 0 mins, 9 s)
-Iteration allocated memory: 79464 kilobytes
+Max Mesh relative refinement value: 0.000901083
+Iteration time: 21.781544s (0 days, 0 hours, 0 mins, 21 s)
+Iteration allocated memory: 117010 kilobytes
 
 Iteration number #9 ***************************
 
@@ -704,120 +752,73 @@ Increasing the geometric refinement..
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Warning: dummy dielectric-dielectric interface found in the input file, skipping
 Refinement completed
-Mesh refinement (-m): 0.00291297
+Mesh refinement (-m): 0.000637162
 ***************************************
 Computing the links.. 
-Number of panels after refinement: 47367
-Number of links to be computed: 5205106
+Number of panels after refinement: 49723
+Number of links to be computed: 8269040
 Error: cannot retrieve the information about the free memory quantity
        Cannot go out-of-core, continuing in-core
 Done computing links
 ***************************************
 Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 332 333 334 335 336 337 338 339 340 341 342 343 344 345 346 347 348 349 350 351 352 353 354 355 356 357 358 359 360 361 362 363 364 365 366 367 368 369 370 371 372 373 374 375 376 377 378 379 380 381 382 383 384 385 386 387 388 389 390 391 392 393 394 395 396 397 398 399 400 401 402 403 404 405 406 407 408 409 410 411 412 413 414 415 416 417 418 419 420 421 422 423 424 425 426 427 428 429 430 431 432 433 434 435 436 437 438 439 440 441 442 443 444 445 446 447 448 449 450 451 452 453 454 455 456 457 458 459 460 461 462 463 464 465 466 467 468 469 470 471 472 473 474 475 476 477 478 479 480 481 482 483 484 485 486 487 488 489 490 491 492 493 494 495 496 497 498 499 500 501 502 503 504 505 506 507 508 509 510 511 512 513 514 515 516 517 518 519 520 521 522 523 524 525 526 527 528 529 530 531 532 533 534 535 536 537 538 539 540 541 542 543 544 545 546 547 548 549 550 551 552 553 554 555 556 557 558 559 560 561 562 563 564 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 584 585 586 587 588 589 590 591 592 593 594 595 596 597 598 599 600 601 602 603 604 605 606 607 608 609 610 611 612 613 614 615 616 617 618 619 620 621 622 623 624 625 626 627 628 629 630 631 632 633 634 635 636 637 638 639 640 641 642 643 644 645 646 647 648 649 650 651 652 653 654 655 656 657 658 659 660 661 662 663 664 665 666 667 668 669 670 671 672 673 674 675 676 677 678 679 680 681 682 683 684 685 686 687 688 689 690 691 692 693 694 695 696 697 698 699 700 701 702 703 704 705 706 707 708 709 710 711 712 713 714 715 716 717 718 719 720 721 722 723 724 725 726 727 728 729 730 731 732 733 734 735 736 737 738 739 740 741 742 743 744 745 746 747 748 749 750 751 752 753 754 755 756 757 758 759 760 761 762 763 764 765 766 767 768 769 770 771 772 773 774 775 776 777 778 779 780 781 782 783 784 785 786 787 788 789 790 791 792 793 794 795 796 797 798 799 800 801 802 803 804 805 806 807 808 809 810 811 812 813 814 815 816 817 818 819 820 821 822 823 824 825 826 827 828 829 830 831 832 833 834 835 836 837 838 839 840 841 842 843 844 845 846 847 848 849 850 851 852 853 854 855 
 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 
 Capacitance matrix is:
-Dimension 10 x 10
-g1_7  5.82883e-09 -2.71371e-10 -4.50874e-11 -2.90992e-11 -7.60384e-10 -4.20868e-11 -5.21883e-11 -3.80189e-09 -1.16498e-10 -9.70727e-10 
-g1_8  -2.80453e-10 6.69877e-09 -3.38016e-10 -8.81304e-10 -1.86341e-11 -1.42289e-10 -1.74194e-09 -1.25114e-10 -3.44621e-09 -2.72414e-11 
-g1_9  -2.2889e-11 -9.50625e-11 1.06352e-09 5.26428e-12 4.33761e-12 -6.93864e-11 -2.64913e-12 -1.23913e-12 -5.05733e-13 -3.31075e-14 
-g1_10  -1.44269e-11 -4.09713e-10 -1.00071e-11 1.03137e-09 -1.70705e-11 -5.01737e-12 -8.51916e-12 -4.9648e-12 -1.28789e-12 -1.00624e-12 
-g1_11  -3.62563e-10 -2.2507e-11 -7.11327e-12 -2.90856e-11 8.91758e-10 -3.01934e-12 -3.94533e-12 -1.12738e-11 -1.9155e-12 -7.5722e-13 
-g1_12  -4.32804e-11 -4.20558e-10 -6.26898e-10 -4.45098e-11 -4.10497e-11 2.9584e-10 3.30803e-12 -9.97222e-12 -2.23232e-12 -1.7807e-12 
-g1_13  -4.99952e-11 -1.73816e-09 -6.21866e-12 -2.82592e-11 -1.16359e-11 -3.37051e-12 1.97725e-09 -1.25807e-10 -2.7379e-11 -7.2634e-12 
-g1_14  -3.80128e-09 -1.31082e-10 -8.56227e-12 -1.52917e-11 -3.33033e-11 -8.54729e-12 -1.24669e-10 4.2827e-09 -7.9266e-11 -1.31232e-11 
-g1_15  -1.19145e-10 -3.43947e-09 -2.26868e-12 -1.04619e-12 -4.76393e-12 -1.91531e-12 -2.66778e-11 -7.83681e-11 3.83473e-09 -7.12793e-11 
-g1_16  -9.7119e-10 -2.766e-11 -5.2903e-13 -1.62202e-12 -1.24239e-12 -7.78208e-13 -7.49829e-12 -1.28967e-11 -7.12142e-11 1.12973e-09 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 7
-Warning: capacitance matrix is not diagonally dominant due to row 1
+Dimension 11 x 11
+g1_7  1.156e-09 -1.13009e-10 -1.78493e-10 7.4521e-11 1.24874e-10 4.48002e-11 -3.14914e-10 2.09583e-12 -1.05974e-10 -3.04633e-11 -1.50638e-11 
+g1_8  -1.80449e-10 6.75208e-09 -2.31598e-10 -3.40721e-10 -8.65416e-10 -1.8275e-11 -1.09741e-10 -1.77681e-09 -1.0872e-10 -3.44115e-09 -2.64161e-11 
+g1_9  -1.83215e-10 -2.65903e-10 5.83749e-09 -8.34575e-11 -6.75936e-11 -7.51772e-10 4.78019e-11 -6.6902e-11 -3.77687e-09 -1.11595e-10 -9.59731e-10 
+g1_10  -7.11831e-12 -8.2303e-11 -2.16515e-11 1.11688e-09 3.0339e-11 1.43635e-11 -1.2601e-10 1.17492e-12 4.87458e-13 4.25494e-12 1.0665e-12 
+g1_11  -4.04878e-12 -4.06155e-10 -1.37011e-11 -1.1836e-11 1.0296e-09 -1.61919e-11 -1.58849e-11 -6.80331e-12 -4.77573e-12 6.35868e-14 -5.08648e-13 
+g1_12  -3.99204e-12 -1.97712e-11 -3.52123e-10 -9.10449e-12 -2.99169e-11 8.7267e-10 -1.09875e-12 -4.73595e-12 -1.0733e-11 -3.37769e-12 -7.92248e-13 
+g1_13  -4.12875e-12 -4.04627e-10 -6.98344e-11 -6.65061e-10 -1.42485e-10 -7.62597e-11 4.40457e-10 -1.75772e-11 -5.50437e-12 -1.28264e-11 -7.71917e-12 
+g1_14  -1.91e-11 -1.76903e-09 -5.24525e-11 -9.53052e-13 -2.55853e-11 -1.19259e-11 -4.4109e-12 2.02186e-09 -1.25996e-10 -2.62634e-11 -6.83104e-12 
+g1_15  -1.13664e-10 -1.0594e-10 -3.77997e-09 -4.05989e-12 -1.31896e-11 -3.05333e-11 -9.49106e-12 -1.24527e-10 4.29803e-09 -7.85143e-11 -1.37789e-11 
+g1_16  -4.71815e-11 -3.33088e-09 -1.09871e-10 -3.27382e-13 3.97572e-13 -7.14566e-12 -3.85867e-13 -2.87776e-11 -7.93725e-11 3.73978e-09 -6.95753e-11 
+g1_17  -2.03951e-11 -2.29669e-11 -9.28985e-10 2.00324e-13 -1.14184e-12 -9.30146e-13 -2.57901e-13 -7.55598e-12 -1.44108e-11 -7.29003e-11 1.09513e-09 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 4
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 7
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 6
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 8
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 9
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 11
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 10
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10 col 5
+Warning: capacitance matrix has a non-negative off-diagonal element at row 11 col 4
 Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
+Warning: capacitance matrix is not diagonally dominant due to row 3
 Warning: capacitance matrix is not diagonally dominant due to row 7
+Warning: capacitance matrix is not diagonally dominant due to row 8
 
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.0741225
+Weighted Frobenius norm of the difference between capacitance (auto option): 0.0830279
 
 Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 47367
-Number of potential estimates: 2538188
-Number of links: 5252473 (uncompressed 2243632689, compression ratio is 99.8%)
+Number of input panels: 2419 of which 1315 conductors and 1104 dielectric
+Number of input panels to solver engine: 2419
+Number of panels after refinement: 49723
+Number of potential estimates: 2722729
+Number of links: 8318763 (uncompressed 2472376729, compression ratio is 99.7%)
 Max recursion level: 35
-Max Mesh relative refinement value: 0.00291297
-Iteration time: 20.709719s (0 days, 0 hours, 0 mins, 20 s)
-Iteration allocated memory: 131684 kilobytes
+Max Mesh relative refinement value: 0.000637162
+Iteration time: 100.369164s (0 days, 0 hours, 1 mins, 40 s)
+Iteration allocated memory: 491103 kilobytes
 
-Iteration number #10 ***************************
-
-***************************************
-Increasing the geometric refinement.. 
-Warning: dummy dielectric-dielectric interface found in the input file, skipping
-Warning: dummy dielectric-dielectric interface found in the input file, skipping
-Refinement completed
-Mesh refinement (-m): 0.00205978
-***************************************
-Computing the links.. 
-Number of panels after refinement: 71202
-Number of links to be computed: 10263046
-Error: cannot retrieve the information about the free memory quantity
-       Cannot go out-of-core, continuing in-core
-Done computing links
-***************************************
-Precond Type(s) (-p): Jacobi 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 
-GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 
-Capacitance matrix is:
-Dimension 10 x 10
-g1_7  6.08589e-09 -2.86511e-10 -4.90421e-11 -2.95397e-11 -7.97704e-10 -3.92416e-11 -4.87373e-11 -3.99999e-09 -1.12858e-10 -1.00972e-09 
-g1_8  -2.91884e-10 6.99367e-09 -3.46719e-10 -9.31846e-10 -1.6848e-11 -1.39947e-10 -1.83541e-09 -1.18352e-10 -3.62107e-09 -2.86754e-11 
-g1_9  -2.10419e-11 -1.00355e-10 1.13455e-09 -2.35472e-12 7.76134e-13 -6.7475e-11 -1.34344e-13 -1.86744e-12 3.5346e-14 -2.11655e-13 
-g1_10  -1.46621e-11 -4.3374e-10 -1.45806e-11 1.08082e-09 -1.7375e-11 -4.56367e-12 -7.11094e-12 -5.92921e-12 -2.13232e-13 -1.95696e-13 
-g1_11  -3.82687e-10 -1.94082e-11 -6.92142e-12 -2.92937e-11 9.23147e-10 -2.40703e-12 -4.54707e-12 -9.68443e-12 -2.14004e-12 -3.5297e-13 
-g1_12  -4.44101e-11 -4.15515e-10 -6.94122e-10 -3.68215e-11 -3.12118e-11 2.82265e-10 4.72869e-13 -1.70192e-12 -1.90976e-12 -3.05202e-12 
-g1_13  -4.64697e-11 -1.8374e-09 -1.3785e-12 -2.25951e-11 -1.21259e-11 -2.97123e-12 2.08098e-09 -1.27294e-10 -3.38398e-11 -7.96714e-12 
-g1_14  -3.97584e-09 -1.17132e-10 -6.18394e-12 -1.68447e-11 -3.15505e-11 -6.70119e-12 -1.26409e-10 4.4562e-09 -9.03728e-11 -1.50774e-11 
-g1_15  -1.0957e-10 -3.64556e-09 -3.01749e-13 -8.40746e-13 -5.33413e-12 -1.59135e-12 -3.30422e-11 -9.00998e-11 4.0455e-09 -6.81187e-11 
-g1_16  -1.01801e-09 -2.76977e-11 -1.48329e-12 -8.3126e-13 -7.99709e-13 -7.93941e-13 -8.19216e-12 -1.4397e-11 -6.86138e-11 1.17558e-09 
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
-Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 9
-Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col 7
-Warning: capacitance matrix is not diagonally dominant due to row 1
-Warning: capacitance matrix is not diagonally dominant due to row 2
-Warning: capacitance matrix is not diagonally dominant due to row 6
-Warning: capacitance matrix is not diagonally dominant due to row 7
-
-Weighted Frobenius norm of the difference between capacitance (auto option): 0.0459729
-
-Solve statistics:
-Number of input panels: 2249 of which 1149 conductors and 1100 dielectric
-Number of input panels to solver engine: 2249
-Number of panels after refinement: 71202
-Number of potential estimates: 4532012
-Number of links: 10334248 (uncompressed 5069724804, compression ratio is 99.8%)
-Max recursion level: 38
-Max Mesh relative refinement value: 0.00205978
-Iteration time: 34.974045s (0 days, 0 hours, 0 mins, 34 s)
-Iteration allocated memory: 234682 kilobytes
-
-Total allocated memory: 234682 kilobytes
-Total time: 65.976723s (0 days, 0 hours, 1 mins, 5 s)
+Total allocated memory: 491103 kilobytes
+Total time: 99.994583s (0 days, 0 hours, 1 mins, 39 s)
 
 
