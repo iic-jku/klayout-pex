@@ -177,6 +177,7 @@ class FasterCapInputBuilder:
                                                 z=0.0,
                                                 height=contact.thickness)
 
+        enlarged_top_cell_bbox = self.top_cell_bbox().enlarged(math.floor(8 / self.dbu))  # 8µm fringe halo
 
         #
         # global substrate block below everything. independent of nets!
@@ -185,7 +186,7 @@ class FasterCapInputBuilder:
         substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
         substrate_region = kdb.Region()
 
-        substrate_block = self.top_cell_bbox().enlarged(math.floor(2 / self.dbu))  # 2µm
+        substrate_block = enlarged_top_cell_bbox.dup()
         substrate_region.insert(substrate_block)
 
         diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
@@ -203,7 +204,7 @@ class FasterCapInputBuilder:
         #
 
         fox_region = kdb.Region()
-        fox_block = self.top_cell_bbox().enlarged(math.floor(2 / self.dbu))  # 2µm
+        fox_block = enlarged_top_cell_bbox.dup()
         fox_region.insert(fox_block)
 
         # field oxide goes from substrate/diff/well up to below the gate-poly
@@ -270,8 +271,7 @@ class FasterCapInputBuilder:
                                                          z=metal_layer.height,
                                                          height=sidewall_height)
                             if conf_diel.thickness_where_no_metal > 0.0:
-                                top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-                                no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                                no_metal_block = enlarged_top_cell_bbox.dup()
                                 no_metal_region = kdb.Region()
                                 no_metal_region.insert(no_metal_block)
                                 no_metal_region -= sidewall_region
@@ -290,8 +290,7 @@ class FasterCapInputBuilder:
             #
             simple_dielectric, diel_height = self.tech_info.simple_dielectric_above_metal(metal_layer_name)
             if simple_dielectric:
-                top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-                diel_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                diel_block = enlarged_top_cell_bbox.dup()
                 diel_region = kdb.Region()
                 diel_region.insert(diel_block)
                 if sidewall_region:
