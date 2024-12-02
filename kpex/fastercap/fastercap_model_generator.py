@@ -730,10 +730,9 @@ class FasterCapModelGenerator:
                                       cond_number=file_num,
                                       rename_conductor=False)
 
-            # compute one reference point "outside"
-            t0 = data[0]
-            rp = t0.outside_reference_point()
-            rp_s = rp.to_fastcap()
+            # NOTE: for now, we compute the reference points for each triangle
+            #       This is a FasterCap feature, reference point in the *.geo file (end of each T line)
+            rp_s = "0 0 0"
             lst_file.append(f"D {fn} {'%.12g' % k_outside} {'%.12g' % k_inside} 0 0 0 {rp_s}")
 
         #
@@ -802,7 +801,12 @@ class FasterCapModelGenerator:
             for t in data:
                 f.write(f"T {cond_number}")
                 f.write(' ' + t.to_fastcap())
-                f.write('\n')
+
+                # compute a reference point "outside"
+                rp = t.outside_reference_point()
+                rp_s = rp.to_fastcap()
+
+                f.write(f" {rp_s}\n")
             if cond_name and rename_conductor:
                 f.write(f"N {cond_number} {cond_name}\n")
 
