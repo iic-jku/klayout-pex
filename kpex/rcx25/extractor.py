@@ -259,6 +259,18 @@ class RCExtractor:
         rdb_output(rdb_cat_sidewall, "All Space Markers", space_markers)
 
         shielded_regions_between_layers: Dict[Tuple[LayerName, LayerName], kdb.Region] = {}
+        for top_layer_name in layer2net2regions.keys():
+            for bot_layer_name in reversed(layer_names_below[top_layer_name]):
+                shielded_region = kdb.Region()
+                shielding_layers = shielding_layer_names.get((top_layer_name, bot_layer_name), None)
+                if shielding_layers:
+                    for sl in shielding_layers:
+                        shielded_region += layer_regions_by_name[sl]
+                shielded_region.merge()
+                shielded_regions_between_layers[(top_layer_name, bot_layer_name)] = shielded_region
+                shielded_regions_between_layers[(bot_layer_name, top_layer_name)] = shielded_region
+                if shielded_region:
+                    rdb_output(rdb_cat_common, f"Shielded ({top_layer_name}-{bot_layer_name})", shielded_region)
 
         #
         # (1) OVERLAP CAPACITANCE
@@ -289,13 +301,7 @@ class RCExtractor:
 
                 rdb_cat_bot_layer = report.create_category(rdb_cat_top_layer, f"bot_layer={bot_layer_name}")
 
-                shielded_region = kdb.Region()
-                shielding_layers = shielding_layer_names.get((top_layer_name, bot_layer_name), None)
-                if shielding_layers:
-                    for sl in shielding_layers:
-                        shielded_region += layer_regions_by_name[sl].__and__(shapes_top_layer)
-                shielded_regions_between_layers[(top_layer_name, bot_layer_name)] = shielded_region
-
+                shielded_region = shielded_regions_between_layers[(top_layer_name, bot_layer_name)]
                 rdb_output(rdb_cat_bot_layer, "shielded_region", shielded_region)
 
                 for net_top in top_net2regions.keys():
