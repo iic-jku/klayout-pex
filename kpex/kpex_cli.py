@@ -111,7 +111,7 @@ class KpexCLI:
                                       help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
                                            "(default is %(default)s for testing now)")
         group_pex_options.add_argument("--fastercap", dest="run_fastercap",
-                                      type=true_or_false, default=True,
+                                      type=true_or_false, default=False,
                                       help="Run FasterCap engine (default is %(default)s)")
         group_pex_options.add_argument("--fastcap", dest="run_fastcap",
                                       type=true_or_false, default=False,
