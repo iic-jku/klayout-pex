@@ -33,7 +33,7 @@ from kpex.util.argparse_helpers import render_enum_help
 PROGRAM_NAME = "convert_layout_pdk"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class GDSPair:
     layer: int
     datatype: int
@@ -297,7 +297,7 @@ def main():
         info("Dumping all available layers…")
         for lyp_path, layer_list in zip(lyp_paths, tech_layer_lists):
             rule(lyp_path)
-            info(sorted([layer.lpp for layer in layer_list.layers]))
+            info(sorted([(layer.lpp, str(layer.gds_pair)) for layer in layer_list.layers]))
         sys.exit(0)
 
     layout = kdb.Layout()
