@@ -273,7 +273,7 @@ def validate_args(args: argparse.Namespace):
                 raise NotImplementedError(f"Unknown input mode {args.input_mode}")
 
         args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
-
+        os.makedirs(args.output_dir_path, exist_ok=True)
         if args.input_mode == InputMode.GDS:
             if args.schematic_path:
                 args.effective_schematic_path = args.schematic_path
