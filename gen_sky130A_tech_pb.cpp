@@ -40,11 +40,13 @@ void write(const kpex::tech::Technology &tech,
     switch (format) {
         case Format::PROTOBUF_TEXTUAL: {
             std::ofstream output(outputPath, std::ios::out | std::ios::binary);
+            output << "# proto-file: tech.proto" << std::endl
+                   << "# proto-message: kpex.tech.Technology" << std::endl << std::endl;
             google::protobuf::io::OstreamOutputStream zcos(&output);
             google::protobuf::TextFormat::Print(tech, &zcos);
             break;
         }
-            
+
         case Format::PROTOBUF_BINARY: {
             std::ofstream output(outputPath, std::ios::out | std::ios::binary);
             tech.SerializeToOstream(&output);
