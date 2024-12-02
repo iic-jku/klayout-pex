@@ -121,6 +121,8 @@ class FasterCapInputBuilder:
                 shapes = self.shapes_of_net(layer_name=metal_layer_name, net=net)
                 if shapes:
                     if shapes.count() >= 1:
+                        info(f"Conductor {net_name}, metal {metal_layer_name}, "
+                             f"z={metal_layer.height}, height={metal_layer.thickness}")
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
                                                     z=metal_layer.height,
@@ -130,6 +132,8 @@ class FasterCapInputBuilder:
                     contact = metal_layer.contact_above
                     shapes = self.shapes_of_net(layer_name=contact.name, net=net)
                     if shapes and not shapes.is_empty():
+                        info(f"Conductor {net_name}, via {contact.name}, "
+                             f"z={metal_z_top}, height={contact.thickness}")
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
                                                     z=metal_z_top,
@@ -149,6 +153,8 @@ class FasterCapInputBuilder:
                 shapes = self.shapes_of_net(layer_name=diffusion_layer_name, net=net)
                 if shapes and not shapes.is_empty():
                     diffusion_regions.append(shapes)
+                    info(f"Diffusion {net_name}, layer {diffusion_layer_name}, "
+                         f"z={0}, height={0.1}")
                     model_builder.add_conductor(net_name=net_name,
                                                 layer=shapes,
                                                 z=0,  # TODO
@@ -157,6 +163,8 @@ class FasterCapInputBuilder:
                 contact = diffusion_layer.contact_above
                 shapes = self.shapes_of_net(layer_name=contact.name, net=net)
                 if shapes and not shapes.is_empty():
+                    info(f"Diffusion {net_name}, contact {contact.name}, "
+                         f"z={0}, height={contact.thickness}")
                     model_builder.add_conductor(net_name=net_name,
                                                 layer=shapes,
                                                 z=0.0,
@@ -182,6 +190,8 @@ class FasterCapInputBuilder:
         diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
         for d in diffusion_regions:
             substrate_region -= d.sized(diffusion_margin)
+        info(f"Substrate VSUBS, "
+             f"z={0 - substrate_layer.height - substrate_layer.thickness}, height={substrate_layer.thickness}")
         model_builder.add_conductor(net_name="VSUBS",
                                     layer=substrate_region,
                                     z=0 - substrate_layer.height - substrate_layer.thickness,
@@ -225,6 +235,7 @@ class FasterCapInputBuilder:
                             # if h_delta == 0:
                             #     h_delta = metal_layer.thickness
                             sidewall_height += h_delta
+                            info(f"Sidewall dielectric {sidewall.name}: z={metal_layer.height}, height={sidewall_height}")
                             model_builder.add_dielectric(material_name=sidewall.name,
                                                          layer=sidewall_region,
                                                          z=metal_layer.height,
@@ -236,6 +247,8 @@ class FasterCapInputBuilder:
                             sidewall_region = sidewall_region.sized(d)
                             h_delta = metal_layer.thickness + conf_diel.thickness_over_metal
                             sidewall_height += h_delta
+                            info(f"Conformal dielectric (sidewall) {sidewall.name}: "
+                                 f"z={metal_layer.height}, height={sidewall_height}")
                             model_builder.add_dielectric(material_name=sidewall.name,
                                                          layer=sidewall_region,
                                                          z=metal_layer.height,
@@ -247,6 +260,8 @@ class FasterCapInputBuilder:
                                 no_metal_region.insert(no_metal_block)
                                 no_metal_region -= sidewall_region
                                 no_metal_height = conf_diel.thickness_where_no_metal
+                                info(f"Conformal dielectric (where no metal) {sidewall.name}: "
+                                     f"z={metal_layer.height}, height={no_metal_height}")
                                 model_builder.add_dielectric(material_name=sidewall.name,
                                                              layer=no_metal_region,
                                                              z=metal_layer.height,
@@ -266,16 +281,22 @@ class FasterCapInputBuilder:
                 if sidewall_region:
                     assert sidewall_height >= 0.0
                     diel_region -= sidewall_region
+                    info(f"Simple dielectric (sidewall) {simple_dielectric.name}: "
+                         f"z={metal_z_bottom + sidewall_height}, height={diel_height - sidewall_height}")
                     model_builder.add_dielectric(material_name=simple_dielectric.name,
                                                  layer=sidewall_region,
                                                  z=metal_z_bottom + sidewall_height,
                                                  height=diel_height - sidewall_height)
                 if no_metal_region:
+                    info(f"Simple dielectric (no metal) {simple_dielectric.name}: "
+                         f"z={metal_z_bottom + no_metal_height}, height={diel_height - no_metal_height}")
                     model_builder.add_dielectric(material_name=simple_dielectric.name,
                                                  layer=diel_region,
                                                  z=metal_z_bottom + no_metal_height,
                                                  height=diel_height - no_metal_height)
                 else:
+                    info(f"Simple dielectric {simple_dielectric.name}: "
+                         f"z={metal_z_bottom}, height={diel_height}")
                     model_builder.add_dielectric(material_name=simple_dielectric.name,
                                                  layer=diel_region,
                                                  z=metal_z_bottom,
