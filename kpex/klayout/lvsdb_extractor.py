@@ -1,12 +1,17 @@
-#!/bin/env python3
-
 from __future__ import annotations
 from typing import *
-
 from dataclasses import dataclass
+from rich.pretty import pprint
+
 import klayout.db as kdb
 
-from rich.pretty import pprint
+from ..logging import (
+    console,
+    debug,
+    info,
+    warning,
+    error
+)
 
 
 # Name to layer/datatype mapping for computed layers
@@ -145,7 +150,6 @@ class KLayoutExtractionContext:
                 region = lvsdb.layer_by_index(layer_index)
                 lm[target_layer_index] = region
 
-        pprint(lm)
         return lm
 
     @staticmethod
@@ -156,8 +160,8 @@ class KLayoutExtractionContext:
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
                 if ln not in name_to_lp:
-                    print(
-                        f"ERROR: Unable to find info about LVS layer '{ln}')")
+                    warning(
+                        f"Unable to find info about extracted LVS layer '{ln}'")
                     continue
                 gds_pair = name_to_lp[ln]
                 nonempty_layers[gds_pair] = KLayoutExtractedLayerInfo(

@@ -11,6 +11,13 @@ import klayout.db as kdb
 
 from klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from tech_info import TechInfo
+from ..logging import (
+    console,
+    debug,
+    info,
+    warning,
+    error
+)
 from fastercap_file_format_pb2 import *
 
 
@@ -119,12 +126,12 @@ class FasterCapInputBuilder:
 
     def extracted_layer(self, net_name: str, layer_name: str) -> Optional[KLayoutExtractedLayerInfo]:
         if layer_name not in self.tech_info.gds_pair_for_layer_name:
-            print(f"WARN: Can't find GDS pair for layer {layer_name} (net {net_name})")
+            warning(f"Can't find GDS pair for layer {layer_name} (net {net_name})")
             return None
 
         gds_pair = self.tech_info.gds_pair_for_layer_name[layer_name]
         if gds_pair not in self.pex_context.extracted_layers:
-            print(f"INFO: Nothing extracted for layer {layer_name} (net {net_name})")
+            debug(f"Nothing extracted for layer {layer_name} (net {net_name})")
             return None
 
         extracted_layer = self.pex_context.extracted_layers[gds_pair]
@@ -178,7 +185,7 @@ class FasterCapInputBuilder:
 
             for net in circuit.each_net():
                 # https://www.klayout.de/doc-qt5/code/class_Net.html
-                print(f"Net name={net.name}, expanded_name={net.expanded_name()}, pin_count={net.pin_count()}, "
+                debug(f"Net name={net.name}, expanded_name={net.expanded_name()}, pin_count={net.pin_count()}, "
                       f"is_floating={net.is_floating()}, is_passive={net.is_passive()}, "
                       f"terminals={list(map(lambda t: format_terminal(t), net.each_terminal()))}")
 
@@ -235,7 +242,7 @@ class FasterCapInputBuilder:
                 #
                 for substrate_layer in substrate_layers:
                     extracted_layer = self.extracted_layer(net_name=net_name, layer_name=substrate_layer.name)
-                    print(f"Substrate layer {substrate_layer.name}, net {net_name}: "
+                    debug(f"Substrate layer {substrate_layer.name}, net {net_name}: "
                           f"Extracted?={extracted_layer is not None}")
                     if not extracted_layer:
                         continue
@@ -250,7 +257,6 @@ class FasterCapInputBuilder:
 
                     triangulated_shapes = region.delaunay(0.0, 1.0)
                     for shape in triangulated_shapes:
-                        #     print(f"Triangle: {shape} (Area: {shape.area()} nm^2)")
                         self._add_triangle_in_z(
                             conductor_file=conductor_file,
                             net_name=net_name,
@@ -259,41 +265,5 @@ class FasterCapInputBuilder:
                         )
 
                 print()
-                # print(f"Shapes of net {net_name}: ")
-                # for shape in shapes:
-                    #     print(f"Type: {type(shape)}: {shape} (Area: {shape.area()} nm^2)")
-                    #
-                    # # ARE there overlaps?
-                    # for shape1 in shapes:
-                    #     for shape2 in shapes:
-                    #         if shape1 == shape2:
-                    #             continue
-                    #         r1 = pya.Region(shape1)
-                    #         r2 = pya.Region(shape2)
-                    #         ov = r1.overlapping(r2)
-                    #         if ov:
-                    #             ins = r1 & r2
-                    #             print(f"Shape1 {shape1} overlaps shape2 {shape2}: {ins}")
-                    #             l = pya.Layout()
-                    #             c = l.create_cell("TOP")
-                    #             lyr = l.layer(pya.LayerInfo(layer_info.gds_layer, layer_info.gds_datatype))
-                    #             c.shapes(lyr).insert(shape1)
-                    #             c.shapes(lyr).insert(shape2)
-                    #             lyr = l.layer(pya.LayerInfo(1000, 0, "intersection.dbg"))
-                    #             c.shapes(lyr).insert(ins)
-                    #             timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S_%f")
-                    #
-                    #             #
-                    #             # l.write(f"overlap__net_{net.name}__layer_{layer_info.name}__{timestamp}.gds")
-                    #             #
-                    #
-                    #             # VARIANTEN zum Angucken:
-                    #
-                    #             # 1) Browser mit:
-                    #             # https://github.com/gdsfactory/kweb
-                    #             # 2) prozess mit klayout anstarten mit dem gds
-                    #
-                    #             # display.show(l)
-                    #             # print("...")
 
         return faster_cap_file
