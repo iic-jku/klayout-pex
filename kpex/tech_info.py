@@ -73,6 +73,19 @@ class TechInfo:
                    self.tech.process_stack.layers)
         )
 
+    @cached_property
+    def dielectric_by_name(self) -> Dict[str, float]:
+        diel_by_name = {}
+        for pl in self.tech.process_stack.layers:
+            match pl.layer_type:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                    diel_by_name[pl.name] = pl.simple_dielectric_layer.dielectric_k
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                    diel_by_name[pl.name] = pl.conformal_dielectric_layer.dielectric_k
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                    diel_by_name[pl.name] = pl.sidewall_dielectric_layer.dielectric_k
+        return diel_by_name
+
     def sidewall_dielectric_layer(self, layer_name: str) -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
         for lyr in self.tech.process_stack.layers:
@@ -91,3 +104,17 @@ class TechInfo:
         if len(found_layers) >= 2:
             raise Exception(f"found multiple sidewall dielectric layers for {layer_name}")
         return found_layers[0]
+
+    def simple_dielectric_above_metal(self, layer_name: str) -> Tuple[process_stack_pb2.ProcessStackInfo.LayerInfo, float]:
+        found_layer: Optional[process_stack_pb2.ProcessStackInfo.LayerInfo] = None
+        diel_lyr: Optional[process_stack_pb2.ProcessStackInfo.LayerInfo] = None
+        for lyr in self.tech.process_stack.layers:
+            if lyr.name == layer_name:
+                found_layer = lyr
+            elif found_layer:
+                if not diel_lyr and lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                    diel_lyr = lyr
+                # search for next metal or end of stack
+                if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
+                    return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
+        return diel_lyr, 10.0   # air TODO

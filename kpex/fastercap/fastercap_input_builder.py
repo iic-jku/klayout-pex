@@ -76,17 +76,8 @@ class FasterCapInputBuilder:
         #    caps VPP ... vergleichen mit modellierten capacities / referenzwert
         #    flipflops (auswirkung auf setup/hold zeiten)
 
-        for pl in self.tech_info.tech.process_stack.layers:
-            match pl.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
-                    diel = pl.simple_dielectric_layer
-                    model_builder.add_material(pl.name, diel.dielectric_k)
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
-                    diel = pl.conformal_dielectric_layer
-                    model_builder.add_material(pl.name, diel.dielectric_k)
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                    diel = pl.sidewall_dielectric_layer
-                    model_builder.add_material(pl.name, diel.dielectric_k)
+        for diel_name, diel_k in self.tech_info.dielectric_by_name.items():
+            model_builder.add_material(name=diel_name, k=diel_k)
 
         circuit = netlist.circuit_by_name(self.pex_context.top_cell.name)
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
@@ -121,35 +112,72 @@ class FasterCapInputBuilder:
                                                     z=metal_layer.height,
                                                     height=metal_layer.thickness)
 
-                        sidewall_height = 0
-                        sidewall_region = extracted_layer.region
-                        sidewallee = metal_layer_name
-                        while True:
-                            sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
-                            if not sidewall:
-                                break
-                            match sidewall.layer_type:
-                                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                                    d = math.floor(sidewall.sidewall_dielectric_layer.width_outside_sidewall / self.dbu)
-                                    sidewall_region = sidewall_region.sized(d)
-                                    h_delta = sidewall.sidewall_dielectric_layer.height_above_metal or metal_layer.thickness
-                                    # if h_delta == 0:
-                                    #     h_delta = metal_layer.thickness
-                                    sidewall_height += h_delta
-                                    model_builder.add_dielectric(material_name=sidewall.name,
-                                                                 layer=sidewall_region,
-                                                                 z=metal_layer.height,
-                                                                 height=sidewall_height)
-                                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
-                                    d = math.floor(sidewall.conformal_dielectric_layer.thickness_sidewall / self.dbu)
-                                    sidewall_region = sidewall_region.sized(d)
-                                    sidewall_height = metal_layer.thickness + sidewall.conformal_dielectric_layer.thickness_over_metal
-                                    model_builder.add_dielectric(material_name=sidewall.name,
-                                                                 layer=sidewall_region,
-                                                                 z=metal_layer.height,
-                                                                 height=sidewall_height)
-                            sidewallee = sidewall.name
+                        # sidewall_height = 0
+                        # sidewall_region = extracted_layer.region
+                        # sidewallee = metal_layer_name
+                        #
+                        # while True:
+                        #     sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
+                        #     if not sidewall:
+                        #         break
+                        #     if sidewall.name == metal_layer.reference_above:  # TODO we won't deal with
+                        #         break
+                        #     match sidewall.layer_type:
+                        #         case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                        #             d = math.floor(sidewall.sidewall_dielectric_layer.width_outside_sidewall / self.dbu)
+                        #             sidewall_region = sidewall_region.sized(d)
+                        #             h_delta = sidewall.sidewall_dielectric_layer.height_above_metal or metal_layer.thickness
+                        #             # if h_delta == 0:
+                        #             #     h_delta = metal_layer.thickness
+                        #             sidewall_height += h_delta
+                        #             model_builder.add_dielectric(material_name=sidewall.name,
+                        #                                          layer=sidewall_region,
+                        #                                          z=metal_layer.height,
+                        #                                          height=sidewall_height)
+                        #
+                        #         case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                        #             conf_diel = sidewall.conformal_dielectric_layer
+                        #             d = math.floor(conf_diel.thickness_sidewall / self.dbu)
+                        #             sidewall_region = sidewall_region.sized(d)
+                        #             h_delta = metal_layer.thickness + conf_diel.thickness_over_metal
+                        #             sidewall_height += h_delta
+                        #             model_builder.add_dielectric(material_name=sidewall.name,
+                        #                                          layer=sidewall_region,
+                        #                                          z=metal_layer.height,
+                        #                                          height=sidewall_height)
+                        #
+                        #             top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+                        #             no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                        #             no_metal_region = kdb.Region()
+                        #             no_metal_region.insert(no_metal_block)
+                        #             no_metal_region -= sidewall_region
+                        #
+                        #             model_builder.add_dielectric(material_name=sidewall.name,
+                        #                                          layer=no_metal_region,
+                        #                                          z=metal_layer.height,
+                        #                                          height=conf_diel.thickness_where_no_metal)
+                        #
+                        #         case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                        #             top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+                        #             no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                        #             no_metal_region = kdb.Region()
+                        #             no_metal_region.insert(no_metal_block)
+                        #             if sidewall_region:
+                        #                 no_metal_region -= sidewall_region
+                        #
+                        #                 model_builder.add_dielectric(material_name=sidewall.name,
+                        #                                              layer=sidewall_region,
+                        #                                              z=metal_layer.height + sidewall_height,
+                        #                                              height=metal_layer.thickness + metal_layer.contact_above.thickness - sidewall_height)
+                        #
+                        #             model_builder.add_dielectric(material_name=sidewall.name,
+                        #                                          layer=no_metal_region,
+                        #                                          z=metal_layer.height,
+                        #                                          height=metal_layer.thickness + metal_layer.contact_above.thickness)
+                        #
+                        #     sidewallee = sidewall.name
 
+                if metal_layer.HasField('contact_above'):
                     contact = metal_layer.contact_above
                     extracted_layer = self.extracted_layer(layer_name=contact.name)
                     if extracted_layer and not extracted_layer.region.is_empty():
@@ -159,11 +187,11 @@ class FasterCapInputBuilder:
                                                     z=metal_z_top,
                                                     height=contact.thickness)
 
-                diel_above = self.tech_info.process_stack_layer_by_name.get(metal_layer.reference_above, None)
-                if diel_above:
-                    #model_builder.add_dielectric(material_name=metal_layer.reference_above,
-                    #                             layer=kdb.Region().)
-                    pass
+                # diel_above = self.tech_info.process_stack_layer_by_name.get(metal_layer.reference_above, None)
+                # if diel_above:
+                #     #model_builder.add_dielectric(material_name=metal_layer.reference_above,
+                #     #                             layer=kdb.Region().)
+                #     pass
                 # TODO: add stuff
 
             # DIFF / TAP
@@ -190,13 +218,15 @@ class FasterCapInputBuilder:
                                                     z=0.0,
                                                     height=contact.thickness)
 
-                diel_above = self.tech_info.process_stack_layer_by_name[diffusion_layer.reference]
-                if diel_above:
-                    pass
+                # diel_above = self.tech_info.process_stack_layer_by_name[diffusion_layer.reference]
+                # if diel_above:
+                #     pass
+                #
+                # # TODO: add stuff
 
-                # TODO: add stuff
-
-        # substrate block blow everything. independent of nets!
+        #
+        # global substrate block below everything. independent of nets!
+        #
 
         substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
         substrate_region = kdb.Region()
@@ -212,6 +242,101 @@ class FasterCapInputBuilder:
                                     layer=substrate_region,
                                     z=0 - substrate_layer.height - substrate_layer.thickness,
                                     height=substrate_layer.thickness)
+
+        #
+        # add dielectrics
+        #
+
+        for metal_layer in self.tech_info.process_metal_layers:
+            metal_layer_name = metal_layer.name
+            metal_layer = metal_layer.metal_layer
+
+            metal_z_bottom = metal_layer.height
+
+            extracted_layer = self.extracted_layer(layer_name=metal_layer_name)
+
+            sidewall_region: Optional[kdb.Region] = None
+            sidewall_height = 0
+
+            no_metal_region: Optional[kdb.Region] = None
+            no_metal_height = 0
+
+            #
+            # add sidewall dielectrics
+            #
+            if extracted_layer:
+                sidewall_height = 0
+                sidewall_region = extracted_layer.region
+                sidewallee = metal_layer_name
+
+                while True:
+                    sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
+                    if not sidewall:
+                        break
+                    if sidewall.name == metal_layer.reference_above:  # TODO we won't deal with
+                        break
+                    match sidewall.layer_type:
+                        case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                            d = math.floor(sidewall.sidewall_dielectric_layer.width_outside_sidewall / self.dbu)
+                            sidewall_region = sidewall_region.sized(d)
+                            h_delta = sidewall.sidewall_dielectric_layer.height_above_metal or metal_layer.thickness
+                            # if h_delta == 0:
+                            #     h_delta = metal_layer.thickness
+                            sidewall_height += h_delta
+                            model_builder.add_dielectric(material_name=sidewall.name,
+                                                         layer=sidewall_region,
+                                                         z=metal_layer.height,
+                                                         height=sidewall_height)
+
+                        case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                            conf_diel = sidewall.conformal_dielectric_layer
+                            d = math.floor(conf_diel.thickness_sidewall / self.dbu)
+                            sidewall_region = sidewall_region.sized(d)
+                            h_delta = metal_layer.thickness + conf_diel.thickness_over_metal
+                            sidewall_height += h_delta
+                            model_builder.add_dielectric(material_name=sidewall.name,
+                                                         layer=sidewall_region,
+                                                         z=metal_layer.height,
+                                                         height=sidewall_height)
+
+                            top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+                            no_metal_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+                            no_metal_region = kdb.Region()
+                            no_metal_region.insert(no_metal_block)
+                            no_metal_region -= sidewall_region
+                            no_metal_height = conf_diel.thickness_where_no_metal
+                            model_builder.add_dielectric(material_name=sidewall.name,
+                                                         layer=no_metal_region,
+                                                         z=metal_layer.height,
+                                                         height=no_metal_height)
+
+                    sidewallee = sidewall.name
+
+            #
+            # add simple dielectric
+            #
+            simple_dielectric, diel_height = self.tech_info.simple_dielectric_above_metal(metal_layer_name)
+            top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+            diel_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+            diel_region = kdb.Region()
+            diel_region.insert(diel_block)
+            if sidewall_region:
+                assert sidewall_height >= 0.0
+                diel_region -= sidewall_region
+                model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                             layer=sidewall_region,
+                                             z=metal_z_bottom + sidewall_height,
+                                             height=diel_height - sidewall_height)
+            if no_metal_region:
+                model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                             layer=diel_region,
+                                             z=metal_z_bottom + no_metal_height,
+                                             height=diel_height - no_metal_height)
+            else:
+                model_builder.add_dielectric(material_name=simple_dielectric.name,
+                                             layer=diel_region,
+                                             z=metal_z_bottom,
+                                             height=diel_height)
 
         gen = model_builder.generate()
         return gen
