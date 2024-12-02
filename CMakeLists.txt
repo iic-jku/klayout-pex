@@ -11,7 +11,6 @@ find_package(protobuf CONFIG REQUIRED)
 set(PROTOBUF_SOURCES 
 	${CMAKE_CURRENT_LIST_DIR}/protos/tech.proto
 	${CMAKE_CURRENT_LIST_DIR}/protos/extract.proto
-	${CMAKE_CURRENT_LIST_DIR}/protos/units.proto
 	${CMAKE_CURRENT_LIST_DIR}/protos/process_stack.proto
 )
 
