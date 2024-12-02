@@ -177,11 +177,6 @@ class FasterCapInputBuilder:
                                                 z=0.0,
                                                 height=contact.thickness)
 
-                # diel_above = self.tech_info.process_stack_layer_by_name[diffusion_layer.reference]
-                # if diel_above:
-                #     pass
-                #
-                # # TODO: add stuff
 
         #
         # global substrate block below everything. independent of nets!
