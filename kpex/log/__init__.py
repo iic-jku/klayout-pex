@@ -11,6 +11,8 @@ from .logger import (
     set_log_level,
     console,
     debug,
+    rule,
+    subproc,
     info,
     warning,
     error
