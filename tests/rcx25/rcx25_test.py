@@ -97,11 +97,33 @@ def assert_expected_matches_obtained(*path_components,
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_single_plate_100um_x_100um_li1_over_substrate():
+    # MAGIC GIVES (8.3 revision 485):
+    #_______________________________ NOTE: with halo=8µm __________________________________
+    # C0 PLATE VSUBS 0.38618p
+    assert_expected_matches_obtained(
+        'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
+C1;PLATE;VSUBS;386.18"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_overlap_plates_100um_x_100um_li1_m1():
+    # MAGIC GIVES (8.3 revision 485):
+    #_______________________________ NOTE: with halo=8µm __________________________________
+    # C2 LOWER VSUBS 0.38618p
+    # C0 UPPER LOWER 0.294756p
+    # C1 UPPER VSUBS 0.205833p
+    #_______________________________ NOTE: with halo=50µm __________________________________
+    # C2 LOWER VSUBS 0.38618p
+    # C0 LOWER UPPER 0.294867p
+    # C1 UPPER VSUBS 0.205621p
+    # NOTE: magic with --magic_halo=50 (µm) gives UPPER-VSUBS of 0.205621p
+    #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
-        # NOTE: magic with --magic_halo=50 (µm) gives UPPER-VSUBS of 0.205621p
-        #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
 C1;LOWER;VSUBS;386.18
 C2;LOWER;UPPER;294.592
@@ -157,6 +179,8 @@ def test_sidewall_100um_x_100um_distance_200nm_li1():
     # C3 B VSUBS 4.54159f
     # C0 B C 7.5f
     # C1 A B 7.5f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # (same!)
 
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
@@ -166,6 +190,46 @@ C2;A;VSUBS;11.92  # TODO: magic=8.231f
 C3;B;VSUBS;11.92  # TODO: magic=4.452f
 C4;B;C;7.5
 C5;A;B;7.5"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sidewall_net_uturn_l1_redux():
+    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C2 C0 VSUBS 38.1255f
+    # C1 C1 VSUBS 12.5876f
+    # C0 C0 C1 1.87386f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # (same!)
+
+    assert_expected_matches_obtained(
+        'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
+C1;C0;VSUBS;40.642
+C2;C1;VSUBS;15.079
+C3;C0;C1;0.019 TODO, MAGIC=1.87386 fF"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
+    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C2 C0 VSUBS 0.300359f
+    # C1 C1 VSUBS 0.086832f
+    # C0 C0 C1 0.286226f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # (same!)
+
+    assert_expected_matches_obtained(
+        'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
+C1;C0;VSUBS;0.447 TODO
+C2;C1;VSUBS;0.223 TODO
+C3;C0;C1;0.145 TODO"""
         )
 
 
@@ -193,3 +257,24 @@ C3;BOTTOM;TOPB;215.898
 C4;TOPA;TOPB;0.503"""
     )
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sideoverlap_simple_plates_li1_m1():
+    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C2 li1 VSUBS 7.931799f
+    # C1 met1 VSUBS 0.248901p
+    # C0 li1 met1 0.143335f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # C2 li1 VSUBS 7.931799f
+    # C1 met1 VSUBS 0.248901p
+    # C0 li1 met1 0.156859f
+
+    assert_expected_matches_obtained(
+        'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
+C1;VSUBS;li1;7.932
+C2;VSUBS;met1;249.059
+C3;li1;met1;0.125 TODO"""
+        )
