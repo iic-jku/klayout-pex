@@ -284,7 +284,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
     expanded_netlist = netlist_expander.expand(
         extracted_netlist=pex_context.lvsdb.netlist(),
         top_cell_name=pex_context.top_cell.name,
-        cap_matrix=cap_matrix
+        cap_matrix=cap_matrix,
+        blackbox_devices=args.blackbox_devices
     )
 
     spice_writer = kdb.NetlistSpiceWriter()

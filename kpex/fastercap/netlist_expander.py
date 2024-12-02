@@ -11,7 +11,7 @@ import klayout.db as kdb
 from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from kpex.log import (
     debug,
-    # info,
+    info,
     warning,
     # error
 )
@@ -22,9 +22,16 @@ class NetlistExpander:
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
-               cap_matrix: CapacitanceMatrix) -> kdb.Netlist:
+               cap_matrix: CapacitanceMatrix,
+               blackbox_devices: bool) -> kdb.Netlist:
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
+
+        if not blackbox_devices:
+            for d in top_circuit.each_device():
+                name = d.name or d.expanded_name()
+                info(f"Removing whiteboxed device {name}")
+                top_circuit.remove_device(d)
 
         # create capacitor class
         cap = kdb.DeviceClassCapacitor()
