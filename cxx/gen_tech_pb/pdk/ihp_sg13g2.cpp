@@ -79,7 +79,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     
     addComputedLayer(tech, KCAP, "mim_via",  125, 10, "Original TopVia1 is 125/0, case MiM cap");
     addComputedLayer(tech, KCAP, "metal5_cap",   67, 10,  "Computed layer for Metal5, case MiM cap");
-    addComputedLayer(tech, KCAP, "cmim_dev",   36, 0,  "Computed layer for MiM cap above Metal5");
+    addComputedLayer(tech, KCAP, "cmim_top",   36, 0,  "Computed layer for MiM cap above Metal5");
 
     
 //    addComputedLayer(tech, KREG, "via1",      68, 44,  "");
@@ -154,6 +154,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     poly->set_reference_below("fox");
     poly->set_reference_above("psg");
     
+    kpex::tech::ProcessStackInfo::Contact *poly_cont = poly->mutable_contact_above();
+    poly_cont->set_name("Cont");
+    poly_cont->set_metal_above("Metal1");
+    poly_cont->set_thickness(0.4299);  // TODO!
+    
     li = psi->add_layers();
     li->set_name("nitride"); // TODO
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
@@ -164,13 +169,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     cl->set_thickness_sidewall(0.05);
     cl->set_reference("GatPoly");
     
-    kpex::tech::ProcessStackInfo::Contact *poly_cont = poly->mutable_contact_above();
-    poly_cont->set_name("Cont");
-    poly_cont->set_metal_above("Metal1");
-    poly_cont->set_thickness(0.4299);  // TODO!
-    
     li = psi->add_layers();
-    li->set_name("psg");
+    li->set_name("ild0");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     kpex::tech::ProcessStackInfo::SimpleDielectricLayer *sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
@@ -182,8 +182,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *metal1 = li->mutable_metal_layer();
     metal1->set_height(poly->height() + poly->thickness() + poly_cont->thickness());
     metal1->set_thickness(0.42);
-    metal1->set_reference_below("psg");
-    metal1->set_reference_above("lint");
+    metal1->set_reference_below("ild0");
+    metal1->set_reference_above("ild1");
     
     kpex::tech::ProcessStackInfo::Contact *via1 = metal1->mutable_contact_above();
     via1->set_name("Via1");
@@ -191,11 +191,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     via1->set_thickness(0.54);
     
     li = psi->add_layers();
-    li->set_name("nild2");
+    li->set_name("ild1");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("lint");
+    sdl->set_reference("ild0");
     
     li = psi->add_layers();
     li->set_name("Metal2");
@@ -203,8 +203,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *metal2 = li->mutable_metal_layer();
     metal2->set_height(metal1->height() + metal1->thickness() + via1->thickness());
     metal2->set_thickness(0.36);
-    metal2->set_reference_below("nild2");
-    metal2->set_reference_above("nild3");
+    metal2->set_reference_below("ild1");
+    metal2->set_reference_above("ild2");
     
     kpex::tech::ProcessStackInfo::Contact *via2 = metal2->mutable_contact_above();
     via2->set_name("Via2");
@@ -212,11 +212,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     via2->set_thickness(0.54);
     
     li = psi->add_layers();
-    li->set_name("nild3");
+    li->set_name("ild2");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild2");
+    sdl->set_reference("ild1");
     
     li = psi->add_layers();
     li->set_name("Metal3");
@@ -233,11 +233,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     via3->set_thickness(0.54);
         
     li = psi->add_layers();
-    li->set_name("nild4");
+    li->set_name("ild3");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild3");
+    sdl->set_reference("ild2");
     
     li = psi->add_layers();
     li->set_name("Metal4");
@@ -245,8 +245,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *metal4 = li->mutable_metal_layer();
     metal4->set_height(metal3->height() + metal3->thickness() + via3->thickness());
     metal4->set_thickness(0.49);
-    metal4->set_reference_below("nild4");
-    metal4->set_reference_above("nild5");
+    metal4->set_reference_below("ild3");
+    metal4->set_reference_above("ild4");
     
     kpex::tech::ProcessStackInfo::Contact *via4 = metal4->mutable_contact_above();
     via4->set_name("Via4");
@@ -254,11 +254,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     via4->set_thickness(0.54);
     
     li = psi->add_layers();
-    li->set_name("nild5");
+    li->set_name("ild4");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
+    sdl->set_reference("ild3");
     
     li = psi->add_layers();
     li->set_name("metal5_n_cap");
@@ -266,8 +266,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *metal5_ncap = li->mutable_metal_layer();
     metal5_ncap->set_height(metal4->height() + metal4->thickness() + via4->thickness());
     metal5_ncap->set_thickness(0.49);
-    metal5_ncap->set_reference_below("nild6");
-    metal5_ncap->set_reference_above("topox");
+    metal5_ncap->set_reference_below("ild4");
+    metal5_ncap->set_reference_above("ildtm1");
     
     kpex::tech::ProcessStackInfo::Contact *topVia1_ncap = metal5_ncap->mutable_contact_above();
     topVia1_ncap->set_name("topvia1_n_cap");
@@ -275,11 +275,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     topVia1_ncap->set_thickness(0.85);
 
     li = psi->add_layers();
-    li->set_name("nild5");
+    li->set_name("ildtm1");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
+    sdl->set_reference("ild4");
 
     li = psi->add_layers();
     li->set_name("metal5_cap");
@@ -287,21 +287,14 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *metal5_cap = li->mutable_metal_layer();
     metal5_cap->set_height(metal5_ncap->height());
     metal5_cap->set_thickness(metal5_ncap->thickness());
-    metal5_cap->set_reference_below("nild6");
-    metal5_cap->set_reference_above("topox");
+    metal5_cap->set_reference_below("ild4");
+    metal5_cap->set_reference_above("ildtm1");
 
-    li = psi->add_layers();
-    li->set_name("nild5");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
-
-    double capild_k = 4.52;  // to match design cap_mim_m3_w18p9_l5p1_no_interconnect to 200fF
+    double capild_k = 6.7;  // to match design sg13g2__pr.gds/cmim to 74.62fF
     double capild_thickness = 0.04;
 
     li = psi->add_layers();
-    li->set_name("tismim");
+    li->set_name("ismim");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
     cl = li->mutable_conformal_dielectric_layer();
     cl->set_dielectric_k(capild_k);
@@ -311,25 +304,32 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     cl->set_reference("metal5_cap");
 
     li = psi->add_layers();
-    li->set_name("cmim_dev");
+    li->set_name("ildtm1");
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
+    sdl = li->mutable_simple_dielectric_layer();
+    sdl->set_dielectric_k(4.1);
+    sdl->set_reference("ild4");
+
+    li = psi->add_layers();
+    li->set_name("cmim_top");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     kpex::tech::ProcessStackInfo::MetalLayer *cmim = li->mutable_metal_layer();
     cmim->set_height(metal5_cap->height() + metal5_cap->thickness() + capild_thickness);
     cmim->set_thickness(0.15);
-    cmim->set_reference_below("nild6");
-    cmim->set_reference_above("topox");
+    cmim->set_reference_below("ismim");
+    cmim->set_reference_above("ildtm1");
     
-    kpex::tech::ProcessStackInfo::Contact *topVia1_cap = metal5_cap->mutable_contact_above();
+    kpex::tech::ProcessStackInfo::Contact *topVia1_cap = cmim->mutable_contact_above();
     topVia1_cap->set_name("mim_via");
     topVia1_cap->set_metal_above("TopMetal1");
     topVia1_cap->set_thickness(topVia1_ncap->thickness() - capild_thickness - cmim->thickness());
 
     li = psi->add_layers();
-    li->set_name("nild5");
+    li->set_name("ildtm1");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
     sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
+    sdl->set_reference("ild4");
 
     li = psi->add_layers();
     li->set_name("TopMetal1");
@@ -337,8 +337,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     kpex::tech::ProcessStackInfo::MetalLayer *topMetal1 = li->mutable_metal_layer();
     topMetal1->set_height(metal5_ncap->height() + metal5_ncap->thickness() + topVia1_ncap->thickness());
     topMetal1->set_thickness(2.0);
-    topMetal1->set_reference_below("nild6");
-    topMetal1->set_reference_above("topox");
+    topMetal1->set_reference_below("ildtm1");
+    topMetal1->set_reference_above("ildtm2");
     
     kpex::tech::ProcessStackInfo::Contact *topVia2 = topMetal1->mutable_contact_above();
     topVia2->set_name("TopVia2");
@@ -346,22 +346,47 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     topVia2->set_thickness(2.8);
 
     li = psi->add_layers();
+    li->set_name("ildtm2");
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
+    sdl = li->mutable_simple_dielectric_layer();
+    sdl->set_dielectric_k(4.1);
+    sdl->set_reference("ildtm1");
+    
+    li = psi->add_layers();
     li->set_name("TopMetal2");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     kpex::tech::ProcessStackInfo::MetalLayer *topMetal2 = li->mutable_metal_layer();
     topMetal2->set_height(topMetal1->height() + topMetal1->thickness() + topVia2->thickness());
     topMetal2->set_thickness(3.0);
-    topMetal2->set_reference_below("nild6");
-    topMetal2->set_reference_above("topox");
+    topMetal2->set_reference_below("ildtm2");
+    topMetal2->set_reference_above("pass1");
 
-    // TODO: add conformal k=6.6 height 0.4µm, sidewall 0.6µm
+    li = psi->add_layers();
+    li->set_name("pass1");
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
+    cl = li->mutable_conformal_dielectric_layer();
+    cl->set_dielectric_k(4.1);
+    cl->set_thickness_over_metal(1.5);
+    cl->set_thickness_where_no_metal(1.5);
+    cl->set_thickness_sidewall(0.3);
+    cl->set_reference("TopMetal2");
+
+    li = psi->add_layers();
+    li->set_name("pass2");
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
+    cl = li->mutable_conformal_dielectric_layer();
+    cl->set_dielectric_k(6.6);
+    cl->set_thickness_over_metal(0.4);
+    cl->set_thickness_where_no_metal(0.4);
+    cl->set_thickness_sidewall(0.3);
+    cl->set_reference("pass1");
     
     li = psi->add_layers();
     li->set_name("air");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
     sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(3.0);
-    sdl->set_reference("topnit");
+    sdl->set_dielectric_k(1.0);
+    sdl->set_reference("pass2");
 }
 
 void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
