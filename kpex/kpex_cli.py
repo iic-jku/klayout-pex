@@ -59,6 +59,17 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_pex.add_argument("--out_dir", "-o", dest="output_dir_path", default=".",
                            help="Output directory path")
 
+    group_fastercap = main_parser.add_argument_group("FasterCap options")
+    group_fastercap.add_argument("--k_void", "-k", dest="k_void",
+                                 type=float, default=3.5,
+                                 help="Dielectric constant of void (default is 3.5)")
+    group_fastercap.add_argument("--delaunay_amax", "-a", dest="delaunay_amax",
+                                 type=float, default=0.5,
+                                 help="Delaunay triangulation maximum area (default is 0.5)")
+    group_fastercap.add_argument("--delaunay_b", "-b", dest="delaunay_b",
+                                 type=float, default=0.5,
+                                 help="Delaunay triangulation b (default is 0.5)")
+
     if arg_list is None:
         arg_list = sys.argv[1:]
     args = main_parser.parse_args(arg_list)
@@ -90,7 +101,11 @@ def validate_args(args: argparse.Namespace):
 def run_fastercap_extraction(args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
                              tech_info: TechInfo):
-    fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context, tech_info=tech_info)
+    fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
+                                                    tech_info=tech_info,
+                                                    k_void=args.k_void,
+                                                    delaunay_amax=args.delaunay_amax,
+                                                    delaunay_b=args.delaunay_b)
     gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
     # def provide_fastcap_file(name: str) -> TextIO:

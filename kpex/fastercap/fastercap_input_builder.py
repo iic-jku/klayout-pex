@@ -29,9 +29,15 @@ from fastercap_file_format_pb2 import *
 class FasterCapInputBuilder:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
-                 tech_info: TechInfo):
+                 tech_info: TechInfo,
+                 k_void: float = 3.5,
+                 delaunay_amax: float = 0.0,
+                 delaunay_b: float = 1.0):
         self.pex_context = pex_context
         self.tech_info = tech_info
+        self.k_void = k_void
+        self.delaunay_amax = delaunay_amax
+        self.delaunay_b = delaunay_b
 
     @cached_property
     def dbu(self) -> float:
@@ -63,9 +69,9 @@ class FasterCapInputBuilder:
 
         model_builder = FasterCapModelBuilder(
             dbu=self.dbu,
-            k_void=3.5,  # TODO
-            delaunay_amax=0.5,
-            delaunay_b=0.5
+            k_void=self.k_void,
+            delaunay_amax=self.delaunay_amax,   # test/compare with smaller, e.g. 0.05 => more triangles
+            delaunay_b=self.delaunay_b          # test/compare with 1.0 => more triangles at edges
         )
 
         for pl in self.tech_info.tech.process_stack.layers:
