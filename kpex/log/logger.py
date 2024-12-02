@@ -55,6 +55,27 @@ def set_log_level(log_level: LogLevel):
     __logger.setLevel(log_level)
 
 
+def register_additional_handler(handler: logging.Handler):
+    """
+    Adds a new handler to the default logger.
+
+    :param handler: The new handler. Must be of type ``logging.Handler``
+        or its subclasses.
+    """
+    __logger.addHandler(handler)
+
+
+def deregister_additional_handler(handler: logging.Handler):
+    """
+    Removes a registered handler from the default logger.
+
+    :param handler: The handler. If not registered, the behavior
+        of this function is undefined.
+    """
+    __logger.removeHandler(handler)
+
+
+
 def configure_logger():
     global __logger, console
 

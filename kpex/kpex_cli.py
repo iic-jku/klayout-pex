@@ -1,10 +1,13 @@
 #! /usr/bin/env python3
 
 import argparse
-import shutil
+from datetime import datetime
 from enum import Enum, StrEnum
+import logging
 import os
 import os.path
+import shlex
+import shutil
 import sys
 from typing import *
 
@@ -20,6 +23,8 @@ from .klayout.netlist_reducer import NetlistReducer
 from .log import (
     LogLevel,
     set_log_level,
+    register_additional_handler,
+    deregister_additional_handler,
     # console,
     # debug,
     info,
@@ -183,7 +188,7 @@ def validate_args(args: argparse.Namespace):
     args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
 
     if found_errors:
-        sys.exit(1)
+        raise Exception("Argument validation failed")
 
 
 def run_fastercap_extraction(args: argparse.Namespace,
@@ -200,11 +205,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
                                                     delaunay_b=args.delaunay_b)
     gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
-
     if args.geometry_check:
         gen.check()
-
-    os.makedirs(args.output_dir_path, exist_ok=True)
 
     faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
     os.makedirs(faster_cap_input_dir_path, exist_ok=True)
@@ -259,8 +261,53 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
 
 def main():
+    info("Called with arguments:")
+    info(' '.join(map(shlex.quote, sys.argv)))
+
     args = parse_args()
-    validate_args(args)
+
+    os.makedirs(args.output_dir_base_path, exist_ok=True)
+
+    def register_log_file_handler(log_path: str,
+                                  formatter: Optional[logging.Formatter]) -> logging.Handler:
+        handler = logging.FileHandler(log_path)
+        handler.setLevel(LogLevel.SUBPROCESS)
+        if formatter:
+            handler.setFormatter(formatter)
+        register_additional_handler(handler)
+        return handler
+
+    def reregister_log_file_handler(handler: logging.Handler,
+                                    log_path: str,
+                                    formatter: Optional[logging.Formatter]):
+        deregister_additional_handler(handler)
+        handler.flush()
+        handler.close()
+        new_path = os.path.join(args.output_dir_path, os.path.basename(log_path))
+        if os.path.exists(new_path):
+            ctime = os.path.getctime(new_path)
+            dt = datetime.fromtimestamp(ctime)
+            timestamp = dt.strftime('%Y-%m-%d_%H-%M-%S')
+            backup_path = f"{new_path[:-4]}_{timestamp}.bak.log"
+            shutil.move(new_path, backup_path)
+        log_path = shutil.move(log_path, args.output_dir_path)
+        register_log_file_handler(log_path, formatter)
+
+    # setup preliminary logger
+    cli_log_path_plain = os.path.join(args.output_dir_base_path, f"kpex_plain.log")
+    cli_log_path_formatted = os.path.join(args.output_dir_base_path, f"kpex.log")
+    formatter = logging.Formatter('[%(asctime)s] [%(levelname)s]    %(message)s')
+    file_handler_plain = register_log_file_handler(cli_log_path_plain, None)
+    file_handler_formatted = register_log_file_handler(cli_log_path_formatted, formatter)
+    try:
+        validate_args(args)
+    except Exception:
+        if args.output_dir_path:
+            reregister_log_file_handler(file_handler_plain, cli_log_path_plain, None)
+            reregister_log_file_handler(file_handler_formatted, cli_log_path_formatted, formatter)
+        sys.exit(1)
+    reregister_log_file_handler(file_handler_plain, cli_log_path_plain, None)
+    reregister_log_file_handler(file_handler_formatted, cli_log_path_formatted, formatter)
 
     set_log_level(args.log_level)
 
