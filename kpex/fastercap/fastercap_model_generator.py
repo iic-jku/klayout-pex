@@ -688,6 +688,7 @@ class FasterCapModelGenerator:
                              cond_name: Optional[str]):
         info(f"Writing FasterCap geo file: {output_path}")
         with open(output_path, "w") as f:
+            f.write(f"0 GEO File")
             for t in data:
                 f.write(f"T {file_number}")
                 for p in t:
