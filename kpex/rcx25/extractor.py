@@ -271,22 +271,29 @@ class RCExtractor:
         side_halo_um = self.tech_info.tech.process_parasitics.side_halo
         side_halo_dbu = int(side_halo_um / dbu) + 1  # add 1 nm to halo
 
-        space_markers = all_region.space_check(
-            side_halo_dbu,  # min space in um
-            True,  # whole edges
-            kdb.Metrics.Projection,  # metrics
-            None,  # ignore angle
-            None,  # min projection
-            None,  # max projection
-            True,  # shielding
-            kdb.Region.NoOppositeFilter,  # error filter for opposite sides
-            kdb.Region.NoRectFilter,  # error filter for rect input shapes
-            False,  # negative
-            kdb.Region.IgnoreProperties,  # property_constraint
-            kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
-        )
+        space_markers_by_layer_name: Dict[LayerName, kdb.Region] = {}
+        rdb_cat_space_markers = report.create_category(rdb_cat_sidewall, "All Space Markers")
 
-        rdb_output(rdb_cat_sidewall, "All Space Markers", space_markers)
+        for layer_name in layer2net2regions.keys():
+            if layer_name == substrate_layer_name:
+                continue
+
+            space_markers = layer_regions_by_name[layer_name].space_check(
+                side_halo_dbu,  # min space in um
+                True,  # whole edges
+                kdb.Metrics.Projection,  # metrics
+                None,  # ignore angle
+                None,  # min projection
+                None,  # max projection
+                True,  # shielding
+                kdb.Region.NoOppositeFilter,  # error filter for opposite sides
+                kdb.Region.NoRectFilter,  # error filter for rect input shapes
+                False,  # negative
+                kdb.Region.IgnoreProperties,  # property_constraint
+                kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+            )
+            space_markers_by_layer_name[layer_name] = space_markers
+            rdb_output(rdb_cat_space_markers, f"layer={layer_name}", space_markers)
 
         #
         # (1) OVERLAP CAPACITANCE
@@ -381,6 +388,8 @@ class RCExtractor:
                 continue
 
             rdb_cat_sw_layer = report.create_category(rdb_cat_sidewall, f"layer={layer_name}")
+
+            space_markers = space_markers_by_layer_name[layer_name]
 
             for i, net1 in enumerate(net2regions.keys()):
                 for j, net2 in enumerate(net2regions.keys()):
