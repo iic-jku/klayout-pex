@@ -60,6 +60,8 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
     group_special.add_argument("--log_level", dest='log_level', default='info',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+    group_special.add_argument("--threads", dest='num_threads', type=int, default=0,
+                               help="number of threads (e.g. for FasterCap)")
 
     group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
@@ -140,6 +142,10 @@ def validate_args(args: argparse.Namespace):
 def run_fastercap_extraction(args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
                              tech_info: TechInfo):
+    num_threads = args.num_threads if args.num_threads > 0 else os.cpu_count() * 4
+    info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {num_threads}")
+    os.environ['OMP_NUM_THREADS'] = f"{num_threads}"
+
     fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
                                                     tech_info=tech_info,
                                                     k_void=args.k_void,
