@@ -30,6 +30,11 @@ class TechInfo:
         self.tech = tech
 
     @cached_property
+    def gds_pair_for_computed_layer_name(self) -> Dict[str, GDSPair]:
+        return {lyr.layer_info.name: (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype)
+                for lyr in self.tech.lvs_computed_layers}
+
+    @cached_property
     def layer_info_by_name(self) -> Dict[str, tech_pb2.LayerInfo]:
         return {lyr.name: lyr for lyr in self.tech.layers}
 

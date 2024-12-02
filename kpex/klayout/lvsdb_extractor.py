@@ -15,47 +15,7 @@ from ..log import (
     error
 )
 
-
-# Name to layer/datatype mapping for computed layers
-
-# NOTE: the names are from computed layers. Specifically the tap
-# original layer is split into ntap and ptap, so there is no
-# meaningful layer/datatype combination from original layer space.
-# Other layers are mapped to functionally equivalent layers.
-name_to_lp: Dict[str, Tuple[int, int]] = {
-    "dnwell":    (64, 18),
-    "li_con":    (67, 20),
-    "licon":     (66, 44),
-    "mcon":      (67, 44),
-    "met1_con":  (68, 20),
-    "met2_con":  (69, 20),
-    "met3_ncap": (70, 20),
-    "met4_ncap": (71, 20),
-    "met5_con":  (72, 20),
-    "nsd":       (93, 44),   # borrow from nsdm
-    "ntap_conn": (65, 144),  # original tap is 65/44, but we need to separate ntap/ptap
-    "nwell":     (64, 20),
-    "poly_con":  (66, 20),
-    "psd":       (94, 20),   # borrow from psdm
-    "ptap_conn": (65, 244),  # original tap is 65/44, but we need to separate ntap/ptap
-    "via1":      (68, 44),
-    "via2":      (69, 44),
-    "via3":      (70, 44),
-    "via4":      (71, 44),
-    'poly_vpp':  (66, 20),
-    'li_vpp':    (67, 20),  # borrow from li1.drawing
-    'met1_vpp':  (68, 20),
-    'met2_vpp':  (69, 20),
-    'met3_vpp':  (70, 20),
-    'met4_vpp':  (71, 20),
-    'met5_vpp':  (72, 20),
-    'licon_vpp': (66, 44),
-    'mcon_vpp':  (67, 44),
-    'via1_vpp':  (68, 44),
-    'via2_vpp':  (69, 44),
-    'via3_vpp':  (70, 44),
-    'via4_vpp':  (71, 44),
-}
+from ..tech_info import TechInfo
 
 
 GDSPair = Tuple[int, int]
@@ -89,7 +49,8 @@ class KLayoutExtractionContext:
     @classmethod
     def prepare_extraction(cls,
                            lvsdb: kdb.LayoutToNetlist,
-                           top_cell: str) -> KLayoutExtractionContext:
+                           top_cell: str,
+                           tech: TechInfo) -> KLayoutExtractionContext:
         dbu = lvsdb.internal_layout().dbu
         target_layout = kdb.Layout()
         target_layout.dbu = dbu
@@ -105,7 +66,7 @@ class KLayoutExtractionContext:
                                      top_cell,
                                      True)  # with_device_cells
 
-        lm = cls.build_LVS_layer_map(target_layout=target_layout, lvsdb=lvsdb)
+        lm = cls.build_LVS_layer_map(target_layout=target_layout, lvsdb=lvsdb, tech=tech)
 
         net_name_prop_num = 1
 
@@ -125,7 +86,7 @@ class KLayoutExtractionContext:
             device_cell_name_prefix=None  # "DEVICE_"
         )  # property name to which to attach the net name
 
-        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb)
+        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb, tech=tech)
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
@@ -140,16 +101,11 @@ class KLayoutExtractionContext:
 
     @staticmethod
     def build_LVS_layer_map(target_layout: kdb.Layout,
-                            lvsdb: kdb.LayoutToNetlist) -> Dict[int, kdb.LayerInfo]:
-        # # TODO: currently, the layer numbers are auto-assigned
-        # # by the sequence they occur in the LVS script, hence not well defined!
-        # # build a layer map for the layers that correspond to original ones.
-        # lm = {}
-        # for lname in lvsdb.layer_names():
-        #     li = kdb.LayerInfo(lname)
-        #     target_layer_index = target_layout.layer(li)  # Creates a new internal layer!
-        #     lm[target_layer_index] = lvsdb.layer_by_name(lname)
-        # pprint(lm)
+                            lvsdb: kdb.LayoutToNetlist,
+                            tech: TechInfo) -> Dict[int, kdb.LayerInfo]:
+        # NOTE: currently, the layer numbers are auto-assigned
+        # by the sequence they occur in the LVS script, hence not well defined!
+        # build a layer map for the layers that correspond to original ones.
 
         # https://www.klayout.de/doc-qt5/code/class_LayerInfo.html
         lm: Dict[int, kdb.LayerInfo] = {}
@@ -160,24 +116,22 @@ class KLayoutExtractionContext:
         for layer_index in lvsdb.layer_indexes():
             lname = lvsdb.layer_name(layer_index)
 
-            layer = datatype = None
-            if lname in name_to_lp:
-                layer, datatype = name_to_lp[lname]
-            else:
-                info = lvsdb.internal_layout().get_info(layer_index)
-                if info != kdb.LayerInfo():
-                    layer = info.layer
-                    datatype = info.datatype
+            gds_pair = tech.gds_pair_for_computed_layer_name.get(lname, None)
+            if not gds_pair:
+                li = lvsdb.internal_layout().get_info(layer_index)
+                if li != kdb.LayerInfo():
+                    gds_pair = (li.layer, li.datatype)
 
-            if layer is not None:
-                target_layer_index = target_layout.layer(layer, datatype)  # Creates a new internal layer!
+            if gds_pair is not None:
+                target_layer_index = target_layout.layer(*gds_pair)  # Creates a new internal layer!
                 region = lvsdb.layer_by_index(layer_index)
                 lm[target_layer_index] = region
 
         return lm
 
     @staticmethod
-    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
+    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist,
+                                  tech: TechInfo) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
 
@@ -186,9 +140,9 @@ class KLayoutExtractionContext:
         for idx, ln in enumerate(lvsdb.layer_names()):
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
-                if ln not in name_to_lp:
-                    warning(
-                        f"Unable to find info about extracted LVS layer '{ln}'")
+                gds_pair = tech.gds_pair_for_computed_layer_name.get(ln, None)
+                if not gds_pair:
+                    warning(f"Unable to find info about extracted LVS layer '{ln}'")
                     gds_pair = (1000 + idx, 20)
                     linfo = KLayoutExtractedLayerInfo(
                         index=idx,
@@ -199,7 +153,6 @@ class KLayoutExtractionContext:
                     unnamed_layers.append(linfo)
                     continue
 
-                gds_pair = name_to_lp[ln]
                 linfo = KLayoutExtractedLayerInfo(
                     index=idx,
                     lvs_layer_name=ln,

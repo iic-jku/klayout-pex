@@ -319,7 +319,9 @@ def main():
                                        lvsdb_path=lvsdb_path)
             lvsdb.read(lvsdb_path)
 
-    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name, lvsdb=lvsdb)
+    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name,
+                                                              lvsdb=lvsdb,
+                                                              tech=tech_info)
     gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
     pex_context.target_layout.write(gds_path)
 
