@@ -114,115 +114,103 @@ void convert(const std::string &inputPath,
     write(tech, outputPath, outputFormat);
 }
 
+void addLayer(kpex::tech::Technology *tech,
+              const std::string &name,
+              uint32_t gds_layer,
+              uint32_t gds_datatype,
+              const std::string &description)
+{
+kpex::tech::LayerInfo *layer = tech->add_layers();
+layer->set_name(name);
+layer->set_description(description);
+layer->set_gds_layer(gds_layer);
+layer->set_gds_datatype(gds_datatype);
+}
+
+void addComputedLayer(kpex::tech::Technology *tech,
+                      kpex::tech::ComputedLayerInfo_Kind kind,
+                      const std::string &name,
+                      uint32_t gds_layer,
+                      uint32_t gds_datatype,
+                      const std::string &description)
+{
+    kpex::tech::ComputedLayerInfo *cl = tech->add_lvs_computed_layers();
+    cl->set_kind(kind);
+    kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
+    layer->set_name(name);
+    layer->set_description(description);
+    layer->set_gds_layer(gds_layer);
+    layer->set_gds_datatype(gds_datatype);
+}
+
+
 void buildLayers(kpex::tech::Technology *tech) {
-    kpex::tech::LayerInfo *layer;
-    layer = tech->add_layers();
-    layer->set_name("diff");
-    layer->set_description("Active (diffusion) area");
-    layer->set_gds_layer(65);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("tap");
-    layer->set_description("Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
-    layer->set_gds_layer(65);
-    layer->set_gds_datatype(44);
+    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
+    addLayer(tech, "tap",  65, 44, "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
+    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
+    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
+    addLayer(tech, "diff", 65, 20, "Active (diffusion) area");
 
-    layer = tech->add_layers();
-    layer->set_name("diff"); // map this to process stack nwell? (TODO: check this with Matthias)
-    layer->set_description("KLayout computed layer: ntap_conn");
-    layer->set_gds_layer(65);
-    layer->set_gds_datatype(144);
+    // map this to process stack nwell? (TODO: check this with Matthias)
+    addLayer(tech, "diff", 65, 144, "KLayout computed layer: ntap_conn");
 
-    layer = tech->add_layers();
-    layer->set_name("diff"); // map this to process stack subs? (TODO: check this with Matthias)
-    layer->set_description("KLayout computed layer: ptap_conn");
-    layer->set_gds_layer(65);
-    layer->set_gds_datatype(244);
+    // map this to process stack subs? (TODO: check this with Matthias)
+    addLayer(tech, "diff", 65, 244, "KLayout computed layer: ptap_conn");
 
-    layer = tech->add_layers();
-    layer->set_name("nwell");
-    layer->set_description("N-well region");
-    layer->set_gds_layer(64);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("poly");
-    layer->set_description("Poly");
-    layer->set_gds_layer(66);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("licon1");
-    layer->set_description("Contact to local interconnect");
-    layer->set_gds_layer(66);
-    layer->set_gds_datatype(44);
-    
-    layer = tech->add_layers();
-    layer->set_name("li1");
-    layer->set_description("Local interconnect");
-    layer->set_gds_layer(67);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("mcon");
-    layer->set_description("Contact from local interconnect to met1");
-    layer->set_gds_layer(67);
-    layer->set_gds_datatype(44);
-    
-    layer = tech->add_layers();
-    layer->set_name("met1");
-    layer->set_description("Metal 1");
-    layer->set_gds_layer(68);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("via");
-    layer->set_description("Contact from met1 to met2");
-    layer->set_gds_layer(68);
-    layer->set_gds_datatype(44);
-    
-    layer = tech->add_layers();
-    layer->set_name("met2");
-    layer->set_description("Metal 2");
-    layer->set_gds_layer(69);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("via2");
-    layer->set_description("Contact from met2 to met3");
-    layer->set_gds_layer(69);
-    layer->set_gds_datatype(44);
-    
-    layer = tech->add_layers();
-    layer->set_name("met3");
-    layer->set_description("Metal 3");
-    layer->set_gds_layer(70);
-    layer->set_gds_datatype(20);
-    
-    layer = tech->add_layers();
-    layer->set_name("via3");
-    layer->set_description("Contact from met3 to met4");
-    layer->set_gds_layer(70);
-    layer->set_gds_datatype(44);
-    
-    layer = tech->add_layers();
-    layer->set_name("met4");
-    layer->set_description("Metal 4");
-    layer->set_gds_layer(71);
-    layer->set_gds_datatype(20);
+    addLayer(tech, "nwell",  64, 20, "N-well region");
+    addLayer(tech, "poly",   66, 20, "Poly");
+    addLayer(tech, "licon1", 66, 44, "Contact to local interconnect");
+    addLayer(tech, "li1",    67, 20, "Local interconnect");
+    addLayer(tech, "mcon",   67, 44, "Contact from local interconnect to met1");
+    addLayer(tech, "met1",   68, 20, "Metal 1");
+    addLayer(tech, "via",    68, 44, "Contact from met1 to met2");
+    addLayer(tech, "met2",   69, 20, "Metal 2");
+    addLayer(tech, "via2",   69, 44, "Contact from met2 to met3");
+    addLayer(tech, "met3",   70, 20, "Metal 3");
+    addLayer(tech, "via3",   70, 44, "Contact from met3 to met4");
+    addLayer(tech, "met4",   71, 20, "Metal 4");
+    addLayer(tech, "via4",   71, 44, "Contact from met4 to met5");
+    addLayer(tech, "met5",   72, 20, "Metal 5");
+}
 
-    layer = tech->add_layers();
-    layer->set_name("via4");
-    layer->set_description("Contact from met4 to met5");
-    layer->set_gds_layer(71);
-    layer->set_gds_datatype(44);
+void buildLVSComputedLayers(kpex::tech::Technology *tech) {
+    kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
+    kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
+    kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
 
-    layer = tech->add_layers();
-    layer->set_name("met5");
-    layer->set_description("Metal 5");
-    layer->set_gds_layer(72);
-    layer->set_gds_datatype(20);
+    addComputedLayer(tech, KREG, "dnwell",    64, 18,  "Deep NWell");
+    addComputedLayer(tech, KREG, "li_con",    67, 20,  "Computed layer for li");
+    addComputedLayer(tech, KREG, "licon",     66, 44,  "Computed layer for contact to li");
+    addComputedLayer(tech, KREG, "mcon",      67, 44,  "");
+    addComputedLayer(tech, KREG, "met1_con",  68, 20,  "");
+    addComputedLayer(tech, KREG, "met2_con",  69, 20,  "");
+    addComputedLayer(tech, KREG, "met3_ncap", 70, 20,  "");
+    addComputedLayer(tech, KREG, "met4_ncap", 71, 20,  "");
+    addComputedLayer(tech, KREG, "met5_con",  72, 20,  "");
+    addComputedLayer(tech, KREG, "nsd",       93, 44,  "borrow from nsdm");
+    addComputedLayer(tech, KREG, "ntap_conn", 65, 144, "Separate ntap, original tap is 65,44, we need seperate ntap/ptap");
+    addComputedLayer(tech, KREG, "nwell",     64, 20,  "");
+    addComputedLayer(tech, KREG, "poly_con",  66, 20,  "");
+    addComputedLayer(tech, KREG, "psd",       94, 20,  "borrow from psdm");
+    addComputedLayer(tech, KREG, "ptap_conn", 65, 244, "Separate ptap, original tap is 65,44, we need seperate ntap/ptap");
+    addComputedLayer(tech, KREG, "via1",      68, 44,  "");
+    addComputedLayer(tech, KREG, "via2",      69, 44,  "");
+    addComputedLayer(tech, KREG, "via3",      70, 44,  "");
+    addComputedLayer(tech, KREG, "via4",      71, 44,  "");
+
+    addComputedLayer(tech, KCAP, "poly_vpp",  66, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "li_vpp",    67, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "met1_vpp",  68, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "met2_vpp",  69, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "met3_vpp",  70, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "met4_vpp",  71, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "met5_vpp",  72, 20,  "Capacitor device metal");
+    addComputedLayer(tech, KCAP, "licon_vpp", 66, 44,  "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "mcon_vpp",  67, 44,  "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "via1_vpp",  68, 44,  "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "via2_vpp",  69, 44,  "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "via3_vpp",  70, 44,  "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "via4_vpp",  71, 44,  "Capacitor device contact");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
@@ -530,6 +518,8 @@ void buildDemoTech(kpex::tech::Technology &tech) {
     tech.set_name("sky130A");
 
     buildLayers(&tech);
+
+    buildLVSComputedLayers(&tech);
 
     kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
     buildProcessStackInfo(psi);
