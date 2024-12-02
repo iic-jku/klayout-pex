@@ -55,7 +55,7 @@ class NetlistExpander:
                               net1: kdb.Net,
                               net2: kdb.Net,
                               cap_value: float):
-            if cap_value >= cap_threshold:
+            if cap_value > cap_threshold:
                 c: kdb.Device = top_circuit.create_device(cap, f"Cext_{i}_{j}")
                 c.connect_terminal('A', net1)
                 c.connect_terminal('B', net2)
