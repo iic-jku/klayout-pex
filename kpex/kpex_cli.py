@@ -77,6 +77,11 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help="Schematic SPICE netlist path (for LVS)")
     group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
     group_pex_input.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
+    default_lvs_script_path = os.path.join(os.environ['HOME'],
+                                           '.klayout', 'salt', 'sky130A_el', 'lvs', 'core', 'sky130.lvs')
+    group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
+                                 default=default_lvs_script_path,
+                                 help=f"Path to KLayout LVS script (default is {default_lvs_script_path})")
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
@@ -242,8 +247,6 @@ def main():
 
     # TODO: make configurable (env vars or config file)
     klayout_exe_path = 'klayout'
-    lvs_script_path = os.path.join(os.environ['HOME'], '.klayout', 'salt', 'sky130A_el',
-                                   'lvs', 'core', 'sky130.lvs')
 
     match args.input_mode:
         case InputMode.LVSDB:
@@ -290,7 +293,7 @@ def main():
             lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
             lvs_runner = LVSRunner()
             lvs_runner.run_klayout_lvs(exe_path=klayout_exe_path,
-                                       lvs_script=lvs_script_path,
+                                       lvs_script=args.lvs_script_path,
                                        gds_path=effective_gds_path,
                                        schematic_path=effective_schematic_path,
                                        log_path=lvs_log_path,
