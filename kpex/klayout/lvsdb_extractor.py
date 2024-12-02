@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import tempfile
 from typing import *
 from dataclasses import dataclass
 from rich.pretty import pprint
@@ -68,6 +70,13 @@ class KLayoutExtractedLayerInfo:
 
 
 @dataclass
+class KLayoutMergedExtractedLayerInfo:
+    source_layers: List[KLayoutExtractedLayerInfo]
+    gds_pair: GDSPair
+    region: kdb.Region
+
+
+@dataclass
 class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
     dbu: float
@@ -75,7 +84,7 @@ class KLayoutExtractionContext:
     layer_map: Dict[int, kdb.LayerInfo]
     cell_mapping: kdb.CellMapping
     target_layout: kdb.Layout
-    extracted_layers: Dict[GDSPair, KLayoutExtractedLayerInfo]
+    extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
 
     @classmethod
     def prepare_extraction(cls,
@@ -165,21 +174,39 @@ class KLayoutExtractionContext:
         return lm
 
     @staticmethod
-    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Dict[GDSPair, KLayoutExtractedLayerInfo]:
+    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Dict[GDSPair, KLayoutMergedExtractedLayerInfo]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
-        nonempty_layers: Dict[GDSPair, KLayoutExtractedLayerInfo] = {}
+        nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
         for idx, ln in enumerate(lvsdb.layer_names()):
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
                 if ln not in name_to_lp:
+                    layout_dump_path = tempfile.mktemp(prefix=f"LVS_layer_{ln}", suffix="gds.gz")
                     warning(
                         f"Unable to find info about extracted LVS layer '{ln}'")
+                    # layout = kdb.Layout()
+                    # layout.add_cell("TOP")
+                    #
                     continue
                 gds_pair = name_to_lp[ln]
-                nonempty_layers[gds_pair] = KLayoutExtractedLayerInfo(
+                linfo = KLayoutExtractedLayerInfo(
                     index=idx,
                     lvs_layer_name=ln,
                     gds_pair=gds_pair,
                     region=layer
                 )
+
+                entry = nonempty_layers.get(gds_pair, None)
+                if entry:
+                    entry.source_layers.append(linfo)
+                    entry.region += layer
+                    entry.region.merge()
+                else:
+                    nonempty_layers[gds_pair] = KLayoutMergedExtractedLayerInfo(
+                        source_layers=[linfo],
+                        gds_pair=gds_pair,
+                        region=layer,
+                    )
+                print()
+
         return nonempty_layers
