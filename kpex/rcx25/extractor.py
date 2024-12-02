@@ -1,9 +1,7 @@
 #! /usr/bin/env python3
 import math
-from asyncio import shield
 from collections import defaultdict
 from dataclasses import dataclass, field
-from mailcap import subst
 from typing import *
 
 import klayout.db as kdb
