@@ -4,12 +4,11 @@ from __future__ import annotations  # allow class type hints within same class
 from typing import *
 from functools import cached_property
 import google.protobuf.json_format
-from cachetools import cached
 
 from .util.multiple_choice import MultipleChoicePattern
 import tech_pb2
 import process_stack_pb2
-
+import extract_pb2
 
 class TechInfo:
     """Helper class for Protocol Buffer tech_pb2.Technology"""
@@ -164,3 +163,27 @@ class TechInfo:
                 if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
                     return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
         return diel_lyr, 5.0   # air TODO
+
+    @cached_property
+    def substrate_cap_by_layer_name(self) -> Dict[str, extract_pb2.CapacitanceInfo.SubstrateCapacitance]:
+        return {sc.layer_name: sc for sc in self.tech.extraction.capacitance.substrates}
+
+    @cached_property
+    def overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, extract_pb2.CapacitanceInfo.OverlapCapacitance]]:
+        """
+        usage: dict[top_layer_name][bottom_layer_name]
+        """
+        return {oc.top_layer_name: {oc.bottom_layer_name: oc}
+                for oc in self.tech.extraction.capacitance.overlaps}
+
+    @cached_property
+    def sidewall_cap_by_layer_name(self) -> Dict[str, extract_pb2.CapacitanceInfo.SidewallCapacitance]:
+        return {sc.layer_name: sc for sc in self.tech.extraction.capacitance.sidewalls}
+
+    @cached_property
+    def side_overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, extract_pb2.CapacitanceInfo.SideOverlapCapacitance]]:
+        """
+        usage: dict[in_layer_name][out_layer_name]
+        """
+        return {oc.in_layer_name: {oc.out_layer_name: oc}
+                for oc in self.tech.extraction.capacitance.sideoverlaps}
