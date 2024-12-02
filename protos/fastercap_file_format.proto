@@ -1,0 +1,117 @@
+//
+// Protocol Buffer Schema for FasterCap Input Files
+// https://www.fastfieldsolvers.com/software.htm#fastercap
+//
+
+syntax = "proto3";
+
+package fastercap_file_format;
+
+//--------------------------------------------------------------------------------------------------
+// 3D Structures
+//--------------------------------------------------------------------------------------------------
+
+/************************************************************************
+Examples, cubes.txt input file references other files,
+(they can be inlined)
+
+* --------------- cubes.txt -----------------------
+* Array of two cubes, in air
+*
+* conductor | dielectric | offset in space
+* file name | constant
+C cube.txt    1.000000     0.0 0.0 0.0
+C cube.txt    1.000000     2.0 0.0 0.0
+* -------------------------------------------------
+
+* --------------- cube.txt -----------------------
+* 1mX1mX1m unit cube
+*
+* conductor      | 3D coordinates of the four corners
+* name to which  | of the quadrilateral Q patch
+* the Q patch    |
+* belongs        |
+Q mycube           1.0 1.0 0.0   1.0 0.0 0.0   1.0 0.0 1.0   1.0 1.0 1.0
+Q mycube           0.0 1.0 0.0   1.0 1.0 0.0   1.0 1.0 1.0   0.0 1.0 1.0
+Q mycube           1.0 0.0 0.0   0.0 0.0 0.0   0.0 0.0 1.0   1.0 0.0 1.0
+Q mycube           0.0 0.0 0.0   0.0 1.0 0.0   0.0 1.0 1.0   0.0 0.0 1.0
+Q mycube           0.0 0.0 0.0   1.0 0.0 0.0   1.0 1.0 0.0   0.0 1.0 0.0
+Q mycube           0.0 0.0 1.0   1.0 0.0 1.0   1.0 1.0 1.0   0.0 1.0 1.0
+
+************************************************************************/
+
+message Vector3D {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Conductor3D {
+  string file_name = 1;
+  double relative_permittivity = 10;  // dielectric constant
+  Vector3D offset_in_space = 20;
+  optional bool merge_with_next = 30; // merge (= treat this and next conductor as same/single conductor)
+}
+
+message Dielectric3D {
+  string file_name = 1;
+  double out_permittivity = 10; // dielectric constant
+  double in_permittivity = 11;  // dielectric constant
+  Vector3D offset_in_space = 20;
+  Vector3D reference_point = 30; // reference point defining which side out_permittivity is
+  optional bool reference_lies_on_in_permittivity = 40;
+}
+
+message QuadrilateralPanel3D {
+  Vector3D point_0 = 10; // points must be entered in clockwise or counterclockwise order!
+  Vector3D point_1 = 11;
+  Vector3D point_2 = 12;
+  Vector3D point_3 = 13;
+
+  oneof either_conductor_or_dielectric {
+    string conductor_name = 1;  // ignored if panel belongs to a dielectric
+    Vector3D dielectric_reference_point = 20; // reference point, if panel belongs to dielectric
+  }
+}
+
+message TriangularPanel3D {
+  Vector3D point_0 = 10; // points must be entered in clockwise or counterclockwise order!
+  Vector3D point_1 = 11;
+  Vector3D point_2 = 12;
+
+  oneof either_conductor_or_dielectric {
+    string conductor_name = 1;  // ignored if panel belongs to a dielectric
+    Vector3D dielectric_reference_point = 20; // reference point, if panel belongs to dielectric
+  }
+}
+
+message ConductorRenameEvent {
+  // rename all panels previously assigned to conductor old_name to new_name
+  string old_name = 1;
+  string new_name = 2;
+}
+
+message Comment {
+  string message = 1;
+}
+
+message InputLine3D {
+  oneof kind {
+    Comment comment = 1;
+    Conductor3D conductor = 10;
+    Dielectric3D dielectric = 20;
+    QuadrilateralPanel3D quadrilateral_panel = 30;
+    TriangularPanel3D triangular_panel = 40;
+    ConductorRenameEvent conductor_rename_event = 50;
+  }
+}
+
+message InputFile3D {
+  string file_name = 1;
+
+  repeated InputLine3D lines = 10;
+
+  repeated InputFile3D sub_input_files = 20;  // e.g. inline or referenced file
+}
+
+//--------------------------------------------------------------------------------------------------
