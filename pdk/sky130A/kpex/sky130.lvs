@@ -1,0 +1,2536 @@
+# Copyright 2022 Efabless Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#===========================================================================================================================
+#------------------------------------------------- SKY130 LVS RULE DECK ----------------------------------------------------
+#===========================================================================================================================
+
+require 'time'
+require "logger"
+
+exec_start_time = Time.now
+
+logger = Logger.new(STDOUT)
+
+logger.formatter = proc do |severity, datetime, progname, msg|
+  "#{datetime}: Memory Usage (" + `pmap #{Process.pid} | tail -1`[10,40].strip + ") : #{msg}\n"
+end
+
+#================================================
+#----------------- FILE SETUP -------------------
+#================================================
+
+logger.info("Starting running SKY130 Klayout LVS runset on %s" % [$input])
+
+#=== GET LAYOUT ===
+if $input
+  source($input)
+  logger.info("Layout file: #{$input}")
+else
+  logger.error("No layout loaded, please add your layout file")
+end
+
+#=== GET THREADS ===
+if $thr
+  threads($thr)
+  logger.info("Number of threads: #{$thr}")
+else
+  threads(16)
+  logger.info("Number of threads: 16")
+end
+
+#=== GET REPORT ===
+if $report
+  report_lvs($report)
+  logger.info("Final report: #{$report}")
+else
+  report_lvs(source.cell_name+".lvsdb")
+  logger.info("Final report: #{source.cell_name}.lvsdb")
+end
+
+#=== GET SUBSTRATE NAME ===
+if $lvs_sub
+  substrate_name = $lvs_sub
+  logger.info("Substrate name: #{$lvs_sub}")
+else
+  substrate_name = "sky130_gnd"
+  logger.info("No substrate name given, default name is sky130_gnd")
+end
+
+#=== CUSTOM WRITER CLASS ===
+class SubcircuitModels < RBA::NetlistSpiceWriterDelegate
+
+  def write_device(device)
+    device_class = device.device_class
+    if device_class.name.include?('fet')
+      str = "M" + device.expanded_name
+    elsif device_class.name.include?('diode')
+      str = "D" + device.expanded_name
+    elsif device_class.name.include?('npn') or device_class.name.include?('pnp')
+      str = "Q" + device.expanded_name
+    elsif device_class.name.include?('res')
+      str = "R" + device.expanded_name
+    elsif device_class.name.include?('ind') or device_class.name.include?('coil')
+      str = "L" + device.expanded_name
+    elsif device_class.name.include?('cap')
+      str = "C" + device.expanded_name
+    else
+      str = "#{device.id}" + device.expanded_name
+    end
+    device_class.terminal_definitions.each do |td|
+      str += " " + net_to_string(device.net_for_terminal(td.id))
+    end
+    str += " " + device_class.name
+    unless device_class.name.include?('vpp') || device_class.name.include?('ind')
+      device_class.parameter_definitions.each do |pd|
+        str += " " + pd.name + ("=%.12g" % device.parameter(pd.id))
+      end
+    end
+    emit_line(str)
+  end      
+
+end
+
+#=== CUSTOM WRITER ===
+custom_spice_writer = RBA::NetlistSpiceWriter::new(SubcircuitModels::new)
+
+#=== NET NAMES OPTION ===
+# true: use net names instead of numbers
+# false: use numbers for nets
+if $spice_net_names == "false"
+  custom_spice_writer.use_net_names = false
+  logger.info("Extracted netlist with net names: #{$spice_net_names}")
+else
+  custom_spice_writer.use_net_names = true
+  logger.info("Extracted netlist with net names: true")
+end
+
+#=== COMMENTS OPTION ===
+# true: put in comments with details
+# false: no comments
+if $spice_comments == "true"
+  custom_spice_writer.with_comments = true
+  logger.info("Extracted netlist with comments in details: #{$spice_comments}")
+else
+  custom_spice_writer.with_comments = false
+  logger.info("Extracted netlist with comments in details: false")
+end
+
+if $target_netlist
+  target_netlist($target_netlist, custom_spice_writer, "Extracted by KLayout with SKY130 LVS runset on : #{Time.now.strftime("%d/%m/%Y %H:%M")}")
+  logger.info("Extracted netlist file: #{$target_netlist}")
+else
+  target_netlist(File.join(File.dirname(RBA::CellView::active.filename), source.cell_name+"_extracted.cir"), custom_spice_writer,  "Extracted by KLayout with SKY130 LVS runset on : #{Time.now.strftime("%d/%m/%Y %H:%M")}")
+  logger.info("Extracted netlist file: #{source.cell_name}_extracted.cir")
+end
+
+#=== EXTRACTION SCALE ===
+if $scale  == "true"
+  device_scaling(1000000)
+  logger.info("device_scaling: true")
+else
+  logger.info("device_scaling: false")
+end
+
+#=== PRINT DETAILS ===
+if $verbose == "true"
+  verbose(true)
+  logger.info("Verbose mode: #{$verbose}")
+else
+  verbose(false)
+  logger.info("Verbose mode: false")
+end
+
+# === TILING MODE ===
+if $run_mode == "tiling"
+  # use a tile size of 1mm - not used in deep mode-
+  # tiles(500.um)
+  # use a tile border of 10 micron:
+  # tile_borders(10.um)
+  tiles(1000)
+  logger.info("Tiling  mode is enabled.")
+
+elsif $run_mode == "deep"
+  #=== HIER MODE ===
+  deep
+  logger.info("deep mode is enabled.")
+
+elsif $run_mode == "flat"
+  #=== FLAT MODE ===
+  flat
+  logger.info("flat  mode is enabled.")
+
+else
+  #=== DEFAULT MODE ===
+  deep
+  logger.info("deep  mode is enabled.")
+
+end # run_mode
+
+
+#================================================
+# --------------- CUSTOM CLASSES ----------------
+#================================================
+
+#====================== CUSTOM READER =========================
+class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
+
+  def parse_element(s, element)
+    if element == "C"
+      super(s + " C=2e-16", element)
+    elsif element == "R"
+      super(s + " R=0", element)
+    elsif element == "L"
+      super(s + " L=0", element)
+    else
+      super
+    end
+  end
+
+  # take and translate the element
+  def element(circuit, el, name, model, value, nets, params)
+
+    if el == "C" && model.include?('SKY130') && model.include?('VPP')
+
+      if nets.size == 4
+        cls = RBA::DeviceClassMOS4Transistor::new
+        cls.name = model
+        circuit.netlist.add(cls)
+
+        # create a device
+        device = circuit.create_device(cls, name)
+
+        # and configure the device
+        [ "S", "G", "D", "B" ].each_with_index do |t,index|
+          device.connect_terminal(t, nets[index])
+        end
+
+      else
+        cls = RBA::DeviceClassCapacitorWithBulk::new
+        cls.name = model
+        circuit.netlist.add(cls)
+
+        # create a device
+        device = circuit.create_device(cls, name)
+
+        # and configure the device
+        [ "A", "B", "W" ].each_with_index do |t,index|
+          device.connect_terminal(t, nets[index])
+        end
+        
+        device.set_parameter("C", params["C"] || 2e-16)
+      
+      end
+
+    elsif el == "L" && model.include?('SKY130') && (model.include?('IND') || model.include?('COIL'))
+
+      cls = RBA::DeviceClassMOS4Transistor::new
+      cls.name = model
+      circuit.netlist.add(cls)
+
+      # create a device
+      device = circuit.create_device(cls, name)
+
+      # and configure the device
+      [ "S", "G", "D", "B" ].each_with_index do |t,index|
+        device.connect_terminal(t, nets[index])
+      end
+
+    else
+      # all other elements are left to the standard implementation
+      return super
+    end
+
+    return true
+
+  end
+
+end
+
+# Instantiate a reader using the new delegate
+reader = RBA::NetlistSpiceReader::new(SubcircuitModelsReader::new)
+
+#=== GET NETLIST ===
+if $schematic
+  schematic($schematic, reader)
+  logger.info("Netlist file: #{$schematic}")
+else
+  begin  
+    schematic("#{source.cell_name}.cdl", reader)
+    logger.info("Netlist file: #{source.cell_name}.cdl")
+  rescue 
+    puts "No schematic loaded , please add your netlist file"
+    logger.error("No schematic loaded , please add your netlist file")
+  end 
+end
+
+class BResistor < RBA::DeviceClassResistorWithBulk
+  def initialize
+    super
+    enable_parameter("R", false)
+    enable_parameter("W", true)
+    enable_parameter("L", true)
+  end
+end
+
+class NResistor < RBA::DeviceClassResistor
+  def initialize
+    super
+    enable_parameter("R", false)
+    enable_parameter("W", true)
+    enable_parameter("L", true)
+  end
+end
+
+class MIMCap < RBA::DeviceClassCapacitor
+  def initialize
+    super
+    enable_parameter("C", false)
+    enable_parameter("A", true)
+    enable_parameter("P", true)
+  end
+end
+
+class VarCap < RBA::DeviceClassCapacitorWithBulk
+  def initialize
+    super
+    enable_parameter("C", false)
+    enable_parameter("A", true)
+    enable_parameter("P", true)
+  end
+end
+
+# class Vpp3Cap < RBA::DeviceClassCapacitorWithBulk
+#   def initialize
+#     super
+#     enable_parameter("C", false)
+#     enable_parameter("A", false)
+#     enable_parameter("P", false)
+#   end
+# end
+
+class Diode < RBA::DeviceClassDiode
+  def initialize
+    super
+    enable_parameter("A", true)
+    enable_parameter("P", true)
+  end
+end
+
+#================================================
+#-------------    Custom Devices  ---------------
+#================================================
+
+#====================== CUSTOM FOUR TERMINAL BJT EXTRACTOR =========================
+class FixBJT4Transistor < RBA::GenericDeviceExtractor
+
+  def initialize(name)
+    self.name = name
+  end
+
+  def setup
+  
+    define_layer("BJT", "BJT Seed Layer")
+    define_layer("tC", "Collector Terminal")
+    define_layer("tB", "Base Terminal")
+    define_layer("tE", "Emitter Terminal")
+    define_layer("tS", "Substrate Terminal")
+    
+    register_device_class(RBA::DeviceClassBJT4Transistor::new)
+  end
+  
+  def get_connectivity(layout, layers)
+
+    conn = RBA::Connectivity::new
+    conn.connect(layers[0], layers[0])
+    conn.connect(layers[0], layers[1])
+    conn.connect(layers[0], layers[2])
+    conn.connect(layers[0], layers[3])
+    
+    return conn
+
+  end
+
+  def extract_devices(layer_geometry)
+
+    # layer_geometry provides the input layers in the order they are 
+    # defined with "define_layer"
+    # conductor is supposed to be "conductor outside marker"
+    bjt          = layer_geometry[0]
+    
+    t_collector  = layer_geometry[1]
+    t_base       = layer_geometry[2]
+    t_emitter    = layer_geometry[3]
+    t_bulk       = layer_geometry[4]
+  
+    bjt.each_merged do |c|
+      dev_c = t_collector & c
+      dev_b = t_base & c
+      dev_e = t_emitter & c
+      
+      dev_c.each_merged do |cc|
+        dev_b.each_merged do |b|
+          dev_e.each_merged do |e|
+            device = create_device()
+          
+            # provide the device terminals to connect the metal to later
+            define_terminal(device, RBA::DeviceClassBJT4Transistor::TERMINAL_C, 1, cc)
+            define_terminal(device, RBA::DeviceClassBJT4Transistor::TERMINAL_B, 2, b)
+            define_terminal(device, RBA::DeviceClassBJT4Transistor::TERMINAL_E, 3, e)
+            define_terminal(device, RBA::DeviceClassBJT4Transistor::TERMINAL_S, 4, e)
+          end
+        end
+      end
+    end 
+  end
+end
+
+#====================== CUSTOM FOUR TERMINAL EXTRACTOR =========================
+class InductorExtractor < RBA::GenericDeviceExtractor
+
+  def initialize(name)
+    self.name = name
+  end
+
+  def setup
+
+    define_layer("C1", "Conductor1")
+    define_layer("C2", "Conductor2")
+    define_layer("M", "Marker")
+    define_layer("B", "Bulk")
+
+    register_device_class(RBA::DeviceClassMOS4Transistor::new)
+
+  end
+
+  def extract_devices(layer_geometry)
+
+    # layer_geometry provides the input layers in the order they are 
+    # defined with "define_layer"
+    # conductor is supposed to be "conductor outside marker"
+    conductor1 = layer_geometry[0]
+    conductor2 = layer_geometry[1]
+    marker     = layer_geometry[2]
+    bulk       = layer_geometry[3]
+
+    marker_merged = marker.merged
+    bulk_merged   = bulk.merged
+
+    # this will be the edge where the marker turns into conductor
+    marker_edges  = (marker_merged.edges & (conductor1))
+    marker_edges2 = (marker_merged.edges & (conductor2))
+
+    marker_merged.each do |r|
+
+      # identify the edges where this marker shape ends
+      interface_edges = marker_edges.interacting(RBA::Region::new(r))
+
+      # form terminal shapes from these edges
+      terminals  = interface_edges.extended_out(1).merged
+      terminals2 = marker_edges2.extended_out(1).merged
+
+      if (terminals.size > 1) and (terminals2.size > 0)
+
+        terminals.each do |term|
+          if "#{RBA::Region::new(term).interacting(conductor1.merged.interacting(RBA::Region::new(terminals[0])))}".empty?
+            terminals = [terminals[0], term]
+            break
+          end
+        end
+
+        device = create_device
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_S, 0,   terminals[0]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_G, 0,   terminals[1]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_D, 1,  terminals2[0]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_B, 3, bulk_merged[0]);
+
+      end
+      
+    end
+
+  end
+
+  def get_connectivity(layout, layers)
+  
+    # marker is used for extraction
+    # conductor is used for producing the terminals
+    conductor1 = layers[0]
+    conductor2 = layers[1]
+    marker     = layers[2]
+    bulk       = layers[3]
+    conn = RBA::Connectivity::new
+    conn.connect(marker    , marker)
+    conn.connect(conductor1, marker)
+    conn.connect(conductor2, marker)
+    conn.connect(bulk      , marker)
+
+    return conn
+
+  end
+
+end
+
+#====================== CUSTOM FOUR TERMINAL VPP EXTRACTOR =========================
+class VPP4Extractor < RBA::GenericDeviceExtractor
+
+  def initialize(name)
+    self.name = name
+  end
+
+  def setup
+
+    define_layer("C1", "Conductor1")
+    define_layer("C2", "Conductor2")
+    define_layer("M", "Marker")
+    define_layer("B", "Bulk")
+
+    register_device_class(RBA::DeviceClassMOS4Transistor::new)
+
+  end
+
+  def extract_devices(layer_geometry)
+
+    # layer_geometry provides the input layers in the order they are 
+    # defined with "define_layer"
+    # conductor is supposed to be "conductor outside marker"
+    conductor1 = layer_geometry[0]
+    conductor2 = layer_geometry[1]
+    marker     = layer_geometry[2]
+    bulk       = layer_geometry[3]
+
+    marker_merged = marker.merged
+    bulk_merged   = bulk.merged
+
+    # this will be the edge where the marker turns into conductor
+    marker_edges  = (marker_merged & (conductor1))
+    marker_edges2 = (marker_merged & (conductor2))
+
+    marker_merged.each do |r|
+
+      # identify the edges where this marker shape ends
+      interface_edges = marker_edges.interacting(RBA::Region::new(r))
+
+      # form terminal shapes from these edges
+      terminals  = interface_edges.merged
+      terminals2 = marker_edges2.merged
+
+      if (terminals.size > 1) and (terminals2.size > 0)
+
+        terminals.each do |term|
+          if terminals[0] == term
+            next
+          end
+          if !"#{RBA::Region::new(term).extents.interacting(RBA::Region::new(terminals[0]).extents)}".empty?
+            terminals = [terminals[0], term]
+            break
+          end
+        end
+
+        device = create_device
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_S, 0,   terminals[0]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_G, 0,   terminals[1]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_D, 1,  terminals2[0]);
+        define_terminal(device, RBA::DeviceClassMOS4Transistor::TERMINAL_B, 3, bulk_merged[0]);
+
+      end
+      
+    end
+
+  end
+
+  def get_connectivity(layout, layers)
+  
+    # marker is used for extraction
+    # conductor is used for producing the terminals
+    conductor1 = layers[0]
+    conductor2 = layers[1]
+    marker     = layers[2]
+    bulk       = layers[3]
+    conn = RBA::Connectivity::new
+    conn.connect(marker    , marker)
+    conn.connect(conductor1, marker)
+    conn.connect(conductor2, marker)
+    conn.connect(bulk      , marker)
+
+    return conn
+
+  end
+
+end
+
+
+#====================== CUSTOM THREE TERMINAL VPP EXTRACTOR =========================
+class VPP3Extractor < RBA::GenericDeviceExtractor
+
+  def initialize(name)
+    self.name = name
+  end
+
+  def setup
+
+    define_layer("C", "Conductor")
+    define_layer("M", "Marker")
+    define_layer("B", "Bulk")
+
+    register_device_class(RBA::DeviceClassCapacitorWithBulk::new)
+
+  end
+
+  def extract_devices(layer_geometry)
+
+    # layer_geometry provides the input layers in the order they are 
+    # defined with "define_layer"
+    # conductor is supposed to be "conductor outside marker"
+    conductor  = layer_geometry[0]
+    marker     = layer_geometry[1]
+    bulk       = layer_geometry[2]
+
+    marker_merged = marker.merged
+    bulk_merged   = bulk.merged
+
+    # this will be the edge where the marker turns into conductor
+    marker_edges  = (marker_merged & (conductor))
+
+    marker_merged.each do |r|
+
+      # identify the edges where this marker shape ends
+      interface_edges = marker_edges.interacting(RBA::Region::new(r))
+
+      # form terminal shapes from these edges
+      terminals  = interface_edges.merged
+      
+      if terminals.size > 1
+
+        terminals.each do |term|
+          if terminals[0] == term
+            next
+          end
+          if !"#{RBA::Region::new(term).extents.interacting(RBA::Region::new(terminals[0]).extents)}".empty?
+            terminals = [terminals[0], term]
+            break
+          end
+        end
+
+        device = create_device
+        device.set_parameter(RBA::DeviceClassCapacitorWithBulk::PARAM_C, 2e-16)
+        define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_A, 0,   terminals[0]);
+        define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_B, 0,   terminals[1]);
+        define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_W, 2, bulk_merged[0]);
+
+      end
+      
+    end
+
+  end
+
+  def get_connectivity(layout, layers)
+  
+    # marker is used for extraction
+    # conductor is used for producing the terminals
+    conductor  = layers[0]
+    marker     = layers[1]
+    bulk       = layers[2]
+    conn = RBA::Connectivity::new
+    conn.connect(marker   , marker)
+    conn.connect(conductor, marker)
+    conn.connect(bulk     , marker)
+
+    return conn
+
+  end
+
+end
+
+
+#====================== CUSTOM VPP NHV EXTRACTOR =========================
+class VPP3NHVExtractor < RBA::GenericDeviceExtractor
+
+  def initialize(name)
+    self.name = name
+  end
+
+  def setup
+  
+    define_layer("MARKER", "VPP Seed Layer")
+    define_layer("tA", "Terminal A")
+    define_layer("tB", "Terminal B")
+    define_layer("tW", "Substrate Terminal")
+    
+    register_device_class(RBA::DeviceClassCapacitorWithBulk::new)
+  end
+  
+  def get_connectivity(layout, layers)
+
+    conn = RBA::Connectivity::new
+    conn.connect(layers[0], layers[0])
+    conn.connect(layers[0], layers[1])
+    conn.connect(layers[0], layers[2])
+    conn.connect(layers[0], layers[3])
+    
+    return conn
+
+  end
+
+  def extract_devices(layer_geometry)
+    vpp_cap      = layer_geometry[0]
+    t_top        = layer_geometry[1]
+    t_bot        = layer_geometry[2]
+    t_bulk       = layer_geometry[3]
+  
+    vpp_cap.each_merged do |c|
+      dev_a = t_top & c
+      dev_b = t_bot & c
+      dev_w = t_bulk & c
+      device = create_device()
+    
+      # provide the device terminals to connect the metal to later
+      device.set_parameter(RBA::DeviceClassCapacitorWithBulk::PARAM_C, 2e-16)
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_A, 1, dev_a[0])
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_B, 2, dev_b[0])
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_W, 3, dev_w[0])
+    end 
+  end
+end
+
+
+#================================================
+#------------- LAYERS DERIVATIONS ---------------
+#================================================
+
+logger.info("Read in polygons from layers.")
+
+#=== INPUTS ===
+diff        = input(65 , 20 )
+poly        = input(66 , 20 )
+li          = input(67 , 20 )
+met1        = input(68 , 20 )
+met2        = input(69 , 20 )
+met3        = input(70 , 20 )
+met4        = input(71 , 20 )
+met5        = input(72 , 20 )
+pad         = input(76 , 20 )
+
+#=== DRAWINGS ===
+bound       = polygons(235, 4  )
+sub_pin     = polygons(64 , 59 )
+dnwell      = polygons(64 , 18 )
+pwell_pin   = polygons(122, 16 )
+pwell_res   = polygons(64 , 13 )
+pwbm        = polygons(19 , 44 )
+pwde        = polygons(124, 20 )
+nwell       = polygons(64 , 20 )
+nwell_pin   = polygons(64 , 16 )
+tap         = polygons(65 , 44 )
+psdm        = polygons(94 , 20 )
+nsdm        = polygons(93 , 44 )
+lvtn        = polygons(125, 44 )
+hvtr        = polygons(18 , 20 )
+hvtp        = polygons(78 , 44 )
+tunm        = polygons(80 , 20 )
+sonos       = polygons(80 , 20 )
+coreid      = polygons(81 , 2  )
+stdcell     = polygons(81 , 4  )
+npnid       = polygons(82 , 20 )
+pnpid       = polygons(82 , 44 )
+rpm         = polygons(86 , 20 )
+urpm        = polygons(79 , 20 )
+ldntm       = polygons(11 , 44 )
+hvntm       = polygons(125, 20 )
+poly_pin    = polygons(66 , 16 )
+poly_res    = polygons(66 , 13 )
+poly_cut    = polygons(66 , 14 )
+poly_short  = polygons(66 , 15 )
+hvi         = polygons(75 , 20 )
+licon       = polygons(66 , 44 )
+npc         = polygons(95 , 20 )
+diff_res    = polygons(65 , 13 )
+diff_cut    = polygons(65 , 14 )
+diode       = polygons(81 , 23 )
+li_pin      = polygons(67 , 16 )
+li_res      = polygons(67 , 13 )
+li_cut      = polygons(67 , 14 )
+mcon        = polygons(67 , 44 )
+met1_pin    = polygons(68 , 16 )
+met1_res    = polygons(68 , 13 )
+met1_cut    = polygons(68 , 14 )
+via1        = polygons(68 , 44 )
+met2_pin    = polygons(69 , 16 )
+met2_res    = polygons(69 , 13 )
+met2_cut    = polygons(69 , 14 )
+met2_fuse   = polygons(69 , 17 )
+via2        = polygons(69 , 44 )
+met3_pin    = polygons(70 , 16 )
+met3_res    = polygons(70 , 13 )
+met3_cut    = polygons(70 , 14 )
+met3_fuse   = polygons(70 , 17 )
+via3        = polygons(70 , 44 )
+met4_pin    = polygons(71 , 16 )
+met4_res    = polygons(71 , 13 )
+met4_cut    = polygons(71 , 14 )
+met4_fuse   = polygons(71 , 17 )
+via4        = polygons(71 , 44 )
+met5_pin    = polygons(72 , 16 )
+met5_res    = polygons(72 , 13 )
+met5_cut    = polygons(72 , 14 )
+rdl         = polygons(74 , 20 )
+rdl_pin     = polygons(74 , 16 )
+glass       = polygons(76 , 20 )
+capm        = polygons(89 , 44 )
+capm2       = polygons(97 , 44 )
+lowtapd     = polygons(81 , 14 )
+fillobsm1   = polygons(62 , 24 )
+fillobsm2   = polygons(105, 52 )
+fillobsm3   = polygons(107, 24 )
+fillobsm4   = polygons(112, 4  )
+ncm         = polygons(92 , 44 )
+natfet      = polygons(124, 21 )
+nsm         = polygons(61 , 20 )
+vhvi        = polygons(74 , 21 )
+uhvi        = polygons(74 , 22 )
+inductor    = polygons(82 , 24 )
+vpp         = polygons(82 , 64 )
+lvs_prune   = polygons(84 , 44 )
+padcenter   = polygons(81 , 20 )
+mf          = polygons(76 , 44 )
+areaid_sl   = polygons(81 , 1  )
+areaid_ce   = polygons(81 , 2  )
+areaid_fe   = polygons(81 , 3  )
+areaid_sc   = polygons(81 , 4  )
+areaid_sf   = polygons(81 , 6  )
+areaid_sw   = polygons(81 , 7  )
+areaid_sr   = polygons(81 , 8  )
+areaid_mt   = polygons(81 , 10 )
+areaid_dt   = polygons(81 , 11 )
+areaid_ft   = polygons(81 , 12 )
+areaid_ww   = polygons(81 , 13 )
+areaid_ld   = polygons(81 , 14 )
+areaid_ns   = polygons(81 , 15 )
+areaid_ij   = polygons(81 , 17 )
+areaid_zr   = polygons(81 , 18 )
+areaid_ed   = polygons(81 , 19 )
+areaid_de   = polygons(81 , 23 )
+areaid_rd   = polygons(81 , 24 )
+areaid_dn   = polygons(81 , 50 )
+areaid_cr   = polygons(81 , 51 )
+areaid_cd   = polygons(81 , 52 )
+areaid_st   = polygons(81 , 53 )
+areaid_op   = polygons(81 , 54 )
+areaid_en   = polygons(81 , 57 )
+areaid_en20 = polygons(81 , 58 )
+areaid_le   = polygons(81 , 60 )
+areaid_hl   = polygons(81 , 63 )
+areaid_sd   = polygons(81 , 70 )
+areaid_po   = polygons(81 , 81 )
+areaid_it   = polygons(81 , 84 )
+areaid_et   = polygons(81 , 101)
+areaid_lvt  = polygons(81 , 108)
+areaid_re   = polygons(81 , 125)
+areaid_ag   = polygons(81 , 79 )
+cfom        = polygons(22 , 20 )
+uhv_mos_1   = polygons(110, 14 )
+uhv_mos_2   = polygons(173, 0  )
+uhv_mos_3   = polygons(174, 0  )
+
+logger.info("Read in labels from layers.")
+
+#=== LABELS ===
+sub_label       = labels(122, 5)
+pwelliso_label  = labels(44 , 5)
+nwell_label     = labels(64 , 5)
+pwell_label     = labels(64 ,59)
+tap_label       = labels(65 , 5)
+diff_label      = labels(65 , 6)
+poly_label      = labels(66 , 5)
+poly_model      = labels(66 ,83)
+li_label        = labels(67 , 5)
+met1_label      = labels(68 , 5)
+met2_label      = labels(69 , 5)
+met3_label      = labels(70 , 5)
+met4_label      = labels(71 , 5)
+met5_label      = labels(72 , 5)
+rdl_label       = labels(74 , 5)
+pad_label       = labels(76 , 5)
+txt_label       = labels(83 ,44)
+
+#=== BULK LAYER ===
+sub = polygon_layer
+
+#================================================
+#------------------ SWITCHES --------------------
+#================================================
+
+logger.info("Evaluate switches start")
+
+# FUSE
+if $fuse
+  FUSE = $fuse
+else
+  FUSE = "m4"
+end # FUSE
+
+# SCH_SIMPLE
+if $schematic_simplify == "true"
+  SCH_SIMPLE = $schematic_simplify
+else
+  SCH_SIMPLE = false
+end # SCH_SIMPLE
+
+logger.info("SCH_SIMPLE enabled  %s" % [SCH_SIMPLE])
+
+# NET_ONLY
+if $net_only == "true"
+  NET_ONLY = true
+else
+  NET_ONLY = false
+end # NET_ONLY
+
+logger.info("NET_ONLY enabled  %s" % [NET_ONLY])
+
+# TOP_LVL_PINS
+if $top_lvl_pins == "true"
+  TOP_LVL_PINS = true
+else
+  TOP_LVL_PINS = false
+end # TOP_LVL_PINS
+
+logger.info("TOP_LVL_PINS enabled  %s" % [TOP_LVL_PINS])
+
+# COMBINE
+if $combine == "true"
+  COMBINE = true
+else
+  COMBINE = false
+end # COMBINE
+
+logger.info("COMBINE enabled  %s" % [COMBINE])
+
+# PURGE
+if $purge == "true"
+  PURGE = true
+else
+  PURGE = false
+end # PURGE
+
+logger.info("PURGE enabled  %s" % [PURGE])
+
+# PURGE_NETS
+if $purge_nets == "true"
+  PURGE_NETS = true
+else
+  PURGE_NETS = false
+end # PURGE_NETS
+
+logger.info("PURGE_NETS enabled  %s" % [PURGE_NETS])
+
+# SIMPLIFY
+if $net_only == "true" || $top_lvl_pins == "true" || $combine == "true" || $purge == "true" || $purge_nets == "true"
+  SIMPLIFY = false
+else
+  SIMPLIFY = true
+end # SIMPLIFY
+
+logger.info("SIMPLIFY enabled  %s" % [SIMPLIFY])
+
+logger.info("Evaluate switches end.")
+
+#================================================================
+#------------------------- MAIN RUNSET --------------------------
+#================================================================
+
+logger.info("SKY130 LVS rules started")
+
+#================================================
+#------------- LAYERS DERIVATIONS ---------------
+#================================================
+
+logger.info("Starting deriving base layers.")
+
+#==================================
+# ------ GENERAL DERIVATIONS ------
+#==================================
+
+ncomp     = diff.and(nsdm)
+pcomp     = diff.and(psdm)
+
+sd        = diff.not(poly).not(diff_res).not(diff_cut).not(tap).not(areaid_po).not(npnid).not(pnpid).not(areaid_de).not(uhv_mos_1).not(uhv_mos_2).not(uhv_mos_3)
+tgate     = poly.and(diff).not(poly_res).not(poly_cut).not(tap).not(tunm).not(rpm).not(npc).not(hvtr).not(uhv_mos_1).not(uhv_mos_2).not(uhv_mos_3)
+
+ngate     = nsdm.and(tgate).not(nwell).not(pwde).not(hvtp).not(psdm)
+nsd       = nsdm.and(sd).not(nwell).interacting(ngate)
+ptap_conn = tap.and(psdm).not(nwell).not(diff_res).not(diff_cut).not(npnid).not(pnpid)
+ptap_bjt  = tap.and(psdm).not(diff_res).not(diff_cut)
+
+pgate     = psdm.and(tgate).and(nwell).not(ldntm).not(nsdm).not(areaid_le)
+psd       = psdm.and(sd).and(nwell).interacting(pgate)
+ntap_conn = tap.and(nsdm).and(nwell).not(diff_res).not(diff_cut).not(npnid).not(pnpid)
+ntap_bjt  = tap.and(nsdm).not(diff_res).not(diff_cut)
+
+poly_con  = poly.not(poly_res).not(vpp).not(npnid)
+li_con    = li.not( li_res ).not(vpp)
+met1_con  = met1.not(met1_res).not(vpp)
+met2_con  = met2.not(met2_res).not(inductor).not(met2_fuse).not(vpp)
+met3_con  = met3.not(met3_res).not(inductor).not(met3_fuse).not(vpp)
+met4_con  = met4.not(met4_res).not(met4_fuse).not(vpp)
+met5_con  = met5.not(met5_res).not(vpp)
+
+
+#==================================
+# ------ MOSFET DERIVATIONS -------
+#==================================
+
+logger.info("Starting MOSFET DERIVATIONS")
+
+# ==============
+# ---- PMOS ----
+# ==============
+
+logger.info("Starting PMOS layers DERIVATIONS")
+
+# General PMOS derivations
+pgate_low_voltage = pgate.not(hvi).not(uhvi).not(pwbm).not(pwde).not(areaid_en).not(areaid_en20)
+pgate_low_voltage_not_pass = pgate_low_voltage.not_interacting(poly_model).not(ncm).not(areaid_ce)
+pgate_high_voltage = pgate.and(hvi).not(hvtp).not(areaid_ce)
+
+# 1.8V PMOS transistor standard
+pgate_1p8v = pgate_low_voltage_not_pass.not(hvtp).not(lvtn)
+
+# 1.8V PMOS transistor low threshold voltage
+pgate_1p8v_lvt = pgate_low_voltage_not_pass.not(hvtp).and(lvtn)
+
+# 1.8V PMOS transistor high threshold voltage
+pgate_1p8v_hvt = pgate_low_voltage_not_pass.and(hvtp).not(lvtn)
+
+# 5V gate 10.5V drain PMOS transistor
+pgate_5p0v_hv = pgate_high_voltage.not(lvtn).not(areaid_en).not(areaid_en20)
+
+# ==============
+# ---- NMOS ----
+# ==============
+
+logger.info("Starting NMOS layers DERIVATIONS")
+
+# General NMOS derivations
+ngate_low_voltage = ngate.not(hvi).not(uhvi).not(pwbm).not(areaid_en).not(areaid_en20)
+ngate_low_voltage_not_pass = ngate_low_voltage.not_interacting(poly_model).not(ncm).not(ldntm).not(areaid_ce).not(ldntm)
+ngate_high_voltage = ngate.and(hvi).not(uhvi).not(ncm).not(areaid_ce).not(ldntm).not(pwbm)
+ngate_nvt = ngate_high_voltage.and(lvtn).not(areaid_ed).not(areaid_ce)
+
+# 1.8V NMOS transistor standard
+ngate_1p8v = ngate_low_voltage_not_pass.not(lvtn)
+
+# 1.8V NMOS transistor low threshold voltage
+ngate_1p8v_lvt = ngate_low_voltage_not_pass.and(lvtn)
+
+# 3.3V NMOS transistor native voltage
+ngate_3p0v_nvt = ngate_nvt.and(areaid_le)
+
+# 5V NMOS transistor native voltage
+ngate_5p0v_nvt = ngate_nvt.not(areaid_le).not_interacting(vpp)
+
+# 5V gate 10.5V drain NMOS transistor
+ngate_5p0v_hv = ngate_high_voltage.not(lvtn).not(areaid_en).not(areaid_en20)
+
+
+#================================
+# ------ BJT DERIVATIONS --------
+#================================
+
+logger.info("Starting BJT DERIVATIONS")
+
+# BJT DERIVATIONS
+bjt_exclude = diff_res.or(diff_cut).or(pwbm).or(pwde).or(hvtr).or(lvtn).or(ncm).or(poly_res).or(poly_cut).or(li_res).or(li_cut)
+npn_exclude = bjt_exclude.or(pwell_res)
+pnp_exclude = bjt_exclude.or(dnwell)
+
+#==============
+# ---- npn ----
+#==============
+
+logger.info("Starting NPN layers DERIVATIONS")
+
+# NPN general nodes DERIVATIONS
+npn_e = ncomp.inside(dnwell).inside(npnid).not(npn_exclude)
+npn_b = ptap_bjt.inside(dnwell).inside(npnid).not(npn_exclude)
+npn_c = ntap_bjt.inside(nwell).inside(dnwell).interacting(npnid).not(npn_exclude)
+
+# 5V NPN with emitter size of 1umx1um nodes DERIVATIONS
+npn_5v0_1x1_e = npn_e.with_area(0.81.um, 1.21.um).interacting(npn_e.edges.with_length(0.9.um, 1.1.um)).not_interacting(poly)
+npn_5v0_1x1_b = npn_b.interacting(npn_b.extents.interacting(npn_5v0_1x1_e))
+npn_5v0_1x1_c = npn_c.interacting(npn_c.extents.interacting(npn_5v0_1x1_e))  
+
+# 5V NPN with emitter size of 1umx2um DERIVATIONS
+npn_5v0_1x2_e = npn_e.with_area(1.71.um, 2.31.um).interacting(npn_e.edges.with_length(1.9.um, 2.1.um)).not_interacting(poly)
+npn_5v0_1x2_b = npn_b.interacting(npn_b.extents.interacting(npn_5v0_1x2_e))
+npn_5v0_1x2_c = npn_c.interacting(npn_c.extents.interacting(npn_5v0_1x2_e))                       
+
+# 11V NPN poly-gated with octagonal emitter nodes DERIVATIONS
+npn_11v0_1x1_e = npn_e.interacting(poly)
+npn_11v0_1x1_b = npn_b.interacting(npn_b.extents.interacting(npn_11v0_1x1_e))
+npn_11v0_1x1_c = npn_c.interacting(npn_c.extents.interacting(npn_11v0_1x1_e)) 
+
+#==============
+# ---- pnp ----
+#==============
+
+logger.info("Starting PNP layers DERIVATIONS")
+
+# PNP general nodes DERIVATIONS
+pnp_e = pcomp.inside(nwell).inside(pnpid).not(pnp_exclude).not_interacting(poly)
+pnp_b = ntap_bjt.inside(pnpid).not(pnp_exclude).not_interacting(poly)
+pnp_c = ptap_bjt.interacting(pnpid).not(pnp_exclude).not_interacting(poly)
+
+# 5V PNP with emitter size of 0.68umx0.68um DERIVATIONS
+pnp_5v0_0p68x0p68_e = pnp_e.with_area(0.3364.um, 0.6084.um).interacting(pnp_e.edges.with_length(0.58.um, 0.78.um))
+pnp_5v0_0p68x0p68_b = pnp_b.interacting(pnp_b.extents.interacting(pnp_5v0_0p68x0p68_e))
+pnp_5v0_0p68x0p68_c = pnp_c.interacting(pnp_c.extents.interacting(pnp_5v0_0p68x0p68_e))  
+
+# 5V PNP with emitter size of 3.4umx3.4um DERIVATIONS
+pnp_5v0_3p4x3p4_e = pnp_e.with_area(10.24.um, 12.96.um).interacting(pnp_e.edges.with_length(3.2.um, 3.6.um))
+pnp_5v0_3p4x3p4_b = pnp_b.interacting(pnp_b.extents.interacting(pnp_5v0_3p4x3p4_e))
+pnp_5v0_3p4x3p4_c = pnp_c.interacting(pnp_c.extents.interacting(pnp_5v0_3p4x3p4_e))  
+
+
+#================================
+# ----- DIODE DERIVATIONS -------
+#================================
+
+logger.info("Starting DIODE DERIVATIONS")
+
+# N+ diffusion diode
+ndiode_terminal_n = ncomp.outside(dnwell).not(hvtp).interacting(areaid_de).not_interacting(areaid_ed)
+ndiode_terminal_p = ptap_conn.holes.interacting(ndiode_terminal_n).not_interacting(areaid_ed)
+
+# P+ diffusion diode
+pdiode_terminal_n = pcomp.outside(dnwell).interacting(areaid_de).not_interacting(areaid_ed)
+pdiode_terminal_p = nwell.interacting(areaid_de).not_interacting(areaid_ed)
+
+# 5V N+ diffusion diode
+ndiode_5v0_terminal_n = ndiode_terminal_n.not(hvi).not(lvtn)
+ndiode_5v0_terminal_p = ndiode_terminal_p.interacting(ndiode_5v0_terminal_n)
+
+# 5V N+ diffusion diode low threshold voltage  [lvt]
+ndiode_5v0_lvt_terminal_n = ndiode_terminal_n.not(hvi).and(lvtn)
+ndiode_5v0_lvt_terminal_p = ndiode_terminal_p.interacting(ndiode_5v0_lvt_terminal_n)
+
+# 5V N+ diffusion diode native threshold voltage [lvt & hvi]
+ndiode_5v0_nvt_terminal_n = ndiode_terminal_n.and(hvi).and(lvtn)
+ndiode_5v0_nvt_terminal_p = ndiode_terminal_p.interacting(ndiode_5v0_nvt_terminal_n)
+
+# 11V N+ diffusion diode 
+ndiode_11v0_terminal_n = ndiode_terminal_n.and(hvi).not(lvtn)
+ndiode_11v0_terminal_p = ndiode_terminal_p.interacting(ndiode_11v0_terminal_n)
+
+# 5V P+ diffusion diode
+pdiode_5v0_terminal_n = pdiode_terminal_n.not(hvtp).not(hvi).not(lvtn)
+pdiode_5v0_terminal_p = pdiode_terminal_p.interacting(pdiode_5v0_terminal_n)
+
+# 5V P+ diffusion diode low threshold voltage [lvt]
+pdiode_5v0_lvt_terminal_n = pdiode_terminal_n.not(hvtp).not(hvi).and(lvtn)
+pdiode_5v0_lvt_terminal_p = pdiode_terminal_p.interacting(pdiode_5v0_lvt_terminal_n)
+
+# 5V P+ diffusion diode high threshold voltage [hvtp]
+pdiode_5v0_hvt_terminal_n = pdiode_terminal_n.and(hvtp).not(hvi).not(lvtn)
+pdiode_5v0_hvt_terminal_p = pdiode_terminal_p.interacting(pdiode_5v0_hvt_terminal_n)
+
+# 11V P+ diffusion diode [hvi]
+pdiode_11v0_terminal_n = pdiode_terminal_n.not(hvtp).and(hvi).not(lvtn)
+pdiode_11v0_terminal_p = pdiode_terminal_p.interacting(pdiode_11v0_terminal_n)
+
+
+#================================
+# --- PHOTODIODE DERIVATIONS ----
+#================================
+
+logger.info("Starting PHOTODIODE DERIVATIONS")
+
+# Photodiode
+photodiode_exclude = diff.or(pwbm).or(pwde).or(hvtr).or(hvtp).or(areaid_de).or(areaid_ed)
+photodiode_n_init = ntap_conn.and(nwell).and(dnwell).interacting(areaid_po).not(photodiode_exclude)
+photodiode_n = photodiode_n_init.with_area(0.16.um, 0.1764.um).interacting(photodiode_n_init.edges.with_length(0.4.um, 0.42.um))
+photodiode_p = ptap_conn.holes.interacting(photodiode_n)
+
+
+#================================
+# ---- RESISTOR DERIVATIONS -----
+#================================
+
+logger.info("Starting RESISTOR DERIVATIONS")
+
+# ===============
+# --DIFF & WELL--
+# ===============
+
+# RES DERIVATIONS
+nplus_res_init  = ncomp.and(diff_res)
+pplus_res_init  = pcomp.and(nwell).and(diff_res)
+
+nplus_cont_init = ncomp.not_interacting(ngate).interacting(diff_res).not(diff_res)
+pplus_cont_init = pcomp.and(nwell).not_interacting(pgate).interacting(diff_res).not(diff_res)
+
+# N+ diffusion resistor
+nplus_res       = nplus_res_init.not(hvi)
+nplus_cont      = nplus_cont_init.not(hvi)
+
+# N+ diffusion high voltage resistor
+nplus_hv_res    = nplus_res_init.and(hvi)
+nplus_hv_cont   = nplus_cont_init.and(hvi)
+
+# P+ diffusion resistor
+pplus_res       = pplus_res_init.not(hvi)
+pplus_cont      = pplus_cont_init.not(hvi)
+
+# P+ diffusion high voltage resistor
+pplus_hv_res    = pplus_res_init.and(hvi)
+pplus_hv_cont   = pplus_cont_init.and(hvi)
+
+# Isolated PWELL resistor
+pwell_resistor  = pwell_res.not(nwell).and(dnwell)
+pwell_term      = ptap_conn.and(dnwell).interacting(pwell_res).not(pwell_res)
+pwell_cont      = nwell.holes.covering(pwell_term)
+
+# ==============
+# ---- POLY ----
+# ==============
+
+# Poly resistor
+poly_res_exclude = diff.or(diff_res).or(diff_cut).or(tap).or(pwbm).or(hvtr).or(hvtp).or(lvtn).or(li_cut).or(vpp).or(npnid) 
+poly_res_init    = poly.and(poly_res).not(poly_res_exclude)
+
+# Poly resistor generic
+poly_res_generic = poly_res_init.not(rpm).not(urpm)
+
+# 300 ohm Poly resistor
+poly_res_300     = poly_res_init.and(psdm).and(rpm).not(urpm)
+
+poly_high_0p35   = poly_res_300.interacting(poly_res_300.edges.with_length(0.34.um, 0.36.um))
+poly_high_0p69   = poly_res_300.interacting(poly_res_300.edges.with_length(0.68.um, 0.7.um ))
+poly_high_1p41   = poly_res_300.interacting(poly_res_300.edges.with_length(1.4.um , 1.42.um))
+poly_high_2p85   = poly_res_300.interacting(poly_res_300.edges.with_length(2.84.um, 2.86.um))
+poly_high_5p73   = poly_res_300.interacting(poly_res_300.edges.with_length(5.72.um, 5.74.um))
+
+# 2K ohm Poly resistor
+poly_res_2k      = poly_res_init.and(psdm).not(rpm).and(urpm)
+
+poly_xhigh_0p35  = poly_res_2k.interacting(poly_res_2k.edges.with_length(0.34.um, 0.36.um))
+poly_xhigh_0p69  = poly_res_2k.interacting(poly_res_2k.edges.with_length(0.68.um, 0.7.um ))
+poly_xhigh_1p41  = poly_res_2k.interacting(poly_res_2k.edges.with_length(1.4.um , 1.42.um))
+poly_xhigh_2p85  = poly_res_2k.interacting(poly_res_2k.edges.with_length(2.84.um, 2.86.um))
+poly_xhigh_5p73  = poly_res_2k.interacting(poly_res_2k.edges.with_length(5.72.um, 5.74.um))
+
+# ===============
+# ---- METAL ----
+# ===============
+
+licon_npc     = licon.and(npc)
+
+# Local inter-connect resistor
+li_resistor   = li.and(li_res)
+
+# Metal1 resistor
+met1_resistor = met1.and(met1_res)
+
+# Metal2 resistor
+met2_resistor = met2.and(met2_res)
+
+# Metal3 resistor
+met3_resistor = met3.and(met3_res)
+
+# Metal4 resistor
+met4_resistor = met4.and(met4_res)
+
+# Metal5 resistor
+met5_resistor = met5.and(met5_res)
+
+
+#==================================
+# ------- FUSE DERIVATIONS --------
+#==================================
+
+logger.info("Starting FUSE DERIVATIONS")
+
+if FUSE == "m2"
+
+  # Metal2 fuse
+  met2_fuse_res_layer  = met2.and(met2_fuse)
+
+elsif FUSE == "m3"
+
+  # Metal3 fuse
+  met3_fuse_res_layer  = met3.and(met3_fuse)
+
+else
+
+  # Metal4 fuse
+  met4_fuse_res_layer  = met4.and(met4_fuse)
+
+end
+
+
+#==================================
+# ----- MIM DERIVATIONS ------
+#==================================
+
+logger.info("Starting MIM DERIVATIONS")
+
+# mim on metal3
+met3_ncap = met3_con.not(capm)
+met3_cap  = met3_con.and(capm)
+via3_ncap = via3.not(capm)
+via3_cap  = via3.and(capm)
+
+# mim on metal4
+met4_ncap = met4_con.not(capm2)
+met4_cap  = met4_con.and(capm2)
+via4_ncap = via4.not(capm2)
+via4_cap  = via4.and(capm2)
+
+
+#==================================
+# ----- VARACTOR DERIVATIONS ------
+#==================================
+
+logger.info("Starting VARACTOR DERIVATIONS")
+
+# voltage varactor
+varactor_exclude  = dnwell.or(hvtr).or(pwbm).or(pwde).or(ncm).or(tunm).or(rpm).or(ldntm).or(npc).or(psdm).or(li_res).or(li_cut).or(areaid_de)
+varactor_gate =  poly_con.and(ntap_conn).not(varactor_exclude)
+
+# Low threshold voltage varactor
+varactor_gate_lvt = poly_con.interacting(varactor_gate.not(hvtp).not(hvi))
+varactor_nsd_lvt  = ntap_conn.not(hvtp).not(hvi).interacting(varactor_gate_lvt).not(varactor_exclude)
+varactor_bulk_lvt = ptap_conn.holes.interacting(varactor_gate_lvt)
+
+# High threshold voltage varactor
+varactor_gate_hvt = poly_con.interacting(varactor_gate.and(hvtp).not(hvi))
+varactor_nsd_hvt  = ntap_conn.and(hvtp).not(hvi).interacting(varactor_gate_hvt).not(varactor_exclude)
+varactor_bulk_hvt = ptap_conn.holes.interacting(varactor_gate_hvt)
+
+
+#==================================
+# ----- INDUCTOR DERIVATIONS ------
+#==================================
+
+logger.info("Starting INDUCTOR DERIVATIONS")
+
+# General Inductor derivation
+inductor_sub = inductor.and(extent)
+
+# RF Inductor with 3 turns and internal diameter of 90um
+coil_1 = inductor.interacting(met3.or(met2).and(inductor.covering(met2.and(inductor), 3, 3)).holes.width(100.um, projection).with_distance(89.um, 91.um).polygons)
+
+# RF Inductor with 5 turns and internal diameter of 125um
+coil_2 = inductor.interacting(met3.or(met2).and(inductor.covering(met2.and(inductor), 5, 5)).holes.width(135.um, projection).with_distance(124.um, 126.um).polygons)
+
+# RF Inductor with 5 turns and internal diameter of 220um
+coil_3 = inductor.interacting(met3.or(met2).and(inductor.covering(met2.and(inductor), 5, 5)).holes.width(230.um, projection).with_distance(219.um, 221.um).polygons)
+
+
+#==================================
+# ------ VPP CAP DERIVATIONS ------
+#==================================
+
+logger.info("Starting VPP CAP DERIVATIONS")
+
+# General VPP capacitor derivation
+vpp_sub   = vpp.and(extent)
+
+# ===============
+# --- LENGTHS ---
+# ===============
+
+vpp_1_43  = vpp.edges.with_length(1.42 , 1.44 )
+vpp_2_08  = vpp.edges.with_length(2.07 , 2.09 )
+vpp_2_36  = vpp.edges.with_length(2.35 , 2.37 )
+vpp_2_51  = vpp.edges.with_length(2.50 , 2.52 )
+vpp_4_04  = vpp.edges.with_length(4.03 , 4.05 )
+vpp_4_25  = vpp.edges.with_length(4.24 , 4.26 )
+vpp_4_38  = vpp.edges.with_length(4.37 , 4.39 )
+vpp_4_59  = vpp.edges.with_length(4.58 , 4.60 )
+vpp_5_49  = vpp.edges.with_length(5.48 , 5.50 )
+vpp_5_75  = vpp.edges.with_length(5.74 , 5.76 )
+vpp_5_76  = vpp.edges.with_length(5.75 , 5.77 )
+vpp_6_46  = vpp.edges.with_length(6.45 , 6.47 )
+vpp_7_50  = vpp.edges.with_length(7.49 , 7.51 )
+vpp_7_84  = vpp.edges.with_length(7.83 , 7.85 )
+vpp_8_24  = vpp.edges.with_length(8.23 , 8.25 )
+vpp_8_58  = vpp.edges.with_length(8.57 , 8.59 )
+vpp_10_40 = vpp.edges.with_length(10.39, 10.41)
+vpp_10_76 = vpp.edges.with_length(10.75, 10.77)
+vpp_10_99 = vpp.edges.with_length(10.98, 11.00)
+vpp_11_07 = vpp.edges.with_length(11.06, 11.08)
+vpp_11_17 = vpp.edges.with_length(11.16, 11.18)
+vpp_11_27 = vpp.edges.with_length(11.26, 11.28)
+vpp_11_35 = vpp.edges.with_length(11.34, 11.36)
+vpp_11_53 = vpp.edges.with_length(11.52, 11.54)
+vpp_20_76 = vpp.edges.with_length(20.75, 20.77)
+vpp_22_27 = vpp.edges.with_length(22.26, 22.28)
+vpp_22_63 = vpp.edges.with_length(22.62, 22.64)
+vpp_33_31 = vpp.edges.with_length(33.30, 33.32)
+vpp_40_76 = vpp.edges.with_length(40.75, 40.77)
+vpp_44_33 = vpp.edges.with_length(44.32, 44.34)
+vpp_55_39 = vpp.edges.with_length(55.38, 55.40)
+vpp_55_45 = vpp.edges.with_length(55.44, 55.46)
+vpp_55_47 = vpp.edges.with_length(55.46, 55.48)
+
+# ===============
+# ---- METAL ----
+# ===============
+
+poly_vpp  = poly.and(vpp)
+li_vpp    =   li.and(vpp)
+met1_vpp  = met1.and(vpp)
+met2_vpp  = met2.and(vpp)
+met3_vpp  = met3.and(vpp)
+met4_vpp  = met4.and(vpp)
+met5_vpp  = met5.and(vpp)
+
+licon_vpp = licon.and(vpp)
+mcon_vpp  =  mcon.and(vpp)
+via1_vpp  =  via1.and(vpp)
+via2_vpp  =  via2.and(vpp)
+via3_vpp  =  via3.and(vpp)
+via4_vpp  =  via4.and(vpp)
+
+# met4_xvpp = met4.interacting(met4.extents.edges.with_length(55.1.um , 55.12.um )).interacting(met4.extents.edges.with_length(28.89.um , 28.91.um ))
+
+# ===============
+# ---- AREAS ----
+# ===============
+
+vpp_04p4x04p6 = vpp.interacting(vpp_4_04).interacting(vpp_4_25)
+vpp_06p8x06p1 = vpp.interacting(vpp_6_46).interacting(vpp_5_75)
+vpp_08p6x07p8 = vpp.interacting(vpp_8_24).interacting(vpp_7_50)
+vpp_11p5x11p7 = vpp.interacting(vpp_11_07).interacting(vpp_11_35)
+
+# ===============
+# ---- STACK ----
+# ===============
+
+vpp_m1m2            = vpp.not_interacting(poly).not_interacting(li).not_interacting(met3).not_interacting(met4).not_interacting(met5)
+vpp_m1m2m3          = vpp.not_interacting(poly).not_interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
+vpp_m1m2m3m4        = vpp.not_interacting(poly).not_interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
+vpp_m1m2m3m4m5      = vpp.not_interacting(poly).not_interacting(li).interacting(met3).interacting(met4).interacting(met5)
+vpp_l1m1m2          = vpp.not_interacting(poly).interacting(li).not_interacting(met3).not_interacting(met4).not_interacting(met5)
+vpp_l1m1m2m3        = vpp.not_interacting(poly).interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
+vpp_l1m1m2m3m4      = vpp.not_interacting(poly).interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
+vpp_l1m1m2m3m4m5    = vpp.not_interacting(poly).interacting(li).interacting(met3).interacting(met4).interacting(met5)
+vpp_pol1m1m2m3      = vpp.interacting(poly).interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
+vpp_pol1m1m2m3m4    = vpp.interacting(poly).interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
+vpp_pol1m1m2m3m4m5  = vpp.interacting(poly).interacting(li).interacting(met3).interacting(met4).interacting(met5)
+
+# ===============
+# --- DEVICES ---
+# ===============
+
+# vpp_02p4x04p6_m1m2_noshield device
+vpp_02p4x04p6_m1m2_noshield = vpp.interacting(vpp_2_08).interacting(vpp_4_25)
+
+# vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap device
+vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap = vpp.interacting(vpp_2_36).interacting(vpp_5_76)
+
+# vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap device
+vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap = vpp.interacting(vpp_2_36).interacting(vpp_10_76)
+
+# vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap device
+vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap = vpp.interacting(vpp_2_36).interacting(vpp_20_76)
+
+# vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap device
+vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap = vpp.interacting(vpp_2_36).interacting(vpp_40_76)
+
+# vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2 device
+vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2 = vpp.interacting(vpp_2_51).interacting(vpp_5_76)
+
+# vpp_03p9x03p9_m1m2_shieldl1_floatm3   device
+vpp_03p9x03p9_m1m2_shieldl1_floatm3   = vpp.interacting(vpp_1_43).interacting(vpp_1_43)
+
+# vpp_04p4x04p6_l1m1m2_noshield device
+vpp_04p4x04p6_l1m1m2_noshield = vpp.interacting(vpp_04p4x04p6).interacting(vpp_l1m1m2).covering(li.holes)
+
+# vpp_04p4x04p6_l1m1m2_noshield_o2subcell device
+vpp_04p4x04p6_l1m1m2_noshield_o2subcell = vpp.interacting(vpp_4_38).interacting(vpp_4_59).interacting(vpp_l1m1m2)
+
+# vpp_04p4x04p6_l1m1m2_shieldpo_floatm3 device
+vpp_04p4x04p6_l1m1m2_shieldpo_floatm3 = vpp.interacting(vpp_04p4x04p6).interacting(vpp_pol1m1m2m3)
+
+# vpp_04p4x04p6_m1m2m3_shieldl1 device
+vpp_04p4x04p6_m1m2m3_shieldl1 = vpp.interacting(vpp_04p4x04p6).interacting(vpp_l1m1m2m3)
+
+# vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4 device
+vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4 = vpp.interacting(vpp_04p4x04p6).interacting(vpp_l1m1m2m3m4m5)
+
+# vpp_04p4x04p6_m1m2_noshield device
+vpp_04p4x04p6_m1m2_noshield = vpp.interacting(vpp_04p4x04p6).interacting(vpp_m1m2).covering(met1.holes)
+
+# vpp_04p4x04p6_m1m2_noshield_o2 device
+vpp_04p4x04p6_m1m2_noshield_o2 = vpp.interacting(vpp_04p4x04p6).interacting(vpp_m1m2).not_covering(met1.holes)
+
+# vpp_04p4x04p6_m1m2_shieldl1 device
+vpp_04p4x04p6_m1m2_shieldl1 = vpp.interacting(vpp_04p4x04p6).interacting(vpp_l1m1m2).not_covering(li.holes)
+
+# vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap device
+vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap = vpp.interacting(vpp_5_49).interacting(vpp_5_49)
+
+# vpp_06p8x06p1_l1m1m2m3_shieldpom4 device
+vpp_06p8x06p1_l1m1m2m3_shieldpom4 = vpp.interacting(vpp_06p8x06p1).interacting(vpp_pol1m1m2m3m4)
+
+# vpp_06p8x06p1_m1m2m3_shieldl1m4 device
+vpp_06p8x06p1_m1m2m3_shieldl1m4 = vpp.interacting(vpp_06p8x06p1).interacting(vpp_l1m1m2m3m4)
+
+# vpp_08p6x07p8_l1m1m2_noshield device
+vpp_08p6x07p8_l1m1m2_noshield = vpp.interacting(vpp_08p6x07p8).interacting(vpp_l1m1m2).covering(li.holes)
+
+# vpp_08p6x07p8_l1m1m2_noshield_o2subcell device
+vpp_08p6x07p8_l1m1m2_noshield_o2subcell = vpp.interacting(vpp_7_84).interacting(vpp_8_58).interacting(vpp_l1m1m2)
+
+# vpp_08p6x07p8_l1m1m2_shieldpo_floatm3 device
+vpp_08p6x07p8_l1m1m2_shieldpo_floatm3 = vpp.interacting(vpp_08p6x07p8).interacting(vpp_pol1m1m2m3)
+
+# vpp_08p6x07p8_m1m2m3_shieldl1 device
+vpp_08p6x07p8_m1m2m3_shieldl1 = vpp.interacting(vpp_08p6x07p8).interacting(vpp_l1m1m2m3)
+
+# vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4 device
+vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4 = vpp.interacting(vpp_08p6x07p8).interacting(vpp_l1m1m2m3m4m5)
+
+# vpp_08p6x07p8_m1m2_noshield device
+vpp_08p6x07p8_m1m2_noshield = vpp.interacting(vpp_08p6x07p8).interacting(vpp_m1m2)
+
+# vpp_08p6x07p8_m1m2_shieldl1 device
+vpp_08p6x07p8_m1m2_shieldl1 = vpp.interacting(vpp_08p6x07p8).interacting(vpp_l1m1m2).not_covering(li.holes)
+
+# vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap device
+vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap = vpp.interacting(vpp_10_99).interacting(vpp_10_99)
+
+# vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv device
+vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv = vpp.interacting(vpp_10_40).interacting(vpp_11_53)
+
+# vpp_11p5x11p7_l1m1m2m3m4_shieldm5 device
+vpp_11p5x11p7_l1m1m2m3m4_shieldm5 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2m3m4m5).covering(li.holes).covering(met4.holes)
+
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5 device
+vpp_11p5x11p7_l1m1m2m3m4_shieldpom5 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.covering(vpp))
+
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x device
+vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.not_covering(vpp))
+
+# # vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x6 device
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x6 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.covering(vpp)).inside(vpp.sized(15.um).interacting(ptap_conn)).interacting(met4.not_covering(vpp))
+
+# # vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x7 device
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x7 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.not_covering(vpp)).inside(vpp.sized(15.um).interacting(ptap_conn)).interacting(met4.not_covering(vpp))
+
+# # vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x8 device
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x8 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.covering(vpp)).interacting(met4_xvpp)
+
+# # vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x9 device
+# vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x9 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4m5).interacting(met5.not_covering(vpp)).interacting(met4_xvpp)
+
+# vpp_11p5x11p7_l1m1m2m3_shieldm4 device
+vpp_11p5x11p7_l1m1m2m3_shieldm4 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2m3m4)
+
+# vpp_11p5x11p7_l1m1m2m3_shieldpom4 device
+vpp_11p5x11p7_l1m1m2m3_shieldpom4 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3m4)
+
+# vpp_11p5x11p7_l1m1m2_noshield device
+vpp_11p5x11p7_l1m1m2_noshield = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2).covering(li.holes)
+
+# vpp_11p5x11p7_l1m1m2_shieldpom3 device
+vpp_11p5x11p7_l1m1m2_shieldpom3 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_pol1m1m2m3)
+
+# vpp_11p5x11p7_m1m2m3m4_shieldl1m5 device
+vpp_11p5x11p7_m1m2m3m4_shieldl1m5 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2m3m4m5).not_covering(li.holes).covering(met4.holes)
+
+# vpp_11p5x11p7_m1m2m3m4_shieldm5 device
+vpp_11p5x11p7_m1m2m3m4_shieldm5 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_m1m2m3m4m5)
+
+# vpp_11p5x11p7_m1m2m3_shieldl1 device
+vpp_11p5x11p7_m1m2m3_shieldl1 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2m3)
+
+# vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4 device
+vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2m3m4m5).not_covering(met4.holes)
+
+# vpp_11p5x11p7_m1m2_noshield device
+vpp_11p5x11p7_m1m2_noshield = vpp.interacting(vpp_11p5x11p7).interacting(vpp_m1m2)
+
+# vpp_11p5x11p7_m1m2_shieldl1 device
+vpp_11p5x11p7_m1m2_shieldl1 = vpp.interacting(vpp_11p5x11p7).interacting(vpp_l1m1m2).not_covering(li.holes)
+
+# vpp_11p5x11p7_m1m4_noshield device
+vpp_11p5x11p7_m1m4_noshield = vpp.interacting(vpp_11p5x11p7).interacting(vpp_m1m2m3m4)
+
+# vpp_11p5x11p7_pol1m1m2m3m4m5_noshield device
+vpp_11p5x11p7_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_11_17).interacting(vpp_11_27)
+
+# vpp_11p5x23p1_pol1m1m2m3m4m5_noshield device
+vpp_11p5x23p1_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_11_17).interacting(vpp_22_63)
+
+# vpp_22p5x11p7_pol1m1m2m3m4m5_noshield device
+vpp_22p5x11p7_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_22_27).interacting(vpp_11_27)
+
+# vpp_22p5x23p1_pol1m1m2m3m4m5_noshield device
+vpp_22p5x23p1_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_22_27).interacting(vpp_22_63)
+
+# vpp_33p6x11p7_pol1m1m2m3m4m5_noshield device
+vpp_33p6x11p7_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_33_31).interacting(vpp_11_27)
+
+# vpp_33p6x23p1_pol1m1m2m3m4m5_noshield device
+vpp_33p6x23p1_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_33_31).interacting(vpp_22_63)
+
+# vpp_44p7x11p7_pol1m1m2m3m4m5_noshield device
+vpp_44p7x11p7_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_44_33).interacting(vpp_11_27)
+
+# vpp_44p7x23p1_pol1m1m2m3m4m5_noshield device
+vpp_44p7x23p1_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_44_33).interacting(vpp_22_63)
+
+# vpp_55p8x11p7_pol1m1m2m3m4m5_noshield device
+vpp_55p8x11p7_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_55_45).interacting(vpp_11_27)
+
+# vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin device
+vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin = vpp.interacting(vpp_55_47).interacting(vpp_11_27)
+
+# vpp_55p8x23p1_pol1m1m2m3m4m5_noshield device
+vpp_55p8x23p1_pol1m1m2m3m4m5_noshield = vpp.interacting(vpp_55_45).interacting(vpp_22_63)
+
+# vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin device
+vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin = vpp.interacting(vpp_55_47).interacting(vpp_22_63)
+
+# vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test device
+vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test = vpp.interacting(vpp_55_39).interacting(vpp_22_63)
+
+
+#==================================
+# ------- SONOS DERIVATIONS -------
+#==================================
+
+logger.info("Starting SONOS DERIVATIONS")
+
+# Build space flash special SONOSFET original/star
+sonos_exclude = diff_res.or(diff_cut).or(tap).or(pwbm).or(pwde).or(hvtr).or(nwell).or(hvtp).or(ncm).or(hvi).or(rpm).or(poly_res).or(poly_cut).or(npc)
+sonos_tgate   = poly.and(diff).not(sonos_exclude)
+sonos_ngate   = nsdm.and(sonos_tgate).not(psdm)
+sonos_gate    = sonos_ngate.and(lvtn).and(dnwell).and(tunm).and(ldntm).interacting(areaid_ce)
+sonos_nsd     = nsdm.and(sd).not(nwell).interacting(sonos_gate)
+
+
+#================================================
+#------------ DEVICES CONNECTIVITY --------------
+#================================================
+
+logger.info("Starting SKY130 LVS connectivity setup")
+
+#================================
+# ----- GENERAL CONNECTIONS -----
+#================================
+
+logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
+
+# export layer names
+if self.respond_to?(:name)
+  %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3_ncap via4_ncap).each do |l|
+    name(eval(l), l)
+  end
+  
+  %w(poly_vpp li_vpp met1_vpp met2_vpp met3_vpp met4_vpp met5_vpp licon_vpp mcon_vpp via1_vpp via2_vpp via3_vpp via4_vpp).each do |l|
+    name(eval(l), l)
+  end
+  
+  %w(capm capm2 met3_cap via3_cap met4_cap via4_cap).each do |l|
+    name(eval(l), l)
+  end
+end
+
+# Inter-layer
+connect(sub         ,     ptap_conn)
+connect(dnwell      ,     ntap_conn)
+connect(nwell       ,     ntap_conn)
+connect(ptap_conn   ,         licon)
+connect(ntap_conn   ,         licon)
+connect(psd         ,         licon)
+connect(nsd         ,         licon)
+connect(poly_con    ,     licon_npc)
+connect(licon_npc   ,         licon)
+connect(licon       ,        li_con)
+connect(li_con      ,          mcon)
+connect(mcon        ,      met1_con)
+connect(met1_con    ,          via1)
+connect(via1        ,      met2_con)
+connect(met2_con    ,          via2)
+connect(via2        ,     met3_ncap)
+connect(met3_ncap   ,     via3_ncap)
+connect(via3_ncap   ,     met4_ncap)
+connect(met4_ncap   ,     via4_ncap)
+connect(via4_ncap   ,      met5_con)
+
+logger.info("Starting SKY130 LVS connectivity setup (Attaching labels)")
+
+# Attaching labels
+connect(sub         ,      sub_label)
+connect(nwell       ,    nwell_label)
+connect(tap         ,      tap_label)
+connect(nsd        ,      diff_label)
+connect(psd        ,      diff_label)
+connect(poly_con    ,     poly_label)
+connect(li_con      ,       li_label)
+connect(met1_con    ,     met1_label)
+connect(met2_con    ,     met2_label)
+connect(met3_ncap   ,     met3_label)
+connect(met4_ncap   ,     met4_label)
+connect(met5_con    ,     met5_label)
+connect(rdl         ,      rdl_label)
+connect(pad         ,      pad_label)
+
+logger.info("Starting SKY130 LVS connectivity setup (Global connections)")
+
+# Global
+connect_global(sub  , substrate_name)
+
+logger.info("Starting SKY130 LVS connectivity setup (Multifinger Devices)")
+
+# Multifinger Devices
+connect_implicit("*")
+
+
+#================================
+# ------ BJT CONNECTIONS --------
+#================================
+
+logger.info("Starting LVS BJT CONNECTIONS")
+
+# ==============
+# ---- npn ----
+# ==============
+
+# npn_5v0_1x1 nodes connections
+connect(npn_5v0_1x1_e,licon)
+connect(npn_5v0_1x1_b,licon)
+connect(npn_5v0_1x1_c,licon)
+
+# npn_5v0_1x2 nodes connections
+connect(npn_5v0_1x2_e,licon)
+connect(npn_5v0_1x2_b,licon)
+connect(npn_5v0_1x2_c,licon)
+
+# npn_11v0_1x1 nodes connections
+connect(npn_11v0_1x1_e,licon)
+connect(npn_11v0_1x1_b,licon)
+connect(npn_11v0_1x1_c,licon)
+
+# ==============
+# ---- pnp ----
+# ==============
+
+# pnp_5v0_0p68x0p68 connections
+connect(pnp_5v0_0p68x0p68_e,licon)
+connect(pnp_5v0_0p68x0p68_b,licon)
+connect(pnp_5v0_0p68x0p68_c,licon)
+
+# pnp_5v0_3p4x3p4 nodes
+connect(pnp_5v0_3p4x3p4_e,licon)
+connect(pnp_5v0_3p4x3p4_b,licon)
+connect(pnp_5v0_3p4x3p4_c,licon)
+
+
+#================================
+# ----- DIODE CONNECTIONS -------
+#================================
+
+logger.info("Starting LVS DIODE CONNECTIONS")
+
+# N+ diffusion diode
+connect(ndiode_terminal_n,     licon)
+connect(ndiode_terminal_p, ptap_conn)
+
+# P+ diffusion diode
+connect(pdiode_terminal_n, licon)
+connect(pdiode_terminal_p, nwell)
+
+
+#================================
+# --- PHOTODIODE CONNECTIONS ----
+#================================
+
+logger.info("Starting LVS PHOTODIODE CONNECTIONS")
+
+# Photodiode
+connect(photodiode_n,     licon)
+connect(photodiode_p, ptap_conn)
+
+
+#==================================
+# ------ MIMCAP CONNECTIONS -------
+#==================================
+
+logger.info("Starting LVS MIMCAP CONNECTIONS")
+
+# mim on metal3
+connect(via2     , met3_cap)
+connect(met3_cap , met3_con)
+connect(met3_cap , met3_ncap)
+connect(met3_cap , met3_label)
+connect(capm     , via3_cap)
+connect(via3_cap , met4_con)
+connect(via3_cap , met4_cap)
+connect(via3_cap , met4_ncap)
+connect(via3_cap , via3_ncap)
+
+# mim on metal4
+connect(via3_cap  , met4_cap)
+connect(via3_ncap , met4_cap)
+connect(met4_cap  , met4_con)
+connect(met4_cap  , met4_ncap)
+connect(met4_cap  , met4_label)
+connect(capm2     , via4_cap)
+connect(via4_cap  , met5_con)
+connect(via4_cap  , via4_ncap)
+
+
+
+#================================
+# ---- VARACTOR CONNECTIONS -----
+#================================
+
+logger.info("Starting LVS VARACTOR CONNECTIONS")
+
+# Low threshold voltage varactor
+connect(varactor_bulk_lvt, ptap_conn)
+
+# High threshold voltage varactor
+connect(varactor_bulk_hvt, ptap_conn)
+
+
+#================================
+# ---- RESISTOR CONNECTIONS -----
+#================================
+
+logger.info("Starting LVS RESISTOR CONNECTIONS")
+
+# Diffusions and Wells
+connect(nplus_cont    , licon)
+connect(nplus_hv_cont , licon)
+connect(pplus_cont    , licon)
+connect(pplus_hv_cont , licon)
+connect(pwell_term    , licon)
+
+
+#================================
+# ---- INDUCTOR CONNECTIONS -----
+#================================
+
+logger.info("Starting LVS INDUCTOR CONNECTIONS")
+
+# General Inductor capacitor connections
+connect(inductor_sub      , pwell_label)
+
+
+#================================
+# ------- VPP CONNECTIONS -------
+#================================
+
+logger.info("Starting LVS VPP CAP CONNECTIONS")
+
+# General VPP capacitor connections
+connect(vpp_sub      , pwell_label)
+
+connect(met1_vpp     ,   met1_con)
+connect(met1_vpp     , met1_label)
+
+connect(met2_vpp     ,   met2_con)
+connect(met2_vpp     , met2_label)
+
+connect(met3_vpp     ,  met3_ncap)
+connect(met3_vpp     , met3_label)
+
+connect(met4_vpp     ,  met4_ncap)
+connect(met4_vpp     , met4_label)
+
+connect(met5_vpp     ,   met5_con)
+connect(met5_vpp     , met5_label)
+
+connect(poly_vpp     ,  licon_vpp)
+connect(licon_vpp    ,     li_vpp)
+connect(li_vpp       ,   mcon_vpp)
+connect(mcon_vpp     ,   met1_vpp)
+connect(met1_vpp     ,   via1_vpp)
+connect(via1_vpp     ,   met2_vpp)
+connect(met2_vpp     ,   via2_vpp)
+connect(via2_vpp     ,   met3_vpp)
+connect(met3_vpp     ,   via3_vpp)
+connect(via3_vpp     ,   met4_vpp)
+connect(met4_vpp     ,   via4_vpp)
+connect(via4_vpp     ,   met5_vpp)
+
+#================================
+# ---- SONOS CONNECTIONS -----
+#================================
+
+logger.info("Starting LVS SONOS CONNECTIONS")
+connect(sonos_nsd    , licon)
+
+
+#================================================
+#------------- DEVICES EXTRACTION ---------------
+#================================================
+
+logger.info("Starting MOSFET EXTRACTION")
+
+# ==============
+# ---- PMOS ----
+# ==============
+
+logger.info("Starting PMOS EXTRACTION")
+
+# 1.8V PMOS transistor standard
+logger.info("Extracting 1.8V PMOS transistor standard")
+extract_devices(mos4("sky130_fd_pr__pfet_01v8"), { "SD" => psd, "G" => pgate_1p8v, "tS" => psd, "tD" => psd, "tG" => poly_con, "W" => nwell })
+
+# 1.8V PMOS transistor low threshold voltage
+logger.info("Extracting 1.8V PMOS transistor low threshold voltage")
+extract_devices(mos4("sky130_fd_pr__pfet_01v8_lvt"), { "SD" => psd, "G" => pgate_1p8v_lvt,   "tS" => psd, "tD" => psd, "tG" => poly_con, "W" => nwell })
+
+# 1.8V PMOS transistor high threshold voltage
+logger.info("Extracting 1.8V PMOS transistor high threshold voltage")
+extract_devices(mos4("sky130_fd_pr__pfet_01v8_hvt"), { "SD" => psd, "G" => pgate_1p8v_hvt,   "tS" => psd, "tD" => psd, "tG" => poly_con, "W" => nwell })
+
+# 5V gate 10.5V drain PMOS transistor
+logger.info("Extracting 5V gate 10.5V drain PMOS transistor")
+extract_devices(mos4("sky130_fd_pr__pfet_g5v0d10v5"), { "SD" => psd, "G" => pgate_5p0v_hv,   "tS" => psd, "tD" => psd, "tG" => poly_con, "W" => nwell })
+
+# ==============
+# ---- NMOS ----
+# ==============
+
+logger.info("Starting NMOS EXTRACTION")
+
+# 1.8V NMOS transistor standard
+logger.info("Extracting 1.8V NMOS transistor standard")
+extract_devices(mos4("sky130_fd_pr__nfet_01v8"), { "SD" => nsd, "G" => ngate_1p8v, "tS" => nsd, "tD" => nsd, "tG" => poly_con, "W" => sub })
+
+# 1.8V NMOS transistor low threshold voltage
+logger.info("Extracting 1.8V NMOS transistor low threshold voltage")
+extract_devices(mos4("sky130_fd_pr__nfet_01v8_lvt"), { "SD" => nsd, "G" => ngate_1p8v_lvt, "tS" => nsd, "tD" => nsd, "tG" => poly_con, "W" => sub })
+
+# 3.3V NMOS transistor native voltage
+logger.info("Extracting 3.3V NMOS transistor native voltage")
+extract_devices(mos4("sky130_fd_pr__nfet_03v3_nvt"), { "SD" => nsd, "G" => ngate_3p0v_nvt, "tS" => nsd, "tD" => nsd, "tG" => poly_con, "W" => sub })
+
+# 5V NMOS transistor native voltage
+logger.info("Extracting 5V NMOS transistor native voltage")
+extract_devices(mos4("sky130_fd_pr__nfet_05v0_nvt"), { "SD" => nsd, "G" => ngate_5p0v_nvt, "tS" => nsd, "tD" => nsd, "tG" => poly_con, "W" => sub })
+
+# 5V gate 10.5V drain NMOS transistor
+logger.info("Extracting 5V gate 10.5V drain NMOS transistor")
+extract_devices(mos4("sky130_fd_pr__nfet_g5v0d10v5"), { "SD" => nsd, "G" => ngate_5p0v_hv, "tS" => nsd, "tD" => nsd, "tG" => poly_con, "W" => sub })
+
+
+#================================
+# ------- BJT EXTRACTION --------
+#================================
+
+logger.info("Starting BJT EXTRACTION")
+
+# ====================
+# ------ NPN --------
+# ====================
+
+logger.info("Starting NPN BJT EXTRACTION")
+
+# sky130_fd_pr__npn_05v5_W1p00L1p00 BJT
+ignore_parameter("sky130_fd_pr__npn_05v5_W1p00L1p00","AE")
+logger.info("Extracting sky130_fd_pr__npn_05v5_W1p00L1p00 BJT")
+extract_devices(bjt4("sky130_fd_pr__npn_05v5_W1p00L1p00"), { "C" => npn_5v0_1x1_c.extents , "B" => npn_5v0_1x1_b.extents , "E" => npn_5v0_1x1_e,"S" => sub.extents,
+                                  "tC" => npn_5v0_1x1_c , "tB" => npn_5v0_1x1_b, "tE" => npn_5v0_1x1_e, "tS" => sub })
+
+# sky130_fd_pr__npn_05v5_W1p00L2p00 BJT
+ignore_parameter("sky130_fd_pr__npn_05v5_W1p00L2p00","AE")
+logger.info("Extracting sky130_fd_pr__npn_05v5_W1p00L2p00 BJT")
+extract_devices(bjt4("sky130_fd_pr__npn_05v5_W1p00L2p00"), { "C" => npn_5v0_1x2_c.extents , "B" => npn_5v0_1x2_b.extents , "E" => npn_5v0_1x2_e,"S" => sub.extents,
+                                "tC" => npn_5v0_1x2_c , "tB" => npn_5v0_1x2_b, "tE" => npn_5v0_1x2_e, "tS" => sub })
+
+# sky130_fd_pr__npn_11v0_W1p00L1p00 BJT
+ignore_parameter("sky130_fd_pr__npn_11v0_W1p00L1p00","AE")
+logger.info("Extracting sky130_fd_pr__npn_11v0_W1p00L1p00 BJT")
+extract_devices(FixBJT4Transistor::new("sky130_fd_pr__npn_11v0_W1p00L1p00"), { "BJT" => npn_11v0_1x1_c.extents, "tC" => npn_11v0_1x1_c , "tB" => npn_11v0_1x1_b, 
+                                                                                "tE" => npn_11v0_1x1_e, "tS" => sub })
+
+# ====================
+# ------- PNP --------
+# ====================
+
+logger.info("Starting PNP BJT EXTRACTION")
+
+# sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT
+ignore_parameter("sky130_fd_pr__pnp_05v5_W0p68L0p68","AE")
+logger.info("Extracting sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT")
+extract_devices(bjt3("sky130_fd_pr__pnp_05v5_W0p68L0p68"), { "C" => pnp_5v0_0p68x0p68_c.extents , "B" => pnp_5v0_0p68x0p68_b.extents , "E" => pnp_5v0_0p68x0p68_e,
+                                  "tC" => pnp_5v0_0p68x0p68_c , "tB" => pnp_5v0_0p68x0p68_b, "tE" => pnp_5v0_0p68x0p68_e })
+
+# sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT
+ignore_parameter("sky130_fd_pr__pnp_05v5_W3p40L3p40","AE")
+logger.info("Extracting sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT")
+extract_devices(bjt3("sky130_fd_pr__pnp_05v5_W3p40L3p40"), { "C" => pnp_5v0_3p4x3p4_c.extents , "B" => pnp_5v0_3p4x3p4_b.extents , "E" => pnp_5v0_3p4x3p4_e,
+                                "tC" => pnp_5v0_3p4x3p4_c , "tB" => pnp_5v0_3p4x3p4_b, "tE" => pnp_5v0_3p4x3p4_e })
+
+
+#================================
+# ------ DIODE EXTRACTION -------
+#================================
+
+logger.info("Starting DIODE EXTRACTION")
+
+# 5V N+ diffusion diode
+logger.info("Extracting 5V N+ diffusion diode")
+extract_devices(diode("sky130_fd_pr__diode_pw2nd_05v5", Diode), { "P" => ndiode_5v0_terminal_p, "N" => ndiode_5v0_terminal_n, "tA" => ndiode_terminal_p , "tC" => ndiode_terminal_n})
+
+# 5V N+ diffusion diode low threshold voltage
+logger.info("Extracting 5V N+ diffusion diode low threshold voltage")
+extract_devices(diode("sky130_fd_pr__diode_pw2nd_05v5_lvt", Diode), { "N" => ndiode_5v0_lvt_terminal_n , "P" => ndiode_5v0_lvt_terminal_p, "tA" => ndiode_terminal_n , "tC" => ndiode_terminal_p})
+
+# 5V N+ diffusion diode native threshold voltage
+logger.info("Extracting 5V N+ diffusion diode native threshold voltage")
+extract_devices(diode("sky130_fd_pr__diode_pw2nd_05v5_nvt", Diode), { "N" => ndiode_5v0_nvt_terminal_n , "P" => ndiode_5v0_nvt_terminal_p, "tA" => ndiode_terminal_n , "tC" => ndiode_terminal_p})
+
+# 11V N+ diffusion diode
+logger.info("Extracting 11V N+ diffusion diode")
+extract_devices(diode("sky130_fd_pr__diode_pw2nd_11v0", Diode), { "N" => ndiode_11v0_terminal_n , "P" => ndiode_11v0_terminal_p, "tA" => ndiode_terminal_n , "tC" => ndiode_terminal_p})
+
+# 5V P+ diffusion diode
+logger.info("Extracting 5V P+ diffusion diode")
+extract_devices(diode("sky130_fd_pr__diode_pd2nw_05v5", Diode), { "N" => pdiode_5v0_terminal_n , "P" => pdiode_5v0_terminal_p, "tA" => pdiode_terminal_n, "tC" => pdiode_terminal_p})
+
+# 5V P+ diffusion diode low threshold voltage
+logger.info("Extracting5V P+ diffusion diode low threshold voltage")
+extract_devices(diode("sky130_fd_pr__diode_pd2nw_05v5_lvt", Diode), { "N" => pdiode_5v0_lvt_terminal_n , "P" => pdiode_5v0_lvt_terminal_p, "tA" => pdiode_terminal_n, "tC" => pdiode_terminal_p})
+
+# 5V P+ diffusion diode high threshold voltage
+logger.info("Extracting 5V P+ diffusion diode high threshold voltage")
+extract_devices(diode("sky130_fd_pr__diode_pd2nw_05v5_hvt", Diode), { "N" => pdiode_5v0_hvt_terminal_n , "P" => pdiode_5v0_hvt_terminal_p, "tA" => pdiode_terminal_n, "tC" => pdiode_terminal_p})
+
+# 11V P+ diffusion diode
+logger.info("Extracting 11V P+ diffusion diode")
+extract_devices(diode("sky130_fd_pr__diode_pd2nw_11v0", Diode), { "N" => pdiode_11v0_terminal_n , "P" => pdiode_11v0_terminal_p, "tA" => pdiode_terminal_n, "tC" => pdiode_terminal_p})
+
+
+#================================
+#---- PHOTODIODE EXTRACTIONS ----
+#================================
+
+logger.info("Starting PHOTODIODE EXTRACTION")
+
+# Photodiode
+logger.info("Extracting Photodiode")
+extract_devices(diode("sky130_fd_pr__photodiode"), { "P" => photodiode_p, "N" => photodiode_n})
+ignore_parameter("sky130_fd_pr__photodiode","A")
+ignore_parameter("sky130_fd_pr__photodiode","p")
+
+
+#================================
+# ---- RESISTOR EXTRACTIONS -----
+#================================
+
+logger.info("Starting RESISTOR EXTRACTION")
+
+# ===============
+# --DIFF & WELL--
+# ===============
+
+# sky130_fd_pr__res_generic_nd
+logger.info("Extracting sky130_fd_pr__res_generic_nd device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_generic_nd", 120, BResistor), { "R" => nplus_res, "C" => nplus_cont, "W" => sub})
+
+# sky130_fd_pr__res_generic_nd
+logger.info("Extracting sky130_fd_pr__res_generic_nd device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_generic_nd_hv", 120, BResistor), { "R" => nplus_hv_res, "C" => nplus_hv_cont, "W" => sub})
+
+# sky130_fd_pr__res_generic_pd
+logger.info("Extracting sky130_fd_pr__res_generic_pd device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_generic_pd", 197, BResistor), { "R" => pplus_res, "C" => pplus_cont, "W" => nwell})
+
+# sky130_fd_pr__res_generic_pd
+logger.info("Extracting sky130_fd_pr__res_generic_pd device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_generic_pd_hv", 197, BResistor), { "R" => pplus_hv_res, "C" => pplus_hv_cont, "W" => nwell})
+
+# sky130_fd_pr__res_iso_pw
+logger.info("Extracting sky130_fd_pr__res_iso_pw device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_iso_pw", 3050, BResistor), { "R" => pwell_resistor, "C" => pwell_cont, "W" => dnwell, "tA" => pwell_term, "tB" => pwell_term, "tW" => dnwell})
+
+# ==============
+# ---- POLY ----
+# ==============
+
+# sky130_fd_pr__res_generic_po
+logger.info("Extracting sky130_fd_pr__res_generic_po device")
+extract_devices(resistor("sky130_fd_pr__res_generic_po", 48.2, NResistor), { "R" => poly_res_generic, "C" => poly_con })
+
+# sky130_fd_pr__res_high_po_0p35
+logger.info("Extracting sky130_fd_pr__res_high_po_0p35 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p35", 319.8, BResistor), { "R" => poly_high_0p35, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_high_po_0p69
+logger.info("Extracting sky130_fd_pr__res_high_po_0p69 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p69", 319.8, BResistor), { "R" => poly_high_0p69, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_high_po_1p41
+logger.info("Extracting sky130_fd_pr__res_high_po_1p41 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_1p41", 319.8, BResistor), { "R" => poly_high_1p41, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_high_po_2p85
+logger.info("Extracting sky130_fd_pr__res_high_po_2p85 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_2p85", 319.8, BResistor), { "R" => poly_high_2p85, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_high_po_5p73
+logger.info("Extracting sky130_fd_pr__res_high_po_5p73 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_5p73", 319.8, BResistor), { "R" => poly_high_5p73, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_xhigh_po_0p35
+logger.info("Extracting sky130_fd_pr__res_xhigh_po_0p35 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p35", 2000, BResistor), { "R" => poly_xhigh_0p35, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_xhigh_po_0p69
+logger.info("Extracting sky130_fd_pr__res_xhigh_po_0p69 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p69", 2000, BResistor), { "R" => poly_xhigh_0p69, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_xhigh_po_1p41
+logger.info("Extracting sky130_fd_pr__res_xhigh_po_1p41 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_1p41", 2000, BResistor), { "R" => poly_xhigh_1p41, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_xhigh_po_2p85
+logger.info("Extracting sky130_fd_pr__res_xhigh_po_2p85 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_2p85", 2000, BResistor), { "R" => poly_xhigh_2p85, "C" => poly_con, "W" => sub})
+
+# sky130_fd_pr__res_xhigh_po_5p73
+logger.info("Extracting sky130_fd_pr__res_xhigh_po_5p73 device")
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_5p73", 2000, BResistor), { "R" => poly_xhigh_5p73, "C" => poly_con, "W" => sub})
+
+# ===============
+# ---- METAL ----
+# ===============
+
+# sky130_fd_pr__res_generic_l1
+logger.info("Extracting sky130_fd_pr__res_generic_l1 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_l1", 12.2, NResistor), { "R" => li_resistor, "C" => li_con })
+
+# sky130_fd_pr__res_generic_m1
+logger.info("Extracting sky130_fd_pr__res_generic_m1 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_m1", 120, NResistor), { "R" => met1_resistor, "C" => met1_con })
+
+# sky130_fd_pr__res_generic_m2
+logger.info("Extracting sky130_fd_pr__res_generic_m2 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_m2", 120, NResistor), { "R" => met2_resistor, "C" => met2_con })
+
+# sky130_fd_pr__res_generic_m3
+logger.info("Extracting sky130_fd_pr__res_generic_m3 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_m3", 47, NResistor), { "R" => met3_resistor, "C" => met3_con })
+
+# sky130_fd_pr__res_generic_m4
+logger.info("Extracting sky130_fd_pr__res_generic_m4 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_m4", 47, NResistor), { "R" => met4_resistor, "C" => met4_con })
+
+# sky130_fd_pr__res_generic_m5
+logger.info("Extracting sky130_fd_pr__res_generic_m5 device")
+extract_devices(resistor("sky130_fd_pr__res_generic_m5", 29, NResistor), { "R" => met5_resistor, "C" => met5_con })
+
+
+#==================================
+# ------- FUSE EXTRACTION -------
+#==================================
+
+logger.info("Starting FUSE EXTRACTION")
+
+if FUSE == "m2"
+
+  # sky130_fd_pr__fuse_m2
+  logger.info("Extracting sky130_fd_pr__fuse_m2 device")
+  extract_devices(resistor("sky130_fd_pr__fuse_m2", 120, NResistor), { "R" => met2_fuse_res_layer, "C" => met2_con })
+
+elsif FUSE == "m3"
+
+  # sky130_fd_pr__fuse_m3
+  logger.info("Extracting sky130_fd_pr__fuse_m3 device")
+  extract_devices(resistor("sky130_fd_pr__fuse_m3", 47, NResistor), { "R" => met3_fuse_res_layer, "C" => met3_ncap })
+
+else
+
+  # sky130_fd_pr__fuse_m4
+  logger.info("Extracting sky130_fd_pr__fuse_m4 device")
+  extract_devices(resistor("sky130_fd_pr__fuse_m4", 47, NResistor), { "R" => met4_fuse_res_layer, "C" => met4_ncap })
+
+end
+
+
+#==================================
+# ------- MIMCAP EXTRACTION -------
+#==================================
+
+logger.info("Starting MIMCAP EXTRACTION")
+
+# sky130_fd_pr__model__cap_mim capacitor
+logger.info("Extracting sky130_fd_pr__model__cap_mim device")
+extract_devices(capacitor("sky130_fd_pr__model__cap_mim", 2e-15, MIMCap), { "P1" => met3_cap, "P2" => capm })
+
+
+# sky130_fd_pr__model__cap_mim_m4 capacitor
+logger.info("Extracting sky130_fd_pr__model__cap_mim_m4 device")
+extract_devices(capacitor("sky130_fd_pr__model__cap_mim_m4", 2e-15, MIMCap), { "P1" => met4_cap, "P2" => capm2 })
+
+
+#==================================
+# ------- VARACTOR EXTRACTION -----
+#==================================
+
+logger.info("Starting VARACTOR EXTRACTION")
+
+# Low threshold voltage varactor
+logger.info("Extracting low threshold voltage varactor")
+extract_devices(capacitor_with_bulk("sky130_fd_pr__cap_var_lvt", 4.4e-15, VarCap), { "P1" => varactor_gate_lvt, "P2" => varactor_nsd_lvt, "W" => varactor_bulk_lvt, "tA" => poly_con, "tB" => ntap_conn})
+
+# High threshold voltage varactor
+logger.info("Extracting high threshold voltage varactor")
+extract_devices(capacitor_with_bulk("sky130_fd_pr__cap_var_hvt", 4.4e-15, VarCap), { "P1" => varactor_gate_hvt, "P2" => varactor_nsd_hvt, "W" => varactor_bulk_hvt, "tA" => poly_con, "tB" => ntap_conn})
+
+
+#==================================
+# ------ INDUCTOR EXTRACTION ------
+#==================================
+
+# logger.info("Starting INDUCTOR EXTRACTION")
+
+# # RF Inductor with 3 turns and internal diameter of 90um
+# logger.info("Extracting RF Inductor with 3 turns and internal diameter of 90um")
+# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_03_90"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_1, "B" => inductor_sub })
+
+# # RF Inductor with 5 turns and internal diameter of 125um
+# logger.info("Extracting RF Inductor with 5 turns and internal diameter of 125um")
+# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_125"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_2, "B" => inductor_sub })
+
+# # RF Inductor with 5 turns and internal diameter of 220um
+# logger.info("Extracting RF Inductor with 5 turns and internal diameter of 220um")
+# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_220"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_3, "B" => inductor_sub })
+
+
+#==================================
+# ---------- VPP EXTRACTION -------
+#==================================
+
+logger.info("Starting VARACTOR EXTRACTION")
+
+# VPP capacitor with dimensions of 2.4um x 4.6um and with layers of m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_02p4x04p6_m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 2.7um x 6.1um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap"), {"C" => met2_vpp, "M" => vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 2.7um x 11.1um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap"), {"C" => met2_vpp, "M" => vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 2.7um x 21.1um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap"), {"C" => met2_vpp, "M" => vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 2.7um x 41.1um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap"), {"C" => met2_vpp, "M" => vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 2.9um x 6.1um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2"), {"C" => met2_vpp, "M" => vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 3.9um x 3.9um and with layers of m1m2 and shieldl1 with floatm3
+logger.info("Extracting sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3"), {"C1" => met2_vpp, "C2" => met3_vpp, "M" => vpp_03p9x03p9_m1m2_shieldl1_floatm3, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of l1m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_l1m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of l1m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_l1m1m2_noshield_o2subcell, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of l1m1m2 and shieldpo with floatm3
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3"), {"C1" => met2_vpp, "C2" => met3_vpp, "M" => vpp_04p4x04p6_l1m1m2_shieldpo_floatm3, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of m1m2m3 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_m1m2m3_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of m1m2m3 and shieldl1m5 with floatm4
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_m1m2_noshield_o2, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 4.4um x 4.6um and with layers of m1m2 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1"), {"C" => met2_vpp, "M" => vpp_04p4x04p6_m1m2_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 5.9um x 5.9um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap"), {"C" => met2_vpp, "M" => vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 6.8um x 6.1um and with layers of l1m1m2m3 and shieldpom4
+logger.info("Extracting sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4"), {"C1" => met2_vpp, "C2" => met4_vpp, "M" => vpp_06p8x06p1_l1m1m2m3_shieldpom4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 6.8um x 6.1um and with layers of m1m2m3 and shieldl1m4
+logger.info("Extracting sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4"), {"C1" => met2_vpp, "C2" => met4_vpp, "M" => vpp_06p8x06p1_m1m2m3_shieldl1m4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of l1m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_08p6x07p8_l1m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of l1m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell"), {"C" => met2_vpp, "M" => vpp_08p6x07p8_l1m1m2_noshield_o2subcell, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of l1m1m2 and shieldpo with floatm3
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3"), {"C1" => met2_vpp, "C2" => met3_vpp, "M" => vpp_08p6x07p8_l1m1m2_shieldpo_floatm3, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of m1m2m3 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1"), {"C" => met2_vpp, "M" => vpp_08p6x07p8_m1m2m3_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of m1m2m3 and shieldl1m5 with floatm4
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_08p6x07p8_m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 8.6um x 7.8um and with layers of m1m2 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1"), {"C" => met2_vpp, "M" => vpp_08p6x07p8_m1m2_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.3um x 11.3um and with layers of m1m2m3m4 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap"), {"C" => met2_vpp, "M" => vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.3um x 11.8um and with layers of l1m1m2m3m4 and shieldm5
+logger.info("Extracting vpp cap sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv")
+extract_devices(VPP3NHVExtractor::new("sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv"),
+                 { "MARKER" => vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv, "tA" =>  met2_vpp, "tB" => met1_vpp, "tW" => met5_vpp })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldm5
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldm5, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5, "B" => vpp_sub })
+
+# # VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+# logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x6")
+# extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x6"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x6, "B" => vpp_sub })
+
+# # VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+# logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x7")
+# extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x7"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x7, "B" => vpp_sub })
+
+# # VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+# logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x8")
+# extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x8"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x8, "B" => vpp_sub })
+
+# # VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+# logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x9")
+# extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x9"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x9, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3m4 and shieldpom5
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3 and shieldm4
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4"), {"C1" => met2_vpp, "C2" => met4_vpp, "M" => vpp_11p5x11p7_l1m1m2m3_shieldm4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2m3 and shieldpom4
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4"), {"C1" => met2_vpp, "C2" => met4_vpp, "M" => vpp_11p5x11p7_l1m1m2m3_shieldpom4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_l1m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of l1m1m2 and shieldpom3
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3"), {"C1" => met2_vpp, "C2" => met3_vpp, "M" => vpp_11p5x11p7_l1m1m2_shieldpom3, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2m3m4 and shieldl1m5
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_m1m2m3m4_shieldl1m5, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2m3m4 and shieldm5
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_m1m2m3m4_shieldm5, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2m3 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_m1m2m3_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2m3 and shieldl1m5 with floatm4
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4")
+extract_devices(VPP4Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4"), {"C1" => met2_vpp, "C2" => met5_vpp, "M" => vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_m1m2_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m2 and shieldl1
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_m1m2_shieldl1, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of m1m4 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_m1m4_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_11p5x11p7_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 11.5um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_11p5x23p1_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 22.5um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_22p5x11p7_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 22.5um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_22p5x23p1_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 33.6um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_33p6x11p7_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 33.6um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_33p6x23p1_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 44.7um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_44p7x11p7_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 44.7um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_44p7x23p1_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 55.8um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_55p8x11p7_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 55.8um x 11.7um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin"), {"C" => met2_vpp, "M" => vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 55.8um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield"), {"C" => met2_vpp, "M" => vpp_55p8x23p1_pol1m1m2m3m4m5_noshield, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 55.8um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin"), {"C" => met2_vpp, "M" => vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin, "B" => vpp_sub })
+
+# VPP capacitor with dimensions of 55.8um x 23.1um and with layers of pol1m1m2m3m4m5 and noshield
+logger.info("Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test")
+extract_devices(VPP3Extractor::new("sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test"), {"C" => met2_vpp, "M" => vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test, "B" => vpp_sub })
+
+
+#==================================
+# ------- SONOS EXTRACTION --------
+#==================================
+
+logger.info("Starting SONOS EXTRACTION")
+
+# Build space flash special SONOSFET star
+logger.info("Extracting Build space flash special SONOSFET star")
+extract_devices(mos4("sky130_fd_bs_flash__special_sonosfet_star"), { "SD" => sonos_nsd, "G" => sonos_gate, "tS" => sonos_nsd, "tD" => sonos_nsd, "tG" => poly_con, "W" => sub })
+
+
+#================================================
+#------------- COMPARISON OPTIONS ---------------
+#================================================
+
+logger.info("Starting SKY130 LVS comparison section")
+
+#=== FLATTEN CELLS ===
+align
+
+#=== NETLIST EXTRACTION ===
+if SIMPLIFY
+  netlist.simplify
+end
+
+#=== NETLIST OPTIONS ===
+if NET_ONLY
+  netlist
+end
+
+if TOP_LVL_PINS
+  netlist.make_top_level_pins
+end
+
+if COMBINE
+  netlist.combine_devices()
+end
+
+if PURGE
+  netlist.purge
+end
+
+if PURGE_NETS
+  netlist.purge_nets
+end
+
+#=== SCHEMATIC OPTIONS ===
+if SCH_SIMPLE
+  schematic.simplify
+end
+
+#=== IGNORE EXTREME VALUES ===
+max_res(1e9)
+min_caps(1e-16)
+
+#=== COMPARE ===
+compare
+
+#=== TIME ESTIMATE ===
+exec_end_time = Time.now
+run_time = exec_end_time - exec_start_time
+logger.info("LVS Total Run time %f seconds" % [run_time])
+
+#=== DECISION ===
+if ! compare
+  logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  logger.error("ERROR : Netlists don't match")
+  logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  exit(1)
+else
+  logger.info("==========================================")
+  logger.info("INFO : Congratulations! Netlists match.")
+  logger.info("==========================================")
+end
+
+
+
