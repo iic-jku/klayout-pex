@@ -25,15 +25,28 @@ def run_fastcap(exe_path: str,
                 permittivity_factor: float = 1.0,
                 iterative_tolerance: float = 0.01):
     work_dir = os.path.dirname(lst_file_path)
+
+    # we have to chdir into the directory containing the lst file,
+    # so make all paths absolute, and the lst_file relative
+    log_path = os.path.abspath(log_path)
+    lst_file_path = os.path.basename(lst_file_path)
+
     info(f"Chdir to {work_dir}")
     os.chdir(work_dir)
     args = [
         exe_path,
         f"-o{expansion_order}",
-        f"-d{partitioning_depth}",
+    ]
+
+    if partitioning_depth != 'auto':
+        args += [
+            f"-d{partitioning_depth}",
+        ]
+
+    args += [
         f"-p{permittivity_factor}",
         f"-t{iterative_tolerance}",
-        f"-l{lst_file_path}",                          # console mode, without GUI
+        f"-l{lst_file_path}",
     ]
 
     info(f"Calling {' '.join(args)}, output file: {log_path}")
