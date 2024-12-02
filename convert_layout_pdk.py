@@ -293,6 +293,7 @@ def main():
     lpp_mapping: Dict[str, Tuple[str]] = {
         'boundary':             ('prBoundary.boundary',),
         'prBoundary.boundary':  ('prBoundary.boundary',),
+        'tap.drawing':          ('Activ.drawing',),
         'diff.drawing':         ('Activ.drawing',),
         'nwell.drawing':        ('NWell.drawing',),
         'nwell.label':          ('NWell.pin', 'NWell.label'), # NOTE: EMX loves purpose .pin
