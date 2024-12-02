@@ -16,6 +16,7 @@ import klayout.db as kdb
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .klayout.netlist_expander import NetlistExpander
@@ -33,6 +34,7 @@ from .log import (
 )
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
+from .util.argparse_helpers import render_enum_help, true_or_false
 from .version import __version__
 
 
@@ -44,30 +46,6 @@ PROGRAM_NAME = "kpex"
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
-
-
-def render_enum_help(topic: str,
-                     enum_cls: Type[Enum],
-                     print_default: bool = True) -> str:
-    if not hasattr(enum_cls, 'DEFAULT'):
-        raise ValueError("Enum must declare case 'DEFAULT'")
-    enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}"
-    if print_default:
-        enum_help += f".\nDefaults to '{enum_cls.DEFAULT.name.lower()}'"
-    return enum_help
-
-
-def true_or_false(arg) -> bool:
-    if isinstance(arg, bool):
-        return arg
-
-    match str(arg).lower():
-        case 'yes' | 'true' | 't' | 'y' | 1:
-            return True
-        case 'no' | 'false' | 'f' | 'n' | 0:
-            return False
-        case _:
-            raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
