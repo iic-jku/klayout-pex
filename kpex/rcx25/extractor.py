@@ -105,58 +105,6 @@ class RCExtractor:
                     net2layer2regions[net_name][canonical_layer_name] = shapes
                     layer_by_name[canonical_layer_name] = metal_layer
 
-        for net in circuit.each_net():
-            # https://www.klayout.de/doc-qt5/code/class_Net.html
-            debug(f"Net name={net.name}, expanded_name={net.expanded_name()}, pin_count={net.pin_count()}, "
-                  f"is_floating={net.is_floating()}, is_passive={net.is_passive()}, "
-                  f"terminals={list(map(lambda t: format_terminal(t), net.each_terminal()))}")
-
-            net_name = net.expanded_name()
-
-            layer2regions = net2layer2regions.get(net_name, None)
-            if not layer2regions:
-                continue
-
-            for layer_name in layer2regions.keys():
-                shapes: Optional[kdb.Region] = layer2regions.get(layer_name, None)
-                if shapes:
-                    if shapes.count() >= 1:
-                        substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name.get(layer_name, None)
-                        if not substrate_cap_spec:
-                            warning(f"No substrate cap specified for layer {layer_name}")
-                            continue
-
-                        area_shapes_unshielded = shapes.dup()
-                        for shielding_layer_name, shielding_region in layer_regions_by_name.items():
-                            if layer_name == shielding_layer_name:
-                                break
-                            area_shapes_unshielded -= shielding_region
-
-                        # (1) SUBSTRATE CAPACITANCE
-                        # area caps ... aF/µm^2
-                        # perimeter / sidewall ... aF/µm
-
-                        area = area_shapes_unshielded.area() * dbu**2         # in µm^2
-                        perimeter = shapes.perimeter() * dbu  # in µm
-
-                        cap_area_femto = area * substrate_cap_spec.area_capacitance / 1000
-                        cap_perimeter_femto = perimeter * substrate_cap_spec.perimeter_capacitance / 1000
-
-                        info(f"net {net_name} layer {layer_name}: "
-                             f"area {area} µm^2, perimeter {perimeter}, "
-                             f"cap_area {round(cap_area_femto, 2)}fF, "
-                             f"cap_peri {round(cap_perimeter_femto, 2)}fF, "
-                             f"sum {round(cap_area_femto + cap_perimeter_femto, 2)}fF")
-
-                        # TODO: shielding of layers below
-                        #  - hinders area
-                        #  - hinders fringe / perimeter ... which "halo"?
-
-        #
-        # (2) OVERLAP CAPACITANCE
-        #
-        # TODO
-
         space_markers = all_region.space_check(
             round(self.tech_info.tech.extraction.side_halo / dbu),  # min space in um
             True,  # whole edges
@@ -172,9 +120,9 @@ class RCExtractor:
             kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
         )
 
+        # (1) SIDEWALL CAPACITANCE
+        #
         for layer_name in layer2net2regions.keys():
-            # (3) SIDEWALL CAPACITANCE
-            #
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name.get(layer_name, None)
             if not sidewall_cap_spec:
                 warning(f"No substrate cap specified for layer {layer_name}")
@@ -218,3 +166,58 @@ class RCExtractor:
 
                             info(f"Sidewall on {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)}fF")
 
+        #
+        # (2) OVERLAP CAPACITANCE
+        #
+        # TODO
+
+
+        #
+        # (3) SUBSTRATE CAPACITANCE
+        #
+        for net in circuit.each_net():
+            # https://www.klayout.de/doc-qt5/code/class_Net.html
+            debug(f"Net name={net.name}, expanded_name={net.expanded_name()}, pin_count={net.pin_count()}, "
+                  f"is_floating={net.is_floating()}, is_passive={net.is_passive()}, "
+                  f"terminals={list(map(lambda t: format_terminal(t), net.each_terminal()))}")
+
+            net_name = net.expanded_name()
+
+            layer2regions = net2layer2regions.get(net_name, None)
+            if not layer2regions:
+                continue
+
+            for layer_name in layer2regions.keys():
+                shapes: Optional[kdb.Region] = layer2regions.get(layer_name, None)
+                if shapes:
+                    if shapes.count() >= 1:
+                        substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name.get(layer_name, None)
+                        if not substrate_cap_spec:
+                            warning(f"No substrate cap specified for layer {layer_name}")
+                            continue
+
+                        area_shapes_unshielded = shapes.dup()
+                        for shielding_layer_name, shielding_region in layer_regions_by_name.items():
+                            if layer_name == shielding_layer_name:
+                                break
+                            area_shapes_unshielded -= shielding_region
+
+                        # (1) SUBSTRATE CAPACITANCE
+                        # area caps ... aF/µm^2
+                        # perimeter / sidewall ... aF/µm
+
+                        area = area_shapes_unshielded.area() * dbu ** 2  # in µm^2
+                        perimeter = shapes.perimeter() * dbu  # in µm
+
+                        cap_area_femto = area * substrate_cap_spec.area_capacitance / 1000
+                        cap_perimeter_femto = perimeter * substrate_cap_spec.perimeter_capacitance / 1000
+
+                        info(f"net {net_name} layer {layer_name}: "
+                             f"area {area} µm^2, perimeter {perimeter}, "
+                             f"cap_area {round(cap_area_femto, 2)}fF, "
+                             f"cap_peri {round(cap_perimeter_femto, 2)}fF, "
+                             f"sum {round(cap_area_femto + cap_perimeter_femto, 2)}fF")
+
+                        # TODO: shielding of layers below
+                        #  - hinders area
+                        #  - hinders fringe / perimeter ... which "halo"?
