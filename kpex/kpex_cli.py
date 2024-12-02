@@ -222,6 +222,7 @@ def validate_args(args: argparse.Namespace):
 def build_fastercap_input(args: argparse.Namespace,
                           pex_context: KLayoutExtractionContext,
                           tech_info: TechInfo) -> str:
+    rule('Process stackup')
     fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
                                                     tech_info=tech_info,
                                                     k_void=args.k_void,
@@ -229,6 +230,7 @@ def build_fastercap_input(args: argparse.Namespace,
                                                     delaunay_b=args.delaunay_b)
     gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
+    rule()
     faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
     os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
@@ -290,8 +292,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
                                  top_cell_name=pex_context.top_cell.name,
                                  output_path=expanded_netlist_csv_path)
 
-    info("Extended netlist (CSV format):")
-    rule()
+    rule("Extended netlist (CSV format):")
     with open(expanded_netlist_csv_path, 'r') as f:
         for line in f.readlines():
             subproc(line[:-1])  # abusing subproc, simply want verbatim
