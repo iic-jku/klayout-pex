@@ -59,7 +59,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KREG, "metal2_con",  10, 0,  "Computed layer for Metal2");
     addComputedLayer(tech, KREG, "metal3_con",  30, 0,  "Computed layer for Metal3");
     addComputedLayer(tech, KREG, "metal4_con",  50, 0,  "Computed layer for Metal4");
-    addComputedLayer(tech, KREG, "metal5_n_cap",  67, 20,  "Computed layer for Metal5, case where no MiM cap");
+    addComputedLayer(tech, KREG, "metal5_n_cap",  67, 200,  "Computed layer for Metal5, case where no MiM cap");
     addComputedLayer(tech, KREG, "topmetal1_con", 126, 0,  "Computed layer for TopMetal1");
     addComputedLayer(tech, KREG, "topmetal2_con", 134, 0,  "Computed layer for TopMetal2");
 
@@ -75,20 +75,12 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     
     addComputedLayer(tech, KREG, "poly_con",    5, 0,    "Computed layer for GatPoly");
 
-    addComputedLayer(tech, KREG, "topvia1_n_cap", 125, 20, "Original TopVia1 is 125/0, case where no MiM cap");
+    addComputedLayer(tech, KREG, "topvia1_n_cap", 125, 200, "Original TopVia1 is 125/0, case where no MiM cap");
     
     addComputedLayer(tech, KCAP, "mim_via",  125, 10, "Original TopVia1 is 125/0, case MiM cap");
-    addComputedLayer(tech, KCAP, "metal5_cap",   67, 10,  "Computed layer for Metal5, case MiM cap");
+    addComputedLayer(tech, KCAP, "metal5_cap",   67, 100,  "Computed layer for Metal5, case MiM cap");
     addComputedLayer(tech, KCAP, "cmim_top",   36, 0,  "Computed layer for MiM cap above Metal5");
 
-    
-//    addComputedLayer(tech, KREG, "via1",      68, 44,  "");
-//    addComputedLayer(tech, KREG, "via2",      69, 44,  "");
-//    addComputedLayer(tech, KREG, "via3_ncap", 70, 144, "Original via3 is 70,44, case where no MiM cap");
-//    addComputedLayer(tech, KREG, "via4_ncap", 71, 144, "Original via4 is 71,44, case where no MiM cap");
-//    addComputedLayer(tech, KREG, "via3_cap",  70, 244,  "Original via3 is 70,44, via above metal 3 MIM cap");
-//    addComputedLayer(tech, KREG, "via4_cap",  71, 244,  "Original via3 is 71,44, via above metal 4 MIM cap");
-//    
 //    addComputedLayer(tech, KCAP, "poly_vpp",  66, 20,  "Capacitor device metal");
 //    addComputedLayer(tech, KCAP, "li_vpp",    67, 20,  "Capacitor device metal");
 //    addComputedLayer(tech, KCAP, "met1_vpp",  68, 20,  "Capacitor device metal");
@@ -102,10 +94,6 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
 //    addComputedLayer(tech, KCAP, "via2_vpp",  69, 44,  "Capacitor device contact");
 //    addComputedLayer(tech, KCAP, "via3_vpp",  70, 44,  "Capacitor device contact");
 //    addComputedLayer(tech, KCAP, "via4_vpp",  71, 44,  "Capacitor device contact");
-//    addComputedLayer(tech, KCAP, "met3_cap",  70, 220, "metal3 part of MiM cap");
-//    addComputedLayer(tech, KCAP, "met4_cap",  71, 220, "metal4 part of MiM cap");
-//    addComputedLayer(tech, KCAP, "capm",      89, 44,  "MiM cap above metal3");
-//    addComputedLayer(tech, KCAP, "capm2",     97, 44,  "MiM cap above metal4");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
