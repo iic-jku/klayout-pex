@@ -119,7 +119,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("fox");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_FIELD_OXIDE);
     kpex::tech::ProcessStackInfo::FieldOxideLayer *fl = li->mutable_field_oxide_layer();
-    fl->set_dielectric_k(0.39);
+    fl->set_dielectric_k(4.632); // fine-tuned for single_plate_100um_x_100um_li1_over_substrate to match foundry table data
     
     li = psi->add_layers();
     li->set_name("poly");
