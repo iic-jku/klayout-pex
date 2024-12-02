@@ -19,6 +19,7 @@ from kpex.version import __version__
 class MagicPEXMode(StrEnum):
     CC = "CC"
     RC = "RC"
+    DEFAULT = "CC"
 
 
 def prepare_magic_script(gds_path: str,
