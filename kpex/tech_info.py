@@ -4,6 +4,7 @@ from __future__ import annotations  # allow class type hints within same class
 from typing import *
 from functools import cached_property
 import google.protobuf.json_format
+from cachetools import cached
 
 from .util.multiple_choice import MultipleChoicePattern
 import tech_pb2
@@ -81,6 +82,17 @@ class TechInfo:
             filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
                    self.tech.process_stack.layers)
         )
+
+    @cached_property
+    def gate_poly_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
+        return self.process_metal_layers[0]
+
+    @cached_property
+    def field_oxide_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
+        return list(
+            filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_FIELD_OXIDE,
+                   self.tech.process_stack.layers)
+        )[0]
 
     @cached_property
     def process_metal_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:

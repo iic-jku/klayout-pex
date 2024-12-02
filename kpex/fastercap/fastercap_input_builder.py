@@ -71,6 +71,14 @@ class FasterCapInputBuilder:
             debug(f"Nothing extracted for layer {layer_name}")
         return shapes
 
+    def top_cell_bbox(self) -> kdb.Box:
+        b1: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+        b2: kdb.Box = self.pex_context.lvsdb.internal_layout().top_cell().bbox()
+        if b1.area() > b2.area():
+            return b1
+        else:
+            return b2
+
     def build(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb
         netlist: kdb.Netlist = lvsdb.netlist()
@@ -87,10 +95,9 @@ class FasterCapInputBuilder:
             delaunay_b=self.delaunay_b          # test/compare with 1.0 => more triangles at edges
         )
 
-        # zellen vergleichen:
-        #    caps VPP ... vergleichen mit modellierten capacities / referenzwert
-        #    flipflops (auswirkung auf setup/hold zeiten)
+        fox_layer = self.tech_info.field_oxide_layer
 
+        model_builder.add_material(name=fox_layer.name, k=fox_layer.field_oxide_layer.dielectric_k)
         for diel_name, diel_k in self.tech_info.dielectric_by_name.items():
             model_builder.add_material(name=diel_name, k=diel_k)
 
@@ -183,8 +190,7 @@ class FasterCapInputBuilder:
         substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
         substrate_region = kdb.Region()
 
-        top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
-        substrate_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+        substrate_block = self.top_cell_bbox().enlarged(math.floor(2 / self.dbu))  # 2µm
         substrate_region.insert(substrate_block)
 
         diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
@@ -200,6 +206,21 @@ class FasterCapInputBuilder:
         #
         # add dielectrics
         #
+
+        fox_region = kdb.Region()
+        fox_block = self.top_cell_bbox().enlarged(math.floor(2 / self.dbu))  # 2µm
+        fox_region.insert(fox_block)
+
+        # field oxide goes from substrate/diff/well up to below the gate-poly
+        gate_poly_height = self.tech_info.gate_poly_layer.metal_layer.height
+        fox_z = 0
+        fox_height = gate_poly_height - fox_z
+        info(f"Simple dielectric (field oxide) {fox_layer.name}: "
+             f"z={fox_z}, height={fox_height}")
+        model_builder.add_dielectric(material_name=fox_layer.name,
+                                     layer=fox_region,
+                                     z=fox_z,
+                                     height=fox_height)
 
         for metal_layer in self.tech_info.process_metal_layers:
             metal_layer_name = metal_layer.name
