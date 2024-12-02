@@ -10,6 +10,7 @@ from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
+from .fastercap.netlist_expander import NetlistExpander
 from .log import (
     LogLevel,
     set_log_level,
@@ -20,7 +21,6 @@ from .log import (
     error
 )
 from .tech_info import TechInfo
-from .util.capacitance_matrix import CapacitanceMatrix
 from .version import __version__
 
 import klayout.db as kdb
@@ -130,14 +130,17 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     os.makedirs(args.output_dir_path, exist_ok=True)
 
-    lst_file = gen.write_fastcap(output_dir_path=args.output_dir_path,
-                                 prefix=args.cell_name)
+    lst_file, cap_matrix_info = gen.write_fastcap(output_dir_path=args.output_dir_path,
+                                                  prefix=f"{args.cell_name}_FasterCap_Input")
+    cap_matrix_info_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Matrix_Info.yaml")
+    cap_matrix_info.write_yaml(cap_matrix_info_path)
 
     gen.dump_stl(output_dir_path=args.output_dir_path)
 
     exe_path = "FasterCap"
-    log_path = os.path.join(args.output_dir_path, "FasterCap_Output.txt")
-    csv_path = os.path.join(args.output_dir_path, "FasterCap_Result_Matrix.csv")
+    log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
+    csv_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Result_Matrix.csv")
+    expanded_netlist_path = os.path.join(args.output_dir_path, f"{args.cell_name}_Expanded_Netlist.cir")
 
     run_fastercap(exe_path=exe_path,
                   lst_file_path=lst_file,
@@ -146,6 +149,17 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     cap_matrix = fastercap_parse_capacitance_matrix(log_path)
     cap_matrix.write_csv(csv_path)
+
+    netlist_expander = NetlistExpander()
+    expanded_netlist = netlist_expander.expand(
+        pex_context=pex_context,
+        cap_matrix=cap_matrix,
+        cap_matrix_info=cap_matrix_info
+    )
+
+    spice_writer = kdb.NetlistSpiceWriter()
+    expanded_netlist.write(expanded_netlist_path, spice_writer)
+    info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
 
 def main():
