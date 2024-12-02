@@ -65,3 +65,19 @@ class TechInfo:
             filter(lambda lyr: lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL,
                    self.tech.process_stack.layers)
         )
+
+    def sidewall_dielectric_layer(self, layer_name: str) -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
+
+        for lyr in self.tech.process_stack.layers:
+            if lyr.layer_type != process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                continue
+
+            if lyr.sidewall_dielectric_layer.reference == layer_name:
+                found_layers.append(lyr)
+
+        if len(found_layers) == 0:
+            return None
+        if len(found_layers) >= 2:
+            raise Exception(f"found multiple sidewall dielectric layers for {layer_name}")
+        return found_layers[0]
