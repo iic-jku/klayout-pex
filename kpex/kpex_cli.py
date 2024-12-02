@@ -97,7 +97,19 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=true_or_false, default=False,  # TODO: in the future this should be True by default
                                  help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
                                       "(default is False for testing now)")
-    
+    group_pex_options.add_argument("--fastercap", dest="run_fastercap",
+                                 type=true_or_false, default=True,
+                                 help=f"Run FasterCap engine "
+                                      f"(default is True)")
+    group_pex_options.add_argument("--fastcap", dest="run_fastcap",
+                                 type=true_or_false, default=False,
+                                 help=f"Run FastCap2 engine "
+                                      f"(default is False)")
+    group_pex_options.add_argument("--2.5D", dest="run_2_5D",
+                                 type=true_or_false, default=False,
+                                 help=f"Run 2.5D analytical engine "
+                                      f"(default is False)")
+
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
                                  type=float, default=3.9,
@@ -144,14 +156,6 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_fastercap.add_argument("--jacobi", dest="fastercap_jacobi_preconditioner",
                                  action='store_true', default=False,
                                  help=f"FasterCap -pj Use Jacobi Preconditioner "
-                                      f"(default is False)")
-    group_fastercap.add_argument("--fastercap", dest="run_fastercap",
-                                 type=true_or_false, default=True,
-                                 help=f"Run FasterCap "
-                                      f"(default is True)")
-    group_fastercap.add_argument("--fastcap", dest="run_fastcap",
-                                 type=true_or_false, default=False,
-                                 help=f"Run FastCap2 "
                                       f"(default is False)")
 
     if arg_list is None:
@@ -585,12 +589,13 @@ def main():
                                    pex_context=pex_context,
                                    lst_file=lst_file)
 
-    rule("kpex 2.5D PEX Engine")
-    report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
-    run_kpex_2_5d_engine(args=args,
-                         pex_context=pex_context,
-                         tech_info=tech_info,
-                         report_path=report_path)
+    if args.run_2_5D:
+        rule("kpex 2.5D PEX Engine")
+        report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
+        run_kpex_2_5d_engine(args=args,
+                             pex_context=pex_context,
+                             tech_info=tech_info,
+                             report_path=report_path)
 
 
 if __name__ == "__main__":
