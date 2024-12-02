@@ -124,7 +124,7 @@ class FasterCapInputBuilder:
                                                     layer=shapes,
                                                     z=metal_layer.height,
                                                     height=metal_layer.thickness)
-                
+
                 if metal_layer.HasField('contact_above'):
                     contact = metal_layer.contact_above
                     shapes = self.shapes_of_net(layer_name=contact.name, net=net)
@@ -215,8 +215,6 @@ class FasterCapInputBuilder:
                 while True:
                     sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
                     if not sidewall:
-                        break
-                    if sidewall.name == metal_layer.reference_above:  # TODO we won't deal with
                         break
                     match sidewall.layer_type:
                         case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
