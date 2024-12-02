@@ -13,7 +13,7 @@ import klayout.db as kdb
 
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
-from ..logging import (
+from ..log import (
     console,
     debug,
     info,

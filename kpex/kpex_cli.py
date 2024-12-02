@@ -10,12 +10,12 @@ from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
-from .logging import (
+from .log import (
     LogLevel,
     set_log_level,
     # console,
     # debug,
-    # info,
+    info,
     # warning,
     error
 )

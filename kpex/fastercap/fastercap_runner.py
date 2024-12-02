@@ -6,7 +6,7 @@ import os
 import subprocess
 import unittest
 
-from kpex.logging import (
+from kpex.log import (
     debug,
     info,
     # warning,
