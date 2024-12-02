@@ -127,13 +127,13 @@ void buildLayers(kpex::tech::Technology *tech) {
     layer->set_gds_datatype(44);
 
     layer = tech->add_layers();
-    layer->set_name("nwell"); // map this to process stack nwell? (TODO: check this with Matthias)
+    layer->set_name("diff"); // map this to process stack nwell? (TODO: check this with Matthias)
     layer->set_description("KLayout computed layer: ntap_conn");
     layer->set_gds_layer(65);
     layer->set_gds_datatype(144);
 
     layer = tech->add_layers();
-    layer->set_name("subs"); // map this to process stack subs? (TODO: check this with Matthias)
+    layer->set_name("diff"); // map this to process stack subs? (TODO: check this with Matthias)
     layer->set_description("KLayout computed layer: ptap_conn");
     layer->set_gds_layer(65);
     layer->set_gds_datatype(244);
@@ -228,7 +228,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     li->set_name("subs");
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SUBSTRATE);
     kpex::tech::ProcessStackInfo::SubstrateLayer *sl = li->mutable_substrate_layer();
-    sl->set_height(0.0);
+    sl->set_height(0.1); // TODO
+    sl->set_thickness(0.33); // TODO
     sl->set_reference("fox");
 
     li = psi->add_layers();
