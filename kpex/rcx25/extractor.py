@@ -87,6 +87,7 @@ class RCExtractor:
 
         rdb_cell = report.create_cell(cell_name)
         rdb_cat_common = report.create_category("Common")
+        rdb_cat_sidewall_old = report.create_category("Sidewall (Space)")
         rdb_cat_sidewall = report.create_category("Sidewall")
         rdb_cat_overlap = report.create_category("Overlap")
         rdb_cat_fringe = report.create_category("Fringe / Side Overlap")
@@ -185,7 +186,7 @@ class RCExtractor:
         side_halo_dbu = int(side_halo_um / dbu) + 1  # add 1 nm to halo
 
         space_markers_by_layer_name: Dict[LayerName, kdb.Region] = {}
-        rdb_cat_space_markers = report.create_category(rdb_cat_sidewall, "All Space Markers")
+        rdb_cat_space_markers = report.create_category(rdb_cat_sidewall_old, "All Space Markers")
 
         for layer_name in layer2net2regions.keys():
             if layer_name == substrate_layer_name:
@@ -304,7 +305,7 @@ class RCExtractor:
             if not net2regions:
                 continue
 
-            rdb_cat_sw_layer = report.create_category(rdb_cat_sidewall, f"layer={layer_name}")
+            rdb_cat_sw_layer = report.create_category(rdb_cat_sidewall_old, f"layer={layer_name}")
 
             space_markers = space_markers_by_layer_name[layer_name]
 
@@ -321,6 +322,11 @@ class RCExtractor:
 
                         rdb_cat_sw_nets = report.create_category(rdb_cat_sw_layer, f"{net1} - {net2}") \
                                           if sidewall_edge_pairs else None
+
+                        rdb_output(rdb_cat_sw_nets, 'Shapes {net1}', shapes1)
+                        rdb_output(rdb_cat_sw_nets, 'Shapes {net2}', shapes2)
+                        rdb_output(rdb_cat_sw_nets, 'Markers interacting {net1}', markers_net1)
+                        rdb_output(rdb_cat_sw_nets, 'Markers interacting {net1}-{net2}', sidewall_edge_pairs)
 
                         for idx, pair in enumerate(sidewall_edge_pairs):
                             edge1: kdb.Edge = pair.first
@@ -390,7 +396,10 @@ class RCExtractor:
                 self.substrate_cap_spec = tech_info.substrate_cap_by_layer_name[inside_layer_name]
                 self.sideoverlap_cap_spec = tech_info.side_overlap_cap_by_layer_names[inside_layer_name][outside_layer_name]
 
+                self.sidewall_cap_spec = tech_info.sidewall_cap_by_layer_name[inside_layer_name]
+
                 self.category_name_counter: Dict[str, int] = defaultdict(int)
+                self.sidewall_counter = 0
 
             def begin_polygon(self,
                               layout: kdb.Layout,
@@ -419,6 +428,9 @@ class RCExtractor:
                       f"inside_net={self.inside_net_name}, "
                       f"outside_layer={self.outside_layer_name}, "
                       f"edge = {edge}")
+
+                rdb_inside_layer = report.create_category(rdb_cat_sidewall, f"layer={self.inside_layer_name}")
+                rdb_sidewall_inside_net = report.create_category(rdb_inside_layer, f"inside={self.inside_net_name}")
 
                 for (x1, x2), polygons_by_net in neighborhood:
                     if not polygons_by_net:
@@ -451,7 +463,8 @@ class RCExtractor:
                             if not p.is_box():
                                 warning(f"Side overlap, outside polygon {p} is not a box. "
                                         f"Currently, only boxes are supported, will be using bounding box {bbox}")
-                            distance_near = (bbox.p1.y + bbox.p2.y) / 2
+                            ## distance_near = (bbox.p1.y + bbox.p2.y) / 2.0
+                            distance_near = min(bbox.p1.y, bbox.p2.y)
                             if distance_near < 0:
                                 distance_near = 0
                             return distance_near
@@ -470,8 +483,34 @@ class RCExtractor:
                         #       Polygons points are sorted clockwise, so the edge
                         #       that goes from right-to-left is the nearest edge
                         nearby_opposing_edge = [e for e in nearest_lateral_shape[1].each_edge() if e.d().x < 0][-1]
-                        rdb_output(rdb_cat_edge_interval, 'Closest nearby edge',
-                                   [self.to_original_trans(edge) * nearby_opposing_edge])
+                        nearby_opposing_edge_trans = self.to_original_trans(edge) * nearby_opposing_edge
+
+                        opposing_net = '<unknown>'
+                        # find the opposing net
+                        for other_net, region in layer2net2regions[self.inside_layer_name].items():
+                            if other_net == self.inside_net_name:
+                                continue
+                            if region.interacting(nearby_opposing_edge_trans).count() >= 1:
+                                # we found the other net!
+                                opposing_net = other_net
+                                break
+
+                        rdb_output(rdb_cat_edge_interval,
+                                   f"Closest nearby edge (net {opposing_net})", [nearby_opposing_edge_trans])
+
+                        sidewall_edge_pair = [nearby_opposing_edge_trans, edge_interval_original]
+                        distance_um = nearest_lateral_shape[0] * dbu
+                        sidewall_cap_femto = (edge_interval_length_um * self.sidewall_cap_spec.capacitance) / \
+                                             (distance_um + self.sidewall_cap_spec.offset) / 1000.0 / 2.0
+
+                        rdb_sidewall_outside_net = report.create_category(rdb_sidewall_inside_net,
+                                                                         f"outside={opposing_net}")
+                        self.sidewall_counter += 1
+                        rdb_output(rdb_sidewall_outside_net,
+                                   f"#{self.sidewall_counter}: "
+                                   f"len {round(edge_interval_length_um, 3)} µm, distance {round(distance_um, 3)} µm, "
+                                   f"{round(sidewall_cap_femto, 3)} fF",
+                                   sidewall_edge_pair)
 
                         nearby_shield = kdb.Polygon([nearby_opposing_edge.p1,
                                                      nearby_opposing_edge.p2,
