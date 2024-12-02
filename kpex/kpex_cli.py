@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import argparse
+from enum import StrEnum
 import os
 import os.path
 import sys
@@ -12,6 +13,7 @@ from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastercap.netlist_expander import NetlistExpander
+from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .klayout.netlist_reducer import NetlistReducer
 from .log import (
@@ -30,6 +32,11 @@ from .version import __version__
 # ------------------------------------------------------------------------------------
 
 PROGRAM_NAME = "kpex"
+
+
+class InputMode(StrEnum):
+    LVSDB = "lvsdb"
+    GDS = "gds"
 
 
 def render_enum_help(topic: str,
@@ -54,13 +61,20 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special.add_argument("--log_level", dest='log_level', default='info',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
 
-    group_pex = main_parser.add_argument_group("Parasitic Extraction")
+    group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
                            help="Technology Protocol Buffer path (*.pb.json)")
-    group_pex.add_argument("--lvsdb", "-l", dest="lvsdb_path", required=True, help="KLayout LVSDB path")
-    group_pex.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
+
     group_pex.add_argument("--out_dir", "-o", dest="output_dir_path", default=".",
                            help="Output directory path")
+
+    group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
+                                                     description="Either LVS is run, or an existing LVSDB is used")
+    group_pex_input.add_argument("--gds", "-g", dest="gds_path", help="GDS path (for LVS)")
+    group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
+                                 help="Schematic SPICE netlist path (for LVS)")
+    group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
+    group_pex_input.add_argument("--cell", "-c", dest="cell_name", default="TOP", help="Cell (default is TOP)")
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
@@ -89,9 +103,28 @@ def validate_args(args: argparse.Namespace):
         error(f"Can't read technology file at path {args.tech_pbjson_path}")
         found_errors = True
 
-    if not os.path.isfile(args.lvsdb_path):
-        error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
-        found_errors = True
+    # input mode: LVS or existing LVSDB?
+    if hasattr(args, 'gds_path'):
+        info(f"GDS input file passed, running in LVS mode")
+        args.input_mode = InputMode.GDS
+        if not os.path.isfile(args.gds_path):
+            error(f"Can't read GDS file (LVS input) at path {args.gds_path}")
+            found_errors = True
+        if not hasattr(args, 'schematic_path'):
+            error(f"LVS input schematic not specified (argument --schematic)")
+            found_errors = True
+        elif not os.path.isfile(args.schematic_path):
+            error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
+            found_errors = True
+    else:
+        info(f"LVSDB input file passed, bypassing LVS")
+        args.input_mode = InputMode.LVSDB
+        if not hasattr(args, 'lvsdb_path'):
+            error(f"LVSDB input path not specified (argument --lvsdb)")
+            found_errors = True
+        elif not os.path.isfile(args.lvsdb_path):
+            error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
+            found_errors = True
 
     try:
         args.log_level = LogLevel[args.log_level.upper()]
@@ -168,6 +201,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
     reduced_netlist.write(reduced_netlist_path, spice_writer)
     info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
+
 def main():
     args = parse_args()
     validate_args(args)
@@ -177,7 +211,56 @@ def main():
     tech_info = TechInfo.from_json(args.tech_pbjson_path)
 
     lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(args.lvsdb_path)
+
+    # TODO: make configurable (env vars or config file)
+    klayout_exe_path = 'klayout'
+    lvs_script_path = os.path.join(os.environ['HOME'], '.klayout', 'salt', 'sky130A_el',
+                                   'lvs', 'core', 'sky130.lvs')
+
+    match args.input_mode:
+        case InputMode.LVSDB:
+            lvsdb.read(args.lvsdb_path)
+        case InputMode.GDS:
+            layout = kdb.Layout()
+            layout.read(args.gds_path)
+
+            found_cell: Optional[kdb.Cell] = None
+            is_only_top_cell = False
+            for cell in layout.cells('*'):
+                if cell.name == args.cell_name:
+                    found_cell = cell
+                    break
+            if not found_cell:
+                error(f"Could not find cell {args.cell_name} in GDS {args.gds_path}")
+                sys.exit(1)
+
+            effective_gds_path = args.gds_path
+
+            top_cells = layout.top_cells()
+            is_only_top_cell = len(top_cells) == 1 and top_cells[0].name == args.cell_name
+            if is_only_top_cell:
+                info(f"Found cell {args.cell_name} in GDS {effective_gds_path} (only top cell)")
+            else:  # there are other cells => extract the top cell to a tmp layout
+                tmp_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
+                info(f"Found cell {args.cell_name} in GDS {effective_gds_path}, "
+                     f"but it is not the only top cell, "
+                     f"so layout is exported to: {tmp_gds_path}")
+                options = kdb.SaveLayoutOptions()
+                options.clear_cells()
+                options.add_cell(found_cell.cell_index())
+                layout.write(tmp_gds_path, options)
+                effective_gds_path = tmp_gds_path
+
+            lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
+            lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
+            lvs_runner = LVSRunner()
+            lvs_runner.run_klayout_lvs(exe_path=klayout_exe_path,
+                                       lvs_script=lvs_script_path,
+                                       gds_path=effective_gds_path,
+                                       schematic_path=args.schematic_path,
+                                       log_path=lvs_log_path,
+                                       lvsdb_path=lvsdb_path)
+            lvsdb.read(lvsdb_path)
 
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name, lvsdb=lvsdb)
     gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_l2n_extracted.gds.gz")
