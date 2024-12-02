@@ -1,8 +1,10 @@
 #! /usr/bin/env python3
 
 import argparse
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
+import numpy
 import os
 import os.path
 import re
@@ -159,7 +161,7 @@ def validate_args(args: argparse.Namespace):
             found_errors = True
 
         try:
-            dir = os.path.dirname(args.input_gds_path)
+            dir = os.path.dirname(os.path.realpath(args.input_gds_path))
             is_dir = os.path.isdir(dir)
             if not is_dir:
                 raise Exception(f"{dir} is no directory")
@@ -173,6 +175,21 @@ def validate_args(args: argparse.Namespace):
 
 def setup_logging(args: argparse.Namespace):
     set_log_level(args.log_level)
+
+
+def guess_technology(layout: kdb.Layout,
+                     tech_layer_lists: List[LayerList]) -> int:
+    layer_infos = [layout.layer_infos()[idx] for idx in layout.layer_indexes()]
+
+    rank_by_tech = [0] * len(tech_layer_lists)
+    for idx, tech_layers in enumerate(tech_layer_lists):
+        tech_layer_set = set(tech_layers.as_gds_list)
+        for li in layer_infos:
+            gds_pair = GDSPair(li.layer, li.datatype)
+            if gds_pair in tech_layer_set:
+                rank_by_tech[idx] += 1
+
+    return numpy.argmax(rank_by_tech)
 
 
 def map_gds_layers(src_layout: kdb.Layout,
@@ -246,18 +263,26 @@ def parse_layers(lyp_path: str) -> LayerList:
     return LayerList(layers)
 
 
+def invert_dict(d: Dict[str, Tuple[str]]) -> Dict[str, Tuple[str]]:
+    n = defaultdict(list)
+    for src_lpp, dest_lpps in d.items():
+        for dest_lpp in dest_lpps:
+            n[dest_lpp].append(src_lpp)
+    n = {k: tuple(v) for k, v in n.items()}
+    return n
+
+
 def main():
     info("Called with arguments:")
     info(' '.join(map(shlex.quote, sys.argv)))
 
-    src_tech = "sky130A"
-    dest_tech = "sg13g2"
+    tech_names = ("sky130A", "sg13g2")
 
     dir = os.path.dirname(os.path.realpath(__file__))
-    src_lyp_path = os.path.join(dir, "pdk", "sky130A", "kpex", "sky130A.lyp")
-    dest_lyp_path = os.path.join(dir, "pdk", "ihp_sg13g2", "kpex", "sg13g2.lyp")
+    lyp_paths = (os.path.join(dir, "pdk", "sky130A", "kpex", "sky130A.lyp"),
+                 os.path.join(dir, "pdk", "ihp_sg13g2", "kpex", "sg13g2.lyp"))
 
-    warning(f"At the moment, only conversion from PDK {src_tech} -> {dest_tech} is supported!")
+    warning(f"At the moment, only conversion between PDKs {tech_names} is supported!")
 
     args = parse_args()
     setup_logging(args)
@@ -267,14 +292,12 @@ def main():
     except Exception:
         sys.exit(1)
 
-    src_layers = parse_layers(src_lyp_path)
-    dest_layers = parse_layers(dest_lyp_path)
+    tech_layer_lists = [parse_layers(lyp_path) for lyp_path in lyp_paths]
     if args.dump_layers_and_quit:
         info("Dumping all available layers…")
-        rule(src_lyp_path)
-        info(sorted([layer.lpp for layer in src_layers.layers]))
-        rule(dest_lyp_path)
-        info(sorted([layer.lpp for layer in dest_layers.layers]))
+        for lyp_path, layer_list in zip(lyp_paths, tech_layer_lists):
+            rule(lyp_path)
+            info(sorted([layer.lpp for layer in layer_list.layers]))
         sys.exit(0)
 
     layout = kdb.Layout()
@@ -287,9 +310,21 @@ def main():
         layout.flatten(
             c.cell_index(),
             -1,   # all levels
-            True  # prune orthan cells
+            True  # prune orphan cells
         )
 
+    src_tech_index = guess_technology(layout=layout, tech_layer_lists=tech_layer_lists)
+
+    assert len(tech_names) == 2
+    dest_tech_index = (src_tech_index + 1) % 2
+
+    src_tech = tech_names[src_tech_index]
+    dest_tech = tech_names[dest_tech_index]
+    src_layers = tech_layer_lists[src_tech_index]
+    dest_layers = tech_layer_lists[dest_tech_index]
+    info(f"Guessing layout is of tech: {src_tech}")
+
+    # from tech1 to tech2
     lpp_mapping: Dict[str, Tuple[str]] = {
         'boundary':             ('prBoundary.boundary',),
         'prBoundary.boundary':  ('prBoundary.boundary',),
@@ -330,6 +365,9 @@ def main():
         'capacitor.drawing':    ('Recog.mom',),
         'capm2.drawing':        ('MIM.drawing',),
     }
+
+    if src_tech_index == 1:
+        lpp_mapping = invert_dict(lpp_mapping)
 
     layer_mapping = LayerMapping(lpp_mapping=lpp_mapping,
                                  src_layers=src_layers,
