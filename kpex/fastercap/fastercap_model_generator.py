@@ -665,6 +665,8 @@ class FasterCapModelGenerator:
             f.write('\n'.join(lst_file))
             f.write('\n')
 
+        return lst_fn
+
     @staticmethod
     def _write_fastercap_geo(file_number: int,
                              output_path: str,
