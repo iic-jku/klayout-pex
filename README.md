@@ -1,4 +1,30 @@
-## Extraction technology info (Protobuffer based)
+## KPEX Extractor
+
+### Prerequisites
+
+- cmake
+- protobuf
+- python3 with pip packages:
+   - protobuf
+   - mypy-protobuf
+   - rich
+
+#### Ubuntu / Debian installation
+
+Install Python3.12 + VENV
+```bash
+sudo apt install python3.12-venv
+python3 -m venv ~/myvenv
+# also add to .bashrc / .zprofile:
+source ~/myvenv/bin/activate
+```
+
+```bash
+sudo apt install cmake libprotobuf-dev protobuf-compiler 
+sudo apt install libcurl4-openssl-dev   # required for klayout pip module
+pip3 install protobuf mypy-protobuf rich klayout
+```
+
 
 ### What does the Makefile do?
 

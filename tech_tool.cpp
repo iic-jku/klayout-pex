@@ -56,7 +56,7 @@ void write(const kpex::tech::Technology &tech,
             google::protobuf::util::JsonPrintOptions options;
             options.add_whitespace = true;
             options.preserve_proto_field_names = true;
-            absl::Status s =
+            auto status =
                 google::protobuf::util::MessageToJsonString(tech, &jsonString, options);
             std::ofstream output(outputPath, std::ios::out | std::ios::binary);
             output << jsonString;
@@ -93,7 +93,7 @@ void read(kpex::tech::Technology *tech,
             std::fstream input(inputPath, std::ios::in);
             std::ostringstream buffer;
             buffer << input.rdbuf();
-            absl::Status s =
+            auto status =
                 google::protobuf::util::JsonStringToMessage(buffer.str(), tech, options);
             break;
         }
