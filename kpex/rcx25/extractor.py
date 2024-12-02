@@ -505,19 +505,79 @@ class RCExtractor:
                         f"{transformed_category_name} ({self.category_name_counter[transformed_category_name]})"
                     )
                     rdb_output(rdb_cat_edge_interval, f"Original Section {edge_interval_original}", edge_interval_original)
-                    shielded_polygons = polygons_by_net.get(1, None)
-                    shielded_region = kdb.Region()
+
+                    polygons_on_same_layer = polygons_by_net.get(1, None)
+                    shielded_region_lateral = kdb.Region()
+                    if polygons_on_same_layer:
+                        shielded_region_lateral.insert(polygons_on_same_layer)
+                        cat_lat_nsh = report.create_category(rdb_cat_edge_interval, f"Laterally nearby shapes")
+                        report.create_items(rdb_cell.rdb_id(),
+                                            cat_lat_nsh.rdb_id(),
+                                            kdb.CplxTrans(mag=dbu),
+                                            kdb.Region([self.to_original_trans(edge) * p for p in shielded_region_lateral]))
+
+                        # NOTE: first lateral nearby shape blocks everything beyond (like sidewall situation) up to halo
+                        def distance_near(p: kdb.Polygon) -> float:
+                            bbox: kdb.Box = p.bbox()
+
+                            if not p.is_box():
+                                warning(f"Side overlap, outside polygon {p} is not a box. "
+                                        f"Currently, only boxes are supported, will be using bounding box {bbox}")
+                            distance_near = (bbox.p1.y + bbox.p2.y) / 2
+                            if distance_near < 0:
+                                distance_near = 0
+                            return distance_near
+
+                        nearest_lateral_shape = (math.inf, polygons_on_same_layer[0])
+                        for p in polygons_on_same_layer:
+                            dnear = distance_near(p)
+                            if dnear < nearest_lateral_shape[0]:
+                                nearest_lateral_shape = (dnear, p)
+
+                        cat_lat_cnsh = report.create_category(rdb_cat_edge_interval, f"Closest nearby shape")
+                        report.create_items(rdb_cell.rdb_id(),
+                                            cat_lat_cnsh.rdb_id(),
+                                            kdb.CplxTrans(mag=dbu),
+                                            kdb.Region(self.to_original_trans(edge) * nearest_lateral_shape[1]))
+
+
+                        # NOTE: this method is always called for a single nearest edge (line), so the
+                        #       polygons have 4 points.
+                        #       Polygons points are sorted clockwise, so the edge
+                        #       that goes from right-to-left is the nearest edge
+                        nearby_opposing_edge = [e for e in nearest_lateral_shape[1].each_edge() if e.d().x < 0][-1]
+                        cat_lat_cne = report.create_category(rdb_cat_edge_interval, f"Closest nearby edge")
+                        report.create_items(rdb_cell.rdb_id(),
+                                            cat_lat_cne.rdb_id(),
+                                            kdb.CplxTrans(mag=dbu),
+                                            [self.to_original_trans(edge) * nearby_opposing_edge])
+
+                        nearby_shield = kdb.Polygon([nearby_opposing_edge.p1,
+                                                     nearby_opposing_edge.p2,
+                                                     kdb.Point(x1, side_halo_dbu),
+                                                     kdb.Point(x2, side_halo_dbu)])
+                        cat_lat_nshi = report.create_category(rdb_cat_edge_interval, f"Nearby shield")
+                        report.create_items(rdb_cell.rdb_id(),
+                                            cat_lat_nshi.rdb_id(),
+                                            kdb.CplxTrans(mag=dbu),
+                                            kdb.Region(self.to_original_trans(edge) * nearby_shield))
+
+                    shielded_region_between = kdb.Region()
+                    shielded_polygons = polygons_by_net.get(2, None)  # shielded from layers between
                     if shielded_polygons:
-                        shielded_region.insert(shielded_polygons)
+                        shielded_region_between.insert(shielded_polygons)
 
                     for net_index, polygons in polygons_by_net.items():
-                        if net_index < 2:  # ignore "self" and "shielded"
+                        if net_index == 0: # laterally shielded
+                            print(f"lateral")
+                            continue
+                        elif net_index == 1:  # ignore "shielded"
                             continue
 
                         if not polygons:
                             continue
 
-                        unshielded_region: kdb.Region = kdb.Region(polygons) - shielded_region
+                        unshielded_region: kdb.Region = kdb.Region(polygons) - shielded_region_between
                         if not unshielded_region:
                             continue
 
@@ -609,7 +669,7 @@ class RCExtractor:
                             #
                             # subcap = ExtCurStyle->exts_perimCap[ta][0] * efflength;
 
-                            # TODO: shielding
+                            # TODO: shielding lateral
 
                             # TODO: fringe portion extracted from substrate
 
@@ -658,8 +718,8 @@ class RCExtractor:
                 rdb_cat_outside_layer = report.create_category(rdb_cat_inside_layer,
                                                                f"outside_layer={outside_layer_name}")
 
-                shielded_regions = shielded_regions_between_layers[(inside_layer_name, outside_layer_name)]
-                rdb_output(rdb_cat_outside_layer, 'Shielded between layers', shielded_regions)
+                shielded_regions_between = shielded_regions_between_layers[(inside_layer_name, outside_layer_name)]
+                rdb_output(rdb_cat_outside_layer, 'Shielded between layers', shielded_regions_between)
 
                 for net_inside in inside_net2regions.keys():
                     shapes_inside_net: kdb.Region = inside_net2regions[net_inside]
@@ -673,14 +733,16 @@ class RCExtractor:
                         inside_layer_name=inside_layer_name,
                         inside_net_name=net_inside,
                         outside_layer_name=outside_layer_name,
-                        child_names=[net_inside, 'SHIELDED'] + list(outside_net2regions.keys()),
+                        child_names=[net_inside, 'NEARBY_SHAPES', 'SHIELD_BETWEEN'] + list(outside_net2regions.keys()),
                         tech_info=self.tech_info,
                         report_category=rdb_cat_inside_net
                     )
 
-                    # kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net)
+                    nearby_shapes = shapes_inside_layer - shapes_inside_net
+                    # children = [kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net),
                     children = [kdb.CompoundRegionOperationNode.new_foreign(),
-                                kdb.CompoundRegionOperationNode.new_secondary(shielded_regions)] + \
+                                kdb.CompoundRegionOperationNode.new_secondary(nearby_shapes),
+                                kdb.CompoundRegionOperationNode.new_secondary(shielded_regions_between)] + \
                                [kdb.CompoundRegionOperationNode.new_secondary(region)
                                 for region in list(outside_net2regions.values())]
 
