@@ -9,6 +9,8 @@ from .fastercap.fastercap_file_writer import *
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .logging import (
+    LogLevel,
+    set_log_level,
     # console,
     # debug,
     # info,
@@ -26,6 +28,15 @@ import klayout.db as kdb
 PROGRAM_NAME = "kpex"
 
 
+def render_enum_help(topic: str,
+                     enum_cls: Type[Enum]) -> str:
+    if not hasattr(enum_cls, 'DEFAULT'):
+        raise ValueError("Enum must declare case 'DEFAULT'")
+    enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}." \
+                f"\nDefaults to '{enum_cls.DEFAULT.value}'"
+    return enum_help
+
+
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                        "KLayout-integrated Parasitic Extraction Tool",
@@ -34,6 +45,8 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special = main_parser.add_argument_group("Special options")
     group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
+    group_special.add_argument("--log_level", dest='log_level', default='info',
+                               help=render_enum_help(topic='log_level', enum_cls=LogLevel))
 
     group_pex = main_parser.add_argument_group("Parasitic Extraction")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
@@ -67,6 +80,9 @@ def validate_args(args: argparse.Namespace):
 def main():
     args = parse_args()
     validate_args(args)
+
+    log_level = LogLevel[args.log_level.upper()]
+    set_log_level(log_level)
 
     tech_info = TechInfo.from_json(args.tech_pbjson_path)
 
