@@ -311,7 +311,7 @@ def main():
                     ])
 
             lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
-            lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
+            lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}.lvsdb.gz")
             lvs_runner = LVSRunner()
             lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
                                        lvs_script=args.lvs_script_path,
