@@ -112,11 +112,11 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help=f"FasterCap -g Use Galerkin scheme "
                                       f"(default is True)")
     group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
-                                 type=float, default=0.04,
+                                 type=float, default=0.5,
                                  help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
                                       f"(default is 0.04)")
     group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
-                                 type=float, default=0.001,
+                                 type=float, default=0.5,
                                  help=f"FasterCap -m Mesh relative refinement value "
                                       f"(default is 0.001)")
 
