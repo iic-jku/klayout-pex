@@ -17,7 +17,6 @@ from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
-from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
@@ -36,6 +35,7 @@ from .log import (
     error,
     rule
 )
+from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
 from .rcx25.extractor import RCExtractor
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -56,8 +56,9 @@ class InputMode(StrEnum):
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                       f"KLayout-integrated Parasitic Extraction Tool",
-                                          epilog=f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand",
                                           add_help=False)
+    #                                          epilog=f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand",
+    
     group_special = main_parser.add_argument_group("Special options")
     group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
@@ -66,7 +67,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special.add_argument("--threads", dest='num_threads', type=int, default=0,
                                help="number of threads (e.g. for FasterCap)")
     group_special.add_argument('--klayout', dest='klayout_exe_path', default='klayout',
-                               help="Path to klayout executuable (default is 'klayout')")
+                               help="Path to klayout executable (default is 'klayout')")
 
     group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
@@ -158,6 +159,21 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  action='store_true', default=False,
                                  help=f"FasterCap -pj Use Jacobi Preconditioner "
                                       f"(default is False)")
+
+    default_magicrc_path = os.path.abspath(f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc")
+    group_magic = main_parser.add_argument_group("MAGIC options")
+    group_magic.add_argument('--magicrc', dest='magicrc_path', default='magic',
+                              help=f"Path to magicrc configuration file (default is '{default_magicrc_path}')")
+    group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='subprocess',
+                             help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
+    group_magic.add_argument("--magic_cthresh", dest="magic_ctresh",
+                             type=float, default=0.01,
+                             help="Threshold for ignored parasitic capacitances (default is 0.01)")
+    group_magic.add_argument("--magic_rthresh", dest="magic_rtresh",
+                             type=float, default=100.0,
+                             help="Threshold for ignored parasitic resistances (default is 100)")
+    group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
+                              help="Path to magic executable (default is 'magic')")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -393,13 +409,7 @@ def run_magic_extraction(args: argparse.Namespace):
               f" (currently {args.input_mode})")
         return
 
-    magic_exe_path = "magic"  # TODO: make this configurable
-    magic_pex_mode = MagicPEXMode.CC  # TODO: make this configurable
-    magicrc_path = f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc"
-    magic_cthresh = 0.01  # TODO: make this configurable
-    magic_rthresh = 100   # TODO: make this configurable
-
-    magic_run_dir = os.path.join(args.output_dir_path, f"magic_{magic_pex_mode}")
+    magic_run_dir = os.path.join(args.output_dir_path, f"magic_{args.magic_pex_mode}")
     magic_log_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Output.txt")
     magic_script_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Script.tcl")
 
@@ -412,12 +422,12 @@ def run_magic_extraction(args: argparse.Namespace):
                          run_dir_path=magic_run_dir,
                          script_path=magic_script_path,
                          output_netlist_path=output_netlist_path,
-                         pex_mode=magic_pex_mode,
-                         c_threshold=magic_cthresh,
-                         r_threshold=magic_rthresh)
+                         pex_mode=args.magic_pex_mode,
+                         c_threshold=args.magic_cthresh,
+                         r_threshold=args.magic_rthresh)
 
-    run_magic(exe_path=magic_exe_path,
-              magicrc_path=magicrc_path,
+    run_magic(exe_path=args.magic_exe_path,
+              magicrc_path=args.magicrc_path,
               script_path=magic_script_path,
               log_path=magic_log_path)
 
