@@ -43,14 +43,14 @@ class FasterCapInputBuilder:
     def dbu(self) -> float:
         return self.pex_context.dbu
 
-    def extracted_layer(self, net_name: str, layer_name: str) -> Optional[KLayoutExtractedLayerInfo]:
+    def extracted_layer(self, layer_name: str) -> Optional[KLayoutExtractedLayerInfo]:
         if layer_name not in self.tech_info.gds_pair_for_layer_name:
-            warning(f"Can't find GDS pair for layer {layer_name} (net {net_name})")
+            warning(f"Can't find GDS pair for layer {layer_name}")
             return None
 
         gds_pair = self.tech_info.gds_pair_for_layer_name[layer_name]
         if gds_pair not in self.pex_context.extracted_layers:
-            debug(f"Nothing extracted for layer {layer_name} (net {net_name})")
+            debug(f"Nothing extracted for layer {layer_name}")
             return None
 
         extracted_layer = self.pex_context.extracted_layers[gds_pair]
@@ -58,9 +58,7 @@ class FasterCapInputBuilder:
 
     def build(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb
-        netlist = lvsdb.netlist()
-        substrate_layers = self.tech_info.process_substrate_layers
-        metal_layers = self.tech_info.process_metal_layers
+        netlist: kdb.Netlist = lvsdb.netlist()
 
         def format_terminal(t: kdb.NetTerminalRef) -> str:
             td = t.terminal_def()
@@ -73,6 +71,10 @@ class FasterCapInputBuilder:
             delaunay_amax=self.delaunay_amax,   # test/compare with smaller, e.g. 0.05 => more triangles
             delaunay_b=self.delaunay_b          # test/compare with 1.0 => more triangles at edges
         )
+
+        # zellen vergleichen:
+        #    caps VPP ... vergleichen mit modellierten capacities / referenzwert
+        #    flipflops (auswirkung auf setup/hold zeiten)
 
         for pl in self.tech_info.tech.process_stack.layers:
             match pl.layer_type:
@@ -91,8 +93,10 @@ class FasterCapInputBuilder:
             error(f"Expected 1 circuit in extracted netlist, but got 0")
         else:
             warning(f"Expected only 1 circuit in extracted netlist, but got {len(circuits)}")
-        circuit = circuits[0]
+        circuit: kdb.Circuit = circuits[0]
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
+
+        diffusion_regions: List[kdb.Region] = []
 
         for net in circuit.each_net():
             # https://www.klayout.de/doc-qt5/code/class_Net.html
@@ -102,14 +106,14 @@ class FasterCapInputBuilder:
 
             net_name = net.expanded_name()
 
-            for metal_layer in metal_layers:
+            for metal_layer in self.tech_info.process_metal_layers:
                 metal_layer_name = metal_layer.name
                 metal_layer = metal_layer.metal_layer
 
                 metal_z_bottom = metal_layer.height
                 metal_z_top = metal_z_bottom + metal_layer.thickness
 
-                extracted_layer = self.extracted_layer(net_name=net_name, layer_name=metal_layer_name)
+                extracted_layer = self.extracted_layer(layer_name=metal_layer_name)
                 if extracted_layer:
                     shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
                     if shapes.count() >= 1:
@@ -148,7 +152,7 @@ class FasterCapInputBuilder:
                             sidewallee = sidewall.name
 
                     contact = metal_layer.contact_above
-                    extracted_layer = self.extracted_layer(net_name=net_name, layer_name=contact.name)
+                    extracted_layer = self.extracted_layer(layer_name=contact.name)
                     if extracted_layer and not extracted_layer.region.is_empty():
                         shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
                         model_builder.add_conductor(net_name=net_name,
@@ -163,25 +167,22 @@ class FasterCapInputBuilder:
                     pass
                 # TODO: add stuff
 
-            #
-            # substrate
-            #
-            for substrate_layer in substrate_layers:
-                substrate_layer_name = substrate_layer.name
-                substrate_layer = substrate_layer.diffusion_layer
-                extracted_layer = self.extracted_layer(net_name=net_name, layer_name=substrate_layer_name)
-                debug(f"Substrate layer {substrate_layer_name}, net {net_name}: "
-                      f"Extracted?={extracted_layer is not None}")
+            # DIFF / TAP
+            for diffusion_layer in self.tech_info.process_diffusion_layers:
+                diffusion_layer_name = diffusion_layer.name
+                diffusion_layer = diffusion_layer.diffusion_layer
+                extracted_layer = self.extracted_layer(layer_name=diffusion_layer_name)
                 if extracted_layer:
                     shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
                     if shapes.count() >= 1:
+                        diffusion_regions.append(shapes)
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
-                                                    z=-0.1,
-                                                    height=0.1)  # TODO: substrate_layer.diffusion_layer.height
+                                                    z=0,  # TODO
+                                                    height=0.1)  # TODO: diffusion_layer.height
 
-                contact = substrate_layer.contact_above
-                extracted_layer = self.extracted_layer(net_name=net_name, layer_name=contact.name)
+                contact = diffusion_layer.contact_above
+                extracted_layer = self.extracted_layer(layer_name=contact.name)
                 if extracted_layer and not extracted_layer.region.is_empty():
                     shapes: kdb.Region = self.pex_context.lvsdb.shapes_of_net(net, extracted_layer.region, True)
                     if shapes.count() >= 1:
@@ -190,11 +191,28 @@ class FasterCapInputBuilder:
                                                     z=0.0,
                                                     height=contact.thickness)
 
-                diel_above = self.tech_info.process_stack_layer_by_name[substrate_layer.reference]
+                diel_above = self.tech_info.process_stack_layer_by_name[diffusion_layer.reference]
                 if diel_above:
                     pass
 
                 # TODO: add stuff
+
+        # substrate block blow everything. independent of nets!
+
+        substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
+        substrate_region = kdb.Region()
+
+        top_cell_bbox: kdb.Box = self.pex_context.target_layout.top_cell().bbox()
+        substrate_block = top_cell_bbox.enlarged(math.floor(1 / self.dbu))  # 1µm
+        substrate_region.insert(substrate_block)
+
+        diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
+        for d in diffusion_regions:
+            substrate_region -= d.sized(diffusion_margin)
+        model_builder.add_conductor(net_name="0",
+                                    layer=substrate_region,
+                                    z=0 - substrate_layer.height - substrate_layer.thickness,
+                                    height=substrate_layer.thickness)
 
         gen = model_builder.generate()
         return gen
