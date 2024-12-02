@@ -21,25 +21,38 @@ from ..log import (
 # meaningful layer/datatype combination from original layer space.
 # Other layers are mapped to functionally equivalent layers.
 name_to_lp: Dict[str, Tuple[int, int]] = {
-  "dnwell":    (64, 18),
-  "li_con":    (67, 20),
-  "licon":     (66, 44),
-  "mcon":      (67, 44),
-  "met1_con":  (68, 20),
-  "met2_con":  (69, 20),
-  "met3_ncap": (70, 20),
-  "met4_ncap": (71, 20),
-  "met5_con":  (72, 20),
-  "nsd":       (93, 44),   # borrow from nsdm
-  "ntap_conn": (65, 144),  # original tap is 65/44, but we need to separate ntap/ptap
-  "nwell":     (64, 20),
-  "poly_con":  (66, 20),
-  "psd":       (94, 20),   # borrow from psdm
-  "ptap_conn": (65, 244),  # original tap is 65/44, but we need to separate ntap/ptap
-  "via1":      (68, 44),
-  "via2":      (69, 44),
-  "via3":      (70, 44),
-  "via4":      (71, 44)
+    "dnwell":    (64, 18),
+    "li_con":    (67, 20),
+    "licon":     (66, 44),
+    "mcon":      (67, 44),
+    "met1_con":  (68, 20),
+    "met2_con":  (69, 20),
+    "met3_ncap": (70, 20),
+    "met4_ncap": (71, 20),
+    "met5_con":  (72, 20),
+    "nsd":       (93, 44),   # borrow from nsdm
+    "ntap_conn": (65, 144),  # original tap is 65/44, but we need to separate ntap/ptap
+    "nwell":     (64, 20),
+    "poly_con":  (66, 20),
+    "psd":       (94, 20),   # borrow from psdm
+    "ptap_conn": (65, 244),  # original tap is 65/44, but we need to separate ntap/ptap
+    "via1":      (68, 44),
+    "via2":      (69, 44),
+    "via3":      (70, 44),
+    "via4":      (71, 44),
+    'poly_vpp':  (66, 20),
+    'li_vpp':    (67, 20),  # borrow from li1.drawing
+    'met1_vpp':  (68, 20),
+    'met2_vpp':  (69, 20),
+    'met3_vpp':  (70, 20),
+    'met4_vpp':  (71, 20),
+    'met5_vpp':  (72, 20),
+    'licon_vpp': (66, 44),
+    'mcon_vpp':  (67, 44),
+    'via1_vpp':  (68, 44),
+    'via2_vpp':  (69, 44),
+    'via3_vpp':  (70, 44),
+    'via4_vpp':  (71, 44),
 }
 
 
