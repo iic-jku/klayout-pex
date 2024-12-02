@@ -170,10 +170,10 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                               help=f"Path to magicrc configuration file (default is '{default_magicrc_path}')")
     group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='subprocess',
                              help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
-    group_magic.add_argument("--magic_cthresh", dest="magic_ctresh",
+    group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
                              type=float, default=0.01,
                              help="Threshold for ignored parasitic capacitances (default is %(default)s1)")
-    group_magic.add_argument("--magic_rthresh", dest="magic_rtresh",
+    group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
                              type=float, default=100.0,
                              help="Threshold for ignored parasitic resistances (default is %(default)s)")
     group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
