@@ -283,6 +283,7 @@ def main():
         deregister_additional_handler(handler)
         handler.flush()
         handler.close()
+        os.makedirs(args.output_dir_path, exist_ok=True)
         new_path = os.path.join(args.output_dir_path, os.path.basename(log_path))
         if os.path.exists(new_path):
             ctime = os.path.getctime(new_path)
@@ -290,7 +291,7 @@ def main():
             timestamp = dt.strftime('%Y-%m-%d_%H-%M-%S')
             backup_path = f"{new_path[:-4]}_{timestamp}.bak.log"
             shutil.move(new_path, backup_path)
-        log_path = shutil.move(log_path, args.output_dir_path)
+        log_path = shutil.move(log_path, new_path)
         register_log_file_handler(log_path, formatter)
 
     # setup preliminary logger
@@ -314,8 +315,6 @@ def main():
     tech_info = TechInfo.from_json(args.tech_pbjson_path)
 
     lvsdb = kdb.LayoutVsSchematic()
-
-    os.makedirs(args.output_dir_path, exist_ok=True)
 
     match args.input_mode:
         case InputMode.LVSDB:
