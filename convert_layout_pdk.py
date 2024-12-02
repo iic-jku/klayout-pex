@@ -61,11 +61,11 @@ class LayerList:
 
     @cached_property
     def gds_pair_by_lpp(self) -> Dict[str, GDSPair]:
-        d = {}
-        for l in self.layers:
-            d[l.lpp] = l.gds_pair
-        return d
+        return {l.lpp: l.gds_pair for l in self.layers}
 
+    @cached_property
+    def lpp_by_gds_pair(self) -> Dict[GDSPair, str]:
+        return {l.gds_pair: l.lpp for l in self.layers}
 
 
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
@@ -116,6 +116,8 @@ def setup_logging(args: argparse.Namespace):
 def map_gds_layers(layout: kdb.Layout,
                    from_tech: str,
                    to_tech: str,
+                   from_layers: LayerList,
+                   to_layers: LayerList,
                    gds_layer_mapping: Dict[GDSPair, GDSPair]):
     layer_infos = [layout.layer_infos()[idx] for idx in layout.layer_indexes()]
     for li in layer_infos:
@@ -123,9 +125,12 @@ def map_gds_layers(layout: kdb.Layout,
         dest_gds_pair = gds_layer_mapping.get(gds_pair, None)
         if not dest_gds_pair:
             dest_gds_pair = GDSPair(1000 + li.layer, li.datatype)
-            error(f"Unable to map layer {gds_pair} from PDK {from_tech} to {to_tech}, "
+            error(f"Unable to map layer {gds_pair} ({from_layers.lpp_by_gds_pair[gds_pair]}) "
+                  f"from PDK {from_tech} to {to_tech}, "
                   f"mapping to dummy layer {dest_gds_pair}")
-        info(f"Mapping layer {gds_pair} -> {dest_gds_pair}")
+        else:
+            info(f"Mapping layer {gds_pair} ({from_layers.lpp_by_gds_pair[gds_pair]}) -> "
+                 f"{dest_gds_pair} ({to_layers.lpp_by_gds_pair[dest_gds_pair]})")
         lyr = layout.layer(li)
         layout.set_info(lyr, kdb.LayerInfo(dest_gds_pair.layer, dest_gds_pair.datatype))
 
@@ -201,50 +206,51 @@ def main():
         )
 
     lpp_mapping = {
-        'boundary':          'prBoundary.boundary',
-        'diff.drawing':      'Activ.drawing',
-        'nwell.drawing':     'NWell.drawing',
-        'nwell.label':       'NWell.label',
-        'pwell.drawing':     'PWell.drawing',
-        'pwell.label':       'PWell.label',
-        'pwell.pin':         'PWell.pin',
-        'nsdm.drawing':      'nSD.drawing',
-        'psdm.drawing':      'pSD.drawing',
-        'poly.drawing':      'GatPoly.drawing',
-        'licon1.drawing':    'Cont.drawing',
-        'li1.drawing':       'Metal1.drawing',
-        'li1.pin':           'Metal1.pin',
-        'li1.label':         'Metal1.text',
-        'mcon.drawing':      'Via1.drawing',
-        'met1.drawing':      'Metal2.drawing',
-        'met1.pin':          'Metal2.pin',
-        'met1.label':        'Metal2.text',
-        'via.drawing':       'Via2.drawing',
-        'met2.drawing':      'Metal3.drawing',
-        'met2.pin':          'Metal3.pin',
-        'met2.label':        'Metal3.text',
-        'via2.drawing':      'Via3.drawing',
-        'met3.drawing':      'Metal4.drawing',
-        'met3.pin':          'Metal4.pin',
-        'met3.label':        'Metal4.text',
-        'via3.drawing':      'Via4.drawing',
-        'met4.drawing':      'Metal5.drawing',
-        'met4.pin':          'Metal5.pin',
-        'met4.label':        'Metal5.text',
-        'via4.drawing':      'TopVia1.drawing',
-        'met5.drawing':      'TopMetal1.drawing',
-        'met5.pin':          'TopMetal1.pin',
-        'met5.label':        'TopMetal1.text',
-        'capacitor.drawing': 'Recog.mom',
-        'capm2.drawing':     'MIM.drawing',
+        'boundary':             'prBoundary.boundary',
+        'prBoundary.boundary':  'prBoundary.boundary',
+        'diff.drawing':         'Activ.drawing',
+        'nwell.drawing':        'NWell.drawing',
+        'nwell.label':          'NWell.label',
+        'pwell.drawing':        'PWell.drawing',
+        'pwell.label':          'PWell.label',
+        'pwell.pin':            'PWell.pin',
+        'nsdm.drawing':         'nSD.drawing',
+        'psdm.drawing':         'pSD.drawing',
+        'poly.drawing':         'GatPoly.drawing',
+        'licon1.drawing':       'Cont.drawing',
+        'li1.drawing':          'Metal1.drawing',
+        'li1.pin':              'Metal1.pin',
+        'li1.label':            'Metal1.text',
+        'mcon.drawing':         'Via1.drawing',
+        'met1.drawing':         'Metal2.drawing',
+        'met1.pin':             'Metal2.pin',
+        'met1.label':           'Metal2.text',
+        'via.drawing':          'Via2.drawing',
+        'met2.drawing':         'Metal3.drawing',
+        'met2.pin':             'Metal3.pin',
+        'met2.label':           'Metal3.text',
+        'via2.drawing':         'Via3.drawing',
+        'met3.drawing':         'Metal4.drawing',
+        'met3.pin':             'Metal4.pin',
+        'met3.label':           'Metal4.text',
+        'via3.drawing':         'Via4.drawing',
+        'met4.drawing':         'Metal5.drawing',
+        'met4.pin':             'Metal5.pin',
+        'met4.label':           'Metal5.text',
+        'via4.drawing':         'TopVia1.drawing',
+        'met5.drawing':         'TopMetal1.drawing',
+        'met5.pin':             'TopMetal1.pin',
+        'met5.label':           'TopMetal1.text',
+        'capacitor.drawing':    'Recog.mom',
+        'capm2.drawing':        'MIM.drawing',
     }
 
     from_layers = parse_layers(from_lyp_path)
     to_layers = parse_layers(to_lyp_path)
     rule(from_lyp_path)
-    info([layer.lpp for layer in from_layers.layers])
+    info(sorted([layer.lpp for layer in from_layers.layers]))
     rule(to_lyp_path)
-    info([layer.lpp for layer in to_layers.layers])
+    info(sorted([layer.lpp for layer in to_layers.layers]))
 
     gds_mapping = {from_layers.gds_pair_by_lpp[from_lpp]: to_layers.gds_pair_by_lpp[to_lpp] \
                    for from_lpp, to_lpp in lpp_mapping.items()}
@@ -252,8 +258,10 @@ def main():
     map_gds_layers(layout,
                    from_tech,
                    to_tech,
+                   from_layers,
+                   to_layers,
                    gds_mapping)
-    
+
     info(f"Writing layout to {args.output_gds_path}")
     layout.write(args.output_gds_path)
 
