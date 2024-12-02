@@ -4,39 +4,6 @@ import os
 import tempfile
 from typing import *
 import unittest
-import yaml
-
-
-@dataclass
-class ConductorInfo:
-    fastcap_index: int
-    net: str
-    outside_dielectric: Optional[str]  # None means (void) dielectricum
-
-
-@dataclass
-class CapacitanceMatrixInfo:
-    conductors: List[ConductorInfo]
-
-    @property
-    def dimension(self):
-        return len(self.conductors)
-
-    def conductor_by_index(self, index: int) -> ConductorInfo:
-        for c in self.conductors:
-            if c.fastcap_index == index:
-                return c
-        raise Exception(f"No conductor found with index {index}")
-
-    @classmethod
-    def from_yaml(cls, path: str) -> CapacitanceMatrixInfo:
-        with open(path, 'r') as f:
-            obj = yaml.load(f, Loader=yaml.Loader)
-            return obj
-
-    def write_yaml(self, path: str):
-        with open(path, 'w') as f:
-            yaml.dump(self, f)
 
 
 @dataclass

@@ -15,15 +15,14 @@ from kpex.log import (
     warning,
     # error
 )
-from .capacitance_matrix import CapacitanceMatrix, CapacitanceMatrixInfo
+from .capacitance_matrix import CapacitanceMatrix
 
 
 class NetlistExpander:
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
-               cap_matrix: CapacitanceMatrix,
-               cap_matrix_info: CapacitanceMatrixInfo) -> kdb.Netlist:
+               cap_matrix: CapacitanceMatrix) -> kdb.Netlist:
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
@@ -33,15 +32,8 @@ class NetlistExpander:
         cap.description = "Extracted by FasterCap PEX"
         expanded_netlist.add(cap)
 
-        # NOTE: the diagonal Cii is the capacitance over GND
-        # https://www.fastfieldsolvers.com/Papers/The_Maxwell_Capacitance_Matrix_WP110301_R03.pdf
-        if cap_matrix_info.dimension != cap_matrix.dimension:
-            raise Exception(f"Mismatch: Cap Matrix Info YAML specifies dimension {cap_matrix_info.dimension}, "
-                            f"but Cap Matrix CSV has dimension {cap_matrix.dimension}")
-
-        nets: List[kdb.Net] = [
-            top_circuit.create_net('0')  # create GROUND net
-        ]
+        top_circuit.create_net('0')  # create GROUND net
+        nets: List[kdb.Net] = []
 
         # build table: name -> net
         name2net: Dict[str, kdb.Net] = {n.expanded_name(): n for n in top_circuit.each_net()}
@@ -50,11 +42,10 @@ class NetlistExpander:
         pattern = re.compile(r'^g\d+_(.*)$')
         for idx, nn in enumerate(cap_matrix.conductor_names):
             m = pattern.match(nn)
-            idx = int(m.group(1))
-            c = cap_matrix_info.conductor_by_index(idx)
-            if c.net not in name2net:
-                raise Exception(f"No net found with name {c.net}, net names are: {list(name2net.keys())}")
-            n = name2net[c.net]
+            nn = m.group(1)
+            if nn not in name2net:
+                raise Exception(f"No net found with name {nn}, net names are: {list(name2net.keys())}")
+            n = name2net[nn]
             nets.append(n)
 
         cap_threshold = 0.0
@@ -137,16 +128,13 @@ class Test(unittest.TestCase):
         lvsdb.read(lvsdb_path)
 
         csv_path = os.path.join(self.klayout_testdata_dir, f"{cell_name}_FasterCap_Result_Matrix.csv")
-        cap_matrix_info_path = os.path.join(self.klayout_testdata_dir, f"{cell_name}_FasterCap_Matrix_Info.yaml")
 
         cap_matrix = CapacitanceMatrix.parse_csv(csv_path, separator=';')
-        cap_matrix_info = CapacitanceMatrixInfo.from_yaml(cap_matrix_info_path)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb)
         expanded_netlist = exp.expand(extracted_netlist=pex_context.lvsdb.netlist(),
                                       top_cell_name=pex_context.top_cell.name,
-                                      cap_matrix=cap_matrix,
-                                      cap_matrix_info=cap_matrix_info)
+                                      cap_matrix=cap_matrix)
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")
         spice_writer = kdb.NetlistSpiceWriter()
         expanded_netlist.write(out_path, spice_writer)

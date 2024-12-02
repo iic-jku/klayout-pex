@@ -44,7 +44,6 @@ import math
 
 import klayout.db as kdb
 
-from .capacitance_matrix import CapacitanceMatrixInfo, ConductorInfo
 from kpex.log import (
     debug,
     info,
@@ -605,12 +604,10 @@ class FasterCapModelGenerator:
 
         self.diel_data = dk
 
-    def write_fastcap(self, output_dir_path: str, prefix: str) -> Tuple[str, CapacitanceMatrixInfo]:
+    def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
         lst_file: List[str] = [f"* k_void={'%.12g' % self.k_void}"]
-
-        cap_matrix_info = CapacitanceMatrixInfo([])
 
         for k, data in self.diel_data.items():
             if len(data) == 0:
@@ -655,10 +652,6 @@ class FasterCapModelGenerator:
             nn, outside = k
             k_outside = self.materials[outside] if outside else self.k_void
 
-            cap_matrix_info.conductors.append(
-                ConductorInfo(fastcap_index=file_num, net=nn, outside_dielectric=outside)
-            )
-
             outside = outside if outside else '(void)'
             lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
             fn = f"{prefix}_{file_num}_outside={outside}_net={nn}.geo"
@@ -675,7 +668,7 @@ class FasterCapModelGenerator:
             f.write('\n'.join(lst_file))
             f.write('\n')
 
-        return lst_fn, cap_matrix_info
+        return lst_fn
 
     @staticmethod
     def _write_fastercap_geo(file_number: int,

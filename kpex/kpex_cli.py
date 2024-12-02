@@ -131,10 +131,8 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     os.makedirs(args.output_dir_path, exist_ok=True)
 
-    lst_file, cap_matrix_info = gen.write_fastcap(output_dir_path=args.output_dir_path,
-                                                  prefix=f"{args.cell_name}_FasterCap_Input")
-    cap_matrix_info_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Matrix_Info.yaml")
-    cap_matrix_info.write_yaml(cap_matrix_info_path)
+    lst_file = gen.write_fastcap(output_dir_path=args.output_dir_path,
+                                 prefix=f"{args.cell_name}_FasterCap_Input")
 
     gen.dump_stl(output_dir_path=args.output_dir_path)
 
@@ -156,8 +154,7 @@ def run_fastercap_extraction(args: argparse.Namespace,
     expanded_netlist = netlist_expander.expand(
         extracted_netlist=pex_context.lvsdb.netlist(),
         top_cell_name=pex_context.top_cell.name,
-        cap_matrix=cap_matrix,
-        cap_matrix_info=cap_matrix_info
+        cap_matrix=cap_matrix
     )
 
     spice_writer = kdb.NetlistSpiceWriter()
