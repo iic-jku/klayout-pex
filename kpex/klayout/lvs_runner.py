@@ -46,8 +46,10 @@ class LVSRunner:
             '-rd', 'net_only=false',
             '-rd', 'top_lvl_pins=false',
             '-rd', 'combine=false',
+            '-rd', 'combine_devices=false', # IHP
             '-rd', 'purge=false',
-            '-rd', 'purge_nets=true',
+            '-rd', 'purge_nets=false',
+            '-rd', 'no_simplify=true', # IHP
         ]
         info(f"Calling {' '.join(args)}, output file: {log_path}")
         rule()
