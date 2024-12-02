@@ -2,7 +2,7 @@
 
 import argparse
 import shutil
-from enum import StrEnum
+from enum import Enum, StrEnum
 import os
 import os.path
 import sys
