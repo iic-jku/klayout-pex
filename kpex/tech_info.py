@@ -8,7 +8,7 @@ import google.protobuf.json_format
 from .util.multiple_choice import MultipleChoicePattern
 import tech_pb2
 import process_stack_pb2
-import extract_pb2
+import process_parasitics_pb2
 
 class TechInfo:
     """Helper class for Protocol Buffer tech_pb2.Technology"""
@@ -179,34 +179,34 @@ class TechInfo:
         return diel_lyr, 5.0   # air TODO
 
     @cached_property
-    def substrate_cap_by_layer_name(self) -> Dict[str, extract_pb2.CapacitanceInfo.SubstrateCapacitance]:
-        return {sc.layer_name: sc for sc in self.tech.extraction.capacitance.substrates}
+    def substrate_cap_by_layer_name(self) -> Dict[str, process_parasitics_pb2.CapacitanceInfo.SubstrateCapacitance]:
+        return {sc.layer_name: sc for sc in self.tech.process_parasitics.capacitance.substrates}
 
     @cached_property
-    def overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, extract_pb2.CapacitanceInfo.OverlapCapacitance]]:
+    def overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance]]:
         """
         usage: dict[top_layer_name][bottom_layer_name]
         """
         return {
             oc.top_layer_name: {
                 oc_bot.bottom_layer_name: oc_bot
-                for oc_bot in self.tech.extraction.capacitance.overlaps if oc_bot.top_layer_name == oc.top_layer_name
+                for oc_bot in self.tech.process_parasitics.capacitance.overlaps if oc_bot.top_layer_name == oc.top_layer_name
             }
-            for oc in self.tech.extraction.capacitance.overlaps
+            for oc in self.tech.process_parasitics.capacitance.overlaps
         }
 
     @cached_property
-    def sidewall_cap_by_layer_name(self) -> Dict[str, extract_pb2.CapacitanceInfo.SidewallCapacitance]:
-        return {sc.layer_name: sc for sc in self.tech.extraction.capacitance.sidewalls}
+    def sidewall_cap_by_layer_name(self) -> Dict[str, process_parasitics_pb2.CapacitanceInfo.SidewallCapacitance]:
+        return {sc.layer_name: sc for sc in self.tech.process_parasitics.capacitance.sidewalls}
 
     @cached_property
-    def side_overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, extract_pb2.CapacitanceInfo.SideOverlapCapacitance]]:
+    def side_overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, process_parasitics_pb2.CapacitanceInfo.SideOverlapCapacitance]]:
         """
         usage: dict[in_layer_name][out_layer_name]
         """
         return {
             oc.in_layer_name: {
                 oc_bot.out_layer_name: oc_bot
-                for oc_bot in self.tech.extraction.capacitance.sideoverlaps if oc_bot.in_layer_name == oc.in_layer_name
+                for oc_bot in self.tech.process_parasitics.capacitance.sideoverlaps if oc_bot.in_layer_name == oc.in_layer_name
             }
-            for oc in self.tech.extraction.capacitance.sideoverlaps}
+            for oc in self.tech.process_parasitics.capacitance.sideoverlaps}

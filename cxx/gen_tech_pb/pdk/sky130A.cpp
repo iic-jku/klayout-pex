@@ -413,7 +413,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     sdl->set_reference("topnit");
 }
 
-void buildExtractionInfo(kpex::tech::ExtractionInfo *ex) {
+void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     ex->set_side_halo(8);
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
@@ -579,8 +579,8 @@ void buildTech(kpex::tech::Technology &tech) {
     kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
     buildProcessStackInfo(psi);
 
-    kpex::tech::ExtractionInfo *ex = tech.mutable_extraction();
-    buildExtractionInfo(ex);
+    kpex::tech::ProcessParasiticsInfo *ex = tech.mutable_process_parasitics();
+    buildProcessParasiticsInfo(ex);
 }
 
 }

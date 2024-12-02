@@ -10,7 +10,7 @@ import klayout.rdb as rdb
 from shapely.measurement import distance
 from solid import polygon
 
-import extract_pb2
+import process_parasitics_pb2
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
 from ..log import (
     console,
@@ -58,7 +58,7 @@ class SidewallCap:  # see Magic EdgeCap, extractInt.c L444
     cap_value: float   # femto farad
     distance: float    # distance in µm
     length: float      # length in µm
-    tech_spec: extract_pb2.CapacitanceInfo.SidewallCapacitance
+    tech_spec: process_parasitics_pb2.CapacitanceInfo.SidewallCapacitance
 
 
 @dataclass(frozen=True)
@@ -75,7 +75,7 @@ class OverlapCap:
     cap_value: float  # femto farad
     shielded_area: float  # in µm^2
     unshielded_area: float  # in µm^2
-    tech_spec: extract_pb2.CapacitanceInfo.OverlapCapacitance
+    tech_spec: process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance
 
 
 @dataclass
@@ -224,7 +224,7 @@ class RCExtractor:
 
         #----------------------------------------------------------------------------------------
 
-        side_halo_um = self.tech_info.tech.extraction.side_halo
+        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
         side_halo_dbu = int(side_halo_um / dbu) + 1  # add 1 nm to halo
 
         space_markers = all_region.space_check(

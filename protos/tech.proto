@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package kpex.tech;
 
-import "extract.proto";
 import "process_stack.proto";
+import "process_parasitics.proto";
 
 message Technology {
     // name of the technology, e.g. "sky130A"
@@ -24,8 +24,8 @@ message Technology {
     // including thicknesses, dielectrics, etc.
     ProcessStackInfo process_stack = 140;
 
-    // WIP: input data for the magic-like PEX engine
-    ExtractionInfo extraction = 200;
+    // Parasistic data for the magic-like PEX engine
+    ProcessParasiticsInfo process_parasitics = 200;
 }
 
 message LayerInfo {
