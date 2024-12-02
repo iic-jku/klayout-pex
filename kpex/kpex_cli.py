@@ -56,6 +56,19 @@ def render_enum_help(topic: str,
     return enum_help
 
 
+def true_or_false(arg) -> bool:
+    if isinstance(arg, bool):
+        return arg
+
+    match str(arg).lower():
+        case 'yes' | 'true' | 't' | 'y' | 1:
+            return True
+        case 'no' | 'false' | 'f' | 'n' | 0:
+            return False
+        case _:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                       f"KLayout-integrated Parasitic Extraction Tool",
@@ -102,7 +115,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=float, default=0.5,
                                  help="Delaunay triangulation b (default is 0.5)")
     group_fastercap.add_argument("--geo_check", dest="geometry_check",
-                                 type=bool, default=False,
+                                 type=true_or_false, default=False,
                                  help=f"Validate geometries before passing to FasterCap "
                                       f"(default is False)")
 
@@ -122,7 +135,7 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  help="FasterCap -f out-of-core free memory to link memory condition "
                                       "(0 = don't go OOC, default is 2)")
     group_fastercap.add_argument("--auto_precond", dest="fastercap_auto_preconditioner",
-                                 type=bool, default=True,
+                                 type=true_or_false, default=True,
                                  help=f"FasterCap -ap Automatic preconditioner usage "
                                       f"(default is True)")
     group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
