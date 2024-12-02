@@ -592,7 +592,8 @@ class RCExtractor:
                                                             outside_net_names=[net_inside] + list(outside_net2regions.keys()),
                                                             tech_info=self.tech_info,
                                                             report_category=rdb_cat_outside_layer)
-                    children = [kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net)] + \
+                    # kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net)
+                    children = [kdb.CompoundRegionOperationNode.new_foreign()] + \
                                [kdb.CompoundRegionOperationNode.new_secondary(region)
                                 for region in list(outside_net2regions.values())]
                     node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
