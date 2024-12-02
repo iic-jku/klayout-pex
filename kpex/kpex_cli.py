@@ -199,11 +199,14 @@ def run_fastercap_extraction(args: argparse.Namespace,
 
     os.makedirs(args.output_dir_path, exist_ok=True)
 
-    lst_file = gen.write_fastcap(output_dir_path=args.output_dir_path,
-                                 prefix=f"{args.cell_name}_FasterCap_Input")
+    faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
+    os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
-    gen.dump_stl(output_dir_path=args.output_dir_path,
-                 prefix=f"{args.cell_name}_Geometry_")
+    lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input')
+
+    geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
+    os.makedirs(geometry_dir_path, exist_ok=True)
+    gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
 
     exe_path = "FasterCap"
     log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_FasterCap_Output.txt")
