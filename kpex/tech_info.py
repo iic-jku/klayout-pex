@@ -187,7 +187,22 @@ class TechInfo:
         """
         usage: dict[top_layer_name][bottom_layer_name]
         """
-        return {
+
+        def convert_substrate_to_overlap_cap(sc: process_parasitics_pb2.CapacitanceInfo.SubstrateCapacitance) \
+            -> process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance:
+            oc = process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance()
+            oc.top_layer_name = sc.layer_name
+            oc.bottom_layer_name = self.internal_substrate_layer_name
+            oc.capacitance = sc.area_capacitance
+            return oc
+
+        d = {
+            ln: {
+                self.internal_substrate_layer_name: convert_substrate_to_overlap_cap(sc)
+            } for ln, sc in self.substrate_cap_by_layer_name.items()
+        }
+
+        d2 = {
             oc.top_layer_name: {
                 oc_bot.bottom_layer_name: oc_bot
                 for oc_bot in self.tech.process_parasitics.capacitance.overlaps if oc_bot.top_layer_name == oc.top_layer_name
@@ -195,18 +210,53 @@ class TechInfo:
             for oc in self.tech.process_parasitics.capacitance.overlaps
         }
 
+        for k1, ve in d2.items():
+            for k2, v in ve.items():
+                if k1 not in d:
+                    d[k1] = {k2: v}
+                else:
+                    d[k1][k2] = v
+        return d
+
     @cached_property
     def sidewall_cap_by_layer_name(self) -> Dict[str, process_parasitics_pb2.CapacitanceInfo.SidewallCapacitance]:
         return {sc.layer_name: sc for sc in self.tech.process_parasitics.capacitance.sidewalls}
+
+    @classmethod
+    @property
+    def internal_substrate_layer_name(cls) -> str:
+        return 'VSUBS'
 
     @cached_property
     def side_overlap_cap_by_layer_names(self) -> Dict[str, Dict[str, process_parasitics_pb2.CapacitanceInfo.SideOverlapCapacitance]]:
         """
         usage: dict[in_layer_name][out_layer_name]
         """
-        return {
+
+        def convert_substrate_to_side_overlap_cap(sc: process_parasitics_pb2.CapacitanceInfo.SubstrateCapacitance) \
+            -> process_parasitics_pb2.CapacitanceInfo.SideOverlapCapacitance:
+            soc = process_parasitics_pb2.CapacitanceInfo.SideOverlapCapacitance()
+            soc.in_layer_name = sc.layer_name
+            soc.out_layer_name = self.internal_substrate_layer_name
+            soc.capacitance = sc.perimeter_capacitance
+            return soc
+
+        d = {
+            ln: {
+                self.internal_substrate_layer_name: convert_substrate_to_side_overlap_cap(sc)
+            } for ln, sc in self.substrate_cap_by_layer_name.items()
+        }
+
+        d2 = {
             oc.in_layer_name: {
                 oc_bot.out_layer_name: oc_bot
                 for oc_bot in self.tech.process_parasitics.capacitance.sideoverlaps if oc_bot.in_layer_name == oc.in_layer_name
             }
-            for oc in self.tech.process_parasitics.capacitance.sideoverlaps}
+            for oc in self.tech.process_parasitics.capacitance.sideoverlaps
+        }
+
+        for k1, ve in d2.items():
+            for k2, v in ve.items():
+                d[k1][k2] = v
+
+        return d
