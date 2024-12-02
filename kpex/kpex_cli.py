@@ -166,9 +166,9 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 
     default_magicrc_path = os.path.abspath(f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc")
     group_magic = main_parser.add_argument_group("MAGIC options")
-    group_magic.add_argument('--magicrc', dest='magicrc_path', default='magic',
-                              help=f"Path to magicrc configuration file (default is '{default_magicrc_path}')")
-    group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='subprocess',
+    group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
+                              help=f"Path to magicrc configuration file (default is '%(default)s')")
+    group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='CC',
                              help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
     group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
                              type=float, default=0.01,
@@ -435,6 +435,9 @@ def run_magic_extraction(args: argparse.Namespace):
               log_path=magic_log_path)
 
     subproc(f"SPICE netlist saved at: {output_netlist_path}")
+    rule("MAGIC PEX SPICE netlist")
+    with open(output_netlist_path, 'r') as f:
+        subproc(f.read())
     rule()
 
 def run_fastcap_extraction(args: argparse.Namespace,
@@ -593,8 +596,12 @@ def main():
                                    dielectric_filter=args.dielectric_filter)
 
     if args.run_magic:
+        rule("MAGIC")
         run_magic_extraction(args)
 
+    # no need to run LVS etc if only running magic engine
+    if not (args.run_fastcap or args.run_fastercap or args.run_2_5D):
+        return
 
     lvsdb = create_lvsdb(args)
 
