@@ -326,8 +326,11 @@ class RCExtractor:
                             edge1: kdb.Edge = pair.first
                             edge2: kdb.Edge = pair.second
 
-                            avg_length = (edge1.length() + edge2.length()) / 2
-                            avg_distance = (pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2
+                            # TODO: support non-parallel situations
+                            # avg_length = (edge1.length() + edge2.length()) / 2.0
+                            # avg_distance = (pair.polygon(0).perimeter() - edge1.length() - edge2.length()) / 2.0
+                            avg_length = min(edge1.length(), edge2.length())
+                            avg_distance = pair.distance()
 
                             debug(f"Edge pair distance {avg_distance}, symmetric? {pair.symmetric}, "
                                  f"perimeter {pair.perimeter()}, parallel? {edge1.is_parallel(edge2)}")
@@ -339,13 +342,15 @@ class RCExtractor:
 
                             length_um = avg_length * dbu
                             distance_um = avg_distance * dbu
-
+                            
+                            # NOTE: this is automatically bidirectional,
+                            #       whereas MAGIC counts 2 sidewall contributions (one for each side of the cap)
                             cap_femto = (length_um * sidewall_cap_spec.capacitance) / \
-                                        (distance_um + sidewall_cap_spec.offset) / 1000
+                                        (distance_um + sidewall_cap_spec.offset) / 1000.0
 
                             rdb_output(rdb_cat_sw_nets, f"Edge Pair {idx}: {round(cap_femto, 3)} fF", pair)
 
-                            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 2)} fF")
+                            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
                             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
                             sw_cap = SidewallCap(key=swk,
