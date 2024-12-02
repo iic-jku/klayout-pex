@@ -192,18 +192,18 @@ class RCExtractor:
                 continue
 
             space_markers = layer_regions_by_name[layer_name].space_check(
-                side_halo_dbu,  # min space in um
-                True,  # whole edges
-                kdb.Metrics.Projection,  # metrics
-                None,  # ignore angle
-                None,  # min projection
-                None,  # max projection
-                True,  # shielding
-                kdb.Region.NoOppositeFilter,  # error filter for opposite sides
-                kdb.Region.NoRectFilter,  # error filter for rect input shapes
-                False,  # negative
-                kdb.Region.IgnoreProperties,  # property_constraint
-                kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
+                d=side_halo_dbu,  # min space in um
+                whole_edges=True,  # whole edges
+                metrics=kdb.Metrics.Projection,  # metrics
+                ignore_angle=None,  # ignore angle
+                min_projection=None,  # min projection
+                max_projection=None,  # max projection
+                shielded=True,  # shielding
+                opposite_filter=kdb.Region.NoOppositeFilter,  # error filter for opposite sides
+                rect_filter=kdb.Region.NoRectFilter,  # error filter for rect input shapes
+                negative=False,  # negative
+                property_constraint=kdb.Region.IgnoreProperties,  # property_constraint
+                zero_distance_mode=kdb.Region.IncludeZeroDistanceWhenTouching  # zero distance mode
             )
             space_markers_by_layer_name[layer_name] = space_markers
             rdb_output(rdb_cat_space_markers, f"layer={layer_name}", space_markers)
