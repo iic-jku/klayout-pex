@@ -9,7 +9,7 @@ from typing import *
 from functools import cached_property
 import klayout.db as kdb
 
-from lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
+from klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from tech_info import TechInfo
 from fastercap_file_format_pb2 import *
 

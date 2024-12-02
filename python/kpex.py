@@ -6,10 +6,10 @@ import rich.console
 
 import klayout.db as kdb
 
-from lvsdb_extractor import KLayoutExtractionContext
 from fastercap.fastercap_input_builder import FasterCapInputBuilder
 from fastercap.fastercap_file_writer import *
 from tech_info import TechInfo
+from klayout.lvsdb_extractor import KLayoutExtractionContext
 
 # ------------------------------------------------------------------------------------
 

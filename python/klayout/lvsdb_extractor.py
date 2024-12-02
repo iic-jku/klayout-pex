@@ -42,7 +42,7 @@ GDSPair = Tuple[int, int]
 
 
 @dataclass
-class ExtractedLayerInfo:
+class KLayoutExtractedLayerInfo:
     index: int
     lvs_layer_name: str        # NOTE: this can be computed, so gds_pair is preferred
     gds_pair: GDSPair
@@ -57,7 +57,7 @@ class KLayoutExtractionContext:
     layer_map: Dict[int, kdb.LayerInfo]
     cell_mapping: kdb.CellMapping
     target_layout: kdb.Layout
-    extracted_layers: Dict[GDSPair, ExtractedLayerInfo]
+    extracted_layers: Dict[GDSPair, KLayoutExtractedLayerInfo]
 
 
     @classmethod
@@ -149,9 +149,9 @@ class KLayoutExtractionContext:
         return lm
 
     @staticmethod
-    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Dict[GDSPair, ExtractedLayerInfo]:
+    def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist) -> Dict[GDSPair, KLayoutExtractedLayerInfo]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
-        nonempty_layers: Dict[GDSPair, ExtractedLayerInfo] = {}
+        nonempty_layers: Dict[GDSPair, KLayoutExtractedLayerInfo] = {}
         for idx, ln in enumerate(lvsdb.layer_names()):
             layer = lvsdb.layer_by_name(ln)
             if layer.count() >= 1:
@@ -160,8 +160,10 @@ class KLayoutExtractionContext:
                         f"ERROR: Unable to find info about LVS layer '{ln}')")
                     continue
                 gds_pair = name_to_lp[ln]
-                nonempty_layers[gds_pair] = ExtractedLayerInfo(index=idx,
-                                                               lvs_layer_name=ln,
-                                                               gds_pair=gds_pair,
-                                                               region=layer)
+                nonempty_layers[gds_pair] = KLayoutExtractedLayerInfo(
+                    index=idx,
+                    lvs_layer_name=ln,
+                    gds_pair=gds_pair,
+                    region=layer
+                )
         return nonempty_layers
