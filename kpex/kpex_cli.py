@@ -88,8 +88,8 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
-                                 type=float, default=3.5,
-                                 help="Dielectric constant of void (default is 3.5)")
+                                 type=float, default=3.9,
+                                 help="Dielectric constant of void (default is 3.9)")
     group_fastercap.add_argument("--delaunay_amax", "-a", dest="delaunay_amax",
                                  type=float, default=0.5,
                                  help="Delaunay triangulation maximum area (default is 0.5)")
