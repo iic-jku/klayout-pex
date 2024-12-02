@@ -28,9 +28,11 @@ SPDX-License-Identifier: GPL-3.0-or-later
 - cmake
 - protobuf
 - python3 with pip packages:
-   - protobuf
-   - mypy-protobuf
-   - rich
+   - poetry (will manage additional dependencies)
+
+### Optional prerequisites
+
+- allure (only needed for test reports)
 
 #### Ubuntu / Debian installation
 
@@ -45,14 +47,15 @@ source ~/myvenv/bin/activate
 ```bash
 sudo apt install cmake libprotobuf-dev protobuf-compiler 
 sudo apt install libcurl4-openssl-dev   # required for klayout pip module
-pip3 install protobuf mypy-protobuf rich klayout
+pip3 install poetry
+poetry update
 ```
 
 ### Building
 
 Calling `./build.sh release` will: 
 - create Python and C++ Protobuffer APIs for the given schema (present in `protos`)
-- compile `tech_tool.cpp` C++ example showing how to read/write/convert different representations
+- compile the `gen_tech_pb` C++ tool
 
 ### Generating KPEX Tech Info JSON files
 
@@ -68,7 +71,7 @@ To quickly run a PEX example with KPEX/2.5D and KPEX/FasterCap engines:
   --out_dir output_sky130A \
   --2.5D yes \
   --fastercap yes \
-  --gds ../designs/sky130A/test_patterns/sideoverlap_complex_li1_m1.gds.gz
+  --gds testdata/sky130A/test_patterns/sideoverlap_complex_li1_m1.gds.gz
 ```
 
 ## Debugging Hints for PyCharm
@@ -78,4 +81,3 @@ To quickly run a PEX example with KPEX/2.5D and KPEX/FasterCap engines:
 In your debugging configuration, set:
 - `Modify Options` > `Emulate terminal in output console`
 - Add environmental variable `COLUMNS=120`
-
