@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import argparse
+import shutil
 from enum import StrEnum
 import os
 import os.path
@@ -62,6 +63,8 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
     group_special.add_argument("--threads", dest='num_threads', type=int, default=0,
                                help="number of threads (e.g. for FasterCap)")
+    group_special.add_argument('--klayout', dest='klayout_exe_path', default='klayout',
+                               help="Path to klayout executuable (default is 'klayout')")
 
     group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
@@ -122,6 +125,12 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 def validate_args(args: argparse.Namespace):
     found_errors = False
 
+    if not os.path.isfile(args.klayout_exe_path):
+        path = shutil.which(args.klayout_exe_path)
+        if not path:
+            error(f"Can't locate KLayout executable at {args.klayout_exe_path}")
+            found_errors = True
+    
     if not os.path.isfile(args.tech_pbjson_path):
         error(f"Can't read technology file at path {args.tech_pbjson_path}")
         found_errors = True
@@ -249,8 +258,6 @@ def main():
 
     lvsdb = kdb.LayoutVsSchematic()
 
-    # TODO: make configurable (env vars or config file)
-    klayout_exe_path = 'klayout'
 
     match args.input_mode:
         case InputMode.LVSDB:
@@ -296,7 +303,7 @@ def main():
             lvs_log_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.log")
             lvsdb_path = os.path.join(args.output_dir_path, f"{args.cell_name}_lvs.lvsdb")
             lvs_runner = LVSRunner()
-            lvs_runner.run_klayout_lvs(exe_path=klayout_exe_path,
+            lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
                                        lvs_script=args.lvs_script_path,
                                        gds_path=effective_gds_path,
                                        schematic_path=effective_schematic_path,
