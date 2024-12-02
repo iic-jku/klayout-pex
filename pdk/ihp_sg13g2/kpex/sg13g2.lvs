@@ -335,12 +335,27 @@ all_layer_names += %w(
   res_metal1 res_metal2 res_metal3 res_metal4 res_metal5 res_topmetal1 res_topmetal2
 )
 
+# special layers needed for KPEX
+
+# metal5_n_cap: metal5 region where no MiM cap is above metal5
+# metal5_cap: metal5 region where MiM cap is above
+# cmim_top: the MiM cap itself (connected to mim_via)
+
+metal5_n_cap = metal5_drw.not(mim_drw)
+metal5_cap   = metal5_drw.and(mim_drw)
+
+all_layer_names += %w(
+  metal5_cap metal5_n_cap 
+)
+
 if self.respond_to?(:name)
   all_layer_names.each do |l|
     name(eval(l), l)
   end 
 end
 
+connect(metal5_n_cap, metal5_con)
+connect(metal5_cap, metal5_con)
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
