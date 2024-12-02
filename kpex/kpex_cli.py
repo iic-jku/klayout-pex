@@ -54,27 +54,34 @@ class InputMode(StrEnum):
 
 
 def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
+    # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
+    epilog = """Environmental variables:
+    PDKPATH  (e.g. $HOME/.volare)
+    PDK      (e.g. sky130A)
+    """
     main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
                                                       f"KLayout-integrated Parasitic Extraction Tool",
-                                          add_help=False)
-    #                                          epilog=f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand",
-    
+                                          epilog=epilog,
+                                          add_help=False,
+                                          formatter_class=argparse.RawDescriptionHelpFormatter)
+
     group_special = main_parser.add_argument_group("Special options")
     group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
     group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
     group_special.add_argument("--log_level", dest='log_level', default='subprocess',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
-    group_special.add_argument("--threads", dest='num_threads', type=int, default=0,
-                               help="number of threads (e.g. for FasterCap)")
+    group_special.add_argument("--threads", dest='num_threads', type=int,
+                               default=os.cpu_count() * 4,
+                               help="number of threads (e.g. for FasterCap) (default is %(default)s)")
     group_special.add_argument('--klayout', dest='klayout_exe_path', default='klayout',
-                               help="Path to klayout executable (default is 'klayout')")
+                               help="Path to klayout executable (default is '%(default)s')")
 
     group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
     group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
                            help="Technology Protocol Buffer path (*.pb.json)")
 
     group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default=".",
-                           help="Output directory path")
+                           help="Output directory path (default is '%(default)s')")
 
     group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
                                                      description="Either LVS is run, or an existing LVSDB is used")
@@ -88,40 +95,39 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 
     group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
                                  default=default_lvs_script_path,
-                                 help=f"Path to KLayout LVS script (default is {default_lvs_script_path})")
+                                 help=f"Path to KLayout LVS script (default is %(default)s)")
     group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                  type=true_or_false, default=True,
-                                 help="Used cached LVSDB (for given input GDS)"
-                                      "(default is true)")
+                                 help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
 
     group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
     group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
                                   type=true_or_false, default=False,  # TODO: in the future this should be True by default
                                   help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
-                                       "(default is False for testing now)")
+                                       "(default is %(default)s for testing now)")
     group_pex_options.add_argument("--fastercap", dest="run_fastercap",
                                   type=true_or_false, default=True,
-                                  help="Run FasterCap engine (default is True)")
+                                  help="Run FasterCap engine (default is %(default)s)")
     group_pex_options.add_argument("--fastcap", dest="run_fastcap",
                                   type=true_or_false, default=False,
-                                  help="Run FastCap2 engine (default is False)")
+                                  help="Run FastCap2 engine (default is %(default)s)")
     group_pex_options.add_argument("--magic", dest="run_magic",
                                   type=true_or_false, default=False,
-                                  help="Run MAGIC engine (default is False)")
+                                  help="Run MAGIC engine (default is %(default)s)")
     group_pex_options.add_argument("--2.5D", dest="run_2_5D",
                                   type=true_or_false, default=False,
-                                  help="Run 2.5D analytical engine (default is False)")
+                                  help="Run 2.5D analytical engine (default is %(default)s)")
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
                                  type=float, default=3.9,
-                                 help="Dielectric constant of void (default is 3.9)")
+                                 help="Dielectric constant of void (default is %(default)s)")
     group_fastercap.add_argument("--delaunay_amax", "-a", dest="delaunay_amax",
                                  type=float, default=50,
-                                 help="Delaunay triangulation maximum area (default is 50)")
+                                 help="Delaunay triangulation maximum area (default is %(default)s)")
     group_fastercap.add_argument("--delaunay_b", "-b", dest="delaunay_b",
                                  type=float, default=0.5,
-                                 help="Delaunay triangulation b (default is 0.5)")
+                                 help="Delaunay triangulation b (default is %(default)s)")
     group_fastercap.add_argument("--geo_check", dest="geometry_check",
                                  type=true_or_false, default=False,
                                  help=f"Validate geometries before passing to FasterCap "
@@ -130,35 +136,31 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                  type=str, default="all",
                                  help=f"Comma separated list of dielectric filter patterns. "
                                       f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
-                                      f"(default is all)")
+                                      f"(default is %(default)s)")
 
     group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                  type=float, default=0.05,
-                                 help="FasterCap -aX error tolerance (default is 0.05)")
+                                 help="FasterCap -aX error tolerance (default is %(default)s)")
     group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
                                  type=float, default=0.5,
                                  help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
-                                      f"(default is 0.5)")
+                                      f"(default is %(default)s)")
     group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
                                  type=float, default=0.5,
-                                 help=f"FasterCap -m Mesh relative refinement value "
-                                      f"(default is 0.5)")
+                                 help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
     group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
                                  type=float, default=2,
                                  help="FasterCap -f out-of-core free memory to link memory condition "
-                                      "(0 = don't go OOC, default is 2)")
+                                      "(0 = don't go OOC, default is %(default)s)")
     group_fastercap.add_argument("--auto_precond", dest="fastercap_auto_preconditioner",
                                  type=true_or_false, default=True,
-                                 help=f"FasterCap -ap Automatic preconditioner usage "
-                                      f"(default is True)")
+                                 help=f"FasterCap -ap Automatic preconditioner usage (default is %(default)s)")
     group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
                                  action='store_true', default=False,
-                                 help=f"FasterCap -g Use Galerkin scheme "
-                                      f"(default is False)")
+                                 help=f"FasterCap -g Use Galerkin scheme (default is %(default)s)")
     group_fastercap.add_argument("--jacobi", dest="fastercap_jacobi_preconditioner",
                                  action='store_true', default=False,
-                                 help=f"FasterCap -pj Use Jacobi Preconditioner "
-                                      f"(default is False)")
+                                 help="FasterCap -pj Use Jacobi preconditioner (default is %(default)s)")
 
     default_magicrc_path = os.path.abspath(f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc")
     group_magic = main_parser.add_argument_group("MAGIC options")
@@ -168,12 +170,12 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                              help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
     group_magic.add_argument("--magic_cthresh", dest="magic_ctresh",
                              type=float, default=0.01,
-                             help="Threshold for ignored parasitic capacitances (default is 0.01)")
+                             help="Threshold for ignored parasitic capacitances (default is %(default)s1)")
     group_magic.add_argument("--magic_rthresh", dest="magic_rtresh",
                              type=float, default=100.0,
-                             help="Threshold for ignored parasitic resistances (default is 100)")
+                             help="Threshold for ignored parasitic resistances (default is %(default)s)")
     group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
-                              help="Path to magic executable (default is 'magic')")
+                              help="Path to magic executable (default is '%(default)s')")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -337,9 +339,8 @@ def build_fastercap_input(args: argparse.Namespace,
 def run_fastercap_extraction(args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
                              lst_file: str):
-    num_threads = args.num_threads if args.num_threads > 0 else os.cpu_count() * 4
-    info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {num_threads}")
-    os.environ['OMP_NUM_THREADS'] = f"{num_threads}"
+    info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
+    os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
 
     exe_path = "FasterCap"
     log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Output.txt")

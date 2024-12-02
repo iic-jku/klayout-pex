@@ -15,7 +15,7 @@ class LogLevel(IntEnum):
     INFO = 20
     WARNING = 30
     ERROR = 40
-    CRICITAL = 50
+    CRITICAL = 50
     DEFAULT = SUBPROCESS
 
     @classmethod
