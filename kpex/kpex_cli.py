@@ -267,7 +267,6 @@ def main():
             layout.read(args.gds_path)
 
             found_cell: Optional[kdb.Cell] = None
-            is_only_top_cell = False
             for cell in layout.cells('*'):
                 if cell.name == args.cell_name:
                     found_cell = cell
