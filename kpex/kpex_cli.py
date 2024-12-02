@@ -229,6 +229,11 @@ def validate_args(args: argparse.Namespace):
         elif not os.path.isfile(args.lvsdb_path):
             error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
             found_errors = True
+        else:
+            lvsdb = kdb.LayoutVsSchematic()
+            lvsdb.read(args.lvsdb_path)
+            top_cell: kdb.Cell = lvsdb.internal_top_cell()
+            args.effective_cell_name = top_cell.name
 
     def input_file_stem(path: str):
         # could be *.gds, or *.gds.gz, so remove all extensions
