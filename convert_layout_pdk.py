@@ -79,10 +79,14 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
     group_special.add_argument("--log_level", dest='log_level', default='SUBPROCESS',
                                help=render_enum_help(topic='log_level', enum_cls=LogLevel))
 
+    group_info = main_parser.add_argument_group("Gather Information")
+    group_info.add_argument("--layers", "-l", action='store_true', dest="dump_layers_and_quit",
+                            help='Dump layers and quit')
+
     group_pex_input = main_parser.add_argument_group("Conversion")
-    group_pex_input.add_argument("--in", "-i", dest="input_gds_path", required=True,
+    group_pex_input.add_argument("--in", "-i", dest="input_gds_path", default=None,
                                  help="Input GDS path")
-    group_pex_input.add_argument("--out", "-o", dest="output_gds_path", required=True,
+    group_pex_input.add_argument("--out", "-o", dest="output_gds_path", default=None,
                                  help="Output GDS path")
 
     if arg_list is None:
@@ -94,16 +98,28 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 def validate_args(args: argparse.Namespace):
     found_errors = False
 
-    if not os.path.isfile(args.input_gds_path):
-        error(f"Can't read GDS input file at path {args.input_gds_path}")
-        found_errors = True
-
     try:
         args.log_level = LogLevel[args.log_level.upper()]
     except KeyError:
         error(f"Requested log level {args.log_level.lower()} does not exist, "
               f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
         found_errors = True
+
+    if args.dump_layers_and_quit:
+        pass
+    else:
+        if not os.path.isfile(args.input_gds_path):
+            error(f"Can't read GDS input file at path {args.input_gds_path}")
+            found_errors = True
+
+        try:
+            dir = os.path.dirname(args.input_gds_path)
+            is_dir = os.path.isdir(dir)
+            if not is_dir:
+                raise Exception(f"{dir} is no directory")
+        except Exception:
+            error(f"Can't write GDS output file at {args.output_gds_path}")
+            found_errors = True
 
     if found_errors:
         raise Exception("Argument validation failed")
@@ -192,6 +208,16 @@ def main():
     except Exception:
         sys.exit(1)
 
+    from_layers = parse_layers(from_lyp_path)
+    to_layers = parse_layers(to_lyp_path)
+    if args.dump_layers_and_quit:
+        info("Dumping all available layers…")
+        rule(from_lyp_path)
+        info(sorted([layer.lpp for layer in from_layers.layers]))
+        rule(to_lyp_path)
+        info(sorted([layer.lpp for layer in to_layers.layers]))
+        sys.exit(0)
+
     layout = kdb.Layout()
 
     info(f"Reading layout from {args.input_gds_path}")
@@ -245,13 +271,6 @@ def main():
         'capm2.drawing':        'MIM.drawing',
     }
 
-    from_layers = parse_layers(from_lyp_path)
-    to_layers = parse_layers(to_lyp_path)
-    rule(from_lyp_path)
-    info(sorted([layer.lpp for layer in from_layers.layers]))
-    rule(to_lyp_path)
-    info(sorted([layer.lpp for layer in to_layers.layers]))
-
     gds_mapping = {from_layers.gds_pair_by_lpp[from_lpp]: to_layers.gds_pair_by_lpp[to_lpp] \
                    for from_lpp, to_lpp in lpp_mapping.items()}
     rule("Map GDS layers")
@@ -262,6 +281,7 @@ def main():
                    to_layers,
                    gds_mapping)
 
+    rule()
     info(f"Writing layout to {args.output_gds_path}")
     layout.write(args.output_gds_path)
 
