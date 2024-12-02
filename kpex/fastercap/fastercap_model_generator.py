@@ -35,6 +35,8 @@
 
 
 from __future__ import annotations
+
+import os
 from typing import *
 from dataclasses import dataclass
 from functools import reduce
@@ -604,8 +606,8 @@ class FasterCapModelGenerator:
 
     # TODO: STL part is missing
 
-    def write_fastcap(self, prefix: str):
-        lst_fn = f"{prefix}.lst"
+    def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
+        lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
         lst_file: List[str] = [f"* k_void={'%.12g' % self.k_void}"]
         for k, data in self.diel_data.items():
@@ -623,8 +625,9 @@ class FasterCapModelGenerator:
                             f"inside={inside if inside else '(void)'}")
 
             fn = f"{prefix}_{file_num}.geo"
+            output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
-                                      file_name=fn,
+                                      output_path=output_path,
                                       data=data,
                                       cond_name=None)
 
@@ -649,8 +652,9 @@ class FasterCapModelGenerator:
             k_outside = self.materials[outside] if outside else self.k_void
             lst_file.append(f"* Conductor interface: outside={outside if outside else '(void)'}, net={nn}")
             fn = f"{prefix}_{file_num}.geo"
+            output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
-                                      file_name=fn,
+                                      output_path=output_path,
                                       data=data,
                                       cond_name=nn)
 
@@ -663,11 +667,11 @@ class FasterCapModelGenerator:
 
     @staticmethod
     def _write_fastercap_geo(file_number: int,
-                             file_name: str,
+                             output_path: str,
                              data: List[Tuple[float, float, float]],
                              cond_name: Optional[str]):
-        info(f"Writing FasterCap geo file: {file_name}")
-        with open(file_name, "w") as f:
+        info(f"Writing FasterCap geo file: {output_path}")
+        with open(output_path, "w") as f:
             title = f"0 file #{file_number}"
             if cond_name:
                 title += f" (net {cond_name}"
@@ -825,14 +829,16 @@ class FasterCapModelGenerator:
                         edges_by_p2[r[1]] = []
                     edges_by_p2[r[1]].append(r)
 
-    def dump_stl(self):
+    def dump_stl(self, output_dir_path: str):
         for mn in self.materials.keys():
             tris = self._collect_diel_tris(mn)
-            self._write_as_stl(f"diel_{mn}.stl", tris)
+            output_path = os.path.join(output_dir_path, f"diel_{mn}.stl")
+            self._write_as_stl(output_path, tris)
 
         for nn in self.net_names:
             tris = self._collect_cond_tris(nn)
-            self._write_as_stl(f"cond_{nn}.stl", tris)
+            output_path = os.path.join(output_dir_path, f"cond_{nn}.stl")
+            self._write_as_stl(output_path, tris)
 
     @staticmethod
     def _write_as_stl(file_name: str,

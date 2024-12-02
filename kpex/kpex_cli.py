@@ -7,6 +7,7 @@ import sys
 
 from .fastercap.fastercap_file_writer import *
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
+from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .klayout.lvsdb_extractor import KLayoutExtractionContext
 from .logging import (
     LogLevel,
@@ -86,6 +87,35 @@ def validate_args(args: argparse.Namespace):
         sys.exit(1)
 
 
+def run_fastercap_extraction(args: argparse.Namespace,
+                             pex_context: KLayoutExtractionContext,
+                             tech_info: TechInfo):
+    fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context, tech_info=tech_info)
+    gen: FasterCapModelGenerator = fastercap_input_builder.build()
+
+    # def provide_fastcap_file(name: str) -> TextIO:
+    #     if not os.path.isdir(args.output_dir_path):
+    #         os.makedirs(args.output_dir_path, exist_ok=True)
+    #     path = os.path.join(args.output_dir_path, name)
+    #     textio = open(path, mode="w")
+    #     return textio
+    #
+    # writer = FasterCapFileWriter()
+    # for circuit, fastercap_input_content in input_files_by_circuit:
+    #     writer.write_3d_file(input_file=fastercap_input_content,
+    #                          file_provider=provide_fastcap_file,
+    #                          sub_file_strategy=FasterCapSubFileStrategy.MULTI_FILE)
+
+    gen.check()
+
+    os.makedirs(args.output_dir_path, exist_ok=True)
+
+    lst_file = gen.write_fastcap(output_dir_path=args.output_dir_path,
+                                 prefix=args.cell_name)
+
+    gen.dump_stl(output_dir_path=args.output_dir_path)
+
+
 def main():
     args = parse_args()
     validate_args(args)
@@ -100,24 +130,9 @@ def main():
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.cell_name, lvsdb=lvsdb)
     # pex_context.target_layout.write(gds_path)
 
-    fastercap_input_builder = FasterCapInputBuilder(
-        pex_context=pex_context,
-        tech_info=tech_info
-    )
-    input_files_by_circuit: List[Tuple[kdb.Circuit, InputFile3D]] = fastercap_input_builder.build()
-
-    def provide_fastcap_file(name: str) -> TextIO:
-        if not os.path.isdir(args.output_dir_path):
-            os.makedirs(args.output_dir_path, exist_ok=True)
-        path = os.path.join(args.output_dir_path, name)
-        textio = open(path, mode="w")
-        return textio
-
-    writer = FasterCapFileWriter()
-    for circuit, fastercap_input_content in input_files_by_circuit:
-        writer.write_3d_file(input_file=fastercap_input_content,
-                             file_provider=provide_fastcap_file,
-                             sub_file_strategy=FasterCapSubFileStrategy.MULTI_FILE)
+    run_fastercap_extraction(args=args,
+                             pex_context=pex_context,
+                             tech_info=tech_info)
 
 
 if __name__ == "__main__":
