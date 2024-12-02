@@ -36,6 +36,8 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
 import os
 from typing import *
 from dataclasses import dataclass
@@ -605,6 +607,8 @@ class FasterCapModelGenerator:
         self.diel_data = dk
 
     def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
+        max_filename_length = os.pathconf(output_dir_path, 'PC_NAME_MAX')
+
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
         lst_file: List[str] = [f"* k_void={'%.12g' % self.k_void}"]
@@ -655,6 +659,13 @@ class FasterCapModelGenerator:
             outside = outside if outside else '(void)'
             lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
             fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
+            if len(fn) > max_filename_length:
+                warning(f"Unusual long net name detected: {nn}")
+                d = hashlib.md5(nn.encode('utf-8')).digest()
+                h = base64.urlsafe_b64encode(d).decode('utf-8').rstrip('=')
+                remaining_len = len(f"{prefix}_{file_num}_outside={outside}_net=.geo")
+                short_nn = nn[0: (max_filename_length - remaining_len - len(h) - 1)] + f"_{h}"
+                fn = f"{prefix}{file_num}_outside={outside}_net={short_nn}.geo"
             output_path = os.path.join(output_dir_path, fn)
             self._write_fastercap_geo(file_number=file_num,
                                       output_path=output_path,
