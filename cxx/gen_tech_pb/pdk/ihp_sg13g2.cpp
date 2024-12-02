@@ -75,8 +75,15 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     
     addComputedLayer(tech, KREG, "poly_con",    5, 0,    "Computed layer for GatPoly");
 
+    addComputedLayer(tech, KREG, "via1_drw", 19, 0, "Computed layer for Via1");
+    addComputedLayer(tech, KREG, "via2_drw", 29, 0, "Computed layer for Via2");
+    addComputedLayer(tech, KREG, "via3_drw", 49, 0, "Computed layer for Via3");
+    addComputedLayer(tech, KREG, "via4_drw", 66, 0, "Computed layer for Via4");
+    
     addComputedLayer(tech, KREG, "topvia1_n_cap", 125, 200, "Original TopVia1 is 125/0, case where no MiM cap");
     
+    addComputedLayer(tech, KREG, "topvia2_drw", 133, 0, "Computed layer for TopVia2");
+
     addComputedLayer(tech, KCAP, "mim_via",  125, 10, "Original TopVia1 is 125/0, case MiM cap");
     addComputedLayer(tech, KCAP, "metal5_cap",   67, 100,  "Computed layer for Metal5, case MiM cap");
     addComputedLayer(tech, KCAP, "cmim_top",   36, 0,  "Computed layer for MiM cap above Metal5");
