@@ -28,6 +28,12 @@ project (kpex)
 
 #_____________________________________________________________________________________________
 
+# add dependencies
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:protocolbuffers/protobuf@29.0")
+
+#_____________________________________________________________________________________________
+
 # see https://github.com/protocolbuffers/protobuf/blob/main/docs/cmake_protobuf_generate.md
 
 find_package(protobuf CONFIG REQUIRED)
