@@ -20,12 +20,12 @@ from .capacitance_matrix import CapacitanceMatrix, CapacitanceMatrixInfo
 
 class NetlistExpander:
     @staticmethod
-    def expand(pex_context: KLayoutExtractionContext,
+    def expand(extracted_netlist: kdb.Netlist,
+               top_cell_name: str,
                cap_matrix: CapacitanceMatrix,
                cap_matrix_info: CapacitanceMatrixInfo) -> kdb.Netlist:
-        expanded_netlist: kdb.Netlist = pex_context.lvsdb.netlist().dup()
-        cell_name = pex_context.top_cell.name
-        top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(cell_name)
+        expanded_netlist: kdb.Netlist = extracted_netlist.dup()
+        top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
         # create capacitor class
         cap = kdb.DeviceClassCapacitor()
@@ -57,7 +57,7 @@ class NetlistExpander:
             n = name2net[c.net]
             nets.append(n)
 
-        cap_threshold = 0.05e-15
+        cap_threshold = 0.0
 
         def add_parasitic_cap(i: int,
                               j: int,
@@ -69,22 +69,54 @@ class NetlistExpander:
                 c.connect_terminal('A', net1)
                 c.connect_terminal('B', net2)
                 c.set_parameter('C', cap_value)
+                if net1 == net2:
+                    raise Exception(f"Invalid attempt to create cap {c.name} between "
+                                    f"same net {net1} with value {'%.12g' % cap_value}")
             else:
                 warning(f"Ignoring capacitance matrix cell [{i},{j}], "
                         f"{'%.12g' % cap_value} is below threshold {'%.12g' % cap_threshold}")
 
-        for j in range(1, cap_matrix.dimension):
-            cap_ii = 0.0
-            for i in range(1, cap_matrix.dimension):
+        # -------------------------------------------------------------
+        # Example capacitance matrix:
+        #     [C11+C12+C13           -C12            -C13]
+        #     [-C21           C21+C22+C23            -C23]
+        #     [-C31                  -C32     C31+C32+C33]
+        # -------------------------------------------------------------
+        #
+        # - Diagonal elements m[i][i] contain the capacitance over GND (Cii),
+        #   but in a sum including all the other values of the row
+        #
+        # https://www.fastfieldsolvers.com/Papers/The_Maxwell_Capacitance_Matrix_WP110301_R03.pdf
+        #
+        for i in range(0, cap_matrix.dimension):
+            row = cap_matrix[i]
+            cap_ii = row[i]
+            for j in range(0, cap_matrix.dimension):
                 if i == j:
-                    cap_ii += cap_matrix[i][j]
-                elif i > j:
+                    continue
+                cap_value = -row[j]  # off-diagonals are always stored as negative values
+                cap_ii -= cap_value  # subtract summands to filter out Cii
+                if j > i:
                     add_parasitic_cap(i=i, j=j,
                                       net1=nets[i], net2=nets[j],
-                                      cap_value=-cap_matrix[i][j])
-            add_parasitic_cap(i=j, j=j,
-                              net1=nets[j], net2=nets[0],
-                              cap_value=cap_ii)
+                                      cap_value=cap_value)
+            if i > 0:
+                add_parasitic_cap(i=i, j=i,
+                                  net1=nets[i], net2=nets[0],
+                                  cap_value=cap_ii)
+
+        # for j in range(1, cap_matrix.dimension):
+        #     cap_ii = 0.0
+        #     for i in range(1, cap_matrix.dimension):
+        #         if i == j:
+        #             cap_ii += cap_matrix[i][j]
+        #         elif i > j:
+        #             add_parasitic_cap(i=i, j=j,
+        #                               net1=nets[i], net2=nets[j],
+        #                               cap_value=-cap_matrix[i][j])
+        #     add_parasitic_cap(i=j, j=j,
+        #                       net1=nets[j], net2=nets[0],
+        #                       cap_value=cap_ii)
 
         return expanded_netlist
 
@@ -111,7 +143,8 @@ class Test(unittest.TestCase):
         cap_matrix_info = CapacitanceMatrixInfo.from_yaml(cap_matrix_info_path)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb)
-        expanded_netlist = exp.expand(pex_context=pex_context,
+        expanded_netlist = exp.expand(extracted_netlist=pex_context.lvsdb.netlist(),
+                                      top_cell_name=pex_context.top_cell.name,
                                       cap_matrix=cap_matrix,
                                       cap_matrix_info=cap_matrix_info)
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")
