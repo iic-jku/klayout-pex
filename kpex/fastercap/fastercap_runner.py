@@ -12,8 +12,7 @@ from kpex.log import (
     # warning,
     error
 )
-from kpex.util import CapacitanceMatrix
-import kpex.version
+from .capacitance_matrix import CapacitanceMatrix
 
 
 def run_fastercap(exe_path: str,
@@ -80,5 +79,23 @@ class Test(unittest.TestCase):
         return os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'fastercap'))
 
     def test_fastercap_parse_capacitance_matrix(self):
-        testdata_path = os.path.join(self.fastercap_testdata_dir, 'fastercap_output.txt')
+        testdata_path = os.path.join(self.fastercap_testdata_dir, 'nmos_diode2_FasterCap_Output.txt')
         obtained_matrix = fastercap_parse_capacitance_matrix(log_path=testdata_path)
+        self.assertEqual(10, len(obtained_matrix.rows))
+        self.assertEqual(10, len(obtained_matrix.rows[0]))
+        self.assertEqual(10, len(obtained_matrix.rows[1]))
+        self.assertEqual(10, len(obtained_matrix.rows[2]))
+        self.assertEqual(10, len(obtained_matrix.rows[3]))
+        self.assertEqual(10, len(obtained_matrix.rows[4]))
+        self.assertEqual(10, len(obtained_matrix.rows[5]))
+        self.assertEqual(10, len(obtained_matrix.rows[6]))
+        self.assertEqual(10, len(obtained_matrix.rows[7]))
+        self.assertEqual(10, len(obtained_matrix.rows[8]))
+        self.assertEqual(10, len(obtained_matrix.rows[9]))
+        self.assertEqual(
+            ['g1_7', 'g1_8', 'g1_9', 'g1_10', 'g1_11', 'g1_12', 'g1_13', 'g1_14', 'g1_15', 'g1_16'],
+            obtained_matrix.conductor_names
+        )
+
+        output_path = os.path.join(self.fastercap_testdata_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
+        obtained_matrix.write_csv(output_path=output_path, separator=';')
