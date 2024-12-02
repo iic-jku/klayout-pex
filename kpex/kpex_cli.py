@@ -17,6 +17,7 @@ from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
+from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
@@ -94,21 +95,21 @@ def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 
     group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
     group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
-                                 type=true_or_false, default=False,  # TODO: in the future this should be True by default
-                                 help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
-                                      "(default is False for testing now)")
+                                  type=true_or_false, default=False,  # TODO: in the future this should be True by default
+                                  help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
+                                       "(default is False for testing now)")
     group_pex_options.add_argument("--fastercap", dest="run_fastercap",
-                                 type=true_or_false, default=True,
-                                 help=f"Run FasterCap engine "
-                                      f"(default is True)")
+                                  type=true_or_false, default=True,
+                                  help="Run FasterCap engine (default is True)")
     group_pex_options.add_argument("--fastcap", dest="run_fastcap",
-                                 type=true_or_false, default=False,
-                                 help=f"Run FastCap2 engine "
-                                      f"(default is False)")
+                                  type=true_or_false, default=False,
+                                  help="Run FastCap2 engine (default is False)")
+    group_pex_options.add_argument("--magic", dest="run_magic",
+                                  type=true_or_false, default=False,
+                                  help="Run MAGIC engine (default is False)")
     group_pex_options.add_argument("--2.5D", dest="run_2_5D",
-                                 type=true_or_false, default=False,
-                                 help=f"Run 2.5D analytical engine "
-                                      f"(default is False)")
+                                  type=true_or_false, default=False,
+                                  help="Run 2.5D analytical engine (default is False)")
 
     group_fastercap = main_parser.add_argument_group("FasterCap options")
     group_fastercap.add_argument("--k_void", "-k", dest="k_void",
@@ -386,6 +387,43 @@ def run_fastercap_extraction(args: argparse.Namespace,
     info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
 
+def run_magic_extraction(args: argparse.Namespace):
+    if args.input_mode != InputMode.GDS:
+        error(f"MAGIC engine only works with GDS input mode"
+              f" (currently {args.input_mode})")
+        return
+
+    magic_exe_path = "magic"  # TODO: make this configurable
+    magic_pex_mode = MagicPEXMode.CC  # TODO: make this configurable
+    magicrc_path = f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc"
+    magic_cthresh = 0.01  # TODO: make this configurable
+    magic_rthresh = 100   # TODO: make this configurable
+
+    magic_run_dir = os.path.join(args.output_dir_path, f"magic_{magic_pex_mode}")
+    magic_log_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Output.txt")
+    magic_script_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Script.tcl")
+
+    output_netlist_path = f"{magic_run_dir}/{args.effective_cell_name}.pex.spice"
+
+    os.makedirs(magic_run_dir, exist_ok=True)
+
+    prepare_magic_script(gds_path=args.effective_gds_path,
+                         cell_name=args.effective_cell_name,
+                         run_dir_path=magic_run_dir,
+                         script_path=magic_script_path,
+                         output_netlist_path=output_netlist_path,
+                         pex_mode=magic_pex_mode,
+                         c_threshold=magic_cthresh,
+                         r_threshold=magic_rthresh)
+
+    run_magic(exe_path=magic_exe_path,
+              magicrc_path=magicrc_path,
+              script_path=magic_script_path,
+              log_path=magic_log_path)
+
+    subproc(f"SPICE netlist saved at: {output_netlist_path}")
+    rule()
+
 def run_fastcap_extraction(args: argparse.Namespace,
                            pex_context: KLayoutExtractionContext,
                            lst_file: str):
@@ -530,6 +568,10 @@ def main():
 
     tech_info = TechInfo.from_json(args.tech_pbjson_path,
                                    dielectric_filter=args.dielectric_filter)
+
+    if args.run_magic:
+        run_magic_extraction(args)
+
 
     lvsdb = create_lvsdb(args)
 
