@@ -1,0 +1,94 @@
+name: "Publish test/coverage/lint reports to GitHub Pages"
+
+on:
+  workflow_call:
+  
+concurrency:
+  group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  allure-report:
+    name: "Generate Allure Report (Aggregated Suites)"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # NOTE: actions/download-artifact@v4 now has merging functionality built in => no need for actions/upload-artifact/merge@v4
+      # - name: "Merge test results (Allure)"
+      #   uses: actions/upload-artifact/merge@v4
+      #   with:
+      #     name: merged-allure-reports
+      #     pattern: upload-python-allure-report-*
+      #     # delete-merged: true
+      #     retention-days: 1
+
+      - name: "Download and merge Allure coverage artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: upload-python-allure-report-*
+          merge-multiple: true
+          path: build/allure-results   # destination
+          
+      - name: "Set up JDK (for Allure)"
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - name: "Load test report history (Allure)"
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: "Build test report"
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          gh_pages: allure-results
+          # allure_history: allure-history
+          allure_results: build/allure-results
+          subfolder: allure
+          # subfolder: allure-results
+
+      - name: "Publish test report"
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+          destination_dir: ./
+          # destination_dir: ./allure
+          keep_files: true
+
+  python-coverage-report:
+    name: "Generate Coverage Report (Aggregated Suites)"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: "Download and merge Python coverage artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: upload-python-coverage-report-*
+          merge-multiple: true
+          path: pycov   # destination
+          
+      - name: Display structure of downloaded files
+        run: ls -R pycov
+          
+      - name: "Publish test report"
+        uses: peaceiris/actions-gh-pages@v4
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: pycov
+          destination_dir: pycov
+          keep_files: true
