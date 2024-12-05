@@ -87,10 +87,10 @@ class KpexCLI:
     def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
         # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
         epilog = """
-| Variable | Example              |
-| -------- | -------------------- |
-| PDKPATH  | (e.g. $HOME/.volare) |
-| PDK      | (e.g. sky130A)       |
+| Variable | Example              | Description                             |
+| -------- | -------------------- | --------------------------------------- |
+| PDKPATH  | (e.g. $HOME/.volare) | Optional (required for default magigrc) |
+| PDK      | (e.g. sky130A)       | Optional (required for default magigrc) |
 """
         epilog_md = rich.console.Group(
             rich.text.Text('Environmental variables:', style='argparse.groups'),
@@ -128,7 +128,8 @@ class KpexCLI:
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
-        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk', 'sky130A', 'kpex', 'sky130.lvs'))
+        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk',
+                                                                'sky130A', 'libs.tech', 'kpex', 'sky130.lvs'))
 
         group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
                                      default=default_lvs_script_path,
@@ -199,7 +200,10 @@ class KpexCLI:
                                      action='store_true', default=False,
                                      help="FasterCap -pj Use Jacobi preconditioner (default is %(default)s)")
 
-        default_magicrc_path = os.path.abspath(f"{os.environ['PDKPATH']}/libs.tech/magic/{os.environ['PDK']}.magicrc")
+        PDKPATH = os.environ.get('PDKPATH', None)
+        default_magicrc_path = \
+            None if PDKPATH is None \
+            else os.path.abspath(f"{PDKPATH}/libs.tech/magic/{os.environ['PDK']}.magicrc")
         group_magic = main_parser.add_argument_group("MAGIC options")
         group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
                                   help=f"Path to magicrc configuration file (default is '%(default)s')")

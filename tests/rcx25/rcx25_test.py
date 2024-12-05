@@ -46,6 +46,11 @@ parent_suite = "kpex/2.5D Extraction Tests"
 tags = ("PEX", "2.5D", "MAGIC")
 
 
+def _kpex_pdk_dir() -> str:
+    return os.path.realpath(os.path.join(__file__, '..', '..', '..',
+                                         'pdk', 'sky130A', 'libs.tech', 'kpex'))
+
+
 def _sky130a_testdata_dir() -> str:
     return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                          'testdata', 'designs', 'sky130A'))
@@ -58,7 +63,7 @@ def _gds(*path_components) -> str:
 def _save_layout_preview(gds_path: str,
                          output_png_path: str):
     kdb.Technology.clear_technologies()
-    default_lyt_path = os.path.abspath(f"{os.environ['PDK_ROOT']}/sky130A/libs.tech/klayout/tech/sky130A.lyt")
+    default_lyt_path = os.path.abspath(f"{_kpex_pdk_dir()}/sky130A.lyt")
     tech = kdb.Technology.create_technology('sky130A')
     tech.load(default_lyt_path)
 
