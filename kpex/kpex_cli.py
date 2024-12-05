@@ -128,7 +128,8 @@ class KpexCLI:
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
-        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk', 'sky130A', 'kpex', 'sky130.lvs'))
+        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk',
+                                                                'sky130A', 'libs.tech', 'kpex', 'sky130.lvs'))
 
         group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
                                      default=default_lvs_script_path,
