@@ -729,7 +729,11 @@ class FasterCapModelGenerator:
         self.diel_data = dk
 
     def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
-        max_filename_length = os.pathconf(output_dir_path, 'PC_NAME_MAX')
+        max_filename_length: Optional[int] = None
+        try:
+            max_filename_length = os.pathconf(output_dir_path, 'PC_NAME_MAX')
+        except AttributeError:
+            pass  # NOTE: windows does not support the os.pathconf attribute
 
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
         file_num = 0
@@ -790,7 +794,7 @@ class FasterCapModelGenerator:
                 outside = outside or '(void)'
                 # lst_file.append(f"* Conductor interface: outside={outside}, net={nn}")
                 fn = f"{prefix}{file_num}_outside={outside}_net={nn}.geo"
-                if len(fn) > max_filename_length:
+                if max_filename_length is not None and len(fn) > max_filename_length:
                     warning(f"Unusual long net name detected: {nn}")
                     d = hashlib.md5(nn.encode('utf-8')).digest()
                     h = base64.urlsafe_b64encode(d).decode('utf-8').rstrip('=')
