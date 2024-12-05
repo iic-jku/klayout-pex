@@ -3,8 +3,43 @@ name = "kpex"
 version = "0.1.0"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
+homepage = "https://github.com/martinjankoehler/klayout-pex"
 license = "GPL-3.0-or-later"
 readme = "README.md"
+keywords = ["electronic", "pex", "parasitic", "extraction", "vlsi", "eda", "ic", "spice",
+            "klayout", "analog", "fsic", "gds", "FasterCap", "magic"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)"
+]
+
+packages = [
+    { include = "kpex" },
+    { include = "process_stack_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
+    { include = "process_parasitics_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
+    { include = "tech_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
+    { include = "build/sky130A_tech.pb.json" },
+    { include = "build/ihp_sg13g2_tech.pb.json" },
+]
+include = [
+    "kpex",
+    "pdk/**/*",
+    "build/python_kpex_protobuf/*",
+    "build/*.json"
+]
+
+[tool.poetry.scripts]
+kpex = 'kpex.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -15,6 +50,7 @@ rich-argparse = "^1.6.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
 pytest-html = "^4.1.1"
 allure-pytest = "^2.13.5"
 csv-diff = "^1.2"

@@ -29,12 +29,23 @@ export PYTHONPATH=$DIR/:$DIR/build/python:${PYTHONPATH}
 
 mkdir -p $DIR/build
 
-# REPORT_PATH=$DIR/build/kpex_test_report.html
-# poetry run pytest --html=$REPORT_PATH --self-contained-html
+ALLURE_RESULTS_PATH=$DIR/build/allure-results
+ALLURE_REPORT_PATH=$DIR/build/allure-report
+COVERAGE_PATH=$DIR/build/coverage-results
 
-RESULTS_PATH=$DIR/build/allure-results
-REPORT_PATH=$DIR/build/allure-report
-poetry run pytest --alluredir $RESULTS_PATH --color no
-allure generate --single-file $RESULTS_PATH --output $REPORT_PATH --clean
+poetry run pytest \
+	--alluredir $ALLURE_RESULTS_PATH \
+	--color no \
+	--cov=$COVERAGE_PATH \
+	--cov-report=html
 
-open -a Safari $REPORT_PATH/index.html
+allure generate \
+	--single-file $ALLURE_RESULTS_PATH \
+	--output $ALLURE_REPORT_PATH \
+	--clean
+
+if [[ -z "$RUNNER_OS" ]] && [[ -d "/Applications/Safari.app" ]]
+then
+    open -a Safari $ALLURE_REPORT_PATH/index.html
+fi
+
