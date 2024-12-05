@@ -244,3 +244,8 @@ jobs:
     needs: build_and_test
     uses: ./.github/workflows/publish-pypi.yml
 
+  call-publish-reports-github-pages:
+    name: "Trigger workflow to publish reports to GitHub Pages"
+    needs: build_and_test
+    uses: ./.github/workflows/publish-reports-github-pages.yml
+
