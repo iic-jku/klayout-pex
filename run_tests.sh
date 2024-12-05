@@ -25,27 +25,35 @@
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 
-export PYTHONPATH=$DIR/:$DIR/build/python:${PYTHONPATH}
+## export PYTHONPATH=$DIR/:$DIR/build/python:${PYTHONPATH}
 
-mkdir -p $DIR/build
+mkdir -p "$DIR"/build
 
-ALLURE_RESULTS_PATH=$DIR/build/allure-results
-ALLURE_REPORT_PATH=$DIR/build/allure-report
-COVERAGE_PATH=$DIR/build/coverage-results
+ALLURE_RESULTS_PATH="$DIR/build/allure-results"
+ALLURE_REPORT_PATH="$DIR/build/allure-report"
+COVERAGE_PATH="$DIR/build/coverage-results"
 
-poetry run pytest \
-	--alluredir $ALLURE_RESULTS_PATH \
-	--color no \
-	--cov=$COVERAGE_PATH \
-	--cov-report=html
+set -x
+set -e
+
+rm -rf "$ALLURE_RESULTS_PATH"
+rm -rf "$ALLURE_REPORT_PATH"
+rm -rf "$COVERAGE_PATH"
+
+poetry run coverage run -m pytest -m "not slow" \
+	--alluredir "$ALLURE_RESULTS_PATH" \
+	--color no
+
+poetry run coverage html --directory "$COVERAGE_PATH" 
 
 allure generate \
-	--single-file $ALLURE_RESULTS_PATH \
-	--output $ALLURE_REPORT_PATH \
+	--single-file "$ALLURE_RESULTS_PATH" \
+	--output "$ALLURE_REPORT_PATH" \
 	--clean
 
 if [[ -z "$RUNNER_OS" ]] && [[ -d "/Applications/Safari.app" ]]
 then
-    open -a Safari $ALLURE_REPORT_PATH/index.html
+    open -a Safari "$ALLURE_REPORT_PATH"/index.html
+    open -a Safari "$COVERAGE_PATH"/index.html
 fi
 
