@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
 homepage = "https://github.com/martinjankoehler/klayout-pex"
+repository = "https://github.com/martinjankoehler/klayout-pex.git"
 license = "GPL-3.0-or-later"
 readme = "README.md"
 keywords = ["electronic", "pex", "parasitic", "extraction", "vlsi", "eda", "ic", "spice",
@@ -37,6 +38,9 @@ include = [
     "build/python_kpex_protobuf/*",
     "build/*.json"
 ]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/martinjankoehler/klayout-pex/issues"
 
 [tool.poetry.scripts]
 kpex = 'kpex.__main__:main'
