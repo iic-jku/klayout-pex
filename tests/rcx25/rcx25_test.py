@@ -30,8 +30,8 @@ import tempfile
 import allure
 import csv_diff
 import os
+import pytest
 from typing import *
-import unittest
 
 import klayout.db as kdb
 import klayout.lay as klay
@@ -129,6 +129,7 @@ def assert_expected_matches_obtained(*path_components,
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
 def test_single_plate_100um_x_100um_li1_over_substrate():
     # MAGIC GIVES (8.3 revision 485):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -142,6 +143,8 @@ C1;PLATE;VSUBS;386.18"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_overlap_plates_100um_x_100um_li1_m1():
     # MAGIC GIVES (8.3 revision 485):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -164,6 +167,8 @@ C3;UPPER;VSUBS;205.52"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -203,6 +208,8 @@ C8;li1;met3;5.031"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_sidewall_100um_x_100um_distance_200nm_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -227,6 +234,8 @@ C5;A;B;7.5"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_sidewall_net_uturn_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -247,6 +256,8 @@ C3;C0;C1;0.019 TODO, MAGIC=1.87386 fF"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -267,6 +278,8 @@ C3;C0;C1;0.145 TODO"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_near_body_shield_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -292,6 +305,8 @@ C4;TOPA;TOPB;0.503"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
 def test_sideoverlap_simple_plates_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
