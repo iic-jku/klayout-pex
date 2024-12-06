@@ -5,8 +5,20 @@ name: Multi-platform Python/C++ build/test
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+       - '.gitignore'
+       - '.github/workflows/publish-pypi.yml'
+       - '.github/workflows/publish-reports-github-pages.yml'
+       - '**.md'
+       - '*.sh'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+       - '.gitignore'
+       - '.github/workflows/publish-pypi.yml'
+       - '.github/workflows/publish-reports-github-pages.yml'
+       - '**.md'
+       - '*.sh'
 
 concurrency:
   group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}
