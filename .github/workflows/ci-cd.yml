@@ -5,8 +5,20 @@ name: Multi-platform Python/C++ build/test
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+       - '.gitignore'
+       - '.github/workflows/publish-pypi.yml'
+       - '.github/workflows/publish-reports-github-pages.yml'
+       - '**.md'
+       - '*.sh'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+       - '.gitignore'
+       - '.github/workflows/publish-pypi.yml'
+       - '.github/workflows/publish-reports-github-pages.yml'
+       - '**.md'
+       - '*.sh'
 
 concurrency:
   group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}
@@ -226,4 +238,9 @@ jobs:
         path: ${{ env.ALLURE_RESULTS_PATH }}
         retention-days: 1
         if-no-files-found: error
+
+  call-publish-pypi:
+    name: "Trigger workflow to publish distribution 📦s to PyPI/TestPyPI"
+    needs: build_and_test
+    uses: ./.github/workflows/publish-pypi.yml
 
