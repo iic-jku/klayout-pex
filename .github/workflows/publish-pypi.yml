@@ -2,7 +2,9 @@ name: "Publish distribution 📦s to PyPI/TestPyPI"
 
 on:
   workflow_call:
-  
+  release:
+    types: [published]
+
 concurrency:
   group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}
   cancel-in-progress: true
@@ -11,14 +13,21 @@ jobs:
   publish-test-pypi:
     name: "Publish distribution 📦s to TestPyPI"
     runs-on: ubuntu-latest
+    
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
+      # NOTE: For now, we don't have any native C++ code deployed as part of the python distribution,
+      #       so all platforms create the same wheels/source archives.
+      #       Therefore it's sufficient to use the ubuntu download artifact:
+      #           python-dist-ubuntu-latest_py3.13
       - name: "Download and merge Python dist artifacts"
         uses: actions/download-artifact@v4
         with:
-          pattern: python-dist-*
+          #                                      # for multi architectures:
+          #--------------------------------------#---------------------------
+          pattern: python-dist-ubuntu-latest*    # pattern: python-dist-*
           merge-multiple: true
           path: dist   # destination
 
@@ -32,4 +41,38 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           attestations: false
+
+  publish-production-pypi:
+    name: "Publish distribution 📦s to PyPI"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+
+    steps:
+      # NOTE: For now, we don't have any native C++ code deployed as part of the python distribution,
+      #       so all platforms create the same wheels/source archives.
+      #       Therefore it's sufficient to use the ubuntu download artifact:
+      #           python-dist-ubuntu-latest_py3.13
+      - name: "Download and merge Python dist artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          #                                      # for multi architectures:
+          #--------------------------------------#---------------------------
+          pattern: python-dist-ubuntu-latest*    # pattern: python-dist-*
+          merge-multiple: true
+          path: dist   # destination
+
+      - name: "List dist directory"
+        run: find dist
+      
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        # continue-on-error: true   # might fail if we don't bump the version
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          repository-url: https://pypi.org/legacy/
+          attestations: false
+
 
