@@ -13,7 +13,8 @@ jobs:
   publish-test-pypi:
     name: "Publish distribution 📦s to TestPyPI"
     runs-on: ubuntu-latest
-    
+    continue-on-error: true
+
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
