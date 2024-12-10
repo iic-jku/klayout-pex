@@ -25,4 +25,4 @@
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 
-/usr/bin/env python3 -m kpex $*
+/usr/bin/env python3 -m klayout_pex $*
