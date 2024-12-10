@@ -117,7 +117,7 @@ class KpexCLI:
         group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
                                help="Technology Protocol Buffer path (*.pb.json)")
 
-        group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default=".",
+        group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
                                help="Output directory path (default is '%(default)s')")
 
         group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
