@@ -30,13 +30,13 @@ import unittest
 
 import klayout.db as kdb
 
-from kpex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from kpex.klayout.netlist_expander import NetlistExpander
-from kpex.log import (
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.klayout.netlist_expander import NetlistExpander
+from klayout_pex.log import (
     debug,
 )
-from kpex.common.capacitance_matrix import CapacitanceMatrix
-from kpex.tech_info import TechInfo
+from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
+from klayout_pex.tech_info import TechInfo
 
 
 @allure.parent_suite("Unit Tests")

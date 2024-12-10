@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import klayout.db as kdb
 
-from kpex.log import (
+from klayout_pex.log import (
     info,
 )
 

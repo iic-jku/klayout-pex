@@ -21,6 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
+
 from __future__ import annotations
 
 import allure
@@ -29,7 +30,7 @@ import tempfile
 from typing import *
 import unittest
 
-from kpex.common.capacitance_matrix import CapacitanceMatrix
+from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
 
 
 @allure.parent_suite("Unit Tests")

@@ -30,7 +30,7 @@ from typing import *
 import xml.etree.ElementTree as ET
 
 import klayout.rdb as rdb
-from kpex.log import (
+from ..log import (
     LogLevel,
     set_log_level,
     register_additional_handler,

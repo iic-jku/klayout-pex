@@ -30,13 +30,13 @@ import os
 import subprocess
 import unittest
 
-from kpex.log import (
+from ..log import (
     info,
     # warning,
     rule,
     subproc,
 )
-from kpex.version import __version__
+from ..version import __version__
 
 
 class MagicPEXMode(StrEnum):

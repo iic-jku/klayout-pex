@@ -36,8 +36,8 @@ from typing import *
 import klayout.db as kdb
 import klayout.lay as klay
 
-from kpex.kpex_cli import KpexCLI
-from kpex.rcx25.extraction_results import CellExtractionResults
+from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.rcx25.extraction_results import CellExtractionResults
 
 
 CSVPath = str

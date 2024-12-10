@@ -28,11 +28,11 @@ from typing import *
 
 import klayout.db as kdb
 
-from kpex.log import (
+from ..log import (
     info,
     warning,
 )
-from kpex.common.capacitance_matrix import CapacitanceMatrix
+from ..common.capacitance_matrix import CapacitanceMatrix
 
 
 class NetlistExpander:

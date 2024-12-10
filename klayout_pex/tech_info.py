@@ -29,9 +29,9 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .util.multiple_choice import MultipleChoicePattern
-import tech_pb2
-import process_stack_pb2
-import process_parasitics_pb2
+import klayout_pex_protobuf.tech_pb2 as tech_pb2
+import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
+import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
 
 class TechInfo:
     """Helper class for Protocol Buffer tech_pb2.Technology"""
