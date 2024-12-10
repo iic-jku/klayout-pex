@@ -25,8 +25,6 @@
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 
-export PYTHONPATH=$DIR/:$DIR/build/python:${PYTHONPATH}
-
 mkdir -p $DIR/build
 
 RESULTS_PATH=$DIR/build/pylint-results.json
