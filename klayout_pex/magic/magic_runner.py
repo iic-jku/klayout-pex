@@ -22,13 +22,11 @@
 # --------------------------------------------------------------------------------
 #
 from enum import StrEnum
-import re
 import time
 from typing import *
 
 import os
 import subprocess
-import unittest
 
 from ..log import (
     info,
