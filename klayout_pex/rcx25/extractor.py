@@ -40,7 +40,7 @@ from ..log import (
 )
 from ..tech_info import TechInfo
 from .extraction_results import *
-import klayout_pex_protobuf.process_stack_pb2
+import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
 
 
 EdgeInterval = Tuple[float, float]
