@@ -80,6 +80,10 @@ from .version import __version__
 PROGRAM_NAME = "kpex"
 
 
+class ArgumentValidationError(Exception):
+    pass
+
+
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
@@ -272,6 +276,8 @@ class KpexCLI:
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
             found_errors = True
 
+        rule('Input Layout')
+
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
             info(f"GDS input file passed, running in LVS mode")
@@ -381,8 +387,23 @@ class KpexCLI:
             error("Failed to parse --diel arg", e)
             found_errors = True
 
+        # at least one engine must be activated
+
+        print("m#äh")
+        if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
+            error("No PEX engines activated")
+            engine_help = """
+| Argument       | Description                             |
+| -------------- | --------------------------------------- |
+| --fastercap y  | Run kpex/FasterCap engine               |
+| --2.5D y       | Run kpex/2.5D engine                    |
+| --magic y      | Run MAGIC engine                        |
+"""
+            subproc(f"\nPlease activate one or more engines using the arguments:\n{engine_help}")
+            found_errors = True
+
         if found_errors:
-            raise Exception("Argument validation failed")
+            raise ArgumentValidationError("Argument validation failed")
 
     def build_fastercap_input(self,
                               args: argparse.Namespace,
@@ -396,17 +417,19 @@ class KpexCLI:
                                                         delaunay_b=args.delaunay_b)
         gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
-        rule()
+        rule('FasterCap Input File Generation')
         faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
         os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
         lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
 
+        rule('STL File Generation')
         geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
         os.makedirs(geometry_dir_path, exist_ok=True)
         gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
 
         if args.geometry_check:
+            rule('Geometry Validation')
             gen.check()
 
         return lst_file
@@ -416,6 +439,7 @@ class KpexCLI:
                                  args: argparse.Namespace,
                                  pex_context: KLayoutExtractionContext,
                                  lst_file: str):
+        rule('FasterCap Execution')
         info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
         os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
 
@@ -520,6 +544,7 @@ class KpexCLI:
                                args: argparse.Namespace,
                                pex_context: KLayoutExtractionContext,
                                lst_file: str):
+        rule('FastCap2 Execution')
         exe_path = "fastcap"
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
         raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Raw.csv")
@@ -634,7 +659,7 @@ class KpexCLI:
         file_handler_formatted = register_log_file_handler(cli_log_path_formatted, formatter)
         try:
             self.validate_args(args)
-        except Exception:
+        except ArgumentValidationError:
             if hasattr(args, 'output_dir_path'):
                 reregister_log_file_handler(file_handler_plain, cli_log_path_plain, None)
                 reregister_log_file_handler(file_handler_formatted, cli_log_path_formatted, formatter)
@@ -663,7 +688,8 @@ class KpexCLI:
 
                 if os.path.exists(lvsdb_path) and args.cache_lvs:
                     if self.modification_date(lvsdb_path) > self.modification_date(args.gds_path):
-                        warning(f"Reusing cached LVSDB at {lvsdb_path}")
+                        warning(f"Reusing cached LVSDB")
+                        subproc(lvsdb_path)
                         lvs_needed = False
 
                 if lvs_needed:
@@ -682,8 +708,8 @@ class KpexCLI:
            '--version' not in argv and \
            '-h' not in argv and \
            '--help' not in argv:
-            info("Called with arguments:")
-            info(' '.join(map(shlex.quote, sys.argv)))
+            rule('Command line arguments')
+            subproc(' '.join(map(shlex.quote, sys.argv)))
 
         args = self.parse_args(argv[1:])
 
@@ -694,19 +720,25 @@ class KpexCLI:
                                        dielectric_filter=args.dielectric_filter)
 
         if args.run_magic:
-            rule("MAGIC")
+            rule('MAGIC')
             self.run_magic_extraction(args)
 
         # no need to run LVS etc if only running magic engine
         if not (args.run_fastcap or args.run_fastercap or args.run_2_5D):
             return
 
+        rule('Prepare LVSDB')
         lvsdb = self.create_lvsdb(args)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.effective_cell_name,
                                                                   lvsdb=lvsdb,
                                                                   tech=tech_info,
                                                                   blackbox_devices=args.blackbox_devices)
+        rule('Non-empty layers in LVS database')
+        for gds_pair, layer_info in pex_context.extracted_layers.items():
+            names = [l.lvs_layer_name for l in layer_info.source_layers]
+            info(f"{gds_pair} -> ({' '.join(names)})")
+
         gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.gds.gz")
         pex_context.target_layout.write(gds_path)
 

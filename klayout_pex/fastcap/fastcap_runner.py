@@ -71,9 +71,10 @@ def run_fastcap(exe_path: str,
         f"-l{lst_file_path}",
     ]
 
-    info(f"Calling {' '.join(args)}, output file: {log_path}")
+    info(f"Calling FastCap2")
+    subproc(f"{' '.join(args)}, output file: {log_path}")
 
-    rule()
+    rule('FastCap Output')
     start = time.time()
 
     proc = subprocess.Popen(args,
@@ -98,7 +99,7 @@ def run_fastcap(exe_path: str,
     if proc.returncode == 0:
         info(f"FastCap2 succeeded after {'%.4g' % duration}s")
     else:
-        raise Exception(f"FastCap2 failed with status code {proc.returncode} after {'%.4g' % duration}s",
+        raise Exception(f"FastCap2 failed with status code {proc.returncode} after {'%.4g' % duration}s, "
                         f"see log file: {log_path}")
 
 
