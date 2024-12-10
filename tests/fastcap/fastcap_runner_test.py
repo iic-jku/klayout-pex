@@ -25,7 +25,7 @@ import allure
 import os
 import unittest
 
-from kpex.fastcap.fastcap_runner import fastcap_parse_capacitance_matrix
+from klayout_pex.fastcap.fastcap_runner import fastcap_parse_capacitance_matrix
 
 
 @allure.parent_suite("Unit Tests")

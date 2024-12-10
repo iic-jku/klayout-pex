@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "klayout-pex"
-version = "0.1.0"
+version = "0.1.3"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
-homepage = "https://github.com/martinjankoehler/klayout-pex"
+homepage = "https://martinjankoehler.github.io/klayout-pex-website/"
 repository = "https://github.com/martinjankoehler/klayout-pex.git"
 license = "GPL-3.0-or-later"
 readme = "README.md"
@@ -25,31 +25,35 @@ classifiers = [
 ]
 
 packages = [
-    { include = "kpex" },
-    { include = "process_stack_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
-    { include = "process_parasitics_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
-    { include = "tech_pb2.py", from = "build/python_kpex_protobuf/", to = "." },
-    { include = "build/sky130A_tech.pb.json" },
-    { include = "build/ihp_sg13g2_tech.pb.json" },
+    { include = "klayout_pex" },
+    { include = "pdk", to = "klayout_pex" },
+    { include = "process_stack_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
+    { include = "process_parasitics_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
+    { include = "tech_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
+    { include = "__init__.py", from = "klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
+    { include = "sky130A_tech.pb.json", from = "build", to = "klayout_pex_protobuf" },
+    { include = "ihp_sg13g2_tech.pb.json", from = "build", to = "klayout_pex_protobuf"  },
 ]
 include = [
     "kpex",
+    "klayout_pex_protobuf",
     "pdk/**/*",
-    "build/python_kpex_protobuf/*",
-    "build/*.json"
+    "build/python/klayout_pex_protobuf/*",
+    "build/*.json",
+    "klayout_pex_protobuf/__init__.py"
 ]
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/martinjankoehler/klayout-pex/issues"
 
 [tool.poetry.scripts]
-kpex = 'kpex.__main__:main'
+kpex = 'klayout_pex.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.12"
-klayout = "^0.29.9"    # required minimum version because of EdgeNeighborhoodVisitor
+klayout = "^0.29.10"    # required minimum version because of EdgeNeighborhoodVisitor
 rich = "^13.9.4"
-protobuf = "^5.28.3"
+protobuf = "^5.29.1"
 rich-argparse = "^1.6.0"
 
 [tool.poetry.group.test.dependencies]
@@ -75,4 +79,6 @@ markers = [
     "serial",
     "wip: mark tests as work-in-progress (delect with '-m \"not wip\"')",
 ]
+
+[tool.poetry_bumpversion.file."klayout_pex/version.py"]
 

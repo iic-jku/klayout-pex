@@ -27,7 +27,7 @@ import os
 import subprocess
 import time
 
-from kpex.log import (
+from ..log import (
     debug,
     info,
     warning,

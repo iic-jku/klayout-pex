@@ -26,7 +26,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
-import process_parasitics_pb2
+import klayout_pex_protobuf.process_parasitics_pb2
 
 
 NetName = str

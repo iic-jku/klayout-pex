@@ -26,13 +26,13 @@ import subprocess
 import time
 from typing import *
 
-from kpex.log import (
+from ..log import (
     info,
     # warning,
     rule,
     subproc,
 )
-from kpex.common.capacitance_matrix import CapacitanceMatrix
+from ..common.capacitance_matrix import CapacitanceMatrix
 
 
 def run_fastercap(exe_path: str,

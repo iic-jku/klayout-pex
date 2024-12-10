@@ -71,7 +71,7 @@ import math
 
 import klayout.db as kdb
 
-from kpex.log import (
+from ..log import (
     debug,
     info,
     warning,

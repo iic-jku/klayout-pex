@@ -76,7 +76,7 @@ protobuf_generate(
 
 #_____________________________________________________________________________________________
 
-set(PROTOBUF_PYTHON_GENERATED "${CMAKE_CURRENT_LIST_DIR}/build/python_kpex_protobuf")
+set(PROTOBUF_PYTHON_GENERATED "${CMAKE_CURRENT_LIST_DIR}/build/python/klayout_pex_protobuf")
 file(MAKE_DIRECTORY "${PROTOBUF_PYTHON_GENERATED}")
 
 protobuf_generate(

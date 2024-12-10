@@ -28,11 +28,11 @@ import unittest
 
 import klayout.db as kdb
 
-from kpex.log import (
+from klayout_pex.log import (
     LogLevel,
     set_log_level,
 )
-from kpex.klayout.netlist_reducer import NetlistReducer
+from klayout_pex.klayout.netlist_reducer import NetlistReducer
 
 
 @allure.parent_suite("Unit Tests")

@@ -24,7 +24,7 @@
 import allure
 import os
 import klayout.db as kdb
-from kpex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 
 
 @allure.parent_suite("Unit Tests")

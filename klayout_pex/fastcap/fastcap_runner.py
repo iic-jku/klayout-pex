@@ -28,7 +28,7 @@ from typing import *
 import os
 import subprocess
 
-from kpex.log import (
+from ..log import (
     debug,
     info,
     warning,
@@ -36,7 +36,7 @@ from kpex.log import (
     rule,
     subproc,
 )
-from kpex.common.capacitance_matrix import CapacitanceMatrix
+from ..common.capacitance_matrix import CapacitanceMatrix
 
 
 def run_fastcap(exe_path: str,

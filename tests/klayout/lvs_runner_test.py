@@ -28,7 +28,7 @@ import os
 import tempfile
 import unittest
 
-from kpex.klayout.lvs_runner import LVSRunner
+from klayout_pex.klayout.lvs_runner import LVSRunner
 
 
 @allure.parent_suite("Unit Tests")

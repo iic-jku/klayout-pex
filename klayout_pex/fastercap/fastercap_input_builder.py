@@ -46,7 +46,7 @@ from ..log import (
 )
 from ..tech_info import TechInfo
 
-import process_stack_pb2
+import klayout_pex_protobuf.process_stack_pb2
 
 
 class FasterCapInputBuilder:
