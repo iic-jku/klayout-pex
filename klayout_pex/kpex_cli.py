@@ -647,8 +647,12 @@ class KpexCLI:
         return lvsdb
 
     def main(self, argv: List[str]):
-        info("Called with arguments:")
-        info(' '.join(map(shlex.quote, sys.argv)))
+        if '-v' not in argv and \
+           '--version' not in argv and \
+           '-h' not in argv and \
+           '--help' not in argv:
+            info("Called with arguments:")
+            info(' '.join(map(shlex.quote, sys.argv)))
 
         args = self.parse_args(argv[1:])
 
