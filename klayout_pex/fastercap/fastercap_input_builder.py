@@ -35,7 +35,7 @@ import math
 
 import klayout.db as kdb
 
-from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
+from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 from ..log import (
     console,
