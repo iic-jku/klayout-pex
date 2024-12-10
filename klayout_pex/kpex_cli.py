@@ -89,8 +89,8 @@ class KpexCLI:
         epilog = """
 | Variable | Example              | Description                             |
 | -------- | -------------------- | --------------------------------------- |
-| PDKPATH  | (e.g. $HOME/.volare) | Optional (required for default magigrc) |
-| PDK      | (e.g. sky130A)       | Optional (required for default magigrc) |
+| PDKPATH  | (e.g. $HOME/.volare) | Optional (required for default magicrc) |
+| PDK      | (e.g. sky130A)       | Optional (required for default magicrc) |
 """
         epilog_md = rich.console.Group(
             rich.text.Text('Environmental variables:', style='argparse.groups'),
