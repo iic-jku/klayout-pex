@@ -26,9 +26,11 @@
 import argparse
 from datetime import datetime
 from enum import StrEnum
+from functools import cached_property
 import logging
 import os
 import os.path
+
 import rich.console
 import rich.markdown
 import rich.text
@@ -65,6 +67,7 @@ from .log import (
     rule
 )
 from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
+from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -80,6 +83,35 @@ PROGRAM_NAME = "kpex"
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
+
+
+# TODO: this should be externally configurable
+class PDK(StrEnum):
+    IHP_SG13G2 = 'ihp_sg13g2'
+    SKY130A = 'sky130A'
+
+    @cached_property
+    def config(self) -> PDKConfig:
+        # NOTE: installation paths of resources in the distribution wheel differes from source repo
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        tech_pb_json_dir = base_dir
+        if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
+            base_dir = os.path.dirname(base_dir)
+            tech_pb_json_dir = os.path.join(base_dir, 'build')
+
+        match self:
+            case PDK.IHP_SG13G2:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg130g2.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
+            case PDK.SKY130A:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sky130.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
 
 
 class KpexCLI:
@@ -114,8 +146,8 @@ class KpexCLI:
                                    help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
-        group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
-                               help="Technology Protocol Buffer path (*.pb.json)")
+        group_pex.add_argument("--pdk", dest="pdk", required=True, type=PDK,
+                               help=render_enum_help(topic='pdk', enum_cls=PDK))
 
         group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
                                help="Output directory path (default is '%(default)s')")
@@ -128,12 +160,7 @@ class KpexCLI:
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
-        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk',
-                                                                'sky130A', 'libs.tech', 'kpex', 'sky130.lvs'))
 
-        group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
-                                     default=default_lvs_script_path,
-                                     help=f"Path to KLayout LVS script (default is %(default)s)")
         group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                      type=true_or_false, default=True,
                                      help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
@@ -230,6 +257,10 @@ class KpexCLI:
     @staticmethod
     def validate_args(args: argparse.Namespace):
         found_errors = False
+
+        pdk_config: PDKConfig = args.pdk.config
+        args.tech_pbjson_path = pdk_config.tech_pb_json_path
+        args.lvs_script_path = pdk_config.pex_lvs_script_path
 
         if not os.path.isfile(args.klayout_exe_path):
             path = shutil.which(args.klayout_exe_path)
