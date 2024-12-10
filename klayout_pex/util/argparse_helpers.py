@@ -32,10 +32,10 @@ def render_enum_help(topic: str,
                      enum_cls: Type[Enum],
                      print_default: bool = True) -> str:
     if not hasattr(enum_cls, 'DEFAULT'):
-        raise ValueError("Enum must declare case 'DEFAULT'")
+        print_default = False
     enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}"
     if print_default:
-        enum_help += f".\nDefaults to '{enum_cls.DEFAULT.name.lower()}'"
+        enum_help += f".\nDefaults to '{getattr(enum_cls, 'DEFAULT').name.lower()}'"
     return enum_help
 
 
