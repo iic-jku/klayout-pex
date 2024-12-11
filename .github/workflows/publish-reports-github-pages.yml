@@ -26,9 +26,9 @@ name: "Publish test/coverage/lint reports to GitHub Pages"
 on:
   workflow_call:
   
-concurrency:
-  group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}
-  cancel-in-progress: true
+# NOTE: concurrency settings must be defined in calling workflow!
+#       otherwise unexpected cancellations will happen
+#   example error: "Canceling since a higher priority waiting request for 'martinjankoehler/klayout-pex-release-v0.1.4-Multi-platform Python/C++ build/test' exists"
 
 jobs:
   allure-report:
