@@ -75,7 +75,8 @@ from ..log import (
     debug,
     info,
     warning,
-    error
+    error,
+    subproc
 )
 
 
@@ -810,7 +811,7 @@ class FasterCapModelGenerator:
                 collation_operator = '' if idx == last_cond_index else ' +'
                 lst_file.append(f"C {fn}  {'%.12g' % k_outside}  0 0 0{collation_operator}")
 
-        info(f"Writing FasterCap list file: {lst_fn}")
+        subproc(lst_fn)
         with open(lst_fn, "w") as f:
             f.write('\n'.join(lst_file))
             f.write('\n')
@@ -823,7 +824,7 @@ class FasterCapModelGenerator:
                              cond_number: int,
                              cond_name: Optional[str],
                              rename_conductor: bool):
-        info(f"Writing FasterCap geo file: {output_path}")
+        subproc(output_path)
         with open(output_path, "w") as f:
             f.write(f"0 GEO File\n")
             for t in data:
@@ -973,7 +974,7 @@ class FasterCapModelGenerator:
         if len(tris) == 0:
             return
 
-        info(f"Writing STL file {file_name}")
+        subproc(file_name)
         with open(file_name, "w") as f:
             f.write("solid stl\n")
             for t in tris:

@@ -26,9 +26,11 @@
 import argparse
 from datetime import datetime
 from enum import StrEnum
+from functools import cached_property
 import logging
 import os
 import os.path
+
 import rich.console
 import rich.markdown
 import rich.text
@@ -65,6 +67,7 @@ from .log import (
     rule
 )
 from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
+from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -77,9 +80,42 @@ from .version import __version__
 PROGRAM_NAME = "kpex"
 
 
+class ArgumentValidationError(Exception):
+    pass
+
+
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
+
+
+# TODO: this should be externally configurable
+class PDK(StrEnum):
+    IHP_SG13G2 = 'ihp_sg13g2'
+    SKY130A = 'sky130A'
+
+    @cached_property
+    def config(self) -> PDKConfig:
+        # NOTE: installation paths of resources in the distribution wheel differes from source repo
+        base_dir = os.path.dirname(os.path.realpath(__file__))
+        tech_pb_json_dir = base_dir
+        if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
+            base_dir = os.path.dirname(base_dir)
+            tech_pb_json_dir = os.path.join(base_dir, 'build')
+
+        match self:
+            case PDK.IHP_SG13G2:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg130g2.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
+            case PDK.SKY130A:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sky130.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
 
 
 class KpexCLI:
@@ -114,10 +150,10 @@ class KpexCLI:
                                    help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
-        group_pex.add_argument("--tech", "-t", dest="tech_pbjson_path", required=True,
-                               help="Technology Protocol Buffer path (*.pb.json)")
+        group_pex.add_argument("--pdk", dest="pdk", required=True, type=PDK,
+                               help=render_enum_help(topic='pdk', enum_cls=PDK))
 
-        group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default=".",
+        group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
                                help="Output directory path (default is '%(default)s')")
 
         group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
@@ -128,12 +164,7 @@ class KpexCLI:
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
-        default_lvs_script_path = os.path.realpath(os.path.join(__file__, '..', '..', 'pdk',
-                                                                'sky130A', 'libs.tech', 'kpex', 'sky130.lvs'))
 
-        group_pex_input.add_argument("--lvs_script", dest="lvs_script_path",
-                                     default=default_lvs_script_path,
-                                     help=f"Path to KLayout LVS script (default is %(default)s)")
         group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                      type=true_or_false, default=True,
                                      help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
@@ -231,6 +262,10 @@ class KpexCLI:
     def validate_args(args: argparse.Namespace):
         found_errors = False
 
+        pdk_config: PDKConfig = args.pdk.config
+        args.tech_pbjson_path = pdk_config.tech_pb_json_path
+        args.lvs_script_path = pdk_config.pex_lvs_script_path
+
         if not os.path.isfile(args.klayout_exe_path):
             path = shutil.which(args.klayout_exe_path)
             if not path:
@@ -240,6 +275,8 @@ class KpexCLI:
         if not os.path.isfile(args.tech_pbjson_path):
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
             found_errors = True
+
+        rule('Input Layout')
 
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
@@ -350,8 +387,23 @@ class KpexCLI:
             error("Failed to parse --diel arg", e)
             found_errors = True
 
+        # at least one engine must be activated
+
+        print("m#äh")
+        if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
+            error("No PEX engines activated")
+            engine_help = """
+| Argument       | Description                             |
+| -------------- | --------------------------------------- |
+| --fastercap y  | Run kpex/FasterCap engine               |
+| --2.5D y       | Run kpex/2.5D engine                    |
+| --magic y      | Run MAGIC engine                        |
+"""
+            subproc(f"\nPlease activate one or more engines using the arguments:\n{engine_help}")
+            found_errors = True
+
         if found_errors:
-            raise Exception("Argument validation failed")
+            raise ArgumentValidationError("Argument validation failed")
 
     def build_fastercap_input(self,
                               args: argparse.Namespace,
@@ -365,17 +417,19 @@ class KpexCLI:
                                                         delaunay_b=args.delaunay_b)
         gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
-        rule()
+        rule('FasterCap Input File Generation')
         faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
         os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
         lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
 
+        rule('STL File Generation')
         geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
         os.makedirs(geometry_dir_path, exist_ok=True)
         gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
 
         if args.geometry_check:
+            rule('Geometry Validation')
             gen.check()
 
         return lst_file
@@ -385,6 +439,7 @@ class KpexCLI:
                                  args: argparse.Namespace,
                                  pex_context: KLayoutExtractionContext,
                                  lst_file: str):
+        rule('FasterCap Execution')
         info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
         os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
 
@@ -489,6 +544,7 @@ class KpexCLI:
                                args: argparse.Namespace,
                                pex_context: KLayoutExtractionContext,
                                lst_file: str):
+        rule('FastCap2 Execution')
         exe_path = "fastcap"
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
         raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Raw.csv")
@@ -603,7 +659,7 @@ class KpexCLI:
         file_handler_formatted = register_log_file_handler(cli_log_path_formatted, formatter)
         try:
             self.validate_args(args)
-        except Exception:
+        except ArgumentValidationError:
             if hasattr(args, 'output_dir_path'):
                 reregister_log_file_handler(file_handler_plain, cli_log_path_plain, None)
                 reregister_log_file_handler(file_handler_formatted, cli_log_path_formatted, formatter)
@@ -632,7 +688,8 @@ class KpexCLI:
 
                 if os.path.exists(lvsdb_path) and args.cache_lvs:
                     if self.modification_date(lvsdb_path) > self.modification_date(args.gds_path):
-                        warning(f"Reusing cached LVSDB at {lvsdb_path}")
+                        warning(f"Reusing cached LVSDB")
+                        subproc(lvsdb_path)
                         lvs_needed = False
 
                 if lvs_needed:
@@ -651,8 +708,8 @@ class KpexCLI:
            '--version' not in argv and \
            '-h' not in argv and \
            '--help' not in argv:
-            info("Called with arguments:")
-            info(' '.join(map(shlex.quote, sys.argv)))
+            rule('Command line arguments')
+            subproc(' '.join(map(shlex.quote, sys.argv)))
 
         args = self.parse_args(argv[1:])
 
@@ -663,19 +720,25 @@ class KpexCLI:
                                        dielectric_filter=args.dielectric_filter)
 
         if args.run_magic:
-            rule("MAGIC")
+            rule('MAGIC')
             self.run_magic_extraction(args)
 
         # no need to run LVS etc if only running magic engine
         if not (args.run_fastcap or args.run_fastercap or args.run_2_5D):
             return
 
+        rule('Prepare LVSDB')
         lvsdb = self.create_lvsdb(args)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.effective_cell_name,
                                                                   lvsdb=lvsdb,
                                                                   tech=tech_info,
                                                                   blackbox_devices=args.blackbox_devices)
+        rule('Non-empty layers in LVS database')
+        for gds_pair, layer_info in pex_context.extracted_layers.items():
+            names = [l.lvs_layer_name for l in layer_info.source_layers]
+            info(f"{gds_pair} -> ({' '.join(names)})")
+
         gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.gds.gz")
         pex_context.target_layout.write(gds_path)
 

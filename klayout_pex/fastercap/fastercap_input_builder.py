@@ -35,7 +35,7 @@ import math
 
 import klayout.db as kdb
 
-from ..klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, GDSPair
+from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 from ..log import (
     console,
@@ -46,7 +46,7 @@ from ..log import (
 )
 from ..tech_info import TechInfo
 
-import klayout_pex_protobuf.process_stack_pb2
+import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
 
 
 class FasterCapInputBuilder:

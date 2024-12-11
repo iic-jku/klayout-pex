@@ -70,9 +70,10 @@ def run_fastercap(exe_path: str,
     args += [
         lst_file_path
     ]
-    info(f"Calling {' '.join(args)}, output file: {log_path}")
+    info(f"Calling FasterCap")
+    subproc(f"{' '.join(args)}, output file: {log_path}")
 
-    rule()
+    rule('FasterCap Output')
     start = time.time()
 
     proc = subprocess.Popen(args,
@@ -97,7 +98,7 @@ def run_fastercap(exe_path: str,
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
     else:
-        raise Exception(f"FasterCap failed with status code {proc.returncode} after {'%.4g' % duration}s",
+        raise Exception(f"FasterCap failed with status code {proc.returncode} after {'%.4g' % duration}s, "
                         f"see log file: {log_path}")
 
 
