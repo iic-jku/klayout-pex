@@ -25,4 +25,4 @@
 
 source _run_tests.sh
 
-run_tests "slow or not slow"
+run_tests "not slow"
