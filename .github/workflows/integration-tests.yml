@@ -1,0 +1,202 @@
+##
+## --------------------------------------------------------------------------------
+## SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+## Johannes Kepler University, Institute for Integrated Circuits.
+##
+## This file is part of KPEX 
+## (see https://github.com/martinjankoehler/klayout-pex).
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
+## SPDX-License-Identifier: GPL-3.0-or-later
+## --------------------------------------------------------------------------------
+##
+
+name: "Integration tests"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  # pull_request:
+  #   branches: [ "main" ]
+  #   paths:
+  #     - '.github/workflows/integration-tests.yml'
+
+env:
+  KLAYOUT_DEB: "klayout_0.29.10-1_amd64.deb"
+  KLAYOUT_URL: "https://www.klayout.org/downloads/Ubuntu-22/klayout_0.29.10-1_amd64.deb"
+
+
+jobs:
+  run-tests:
+    name: Integration Test ${{ matrix.os }}-${{ matrix.build_type }}-py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. 
+      # Consider changing this to true when your workflow is stable.
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-22.04]
+        python-version: ['3.12']
+    
+    continue-on-error: true
+
+    env:
+      ALLURE_RESULTS_PATH: build/allure-results
+      COVERAGE_DATA_PATH: build/python-coverage.sqlite
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: "[🐍] Setup python ${{ matrix.python-version }}"
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: "[🐍] Install Poetry"
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        virtualenvs-path: .venv
+        installer-parallel: true
+
+    - name: "[🐍] Load cached venv"
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: "[🐍] Install dependencies"
+      run: poetry install --no-interaction --no-root
+      shell: bash    # NOTE: required for windows poetry calls
+
+    - name: "Restore cached klayout deb 📦 download"
+      id: cache-klayout-deb
+      uses: actions/cache/restore@v4
+      with:
+        path: klayout-deb
+        key: ${{ runner.os }}-klayout-deb
+
+    - name: "Download klayout deb 📦"
+      if: steps.cache-klayout-deb.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p klayout-deb
+        pushd klayout-deb
+        wget "$KLAYOUT_URL"
+        popd
+
+    - name: "Save cached klayout deb 📦 download"
+      if: success() || failure()
+      uses: actions/cache/save@v4
+      with:
+        path: klayout-deb
+        key: ${{ runner.os }}-klayout-deb
+
+    - name: "Install klayout deb 📦"
+      run: |
+        pushd klayout-deb
+        sudo apt-get update
+        sudo apt-get install ./$KLAYOUT_DEB
+        popd
+
+    - name: "Restore cached LVSDB results"
+      uses: actions/cache/restore@v4
+      with:
+        path: output_sky130A/.kpex_cache
+        key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache
+
+    - name: "Download and merge Python dist artifacts"
+      uses: actions/download-artifact@v4
+      with:
+        pattern: python-dist-ubuntu-latest* 
+        merge-multiple: true
+        path: dist   # destination
+
+    - name: "Unpack Source Distribution"
+      run: |
+        tar xvfz dist/klayout_pex*.tar.gz --strip-components=1
+
+    - name: "[🐍] Run Unit tests"
+      run: >
+        poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "slow"
+        --alluredir ${{ env.ALLURE_RESULTS_PATH }}
+        --color no 
+      shell: bash    # NOTE: required for windows poetry calls
+
+    - name: "[🐍] Store coverage results"
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-integration-tests-coverage-report-${{ matrix.os }}_py${{ matrix.python-version }}
+        path: ${{ env.COVERAGE_DATA_PATH }}   # NOTE: pytest-cov coverage binary file, can be combined later!
+        retention-days: 1
+        if-no-files-found: error
+        
+    - name: "[🐍] Store allure test results"
+      if: success() || failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-integration-tests-allure-report-${{ matrix.os }}_py${{ matrix.python-version }}
+        path: ${{ env.ALLURE_RESULTS_PATH }}
+        retention-days: 1
+        if-no-files-found: error
+
+    - name: "Save cached LVSDB results"
+      if: success() || failure()
+      uses: actions/cache/save@v4
+      with:
+        path: output_sky130A/.kpex_cache
+        key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache
+
+  call-publish-reports-github-pages:
+    name: "Publish reports to GitHub Pages"
+    needs: run-tests
+    concurrency:
+      group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-reports-github-pages
+      cancel-in-progress: true
+    uses: ./.github/workflows/publish-reports-github-pages.yml
+       
+  # run-inside-docker:
+  #   name: "Run tests"
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  # 
+  #   steps:
+  #   - uses: actions/checkout@v4
+  # 
+  #   - name: Generate Cache Key from Dockerfiles
+  #     id: generate_cache_key
+  #     run: |
+  #       files="./tests/fixtures/docker-compose.yml"
+  #       file_contents=$(cat $files)
+  #       key=$(echo "${file_contents}" | sha1sum | awk '{print $1}')
+  #       echo "key=${key}" >> "$GITHUB_OUTPUT"
+  # 
+  #   - name: "Cache Docker images"
+  #     uses: ScribeMD/docker-cache@0.5.0
+  #     with:
+  #       key: docker-${{ runner.os }}-integration-tests-${{ steps.generate_cache_key.outputs.key }}
+  #       
+  #   - name: "Install Docker and run tests"
+  #     uses: adambirds/docker-compose-action@v1.5.0
+  #     with:
+  #       compose-file: "./tests/fixtures/docker-compose.yml"
+  #       test-container: iic-osic-tools
+  #       test-command: --skip ./run_integration_tests.sh
+  #     continue-on-error: true    # ensure docker cache is written nevertheless
+      
