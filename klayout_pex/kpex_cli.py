@@ -390,7 +390,6 @@ class KpexCLI:
 
         # at least one engine must be activated
 
-        print("m#äh")
         if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
             error("No PEX engines activated")
             engine_help = """
