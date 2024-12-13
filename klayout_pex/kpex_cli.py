@@ -98,11 +98,12 @@ class PDK(StrEnum):
     def config(self) -> PDKConfig:
         # NOTE: installation paths of resources in the distribution wheel differes from source repo
         base_dir = os.path.dirname(os.path.realpath(__file__))
-        tech_pb_json_dir = base_dir
         if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
             base_dir = os.path.dirname(base_dir)
             tech_pb_json_dir = os.path.join(base_dir, 'build')
-
+        else:  # site-packages/klayout_pex -> site-packages/klayout_pex_protobuf
+            tech_pb_json_dir = os.path.join(os.path.dirname(base_dir), 'klayout_pex_protobuf')
+        
         match self:
             case PDK.IHP_SG13G2:
                 return PDKConfig(
