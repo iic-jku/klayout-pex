@@ -89,10 +89,9 @@ jobs:
           # destination_dir: ./allure
           keep_files: true
 
-  python-coverage-report:
+  merge-coverage-reports:
     name: "Generate Coverage Report (Aggregated Suites)"
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -117,6 +116,9 @@ jobs:
       - name: "Display structure of downloaded files"
         run: ls -R pycov-databases
 
+      - name: "Print current working directory"
+        run: pwd
+
       - name: "[🐍] Setup python"
         id: setup-python
         uses: actions/setup-python@v5
@@ -136,10 +138,29 @@ jobs:
 
       - name: "Display structure of coverage report"
         run: ls -R pycov
-          
-      - name: "Publish test report"
+
+      - name: "[🐍] Store merged coverage reports"
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-coverage-report
+          path: pycov
+          retention-days: 1
+          if-no-files-found: error
+
+  publish-coverage-reports:
+    name: "Publish Coverage Report (Aggregated Suites)"
+    runs-on: ubuntu-latest
+    needs: merge-coverage-reports
+    steps:
+      - name: "Download merged coverage artifact"
+        uses: actions/download-artifact@v4
+        with:
+          name: merged-coverage-report
+          path: pycov   # destination
+    
+      - name: "Publish coverage reports"
         uses: peaceiris/actions-gh-pages@v4
-        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
