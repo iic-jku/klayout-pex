@@ -24,18 +24,33 @@
 #
 
 import argparse
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import *
 
 
 def render_enum_help(topic: str,
                      enum_cls: Type[Enum],
-                     print_default: bool = True) -> str:
+                     print_default: bool = True,
+                     lowercase_strenum: bool = False) -> str:
+    def canonic_string(name: str, member: str) -> str:
+        if issubclass(enum_cls, StrEnum):
+            if name.lower() == 'default':
+                return 'default'
+            return member.lower() if lowercase_strenum else member
+        return name.lower()
     if not hasattr(enum_cls, 'DEFAULT'):
         print_default = False
-    enum_help = f"{topic} ∈ {set([name.lower() for name, member in enum_cls.__members__.items()])}"
+    case_list = [f"'{canonic_string(name, member)}'" for name, member in enum_cls.__members__.items()]
+    enum_help = f"{topic} ∈ \u007b{', '.join(case_list)}\u007d"
     if print_default:
-        enum_help += f".\nDefaults to '{getattr(enum_cls, 'DEFAULT').name.lower()}'"
+        default_case: enum_cls = getattr(enum_cls, 'DEFAULT')
+        if issubclass(enum_cls, StrEnum):
+            default_value: str = default_case.value
+            if lowercase_strenum:
+                default_value = default_value.lower()
+        else:
+            default_value = default_case.name.lower()
+        enum_help += f".\nDefaults to '{default_value}'"
     return enum_help
 
 
