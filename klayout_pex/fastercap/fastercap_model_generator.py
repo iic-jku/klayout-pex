@@ -380,13 +380,19 @@ class FasterCapModelGenerator:
     def add_in(self, name: str, layer: kdb.Region):
         debug(f"add_in: {name} -> {layer}")
         if name not in self.layers_in:
-            self.layers_in[name] = kdb.Region()
+            # NOTE: Calling kdb.Region([]) with the empty list enforces, that a flat layer is created.
+            #       The following "+=" packs the polynomials into this flat layer and
+            #       does not copy the hierarchical layer from the LayoutToNetlist database.
+            self.layers_in[name] = kdb.Region([])
         self.layers_in[name] += layer
 
     def add_out(self, name: str, layer: kdb.Region):
         debug(f"add_out: {name} -> {layer}")
         if name not in self.layers_out:
-            self.layers_out[name] = kdb.Region()
+            # NOTE: Calling kdb.Region([]) with the empty list enforces, that a flat layer is created.
+            #       The following "+=" packs the polynomials into this flat layer and
+            #       does not copy the hierarchical layer from the LayoutToNetlist database.
+            self.layers_out[name] = kdb.Region([])
         self.layers_out[name] += layer
 
     def finish_z(self):
