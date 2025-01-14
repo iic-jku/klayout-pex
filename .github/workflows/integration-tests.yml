@@ -34,8 +34,9 @@ on:
 
 env:
   KLAYOUT_DEB: "klayout_0.29.10-1_amd64.deb"
-  KLAYOUT_URL: "https://www.klayout.org/downloads/Ubuntu-22/klayout_0.29.10-1_amd64.deb"
-
+  KLAYOUT_URL: "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.29.10-1_amd64.deb"
+  FASTERCAP_URL: "https://github.com/martinjankoehler/FasterCap/releases/download/v6.0.8/FasterCap_6.0.8_amd64_ubuntu-24.04.deb"
+  FASTERCAP_DEB: "FasterCap_6.0.8_amd64_ubuntu-24.04.deb"
 
 jobs:
   run-tests:
@@ -48,7 +49,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-24.04]
         python-version: ['3.12']
     
     continue-on-error: true
@@ -85,33 +86,35 @@ jobs:
       run: poetry install --no-interaction --no-root
       shell: bash    # NOTE: required for windows poetry calls
 
-    - name: "Restore cached klayout deb 📦 download"
-      id: cache-klayout-deb
+    - name: "Restore cached deb 📦 downloads"
+      id: cache-deb-downloads
       uses: actions/cache/restore@v4
       with:
-        path: klayout-deb
-        key: ${{ runner.os }}-klayout-deb
+        path: deb-downloads
+        key: ${{ runner.os }}-deb-downloads
 
-    - name: "Download klayout deb 📦"
-      if: steps.cache-klayout-deb.outputs.cache-hit != 'true'
+    - name: "Download deb 📦s"
+      if: steps.cache-deb-downloads.outputs.cache-hit != 'true'
       run: |
-        mkdir -p klayout-deb
-        pushd klayout-deb
+        mkdir -p deb-downloads
+        pushd deb-downloads
         wget "$KLAYOUT_URL"
+        wget "$FASTERCAP_URL"
         popd
 
-    - name: "Save cached klayout deb 📦 download"
+    - name: "Save cached deb 📦 downloads"
       if: success() || failure()
       uses: actions/cache/save@v4
       with:
-        path: klayout-deb
-        key: ${{ runner.os }}-klayout-deb
+        path: deb-downloads
+        key: ${{ runner.os }}-deb-downloads
 
-    - name: "Install klayout deb 📦"
+    - name: "Install deb 📦s"
       run: |
-        pushd klayout-deb
+        pushd deb-downloads
         sudo apt-get update
         sudo apt-get install ./$KLAYOUT_DEB
+        sudo apt-get install ./$FASTERCAP_DEB
         popd
 
     - name: "Restore cached LVSDB results"
