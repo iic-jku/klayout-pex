@@ -509,6 +509,8 @@ class KpexCLI:
         reduced_netlist.write(reduced_netlist_path, spice_writer)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
+        self._fastercap_extracted_csv_path = expanded_netlist_csv_path
+
     def run_magic_extraction(self,
                              args: argparse.Namespace):
         if args.input_mode != InputMode.GDS:
@@ -837,6 +839,12 @@ class KpexCLI:
         if not hasattr(self, '_rcx25_extracted_csv_path'):
             raise Exception('rcx25_extracted_csv_path is not initialized, was run_kpex_2_5d_engine called?')
         return self._rcx25_extracted_csv_path
+
+    @property
+    def fastercap_extracted_csv_path(self) -> str:
+        if not hasattr(self, '_fastercap_extracted_csv_path'):
+            raise Exception('fastercap_extracted_csv_path is not initialized, was run_fastercap_extraction called?')
+        return self._fastercap_extracted_csv_path
 
 
 if __name__ == "__main__":

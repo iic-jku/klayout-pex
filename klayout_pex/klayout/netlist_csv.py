@@ -36,7 +36,7 @@ class NetlistCSVWriter:
                   top_cell_name: str,
                   output_path: str):
         with open(output_path, 'w') as f:
-            f.write('Device;Net1;Net2;Capacitance [F];Capacitance [fF]\n')
+            f.write('Device;Net1;Net2;Capacitance [fF]\n')
 
             top_circuit: kdb.Circuit = netlist.circuit_by_name(top_cell_name)
 
@@ -56,4 +56,4 @@ class NetlistCSVWriter:
                     net2 = d.net_for_terminal('B')
                     cap = params['C']
                     cap_femto = round(cap * 1e15, 2)
-                    f.write(f"{dn};{net1.name};{net2.name};{'%.12g' % cap};{cap_femto}f\n")
+                    f.write(f"{dn};{net1.name};{net2.name};{cap_femto}\n")
