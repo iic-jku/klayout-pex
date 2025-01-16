@@ -21,48 +21,55 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  * --------------------------------------------------------------------------------
  */
+
+#include <iostream>
+#include <filesystem>
+
 #include "protobuf.h"
 #include "pdk/ihp_sg13g2.h"
 #include "pdk/sky130A.h"
 
-void writeTech(const std::string &tech_name,
+void writeTech(const std::filesystem::path &output_directory,
+               const std::string &tech_name,
                const kpex::tech::Technology &tech)
 {
-    const std::string stem = "build/" + tech_name + "_tech";
-    write(tech, stem + ".pb.json", Format::JSON);
-    
-    //    write(tech, stem + ".binpb", Format::PROTOBUF_BINARY);
-    //    write(tech, stem + ".txtpb", Format::PROTOBUF_TEXTUAL);
-        
-    //    std::cout << "--------------------------------------------" << std::endl;
-    //    convert(stem + ".pb.json", Format::JSON,
-    //            stem + "__from_json.txtpb", Format::PROTOBUF_TEXTUAL);
-    //    std::cout << "--------------------------------------------" << std::endl;
-    //    convert(stem + "_tech.pb.json", Format::JSON,
-    //            stem + "_tech__from_json.binpb", Format::PROTOBUF_BINARY);
-    //    std::cout << "--------------------------------------------" << std::endl;
-    //    convert(stem + "_tech.pb.json", Format::JSON,
-    //            stem + "_tech__from_json.json", Format::JSON);
+    const std::filesystem::path json_pb_path = output_directory / (tech_name + "_tech" + ".pb.json");
+    write(tech, json_pb_path.string(), Format::JSON);
 }
 
 int main(int argc, char **argv) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+
     
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <output-directory>" << std::endl;
+        return 1;
+    }
+    
+    std::filesystem::path output_directory(argv[1]);
+    if (std::filesystem::exists(output_directory) && !std::filesystem::is_directory(output_directory)) {
+        std::cerr << "ERROR: Output directory path already exists, but is not a directory" << std::endl;
+        return 2;
+    }
+    std::filesystem::create_directories(output_directory);
+
     {
         kpex::tech::Technology tech;
         sky130A::buildTech(tech);
-        writeTech("sky130A", tech);
+        writeTech(output_directory, "sky130A", tech);
     }
     
     {
         kpex::tech::Technology tech;
         ihp_sg13g2::buildTech(tech);
-        writeTech("ihp_sg13g2", tech);
+        writeTech(output_directory, "ihp_sg13g2", tech);
     }
 
     // Optional:  Delete all global objects allocated by libprotobuf.
     google::protobuf::ShutdownProtobufLibrary();
+    
+    return 0;
 }
 
