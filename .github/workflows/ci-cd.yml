@@ -208,12 +208,12 @@ jobs:
 
     - name: "[C++] Generate PB Tech (Windows)"
       if: ${{ matrix.os == 'windows-latest' }}
-      run: build\${{matrix.build_type}}\gen_tech_pb.exe
+      run: build\${{matrix.build_type}}\gen_tech_pb.exe klayout_pex_protobuf
       working-directory: ${{github.workspace}}
 
     - name: "[C++] Generate PB Tech (Unix)"
       if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
-      run: build/gen_tech_pb
+      run: build/gen_tech_pb klayout_pex_protobuf
       working-directory: ${{github.workspace}}
 
     - name: "[🐍] Install project"
