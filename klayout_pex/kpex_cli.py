@@ -96,14 +96,15 @@ class PDK(StrEnum):
 
     @cached_property
     def config(self) -> PDKConfig:
-        # NOTE: installation paths of resources in the distribution wheel differes from source repo
+        # NOTE: installation paths of resources in the distribution wheel differs from source repo
         base_dir = os.path.dirname(os.path.realpath(__file__))
+
         if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
             base_dir = os.path.dirname(base_dir)
-            tech_pb_json_dir = os.path.join(base_dir, 'build')
+            tech_pb_json_dir = os.path.join(base_dir, 'klayout_pex_protobuf')
         else:  # site-packages/klayout_pex -> site-packages/klayout_pex_protobuf
             tech_pb_json_dir = os.path.join(os.path.dirname(base_dir), 'klayout_pex_protobuf')
-        
+
         match self:
             case PDK.IHP_SG13G2:
                 return PDKConfig(
@@ -277,6 +278,10 @@ class KpexCLI:
 
         if not os.path.isfile(args.tech_pbjson_path):
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
+            found_errors = True
+
+        if not os.path.isfile(args.lvs_script_path):
+            error(f"Can't locate LVS script path at {args.lvs_script_path}")
             found_errors = True
 
         rule('Input Layout')
