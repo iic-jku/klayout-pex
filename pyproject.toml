@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "klayout-pex"
-version = "0.1.8"
+version = "0.1.12"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
 homepage = "https://martinjankoehler.github.io/klayout-pex-website/"
@@ -27,20 +27,19 @@ classifiers = [
 packages = [
     { include = "klayout_pex" },
     { include = "pdk", to = "klayout_pex" },
-    { include = "process_stack_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
-    { include = "process_parasitics_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
-    { include = "tech_pb2.py", from = "build/python/klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
-    { include = "__init__.py", from = "klayout_pex_protobuf/", to = "klayout_pex_protobuf" },
-    { include = "sky130A_tech.pb.json", from = "build", to = "klayout_pex_protobuf" },
-    { include = "ihp_sg13g2_tech.pb.json", from = "build", to = "klayout_pex_protobuf"  },
+    { include = "klayout_pex_protobuf" }
 ]
 include = [
     "kpex",
-    "klayout_pex_protobuf",
     "pdk/**/*",
-    "build/python/klayout_pex_protobuf/*",
-    "build/*.json",
-    "klayout_pex_protobuf/__init__.py"
+    "klayout_pex_protobuf/__init__.py",
+    # NOTE: explicitly mention generated protobuf files,
+    #       otherwise the .gitignore entries would suppress them
+    { path = "klayout_pex_protobuf/ihp_sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/process_stack_pb2.py", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.urls]
@@ -70,7 +69,7 @@ pylint-json2html = "^0.5.0"
 licenseheaders = "^0.8.8"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0", "setuptools>=42"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]

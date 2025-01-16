@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
     @property
     def tech_info_json_path(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'build', 'sky130A_tech.pb.json'))
+                                             'klayout_pex_protobuf', 'sky130A_tech.pb.json'))
 
     def test_netlist_expansion(self):
         exp = NetlistExpander()

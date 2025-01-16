@@ -198,6 +198,13 @@ jobs:
         --build ${{ steps.strings.outputs.build-output-dir }} 
         --config ${{ matrix.build_type }}
 
+    - name: "CMake: Verify python protobuf generation"
+      run: |
+        # check if protobuf python modules were created
+        ls klayout_pex_protobuf/tech_pb2.py
+      shell: bash
+      working-directory: ${{github.workspace}}
+
     - name: "[C++] Test"
       continue-on-error: true
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
@@ -208,12 +215,12 @@ jobs:
 
     - name: "[C++] Generate PB Tech (Windows)"
       if: ${{ matrix.os == 'windows-latest' }}
-      run: build\${{matrix.build_type}}\gen_tech_pb.exe
+      run: build\${{matrix.build_type}}\gen_tech_pb.exe klayout_pex_protobuf
       working-directory: ${{github.workspace}}
 
     - name: "[C++] Generate PB Tech (Unix)"
       if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
-      run: build/gen_tech_pb
+      run: build/gen_tech_pb klayout_pex_protobuf
       working-directory: ${{github.workspace}}
 
     - name: "[🐍] Install project"
@@ -223,6 +230,16 @@ jobs:
     - name: "[🐍] Build wheel and source archives"
       run: poetry build --output dist
       shell: bash    # NOTE: required for windows poetry calls
+
+    - name: "[🐍] Verify wheel contains generation tech protobuf json messages"
+      run: |
+        unzip -l dist/*.whl | grep klayout_pex_protobuf | grep .pb.json
+      shell: bash
+
+    - name: "[🐍] Verify wheel contains generation protobuf python modules"
+      run: |
+        unzip -l dist/*.whl | grep klayout_pex_protobuf | grep _pb2.py
+      shell: bash
 
     - name: "[🐍] Store dist artifact"
       uses: actions/upload-artifact@v4

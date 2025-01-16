@@ -130,9 +130,10 @@ jobs:
         merge-multiple: true
         path: dist   # destination
 
-    - name: "Unpack Source Distribution"
+    - name: "Unpack Python Wheel"
       run: |
-        tar xvfz dist/klayout_pex*.tar.gz --strip-components=1
+        tar xvfz dist/klayout_pex*.tar.gz --strip-components=1   # source dist
+        unzip -o dist/klayout_pex*.whl klayout_pex_protobuf/\*   # generated protobuf files
 
     - name: "[🐍] Run Unit tests"
       run: >
