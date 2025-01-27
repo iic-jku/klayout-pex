@@ -152,7 +152,8 @@ class KpexCLI:
                                    help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
-        group_pex.add_argument("--pdk", dest="pdk", required=True, type=PDK,
+        group_pex.add_argument("--pdk", dest="pdk", required=True,
+                               type=PDK, choices=list(PDK),
                                help=render_enum_help(topic='pdk', enum_cls=PDK))
 
         group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
@@ -162,7 +163,8 @@ class KpexCLI:
                                                          description="Either LVS is run, or an existing LVSDB is used")
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (for LVS)")
+                                     help="Schematic SPICE netlist path (for LVS). "
+                                          "If none given, a dummy schematic will be created")
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
@@ -179,16 +181,16 @@ class KpexCLI:
                                       help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
                                            "(default is %(default)s for testing now)")
         group_pex_options.add_argument("--fastercap", dest="run_fastercap",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run FasterCap engine (default is %(default)s)")
         group_pex_options.add_argument("--fastcap", dest="run_fastcap",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run FastCap2 engine (default is %(default)s)")
         group_pex_options.add_argument("--magic", dest="run_magic",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run MAGIC engine (default is %(default)s)")
         group_pex_options.add_argument("--2.5D", dest="run_2_5D",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run 2.5D analytical engine (default is %(default)s)")
 
         group_fastercap = main_parser.add_argument_group("FasterCap options")
@@ -242,17 +244,20 @@ class KpexCLI:
         group_magic = main_parser.add_argument_group("MAGIC options")
         group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
                                   help=f"Path to magicrc configuration file (default is '%(default)s')")
-        group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='CC',
-                                 help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
+        group_magic.add_argument("--magic_mode", dest='magic_pex_mode',
+                                 default=MagicPEXMode.DEFAULT, type=MagicPEXMode, choices=list(MagicPEXMode),
+                                 help=render_enum_help(topic='magic_mode', enum_cls=MagicPEXMode))
         group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
                                  type=float, default=0.01,
-                                 help="Threshold for ignored parasitic capacitances (default is %(default)s)")
+                                 help="Threshold (in fF) for ignored parasitic capacitances (default is %(default)s). "
+                                      "(MAGIC command: ext2spice cthresh <value>)")
         group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
                                  type=float, default=100.0,
-                                 help="Threshold for ignored parasitic resistances (default is %(default)s)")
+                                 help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
+                                      "(MAGIC command: ext2spice rthresh <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
-                                 help="Custom sidewall halo distance in µm "
+                                 help="Custom sidewall halo distance (in µm) "
                                       "(MAGIC command: extract halo <value>) (default is no custom halo)")
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
@@ -400,13 +405,14 @@ class KpexCLI:
         if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
             error("No PEX engines activated")
             engine_help = """
-| Argument       | Description                             |
-| -------------- | --------------------------------------- |
-| --fastercap y  | Run kpex/FasterCap engine               |
-| --2.5D y       | Run kpex/2.5D engine                    |
-| --magic y      | Run MAGIC engine                        |
+| Argument     | Description               |
+| ------------ | ------------------------- |
+| --fastercap  | Run kpex/FasterCap engine |
+| --2.5D       | Run kpex/2.5D engine      |
+| --magic      | Run MAGIC engine          |
 """
-            subproc(f"\nPlease activate one or more engines using the arguments:\n{engine_help}")
+            subproc(f"\n\nPlease activate one or more engines using the arguments:")
+            rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
             found_errors = True
 
         if args.cache_dir_path is None:
