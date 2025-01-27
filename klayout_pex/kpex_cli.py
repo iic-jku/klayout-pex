@@ -181,16 +181,16 @@ class KpexCLI:
                                       help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
                                            "(default is %(default)s for testing now)")
         group_pex_options.add_argument("--fastercap", dest="run_fastercap",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run FasterCap engine (default is %(default)s)")
         group_pex_options.add_argument("--fastcap", dest="run_fastcap",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run FastCap2 engine (default is %(default)s)")
         group_pex_options.add_argument("--magic", dest="run_magic",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run MAGIC engine (default is %(default)s)")
         group_pex_options.add_argument("--2.5D", dest="run_2_5D",
-                                      type=true_or_false, default=False,
+                                      action='store_true', default=False,
                                       help="Run 2.5D analytical engine (default is %(default)s)")
 
         group_fastercap = main_parser.add_argument_group("FasterCap options")
@@ -405,13 +405,14 @@ class KpexCLI:
         if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
             error("No PEX engines activated")
             engine_help = """
-| Argument       | Description                             |
-| -------------- | --------------------------------------- |
-| --fastercap y  | Run kpex/FasterCap engine               |
-| --2.5D y       | Run kpex/2.5D engine                    |
-| --magic y      | Run MAGIC engine                        |
+| Argument     | Description               |
+| ------------ | ------------------------- |
+| --fastercap  | Run kpex/FasterCap engine |
+| --2.5D       | Run kpex/2.5D engine      |
+| --magic      | Run MAGIC engine          |
 """
-            subproc(f"\nPlease activate one or more engines using the arguments:\n{engine_help}")
+            subproc(f"\n\nPlease activate one or more engines using the arguments:")
+            rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
             found_errors = True
 
         if args.cache_dir_path is None:
