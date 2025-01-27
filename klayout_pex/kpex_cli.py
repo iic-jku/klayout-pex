@@ -243,8 +243,9 @@ class KpexCLI:
         group_magic = main_parser.add_argument_group("MAGIC options")
         group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
                                   help=f"Path to magicrc configuration file (default is '%(default)s')")
-        group_magic.add_argument("--magic_mode", dest='magic_pex_mode', default='CC',
-                                 help=render_enum_help(topic='log_level', enum_cls=MagicPEXMode))
+        group_magic.add_argument("--magic_mode", dest='magic_pex_mode',
+                                 default=MagicPEXMode.DEFAULT, type=MagicPEXMode, choices=list(MagicPEXMode),
+                                 help=render_enum_help(topic='magic_mode', enum_cls=MagicPEXMode))
         group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
                                  type=float, default=0.01,
                                  help="Threshold (in fF) for ignored parasitic capacitances (default is %(default)s). "
