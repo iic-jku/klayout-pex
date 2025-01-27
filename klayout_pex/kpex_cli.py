@@ -251,7 +251,8 @@ class KpexCLI:
                                       "(MAGIC command: ext2spice cthresh <value>)")
         group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
                                  type=float, default=100.0,
-                                 help="Threshold for ignored parasitic resistances (default is %(default)s)")
+                                 help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
+                                      "(MAGIC command: ext2spice rthresh <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance in µm "
