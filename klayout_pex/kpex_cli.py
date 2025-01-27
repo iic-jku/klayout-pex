@@ -152,7 +152,8 @@ class KpexCLI:
                                    help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
-        group_pex.add_argument("--pdk", dest="pdk", required=True, type=PDK,
+        group_pex.add_argument("--pdk", dest="pdk", required=True,
+                               type=PDK, choices=list(PDK),
                                help=render_enum_help(topic='pdk', enum_cls=PDK))
 
         group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
