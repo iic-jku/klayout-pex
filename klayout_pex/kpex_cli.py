@@ -162,7 +162,8 @@ class KpexCLI:
                                                          description="Either LVS is run, or an existing LVSDB is used")
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (for LVS)")
+                                     help="Schematic SPICE netlist path (for LVS). "
+                                          "If none given, a dummy schematic will be created")
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
