@@ -255,7 +255,7 @@ class KpexCLI:
                                       "(MAGIC command: ext2spice rthresh <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
-                                 help="Custom sidewall halo distance in µm "
+                                 help="Custom sidewall halo distance (in µm) "
                                       "(MAGIC command: extract halo <value>) (default is no custom halo)")
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
