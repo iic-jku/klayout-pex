@@ -93,7 +93,7 @@ def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CS
               '--pdk', 'sky130A',
               '--gds', gds_path,
               '--out_dir', output_dir_path,
-              '--2.5D', 'y'])
+              '--2.5D'])
     assert cli.rcx25_extraction_results is not None
     assert len(cli.rcx25_extraction_results.cell_extraction_results) == 1  # assume single cell test
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
