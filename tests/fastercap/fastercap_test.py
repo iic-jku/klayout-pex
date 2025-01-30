@@ -92,7 +92,7 @@ def _extract_single_cell(*path_components) -> Tuple[CSVPath, PNGPath]:
               '--pdk', 'sky130A',
               '--gds', gds_path,
               '--out_dir', output_dir_path,
-              '--fastercap', 'y'])
+              '--fastercap'])
     assert cli.fastercap_extracted_csv_path is not None
     return cli.fastercap_extracted_csv_path, preview_png_path
 
