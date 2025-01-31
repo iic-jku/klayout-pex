@@ -44,7 +44,8 @@ class LVSRunner:
                         gds_path: str,
                         schematic_path: str,
                         log_path: str,
-                        lvsdb_path: str):
+                        lvsdb_path: str,
+                        verbose: bool):
         args = [
             exe_path,
             '-b',
@@ -57,7 +58,7 @@ class LVSRunner:
             '-rd', 'spice_net_names=true',
             '-rd', 'spice_comments=false',
             '-rd', 'scale=false',
-            '-rd', 'verbose=true',
+            '-rd', f"verbose={'true' if verbose else 'false'}",
             '-rd', 'schematic_simplify=false',
             '-rd', 'net_only=false',
             '-rd', 'top_lvl_pins=true',
@@ -67,8 +68,9 @@ class LVSRunner:
             '-rd', 'purge_nets=false',
             '-rd', 'no_simplify=true', # IHP
         ]
-        info(f"Calling {' '.join(args)}, output file: {log_path}")
-        rule()
+        rule('Calling KLayout LVS script')
+        subproc(' '.join(args))
+        subproc(log_path)
         start = time.time()
 
         proc = subprocess.Popen(args,
