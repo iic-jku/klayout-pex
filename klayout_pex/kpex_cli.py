@@ -180,6 +180,9 @@ class KpexCLI:
                                      help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
         group_pex_input.add_argument("--cache-dir", dest="cache_dir_path", default=None,
                                      help="Path for cached LVSDB (default is .kpex_cache within --out_dir)")
+        group_pex_input.add_argument("--lvs-verbose", dest="klayout_lvs_verbose",
+                                     type=true_or_false, default=False,
+                                     help="Verbose KLayout LVS output (default is %(default)s)")
 
         group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
         group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
@@ -732,7 +735,8 @@ class KpexCLI:
                                                gds_path=args.effective_gds_path,
                                                schematic_path=args.effective_schematic_path,
                                                log_path=lvs_log_path,
-                                               lvsdb_path=lvsdb_path)
+                                               lvsdb_path=lvsdb_path,
+                                               verbose=args.klayout_lvs_verbose)
                     if args.cache_lvs:
                         cache_dir_path = os.path.dirname(lvsdb_cache_path)
                         if not os.path.exists(cache_dir_path):
