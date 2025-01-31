@@ -84,6 +84,7 @@ class RCExtractor:
         shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair)
         if not shapes:
             debug(f"Nothing extracted for layer {layer_name}")
+
         return shapes
 
     def extract(self) -> ExtractionResults:
@@ -138,6 +139,7 @@ class RCExtractor:
 
         layer_regions_by_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
         all_region = kdb.Region()
+        all_region.enable_properties()
         regions_below_layer: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
         regions_below_and_including_layer: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
         all_layer_names: List[LayerName] = []
@@ -146,6 +148,7 @@ class RCExtractor:
         previous_layer_name: Optional[str] = None
 
         substrate_region = kdb.Region()
+        substrate_region.enable_properties()
         substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(8.0 / dbu))  # 8 µm halo
         substrate_layer_name = self.tech_info.internal_substrate_layer_name
         layer_names_below[substrate_layer_name] = []
@@ -164,10 +167,17 @@ class RCExtractor:
             canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
 
             all_layer_shapes = self.shapes_of_layer(layer_name) or kdb.Region()
+
+            # This is important: in order to see the properties, we have to explicitly
+            # enable them. By default, Region objects ignore the properties.
+            all_layer_shapes.enable_properties()
+
             layer_regions_by_name[canonical_layer_name] += all_layer_shapes
+            layer_regions_by_name[canonical_layer_name].enable_properties()
             # NOTE: multiple LVS layers can be mapped to the same canonical name
             if previous_layer_name != canonical_layer_name:
                 regions_below_layer[canonical_layer_name] += all_region
+                regions_below_layer[canonical_layer_name].enable_properties()
                 layer_names_below[canonical_layer_name] = list(all_layer_names)
                 for ln in all_layer_names:
                     lp = (canonical_layer_name, ln)
@@ -177,6 +187,7 @@ class RCExtractor:
                 all_layer_names.append(canonical_layer_name)
             all_region += all_layer_shapes
             regions_below_and_including_layer[canonical_layer_name] += all_region
+            regions_below_and_including_layer[canonical_layer_name].enable_properties()
 
             previous_layer_name = canonical_layer_name
 
@@ -193,6 +204,7 @@ class RCExtractor:
         for top_layer_name in layer2net2regions.keys():
             for bot_layer_name in reversed(layer_names_below[top_layer_name]):
                 shielded_region = kdb.Region()
+                shielded_region.enable_properties()
                 shielding_layers = shielding_layer_names.get((top_layer_name, bot_layer_name), None)
                 if shielding_layers:
                     for sl in shielding_layers:
@@ -475,6 +487,7 @@ class RCExtractor:
 
                     polygons_on_same_layer = polygons_by_net.get(1, None)
                     shielded_region_lateral = kdb.Region()
+                    shielded_region_lateral.enable_properties()
                     if polygons_on_same_layer:
                         shielded_region_lateral.insert(polygons_on_same_layer)
                         rdb_output(rdb_cat_edge_interval, 'Laterally nearby shapes',
@@ -545,6 +558,7 @@ class RCExtractor:
                                    kdb.Region(self.to_original_trans(edge) * nearby_shield))
 
                     shielded_region_between = kdb.Region()
+                    shielded_region_between.enable_properties()
                     shielded_polygons = polygons_by_net.get(2, None)  # shielded from layers between
                     if shielded_polygons:
                         shielded_region_between.insert(shielded_polygons)
@@ -561,6 +575,7 @@ class RCExtractor:
                         unshielded_region: kdb.Region = kdb.Region(polygons) - shielded_region_between
                         if not unshielded_region:
                             continue
+                        unshielded_region.enable_properties()
 
                         net_name = self.child_names[net_index]
                         rdb_cat_outside_net = report.create_category(rdb_cat_edge_interval,
@@ -718,6 +733,10 @@ class RCExtractor:
                     )
 
                     nearby_shapes = shapes_inside_layer - shapes_inside_net
+
+                    nearby_shapes.enable_properties()
+                    shielded_regions_between.enable_properties()
+
                     # children = [kdb.CompoundRegionOperationNode.new_secondary(shapes_inside_net),
                     children = [kdb.CompoundRegionOperationNode.new_foreign(),
                                 kdb.CompoundRegionOperationNode.new_secondary(nearby_shapes),

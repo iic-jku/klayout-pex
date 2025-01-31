@@ -45,6 +45,9 @@ from ..tech_info import TechInfo
 
 GDSPair = Tuple[int, int]
 
+LayerIndexMap = Dict[int, int]  # maps layer indexes of LVSDB to annotated_layout
+LVSDBRegions = Dict[int, kdb.Region]  # maps layer index of annotated_layout to LVSDB region
+
 
 @dataclass
 class KLayoutExtractedLayerInfo:
@@ -65,7 +68,8 @@ class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
     dbu: float
     top_cell: kdb.Cell
-    layer_map: Dict[int, kdb.LayerInfo]
+    layer_index_map: LayerIndexMap
+    lvsdb_regions: LVSDBRegions
     cell_mapping: kdb.CellMapping
     target_layout: kdb.Layout
     extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
@@ -92,12 +96,15 @@ class KLayoutExtractionContext:
                                      top_cell,
                                      not blackbox_devices)  # with_device_cells
 
-        lm = cls.build_LVS_layer_map(target_layout=target_layout,
-                                     lvsdb=lvsdb,
-                                     tech=tech,
-                                     blackbox_devices=blackbox_devices)
+        lvsdb_regions, layer_index_map = cls.build_LVS_layer_map(annotated_layout=target_layout,
+                                                                 lvsdb=lvsdb,
+                                                                 tech=tech,
+                                                                 blackbox_devices=blackbox_devices)
 
-        net_name_prop_num = 1
+        # NOTE: GDS only supports integer properties to GDS,
+        #       as GDS does not support string keys,
+        #       like OASIS does.
+        net_name_prop = "net"
 
         # Build a full hierarchical representation of the nets
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method14
@@ -108,22 +115,26 @@ class KLayoutExtractionContext:
         lvsdb.build_all_nets(
             cmap=cm,               # mapping of internal layout to target layout for the circuit mapping
             target=target_layout,  # target layout
-            lmap=lm,               # maps: target layer index => net regions
+            lmap=lvsdb_regions,    # maps: target layer index => net regions
             hier_mode=hier_mode,   # hier mode
-            netname_prop=net_name_prop_num,  # property name to which to attach the net name
-            circuit_cell_name_prefix="CIRCUIT_",
-            device_cell_name_prefix=None  # "DEVICE_"
+            netname_prop=net_name_prop,  # property name to which to attach the net name
+            circuit_cell_name_prefix="CIRCUIT_", # NOTE: generates a cell for each circuit
+            net_cell_name_prefix=None,    # NOTE: this would generate a cell for each net
+            device_cell_name_prefix=None  # NOTE: this would create a cell for each device (e.g. transistor)
         )
 
         extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
                                                                          tech=tech,
+                                                                         annotated_layout=target_layout,
+                                                                         layer_index_map=layer_index_map,
                                                                          blackbox_devices=blackbox_devices)
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
             dbu=dbu,
             top_cell=top_cell,
-            layer_map=lm,
+            layer_index_map=layer_index_map,
+            lvsdb_regions=lvsdb_regions,
             cell_mapping=cm,
             target_layout=target_layout,
             extracted_layers=extracted_layers,
@@ -131,16 +142,17 @@ class KLayoutExtractionContext:
         )
 
     @staticmethod
-    def build_LVS_layer_map(target_layout: kdb.Layout,
+    def build_LVS_layer_map(annotated_layout: kdb.Layout,
                             lvsdb: kdb.LayoutToNetlist,
                             tech: TechInfo,
-                            blackbox_devices: bool) -> Dict[int, kdb.LayerInfo]:
+                            blackbox_devices: bool) -> Tuple[LVSDBRegions, LayerIndexMap]:
         # NOTE: currently, the layer numbers are auto-assigned
         # by the sequence they occur in the LVS script, hence not well defined!
         # build a layer map for the layers that correspond to original ones.
 
         # https://www.klayout.de/doc-qt5/code/class_LayerInfo.html
-        lm: Dict[int, kdb.LayerInfo] = {}
+        lvsdb_regions: LVSDBRegions = {}
+        layer_index_map: LayerIndexMap = {}
 
         if not hasattr(lvsdb, "layer_indexes"):
             raise Exception("Needs at least KLayout version 0.29.2")
@@ -157,29 +169,41 @@ class KLayoutExtractionContext:
                         continue
 
             gds_pair = tech.gds_pair_for_computed_layer_name.get(lname, None)
+            print(f"1 - gds_pair = {gds_pair}")
             if not gds_pair:
                 li = lvsdb.internal_layout().get_info(layer_index)
                 if li != kdb.LayerInfo():
                     gds_pair = (li.layer, li.datatype)
+                    print(f"1a - gds_pair = {gds_pair}   not found as computed!")
 
             if gds_pair is not None:
-                target_layer_index = target_layout.layer(*gds_pair)  # Creates a new internal layer!
+                annotated_layer_index = annotated_layout.layer()  # creates new index each time!
+                # Creates a new internal layer! because multiple layers with the same gds_pair are possible!
+                annotated_layout.set_info(annotated_layer_index, kdb.LayerInfo(*gds_pair))
                 region = lvsdb.layer_by_index(layer_index)
-                lm[target_layer_index] = region
+                lvsdb_regions[annotated_layer_index] = region
+                layer_index_map[layer_index] = annotated_layer_index
 
-        return lm
+        return lvsdb_regions, layer_index_map
 
     @staticmethod
     def nonempty_extracted_layers(lvsdb: kdb.LayoutToNetlist,
                                   tech: TechInfo,
+                                  annotated_layout: kdb.Layout,
+                                  layer_index_map: LayerIndexMap,
                                   blackbox_devices: bool) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
 
         unnamed_layers: List[KLayoutExtractedLayerInfo] = []
-
+        lvsdb_layer_indexes = lvsdb.layer_indexes()
         for idx, ln in enumerate(lvsdb.layer_names()):
-            layer = lvsdb.layer_by_name(ln)
+            li = lvsdb_layer_indexes[idx]
+            if li not in layer_index_map:
+                continue
+            li = layer_index_map[li]
+            layer = kdb.Region(annotated_layout.top_cell().begin_shapes_rec(li))
+            layer.enable_properties()
             if layer.count() >= 1:
                 computed_layer_info = tech.computed_layer_info_by_name.get(ln, None)
                 if not computed_layer_info:
@@ -229,25 +253,28 @@ class KLayoutExtractionContext:
         else:
             return b2
 
-    def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
-        lyr = self.extracted_layers.get(gds_pair, None)
-        if not lyr:
-            return None
-
-        shapes: kdb.Region
-
-        match len(lyr.source_layers):
-            case 0:
-                raise AssertionError('Internal error: Empty list of source_layers')
-            case 1:
-                shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
-            case _:
-                shapes = kdb.Region()
-                for sl in lyr.source_layers:
-                    shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
-                # shapes.merge()
-
-        return shapes
+    # def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
+    #     lyr = self.extracted_layers.get(gds_pair, None)
+    #     if not lyr:
+    #         return None
+    #
+    #     shapes: kdb.Region
+    #
+    #     match len(lyr.source_layers):
+    #         case 0:
+    #             raise AssertionError('Internal error: Empty list of source_layers')
+    #         case 1:
+    #             # shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
+    #             layer_index = lyr.source_layers[0].index
+    #             shapes = lyr.source_layers[0].region
+    #         case _:
+    #             shapes = kdb.Region()
+    #             for sl in lyr.source_layers:
+    #                 shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
+    #             # shapes.merge()
+    #
+    #     shapes.enable_properties()
+    #     return shapes
 
     def shapes_of_layer(self, gds_pair: GDSPair) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
