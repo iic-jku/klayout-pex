@@ -99,7 +99,8 @@ class PDK(StrEnum):
         # NOTE: installation paths of resources in the distribution wheel differs from source repo
         base_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
+        # NOTE: .git can be dir (standalone clone), or file (in case of submodule)
+        if os.path.exists(os.path.join(base_dir, '..', '.git')): # in source repo
             base_dir = os.path.dirname(base_dir)
             tech_pb_json_dir = os.path.join(base_dir, 'klayout_pex_protobuf')
         else:  # site-packages/klayout_pex -> site-packages/klayout_pex_protobuf
