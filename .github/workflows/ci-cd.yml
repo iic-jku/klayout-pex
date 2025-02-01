@@ -134,7 +134,7 @@ jobs:
       shell: bash    # NOTE: required for windows poetry calls
 
     - name: "[C++] Ccache for gh actions"
-      uses: hendrikmuhs/ccache-action@v1.2.14
+      uses: hendrikmuhs/ccache-action@v1.2.16
       with:
         key: ${{ github.job }}-${{ matrix.os }}  # Eg. "some_build-ubuntu-latest"
         
