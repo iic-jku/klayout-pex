@@ -251,29 +251,6 @@ class KLayoutExtractionContext:
         else:
             return b2
 
-    # def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
-    #     lyr = self.extracted_layers.get(gds_pair, None)
-    #     if not lyr:
-    #         return None
-    #
-    #     shapes: kdb.Region
-    #
-    #     match len(lyr.source_layers):
-    #         case 0:
-    #             raise AssertionError('Internal error: Empty list of source_layers')
-    #         case 1:
-    #             # shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
-    #             layer_index = lyr.source_layers[0].index
-    #             shapes = lyr.source_layers[0].region
-    #         case _:
-    #             shapes = kdb.Region()
-    #             for sl in lyr.source_layers:
-    #                 shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
-    #             # shapes.merge()
-    #
-    #     shapes.enable_properties()
-    #     return shapes
-
     def shapes_of_layer(self, gds_pair: GDSPair) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
