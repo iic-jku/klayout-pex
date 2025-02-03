@@ -169,12 +169,10 @@ class KLayoutExtractionContext:
                         continue
 
             gds_pair = tech.gds_pair_for_computed_layer_name.get(lname, None)
-            print(f"1 - gds_pair = {gds_pair}")
             if not gds_pair:
                 li = lvsdb.internal_layout().get_info(layer_index)
                 if li != kdb.LayerInfo():
                     gds_pair = (li.layer, li.datatype)
-                    print(f"1a - gds_pair = {gds_pair}   not found as computed!")
 
             if gds_pair is not None:
                 annotated_layer_index = annotated_layout.layer()  # creates new index each time!
