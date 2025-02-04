@@ -36,6 +36,7 @@ CellName = str
 
 ChildIndex = int
 
+PolygonNeighborhood = Dict[ChildIndex, List[kdb.PolygonWithProperties]]
 
 EdgeInterval = Tuple[float, float]
 EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]
