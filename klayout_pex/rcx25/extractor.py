@@ -43,6 +43,7 @@ from ..log import (
 from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .geometry_restorer import GeometryRestorer
 from .types import EdgeInterval, EdgeNeighborhood, EdgeNeighborhoodChild, EdgeNeighborhoodChildKind
 import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
 
