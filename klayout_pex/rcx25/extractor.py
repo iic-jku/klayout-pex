@@ -57,6 +57,9 @@ class RCExtractor:
         self.tech_info = tech_info
         self.report_path = report_path
 
+        if "PolygonWithProperties" not in kdb.__all__:
+            raise Exception("KLayout version does not support properties (needs 0.30 at least)")
+
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
         gds_pair = self.tech_info.gds_pair_for_computed_layer_name.get(layer_name, None)
         if not gds_pair:
