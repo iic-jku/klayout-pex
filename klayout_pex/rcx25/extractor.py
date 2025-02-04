@@ -199,13 +199,14 @@ class RCExtractor:
             info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
-            sidewall_cap = SidewallCap(key=swk,
-                                       cap_value=cap_femto,
-                                       distance=distance_um,
-                                       length=length_um,
-                                       tech_spec=sidewall_cap_spec)
+            sw_cap = SidewallCap(key=swk,
+                                 cap_value=cap_femto,
+                                 distance=distance_um,
+                                 length=length_um,
+                                 tech_spec=sidewall_cap_spec)
+            results.add_sidewall_cap(sw_cap)
 
-            report.output_sidewall(sidewall_cap=sidewall_cap,
+            report.output_sidewall(sidewall_cap=sw_cap,
                                    inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
                                    outside_edge=geometry_restorer.restore_edge(outside_edge))
 
