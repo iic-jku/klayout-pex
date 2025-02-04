@@ -105,8 +105,8 @@ class RCExtractor:
         dbu = self.pex_context.dbu
         # ------------------------------------------------------------------------
 
-        layer_by_name: Dict[LayerName, process_stack_pb2.ProcessStackInfo.LayerInfo] = {}
         layer_regions_by_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
+
         all_region = kdb.Region()
         all_region.enable_properties()
 
@@ -114,6 +114,8 @@ class RCExtractor:
         substrate_region.enable_properties()
         substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(8.0 / dbu))  # 8 µm halo
         substrate_layer_name = self.tech_info.internal_substrate_layer_name
+
+        layer_regions_by_name[substrate_layer_name] = substrate_region
 
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
@@ -129,6 +131,9 @@ class RCExtractor:
             layer_regions_by_name[canonical_layer_name] += all_layer_shapes
             layer_regions_by_name[canonical_layer_name].enable_properties()
             all_region += all_layer_shapes
+
+        all_layer_names = list(layer_regions_by_name.keys())
+        all_layer_regions = layer_regions_by_name.values()
 
         # ------------------------------------------------------------------------
 
@@ -146,7 +151,9 @@ class RCExtractor:
                 warning(f"No overlap cap specified for layer bottom={bot_layer_name}")
                 return
 
-            net_bot = polygon_bot.property('net')
+            net_bot = self.tech_info.internal_substrate_layer_name \
+                      if bot_layer_name == self.tech_info.internal_substrate_layer_name \
+                      else polygon_bot.property('net')
             net_top = polygon_top.property('net')
 
             top_region = kdb.Region(polygon_top)
@@ -324,11 +331,8 @@ class RCExtractor:
                                                 polygon=polygon,
                                                 geometry_restorer=geometry_restorer)
 
-        layer_names = list(layer_regions_by_name.keys())
-        all_layer_regions = layer_regions_by_name.values()
-
         for idx, (layer_name, layer_region) in enumerate(layer_regions_by_name.items()):
-            other_layer_names = [oln for oln in layer_names if oln != layer_name]
+            other_layer_names = [oln for oln in all_layer_names if oln != layer_name]
             other_layer_regions = [
                 r for ln, r in layer_regions_by_name.items()
                 if ln != layer_name
@@ -339,7 +343,7 @@ class RCExtractor:
             #
 
             ovl_visitor = PEXPolygonNeighborhoodVisitor(
-                layer_names=layer_names,
+                layer_names=all_layer_names,
                 inside_layer_index=idx
             )
 
