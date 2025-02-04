@@ -26,12 +26,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
+from .types import NetName, LayerName, CellName
 import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
-
-
-NetName = str
-LayerName = str
-CellName = str
 
 
 @dataclass
