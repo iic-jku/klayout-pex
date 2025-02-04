@@ -43,24 +43,8 @@ from ..log import (
 from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .types import EdgeInterval, EdgeNeighborhood, EdgeNeighborhoodChild, EdgeNeighborhoodChildKind
 import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
-
-
-EdgeInterval = Tuple[float, float]
-ChildIndex = int
-EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]
-
-
-class EdgeNeighborhoodChildKind(IntEnum):
-    UNINITIALIZED = 0
-    SIDEWALL = 1
-    OTHER_LAYER = 2
-
-
-@dataclass
-class EdgeNeighborhoodChild:
-    kind: EdgeNeighborhoodChildKind
-    layer_name: LayerName
 
 
 class RCExtractor:
