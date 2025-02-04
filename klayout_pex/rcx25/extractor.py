@@ -140,8 +140,7 @@ class RCExtractor:
         def emit_overlap(bot_layer_name: LayerName,
                          top_layer_name: LayerName,
                          polygon_bot: kdb.PolygonWithProperties,
-                         polygon_top: kdb.PolygonWithProperties,
-                         geometry_restorer: GeometryRestorer):
+                         polygon_top: kdb.PolygonWithProperties):
             top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
             if not top_overlap_specs:
                 warning(f"No overlap cap specified for layer top={top_layer_name}")
@@ -179,10 +178,9 @@ class RCExtractor:
 
                 results.add_overlap_cap(cap)
 
-                # TODO: fix restorer
                 report.output_overlap(overlap_cap=cap,
-                                      bottom_polygon=polygon_bot, # TODO geometry_restorer.restore_polygon(polygon_bot),
-                                      top_polygon=polygon_top,    # TODO geometry_restorer.restore_polygon(polygon_top),
+                                      bottom_polygon=polygon_bot,
+                                      top_polygon=polygon_top,
                                       overlap_area=overlap_area)
 
         def emit_sidewall(layer_name: LayerName,
@@ -258,10 +256,6 @@ class RCExtractor:
                           cell: kdb.Cell,
                           polygon: kdb.PolygonWithProperties,
                           neighborhood: PolygonNeighborhood):
-                # TODO: fix geometry restorer!
-                # geometry_restorer = GeometryRestorer(self.to_original_trans(polygon.each_edge()[0]))
-                geometry_restorer = None
-
                 # We just look "upwards", as we don't want to count areas twice
                 for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
                     neighbor_polygons = neighborhood.get(other_layer_index, None)
@@ -273,8 +267,7 @@ class RCExtractor:
                         emit_overlap(bot_layer_name=self.layer_names[self.inside_layer_index],
                                      top_layer_name=self.layer_names[other_layer_index],
                                      polygon_bot=polygon,
-                                     polygon_top=neighbor_polygon,
-                                     geometry_restorer=geometry_restorer)
+                                     polygon_top=neighbor_polygon)
 
         # ------------------------------------------------------------------------
 
