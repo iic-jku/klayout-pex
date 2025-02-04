@@ -43,6 +43,7 @@ from ..log import (
 from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .geometry_restorer import GeometryRestorer
 from .types import EdgeInterval, EdgeNeighborhood, EdgeNeighborhoodChild, EdgeNeighborhoodChildKind
 import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
 
@@ -124,22 +125,6 @@ class RCExtractor:
             layer_regions_by_name[canonical_layer_name] += all_layer_shapes
             layer_regions_by_name[canonical_layer_name].enable_properties()
             all_region += all_layer_shapes
-
-        # ------------------------------------------------------------------------
-
-        class GeometryRestorer:
-            def __init__(self, transformation: kdb.IMatrix3d):
-                self.transformation = transformation
-
-            def restore_edge_interval(self, edge_interval: EdgeInterval) -> kdb.Edge:
-                return self.transformation * kdb.Edge(kdb.Point(edge_interval[0], 0),
-                                                      kdb.Point(edge_interval[1], 0))
-
-            def restore_edge(self, edge: kdb.Edge) -> kdb.Edge:
-                return self.transformation * edge
-
-            def restore_polygon(self, polygon: kdb.Polygon) -> kdb.Polygon:
-                return self.transformation * polygon
 
         # ------------------------------------------------------------------------
 
