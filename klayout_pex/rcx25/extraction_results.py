@@ -130,25 +130,37 @@ class ExtractionSummary:
 class CellExtractionResults:
     cell_name: CellName
 
-    overlap_coupling: Dict[OverlapKey, OverlapCap] = field(default_factory=dict)
-    sidewall_table: Dict[SidewallKey, SidewallCap] = field(default_factory=dict)
-    sideoverlap_table: Dict[SideOverlapKey, SideOverlapCap] = field(default_factory=dict)
+    overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
+    sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
+    sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
+
+    def add_overlap_cap(self, cap: OverlapCap):
+        self.overlap_table[cap.key].append(cap)
+
+    def add_sidewall_cap(self, cap: SidewallCap):
+        self.sidewall_table[cap.key].append(cap)
+
+    def add_sideoverlap_cap(self, cap: SideOverlapCap):
+        self.sideoverlap_table[cap.key].append(cap)
 
     def summarize(self) -> ExtractionSummary:
-        overlap_summary = ExtractionSummary({
-            NetCoupleKey(key.net_top, key.net_bot): cap.cap_value
-            for key, cap in self.overlap_coupling.items()
-        })
+        normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.overlap_table.items():
+            normalized_key = NetCoupleKey(key.net_bot, key.net_top).normed()
+            normalized_overlap_table[normalized_key] += sum((e.cap_value for e in entries))
+        overlap_summary = ExtractionSummary(normalized_overlap_table)
 
-        sidewall_summary = ExtractionSummary({
-            NetCoupleKey(key.net1, key.net2): cap.cap_value
-            for key, cap in self.sidewall_table.items()
-        })
+        normalized_sidewall_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.sidewall_table.items():
+            normalized_key = NetCoupleKey(key.net1, key.net2).normed()
+            normalized_sidewall_table[normalized_key] += sum((e.cap_value for e in entries))
+        sidewall_summary = ExtractionSummary(normalized_sidewall_table)
 
-        sideoverlap_summary = ExtractionSummary({
-            NetCoupleKey(key.net_inside, key.net_outside): cap.cap_value
-            for key, cap in self.sideoverlap_table.items()
-        })
+        normalized_sideoverlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.sideoverlap_table.items():
+            normalized_key = NetCoupleKey(key.net_inside, key.net_outside).normed()
+            normalized_sideoverlap_table[normalized_key] += sum((e.cap_value for e in entries))
+        sideoverlap_summary = ExtractionSummary(normalized_sideoverlap_table)
 
         return ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary
