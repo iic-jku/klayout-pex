@@ -72,6 +72,28 @@ class ExtractionReporter:
                                  self.dbu_trans,
                                  shapes)
 
+    def output_overlap(self,
+                       overlap_cap: OverlapCap,
+                       bottom_polygon: kdb.PolygonWithProperties,
+                       top_polygon: kdb.PolygonWithProperties,
+                       overlap_area: kdb.Region):
+        cat_overlap_top_layer = self.report.create_category(self.cat_overlap,
+                                                            f"top_layer={overlap_cap.key.layer_top}")
+        cat_overlap_bot_layer = self.report.create_category(cat_overlap_top_layer,
+                                                            f'bot_layer={overlap_cap.key.layer_bot}')
+        cat_overlap_nets = self.report.create_category(cat_overlap_bot_layer,
+                                                       f'{overlap_cap.key.net_top} – {overlap_cap.key.net_bot}')
+        self.category_name_counter[cat_overlap_nets.path()] += 1
+        cat_overlap_cap = self.report.create_category(
+            cat_overlap_nets,
+            f"#{self.category_name_counter[cat_overlap_nets.path()]} "
+            f"{overlap_cap.cap_value} fF",
+        )
+
+        self.output_shapes(cat_overlap_cap, "Top Polygon", [top_polygon])
+        self.output_shapes(cat_overlap_cap, "Bottom Polygon", [bottom_polygon])
+        self.output_shapes(cat_overlap_cap, "Overlap Area", overlap_area)
+
     def output_sidewall(self,
                         sidewall_cap: SidewallCap,
                         inside_edge: kdb.Edge,
