@@ -34,10 +34,11 @@ NetName = str
 LayerName = str
 CellName = str
 
-EdgeInterval = Tuple[float, float]
 ChildIndex = int
-EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]
 
+
+EdgeInterval = Tuple[float, float]
+EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]
 
 class EdgeNeighborhoodChildKind(IntEnum):
     UNINITIALIZED = 0
