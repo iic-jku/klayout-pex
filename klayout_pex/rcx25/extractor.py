@@ -242,7 +242,97 @@ class RCExtractor:
                         edge_interval: EdgeInterval,
                         polygon: kdb.PolygonWithProperties,
                         geometry_restorer: GeometryRestorer):
-            pass
+            inside_net_name = self.tech_info.internal_substrate_layer_name \
+                              if inside_layer_name == self.tech_info.internal_substrate_layer_name \
+                              else edge.property('net')
+
+            outside_net_name = self.tech_info.internal_substrate_layer_name \
+                               if outside_layer_name == self.tech_info.internal_substrate_layer_name \
+                               else polygon.property('net')
+
+            # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
+            overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name,
+                                                                                                None)
+            if not overlap_cap_spec:
+                overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
+
+            substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name[inside_layer_name]
+            sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][outside_layer_name]
+
+            bbox = polygon.bbox()
+
+            if not polygon.is_box():
+                warning(f"Side overlap, outside polygon {polygon} is not a box. "
+                        f"Currently, only boxes are supported, will be using bounding box {bbox}")
+
+            distance_near = bbox.p1.y  # + 1
+            if distance_near < 0:
+                distance_near = 0
+            distance_far = bbox.p2.y  # - 2
+            if distance_far < 0:
+                distance_far = 0
+            try:
+                assert distance_near >= 0
+                assert distance_far >= distance_near
+            except AssertionError:
+                print()
+                raise
+
+            if distance_far == distance_near:
+                return
+
+            distance_near_um = distance_near * dbu
+            distance_far_um = distance_far * dbu
+
+            # NOTE: overlap scaling is 1/50  (see MAGIC ExtTech)
+            alpha_scale_factor = 0.02 * 0.01 * 0.5 * 200.0
+            alpha_c = overlap_cap_spec.capacitance * alpha_scale_factor
+
+            # see Magic ExtCouple.c L1164
+            cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um)
+            cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um)
+
+            # "cfrac" is the fractional portion of the fringe cap seen
+            # by tile tp along its length.  This is independent of the
+            # portion of the boundary length that tile tp occupies.
+            cfrac = cfar - cnear
+
+            # The fringe portion extracted from the substrate will be
+            # different than the portion added to the coupling layer.
+            sfrac: float
+
+            # see Magic ExtCouple.c L1198
+            alpha_s = substrate_cap_spec.area_capacitance / alpha_scale_factor
+            if alpha_s != alpha_c:
+                snear = (2.0 / math.pi) * math.atan(alpha_s * distance_near_um)
+                sfar = (2.0 / math.pi) * math.atan(alpha_s * distance_far_um)
+                sfrac = sfar - snear
+            else:
+                sfrac = cfrac
+
+            if outside_layer_name == substrate_layer_name:
+                cfrac = sfrac
+
+            edge_interval_length = edge_interval[1] - edge_interval[0]
+            edge_interval_length_um = edge_interval_length * dbu
+
+            cap_femto = (cfrac * edge_interval_length_um *
+                         sideoverlap_cap_spec.capacitance / 1000.0)
+            if cap_femto > 0.0:
+                info(f"(Side Overlap) {layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
+                     f"{round(cap_femto, 5)} fF, "
+                     f"edge interval length = {round(edge_interval_length_um, 2)} µm")
+
+                sok = SideOverlapKey(layer_inside=inside_layer_name,
+                                     net_inside=inside_net_name,
+                                     layer_outside=outside_layer_name,
+                                     net_outside=outside_net_name)
+                soc = SideOverlapCap(key=sok, cap_value=cap_femto)
+                results.add_sideoverlap_cap(soc)
+
+                report.output_sideoverlap(sideoverlap_cap=soc,
+                                          inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
+                                          outside_polygon=geometry_restorer.restore_polygon(polygon))
 
         # ------------------------------------------------------------------------
 
