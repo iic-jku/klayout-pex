@@ -39,6 +39,7 @@ ChildIndex = int
 PolygonNeighborhood = Dict[ChildIndex, List[kdb.PolygonWithProperties]]
 
 EdgeInterval = Tuple[float, float]
+EdgeDistance = float
 EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]
 
 class EdgeNeighborhoodChildKind(IntEnum):
