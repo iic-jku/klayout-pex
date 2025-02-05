@@ -260,17 +260,23 @@ class RCExtractor:
                           polygon: kdb.PolygonWithProperties,
                           neighborhood: PolygonNeighborhood):
                 # We just look "upwards", as we don't want to count areas twice
+
+                shielded_region = kdb.Region()
+
                 for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
-                    neighbor_polygons = neighborhood.get(other_layer_index, None)
-                    if neighbor_polygons is None:
+                    polygons_above = neighborhood.get(other_layer_index, None)
+                    if polygons_above is None:
                         continue
 
-                    for neighbor_polygon in neighbor_polygons:
+                    for polygon_above in polygons_above:
                         # TODO: bot_region is loop invariant, cache
                         emit_overlap(bot_layer_name=self.layer_names[self.inside_layer_index],
                                      top_layer_name=self.layer_names[other_layer_index],
                                      polygon_bot=polygon,
-                                     polygon_top=neighbor_polygon)
+                                     polygon_top=polygon_above,
+                                     shielded_region=shielded_region)
+
+                        shielded_region.insert(polygon_above)
 
         # ------------------------------------------------------------------------
 
