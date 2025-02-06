@@ -44,6 +44,7 @@ from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .geometry_restorer import GeometryRestorer
+from .polygon_utils import find_polygon_with_nearest_edge
 from .types import EdgeInterval, EdgeNeighborhood, EdgeNeighborhoodChild, EdgeNeighborhoodChildKind, \
                    PolygonNeighborhood
 import klayout_pex_protobuf.process_stack_pb2 as process_stack_pb2
@@ -209,7 +210,6 @@ class RCExtractor:
             avg_length = edge_interval[1] - edge_interval[0]
             avg_distance = min(polygon.bbox().p1.y, polygon.bbox().p2.y)
 
-            # outside_edge = kdb.Edge(polygon.bbox().p1, polygon.bbox().p2)
             outside_edge = [e for e in polygon.each_edge() if e.d().x < 0][-1]
 
             length_um = avg_length * dbu
@@ -399,7 +399,6 @@ class RCExtractor:
                 #       going from 0 to edge.length
                 #       so we only have to consider the y-axis to get the near and far distances
                 #
-
                 geometry_restorer = GeometryRestorer(self.to_original_trans(edge))
 
                 for edge_interval, polygons_by_child in neighborhood:
@@ -411,12 +410,18 @@ class RCExtractor:
 
                         match cd.kind:
                             case EdgeNeighborhoodChildKind.SIDEWALL:
-                                for polygon in polygons:
-                                    emit_sidewall(layer_name=cd.layer_name,
-                                                  edge=edge,
-                                                  edge_interval=edge_interval,
-                                                  polygon=polygon,
-                                                  geometry_restorer=geometry_restorer)
+                                # NOTE: use only the nearest polygon,
+                                #       as the others are laterally shielded by the nearer ones
+
+                                distance, nearest_polygon = find_polygon_with_nearest_edge(
+                                    polygons_on_same_layer=polygons
+                                )
+
+                                emit_sidewall(layer_name=cd.layer_name,
+                                              edge=edge,
+                                              edge_interval=edge_interval,
+                                              polygon=nearest_polygon,
+                                              geometry_restorer=geometry_restorer)
 
                             case EdgeNeighborhoodChildKind.OTHER_LAYER:
                                 for polygon in polygons:
