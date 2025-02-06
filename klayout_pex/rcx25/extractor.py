@@ -140,7 +140,8 @@ class RCExtractor:
         def emit_overlap(bot_layer_name: LayerName,
                          top_layer_name: LayerName,
                          polygon_bot: kdb.PolygonWithProperties,
-                         polygon_top: kdb.PolygonWithProperties):
+                         polygon_top: kdb.PolygonWithProperties,
+                         shielded_region: kdb.Region):
             top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
             if not top_overlap_specs:
                 warning(f"No overlap cap specified for layer top={top_layer_name}")
@@ -158,12 +159,13 @@ class RCExtractor:
             top_region = kdb.Region(polygon_top)
             bottom_region = kdb.Region(polygon_bot)
 
-            overlap_area = top_region.__and__(bottom_region)
+            overlap_area = top_region.__and__(bottom_region) - shielded_region
 
-            area_um2 = overlap_area.area() * dbu ** 2
-            cap_femto = area_um2 * overlap_cap_spec.capacitance / 1000.0
+            overlap_area_um2 = overlap_area.area() * dbu ** 2
+            cap_femto = overlap_area_um2 * overlap_cap_spec.capacitance / 1000.0
             info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
-                 f"cap: {round(cap_femto, 2)} fF")
+                 f"cap: {round(cap_femto, 2)} fF, "
+                 f"area: {overlap_area_um2} µm^2")
 
             if cap_femto > 0.0:
                 ovk = OverlapKey(layer_top=top_layer_name,
