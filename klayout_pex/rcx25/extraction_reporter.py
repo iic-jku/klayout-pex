@@ -87,7 +87,7 @@ class ExtractionReporter:
         cat_overlap_cap = self.report.create_category(
             cat_overlap_nets,
             f"#{self.category_name_counter[cat_overlap_nets.path()]} "
-            f"{overlap_cap.cap_value} fF",
+            f"{round(overlap_cap.cap_value, 3)} fF",
         )
 
         self.output_shapes(cat_overlap_cap, "Top Polygon", [top_polygon])
@@ -110,7 +110,8 @@ class ExtractionReporter:
             cat_sidewall_net_outside,
             f"#{self.category_name_counter[cat_sidewall_net_outside.path()]}: "
             f"len {sidewall_cap.length} µm, "
-            f"distance {sidewall_cap.distance} µm, {sidewall_cap.cap_value} fF",
+            f"distance {sidewall_cap.distance} µm, "
+            f"{round(sidewall_cap.cap_value, 3)} fF",
             [inside_edge, outside_edge]
         )
 
@@ -120,11 +121,11 @@ class ExtractionReporter:
                            outside_polygon: kdb.Polygon):
         cat_sideoverlap_layer_inside = self.report.create_category(self.cat_fringe,
                                                                    f"inside_layer={sideoverlap_cap.key.layer_inside}")
-        cat_sideoverlap_layer_outside = self.report.create_category(cat_sideoverlap_layer_inside,
-                                                                    f'outside_layer={sideoverlap_cap.key.layer_outside}')
-        cat_sideoverlap_net_inside = self.report.create_category(cat_sideoverlap_layer_outside,
+        cat_sideoverlap_net_inside = self.report.create_category(cat_sideoverlap_layer_inside,
                                                                  f'inside_net={sideoverlap_cap.key.net_inside}')
-        cat_sideoverlap_net_outside = self.report.create_category(cat_sideoverlap_net_inside,
+        cat_sideoverlap_layer_outside = self.report.create_category(cat_sideoverlap_net_inside,
+                                                                    f'outside_layer={sideoverlap_cap.key.layer_outside}')
+        cat_sideoverlap_net_outside = self.report.create_category(cat_sideoverlap_layer_outside,
                                                                   f'outside_net={sideoverlap_cap.key.net_outside}')
         self.category_name_counter[cat_sideoverlap_net_outside.path()] += 1
 
@@ -135,6 +136,6 @@ class ExtractionReporter:
         self.output_shapes(
             cat_sideoverlap_net_outside,
             f"#{self.category_name_counter[cat_sideoverlap_net_outside.path()]}: "
-            f"{sideoverlap_cap.cap_value} fF",
+            f"{round(sideoverlap_cap.cap_value, 3)} fF",
             shapes
         )
