@@ -320,7 +320,8 @@ class RCExtractor:
                          sideoverlap_cap_spec.capacitance / 1000.0)
             if cap_femto > 0.0:
                 info(f"(Side Overlap) {layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
-                     f"{round(cap_femto, 5)} fF")
+                     f"{round(cap_femto, 5)} fF, "
+                     f"edge interval length = {round(edge_interval_length_um, 2)} µm")
 
                 sok = SideOverlapKey(layer_inside=inside_layer_name,
                                      net_inside=inside_net_name,
