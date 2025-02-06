@@ -338,6 +338,7 @@ class RCExtractor:
             def __init__(self,
                          layer_names: List[LayerName],
                          inside_layer_index: int):
+                super().__init__()
                 self.layer_names = layer_names
                 self.inside_layer_index = inside_layer_index
 
@@ -370,6 +371,8 @@ class RCExtractor:
         class PEXEdgeNeighborhoodVisitor(kdb.EdgeNeighborhoodVisitor):
             def __init__(self,
                          children_description: List[EdgeNeighborhoodChild]):
+                super().__init__()
+
                 self.children_description = children_description
                 # NOTE: children_description[0] is the inside net (foreign)
                 #       children_description[1:] are the outside nets
