@@ -39,3 +39,11 @@ Check out the [documentation website](https://martinjankoehler.github.io/klayout
 `pip install klayout-pex`
 
 After that, you should be able to run `kpex --help`.
+
+## Acknowledgements
+
+Special thanks to the public funded German project FMD-QNC (16ME0831)
+https://www.elektronikforschung.de/projekte/fmd-qnc for financial
+support to this work.
+
+
