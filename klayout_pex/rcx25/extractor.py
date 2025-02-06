@@ -319,7 +319,8 @@ class RCExtractor:
             cap_femto = (cfrac * edge_interval_length_um *
                          sideoverlap_cap_spec.capacitance / 1000.0)
             if cap_femto > 0.0:
-                # report.create_category(rdb_cat_outside_net, f"{round(cap_femto, 3)} fF")  # used as info text
+                info(f"(Side Overlap) {layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
+                     f"{round(cap_femto, 5)} fF")
 
                 sok = SideOverlapKey(layer_inside=inside_layer_name,
                                      net_inside=inside_net_name,
