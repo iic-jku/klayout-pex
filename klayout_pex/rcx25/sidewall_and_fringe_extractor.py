@@ -87,9 +87,9 @@ class SidewallAndFringeExtractor:
             en_node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
                 children=en_children,
                 visitor=en_visitor,
-                bext=0, # bext
-                eext=0, # eext,
-                din=0, # din
+                bext=-1, # NOTE: subtract 1 dbu to suppress quasi-empty contributions (will also suppress 90° edges)
+                eext=-1, # NOTE: subtract 1 dbu to suppress quasi-empty contributions (will also suppress 90° edges)
+                din=0,
                 dout=side_halo_dbu # dout
             )
 
