@@ -23,6 +23,7 @@
 # --------------------------------------------------------------------------------
 #
 
+from functools import cached_property
 import math
 
 import klayout.db as kdb
@@ -37,7 +38,7 @@ from .geometry_restorer import GeometryRestorer
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .polygon_utils import find_polygon_with_nearest_edge
-from .types import EdgeInterval, EdgeNeighborhood, EdgeNeighborhoodChild, EdgeNeighborhoodChildKind
+from .types import EdgeInterval, EdgeNeighborhood
 
 
 class SidewallAndFringeExtractor:
@@ -55,31 +56,42 @@ class SidewallAndFringeExtractor:
         self.results = results
         self.report = report
 
+        self.all_layer_regions = layer_regions_by_name.values()
+
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
-            other_layer_names = [oln for oln in self.all_layer_names if oln != layer_name]
             other_layer_regions = [
                 r for ln, r in self.layer_regions_by_name.items()
                 if ln != layer_name
             ]
 
             en_visitor = self.PEXEdgeNeighborhoodVisitor(
-                children_description=[EdgeNeighborhoodChild(EdgeNeighborhoodChildKind.SIDEWALL, layer_name)] +
-                                     [EdgeNeighborhoodChild(EdgeNeighborhoodChildKind.OTHER_LAYER, name)
-                                      for name in other_layer_names],
-                inside_layer_name=layer_name,
+                all_layer_names=self.all_layer_names,
+                inside_layer_index=idx,
                 dbu=self.dbu,
                 tech_info=self.tech_info,
                 results=self.results,
                 report=self.report
             )
 
-            en_children = [
-                # kdb.CompoundRegionOperationNode.new_primary(),
-                kdb.CompoundRegionOperationNode.new_foreign()
-            ]
-            en_children += [kdb.CompoundRegionOperationNode.new_secondary(other_layer_region)
-                            for other_layer_region in other_layer_regions]
+            # layer_regions_with_cleared_inside_region = list(self.all_layer_regions)
+            # layer_regions_with_cleared_inside_region[idx] = kdb.Region()
+            #
+            # en_children = [
+            #     # kdb.CompoundRegionOperationNode.new_primary(),
+            #     kdb.CompoundRegionOperationNode.new_foreign()
+            # ]
+            # en_children += [kdb.CompoundRegionOperationNode.new_secondary(r)
+            #                 for r in layer_regions_with_cleared_inside_region]
+            #
+            # en_children = [
+            #     # kdb.CompoundRegionOperationNode.new_primary(),
+            #     kdb.CompoundRegionOperationNode.new_foreign()
+            # ]
+
+            en_children = [kdb.CompoundRegionOperationNode.new_secondary(r)
+                           for r in self.all_layer_regions]
+            en_children[idx] = kdb.CompoundRegionOperationNode.new_foreign()
 
             side_halo_um = self.tech_info.tech.process_parasitics.side_halo
             side_halo_dbu = int(side_halo_um / self.dbu) + 1  # add 1 nm to halo
@@ -99,20 +111,30 @@ class SidewallAndFringeExtractor:
 
     class PEXEdgeNeighborhoodVisitor(kdb.EdgeNeighborhoodVisitor):
         def __init__(self,
-                     children_description: List[EdgeNeighborhoodChild],
-                     inside_layer_name: LayerName,
+                     all_layer_names: List[LayerName],
+                     inside_layer_index: int,
                      dbu: float,
                      tech_info: TechInfo,
                      results: CellExtractionResults,
                      report: ExtractionReporter):
             super().__init__()
 
-            self.children_description = children_description
-            self.inside_layer_name = inside_layer_name
+            self.all_layer_names = all_layer_names
+            self.inside_layer_index = inside_layer_index
             self.dbu = dbu
             self.tech_info = tech_info
             self.results = results
             self.report = report
+
+            # NOTE: prepare layers below and layers above the "inside" layer,
+            #       each prepared for iteration that allows iterativly growing a shield region
+            self.layer_below_indices = reversed(range(0, inside_layer_index))
+            self.layer_above_indices = range(inside_layer_index,
+                                             len(all_layer_names) - inside_layer_index)
+
+        @cached_property
+        def inside_layer_name(self) -> LayerName:
+            return self.all_layer_names[self.inside_layer_index]
 
         def begin_polygon(self,
                           layout: kdb.Layout,
@@ -139,36 +161,47 @@ class SidewallAndFringeExtractor:
                 if not polygons_by_child:
                     continue
 
+                shields = [kdb.Region() for _ in self.all_layer_names]
                 for child_index, polygons in polygons_by_child.items():
-                    cd = self.children_description[child_index]
+                    shields[child_index].insert(polygons)
 
-                    match cd.kind:
-                        case EdgeNeighborhoodChildKind.SIDEWALL:
-                            # NOTE: use only the nearest polygon,
-                            #       as the others are laterally shielded by the nearer ones
+                for child_index, polygons in polygons_by_child.items():
+                    if self.inside_layer_index == child_index:   # SIDEWALL!
+                        # NOTE: use only the nearest polygon,
+                        #       as the others are laterally shielded by the nearer ones
+                        distance, nearest_polygon = find_polygon_with_nearest_edge(
+                            polygons_on_same_layer=polygons
+                        )
 
-                            distance, nearest_polygon = find_polygon_with_nearest_edge(
-                                polygons_on_same_layer=polygons
-                            )
+                        self.emit_sidewall(
+                            layer_name=self.inside_layer_name,
+                            edge=edge,
+                            edge_interval=edge_interval,
+                            polygon=nearest_polygon,
+                            geometry_restorer=geometry_restorer
+                        )
+                    else:   # FRINGE!
+                        shield = kdb.Region()
+                        if child_index < self.inside_layer_index:
+                            r = range(child_index + 1, self.inside_layer_index)
+                            for idx in r:
+                                shield += shields[idx]
+                        elif self.inside_layer_index < child_index:
+                            r = range(self.inside_layer_index + 1, child_index)
+                            for idx in r:
+                                shield += shields[idx]
 
-                            self.emit_sidewall(
-                                layer_name=self.inside_layer_name,
+
+                        for polygon in polygons:
+                            self.emit_fringe(
+                                inside_layer_name=self.inside_layer_name,
+                                outside_layer_name=self.all_layer_names[child_index],
                                 edge=edge,
                                 edge_interval=edge_interval,
-                                polygon=nearest_polygon,
+                                polygon=polygon,
+                                shield=shield,
                                 geometry_restorer=geometry_restorer
                             )
-
-                        case EdgeNeighborhoodChildKind.OTHER_LAYER:
-                            for polygon in polygons:
-                                self.emit_fringe(
-                                    inside_layer_name=self.inside_layer_name,
-                                    outside_layer_name=cd.layer_name,
-                                    edge=edge,
-                                    edge_interval=edge_interval,
-                                    polygon=polygon,
-                                    geometry_restorer=geometry_restorer
-                                )
 
         def emit_sidewall(self,
                           layer_name: LayerName,
@@ -229,6 +262,7 @@ class SidewallAndFringeExtractor:
                         edge: kdb.EdgeWithProperties,
                         edge_interval: EdgeInterval,
                         polygon: kdb.PolygonWithProperties,
+                        shield: kdb.Region,
                         geometry_restorer: GeometryRestorer):
             inside_net_name = self.tech_info.internal_substrate_layer_name \
                 if inside_layer_name == self.tech_info.internal_substrate_layer_name \
@@ -237,6 +271,11 @@ class SidewallAndFringeExtractor:
             outside_net_name = self.tech_info.internal_substrate_layer_name \
                 if outside_layer_name == self.tech_info.internal_substrate_layer_name \
                 else polygon.property('net')
+
+            unshielded_polygon = kdb.Region(polygon)
+            unshielded_polygon -= shield
+            if unshielded_polygon.is_empty():
+                return
 
             # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
             overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name,
@@ -248,10 +287,10 @@ class SidewallAndFringeExtractor:
             sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][
                 outside_layer_name]
 
-            bbox = polygon.bbox()
+            bbox = unshielded_polygon.bbox()
 
-            if not polygon.is_box():
-                warning(f"Side overlap, outside polygon {polygon} is not a box. "
+            if not unshielded_polygon.is_box():
+                warning(f"Side overlap, outside polygon {unshielded_polygon} is not a box. "
                         f"Currently, only boxes are supported, will be using bounding box {bbox}")
 
             distance_near = bbox.p1.y  # + 1
@@ -320,7 +359,7 @@ class SidewallAndFringeExtractor:
                 soc = SideOverlapCap(key=sok, cap_value=cap_femto)
                 self.results.add_sideoverlap_cap(soc)
 
-                self.report.output_sideoverlap(#
+                self.report.output_sideoverlap(
                     sideoverlap_cap=soc,
                     inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
                     outside_polygon=geometry_restorer.restore_polygon(polygon)
