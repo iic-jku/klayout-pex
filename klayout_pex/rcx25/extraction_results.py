@@ -87,6 +87,16 @@ class SideOverlapKey:
         return f"{self.layer_inside}({self.net_inside})-"\
                f"{self.layer_outside}({self.net_outside})"
 
+    def __post_init__(self):
+        if self.layer_inside is None:
+            raise ValueError("layer_inside cannot be None")
+        if self.net_inside is None:
+            raise ValueError("net_inside cannot be None")
+        if self.layer_outside is None:
+            raise ValueError("layer_outside cannot be None")
+        if self.net_outside is None:
+            raise ValueError("net_outside cannot be None")
+
 
 @dataclass
 class SideOverlapCap:
@@ -104,6 +114,12 @@ class NetCoupleKey:
 
     def __repr__(self) -> str:
         return f"{self.net1}-{self.net2}"
+
+    def __post_init__(self):
+        if self.net1 is None:
+            raise ValueError("net1 cannot be None")
+        if self.net2 is None:
+            raise ValueError("net2 cannot be None")
 
     # NOTE: we norm net names alphabetically
     def normed(self) -> NetCoupleKey:
