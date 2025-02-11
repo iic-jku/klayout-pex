@@ -777,10 +777,10 @@ class KpexCLI:
             names = [l.lvs_layer_name for l in layer_info.source_layers]
             info(f"{gds_pair} -> ({' '.join(names)})")
 
-        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.gds.gz")
+        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.oas.gz")
         pex_context.target_layout.write(gds_path)
 
-        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.gds.gz")
+        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.oas.gz")
         pex_context.lvsdb.internal_layout().write(gds_path)
 
         def dump_layers(cell: str,
