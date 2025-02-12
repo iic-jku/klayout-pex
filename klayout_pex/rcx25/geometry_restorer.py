@@ -41,3 +41,6 @@ class GeometryRestorer:
 
     def restore_polygon(self, polygon: kdb.Polygon) -> kdb.Polygon:
         return self.transformation * polygon
+
+    def restore_region(self, region: kdb.Region) -> kdb.Region:
+        return region.transformed(self.transformation)
