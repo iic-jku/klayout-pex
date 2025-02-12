@@ -119,6 +119,8 @@ class ExtractionReporter:
                            sideoverlap_cap: SideOverlapCap,
                            inside_edge: kdb.Edge,
                            outside_polygon: kdb.Polygon):
+        # ,
+        #                    unshielded_region: kdb.Region):
         cat_sideoverlap_layer_inside = self.report.create_category(self.cat_fringe,
                                                                    f"inside_layer={sideoverlap_cap.key.layer_inside}")
         cat_sideoverlap_net_inside = self.report.create_category(cat_sideoverlap_layer_inside,
@@ -129,13 +131,16 @@ class ExtractionReporter:
                                                                   f'outside_net={sideoverlap_cap.key.net_outside}')
         self.category_name_counter[cat_sideoverlap_net_outside.path()] += 1
 
-        shapes = kdb.Shapes()
-        shapes.insert(inside_edge)
-        shapes.insert(outside_polygon)
-
-        self.output_shapes(
+        cat_sideoverlap_cap = self.report.create_category(
             cat_sideoverlap_net_outside,
             f"#{self.category_name_counter[cat_sideoverlap_net_outside.path()]}: "
-            f"{round(sideoverlap_cap.cap_value, 3)} fF",
-            shapes
+            f"{round(sideoverlap_cap.cap_value, 3)} fF"
         )
+
+        self.output_shapes(cat_sideoverlap_cap, 'Inside Edge', inside_edge)
+
+        shapes = kdb.Shapes()
+        shapes.insert(outside_polygon)
+        self.output_shapes(cat_sideoverlap_cap, 'Outside Polygon', shapes)
+
+        # self.output_shapes(cat_sideoverlap_cap, 'Unshielded Region', unshielded_region)
