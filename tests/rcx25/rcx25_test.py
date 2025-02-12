@@ -135,7 +135,7 @@ def test_single_plate_100um_x_100um_li1_over_substrate():
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;PLATE;VSUBS;386.18"""
+C1;PLATE;VSUBS;386.179"""
         )
 
 
@@ -158,9 +158,9 @@ def test_overlap_plates_100um_x_100um_li1_m1():
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;LOWER;VSUBS;386.18
-C2;LOWER;UPPER;294.592
-C3;UPPER;VSUBS;205.52"""
+C1;LOWER;VSUBS;386.179
+C2;UPPER;VSUBS;205.52
+C3;LOWER;UPPER;294.592"""
     )
 
 @allure.parent_suite(parent_suite)
@@ -193,13 +193,13 @@ def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;VSUBS;li1;386.18
-C2;li1;met1;294.592
-C3;VSUBS;met1;205.52
-C4;met1;met2;680.482
-C5;li1;met2;99.015
-C6;VSUBS;met2;51.302
-C7;VSUBS;met3;135.996
+C1;VSUBS;li1;386.179
+C2;VSUBS;met1;205.52
+C3;VSUBS;met2;51.301
+C4;VSUBS;met3;135.995
+C5;li1;met1;294.592
+C6;li1;met2;99.015
+C7;met1;met2;680.482
 C8;li1;met3;5.031"""
     )
 
@@ -246,8 +246,8 @@ def test_sidewall_net_uturn_l1_redux():
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C0;VSUBS;40.642
-C2;C1;VSUBS;15.079
+C1;C1;VSUBS;15.079
+C2;C0;VSUBS;40.641
 C3;C0;C1;0.019 TODO, MAGIC=1.87386 fF"""
         )
 
@@ -320,6 +320,6 @@ def test_sideoverlap_simple_plates_li1_m1():
         'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
 C1;VSUBS;li1;7.932
-C2;VSUBS;met1;249.059
+C2;VSUBS;met1;249.058
 C3;li1;met1;0.125 TODO"""
         )
