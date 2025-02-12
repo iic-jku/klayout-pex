@@ -39,6 +39,7 @@ from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .polygon_utils import find_polygon_with_nearest_edge
 from .types import EdgeInterval, EdgeNeighborhood
+from process_parasitics_pb2 import CapacitanceInfo
 
 
 class SidewallAndFringeExtractor:
@@ -146,9 +147,16 @@ class SidewallAndFringeExtractor:
                 if not polygons_by_child:
                     continue
 
-                shields = [kdb.Region() for _ in self.all_layer_names]
+                edge_interval_length = edge_interval[1] - edge_interval[0]
+                if edge_interval_length <= 1:
+                    warning(f"Short edge interval {edge_interval} "
+                            f"(length {edge_interval_length * self.dbu * 1000} nm), "
+                            f"expected to be dropped due to bext/eext parameters, skipping…")
+                    continue
+
+                layer_fringe_shields = [kdb.Region() for _ in self.all_layer_names]
                 for child_index, polygons in polygons_by_child.items():
-                    shields[child_index].insert(polygons)
+                    layer_fringe_shields[child_index].insert(polygons)
 
                 for child_index, polygons in polygons_by_child.items():
                     if self.inside_layer_index == child_index:   # SIDEWALL!
@@ -166,27 +174,28 @@ class SidewallAndFringeExtractor:
                             geometry_restorer=geometry_restorer
                         )
                     else:   # FRINGE!
-                        shield = kdb.Region()
+                        fringe_shield = kdb.Region()
                         if child_index < self.inside_layer_index:
                             r = range(child_index + 1, self.inside_layer_index)
                             for idx in r:
-                                shield += shields[idx]
+                                fringe_shield += layer_fringe_shields[idx]
                         elif self.inside_layer_index < child_index:
                             r = range(self.inside_layer_index + 1, child_index)
                             for idx in r:
-                                shield += shields[idx]
+                                fringe_shield += layer_fringe_shields[idx]
 
+                        # NOTE:
+                        #    polygons can have different nets
+                        #    polygons can be segmented after shield is applied
 
-                        for polygon in polygons:
-                            self.emit_fringe(
-                                inside_layer_name=self.inside_layer_name,
-                                outside_layer_name=self.all_layer_names[child_index],
-                                edge=edge,
-                                edge_interval=edge_interval,
-                                polygon=polygon,
-                                shield=shield,
-                                geometry_restorer=geometry_restorer
-                            )
+                        self.emit_fringe(
+                            inside_layer_name=self.inside_layer_name,
+                            outside_layer_name=self.all_layer_names[child_index],
+                            edge=edge,
+                            edge_interval=edge_interval,
+                            outside_polygons=polygons,
+                            shield=fringe_shield,
+                            geometry_restorer=geometry_restorer)
 
         def emit_sidewall(self,
                           layer_name: LayerName,
@@ -241,59 +250,14 @@ class SidewallAndFringeExtractor:
                 outside_edge=geometry_restorer.restore_edge(outside_edge)
             )
 
-        def emit_fringe(self,
-                        inside_layer_name: LayerName,
-                        outside_layer_name: LayerName,
-                        edge: kdb.EdgeWithProperties,
-                        edge_interval: EdgeInterval,
-                        polygon: kdb.PolygonWithProperties,
-                        shield: kdb.Region,
-                        geometry_restorer: GeometryRestorer):
-            inside_net_name = self.tech_info.internal_substrate_layer_name \
-                if inside_layer_name == self.tech_info.internal_substrate_layer_name \
-                else edge.property('net')
-
-            outside_net_name = self.tech_info.internal_substrate_layer_name \
-                if outside_layer_name == self.tech_info.internal_substrate_layer_name \
-                else polygon.property('net')
-
-            unshielded_polygon = kdb.Region(polygon)
-            unshielded_polygon -= shield
-            if unshielded_polygon.is_empty():
-                return
-
-            # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
-            overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name,
-                                                                                                None)
-            if not overlap_cap_spec:
-                overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
-
-            substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name[inside_layer_name]
-            sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][
-                outside_layer_name]
-
-            bbox = unshielded_polygon.bbox()
-
-            if not unshielded_polygon.is_box():
-                warning(f"Side overlap, outside polygon {unshielded_polygon} is not a box. "
-                        f"Currently, only boxes are supported, will be using bounding box {bbox}")
-
-            distance_near = bbox.p1.y  # + 1
-            if distance_near < 0:
-                distance_near = 0
-            distance_far = bbox.p2.y  # - 2
-            if distance_far < 0:
-                distance_far = 0
-            try:
-                assert distance_near >= 0
-                assert distance_far >= distance_near
-            except AssertionError:
-                print()
-                raise
-
-            if distance_far == distance_near:
-                return
-
+        def fringe_cap(self,
+                       edge_interval_length: float,
+                       distance_near: float,
+                       distance_far: float,
+                       to_substrate: bool,
+                       overlap_cap_spec: CapacitanceInfo.OverlapCapacitance,
+                       substrate_cap_spec: CapacitanceInfo.SubstrateCapacitance,
+                       sideoverlap_cap_spec: CapacitanceInfo.SideOverlapCapacitance) -> float:
             distance_near_um = distance_near * self.dbu
             distance_far_um = distance_far * self.dbu
 
@@ -323,30 +287,134 @@ class SidewallAndFringeExtractor:
             else:
                 sfrac = cfrac
 
-            if outside_layer_name == self.tech_info.internal_substrate_layer_name:
+            if to_substrate:
                 cfrac = sfrac
 
-            edge_interval_length = edge_interval[1] - edge_interval[0]
             edge_interval_length_um = edge_interval_length * self.dbu
 
             cap_femto = (cfrac * edge_interval_length_um *
                          sideoverlap_cap_spec.capacitance / 1000.0)
-            if cap_femto > 0.0:
-                info(f"(Side Overlap) "
-                     f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
-                     f"{round(cap_femto, 5)} fF, "
-                     f"edge interval length = {round(edge_interval_length_um, 2)} µm")
 
-                sok = SideOverlapKey(layer_inside=inside_layer_name,
-                                     net_inside=inside_net_name,
-                                     layer_outside=outside_layer_name,
-                                     net_outside=outside_net_name)
-                soc = SideOverlapCap(key=sok, cap_value=cap_femto)
-                self.results.add_sideoverlap_cap(soc)
+            return cap_femto
 
-                self.report.output_sideoverlap(
-                    sideoverlap_cap=soc,
-                    inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
-                    outside_polygon=geometry_restorer.restore_polygon(polygon)
-                )
+        def emit_fringe(self,
+                        inside_layer_name: LayerName,
+                        outside_layer_name: LayerName,
+                        edge: kdb.EdgeWithProperties,
+                        edge_interval: EdgeInterval,
+                        outside_polygons: List[kdb.PolygonWithProperties],
+                        shield: kdb.Region,
+                        geometry_restorer: GeometryRestorer):
+            inside_net_name = self.tech_info.internal_substrate_layer_name \
+                if inside_layer_name == self.tech_info.internal_substrate_layer_name \
+                else edge.property('net')
+
+            # NOTE: each polygon in outside_polygons
+            #          - could have a different net
+            #          - could be segmented by a shield into multiple polygons
+            #            each with different near/far regions
+
+            outside_net_names = [
+                self.tech_info.internal_substrate_layer_name \
+                if outside_layer_name == self.tech_info.internal_substrate_layer_name \
+                else p.property('net')
+                for p in outside_polygons
+            ]
+
+            same_net_markers = [
+                inside_net_name == outside_net_name
+                for outside_net_name in outside_net_names
+            ]
+
+            # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
+            overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name,
+                                                                                                None)
+            if not overlap_cap_spec:
+                overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
+
+            substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name[inside_layer_name]
+            sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][
+                outside_layer_name]
+
+            polygons_by_net: Dict[NetName, List[kdb.PolygonWithProperties]] = defaultdict(list)
+
+            for idx, p in enumerate(outside_polygons):
+                outside_net = outside_net_names[idx]
+                is_same_net = same_net_markers[idx]
+
+                if is_same_net:
+                    # TODO: log?
+                    continue
+
+                if shield.is_empty():
+                    polygons_by_net[outside_net].append(p)
+                else:
+                    unshielded_region = kdb.Region(p)
+                    unshielded_region.enable_properties()
+                    unshielded_region -= shield
+                    if unshielded_region.is_empty():
+                        # TODO: log?
+                        continue
+
+                    for up in unshielded_region.each():
+                        up = kdb.PolygonWithProperties(up, {'net': outside_net})
+                        polygons_by_net[outside_net].append(up)
+                        # if p != up:
+                        #    print(f"Unshieleded polygon {up}, differs from original polygon {p}")
+
+            for outside_net_name, polygons in polygons_by_net.items():
+                for p in polygons:
+                    bbox = p.bbox()
+                    if not p.is_box():
+                        warning(f"Side overlap, polygon {p} is not a box. "
+                                f"Currently, only boxes are supported, will be using bounding box {bbox}")
+
+                    distance_near = bbox.p1.y  # + 1
+                    if distance_near < 0:
+                        distance_near = 0
+                    distance_far = bbox.p2.y  # - 2
+                    if distance_far < 0:
+                        distance_far = 0
+                    try:
+                        assert distance_near >= 0
+                        assert distance_far >= distance_near
+                    except AssertionError:
+                        print()
+                        raise
+
+                    if distance_far == distance_near:
+                        return
+
+                    edge_interval_length = edge_interval[1] - edge_interval[0]
+                    edge_interval_length_um = edge_interval_length * self.dbu
+
+                    to_substrate = outside_layer_name == self.tech_info.internal_substrate_layer_name
+
+                    cap_femto = self.fringe_cap(edge_interval_length=edge_interval_length,
+                                                distance_near=distance_near,
+                                                distance_far=distance_far,
+                                                to_substrate=to_substrate,
+                                                overlap_cap_spec=overlap_cap_spec,
+                                                substrate_cap_spec=substrate_cap_spec,
+                                                sideoverlap_cap_spec=sideoverlap_cap_spec)
+
+                    if cap_femto > 0.0001:  # TODO: configurable threshold, but keeping accumulation might also be nice
+                        info(f"(Side Overlap) "
+                             f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
+                             f"{round(cap_femto, 5)} fF, "
+                             f"edge interval length = {round(edge_interval_length_um, 2)} µm")
+
+                        sok = SideOverlapKey(layer_inside=inside_layer_name,
+                                             net_inside=inside_net_name,
+                                             layer_outside=outside_layer_name,
+                                             net_outside=outside_net_name)
+                        soc = SideOverlapCap(key=sok, cap_value=cap_femto)
+                        self.results.add_sideoverlap_cap(soc)
+
+                        self.report.output_sideoverlap(
+                            sideoverlap_cap=soc,
+                            inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
+                            outside_polygon=geometry_restorer.restore_polygon(p)
+                            # unshielded_region=geometry_restorer.restore_region(unshielded_region)
+                        )
 
