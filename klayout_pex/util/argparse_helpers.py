@@ -40,7 +40,9 @@ def render_enum_help(topic: str,
         return name.lower()
     if not hasattr(enum_cls, 'DEFAULT'):
         print_default = False
-    case_list = [f"'{canonic_string(name, member)}'" for name, member in enum_cls.__members__.items()]
+    case_list = [f"'{canonic_string(name, member)}'"
+                 for name, member in enum_cls.__members__.items()
+                 if name.lower() != 'default']
     enum_help = f"{topic} ∈ \u007b{', '.join(case_list)}\u007d"
     if print_default:
         default_case: enum_cls = getattr(enum_cls, 'DEFAULT')
