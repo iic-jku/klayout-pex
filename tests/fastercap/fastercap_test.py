@@ -124,6 +124,7 @@ def assert_expected_matches_obtained(*path_components,
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+@pytest.mark.fastercap
 def test_single_plate_100um_x_100um_li1_over_substrate():
     #_______________________________ NOTE: with halo=8µm __________________________________
     # C0 PLATE VSUBS 0.38618p
