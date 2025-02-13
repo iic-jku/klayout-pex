@@ -41,7 +41,6 @@ function run_tests() {
     rm -rf "$COVERAGE_PATH"
 
     set -x
-    set -e
 
     poetry run coverage run -m pytest -m "$PATTERN" \
         --alluredir "$ALLURE_RESULTS_PATH" \
