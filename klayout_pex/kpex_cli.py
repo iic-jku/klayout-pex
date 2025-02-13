@@ -503,7 +503,7 @@ class KpexCLI:
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
-            top_cell_name=pex_context.top_cell.name,
+            top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             blackbox_devices=args.blackbox_devices
         )
@@ -511,7 +511,7 @@ class KpexCLI:
         # create a nice CSV for reports, useful for spreadsheets
         netlist_csv_writer = NetlistCSVWriter()
         netlist_csv_writer.write_csv(netlist=expanded_netlist,
-                                     top_cell_name=pex_context.top_cell.name,
+                                     top_cell_name=pex_context.annotated_top_cell.name,
                                      output_path=expanded_netlist_csv_path)
 
         rule("Extended netlist (CSV format):")
@@ -530,7 +530,7 @@ class KpexCLI:
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
-                                                 top_cell_name=pex_context.top_cell.name)
+                                                 top_cell_name=pex_context.annotated_top_cell.name)
         reduced_netlist.write(reduced_netlist_path, spice_writer)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
@@ -616,7 +616,7 @@ class KpexCLI:
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
-            top_cell_name=pex_context.top_cell.name,
+            top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             blackbox_devices=args.blackbox_devices
         )
@@ -629,7 +629,7 @@ class KpexCLI:
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
-                                                 top_cell_name=pex_context.top_cell.name)
+                                                 top_cell_name=pex_context.annotated_top_cell.name)
         reduced_netlist.write(reduced_netlist_path, spice_writer)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
@@ -805,7 +805,7 @@ class KpexCLI:
             info(f"{gds_pair} -> ({' '.join(names)})")
 
         gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.oas.gz")
-        pex_context.target_layout.write(gds_path)
+        pex_context.annotated_layout.write(gds_path)
 
         gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.oas.gz")
         pex_context.lvsdb.internal_layout().write(gds_path)

@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
                                                                   tech=tech,
                                                                   blackbox_devices=False)
         expanded_netlist = exp.expand(extracted_netlist=pex_context.lvsdb.netlist(),
-                                      top_cell_name=pex_context.top_cell.name,
+                                      top_cell_name=pex_context.annotated_top_cell.name,
                                       cap_matrix=cap_matrix,
                                       blackbox_devices=False)
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")

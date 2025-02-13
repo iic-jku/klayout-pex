@@ -77,7 +77,7 @@ class RCExtractor:
         extraction_results = ExtractionResults()
 
         # TODO: for now, we always flatten and have only 1 cell
-        cell_name = self.pex_context.top_cell.name
+        cell_name = self.pex_context.annotated_top_cell.name
         extraction_report = ExtractionReporter(cell_name=cell_name,
                                                dbu=self.pex_context.dbu)
         cell_extraction_results = CellExtractionResults(cell_name=cell_name)
