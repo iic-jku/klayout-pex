@@ -256,18 +256,26 @@ class KLayoutExtractionContext:
         if not lyr:
             return None
 
-        shapes: kdb.Region
+        shapes = kdb.Region()
+        shapes.enable_properties()
+
+        def add_shapes_from_region(source_region: kdb.Region):
+            iter, transform = source_region.begin_shapes_rec()
+            while not iter.at_end():
+                shape = iter.shape()
+                net_name = shape.property('net')
+                if net_name == net.name:
+                    shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
+                                  iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
+                                  shape.polygon)
+                iter.next()
 
         match len(lyr.source_layers):
             case 0:
                 raise AssertionError('Internal error: Empty list of source_layers')
-            case 1:
-                shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
             case _:
-                shapes = kdb.Region()
                 for sl in lyr.source_layers:
-                    shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
-                # shapes.merge()
+                    add_shapes_from_region(sl.region)
 
         return shapes
 
