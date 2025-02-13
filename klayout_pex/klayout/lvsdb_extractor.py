@@ -256,18 +256,31 @@ class KLayoutExtractionContext:
         if not lyr:
             return None
 
-        shapes: kdb.Region
+        shapes = kdb.Region()
+        shapes.enable_properties()
+
+        def add_shapes_from_region(source_region: kdb.Region):
+            for iter in source_region.begin_shapes_rec():
+                if iter.__class__ is not kdb.RecursiveShapeIterator:
+                    # NOTE: strangely, at the end of the iteration, iter will be an instance of ICplxTrans!
+                    break
+
+                while not iter.at_end():
+                    shape = iter.shape()
+                    net_name = shape.property('net')
+                    if net_name == net.name:
+                        shapes.insert(shape.polygon)
+                    iter.next()
 
         match len(lyr.source_layers):
             case 0:
                 raise AssertionError('Internal error: Empty list of source_layers')
             case 1:
-                shapes = self.lvsdb.shapes_of_net(net, lyr.source_layers[0].region, True)
+                layer_region = lyr.source_layers[0].region
+                add_shapes_from_region(layer_region)
             case _:
-                shapes = kdb.Region()
                 for sl in lyr.source_layers:
-                    shapes += self.lvsdb.shapes_of_net(net, sl.region, True)
-                # shapes.merge()
+                    add_shapes_from_region(sl.region)
 
         return shapes
 
