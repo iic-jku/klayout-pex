@@ -68,11 +68,11 @@ class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
     tech: TechInfo
     dbu: float
-    top_cell: kdb.Cell
     layer_index_map: LayerIndexMap
     lvsdb_regions: LVSDBRegions
     cell_mapping: kdb.CellMapping
-    target_layout: kdb.Layout
+    annotated_top_cell: kdb.Cell
+    annotated_layout: kdb.Layout
     extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
     unnamed_layers: List[KLayoutExtractedLayerInfo]
 
@@ -83,9 +83,9 @@ class KLayoutExtractionContext:
                            tech: TechInfo,
                            blackbox_devices: bool) -> KLayoutExtractionContext:
         dbu = lvsdb.internal_layout().dbu
-        target_layout = kdb.Layout()
-        target_layout.dbu = dbu
-        top_cell = target_layout.create_cell(top_cell)
+        annotated_layout = kdb.Layout()
+        annotated_layout.dbu = dbu
+        top_cell = annotated_layout.create_cell(top_cell)
 
         # CellMapping
         #   mapping of internal layout to target layout for the circuit mapping
@@ -93,11 +93,11 @@ class KLayoutExtractionContext:
         # ---
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         # Creates a cell mapping for copying shapes from the internal layout to the given target layout
-        cm = lvsdb.cell_mapping_into(target_layout,  # target layout
+        cm = lvsdb.cell_mapping_into(annotated_layout,  # target layout
                                      top_cell,
                                      not blackbox_devices)  # with_device_cells
 
-        lvsdb_regions, layer_index_map = cls.build_LVS_layer_map(annotated_layout=target_layout,
+        lvsdb_regions, layer_index_map = cls.build_LVS_layer_map(annotated_layout=annotated_layout,
                                                                  lvsdb=lvsdb,
                                                                  tech=tech,
                                                                  blackbox_devices=blackbox_devices)
@@ -115,7 +115,7 @@ class KLayoutExtractionContext:
 
         lvsdb.build_all_nets(
             cmap=cm,               # mapping of internal layout to target layout for the circuit mapping
-            target=target_layout,  # target layout
+            target=annotated_layout,  # target layout
             lmap=lvsdb_regions,    # maps: target layer index => net regions
             hier_mode=hier_mode,   # hier mode
             netname_prop=net_name_prop,  # property name to which to attach the net name
@@ -126,7 +126,7 @@ class KLayoutExtractionContext:
 
         extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
                                                                          tech=tech,
-                                                                         annotated_layout=target_layout,
+                                                                         annotated_layout=annotated_layout,
                                                                          layer_index_map=layer_index_map,
                                                                          blackbox_devices=blackbox_devices)
 
@@ -134,11 +134,11 @@ class KLayoutExtractionContext:
             lvsdb=lvsdb,
             tech=tech,
             dbu=dbu,
-            top_cell=top_cell,
+            annotated_top_cell=top_cell,
             layer_index_map=layer_index_map,
             lvsdb_regions=lvsdb_regions,
             cell_mapping=cm,
-            target_layout=target_layout,
+            annotated_layout=annotated_layout,
             extracted_layers=extracted_layers,
             unnamed_layers=unnamed_layers
         )
@@ -247,7 +247,7 @@ class KLayoutExtractionContext:
         return nonempty_layers, unnamed_layers
 
     def top_cell_bbox(self) -> kdb.Box:
-        b1: kdb.Box = self.target_layout.top_cell().bbox()
+        b1: kdb.Box = self.annotated_layout.top_cell().bbox()
         b2: kdb.Box = self.lvsdb.internal_layout().top_cell().bbox()
         if b1.area() > b2.area():
             return b1
