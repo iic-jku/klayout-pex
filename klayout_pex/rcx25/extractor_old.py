@@ -91,7 +91,7 @@ class RCExtractor:
         extraction_results = ExtractionResults()
 
         # TODO: for now, we always flatten and have only 1 cell
-        cell_name = self.pex_context.top_cell.name
+        cell_name = self.pex_context.annotated_top_cell.name
         report = rdb.ReportDatabase(f"PEX {cell_name}")
         cell_extraction_result = self.extract_cell(cell_name=cell_name, report=report)
         extraction_results.cell_extraction_results[cell_name] = cell_extraction_result
@@ -125,11 +125,11 @@ class RCExtractor:
                                 kdb.CplxTrans(mag=dbu),
                                 shapes)
 
-        circuit = netlist.circuit_by_name(self.pex_context.top_cell.name)
+        circuit = netlist.circuit_by_name(self.pex_context.annotated_top_cell.name)
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
         if not circuit:
             circuits = [c.name for c in netlist.each_circuit()]
-            raise Exception(f"Expected circuit called {self.pex_context.top_cell.name} in extracted netlist, "
+            raise Exception(f"Expected circuit called {self.pex_context.annotated_top_cell.name} in extracted netlist, "
                             f"only available circuits are: {circuits}")
 
         #----------------------------------------------------------------------------------------
