@@ -53,12 +53,6 @@ class OverlapExtractor:
 
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
-            other_layer_names = [oln for oln in self.all_layer_names if oln != layer_name]
-            other_layer_regions = [
-                r for ln, r in self.layer_regions_by_name.items()
-                if ln != layer_name
-            ]
-
             ovl_visitor = self.PEXPolygonNeighborhoodVisitor(
                 layer_names=self.all_layer_names,
                 inside_layer_index=idx,
