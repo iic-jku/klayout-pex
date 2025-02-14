@@ -323,3 +323,30 @@ C1;VSUBS;li1;7.932
 C2;VSUBS;met1;249.058
 C3;li1;met1;0.125 TODO"""
         )
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.wip
+def test_sideoverlap_shielding_simple_plates_li1_m1_m2():
+    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C5 li1 VSUBS 11.7936f
+    # C4 met1 VSUBS 57.990803f
+    # C2 li1 met1 15.661301f
+    # C0 met1 met2 0.257488p
+    # C3 met2 VSUBS 5.29197f
+    # C1 li1 met2 0.151641f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    #
+
+    assert_expected_matches_obtained(
+        'test_patterns', 'sideoverlap_shielding_simple_plates_li1_m1_m2.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
+C1;VSUBS;li1;11.793
+C2;VSUBS;met1;56.996
+C3;li1;met1;15.661
+C4;met1;met2;257.488
+C5;VSUBS;met2;4.757
+C6;li1;met2;0.152"""
+        )
