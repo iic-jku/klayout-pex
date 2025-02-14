@@ -26,6 +26,8 @@ from __future__ import annotations
 import tempfile
 from typing import *
 from dataclasses import dataclass
+
+from klayout.dbcore import PolygonWithProperties
 from rich.pretty import pprint
 
 import klayout.db as kdb
@@ -295,10 +297,20 @@ class KLayoutExtractionContext:
             case 1:
                 shapes = lyr.source_layers[0].region
             case _:
+                # NOTE: currently a bug, for now use polygon-per-polygon workaround
+                # shapes = kdb.Region()
+                # for sl in lyr.source_layers:
+                #     shapes += sl.region
                 shapes = kdb.Region()
+                shapes.enable_properties()
                 for sl in lyr.source_layers:
-                    shapes += sl.region
-                # shapes.merge()
+                    iter, transform = sl.region.begin_shapes_rec()
+                    while not iter.at_end():
+                        p = PolygonWithProperties(iter.shape().polygon, {'net': iter.shape().property('net')})
+                        shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
+                                      iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
+                                      p)
+                        iter.next()
 
         return shapes
 
