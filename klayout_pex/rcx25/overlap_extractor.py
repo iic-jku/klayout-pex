@@ -108,6 +108,11 @@ class OverlapExtractor:
                     continue
 
                 for polygon_above in polygons_above:
+                    net_top = polygon_above.property('net')
+
+                    if net_top == net_bot:
+                        continue
+
                     top_layer_name = self.layer_names[other_layer_index]
 
                     top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
@@ -118,8 +123,6 @@ class OverlapExtractor:
                     if not overlap_cap_spec:
                         warning(f"No overlap cap specified for layer bottom={bot_layer_name}")
                         return
-
-                    net_top = polygon_above.property('net')
 
                     top_region = kdb.Region(polygon_above)
 
