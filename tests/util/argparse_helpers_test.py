@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
             CASE2 = 2
             DEFAULT = CASE1
 
-        expected_string = "--arg ∈ {'case1', 'case2', 'default'}.\nDefaults to 'case1'"
+        expected_string = "--arg ∈ {'case1', 'case2'}.\nDefaults to 'case1'"
         obtained_string = render_enum_help(enum_cls=IntEnum2, topic="--arg", print_default=True)
         assert obtained_string == expected_string
 
@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
             CASE2 = "Case2"
             DEFAULT = CASE1
 
-        expected_string = "--arg ∈ {'Case1', 'Case2', 'default'}.\nDefaults to 'Case1'"
+        expected_string = "--arg ∈ {'Case1', 'Case2'}.\nDefaults to 'Case1'"
         obtained_string = render_enum_help(enum_cls=StrEnum1, topic="--arg", print_default=True)
         assert obtained_string == expected_string
 
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
             CASE2 = "Case2"
             DEFAULT = CASE1
 
-        expected_string = "--arg ∈ {'case1', 'case2', 'default'}.\nDefaults to 'case1'"
+        expected_string = "--arg ∈ {'case1', 'case2'}.\nDefaults to 'case1'"
         obtained_string = render_enum_help(enum_cls=StrEnum1, topic="--arg",
                                            print_default=True,
                                            lowercase_strenum=True)
