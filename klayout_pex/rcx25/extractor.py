@@ -104,7 +104,9 @@ class RCExtractor:
 
         substrate_region = kdb.Region()
         substrate_region.enable_properties()
-        substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(8.0 / dbu))  # 8 µm halo
+
+        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
+        substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
 
         layer_regions_by_name[ self.tech_info.internal_substrate_layer_name] = substrate_region
 
