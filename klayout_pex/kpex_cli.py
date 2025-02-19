@@ -276,6 +276,12 @@ class KpexCLI:
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
 
+        group_25d = main_parser.add_argument_group("2.5D options")
+        group_25d.add_argument("--halo", dest="halo",
+                                 type=float, default=None,
+                                 help="Custom sidewall halo distance (in µm) to override tech info "
+                                      "(default is no custom halo)")
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
@@ -783,6 +789,9 @@ class KpexCLI:
 
         tech_info = TechInfo.from_json(args.tech_pbjson_path,
                                        dielectric_filter=args.dielectric_filter)
+
+        if args.halo is not None:
+            tech_info.tech.process_parasitics.side_halo = args.halo
 
         if args.run_magic:
             rule('MAGIC')
