@@ -37,7 +37,7 @@ from ..tech_info import TechInfo
 from .geometry_restorer import GeometryRestorer
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
-from .polygon_utils import find_polygon_with_nearest_edge
+from .polygon_utils import find_polygon_with_nearest_edge, nearest_edge
 from .types import EdgeInterval, EdgeNeighborhood
 from process_parasitics_pb2 import CapacitanceInfo
 
@@ -77,7 +77,8 @@ class SidewallAndFringeExtractor:
 
             en_children = [kdb.CompoundRegionOperationNode.new_secondary(r)
                            for r in self.all_layer_regions]
-            en_children[idx] = kdb.CompoundRegionOperationNode.new_foreign()
+            en_children[idx] = kdb.CompoundRegionOperationNode.new_foreign()  # sidewall of other nets on the same layer
+            en_children.append(kdb.CompoundRegionOperationNode.new_primary()) # opposing structures of the same polygon
 
             side_halo_um = self.tech_info.tech.process_parasitics.side_halo
             side_halo_dbu = int(side_halo_um / self.dbu) + 1  # add 1 nm to halo
@@ -131,6 +132,10 @@ class SidewallAndFringeExtractor:
         def end_polygon(self):
             pass
 
+        @cached_property
+        def side_halo(self) -> float:
+            return self.tech_info.tech.process_parasitics.side_halo
+
         def on_edge(self,
                     layout: kdb.Layout,
                     cell: kdb.Cell,
@@ -162,25 +167,61 @@ class SidewallAndFringeExtractor:
 
                 layer_fringe_shields = [kdb.Region() for _ in self.all_layer_names]
                 for child_index, polygons in polygons_by_child.items():
-                    layer_fringe_shields[child_index].insert(polygons)
+                    if child_index < len(self.all_layer_names):
+                        layer_fringe_shields[child_index].insert(polygons)
+
+                # NOTE: lateral fringe shielding, can be caused by
+                #         - sidewall (other net)
+                #         - same net "sidewall" (other polygons)
+                #         - even opposing edges of the same polygon of the same net!
+                #       fringe to shapes on other layers will be limited by this distance
+                #       (i.e., fringe is shielded beyond this distance)
+
+                nearest_distance: Optional[float] = None
+                nearest_lateral_edge: Optional[kdb.EdgeWithProperties] = None
 
                 for child_index, polygons in polygons_by_child.items():
-                    if self.inside_layer_index == child_index:   # SIDEWALL!
+                    if child_index == len(self.all_layer_names):  # TODO, fix index, same layer, same polygon
+                        distance, nearby_polygon = find_polygon_with_nearest_edge(polygons_on_same_layer=polygons)
+
+                        if nearest_distance is None or \
+                           distance < nearest_distance:
+                            nearest_distance = distance
+                            nearest_lateral_edge = nearest_edge(nearby_polygon)
+                    elif self.inside_layer_index == child_index:   # SIDEWALL!
                         # NOTE: use only the nearest polygon,
                         #       as the others are laterally shielded by the nearer ones
-                        distance, nearest_polygon = find_polygon_with_nearest_edge(
-                            polygons_on_same_layer=polygons
-                        )
+                        distance, nearby_polygon = find_polygon_with_nearest_edge(polygons_on_same_layer=polygons)
+
+                        if nearest_distance is None or \
+                           distance < nearest_distance:
+                            nearest_distance = distance
+                            nearest_lateral_edge = nearest_edge(nearby_polygon)
 
                         self.emit_sidewall(
                             layer_name=self.inside_layer_name,
                             edge=edge,
                             edge_interval=edge_interval,
-                            polygon=nearest_polygon,
+                            polygon=nearby_polygon,
                             geometry_restorer=geometry_restorer
                         )
-                    else:   # FRINGE!
+
+                lateral_shield: Optional[kdb.Polygon] = None
+                if nearest_lateral_edge is not None:
+                    lateral_shield = kdb.Polygon([
+                        nearest_lateral_edge.p2,
+                        nearest_lateral_edge.p1,
+                        kdb.Point(nearest_lateral_edge.p1.x, (self.side_halo + 10) / self.dbu),
+                        kdb.Point(nearest_lateral_edge.p2.x, (self.side_halo + 10) / self.dbu),
+                    ])
+
+                for child_index, polygons in polygons_by_child.items():
+                    if self.inside_layer_index == child_index:
+                        continue  # already handled above
+                    elif child_index < len(self.all_layer_names): # FRINGE!
                         fringe_shield = kdb.Region()
+                        if lateral_shield is not None:
+                            fringe_shield.insert(lateral_shield)
                         if child_index < self.inside_layer_index:
                             r = range(child_index + 1, self.inside_layer_index)
                             for idx in r:
@@ -201,6 +242,7 @@ class SidewallAndFringeExtractor:
                             edge_interval=edge_interval,
                             outside_polygons=polygons,
                             shield=fringe_shield,
+                            lateral_shield=lateral_shield,
                             geometry_restorer=geometry_restorer)
 
         def emit_sidewall(self,
@@ -211,6 +253,10 @@ class SidewallAndFringeExtractor:
                           geometry_restorer: GeometryRestorer):
             net1 = edge.property('net')
             net2 = polygon.property('net')
+
+            if net1 == net2:
+                return
+
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name[layer_name]
 
             # TODO!
@@ -228,7 +274,7 @@ class SidewallAndFringeExtractor:
             avg_length = edge_interval[1] - edge_interval[0]
             avg_distance = min(polygon.bbox().p1.y, polygon.bbox().p2.y)
 
-            outside_edge = [e for e in polygon.each_edge() if e.d().x < 0][-1]
+            outside_edge = nearest_edge(polygon)
 
             length_um = avg_length * self.dbu
             distance_um = avg_distance * self.dbu
@@ -291,6 +337,7 @@ class SidewallAndFringeExtractor:
                         edge_interval: EdgeInterval,
                         outside_polygons: List[kdb.PolygonWithProperties],
                         shield: kdb.Region,
+                        lateral_shield: kdb.Polygon,
                         geometry_restorer: GeometryRestorer):
             inside_net_name = self.tech_info.internal_substrate_layer_name \
                 if inside_layer_name == self.tech_info.internal_substrate_layer_name \
@@ -397,7 +444,7 @@ class SidewallAndFringeExtractor:
                         self.report.output_sideoverlap(
                             sideoverlap_cap=soc,
                             inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
-                            outside_polygon=geometry_restorer.restore_polygon(p)
-                            # unshielded_region=geometry_restorer.restore_region(unshielded_region)
+                            outside_polygon=geometry_restorer.restore_polygon(p),
+                            lateral_shield=geometry_restorer.restore_polygon(lateral_shield) \
+                                           if lateral_shield is not None else None
                         )
-
