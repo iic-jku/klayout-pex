@@ -27,8 +27,11 @@ from typing import *
 
 import klayout.rdb as rdb
 import klayout.db as kdb
+from klayout.dbcore import EdgeNeighborhoodVisitor
 
 from .extraction_results import *
+from .geometry_restorer import GeometryRestorer
+from .types import EdgeNeighborhood, LayerName, NetName
 
 
 VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
@@ -59,18 +62,23 @@ class ExtractionReporter:
     def cat_fringe(self) -> rdb.RdbCategory:
         return self.report.create_category("Fringe / Side Overlap")
 
+    @cached_property
+    def cat_edge_neighborhood(self) -> rdb.RdbCategory:
+        return self.report.create_category("Edge Neighborhood Visitor")
+
     def save(self, path: str):
         self.report.save(path)
 
     def output_shapes(self,
                       parent_category: rdb.RdbCategory,
                       category_name: str,
-                      shapes: VarShapes):
+                      shapes: VarShapes) -> rdb.RdbCategory:
         rdb_cat = self.report.create_category(parent_category, category_name)
         self.report.create_items(self.cell.rdb_id(),  ## TODO: if later hierarchical mode is introduced
                                  rdb_cat.rdb_id(),
                                  self.dbu_trans,
                                  shapes)
+        return rdb_cat
 
     def output_overlap(self,
                        overlap_cap: OverlapCap,
@@ -144,3 +152,30 @@ class ExtractionReporter:
         self.output_shapes(cat_sideoverlap_cap, 'Outside Polygon', shapes)
 
         # self.output_shapes(cat_sideoverlap_cap, 'Unshielded Region', unshielded_region)
+
+    def output_edge_neighborhood(self,
+                                 inside_layer: LayerName,
+                                 all_layer_names: List[LayerName],
+                                 edge: kdb.EdgeWithProperties,
+                                 neighborhood: EdgeNeighborhood,
+                                 geometry_restorer: GeometryRestorer):
+        cat_en_layer_inside = self.report.create_category(self.cat_edge_neighborhood, f"inside_layer={inside_layer}")
+        inside_net = edge.property('net')
+        cat_en_net_inside = self.report.create_category(cat_en_layer_inside, f'inside_net={inside_net}')
+
+        for edge_interval, polygons_by_child in neighborhood:
+            cat_en_edge_interval = self.report.create_category(cat_en_net_inside, f"Edge Interval: {edge_interval}")
+            self.category_name_counter[cat_en_edge_interval.path()] += 1
+            cat_en_edge = self.report.create_category(
+                cat_en_edge_interval,
+                f"#{self.category_name_counter[cat_en_edge_interval.path()]}"
+            )
+            self.output_shapes(cat_en_edge, "Edge", [edge])  # geometry_restorer.restore_edge(edge))
+
+            for child_index, polygons in polygons_by_child.items():
+                self.output_shapes(
+                    cat_en_edge,
+                    f"Child {child_index}: "
+                    f"{child_index < len(all_layer_names) and all_layer_names[child_index] or 'None'}",
+                    [geometry_restorer.restore_polygon(p) for p in polygons]
+                )
