@@ -260,12 +260,11 @@ class SidewallAndFringeExtractor:
                        edge_interval_length: float,
                        distance_near: float,
                        distance_far: float,
-                       to_substrate: bool,
                        overlap_cap_spec: CapacitanceInfo.OverlapCapacitance,
-                       substrate_cap_spec: CapacitanceInfo.SubstrateCapacitance,
                        sideoverlap_cap_spec: CapacitanceInfo.SideOverlapCapacitance) -> float:
             distance_near_um = distance_near * self.dbu
             distance_far_um = distance_far * self.dbu
+            edge_interval_length_um = edge_interval_length * self.dbu
 
             # NOTE: overlap scaling is 1/50  (see MAGIC ExtTech)
             alpha_scale_factor = 0.02 * 0.01 * 0.5 * 200.0
@@ -279,24 +278,6 @@ class SidewallAndFringeExtractor:
             # by tile tp along its length.  This is independent of the
             # portion of the boundary length that tile tp occupies.
             cfrac = cfar - cnear
-
-            # The fringe portion extracted from the substrate will be
-            # different than the portion added to the coupling layer.
-            sfrac: float
-
-            # see Magic ExtCouple.c L1198
-            alpha_s = substrate_cap_spec.area_capacitance / alpha_scale_factor
-            if alpha_s != alpha_c:
-                snear = (2.0 / math.pi) * math.atan(alpha_s * distance_near_um)
-                sfar = (2.0 / math.pi) * math.atan(alpha_s * distance_far_um)
-                sfrac = sfar - snear
-            else:
-                sfrac = cfrac
-
-            if to_substrate:
-                cfrac = sfrac
-
-            edge_interval_length_um = edge_interval_length * self.dbu
 
             cap_femto = (cfrac * edge_interval_length_um *
                          sideoverlap_cap_spec.capacitance / 1000.0)
@@ -394,14 +375,10 @@ class SidewallAndFringeExtractor:
                     edge_interval_length = edge_interval[1] - edge_interval[0]
                     edge_interval_length_um = edge_interval_length * self.dbu
 
-                    to_substrate = outside_layer_name == self.tech_info.internal_substrate_layer_name
-
                     cap_femto = self.fringe_cap(edge_interval_length=edge_interval_length,
                                                 distance_near=distance_near,
                                                 distance_far=distance_far,
-                                                to_substrate=to_substrate,
                                                 overlap_cap_spec=overlap_cap_spec,
-                                                substrate_cap_spec=substrate_cap_spec,
                                                 sideoverlap_cap_spec=sideoverlap_cap_spec)
 
                     if cap_femto > 0.0001:  # TODO: configurable threshold, but keeping accumulation might also be nice
