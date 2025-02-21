@@ -27,6 +27,7 @@ from typing import *
 import math
 
 import klayout.db as kdb
+from klayout.dbcore import EdgeWithProperties
 
 from .types import EdgeDistance
 from ..log import warning
@@ -55,3 +56,8 @@ def find_polygon_with_nearest_edge(polygons_on_same_layer: List[kdb.PolygonWithP
             nearest_lateral_shape = (dnear, p)
 
     return nearest_lateral_shape
+
+
+def nearest_edge(polygon: kdb.PolygonWithProperties) -> EdgeWithProperties:
+    edge = [e for e in polygon.each_edge() if e.d().x < 0][-1]
+    return kdb.EdgeWithProperties(edge, properties={'net': polygon.property('net')})
