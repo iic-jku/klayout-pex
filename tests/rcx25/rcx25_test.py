@@ -211,22 +211,18 @@ C8;li1;met3;5.031"""
 def test_sidewall_100um_x_100um_distance_200nm_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
-    # C2 C VSUBS 8.231f
-    # C4 A VSUBS 8.231f
-    # C3 B VSUBS 4.54159f
-    # C0 B C 7.5f
-    # C1 A B 7.5f
+    # C0 A B 7.5f
+    # C1 B VSUBS 8.231f
+    # C2 A VSUBS 8.231f
     # _______________________________ NOTE: with halo=50µm __________________________________
     # (same!)
 
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C;VSUBS;11.92  # TODO: magic=8.231f 
+C1;B;VSUBS;11.92  # TODO: magic=8.231f
 C2;A;VSUBS;11.92  # TODO: magic=8.231f
-C3;B;VSUBS;11.92  # TODO: magic=4.452f
-C4;B;C;7.5
-C5;A;B;7.5"""
+C3;A;B;7.5"""
         )
 
 
