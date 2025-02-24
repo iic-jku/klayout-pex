@@ -93,7 +93,8 @@ def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CS
               '--pdk', 'sky130A',
               '--gds', gds_path,
               '--out_dir', output_dir_path,
-              '--2.5D'])
+              '--2.5D',
+              '--halo', '10000'])
     assert cli.rcx25_extraction_results is not None
     assert len(cli.rcx25_extraction_results.cell_extraction_results) == 1  # assume single cell test
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
@@ -159,8 +160,8 @@ def test_overlap_plates_100um_x_100um_li1_m1():
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
 C1;LOWER;VSUBS;386.179
-C2;UPPER;VSUBS;205.52
-C3;LOWER;UPPER;294.592"""
+C2;UPPER;VSUBS;205.619
+C3;LOWER;UPPER;294.867"""
     )
 
 @allure.parent_suite(parent_suite)
@@ -171,36 +172,38 @@ def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
     # C7 li1 VSUBS 0.38618p
-    # C3 li1 met1 0.294756p     # DIFFERS a bit !!! TODO
-    # C6 met1 VSUBS 0.205833p   # DIFFERS a bit !!! TODO
-    # C0 met1 met2 0.680652p    # DIFFERS a bit !!! TODO
-    # C2 li1 met2 99.3128f      # DIFFERS a bit !!! TODO
+    # C6 met1 VSUBS 0.205833p
     # C5 met2 VSUBS 52.151802f
     # C4 met3 VSUBS 0.136643p
+    # C3 li1 met1 0.294756p
+    # C0 met1 met2 0.680652p
+    # C2 li1 met2 99.3128f
     # C1 li1 met3 5.59194f
     #_______________________________ NOTE: with halo=50µm __________________________________
     # C9 li1 VSUBS 0.38618p
-    # C5 li1 met1 0.294867p     # DIFFERS a bit !!! TODO
-    # C8 met1 VSUBS 0.205621p   # DIFFERS, but that's a MAGIC issue (see test_overlap_plates_100um_x_100um_li1_m1)
+    # C8 met1 VSUBS 0.205621p
+    # C7 met2 VSUBS 51.5767f
+    # C6 met3 VSUBS 0.136103p
+    # C5 li1 met1 0.294867p
+    # C4 li1 met2 99.518005f
     # C2 met1 met2 0.680769p
-    # C4 li1 met2 99.518005f    # DIFFERS a bit !!! TODO
-    # C7 met2 VSUBS 51.5767f    # DIFFERS a bit !!! TODO
-    # C3 li1 met3 6.01281f      # DIFFERS !!! TODO
-    # C0 met2 met3 0.0422f      # we don't have that?! !!! TODO
-    # C6 met3 VSUBS 0.136103p   # DIFFERS a bit !!! TODO
-    # C1 met1 met3 0.012287f    # NOTE: we don't have that, due to halo=8µm
+    # C3 li1 met3 6.01281f
+    # C1 met1 met3 0.012287f
+    # C0 met2 met3 0.0422f
 
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
 C1;VSUBS;li1;386.179
-C2;VSUBS;met1;205.52
-C3;VSUBS;met2;51.301
-C4;VSUBS;met3;135.995
-C5;li1;met1;294.592
-C6;li1;met2;99.015
-C7;met1;met2;680.482
-C8;li1;met3;5.031"""
+C2;VSUBS;met1;205.619
+C3;VSUBS;met2;51.574
+C4;VSUBS;met3;136.063
+C5;li1;met1;294.867
+C6;li1;met2;99.518
+C7;met1;met2;680.769
+C8;li1;met3;6.013
+C9;met1;met3;0.016
+C10;met2;met3;0.056"""
     )
 
 
@@ -220,8 +223,8 @@ def test_sidewall_100um_x_100um_distance_200nm_li1():
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;B;VSUBS;11.92  # TODO: magic=8.231f
-C2;A;VSUBS;11.92  # TODO: magic=8.231f
+C1;B;VSUBS;8.231
+C2;A;VSUBS;8.231
 C3;A;B;7.5"""
         )
 
@@ -233,8 +236,8 @@ C3;A;B;7.5"""
 def test_sidewall_net_uturn_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
-    # C2 C0 VSUBS 38.1255f
     # C1 C1 VSUBS 12.5876f
+    # C2 C0 VSUBS 38.1255f
     # C0 C0 C1 1.87386f
     # _______________________________ NOTE: with halo=50µm __________________________________
     # (same!)
@@ -242,9 +245,9 @@ def test_sidewall_net_uturn_l1_redux():
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C1;VSUBS;15.079
-C2;C0;VSUBS;40.641
-C3;C0;C1;0.019 TODO, MAGIC=1.87386 fF"""
+C1;C1;VSUBS;12.588
+C2;C0;VSUBS;38.125
+C3;C0;C1;1.874"""
         )
 
 
@@ -255,8 +258,8 @@ C3;C0;C1;0.019 TODO, MAGIC=1.87386 fF"""
 def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
-    # C2 C0 VSUBS 0.300359f
     # C1 C1 VSUBS 0.086832f
+    # C2 C0 VSUBS 0.300359f
     # C0 C0 C1 0.286226f
     # _______________________________ NOTE: with halo=50µm __________________________________
     # (same!)
@@ -264,9 +267,9 @@ def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C0;VSUBS;0.447 TODO
-C2;C1;VSUBS;0.223 TODO
-C3;C0;C1;0.145 TODO"""
+C1;C1;VSUBS;0.087
+C2;C0;VSUBS;0.3
+C3;C0;C1;0.286"""
         )
 
 
@@ -290,10 +293,12 @@ def test_near_body_shield_li1_m1():
     assert_expected_matches_obtained(
         'test_patterns', 'near_body_shield_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;BOTTOM;VSUBS;405.082
-C2;BOTTOM;TOPA;215.898
-C3;BOTTOM;TOPB;215.898
-C4;TOPA;TOPB;0.503"""
+C1;BOTTOM;VSUBS;405.081
+C2;BOTTOM;TOPB;215.972
+C3;BOTTOM;TOPA;215.972
+C4;TOPA;TOPB;0.503
+C5;TOPA;VSUBS;0.299
+C6;TOPB;VSUBS;0.299"""
     )
 
 
@@ -315,9 +320,9 @@ def test_sideoverlap_simple_plates_li1_m1():
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;VSUBS;li1;7.932
-C2;VSUBS;met1;249.058
-C3;li1;met1;0.125 TODO"""
+C1;VSUBS;li1;7.931
+C2;VSUBS;met1;248.899
+C3;li1;met1;0.157"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -334,15 +339,20 @@ def test_sideoverlap_shielding_simple_plates_li1_m1_m2():
     # C3 met2 VSUBS 5.29197f
     # C1 li1 met2 0.151641f
     # _______________________________ NOTE: with halo=50µm __________________________________
-    #
+    # C5 li1 VSUBS 11.7936f
+    # C4 met1 VSUBS 57.990803f
+    # C2 li1 met1 15.709599f
+    # C0 met1 met2 0.257488p
+    # C3 met2 VSUBS 5.29197f
+    # C1 li1 met2 0.151641f
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_shielding_simple_plates_li1_m1_m2.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
 C1;VSUBS;li1;11.793
-C2;VSUBS;met1;56.996
-C3;li1;met1;15.661
+C2;VSUBS;met1;57.99
+C3;li1;met1;15.71
 C4;met1;met2;257.488
-C5;VSUBS;met2;4.757
+C5;VSUBS;met2;5.291
 C6;li1;met2;0.152"""
         )
