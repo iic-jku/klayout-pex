@@ -275,6 +275,9 @@ class KpexCLI:
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) to override tech info "
                                       "(default is no custom halo)")
+        group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
+                                type=true_or_false, default=True,
+                                help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
 
         if arg_list is None:
             arg_list = sys.argv[1:]
@@ -626,6 +629,7 @@ class KpexCLI:
                              report_path: str,
                              netlist_csv_path: str):
         extractor = RCExtractor(pex_context=pex_context,
+                                scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                 tech_info=tech_info,
                                 report_path=report_path)
         extraction_results = extractor.extract()
