@@ -386,7 +386,200 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
-    // TODO! see sky130A.cpp
+    // NOTE: coefficients according to https://github.com/IHP-GmbH/IHP-Open-PDK/blob/8923b6c877bd755b8a04c655fd4c0e6f910120eb/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.tech#L4657
+
+    ex->set_side_halo(8);
+    
+    kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
+    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
+    lr->set_layer_name("TODO ndiffres");
+    lr->set_resistance(120000);
+    lr->set_corner_adjustment_fraction(0.5);
+    //...
+    lr = ri->add_layers();
+    lr->set_layer_name("TODO poly");
+    lr->set_resistance(48200);
+    //...
+    
+    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
+    vr->set_via_name("TODO mcon");
+    vr->set_resistance(9300);
+    //...
+    
+    kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
+
+    //                  layer,    area_cap,  perimeter_cap
+    addSubstrateCap(ci, "GatPoly",  87.433,   44.537);
+    addSubstrateCap(ci, "Metal1",   35.015,   39.585);
+    addSubstrateCap(ci, "Metal2",   18.180,   34.798);
+    addSubstrateCap(ci, "Metal3",   11.994,   31.352);
+    addSubstrateCap(ci, "Metal4",    8.948,   29.083);
+    addSubstrateCap(ci, "Metal5",    7.136,   27.527);
+    addSubstrateCap(ci, "TopMetal1", 5.649,   37.383);
+    addSubstrateCap(ci, "TopMetal2", 3.233,   31.175);
+    
+    const std::string diff_lv_nonfet = "Activ";   // TODO: diff must be non-fet!
+    const std::string diff_hv_nonfet = "Activ";   // TODO: diff must be non-fet!
+
+    //                top_layer,    bottom_layer,   cap
+    addOverlapCap(ci, "GatPoly",    "NWell",        87.433);
+    addOverlapCap(ci, "GatPoly",    "PWell",        87.433);
+    addOverlapCap(ci, "Metal1",     "PWell",        35.015);
+    addOverlapCap(ci, "Metal1",     "NWell",        35.015);
+    addOverlapCap(ci, "Metal1",     diff_lv_nonfet, 58.168);
+    addOverlapCap(ci, "Metal1",     diff_hv_nonfet, 57.702);
+    addOverlapCap(ci, "Metal1",     "GatPoly",      78.653);
+    addOverlapCap(ci, "Metal2",     "PWell",        18.180);
+    addOverlapCap(ci, "Metal2",     "NWell",        18.180);
+    addOverlapCap(ci, "Metal2",     diff_lv_nonfet, 22.916);
+    addOverlapCap(ci, "Metal2",     diff_hv_nonfet, 22.844);
+    addOverlapCap(ci, "Metal2",     "GatPoly",      25.537);
+    addOverlapCap(ci, "Metal2",     "Metal1",       67.225);
+    addOverlapCap(ci, "Metal3",     "NWell",        11.994);
+    addOverlapCap(ci, "Metal3",     "PWell",        11.994);
+    addOverlapCap(ci, "Metal3",     diff_lv_nonfet, 13.887);
+    addOverlapCap(ci, "Metal3",     diff_hv_nonfet, 13.860);
+    addOverlapCap(ci, "Metal3",     "GatPoly",      14.808);
+    addOverlapCap(ci, "Metal3",     "Metal1",       23.122);
+    addOverlapCap(ci, "Metal3",     "Metal2",       67.225);
+    addOverlapCap(ci, "Metal4",     "NWell",         8.948);
+    addOverlapCap(ci, "Metal4",     "PWell",         8.948);
+    addOverlapCap(ci, "Metal4",     diff_lv_nonfet,  9.962);
+    addOverlapCap(ci, "Metal4",     diff_hv_nonfet,  9.948);
+    addOverlapCap(ci, "Metal4",     "GatPoly",      10.427);
+    addOverlapCap(ci, "Metal4",     "Metal1",       13.962);
+    addOverlapCap(ci, "Metal4",     "Metal2",       23.122);
+    addOverlapCap(ci, "Metal4",     "Metal3",       67.225);
+    addOverlapCap(ci, "Metal5",     "NWell",         7.136);
+    addOverlapCap(ci, "Metal5",     "PWell",         7.136);
+    addOverlapCap(ci, "Metal5",     diff_lv_nonfet,  7.766);
+    addOverlapCap(ci, "Metal5",     diff_hv_nonfet,  7.758);
+    addOverlapCap(ci, "Metal5",     "GatPoly",       8.046);
+    addOverlapCap(ci, "Metal5",     "Metal1",       10.000);
+    addOverlapCap(ci, "Metal5",     "Metal2",       13.962);
+    addOverlapCap(ci, "Metal5",     "Metal3",       23.122);
+    addOverlapCap(ci, "Metal5",     "Metal4",       67.225);
+    addOverlapCap(ci, "TopMetal1",  "NWell",         5.649);
+    addOverlapCap(ci, "TopMetal1",  "PWell",         5.649);
+    addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  6.036);
+    addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  6.031);
+    addOverlapCap(ci, "TopMetal1",  "GatPoly",       6.204);
+    addOverlapCap(ci, "TopMetal1",  "Metal1",        7.304);
+    addOverlapCap(ci, "TopMetal1",  "Metal2",        9.214);
+    addOverlapCap(ci, "TopMetal1",  "Metal3",       12.475);
+    addOverlapCap(ci, "TopMetal1",  "Metal4",       19.309);
+    addOverlapCap(ci, "TopMetal1",  "Metal5",       42.708);
+    addOverlapCap(ci, "TopMetal2",  "NWell",         3.233);
+    addOverlapCap(ci, "TopMetal2",  "PWell",         3.233);
+    addOverlapCap(ci, "TopMetal2",  diff_lv_nonfet,  3.357);
+    addOverlapCap(ci, "TopMetal2",  diff_hv_nonfet,  3.355);
+    addOverlapCap(ci, "TopMetal2",  "GatPoly",       3.408);
+    addOverlapCap(ci, "TopMetal2",  "Metal1",        3.716);
+    addOverlapCap(ci, "TopMetal2",  "Metal2",        4.154);
+    addOverlapCap(ci, "TopMetal2",  "Metal3",        4.708);
+    addOverlapCap(ci, "TopMetal2",  "Metal4",        5.434);
+    addOverlapCap(ci, "TopMetal2",  "Metal5",        6.425);
+    addOverlapCap(ci, "TopMetal2",  "TopMetal1",    12.965);
+
+    //                 layer_name,      cap,  offset
+    addSidewallCap(ci, "GatPoly",    11.722, -0.023);
+    addSidewallCap(ci, "Metal1",     28.735, -0.057);
+    addSidewallCap(ci, "Metal2",     40.981, -0.033);
+    addSidewallCap(ci, "Metal3",     37.679, -0.045);
+    addSidewallCap(ci, "Metal4",     49.526,  0.004);
+    addSidewallCap(ci, "Metal5",     53.129,  0.021);
+    addSidewallCap(ci, "TopMetal1", 162.172,  0.343);
+    addSidewallCap(ci, "TopMetal2", 227.323,  1.893);
+
+    //                        in_layer,       out_layer,      cap
+    addSidewallOverlapCap(ci, "GatPoly",      "NWell",        44.537);
+    addSidewallOverlapCap(ci, "GatPoly",      "PWell",        44.537);
+    addSidewallOverlapCap(ci, "Metal1",       "NWell",        39.585);
+    addSidewallOverlapCap(ci, "Metal1",       "PWell",        39.585);
+    addSidewallOverlapCap(ci, "Metal1",       diff_lv_nonfet, 44.749);
+    addSidewallOverlapCap(ci, "Metal1",       diff_hv_nonfet, 45.041);
+    addSidewallOverlapCap(ci, "Metal1",       "GatPoly",      49.378);
+    addSidewallOverlapCap(ci, "GatPoly",      "Metal1",       23.229);
+    addSidewallOverlapCap(ci, "Metal2",       "NWell",        34.798);
+    addSidewallOverlapCap(ci, "Metal2",       "PWell",        34.798);
+    addSidewallOverlapCap(ci, "Metal2",       diff_lv_nonfet, 36.950);
+    addSidewallOverlapCap(ci, "Metal2",       diff_hv_nonfet, 36.919);
+    addSidewallOverlapCap(ci, "Metal2",       "GatPoly",      37.616);
+    addSidewallOverlapCap(ci, "GatPoly",      "Metal2",       10.801);
+    addSidewallOverlapCap(ci, "Metal2",       "Metal1",       49.543);
+    addSidewallOverlapCap(ci, "Metal1",       "Metal2",       31.073);
+    addSidewallOverlapCap(ci, "Metal3",       "NWell",        31.352);
+    addSidewallOverlapCap(ci, "Metal3",       "PWell",        31.352);
+    addSidewallOverlapCap(ci, "Metal3",       diff_lv_nonfet, 32.271);
+    addSidewallOverlapCap(ci, "Metal3",       diff_hv_nonfet, 32.495);
+    addSidewallOverlapCap(ci, "Metal3",       "GatPoly",      32.795);
+    addSidewallOverlapCap(ci, "GatPoly",      "Metal3",       7.068);
+    addSidewallOverlapCap(ci, "Metal3",       "Metal1",       37.009);
+    addSidewallOverlapCap(ci, "Metal1",       "Metal3",       17.349);
+    addSidewallOverlapCap(ci, "Metal3",       "Metal2",       49.537);
+    addSidewallOverlapCap(ci, "Metal2",       "Metal3",       36.907);
+    addSidewallOverlapCap(ci, "Metal4",       "NWell",        29.083);
+    addSidewallOverlapCap(ci, "Metal4",       "PWell",        29.083);
+    addSidewallOverlapCap(ci, "Metal4",       diff_lv_nonfet, 29.755);
+    addSidewallOverlapCap(ci, "Metal4",       diff_hv_nonfet, 29.942);
+    addSidewallOverlapCap(ci, "Metal4",       "GatPoly",      30.101);
+    addSidewallOverlapCap(ci, "GatPoly",      "Metal4",        5.240);
+    addSidewallOverlapCap(ci, "Metal4",       "Metal1",       32.162);
+    addSidewallOverlapCap(ci, "Metal1",       "Metal4",       12.398);
+    addSidewallOverlapCap(ci, "Metal4",       "Metal2",       36.335);
+    addSidewallOverlapCap(ci, "Metal2",       "Metal4",       22.327);
+    addSidewallOverlapCap(ci, "Metal4",       "Metal3",       49.537);
+    addSidewallOverlapCap(ci, "Metal3",       "Metal4",       40.019);
+    addSidewallOverlapCap(ci, "Metal5",       "NWell",        27.527);
+    addSidewallOverlapCap(ci, "Metal5",       "PWell",        27.527);
+    addSidewallOverlapCap(ci, "Metal5",       diff_lv_nonfet, 28.227);
+    addSidewallOverlapCap(ci, "Metal5",       diff_hv_nonfet, 28.221);
+    addSidewallOverlapCap(ci, "Metal5",       "GatPoly",      28.414);
+    addSidewallOverlapCap(ci, "GatPoly",      "Metal5",        4.178);
+    addSidewallOverlapCap(ci, "Metal5",       "Metal1",       29.935);
+    addSidewallOverlapCap(ci, "Metal1",       "Metal5",        9.725);
+    addSidewallOverlapCap(ci, "Metal5",       "Metal2",       32.116);
+    addSidewallOverlapCap(ci, "Metal2",       "Metal5",       16.534);
+    addSidewallOverlapCap(ci, "Metal5",       "Metal3",       36.971);
+    addSidewallOverlapCap(ci, "Metal3",       "Metal5",       24.785);
+    addSidewallOverlapCap(ci, "Metal5",       "Metal4",       49.517);
+    addSidewallOverlapCap(ci, "Metal4",       "Metal5",       41.956);
+    
+    addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        37.383);
+    addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        37.383);
+    addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 38.084);
+    addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 38.085);
+    addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      38.376);
+    addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.316);
+    addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       39.678);
+    addSidewallOverlapCap(ci, "Metal1",       "TopMetal1",     7.669);
+    addSidewallOverlapCap(ci, "TopMetal1",    "Metal2",       42.268);
+    addSidewallOverlapCap(ci, "Metal2",       "TopMetal1",    12.649);
+    addSidewallOverlapCap(ci, "TopMetal1",    "Metal3",       46.611);
+    addSidewallOverlapCap(ci, "Metal3",       "TopMetal1",    17.848);
+    addSidewallOverlapCap(ci, "TopMetal1",    "Metal4",       52.657);
+    addSidewallOverlapCap(ci, "Metal4",       "TopMetal1",    24.526);
+    addSidewallOverlapCap(ci, "TopMetal1",    "Metal5",       65.859);
+    addSidewallOverlapCap(ci, "Metal5",       "TopMetal1",    36.377);
+    
+    addSidewallOverlapCap(ci, "TopMetal2",    "NWell",        31.175);
+    addSidewallOverlapCap(ci, "TopMetal2",    "PWell",        31.175);
+    addSidewallOverlapCap(ci, "TopMetal2",    diff_lv_nonfet, 31.484);
+    addSidewallOverlapCap(ci, "TopMetal2",    diff_hv_nonfet, 30.835);
+    addSidewallOverlapCap(ci, "TopMetal2",    "GatPoly",      30.971);
+    addSidewallOverlapCap(ci, "GatPoly",      "TopMetal2",     1.909);
+    addSidewallOverlapCap(ci, "TopMetal2",    "Metal1",       32.318);
+    addSidewallOverlapCap(ci, "Metal1",       "TopMetal2",     4.344);
+    addSidewallOverlapCap(ci, "TopMetal2",    "Metal2",       33.245);
+    addSidewallOverlapCap(ci, "Metal2",       "TopMetal2",     6.975);
+    addSidewallOverlapCap(ci, "TopMetal2",    "Metal3",       34.339);
+    addSidewallOverlapCap(ci, "Metal3",       "TopMetal2",     9.381);
+    addSidewallOverlapCap(ci, "TopMetal2",    "Metal4",       35.630);
+    addSidewallOverlapCap(ci, "Metal4",       "TopMetal2",    11.825);
+    addSidewallOverlapCap(ci, "TopMetal2",    "Metal5",       37.206);
+    addSidewallOverlapCap(ci, "Metal5",       "TopMetal2",    14.415);
+    addSidewallOverlapCap(ci, "TopMetal2",    "TopMetal1",    44.735);
+    addSidewallOverlapCap(ci, "TopMetal1",    "TopMetal2",    33.071);
 }
 
 void buildTech(kpex::tech::Technology &tech) {
