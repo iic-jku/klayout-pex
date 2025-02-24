@@ -44,9 +44,11 @@ from .types import EdgeInterval
 class RCExtractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
+                 scale_ratio_to_fit_halo: bool,
                  tech_info: TechInfo,
                  report_path: str):
         self.pex_context = pex_context
+        self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
         self.tech_info = tech_info
         self.report_path = report_path
 
@@ -141,6 +143,7 @@ class RCExtractor:
             all_layer_names=all_layer_names,
             layer_regions_by_name=layer_regions_by_name,
             dbu=dbu,
+            scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
             tech_info=self.tech_info,
             results=results,
             report=report

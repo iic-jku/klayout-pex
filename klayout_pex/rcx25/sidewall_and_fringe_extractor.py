@@ -47,12 +47,14 @@ class SidewallAndFringeExtractor:
                  all_layer_names: List[LayerName],
                  layer_regions_by_name: Dict[LayerName, kdb.Region],
                  dbu: float,
+                 scale_ratio_to_fit_halo: bool,
                  tech_info: TechInfo,
                  results: CellExtractionResults,
                  report: ExtractionReporter):
         self.all_layer_names = all_layer_names
         self.layer_regions_by_name = layer_regions_by_name
         self.dbu = dbu
+        self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
         self.tech_info = tech_info
         self.results = results
         self.report = report
@@ -70,6 +72,7 @@ class SidewallAndFringeExtractor:
                 all_layer_names=self.all_layer_names,
                 inside_layer_index=idx,
                 dbu=self.dbu,
+                scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
                 tech_info=self.tech_info,
                 results=self.results,
                 report=self.report
@@ -102,6 +105,7 @@ class SidewallAndFringeExtractor:
                      inside_layer_index: int,
                      dbu: float,
                      tech_info: TechInfo,
+                     scale_ratio_to_fit_halo: bool,
                      results: CellExtractionResults,
                      report: ExtractionReporter):
             super().__init__()
@@ -110,6 +114,7 @@ class SidewallAndFringeExtractor:
             self.inside_layer_index = inside_layer_index
             self.dbu = dbu
             self.tech_info = tech_info
+            self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
             self.results = results
             self.report = report
 
@@ -319,6 +324,14 @@ class SidewallAndFringeExtractor:
             # see Magic ExtCouple.c L1164
             cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um)
             cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um)
+
+            if self.scale_ratio_to_fit_halo:
+                full_halo_ratio = (2.0 / math.pi) * math.atan(alpha_c * self.side_halo)
+                # NOTE: for a large enough halo, full_halo would be 1,
+                #       but it is smaller, so we compensate
+                if full_halo_ratio < 1.0:
+                    cnear /= full_halo_ratio
+                    cfar /= full_halo_ratio
 
             # "cfrac" is the fractional portion of the fringe cap seen
             # by tile tp along its length.  This is independent of the
