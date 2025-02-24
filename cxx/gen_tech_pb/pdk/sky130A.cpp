@@ -442,17 +442,17 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
     kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
-    lr->set_layer_name("ndiffres");
+    lr->set_layer_name("TODO ndiffres");
     lr->set_resistance(120000);
     lr->set_corner_adjustment_fraction(0.5);
     //...
     lr = ri->add_layers();
-    lr->set_layer_name("poly");
+    lr->set_layer_name("TODO poly");
     lr->set_resistance(48200);
     //...
     
     kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
-    vr->set_via_name("mcon");
+    vr->set_via_name("TODO mcon");
     vr->set_resistance(9300);
     //...
     
