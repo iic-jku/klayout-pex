@@ -256,9 +256,13 @@ class KpexCLI:
                                  help="Threshold (in fF) for ignored parasitic capacitances (default is %(default)s). "
                                       "(MAGIC command: ext2spice cthresh <value>)")
         group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
-                                 type=float, default=100.0,
+                                 type=int, default=100,
                                  help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
                                       "(MAGIC command: ext2spice rthresh <value>)")
+        group_magic.add_argument("--magic_tolerance", dest="magic_tolerance",
+                                 type=float, default=1,
+                                 help="Set ratio between resistor and device tolerance (default is %(default)s). "
+                                      "(MAGIC command: extresist tolerance <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) "
@@ -534,8 +538,10 @@ class KpexCLI:
             return
 
         magic_run_dir = os.path.join(args.output_dir_path, f"magic_{args.magic_pex_mode}")
-        magic_log_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Output.txt")
-        magic_script_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Script.tcl")
+        magic_log_path = os.path.join(magic_run_dir,
+                                      f"{args.effective_cell_name}_MAGIC_{args.magic_pex_mode}_Output.txt")
+        magic_script_path = os.path.join(magic_run_dir,
+                                         f"{args.effective_cell_name}_MAGIC_{args.magic_pex_mode}_Script.tcl")
 
         output_netlist_path = f"{magic_run_dir}/{args.effective_cell_name}.pex.spice"
 
@@ -549,6 +555,7 @@ class KpexCLI:
                              pex_mode=args.magic_pex_mode,
                              c_threshold=args.magic_cthresh,
                              r_threshold=args.magic_rthresh,
+                             tolerance=args.magic_tolerance,
                              halo=args.magic_halo)
 
         run_magic(exe_path=args.magic_exe_path,
