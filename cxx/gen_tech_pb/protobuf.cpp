@@ -146,6 +146,37 @@ void addComputedLayer(kpex::tech::Technology *tech,
     layer->set_gds_datatype(gds_datatype);
 }
 
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance)
+{
+    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
+    lr->set_layer_name(layer_name);
+    lr->set_resistance(resistance);
+}
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance,
+                        double corner_adjustment_fraction)
+{
+    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
+    lr->set_layer_name(layer_name);
+    lr->set_resistance(resistance);
+    if (corner_adjustment_fraction != 0.0) {
+        lr->set_corner_adjustment_fraction(corner_adjustment_fraction);
+    }
+}
+
+void addViaResistance(kpex::tech::ResistanceInfo *ri,
+                      const std::string &via_name,
+                      double resistance)
+{
+    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
+    vr->set_via_name(via_name);
+    vr->set_resistance(resistance);
+}
+
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
                      const std::string &layer_name,
                      float area_cap,

@@ -438,24 +438,33 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
+    // See  https://docs.google.com/spreadsheets/d/1N9To-xTiA7FLfQ1SNzWKe-wMckFEXVE9WPkPPjYkaxE/edit?pli=1&gid=1654372372#gid=1654372372
+    
     ex->set_side_halo(8.0);
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
-    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
-    lr->set_layer_name("TODO ndiffres");
-    lr->set_resistance(120000);
-    lr->set_corner_adjustment_fraction(0.5);
-    //...
-    lr = ri->add_layers();
-    lr->set_layer_name("TODO poly");
-    lr->set_resistance(48200);
-    //...
+
+    // resistance values are in mΩ / square
+    //                     layer, resistance, [corner_adjustment_fraction]
+    addLayerResistance(ri, "poly", 48200);  // allpolynonres
+    addLayerResistance(ri, "li1",  12800);
+    addLayerResistance(ri, "met1",   125);
+    addLayerResistance(ri, "met2",   125);
+    addLayerResistance(ri, "met3",    47);
+    addLayerResistance(ri, "met4",    47);
+    addLayerResistance(ri, "met5",    29);
     
-    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
-    vr->set_via_name("TODO mcon");
-    vr->set_resistance(9300);
-    //...
-    
+    // resistance values are in mΩ / square
+    //                   layer,         resistance
+    addViaResistance(ri, "licon_poly",  152000);
+    addViaResistance(ri, "licon_ndiff", 185000);
+    addViaResistance(ri, "licon_pdiff", 585000);
+    addViaResistance(ri, "mcon",          9300);
+    addViaResistance(ri, "via",           4500);
+    addViaResistance(ri, "via2",          3410);
+    addViaResistance(ri, "via3",          3410);
+    addViaResistance(ri, "via4",           380);
+
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
     
     //                  layer,  area_cap,  perimeter_cap
