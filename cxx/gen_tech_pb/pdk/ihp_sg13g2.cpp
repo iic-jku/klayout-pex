@@ -391,21 +391,29 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     ex->set_side_halo(8);
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
-    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
-    lr->set_layer_name("TODO ndiffres");
-    lr->set_resistance(120000);
-    lr->set_corner_adjustment_fraction(0.5);
-    //...
-    lr = ri->add_layers();
-    lr->set_layer_name("TODO poly");
-    lr->set_resistance(48200);
-    //...
+
+    // resistance values are in mΩ / square
+    //                     layer, resistance, [corner_adjustment_fraction]
+    // addLayerResistance(ri, "GatPoly", 48200); // TODO
+    addLayerResistance(ri, "Metal1",    110);
+    addLayerResistance(ri, "Metal2",     88);
+    addLayerResistance(ri, "Metal3",     88);
+    addLayerResistance(ri, "Metal4",     88);
+    addLayerResistance(ri, "Metal5",     88);
+    addLayerResistance(ri, "TopMetal1",  18);
+    addLayerResistance(ri, "TopMetal2",  11);
     
-    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
-    vr->set_via_name("TODO mcon");
-    vr->set_resistance(9300);
-    //...
-    
+    // resistance values are in mΩ / square
+    //                   layer,         resistance
+    addViaResistance(ri, "Cont",      17000);  // TODO: alldiffcont???
+    // addViaResistance(ri, "Cont",      15000);  // TODO: pc??
+    addViaResistance(ri, "Via1",       9000);
+    addViaResistance(ri, "Via2",       9000);
+    addViaResistance(ri, "Via3",       9000);
+    addViaResistance(ri, "Via4",       9000);
+    addViaResistance(ri, "TopVia1",    2200);
+    addViaResistance(ri, "TopVia2",    1100);
+
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
 
     //                  layer,    area_cap,  perimeter_cap

@@ -72,6 +72,19 @@ void addComputedLayer(kpex::tech::Technology *tech,
                       const std::string &original_layer_name,
                       const std::string &description);
 
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance);
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance,
+                        double corner_adjustment_fraction);
+
+void addViaResistance(kpex::tech::ResistanceInfo *ri,
+                      const std::string &via_name,
+                      double resistance);
+
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
                      const std::string &layer_name,
                      float area_cap,
