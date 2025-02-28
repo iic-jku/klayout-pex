@@ -28,17 +28,17 @@ import math
 
 import klayout.db as kdb
 
-from ..log import (
+from klayout_pex.log import (
     info,
     warning
 )
-from ..tech_info import TechInfo
+from klayout_pex.tech_info import TechInfo
 
-from .geometry_restorer import GeometryRestorer
-from .extraction_results import *
-from .extraction_reporter import ExtractionReporter
-from .polygon_utils import find_polygon_with_nearest_edge, nearest_edge
-from .types import EdgeInterval, EdgeNeighborhood
+from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
+from klayout_pex.rcx25.extraction_results import *
+from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
+from klayout_pex.rcx25.c.polygon_utils import find_polygon_with_nearest_edge, nearest_edge
+from klayout_pex.rcx25.types import EdgeInterval, EdgeNeighborhood
 from process_parasitics_pb2 import CapacitanceInfo
 
 

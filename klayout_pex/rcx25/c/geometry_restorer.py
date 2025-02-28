@@ -25,7 +25,7 @@
 
 import klayout.db as kdb
 
-from .types import EdgeInterval
+from klayout_pex.rcx25.types import EdgeInterval
 
 
 class GeometryRestorer:
