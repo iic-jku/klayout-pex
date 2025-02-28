@@ -23,16 +23,13 @@
 #
 
 from functools import cached_property
-from typing import *
 
 import klayout.rdb as rdb
 import klayout.db as kdb
-from klayout.dbcore import EdgeNeighborhoodVisitor
 
 from .extraction_results import *
-from .geometry_restorer import GeometryRestorer
-from .types import EdgeNeighborhood, LayerName, NetName
-
+from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
+from .types import EdgeNeighborhood, LayerName
 
 VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
 

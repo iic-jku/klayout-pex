@@ -27,18 +27,14 @@ import klayout.db as kdb
 
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
 from ..log import (
-    console,
     debug,
-    info,
-    warning,
-    error
+    warning
 )
 from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
-from .overlap_extractor import OverlapExtractor
-from .sidewall_and_fringe_extractor import SidewallAndFringeExtractor
-from .types import EdgeInterval
+from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
+from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
 
 
 class RCExtractor:
