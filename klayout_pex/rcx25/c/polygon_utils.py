@@ -29,8 +29,8 @@ import math
 import klayout.db as kdb
 from klayout.dbcore import EdgeWithProperties
 
-from .types import EdgeDistance
-from ..log import warning
+from klayout_pex.rcx25.types import EdgeDistance
+from klayout_pex.log import warning
 
 
 # NOTE: first lateral nearby shape blocks everything beyond (like sidewall situation) up to halo

@@ -25,15 +25,15 @@
 
 import klayout.db as kdb
 
-from ..log import (
+from klayout_pex.log import (
     info,
     warning,
 )
-from ..tech_info import TechInfo
+from klayout_pex.tech_info import TechInfo
 
-from .types import PolygonNeighborhood
-from .extraction_results import *
-from .extraction_reporter import ExtractionReporter
+from klayout_pex.rcx25.types import PolygonNeighborhood
+from klayout_pex.rcx25.extraction_results import *
+from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 
 
 class OverlapExtractor:
