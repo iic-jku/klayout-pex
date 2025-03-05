@@ -208,6 +208,8 @@ class KpexCLI:
         group_fastercap.add_argument("--k_void", "-k", dest="k_void",
                                      type=float, default=3.9,
                                      help="Dielectric constant of void (default is %(default)s)")
+
+        # TODO: reflect that these are also now used by KPEX/2.5D engine!
         group_fastercap.add_argument("--delaunay_amax", "-a", dest="delaunay_amax",
                                      type=float, default=50,
                                      help="Delaunay triangulation maximum area (default is %(default)s)")
@@ -653,6 +655,9 @@ class KpexCLI:
                              report_path: str,
                              netlist_csv_path: str):
         extractor = RCExtractor(pex_context=pex_context,
+                                pex_mode=args.pex_mode,
+                                delaunay_amax=args.delaunay_amax,
+                                delaunay_b=args.delaunay_b,
                                 scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                 tech_info=tech_info,
                                 report_path=report_path)
