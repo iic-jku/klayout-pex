@@ -87,6 +87,13 @@ class TechInfo:
         return {lyr.name: lyr for lyr in self.tech.layers}
 
     @cached_property
+    def pin_layer_mapping_for_drw_gds_pair(self) -> Dict[GDSPair, tech_pb2.PinLayerMapping]:
+        return {
+            (m.drw_gds_layer, m.drw_gds_datatype): (m.pin_gds_layer, m.pin_gds_datatype)
+            for m in self.tech.pin_layer_mappings
+        }
+
+    @cached_property
     def gds_pair_for_layer_name(self) -> Dict[str, GDSPair]:
         return {lyr.name: (lyr.gds_layer, lyr.gds_datatype) for lyr in self.tech.layers}
 
