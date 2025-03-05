@@ -67,6 +67,7 @@ from .log import (
     rule
 )
 from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
+from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
 from .tech_info import TechInfo
@@ -543,7 +544,8 @@ class KpexCLI:
         magic_script_path = os.path.join(magic_run_dir,
                                          f"{args.effective_cell_name}_MAGIC_{args.magic_pex_mode}_Script.tcl")
 
-        output_netlist_path = f"{magic_run_dir}/{args.effective_cell_name}.pex.spice"
+        output_netlist_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}.pex.spice")
+        report_db_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_report.rdb.gz")
 
         os.makedirs(magic_run_dir, exist_ok=True)
 
@@ -563,7 +565,20 @@ class KpexCLI:
                   script_path=magic_script_path,
                   log_path=magic_log_path)
 
+        layout = kdb.Layout()
+        layout.read(args.effective_gds_path)
+
+        report = rdb.ReportDatabase('')
+        magic_log_analyzer = MagicLogAnalyzer(magic_log_dir_path=magic_run_dir,
+                                              report=report,
+                                              dbu=layout.dbu)
+        magic_log_analyzer.analyze()
+        report.save(report_db_path)
+
+        rule("Paths")
+        subproc(f"Report DB saved at: {report_db_path}")
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
+
         rule("MAGIC PEX SPICE netlist")
         with open(output_netlist_path, 'r') as f:
             subproc(f.read())
