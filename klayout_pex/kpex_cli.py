@@ -70,6 +70,7 @@ from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
+from .rcx25.pex_mode import PEXMode
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
 from .util.argparse_helpers import render_enum_help, true_or_false
@@ -277,6 +278,9 @@ class KpexCLI:
                                   help="Path to magic executable (default is '%(default)s')")
 
         group_25d = main_parser.add_argument_group("2.5D options")
+        group_25d.add_argument("--mode", dest='pex_mode',
+                               default=PEXMode.DEFAULT, type=PEXMode, choices=list(PEXMode),
+                               help=render_enum_help(topic='mode', enum_cls=PEXMode))
         group_25d.add_argument("--halo", dest="halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) to override tech info "
