@@ -33,18 +33,26 @@ from ..log import (
 from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
+from .r.resistor_extraction import ResistorExtraction, ResistorNetwork
 
 
 class RCExtractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
+                 pex_mode: PEXMode,
                  scale_ratio_to_fit_halo: bool,
+                 delaunay_amax: float,
+                 delaunay_b: float,
                  tech_info: TechInfo,
                  report_path: str):
         self.pex_context = pex_context
+        self.pex_mode = pex_mode
         self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
+        self.delaunay_amax = delaunay_amax
+        self.delaunay_b = delaunay_b
         self.tech_info = tech_info
         self.report_path = report_path
 
@@ -106,7 +114,7 @@ class RCExtractor:
         side_halo_um = self.tech_info.tech.process_parasitics.side_halo
         substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
 
-        layer_regions_by_name[ self.tech_info.internal_substrate_layer_name] = substrate_region
+        layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = substrate_region
 
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
@@ -125,25 +133,45 @@ class RCExtractor:
 
         all_layer_names = list(layer_regions_by_name.keys())
 
-        overlap_extractor = OverlapExtractor(
-            all_layer_names=all_layer_names,
-            layer_regions_by_name=layer_regions_by_name,
-            dbu=dbu,
-            tech_info=self.tech_info,
-            results=results,
-            report=report
-        )
-        overlap_extractor.extract()
+        # ------------------------------------------------------------------------
+        if self.pex_mode.need_capacitance():
+            overlap_extractor = OverlapExtractor(
+                all_layer_names=all_layer_names,
+                layer_regions_by_name=layer_regions_by_name,
+                dbu=dbu,
+                tech_info=self.tech_info,
+                results=results,
+                report=report
+            )
+            overlap_extractor.extract()
 
-        sidewall_and_fringe_extractor = SidewallAndFringeExtractor(
-            all_layer_names=all_layer_names,
-            layer_regions_by_name=layer_regions_by_name,
-            dbu=dbu,
-            scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
-            tech_info=self.tech_info,
-            results=results,
-            report=report
-        )
-        sidewall_and_fringe_extractor.extract()
+            sidewall_and_fringe_extractor = SidewallAndFringeExtractor(
+                all_layer_names=all_layer_names,
+                layer_regions_by_name=layer_regions_by_name,
+                dbu=dbu,
+                scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
+                tech_info=self.tech_info,
+                results=results,
+                report=report
+            )
+            sidewall_and_fringe_extractor.extract()
+
+        # ------------------------------------------------------------------------
+        rex = ResistorExtraction(b=self.delaunay_b, amax=self.delaunay_amax)
+        if self.pex_mode.need_resistance():
+            c: kdb.Circuit = netlist.top_circuit()
+            debug(f"found {c.pin_count()}pins")
+
+            for layer_name, region in layer_regions_by_name.items():
+                if layer_name == self.tech_info.internal_substrate_layer_name:
+                    continue
+
+                gds_pair = self.gds_pair(layer_name)
+                pins = self.pex_context.pins_of_layer(gds_pair)
+                labels = self.pex_context.labels_of_layer(gds_pair)
+
+                resistor_networks = rex.extract(polygons=region, pins=pins, labels=labels)
+                for rn in resistor_networks:
+                    print(rn.to_string(True))
 
         return results
