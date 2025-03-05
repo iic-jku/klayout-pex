@@ -63,6 +63,7 @@ class KLayoutMergedExtractedLayerInfo:
 @dataclass
 class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
+    tech: TechInfo
     dbu: float
     top_cell: kdb.Cell
     layer_map: Dict[int, kdb.LayerInfo]
@@ -121,6 +122,7 @@ class KLayoutExtractionContext:
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
+            tech=tech,
             dbu=dbu,
             top_cell=top_cell,
             layer_map=lm,
@@ -269,4 +271,23 @@ class KLayoutExtractionContext:
 
         return shapes
 
+    def pins_of_layer(self, gds_pair: GDSPair) -> kdb.Region:
+        pin_gds_pair = self.tech.pin_layer_mapping_for_drw_gds_pair[gds_pair]
 
+        lyr = self.extracted_layers.get(pin_gds_pair, None)
+        if lyr is None:
+            return kdb.Region()
+        if len(lyr.source_layers) != 1:
+            raise NotImplementedError(f"currently only supporting 1 pin layer mapping, "
+                                      f"but got {len(lyr.source_layers)}")
+        return lyr.source_layers[0].region
+
+    def labels_of_layer(self, gds_pair: GDSPair) -> kdb.Texts:
+        lyr = self.extracted_layers.get(gds_pair, None)
+        if lyr is None:
+            return kdb.Texts()
+
+        # self.original_layout
+
+        labels: kdb.Texts
+        return None
