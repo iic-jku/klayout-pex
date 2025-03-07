@@ -325,11 +325,17 @@ class KLayoutExtractionContext:
         return lyr.source_layers[0].region
 
     def labels_of_layer(self, gds_pair: GDSPair) -> kdb.Texts:
-        lyr = self.extracted_layers.get(gds_pair, None)
-        if lyr is None:
-            return kdb.Texts()
+        # TODO! the labels will come directly from the LVS database!
+        #       for now, as a workaround, get them from the layout
+        #
+        # NOTE: the labels for sky130A are always same layer, datatype=5
 
-        # self.original_layout
+        lay: kdb.Layout = self.lvsdb.internal_layout()
+        label_layer_idx = lay.find_layer(gds_pair[0], 5)  # sky130 layer dt = 5
+        sh_it = lay.begin_shapes(self.lvsdb.internal_top_cell(), label_layer_idx)
+        labels: kdb.Texts = kdb.Texts(sh_it)
 
-        labels: kdb.Texts
-        return None
+        # TODO: FIXME: this is a workaround for now,
+        #       as the geometry of the original layout does not necessarily match the annotated layout
+        #       until Matthias retains the labels within the Netlist DB
+        return labels
