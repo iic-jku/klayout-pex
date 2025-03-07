@@ -128,6 +128,21 @@ void addLayer(kpex::tech::Technology *tech,
     layer->set_gds_datatype(gds_datatype);
 }
 
+void addPinLayerMapping(kpex::tech::Technology *tech,
+                        const std::string &description,
+                        uint32_t pin_gds_layer,
+                        uint32_t pin_gds_datatype,
+                        uint32_t drw_gds_layer,
+                        uint32_t drw_gds_datatype)
+{
+    kpex::tech::PinLayerMapping *m = tech->add_pin_layer_mappings();
+    m->set_description(description);
+    m->set_pin_gds_layer(pin_gds_layer);
+    m->set_pin_gds_datatype(pin_gds_datatype);
+    m->set_drw_gds_layer(drw_gds_layer);
+    m->set_drw_gds_datatype(drw_gds_datatype);
+}
+
 void addComputedLayer(kpex::tech::Technology *tech,
                       kpex::tech::ComputedLayerInfo_Kind kind,
                       const std::string &name,
