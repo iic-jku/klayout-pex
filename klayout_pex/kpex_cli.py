@@ -654,10 +654,15 @@ class KpexCLI:
                              tech_info: TechInfo,
                              report_path: str,
                              netlist_csv_path: str):
+        # TODO: make this separatly configurable
+        #       for now we use 0
+        args.rcx25d_delaunay_amax = 0
+        args.rcx25d_delaunay_b = 0.5
+
         extractor = RCExtractor(pex_context=pex_context,
                                 pex_mode=args.pex_mode,
-                                delaunay_amax=args.delaunay_amax,
-                                delaunay_b=args.delaunay_b,
+                                delaunay_amax=args.rcx25d_delaunay_amax,
+                                delaunay_b=args.rcx25d_delaunay_b,
                                 scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                 tech_info=tech_info,
                                 report_path=report_path)
