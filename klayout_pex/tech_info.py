@@ -208,6 +208,18 @@ class TechInfo:
                     return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
         return diel_lyr, 5.0   # air TODO
 
+    #--------------------------------
+
+    @cached_property
+    def layer_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.LayerResistance]:
+        return {r.layer_name: r for r in self.tech.process_parasitics.resistance.layers}
+
+    @cached_property
+    def via_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ViaResistance]:
+        return {r.via_name: r for r in self.tech.process_parasitics.resistance.vias}
+
+    #--------------------------------
+
     @cached_property
     def substrate_cap_by_layer_name(self) -> Dict[str, process_parasitics_pb2.CapacitanceInfo.SubstrateCapacitance]:
         return {sc.layer_name: sc for sc in self.tech.process_parasitics.capacitance.substrates}
