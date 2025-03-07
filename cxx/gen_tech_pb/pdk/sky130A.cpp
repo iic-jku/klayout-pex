@@ -32,36 +32,50 @@
 namespace sky130A {
 
 void buildLayers(kpex::tech::Technology *tech) {
-    addLayer(tech, "dnwell", 64, 18, "Deep N-well");
-    addLayer(tech, "nwell",  64, 20, "N-well region");
-    addLayer(tech, "diff",   65, 20, "Active (diffusion) area");
-    addLayer(tech, "tap",    65, 44, "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
-    addLayer(tech, "psdm",   94, 20, "");
-    addLayer(tech, "nsdm",   93, 44, "");
-    addLayer(tech, "poly",   66, 20, "Poly");
-    addLayer(tech, "licon1", 66, 44, "Contact to local interconnect");
-    addLayer(tech, "li1",    67, 20, "Local interconnect");
-    addLayer(tech, "mcon",   67, 44, "Contact from local interconnect to met1");
-    addLayer(tech, "met1",   68, 20, "Metal 1");
-    addLayer(tech, "via",    68, 44, "Contact from met1 to met2");
-    addLayer(tech, "met2",   69, 20, "Metal 2");
-    addLayer(tech, "via2",   69, 44, "Contact from met2 to met3");
-    addLayer(tech, "met3",   70, 20, "Metal 3");
-    addLayer(tech, "via3",   70, 44, "Contact from cap above met3 to met4");
-    addLayer(tech, "capm",   89, 44,  "MiM capacitor plate over metal 3");
-    addLayer(tech, "met4",   71, 20, "Metal 4");
-    addLayer(tech, "capm2",  97, 44,  "MiM capacitor plate over metal 4");
-    addLayer(tech, "via4",   71, 44, "Contact from met4 to met5 (no MiM cap)");
-    addLayer(tech, "met5",   72, 20, "Metal 5");
+    //             name      gds_pair  description
+    addLayer(tech, "dnwell", 64, 18,   "Deep N-well");
+    addLayer(tech, "nwell",  64, 20,   "N-well region");
+    addLayer(tech, "diff",   65, 20,   "Active (diffusion) area");
+    addLayer(tech, "tap",    65, 44,   "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
+    addLayer(tech, "psdm",   94, 20,   "");
+    addLayer(tech, "nsdm",   93, 44,   "");
+    addLayer(tech, "poly",   66, 20,   "Poly");
+    addLayer(tech, "licon1", 66, 44,   "Contact to local interconnect");
+    addLayer(tech, "li1",    67, 20,   "Local interconnect");
+    addLayer(tech, "mcon",   67, 44,   "Contact from local interconnect to met1");
+    addLayer(tech, "met1",   68, 20,   "Metal 1");
+    addLayer(tech, "via",    68, 44,   "Contact from met1 to met2");
+    addLayer(tech, "met2",   69, 20,   "Metal 2");
+    addLayer(tech, "via2",   69, 44,   "Contact from met2 to met3");
+    addLayer(tech, "met3",   70, 20,   "Metal 3");
+    addLayer(tech, "via3",   70, 44,   "Contact from cap above met3 to met4");
+    addLayer(tech, "capm",   89, 44,   "MiM capacitor plate over metal 3");
+    addLayer(tech, "met4",   71, 20,   "Metal 4");
+    addLayer(tech, "capm2",  97, 44,   "MiM capacitor plate over metal 4");
+    addLayer(tech, "via4",   71, 44,   "Contact from met4 to met5 (no MiM cap)");
+    addLayer(tech, "met5",   72, 20,   "Metal 5");
+}
+
+void buildPinLayerMappings(kpex::tech::Technology *tech) {
+    //                       description   pin_gds_pair   drw_gds_pair
+    addPinLayerMapping(tech, "poly.pin",   66, 16,        66, 20);
+    addPinLayerMapping(tech, "li1.pin",    67, 16,        67, 20);
+    addPinLayerMapping(tech, "met1.pin",   68, 16,        68, 20);
+    addPinLayerMapping(tech, "met2.pin",   69, 16,        69, 20);
+    addPinLayerMapping(tech, "met3.pin",   70, 16,        70, 20);
+    addPinLayerMapping(tech, "met4.pin",   71, 16,        71, 20);
+    addPinLayerMapping(tech, "met5.pin",   72, 16,        72, 20);
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
     kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
+    kpex::tech::ComputedLayerInfo::Kind KPIN = kpex::tech::ComputedLayerInfo_Kind_KIND_PIN;
     
+    //                     kind  lvs_name lvs_gds_pair  orig. layer   description
     addComputedLayer(tech, KREG, "dnwell",    64, 18,  "dnwell",     "Deep NWell");
-    addComputedLayer(tech, KREG, "li_con",    67, 20,  "li1",  "Computed layer for li");
+    addComputedLayer(tech, KREG, "li_con",    67, 20,  "li1",    "Computed layer for li");
     addComputedLayer(tech, KREG, "licon",     66, 44,  "licon1", "Computed layer for contact to li");
     addComputedLayer(tech, KREG, "mcon",      67, 44,  "mcon", "");
     addComputedLayer(tech, KREG, "met1_con",  68, 20,  "met1", "");
@@ -99,6 +113,14 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KCAP, "met4_cap",  71, 220, "met4", "metal4 part of MiM cap");
     addComputedLayer(tech, KCAP, "capm",      89, 44,  "capm", "MiM cap above metal3");
     addComputedLayer(tech, KCAP, "capm2",     97, 44,  "capm2", "MiM cap above metal4");
+    
+    addComputedLayer(tech, KPIN, "poly_pin_con", 66, 16,  "poly.pin", "Poly pin");
+    addComputedLayer(tech, KPIN, "li_pin_con",   67, 16,  "li1.pin",   "li1 pin");
+    addComputedLayer(tech, KPIN, "met1_pin_con", 68, 16,  "met1.pin", "met1 pin");
+    addComputedLayer(tech, KPIN, "met2_pin_con", 69, 16,  "met2.pin", "met2 pin");
+    addComputedLayer(tech, KPIN, "met3_pin_con", 70, 16,  "met3.pin", "met3 pin");
+    addComputedLayer(tech, KPIN, "met4_pin_con", 71, 16,  "met4.pin", "met4 pin");
+    addComputedLayer(tech, KPIN, "met5_pin_con", 72, 16,  "met5.pin", "met5 pin");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
@@ -606,7 +628,8 @@ void buildTech(kpex::tech::Technology &tech) {
     tech.set_name("sky130A");
 
     buildLayers(&tech);
-
+    buildPinLayerMappings(&tech);
+    
     buildLVSComputedLayers(&tech);
 
     kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
