@@ -994,6 +994,15 @@ met3_con  = met3.not(met3_res).not(inductor).not(met3_fuse).not(vpp)
 met4_con  = met4.not(met4_res).not(met4_fuse).not(vpp)
 met5_con  = met5.not(met5_res).not(vpp)
 
+# Pins (NOTE: a regular LVS would not do this, we need it for PEX)
+poly_pin_con = poly_pin & poly_con
+li_pin_con   = li_pin   & li_con
+met1_pin_con = met1_pin & met1_con
+met2_pin_con = met2_pin & met2_con
+met3_pin_con = met3_pin & met3_con
+met4_pin_con = met4_pin & met4_con
+met5_pin_con = met5_pin & met5_con
+
 #==================================
 # ------ MOSFET DERIVATIONS -------
 #==================================
@@ -1630,7 +1639,6 @@ sonos_ngate   = nsdm.and(sonos_tgate).not(psdm)
 sonos_gate    = sonos_ngate.and(lvtn).and(dnwell).and(tunm).and(ldntm).interacting(areaid_ce)
 sonos_nsd     = nsdm.and(sd).not(nwell).interacting(sonos_gate)
 
-
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
 #================================================
@@ -1645,6 +1653,10 @@ logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
 # export layer names
 if self.respond_to?(:name)
+  %w(poly_pin_con li_pin_con met1_pin_con met2_pin_con met3_pin_con met4_pin_con met5_pin_con).each do |l|
+    name(eval(l), l)
+  end
+  
   %w(dnwell li_con licon mcon_con met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1_con via2_con via3_ncap via4_ncap).each do |l|
     name(eval(l), l)
   end
@@ -1697,6 +1709,15 @@ connect(met4_ncap   ,     met4_label)
 connect(met5_con    ,     met5_label)
 connect(rdl         ,      rdl_label)
 connect(pad         ,      pad_label)
+
+# Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(poly_con    ,      poly_pin_con)
+connect(li_con      ,      li_pin_con)
+connect(met1_con    ,      met1_pin_con)
+connect(met2_con    ,      met2_pin_con)
+connect(met3_ncap   ,      met3_pin_con)
+connect(met4_ncap   ,      met4_pin_con)
+connect(met5_con    ,      met5_pin_con)
 
 logger.info("Starting SKY130 LVS connectivity setup (Global connections)")
 
