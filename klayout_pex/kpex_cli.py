@@ -271,6 +271,15 @@ class KpexCLI:
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
 
+        group_25d = main_parser.add_argument_group("2.5D options")
+        group_25d.add_argument("--halo", dest="halo",
+                                 type=float, default=None,
+                                 help="Custom sidewall halo distance (in µm) to override tech info "
+                                      "(default is no custom halo)")
+        group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
+                                type=true_or_false, default=True,
+                                help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
@@ -498,7 +507,7 @@ class KpexCLI:
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
-            top_cell_name=pex_context.top_cell.name,
+            top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             blackbox_devices=args.blackbox_devices
         )
@@ -506,7 +515,7 @@ class KpexCLI:
         # create a nice CSV for reports, useful for spreadsheets
         netlist_csv_writer = NetlistCSVWriter()
         netlist_csv_writer.write_csv(netlist=expanded_netlist,
-                                     top_cell_name=pex_context.top_cell.name,
+                                     top_cell_name=pex_context.annotated_top_cell.name,
                                      output_path=expanded_netlist_csv_path)
 
         rule("Extended netlist (CSV format):")
@@ -525,7 +534,7 @@ class KpexCLI:
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
-                                                 top_cell_name=pex_context.top_cell.name)
+                                                 top_cell_name=pex_context.annotated_top_cell.name)
         reduced_netlist.write(reduced_netlist_path, spice_writer)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
@@ -611,7 +620,7 @@ class KpexCLI:
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
-            top_cell_name=pex_context.top_cell.name,
+            top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             blackbox_devices=args.blackbox_devices
         )
@@ -624,7 +633,7 @@ class KpexCLI:
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
-                                                 top_cell_name=pex_context.top_cell.name)
+                                                 top_cell_name=pex_context.annotated_top_cell.name)
         reduced_netlist.write(reduced_netlist_path, spice_writer)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
@@ -635,6 +644,7 @@ class KpexCLI:
                              report_path: str,
                              netlist_csv_path: str):
         extractor = RCExtractor(pex_context=pex_context,
+                                scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                 tech_info=tech_info,
                                 report_path=report_path)
         extraction_results = extractor.extract()
@@ -779,6 +789,9 @@ class KpexCLI:
         tech_info = TechInfo.from_json(args.tech_pbjson_path,
                                        dielectric_filter=args.dielectric_filter)
 
+        if args.halo is not None:
+            tech_info.tech.process_parasitics.side_halo = args.halo
+
         if args.run_magic:
             rule('MAGIC')
             self.run_magic_extraction(args)
@@ -799,10 +812,10 @@ class KpexCLI:
             names = [l.lvs_layer_name for l in layer_info.source_layers]
             info(f"{gds_pair} -> ({' '.join(names)})")
 
-        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.gds.gz")
-        pex_context.target_layout.write(gds_path)
+        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_extracted.oas.gz")
+        pex_context.annotated_layout.write(gds_path)
 
-        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.gds.gz")
+        gds_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_l2n_internal.oas.gz")
         pex_context.lvsdb.internal_layout().write(gds_path)
 
         def dump_layers(cell: str,
