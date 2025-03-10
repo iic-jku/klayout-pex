@@ -115,14 +115,14 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     auto nwell =    addNWellLayer(psi, "ntap",  0.0,    "fox");
     auto diff = addDiffusionLayer(psi, "ptap",  0.0,    "fox");
-
+    
     // FOX:                 name     dielectric_k
     //-----------------------------------------------------------------------------------------------
     addFieldOxideLayer(psi, "fox",   3.95); // from SG13G2_os_process_spec.pdf p6
     
     double capild_k = 6.7;  // to match design sg13g2__pr.gds/cmim to 74.62fF
     double capild_thickness = 0.04;
-
+    
     auto poly_height = 0.4;
     
     auto poly_thickness = 0.16;
@@ -134,7 +134,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto cmim_cap_thickness = 0.15;
     auto topmet1_thickness = 2.0;
     auto topmet2_thickness = 3.0;
-
+    
     auto conp_thickness = 0.64 - poly_thickness;
     auto via1_thickness = 0.54;
     auto via2_thickness = 0.54;
@@ -143,7 +143,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto topvia1_ncap_thickness = 0.85;
     auto mim_via_thickness = topvia1_ncap_thickness - capild_thickness - cmim_cap_thickness;
     auto topvia2_thickness = 2.8;
-
+    
     auto met1_height      = poly_height + poly_thickness + conp_thickness;
     auto met2_height      = met1_height + met1_thickness + via1_thickness;
     auto met3_height      = met2_height + met2_thickness + via2_thickness;
@@ -162,11 +162,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
     addConformalDielectric(psi, "nitride",        6.5,         0.05,            0.05,      0.05,  "GatPoly");
-
+    
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild0",   4.1,          "fox");
-
+    
     // METAL:                      name,     height,      thickness,      ref_below, ref_above
     //-----------------------------------------------------------------------------------------------
     auto met1 = addMetalLayer(psi, "Metal1", met1_height, met1_thickness, "ild0",   "ild1");
@@ -190,7 +190,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild3",   4.1,          "ild2");
-
+    
     // METAL:                      name,     height,      thickness,      ref_below, ref_above
     //-----------------------------------------------------------------------------------------------
     auto met4 = addMetalLayer(psi, "Metal4", met4_height, met4_thickness, "ild3",   "ild4");
@@ -198,7 +198,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild4",   4.1,          "ild3");
-
+    
     // METAL:                           name,           height,           thickness,      ref_below, ref_above
     //-----------------------------------------------------------------------------------------------
     auto met5_ncap = addMetalLayer(psi, "metal5_n_cap", met5_height, met5_thickness, "ild4",   "ildtm1");
@@ -206,16 +206,16 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
-
+    
     // METAL:                           name,           height,        thickness,      ref_below, ref_above
     //-----------------------------------------------------------------------------------------------------------
     auto met5_cap = addMetalLayer(psi, "metal5_cap", met5_height, met5_thickness, "ild4",   "ildtm1");
-
+    
     // DIELECTRIC (conformal)   name,    dielectric_k, thickness,        thickness,      thickness, ref
     //                                                 over metal,       where no metal, sidewall
     //------------------------------------------------------------------------------------------------------------
     addConformalDielectric(psi, "ismim", capild_k,     capild_thickness, 0.0,            0.0,       "metal5_cap");
-
+    
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
@@ -223,28 +223,28 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // METAL:                           name,      height,      thickness,          ref_below, ref_above
     //----------------------------------------------------------------------------------------------------
     auto cmim_cap = addMetalLayer(psi, "cmim_top", cmim_height, cmim_cap_thickness, "ismim",   "ildtm1");
-
+    
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
-
+    
     // METAL:                           name,      height,         thickness,         ref_below, ref_above
     //----------------------------------------------------------------------------------------------------
     auto topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_height, topmet1_thickness, "ildtm1",  "ildtm2");
-
+    
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm2",   4.1,        "ildtm1");
-
+    
     // METAL:                           name,      height,         thickness,         ref_below, ref_above
     //----------------------------------------------------------------------------------------------------
     auto topmet2 = addMetalLayer(psi, "TopMetal2", topmet2_height, topmet2_thickness, "ildtm2",   "pass1");
-
+    
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
     addConformalDielectric(psi, "pass1",          4.1,         1.5,            1.5,      0.3,    "TopMetal2");
-
+    
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
@@ -253,8 +253,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (simple)   name,    dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "air",   1.0,          "pass2");
-
-
+    
+    
     auto contn = nwell->mutable_contact_above();
     auto contd = diff->mutable_contact_above();
     auto contp = poly->mutable_contact_above();
@@ -265,19 +265,35 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto topvia1_n_cap = met5_ncap->mutable_contact_above();
     auto mim_via = cmim_cap->mutable_contact_above();
     auto topvia2 = topmet1->mutable_contact_above();
+    
+    // CONTACT:               contact,         metal_above,   thickness,               width, spacing,         border
+    //----------------------------------------------------------------------------------------------------------------
+    setContact(contn,         "Cont",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contd,         "Cont",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contp,         "Cont",          "Metal1",      conp_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via1,          "Via1",          "Metal2",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via2,          "Via2",          "Metal3",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via3,          "Via3",          "Metal4",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via4,          "Via4",          "Metal5",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(topvia1_n_cap, "topvia1_n_cap", "TopMetal1",   topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(mim_via,       "mim_via",       "TopMetal1",   mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(topvia2,       "TopVia2",       "TopMetal2",   topvia2_thickness,       0.9,    1.06,           0.5);
+    
+    // TODO: refine via rules!
+    
+    // NOTE:  Contact arrays defined at 200 spacing for large array rule (5x5), otherwise spacing is 180.
+    //        The smallest square which would be illegal at 180 spacing is
+    //        (160 * 5) + (180 * 4) = 1520 (divided by 2 is 760)
+    
+    // NOTE:  Via1 arrays defined at 290 spacing for large array rule (4x4), otherwise spacing is 220.
+    //        The smallest square which would be illegal at 220 spacing is
+    //        (5 * 2) + (190 * 4) + (220 * 3) = 1430 (divided by 2 is 715)
 
-    // CONTACT:               contact,         metal_above,   thickness,                width, spacing,  border
-    //---------------------------------------------------------------------------------------------------------
-    setContact(contn,         "Cont",          "Metal1",      0.4 + 0.64,               0.0,    0.0,  0.0);
-    setContact(contd,         "Cont",          "Metal1",      0.4 + 0.64,               0.0,    0.0,  0.0);
-    setContact(contp,         "Cont",          "Metal1",      conp_thickness,           0.0,    0.0,  0.0);
-    setContact(via1,          "Via1",          "Metal2",      via1_thickness,           0.0,    0.0,  0.0);
-    setContact(via2,          "Via2",          "Metal3",      via1_thickness,           0.0,    0.0,  0.0);
-    setContact(via3,          "Via3",          "Metal4",      via1_thickness,           0.0,    0.0,  0.0);
-    setContact(via4,          "Via4",          "Metal5",      via1_thickness,           0.0,    0.0,  0.0);
-    setContact(topvia1_n_cap, "topvia1_n_cap", "TopMetal1",   topvia1_ncap_thickness,   0.0,    0.0,  0.0);
-    setContact(mim_via,       "mim_via",       "TopMetal1",   mim_via_thickness,        0.0,    0.0,  0.0);
-    setContact(topvia2,       "TopVia2",       "TopMetal2",   topvia2_thickness,        0.0,    0.0,  0.0);
+    // NOTE: VIA2/VIA3/VIA4 same as VIA1!
+    
+    // TODO: depending if sealring or not the grid rules differ
+    // TODO: if sealring is enabled, then no via restriction for TopVia2!
+    
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
