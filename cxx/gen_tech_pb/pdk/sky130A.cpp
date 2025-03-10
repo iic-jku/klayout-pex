@@ -77,7 +77,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KREG, "dnwell",    64, 18,  "dnwell",     "Deep NWell");
     addComputedLayer(tech, KREG, "li_con",    67, 20,  "li1",    "Computed layer for li");
     addComputedLayer(tech, KREG, "licon",     66, 44,  "licon1", "Computed layer for contact to li");
-    addComputedLayer(tech, KREG, "mcon",      67, 44,  "mcon", "");
+    addComputedLayer(tech, KREG, "mcon_con",  67, 44,  "mcon", "");
     addComputedLayer(tech, KREG, "met1_con",  68, 20,  "met1", "");
     addComputedLayer(tech, KREG, "met2_con",  69, 20,  "met2", "");
     addComputedLayer(tech, KREG, "met3_ncap", 70, 20,  "met3", "");
@@ -89,8 +89,8 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KREG, "poly_con",  66, 20,  "poly", "");
     addComputedLayer(tech, KREG, "psd",       94, 20,  "psdm", "borrow from psdm");
     addComputedLayer(tech, KREG, "ptap_conn", 65, 244, "tap", "Separate ptap, original tap is 65,44, we need seperate ntap/ptap");
-    addComputedLayer(tech, KREG, "via1",      68, 44,  "via1", "");
-    addComputedLayer(tech, KREG, "via2",      69, 44,  "via2", "");
+    addComputedLayer(tech, KREG, "via1_con",  68, 44,  "via1", "");
+    addComputedLayer(tech, KREG, "via2_con",  69, 44,  "via2", "");
     addComputedLayer(tech, KREG, "via3_ncap", 70, 144, "via3", "Original via3 is 70,44, case where no MiM cap");
     addComputedLayer(tech, KREG, "via4_ncap", 71, 144, "via4", "Original via4 is 71,44, case where no MiM cap");
     addComputedLayer(tech, KREG, "via3_cap",  70, 244, "via3", "Original via3 is 70,44, via above metal 3 MIM cap");
