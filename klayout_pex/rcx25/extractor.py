@@ -39,7 +39,7 @@ from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
-from .r.resistor_extraction import ResistorExtraction, ResistorNetwork
+from .r.resistor_extraction import ResistorExtraction, ResistorNetworks
 
 
 class RCExtractor:
@@ -119,6 +119,12 @@ class RCExtractor:
 
         layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = substrate_region
 
+        via_name_below_layer_name: Dict[LayerName, Optional[LayerName]] = {}
+        via_name_above_layer_name: Dict[LayerName, Optional[LayerName]] = {}
+        via_regions_by_via_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
+
+        previous_via_name: Optional[str] = None
+
         for metal_layer in self.tech_info.process_metal_layers:
             layer_name = metal_layer.name
             gds_pair = self.gds_pair(layer_name)
@@ -133,6 +139,20 @@ class RCExtractor:
             layer_regions_by_name[canonical_layer_name] += all_layer_shapes
             layer_regions_by_name[canonical_layer_name].enable_properties()
             all_region += all_layer_shapes
+
+            if metal_layer.metal_layer.HasField('contact_above'):
+                contact = metal_layer.metal_layer.contact_above
+
+                via_regions = self.shapes_of_layer(contact.name)
+                if via_regions is not None:
+                    via_regions.enable_properties()
+                    via_regions_by_via_name[contact.name] += via_regions
+                    via_name_above_layer_name[canonical_layer_name] = contact.name
+                    via_name_below_layer_name[canonical_layer_name] = previous_via_name
+
+                previous_via_name = contact.name
+            else:
+                previous_via_name = None
 
         all_layer_names = list(layer_regions_by_name.keys())
 
@@ -166,6 +186,8 @@ class RCExtractor:
             c: kdb.Circuit = netlist.top_circuit()
             debug(f"found {c.pin_count()}pins")
 
+            networks_by_layer: Dict[LayerName, ResistorNetworks] = {}
+
             for layer_name, region in layer_regions_by_name.items():
                 if layer_name == self.tech_info.internal_substrate_layer_name:
                     continue
@@ -176,18 +198,37 @@ class RCExtractor:
 
                 layer_sheet_resistance = self.tech_info.layer_resistance_by_layer_name[layer_name]
 
-                # TODO: include vias into graph!!!
+                # TODO: include device terminals
 
-                resistor_networks = rex.extract(polygons=region, pins=pins, labels=labels)
+                nodes = kdb.Region()
+                nodes.enable_properties()
+
+                nodes.insert(pins)
+
+                # create additional nodes for vias
+                via_above = via_name_above_layer_name.get(layer_name, None)
+                if via_above is not None:
+                    # labels.insert(kdb.Text())
+                    nodes.insert(via_regions_by_via_name[via_above])
+                via_below = via_name_below_layer_name.get(layer_name, None)
+                if via_below is not None:
+                    nodes.insert(via_regions_by_via_name[via_below])
+
+                nodes = nodes.sized(-1)  # TODO: with the subtraction done in ResistorExtraction
+                                         #       we have the problem that
+                                         #       if metal_layer_region == via_region, the Region is empty
+
+                resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
+                networks_by_layer[layer_name] = resistor_networks
 
                 subproc(f"Layer {layer_name}   (R_coeff = {layer_sheet_resistance.resistance}):")
-                for rn in resistor_networks:
+                for rn in resistor_networks.networks:
                     # print(rn.to_string(True))
                     subproc("\tNodes:")
                     for node_id in rn.node_to_s.keys():
                         loc = rn.locations[node_id]
                         node_name = rn.node_names[node_id]
-                        subproc(f"\t\tNode {node_name} at {loc} ({loc.x * dbu} µm, {loc.y * dbu} µm)")
+                        subproc(f"\t\tNode #{node_id} {node_name} at {loc} ({loc.x * dbu} µm, {loc.y * dbu} µm)")
 
                     subproc("\tResistors:")
                     visited_resistors: Set[Conductance] = set()
@@ -203,5 +244,31 @@ class RCExtractor:
                             # TODO: layer_sheet_resistance.corner_adjustment_fraction not yet used !!!
                             subproc(f"\t\t{node_name} ↔︎ {other_node_name}: {round(ohm, 3)} Ω    (internally: {conductance.cond})")
 
+            # "Stitch" in the VIAs into the graph
+            for layer_idx_bottom, layer_name_bottom in enumerate(all_layer_names):
+                if layer_name_bottom == self.tech_info.internal_substrate_layer_name:
+                    continue
+
+                via_above = via_name_above_layer_name.get(layer_name_bottom, None)
+                if via_above is None:
+                    continue
+
+                layer_name_top = all_layer_names[layer_idx_bottom + 1]
+
+                networks_bottom = networks_by_layer[layer_name_bottom]
+                networks_top = networks_by_layer[layer_name_top]
+
+                for polygon in via_regions_by_via_name[via_above]:
+                    info(f"via ({via_above}) found between metals {layer_name_bottom} ↔ {layer_name_top} at {polygon}")
+
+                    matches_bottom = networks_bottom.find_network_nodes(location=polygon)
+                    # info(matches_bottom)
+                    matches_top = networks_top.find_network_nodes(location=polygon)
+                    # info(matches_top)
+
+                    # given a drawn via area, we calculate the actual via matrix
+                    ### via_width = 1
+                    ### via_spacing = 1
+                    ### via_border = 0
 
         return results
