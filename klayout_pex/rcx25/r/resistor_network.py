@@ -23,6 +23,7 @@
 #
 
 from __future__ import annotations
+from dataclasses import dataclass
 from typing import *
 
 import klayout.db as kdb
@@ -331,3 +332,19 @@ class ResistorNetwork:
                     niter += 1
                     debug(f"Nodes left after iteration {niter} with nmax={nmax}: "
                           f"{len(self.node_to_s)} with {len(self.s)} edges.")
+
+
+@dataclass
+class ResistorNetworks:
+    networks: List[ResistorNetwork]
+
+    def find_network_nodes(self, location: kdb.Polygon) -> List[Tuple[ResistorNetworks, NodeID]]:
+        matches = []
+
+        for nw in self.networks:
+            for point, nid in nw.nodes.items():
+                if location.inside(point):
+                    print(f"node {nid} is located ({point}) within search area {location}")
+                    matches.append((nw, nid))
+
+        return matches
