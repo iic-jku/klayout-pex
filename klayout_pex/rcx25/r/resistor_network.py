@@ -34,6 +34,9 @@ from klayout_pex.log import (
 from .conductance import Conductance
 
 
+NodeID = int
+
+
 class ResistorNetwork:
     """
     A general container for a resistor network
@@ -43,13 +46,13 @@ class ResistorNetwork:
     one to many resistors connecting two of them each.
 
     Attributes are:
-    * nodes -> dict[kdb.Point, int]: The node IDs per kdb.Point
-    * locations -> dict[int, kdb.Point]: the kdb.Point of a node (given by ID)
-    * s -> dict[(int, int), Conductance]: the registors
-    * node_to_s -> dict[int, list[(Conductance, int)]]: the resistors connected to a node with the
+    * nodes -> dict[kdb.Point, NodeID]: The node IDs per kdb.Point
+    * locations -> dict[NodeID, kdb.Point]: the kdb.Point of a node (given by ID)
+    * s -> dict[(NodeID, NodeID), Conductance]: the registors
+    * node_to_s -> dict[NodeID, list[(Conductance, NodeID)]]: the resistors connected to a node with the
       node connected by the resistor
-    * precious -> set[int]: a set of node IDs for the precious nodes
-    * node_names -> dict[int, str]: the names of nodes
+    * precious -> set[NodeID]: a set of node IDs for the precious nodes
+    * node_names -> dict[NodeID, str]: the names of nodes
     """
 
     def __init__(self):
@@ -170,13 +173,13 @@ class ResistorNetwork:
         return errors
 
     # TODO: this is slow!
-    def node_ids(self, edge: kdb.Edge) -> List[int]:
+    def node_ids(self, edge: kdb.Edge) -> List[NodeID]:
         """
         Gets the node IDs that are on a given Edge
         """
         return [nid for (p, nid) in self.nodes.items() if edge.contains(p)]
 
-    def node_id(self, point: kdb.Point) -> int:
+    def node_id(self, point: kdb.Point) -> NodeID:
         """
         Gets the node ID for a given point
         """
@@ -201,7 +204,7 @@ class ResistorNetwork:
         """
         self.node_names[nid] = name
 
-    def mark_precious(self, nid: int):
+    def mark_precious(self, nid: NodeID):
         """
         Marks a node a precious
 
@@ -209,7 +212,7 @@ class ResistorNetwork:
         """
         self.precious.add(nid)
 
-    def location(self, nid: int) -> Optional[kdb.Point]:
+    def location(self, nid: NodeID) -> Optional[kdb.Point]:
         """
         Gets the location for a given node ID
         """
@@ -218,7 +221,7 @@ class ResistorNetwork:
 
         return None
 
-    def add_cond(self, a: int, b: int, cond: Conductance):
+    def add_cond(self, a: NodeID, b: NodeID, cond: Conductance):
         """
         Adds a resistor connecting two nodes
 
@@ -235,7 +238,7 @@ class ResistorNetwork:
                 self.node_to_s[b] = []
             self.node_to_s[b].append((cond, a))
 
-    def eliminate_node(self, nid: int):
+    def eliminate_node(self, nid: NodeID):
         """
         Eliminates a node
 
@@ -258,7 +261,7 @@ class ResistorNetwork:
                     self.add_cond(s1[1], s2[1], Conductance(c))
         self.remove_node(nid)
 
-    def remove_node(self, nid: int):
+    def remove_node(self, nid: NodeID):
         """
         Deletes a node and the corresponding resistors
         """
@@ -274,7 +277,7 @@ class ResistorNetwork:
         del self.nodes[self.locations[nid]]
         del self.locations[nid]
 
-    def connect_nodes(self, a: int, b: int):
+    def connect_nodes(self, a: NodeID, b: NodeID):
         """
         Contracts a and b into a.
         NOTE: b will be removed and is no longer valid afterwards
