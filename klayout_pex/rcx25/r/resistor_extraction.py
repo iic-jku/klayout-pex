@@ -32,7 +32,7 @@ from klayout_pex.log import (
     error,
 )
 from .conductance import Conductance
-from .resistor_network import ResistorNetwork
+from .resistor_network import ResistorNetwork, ResistorNetworks
 
 class ResistorExtraction:
     """
@@ -58,7 +58,7 @@ class ResistorExtraction:
                 polygons: kdb.Region,
                 pins: kdb.Region,
                 labels: kdb.Texts,
-                doc_layer: kdb.Shapes = None) -> List[ResistorNetwork]:
+                doc_layer: kdb.Shapes = None) -> ResistorNetworks:
         """
         Extracts resistor networks from the polygons on the given regions
 
@@ -153,4 +153,4 @@ class ResistorExtraction:
 
             networks.append(rn)
 
-        return networks
+        return ResistorNetworks(networks)
