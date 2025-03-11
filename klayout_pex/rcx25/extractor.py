@@ -22,6 +22,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
+import math
 
 import klayout.db as kdb
 
@@ -39,7 +40,13 @@ from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
-from .r.resistor_extraction import ResistorExtraction, ResistorNetworks
+from .r.resistor_extraction import ResistorExtraction
+from .r.resistor_network import (
+    ResistorNetworks,
+    ViaResistor,
+    ViaJunction,
+    MultiLayerResistanceNetwork
+)
 
 
 class RCExtractor:
@@ -186,6 +193,8 @@ class RCExtractor:
             c: kdb.Circuit = netlist.top_circuit()
             debug(f"found {c.pin_count()}pins")
 
+            result_network = MultiLayerResistanceNetwork(via_resistors=[])
+
             networks_by_layer: Dict[LayerName, ResistorNetworks] = {}
 
             for layer_name, region in layer_regions_by_name.items():
@@ -249,26 +258,48 @@ class RCExtractor:
                 if layer_name_bottom == self.tech_info.internal_substrate_layer_name:
                     continue
 
-                via_above = via_name_above_layer_name.get(layer_name_bottom, None)
-                if via_above is None:
+                via = self.tech_info.contact_above_metal_layer_name.get(layer_name_bottom, None)
+                if via is None:
                     continue
+
+                via_region = via_regions_by_via_name.get(via.name)
+                if via_region is None:
+                    continue
+
+                r_coeff = self.tech_info.via_resistance_by_layer_name[via.name].resistance
 
                 layer_name_top = all_layer_names[layer_idx_bottom + 1]
 
                 networks_bottom = networks_by_layer[layer_name_bottom]
                 networks_top = networks_by_layer[layer_name_top]
 
-                for polygon in via_regions_by_via_name[via_above]:
-                    info(f"via ({via_above}) found between metals {layer_name_bottom} ↔ {layer_name_top} at {polygon}")
-
-                    matches_bottom = networks_bottom.find_network_nodes(location=polygon)
+                for via_polygon in via_region:
+                    matches_bottom = networks_bottom.find_network_nodes(location=via_polygon)
                     # info(matches_bottom)
-                    matches_top = networks_top.find_network_nodes(location=polygon)
+                    matches_top = networks_top.find_network_nodes(location=via_polygon)
                     # info(matches_top)
 
                     # given a drawn via area, we calculate the actual via matrix
-                    ### via_width = 1
-                    ### via_spacing = 1
-                    ### via_border = 0
+                    approx_width = math.sqrt(via_polygon.area()) * dbu
+                    n_xy = 1 + math.floor((approx_width - (via.width + 2 * via.border)) / (via.width + via.spacing))
+                    r_via_ohm = r_coeff / n_xy**2 / 1000.0   # mΩ -> Ω
+
+                    info(f"via ({via.name}) found between "
+                         f"metals {layer_name_bottom} ↔ {layer_name_top} at {via_polygon}, "
+                         f"{n_xy}x{n_xy} (w={via.width}, sp={via.spacing}, border={via.border}), "
+                         f"{r_via_ohm} Ω")
+
+                    via_resistor = ViaResistor(
+                        bottom=ViaJunction(layer_name=layer_name_bottom,
+                                           network=matches_bottom[0][0],
+                                           node_id=matches_bottom[0][1]),
+                        top=ViaJunction(layer_name=layer_name_top,
+                                        network=matches_top[0][0],
+                                        node_id=matches_top[0][1]),
+                        resistance=r_via_ohm
+                    )
+                    result_network.via_resistors.append(via_resistor)
+
+        info(result_network)
 
         return results
