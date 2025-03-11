@@ -208,6 +208,16 @@ class TechInfo:
                     return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
         return diel_lyr, 5.0   # air TODO
 
+    @cached_property
+    def contact_above_metal_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+        return {lyr.name: lyr.metal_layer.contact_above
+                for lyr in self.process_metal_layers}
+
+    @cached_property
+    def contact_by_contact_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+        return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
+                for lyr in self.process_metal_layers}
+
     #--------------------------------
 
     @cached_property
@@ -302,3 +312,4 @@ class TechInfo:
                 d[k1][k2] = v
 
         return d
+
