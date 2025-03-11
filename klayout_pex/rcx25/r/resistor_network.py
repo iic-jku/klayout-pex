@@ -33,6 +33,7 @@ from klayout_pex.log import (
     error,
 )
 from .conductance import Conductance
+from ..types import LayerName
 
 
 NodeID = int
@@ -338,7 +339,7 @@ class ResistorNetwork:
 class ResistorNetworks:
     networks: List[ResistorNetwork]
 
-    def find_network_nodes(self, location: kdb.Polygon) -> List[Tuple[ResistorNetworks, NodeID]]:
+    def find_network_nodes(self, location: kdb.Polygon) -> List[Tuple[ResistorNetwork, NodeID]]:
         matches = []
 
         for nw in self.networks:
@@ -348,3 +349,22 @@ class ResistorNetworks:
                     matches.append((nw, nid))
 
         return matches
+
+
+@dataclass
+class ViaJunction:
+    layer_name: LayerName
+    network: ResistorNetwork
+    node_id: NodeID
+
+
+@dataclass
+class ViaResistor:
+    bottom: ViaJunction
+    top: ViaJunction
+    resistance: float  # mΩ
+
+
+@dataclass
+class MultiLayerResistanceNetwork:
+    via_resistors: List[ViaResistor]
