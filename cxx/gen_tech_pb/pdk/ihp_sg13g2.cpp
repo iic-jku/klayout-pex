@@ -58,6 +58,18 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, "TopMetal2", 134,  0, "Defines 2-nd thick TopMetal layer");
 }
 
+void buildPinLayerMappings(kpex::tech::Technology *tech) {
+    //                       description      pin_gds_pair  drw_gds_pair
+    addPinLayerMapping(tech, "GatPoly.pin",   5, 2,         5, 0);
+    addPinLayerMapping(tech, "Metal1.pin",    8, 2,         8, 0);
+    addPinLayerMapping(tech, "Metal2.pin",    10, 2,        10, 0);
+    addPinLayerMapping(tech, "Metal3.pin",    30, 2,        30, 0);
+    addPinLayerMapping(tech, "Metal4.pin",    50, 2,        50, 0);
+    addPinLayerMapping(tech, "Metal5.pin",    67, 2,        67, 0);
+    addPinLayerMapping(tech, "TopMetal1.pin", 126, 2,       126, 0);
+    addPinLayerMapping(tech, "TopMetal2.pin", 134, 2,       134, 0);
+}
+
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
     kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
@@ -505,7 +517,8 @@ void buildTech(kpex::tech::Technology &tech) {
     tech.set_name("ihp_sg13g2");
     
     buildLayers(&tech);
-    
+    buildPinLayerMappings(&tech);
+
     buildLVSComputedLayers(&tech);
     
     kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();
