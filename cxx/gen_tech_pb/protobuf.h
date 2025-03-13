@@ -62,16 +62,13 @@ void convert(const std::string &inputPath,
 
 void addLayer(kpex::tech::Technology *tech,
               const std::string &name,
-              uint32_t gds_layer,
-              uint32_t gds_datatype,
+              uint32_t drw_gds_layer,
+              uint32_t drw_gds_datatype,
+              int64_t pin_gds_layer,      // -1 if not available
+              int64_t pin_gds_datatype,   // -1 if not available
+              int64_t label_gds_layer,    // -1 if not available
+              int64_t label_gds_datatype, // -1 if not available
               const std::string &description);
-
-void addPinLayerMapping(kpex::tech::Technology *tech,
-                        const std::string &description,
-                        uint32_t pin_gds_layer,
-                        uint32_t pin_gds_datatype,
-                        uint32_t drw_gds_layer,
-                        uint32_t drw_gds_datatype);
 
 void addComputedLayer(kpex::tech::Technology *tech,
                       kpex::tech::ComputedLayerInfo_Kind kind,
