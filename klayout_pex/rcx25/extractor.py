@@ -191,11 +191,69 @@ class RCExtractor:
             rex = ResistorExtraction(b=self.delaunay_b, amax=self.delaunay_amax)
 
             c: kdb.Circuit = netlist.top_circuit()
-            debug(f"found {c.pin_count()}pins")
+            info(f"LVSDB: found {c.pin_count()}pins")
 
-            result_network = MultiLayerResistanceNetwork(via_resistors=[])
+            result_network = MultiLayerResistanceNetwork(
+                resistor_networks_by_layer={},
+                via_resistors=[]
+            )
 
-            networks_by_layer: Dict[LayerName, ResistorNetworks] = {}
+            devices: List[kdb.Device] = list(c.each_device())
+            for d in devices:
+                # https://www.klayout.de/doc-qt5/code/class_Device.html
+                param_defs = d.device_class().parameter_definitions()
+                params = {p.name: d.parameter(p.id()) for p in param_defs}
+
+                dc: kdb.DeviceClass = d.device_class()
+                da: kdb.DeviceAbstract = d.device_abstract
+
+                terminal_definitions = [td.name for td in dc.terminal_definitions()]
+
+                # https://www.klayout.de/0.26/doc/code/class_DeviceAbstract.html
+                # NOTE: the Device Abstract has the goemetrical model for the device!
+                #      each device is represented by a cell
+
+                info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
+                     f"device_class={dc}, device_class.name={dc.name}, "
+                     f"device_terminal_definitions={terminal_definitions}, "
+                     f"trans={d.trans}, "
+                     f"parameter_definitions={list(map(lambda p: p.description, param_defs))}, "
+                     f"params={params}")
+
+                # terminal_cluster_ids = [da.cluster_id_for_terminal(td.id())
+                #                         for td in d.device_class().terminal_definitions()]
+
+                info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
+                     f"Device abstract cell index={da.cell_index()}")
+
+                device_cell_name = self.pex_context.annotated_layout.cell_name(da.cell_index())
+                device_cell: kdb.Cell = self.pex_context.annotated_layout.cell(device_cell_name)
+                info(f"annotated layout cell for cell index {da.cell_index()}: {device_cell_name}")  # TODO: internal_layout() for annotated?!
+                # cl = self.pex_context.lvsdb.internal_layout().cell_name(da.cell_index())
+                # info(f"annotated layout cell for cell index {da.cell_index()}: {cl}")
+
+                for td in dc.terminal_definitions():
+                    n = d.net_for_terminal(td.id())
+
+                    for lyr_idx in device_cell.layout().layer_indexes():
+                        terminal_shapes = device_cell.shapes(lyr_idx)
+                        if len(terminal_shapes) >= 1:
+                            info(f"Device {d.expanded_name()}, Terminal {td.name} (net {n.name}): {terminal_shapes}")
+
+                    #
+                    # for metal_layer in self.tech_info.process_metal_layers:
+                    #     layer_name = metal_layer.name
+                    #     gds_pair = self.gds_pair(layer_name)
+                    #     # canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+                    #     lyr_idx = self.pex_context.annotated_layout.find_layer(*gds_pair)
+                    #     if lyr_idx is None:
+                    #         continue
+                    #     sh_iter: kdb.RecursiveShapeIterator = self.pex_context.annotated_layout.begin_shapes(device_cell, lyr_idx)
+                    #     if not sh_iter.at_end():
+                    #         terminal_shapes = kdb.Region(sh_iter)
+                    #         info(f"Device {d.expanded_name()}, Terminal {td.name} (net {n.name}): {terminal_shapes}")
+
+
 
             for layer_name, region in layer_regions_by_name.items():
                 if layer_name == self.tech_info.internal_substrate_layer_name:
@@ -208,6 +266,7 @@ class RCExtractor:
                 layer_sheet_resistance = self.tech_info.layer_resistance_by_layer_name[layer_name]
 
                 # TODO: include device terminals
+
 
                 nodes = kdb.Region()
                 nodes.enable_properties()
@@ -228,7 +287,8 @@ class RCExtractor:
                                          #       if metal_layer_region == via_region, the Region is empty
 
                 resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
-                networks_by_layer[layer_name] = resistor_networks
+
+                result_network.resistor_networks_by_layer[layer_name] = resistor_networks
 
                 subproc(f"Layer {layer_name}   (R_coeff = {layer_sheet_resistance.resistance}):")
                 for rn in resistor_networks.networks:
@@ -262,16 +322,19 @@ class RCExtractor:
                 if via is None:
                     continue
 
-                via_region = via_regions_by_via_name.get(via.name)
+                via_gds_pair = self.gds_pair(via.name)
+                canonical_via_name = self.tech_info.canonical_layer_name_by_gds_pair[via_gds_pair]
+
+                via_region = via_regions_by_via_name.get(canonical_via_name)
                 if via_region is None:
                     continue
 
-                r_coeff = self.tech_info.via_resistance_by_layer_name[via.name].resistance
+                r_coeff = self.tech_info.via_resistance_by_layer_name[canonical_via_name].resistance
 
                 layer_name_top = all_layer_names[layer_idx_bottom + 1]
 
-                networks_bottom = networks_by_layer[layer_name_bottom]
-                networks_top = networks_by_layer[layer_name_top]
+                networks_bottom = result_network.resistor_networks_by_layer[layer_name_bottom]
+                networks_top = result_network.resistor_networks_by_layer[layer_name_top]
 
                 for via_polygon in via_region:
                     matches_bottom = networks_bottom.find_network_nodes(location=via_polygon)
@@ -284,22 +347,25 @@ class RCExtractor:
                     n_xy = 1 + math.floor((approx_width - (via.width + 2 * via.border)) / (via.width + via.spacing))
                     r_via_ohm = r_coeff / n_xy**2 / 1000.0   # mΩ -> Ω
 
-                    info(f"via ({via.name}) found between "
+                    info(f"via ({canonical_via_name}) found between "
                          f"metals {layer_name_bottom} ↔ {layer_name_top} at {via_polygon}, "
                          f"{n_xy}x{n_xy} (w={via.width}, sp={via.spacing}, border={via.border}), "
                          f"{r_via_ohm} Ω")
 
+                    match_bottom = matches_bottom[0] if len(matches_bottom) == 1 else (None, -1)
+                    match_top = matches_top[0] if len(matches_top) == 1 else (None, -1)
+
                     via_resistor = ViaResistor(
                         bottom=ViaJunction(layer_name=layer_name_bottom,
-                                           network=matches_bottom[0][0],
-                                           node_id=matches_bottom[0][1]),
+                                           network=match_bottom[0],
+                                           node_id=match_bottom[1]),
                         top=ViaJunction(layer_name=layer_name_top,
-                                        network=matches_top[0][0],
-                                        node_id=matches_top[0][1]),
+                                        network=match_top[0],
+                                        node_id=match_top[1]),
                         resistance=r_via_ohm
                     )
                     result_network.via_resistors.append(via_resistor)
 
-        info(result_network)
+            info(result_network)
 
         return results

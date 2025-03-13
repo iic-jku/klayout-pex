@@ -367,4 +367,5 @@ class ViaResistor:
 
 @dataclass
 class MultiLayerResistanceNetwork:
+    resistor_networks_by_layer: Dict[LayerName, ResistorNetworks]
     via_resistors: List[ViaResistor]
