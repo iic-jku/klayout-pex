@@ -227,7 +227,8 @@ class KLayoutExtractionContext:
                         case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_CAPACITOR:
                             continue
 
-                gds_pair = (computed_layer_info.layer_info.gds_layer, computed_layer_info.layer_info.gds_datatype)
+                gds_pair = (computed_layer_info.layer_info.drw_gds_pair.layer,
+                            computed_layer_info.layer_info.drw_gds_pair.datatype)
 
                 linfo = KLayoutExtractedLayerInfo(
                     index=idx,
