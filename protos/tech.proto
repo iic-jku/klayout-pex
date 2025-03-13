@@ -33,9 +33,6 @@ message Technology {
     // PEX relevant layers as given in a layout
     repeated LayerInfo layers = 101;
 
-    // Mapping of pin layer names to drawing layers
-    repeated PinLayerMapping pin_layer_mappings = 110;
-
     //  Mapping of layer name to layer/datatype for computed layers (introduced by LVS)
     //
     //     NOTE: the names are from computed layers.
@@ -52,23 +49,18 @@ message Technology {
     ProcessParasiticsInfo process_parasitics = 200;
 }
 
-message LayerInfo {
-    string name = 1;
-    
-    string description = 11;
-    
-    uint32 gds_layer = 21;
-    uint32 gds_datatype = 22;
+message GDSPair {
+    uint32 layer = 1;
+    uint32 datatype = 2;
 }
 
-message PinLayerMapping {
-    string description = 11;
+message LayerInfo {
+    string name = 1;
+    string description = 10;
     
-    uint32 pin_gds_layer = 21;    // GDS pair of the pin layer
-    uint32 pin_gds_datatype = 22;
-    
-    uint32 drw_gds_layer = 51;    // GDS pair of the drawing layer, e.g. metal layer
-    uint32 drw_gds_datatype = 52;
+    GDSPair drw_gds_pair = 20;
+    GDSPair pin_gds_pair = 30;
+    GDSPair label_gds_pair = 40;
 }
 
 message ComputedLayerInfo {

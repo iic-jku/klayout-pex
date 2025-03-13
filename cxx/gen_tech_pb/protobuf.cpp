@@ -117,30 +117,35 @@ void convert(const std::string &inputPath,
 
 void addLayer(kpex::tech::Technology *tech,
               const std::string &name,
-              uint32_t gds_layer,
-              uint32_t gds_datatype,
+              uint32_t drw_gds_layer,
+              uint32_t drw_gds_datatype,
+              int64_t pin_gds_layer,
+              int64_t pin_gds_datatype,
+              int64_t label_gds_layer,
+              int64_t label_gds_datatype,
               const std::string &description)
 {
     kpex::tech::LayerInfo *layer = tech->add_layers();
     layer->set_name(name);
     layer->set_description(description);
-    layer->set_gds_layer(gds_layer);
-    layer->set_gds_datatype(gds_datatype);
-}
-
-void addPinLayerMapping(kpex::tech::Technology *tech,
-                        const std::string &description,
-                        uint32_t pin_gds_layer,
-                        uint32_t pin_gds_datatype,
-                        uint32_t drw_gds_layer,
-                        uint32_t drw_gds_datatype)
-{
-    kpex::tech::PinLayerMapping *m = tech->add_pin_layer_mappings();
-    m->set_description(description);
-    m->set_pin_gds_layer(pin_gds_layer);
-    m->set_pin_gds_datatype(pin_gds_datatype);
-    m->set_drw_gds_layer(drw_gds_layer);
-    m->set_drw_gds_datatype(drw_gds_datatype);
+    
+    kpex::tech::GDSPair *gds;
+    
+    gds = layer->mutable_drw_gds_pair();
+    gds->set_layer(drw_gds_layer);
+    gds->set_datatype(drw_gds_datatype);
+    
+    if (pin_gds_layer >= 0 && pin_gds_datatype >= 0) {
+        gds = layer->mutable_pin_gds_pair();
+        gds->set_layer((uint32_t)pin_gds_layer);
+        gds->set_datatype((uint32_t)pin_gds_datatype);
+    }
+    
+    if (label_gds_layer >= 0 && label_gds_datatype >= 0) {
+        gds = layer->mutable_label_gds_pair();
+        gds->set_layer((uint32_t)label_gds_layer);
+        gds->set_datatype((uint32_t)label_gds_datatype);
+    }
 }
 
 void addComputedLayer(kpex::tech::Technology *tech,
@@ -157,8 +162,9 @@ void addComputedLayer(kpex::tech::Technology *tech,
     kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
     layer->set_name(name);
     layer->set_description(description);
-    layer->set_gds_layer(gds_layer);
-    layer->set_gds_datatype(gds_datatype);
+    kpex::tech::GDSPair *gds = layer->mutable_drw_gds_pair();
+    gds->set_layer(gds_layer);
+    gds->set_datatype(gds_datatype);
 }
 
 //-------------------------------------------------------------------------

@@ -36,38 +36,27 @@
 namespace ihp_sg13g2 {
 
 void buildLayers(kpex::tech::Technology *tech) {
-    addLayer(tech, "Activ",    1, 0, "Active (diffusion) area"); // ~ diff.drawing
-    addLayer(tech, "NWell",   31,  0, "N-well region");
-    addLayer(tech, "PWell",   46,  0, "P-well region");
-    addLayer(tech, "nSD",      7, 0,  "Computed layer for nSD");
-    addLayer(tech, "pSD",     14, 0,  "Computed layer for pSD");
-    addLayer(tech, "GatPoly",  5,  0, "Poly"); // ~ poly.drawing
-    addLayer(tech, "Cont",     6,  0, "Defines 1-st metal contacts to Activ, GatPoly");
-    addLayer(tech, "Metal1",   8,  0, "Defines 1-st metal interconnect");
-    addLayer(tech, "Via1",    19,  0, "Defines 1-st metal to 2-nd metal contact");
-    addLayer(tech, "Metal2",  10,  0, "Defines 2-nd metal interconnect");
-    addLayer(tech, "Via2",    29,  0, "Defines 2-nd metal to 3-rd metal contact");
-    addLayer(tech, "Metal3",  30,  0, "Defines 3-rd metal interconnect");
-    addLayer(tech, "Via3",    49,  0, "Defines 3-rd metal to 4-th metal contact");
-    addLayer(tech, "Metal4",  50,  0, "Defines 4-th metal interconnect");
-    addLayer(tech, "Via4",    66,  0, "Defines 4-th metal to 5-th metal contact");
-    addLayer(tech, "Metal5",  67,  0, "Defines 5-th metal interconnect");
-    addLayer(tech, "TopVia1",   125,  0, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
-    addLayer(tech, "TopMetal1", 126,  0, "Defines 1-st thick TopMetal layer");
-    addLayer(tech, "TopVia2",   133,  0, "Defines via between TopMetal1 and TopMetal2");
-    addLayer(tech, "TopMetal2", 134,  0, "Defines 2-nd thick TopMetal layer");
-}
-
-void buildPinLayerMappings(kpex::tech::Technology *tech) {
-    //                       description      pin_gds_pair  drw_gds_pair
-    addPinLayerMapping(tech, "GatPoly.pin",   5, 2,         5, 0);
-    addPinLayerMapping(tech, "Metal1.pin",    8, 2,         8, 0);
-    addPinLayerMapping(tech, "Metal2.pin",    10, 2,        10, 0);
-    addPinLayerMapping(tech, "Metal3.pin",    30, 2,        30, 0);
-    addPinLayerMapping(tech, "Metal4.pin",    50, 2,        50, 0);
-    addPinLayerMapping(tech, "Metal5.pin",    67, 2,        67, 0);
-    addPinLayerMapping(tech, "TopMetal1.pin", 126, 2,       126, 0);
-    addPinLayerMapping(tech, "TopMetal2.pin", 134, 2,       134, 0);
+    //             name,     drw_gds, pin_gds, label_gds, description
+    addLayer(tech, "Activ",       1,0,   1,2,  -1,-1, "Active (diffusion) area"); // ~ diff.drawing
+    addLayer(tech, "NWell",      31,0,  31,2,  -1,-1, "N-well region");
+    addLayer(tech, "PWell",      46,0,  46,2,  -1,-1, "P-well region");
+    addLayer(tech, "nSD",         7,0, -1,-1,  -1,-1, "Defines areas to receive N+ S/D implant");
+    addLayer(tech, "pSD",        14,0, -1,-1,  -1,-1, "Defines areas to receive P+ S/D implant");
+    addLayer(tech, "GatPoly",     5,0,   5,2,  -1,-1, "Poly"); // ~ poly.drawing
+    addLayer(tech, "Cont",        6,0, -1,-1,  -1,-1, "Defines 1-st metal contacts to Activ, GatPoly");
+    addLayer(tech, "Metal1",      8,0,   8,2,   8,25, "Defines 1-st metal interconnect");
+    addLayer(tech, "Via1",       19,0, -1,-1,  -1,-1, "Defines 1-st metal to 2-nd metal contact");
+    addLayer(tech, "Metal2",     10,0,  10,2,  10,25, "Defines 2-nd metal interconnect");
+    addLayer(tech, "Via2",       29,0, -1,-1,  -1,-1, "Defines 2-nd metal to 3-rd metal contact");
+    addLayer(tech, "Metal3",     30,0,  30,2,  30,25, "Defines 3-rd metal interconnect");
+    addLayer(tech, "Via3",       49,0, -1,-1,  -1,-1, "Defines 3-rd metal to 4-th metal contact");
+    addLayer(tech, "Metal4",     50,0,  50,2,  50,25, "Defines 4-th metal interconnect");
+    addLayer(tech, "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
+    addLayer(tech, "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
+    addLayer(tech, "TopVia1",   125,0, -1,-1,  -1,-1, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
+    addLayer(tech, "TopMetal1", 126,0, 126,2, 126,25, "Defines 1-st thick TopMetal layer");
+    addLayer(tech, "TopVia2",   133,0, -1,-1,  -1,-1, "Defines via between TopMetal1 and TopMetal2");
+    addLayer(tech, "TopMetal2", 134,0, 134,2, 134,25, "Defines 2-nd thick TopMetal layer");
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
@@ -75,8 +64,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
     
-//    addComputedLayer(tech, KREG, "dnwell",    64, 18, "DNWell", "Deep NWell");
-
+    //                     kind  lvs_name lvs_gds_pair  orig. layer   description
     addComputedLayer(tech, KREG, "cont_drw",     6, 0,  "Cont", "Computed layer for contact to Metal1");
     addComputedLayer(tech, KREG, "metal1_con",   8,  0,  "Metal1", "Computed layer for Metal1");
     addComputedLayer(tech, KREG, "metal2_con",   10, 0,  "Metal2", "Computed layer for Metal2");
@@ -517,7 +505,6 @@ void buildTech(kpex::tech::Technology &tech) {
     tech.set_name("ihp_sg13g2");
     
     buildLayers(&tech);
-    buildPinLayerMappings(&tech);
 
     buildLVSComputedLayers(&tech);
     
