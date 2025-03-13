@@ -61,7 +61,7 @@ class TechInfo:
 
     @cached_property
     def gds_pair_for_computed_layer_name(self) -> Dict[str, GDSPair]:
-        return {lyr.layer_info.name: (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype)
+        return {lyr.layer_info.name: (lyr.layer_info.drw_gds_pair.layer, lyr.layer_info.drw_gds_pair.datatype)
                 for lyr in self.tech.lvs_computed_layers}
 
     @cached_property
@@ -71,14 +71,14 @@ class TechInfo:
     @cached_property
     def computed_layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.ComputedLayerInfo]:
         return {
-            (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype): lyr
+            (lyr.layer_info.drw_gds_pair.layer, lyr.layer_info.drw_gds_pair.datatype): lyr
             for lyr in self.tech.lvs_computed_layers
         }
 
     @cached_property
     def canonical_layer_name_by_gds_pair(self) -> Dict[GDSPair, str]:
         return {
-            (lyr.layer_info.gds_layer, lyr.layer_info.gds_datatype): lyr.original_layer_name
+            (lyr.layer_info.drw_gds_pair.layer, lyr.layer_info.drw_gds_pair.datatype): lyr.original_layer_name
             for lyr in self.tech.lvs_computed_layers
         }
 
@@ -95,11 +95,11 @@ class TechInfo:
 
     @cached_property
     def gds_pair_for_layer_name(self) -> Dict[str, GDSPair]:
-        return {lyr.name: (lyr.gds_layer, lyr.gds_datatype) for lyr in self.tech.layers}
+        return {lyr.name: (lyr.drw_gds_pair.layer, lyr.drw_gds_pair.datatype) for lyr in self.tech.layers}
 
     @cached_property
     def layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.LayerInfo]:
-        return {(lyr.gds_layer, lyr.gds_datatype): lyr for lyr in self.tech.layers}
+        return {(lyr.drw_gds_pair.layer, lyr.drw_gds_pair.datatype): lyr for lyr in self.tech.layers}
 
     @cached_property
     def process_stack_layer_by_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.LayerInfo]:
@@ -108,7 +108,7 @@ class TechInfo:
     @cached_property
     def process_stack_layer_by_gds_pair(self) -> Dict[GDSPair, process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return {
-            (lyr.gds_layer, lyr.gds_datatype): self.process_stack_layer_by_name[lyr.name]
+            (lyr.drw_gds_pair.layer, lyr.drw_gds_pair.datatype): self.process_stack_layer_by_name[lyr.name]
             for lyr in self.tech.process_stack.layers
         }
 
