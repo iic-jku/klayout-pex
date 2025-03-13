@@ -315,8 +315,8 @@ class KLayoutExtractionContext:
         return shapes
 
     def pins_of_layer(self, gds_pair: GDSPair) -> kdb.Region:
-        pin_gds_pair = self.tech.pin_layer_mapping_for_drw_gds_pair[gds_pair]
-
+        pin_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].pin_gds_pair
+        pin_gds_pair = pin_gds_pair.layer, pin_gds_pair.datatype
         lyr = self.extracted_layers.get(pin_gds_pair, None)
         if lyr is None:
             return kdb.Region()
@@ -326,21 +326,14 @@ class KLayoutExtractionContext:
         return lyr.source_layers[0].region
 
     def labels_of_layer(self, gds_pair: GDSPair) -> kdb.Texts:
-        # TODO! the labels will come directly from the LVS database!
-        #       for now, as a workaround, get them from the layout
-        #
-        # NOTE: the labels for sky130A are always same layer, datatype=5
+        labels_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].label_gds_pair
+        labels_gds_pair = labels_gds_pair.layer, labels_gds_pair.datatype
 
         lay: kdb.Layout = self.lvsdb.internal_layout()
-        label_layer_idx = lay.find_layer(gds_pair[0], 5)  # sky130 layer dt = 5
+        label_layer_idx = lay.find_layer(labels_gds_pair)  # sky130 layer dt = 5
         if label_layer_idx is None:
-            warning(f"Can't find a label layer for metal layer with gds_pair {gds_pair}")
             return kdb.Texts()
 
         sh_it = lay.begin_shapes(self.lvsdb.internal_top_cell(), label_layer_idx)
         labels: kdb.Texts = kdb.Texts(sh_it)
-
-        # TODO: FIXME: this is a workaround for now,
-        #       as the geometry of the original layout does not necessarily match the annotated layout
-        #       until Matthias retains the labels within the Netlist DB
         return labels
