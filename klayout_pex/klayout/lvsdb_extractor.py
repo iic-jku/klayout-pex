@@ -333,6 +333,10 @@ class KLayoutExtractionContext:
 
         lay: kdb.Layout = self.lvsdb.internal_layout()
         label_layer_idx = lay.find_layer(gds_pair[0], 5)  # sky130 layer dt = 5
+        if label_layer_idx is None:
+            warning(f"Can't find a label layer for metal layer with gds_pair {gds_pair}")
+            return kdb.Texts()
+
         sh_it = lay.begin_shapes(self.lvsdb.internal_top_cell(), label_layer_idx)
         labels: kdb.Texts = kdb.Texts(sh_it)
 
