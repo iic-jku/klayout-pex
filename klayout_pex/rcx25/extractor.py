@@ -198,62 +198,9 @@ class RCExtractor:
                 via_resistors=[]
             )
 
-            devices: List[kdb.Device] = list(c.each_device())
-            for d in devices:
-                # https://www.klayout.de/doc-qt5/code/class_Device.html
-                param_defs = d.device_class().parameter_definitions()
-                params = {p.name: d.parameter(p.id()) for p in param_defs}
-
-                dc: kdb.DeviceClass = d.device_class()
-                da: kdb.DeviceAbstract = d.device_abstract
-
-                terminal_definitions = [td.name for td in dc.terminal_definitions()]
-
-                # https://www.klayout.de/0.26/doc/code/class_DeviceAbstract.html
-                # NOTE: the Device Abstract has the goemetrical model for the device!
-                #      each device is represented by a cell
-
-                info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
-                     f"device_class={dc}, device_class.name={dc.name}, "
-                     f"device_terminal_definitions={terminal_definitions}, "
-                     f"trans={d.trans}, "
-                     f"parameter_definitions={list(map(lambda p: p.description, param_defs))}, "
-                     f"params={params}")
-
-                # terminal_cluster_ids = [da.cluster_id_for_terminal(td.id())
-                #                         for td in d.device_class().terminal_definitions()]
-
-                info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
-                     f"Device abstract cell index={da.cell_index()}")
-
-                device_cell_name = self.pex_context.annotated_layout.cell_name(da.cell_index())
-                device_cell: kdb.Cell = self.pex_context.annotated_layout.cell(device_cell_name)
-                info(f"annotated layout cell for cell index {da.cell_index()}: {device_cell_name}")  # TODO: internal_layout() for annotated?!
-                # cl = self.pex_context.lvsdb.internal_layout().cell_name(da.cell_index())
-                # info(f"annotated layout cell for cell index {da.cell_index()}: {cl}")
-
-                for td in dc.terminal_definitions():
-                    n = d.net_for_terminal(td.id())
-
-                    for lyr_idx in device_cell.layout().layer_indexes():
-                        terminal_shapes = device_cell.shapes(lyr_idx)
-                        if len(terminal_shapes) >= 1:
-                            info(f"Device {d.expanded_name()}, Terminal {td.name} (net {n.name}): {terminal_shapes}")
-
-                    #
-                    # for metal_layer in self.tech_info.process_metal_layers:
-                    #     layer_name = metal_layer.name
-                    #     gds_pair = self.gds_pair(layer_name)
-                    #     # canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
-                    #     lyr_idx = self.pex_context.annotated_layout.find_layer(*gds_pair)
-                    #     if lyr_idx is None:
-                    #         continue
-                    #     sh_iter: kdb.RecursiveShapeIterator = self.pex_context.annotated_layout.begin_shapes(device_cell, lyr_idx)
-                    #     if not sh_iter.at_end():
-                    #         terminal_shapes = kdb.Region(sh_iter)
-                    #         info(f"Device {d.expanded_name()}, Terminal {td.name} (net {n.name}): {terminal_shapes}")
-
-
+            devices_by_name = self.pex_context.devices_by_name
+            info(devices_by_name)
+            print('')
 
             for layer_name, region in layer_regions_by_name.items():
                 if layer_name == self.tech_info.internal_substrate_layer_name:

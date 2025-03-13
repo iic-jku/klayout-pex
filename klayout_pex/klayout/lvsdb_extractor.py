@@ -23,9 +23,10 @@
 #
 from __future__ import annotations
 
+from dataclasses import dataclass
+from functools import cached_property
 import tempfile
 from typing import *
-from dataclasses import dataclass
 
 from klayout.dbcore import PolygonWithProperties
 from rich.pretty import pprint
@@ -63,6 +64,37 @@ class KLayoutExtractedLayerInfo:
 class KLayoutMergedExtractedLayerInfo:
     source_layers: List[KLayoutExtractedLayerInfo]
     gds_pair: GDSPair
+
+
+@dataclass
+class KLayoutDeviceTerminal:
+    id: int
+    name: str
+    regions_by_layer_name: Dict[str, kdb.Region]
+    net_name: str
+
+    # internal data access
+    net_terminal_ref: kdb.NetTerminalRef
+    net: kdb.Net
+
+
+@dataclass
+class KLayoutDeviceTerminalList:
+    terminals: List[KLayoutDeviceTerminal]
+
+
+@dataclass
+class KLayoutDeviceInfo:
+    id: str
+    name: str   # expanded name
+    class_name: str
+    abstract_name: str
+
+    terminals: KLayoutDeviceTerminalList
+    params: Dict[str, str]
+
+    # internal data access
+    device: kdb.Device
 
 
 @dataclass
@@ -337,3 +369,68 @@ class KLayoutExtractionContext:
         sh_it = lay.begin_shapes(self.lvsdb.internal_top_cell(), label_layer_idx)
         labels: kdb.Texts = kdb.Texts(sh_it)
         return labels
+
+    @cached_property
+    def top_circuit(self) -> kdb.Circuit:
+        return self.lvsdb.netlist().top_circuit()
+
+    @cached_property
+    def devices_by_name(self) -> Dict[str, KLayoutDeviceInfo]:
+        dd = {}
+
+        for d in self.top_circuit.each_device():
+            # https://www.klayout.de/doc-qt5/code/class_Device.html
+            d: kdb.Device
+
+            param_defs = d.device_class().parameter_definitions()
+            params_by_name = {pd.name: d.parameter(pd.id()) for pd in param_defs}
+
+            # terminal_defs = [td.name for td in d.device_class().terminal_definitions()]
+            # info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
+            #      f"device_class={dc}, device_class.name={dc.name}, "
+            #      f"device_terminal_definitions={terminal_definitions}, "
+            #      f"trans={d.trans}, "
+            #      f"parameter_definitions={list(map(lambda p: p.description, param_defs))}, "
+            #      f"params={params}")
+
+            terminals: List[KLayoutDeviceTerminal] = []
+
+            for td in d.device_class().terminal_definitions():
+                n: kdb.Net = d.net_for_terminal(td.id())
+
+                for nt in n.each_terminal():
+                    nt: kdb.NetTerminalRef
+
+                    if nt.device().expanded_name() != d.expanded_name():
+                        continue
+                    if nt.terminal_id() != td.id():
+                        continue
+
+                    shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
+
+                    terminals.append(
+                        KLayoutDeviceTerminal(
+                            id=td.id(),
+                            name=td.name,
+                            regions_by_layer_name=shapes_by_lyr_idx,  # TODO: key should be name
+                            net_name=n.name,
+                            net_terminal_ref=nt,
+                            net=n
+                        )
+                    )
+
+            # params: Dict[str, str] = {}
+            # for pd in d.device_class().parameter_definitions():
+            #     params[pd.name] = params_by_name[pd.name]
+
+            dd[d.expanded_name()] = KLayoutDeviceInfo(
+                id=d.id(),
+                name=d.expanded_name(),
+                class_name=d.device_class().name,
+                abstract_name=d.device_abstract.name,
+                params=params_by_name,
+                terminals=terminals,
+                device=d
+            )
+
+        return dd
