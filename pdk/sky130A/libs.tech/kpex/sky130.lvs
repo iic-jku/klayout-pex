@@ -1653,6 +1653,10 @@ logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
 # export layer names
 if self.respond_to?(:name)
+  %w(sub_label pwelliso_label nwell_label pwell_label tap_label diff_label poly_label poly_model li_label met1_label met2_label met3_label met4_label met5_label rdl_label pad_label txt_label).each do |l|
+    name(eval(l), l)
+  end
+
   %w(poly_pin_con li_pin_con met1_pin_con met2_pin_con met3_pin_con met4_pin_con met5_pin_con).each do |l|
     name(eval(l), l)
   end
