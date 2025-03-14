@@ -49,6 +49,18 @@ class ExtractionReporter:
         return self.report.create_category('Common')
 
     @cached_property
+    def cat_pins(self) -> rdb.RdbCategory:
+        return self.report.create_category("Pins")
+
+    @cached_property
+    def cat_devices(self) -> rdb.RdbCategory:
+        return self.report.create_category("Devices")
+
+    @cached_property
+    def cat_vias(self) -> rdb.RdbCategory:
+        return self.report.create_category("Vias")
+
+    @cached_property
     def cat_overlap(self) -> rdb.RdbCategory:
         return self.report.create_category("[C] Overlap")
 
@@ -63,10 +75,6 @@ class ExtractionReporter:
     @cached_property
     def cat_edge_neighborhood(self) -> rdb.RdbCategory:
         return self.report.create_category("[C] Edge Neighborhood Visitor")
-
-    @cached_property
-    def cat_devices(self) -> rdb.RdbCategory:
-        return self.report.create_category("Devices")
 
     def save(self, path: str):
         self.report.save(path)
@@ -200,9 +208,48 @@ class ExtractionReporter:
 
         cat_device_terminals = self.report.create_category(cat_device, 'Terminals')
         for t in device.terminals.terminals:
-            for layer_name, regions in t.regions_by_layer_name.items():
-                self.output_shapes(
+            if t.regions_by_layer_name:
+                for layer_name, regions in t.regions_by_layer_name.items():
+                    self.output_shapes(
+                        cat_device_terminals,
+                        f"{t.name}: net {t.net_name}, layer {layer_name}",
+                        regions
+                    )
+            else:
+                self.report.create_category(
                     cat_device_terminals,
-                    f"{t.name}: net {t.net_name}, layer {layer_name}",
-                    regions
+                    f"{t.name}: net <NOT CONNECTED> (TODO layer/shapes)",
                 )
+
+    def output_via(self,
+                   via_name: LayerName,
+                   bottom_layer: LayerName,
+                   top_layer: LayerName,
+                   net: str,
+                   via_width: float,
+                   via_spacing: float,
+                   via_border: float,
+                   polygon: kdb.Polygon,
+                   ohm: float):
+        cat_via_layers = self.report.create_category(
+            self.cat_vias,
+            f"{via_name} ({bottom_layer} ↔ {top_layer}) (w={via_width}, sp={via_spacing}, b={via_border})"
+        )
+
+        self.category_name_counter[cat_via_layers.path()] += 1
+
+        self.output_shapes(
+            cat_via_layers,
+            f"#{self.category_name_counter[cat_via_layers.path()]} "
+            f"{ohm} Ω  (net {net})",
+            [polygon]
+        )
+
+    def output_pin(self,
+                   layer_name: LayerName,
+                   pin_point: kdb.Box,
+                   label: kdb.Text):
+        cat_pin_layer = self.report.create_category(self.cat_pins, layer_name)
+        sh = kdb.Shapes()
+        sh.insert(pin_point)
+        self.output_shapes(cat_pin_layer, label.string, sh)
