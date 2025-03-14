@@ -30,6 +30,7 @@ import klayout.db as kdb
 from klayout_pex.log import (
     debug,
     error,
+    warning
 )
 from .conductance import Conductance
 from .resistor_network import ResistorNetwork, ResistorNetworks
@@ -92,7 +93,12 @@ class ResistorExtraction:
 
             r -= pr
 
-            tris = r.delaunay(self.amax, self.b)
+            try:
+                tris = r.delaunay(self.amax, self.b)
+            except Exception as e:
+                error(f"Failed to perform delaunay triangulation (a={self.amax}, b={self.b}) "
+                      f"on polygon {r} due to exception: {e}")
+                continue
             debug(f"Decomposed into {tris.count()} triangles with b={self.b} and amax={self.amax}")
 
             rn = ResistorNetwork()
