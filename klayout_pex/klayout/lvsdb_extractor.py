@@ -429,7 +429,7 @@ class KLayoutExtractionContext:
                 class_name=d.device_class().name,
                 abstract_name=d.device_abstract.name,
                 params=params_by_name,
-                terminals=terminals,
+                terminals=KLayoutDeviceTerminalList(terminals=terminals),
                 device=d
             )
 
