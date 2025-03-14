@@ -30,6 +30,7 @@ import klayout.db as kdb
 from .extraction_results import *
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from .types import EdgeNeighborhood, LayerName
+from ..klayout.lvsdb_extractor import KLayoutDeviceInfo
 
 VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
 
@@ -49,19 +50,23 @@ class ExtractionReporter:
 
     @cached_property
     def cat_overlap(self) -> rdb.RdbCategory:
-        return self.report.create_category("Overlap")
+        return self.report.create_category("[C] Overlap")
 
     @cached_property
     def cat_sidewall(self) -> rdb.RdbCategory:
-        return self.report.create_category("Sidewall")
+        return self.report.create_category("[C] Sidewall")
 
     @cached_property
     def cat_fringe(self) -> rdb.RdbCategory:
-        return self.report.create_category("Fringe / Side Overlap")
+        return self.report.create_category("[C] Fringe / Side Overlap")
 
     @cached_property
     def cat_edge_neighborhood(self) -> rdb.RdbCategory:
-        return self.report.create_category("Edge Neighborhood Visitor")
+        return self.report.create_category("[C] Edge Neighborhood Visitor")
+
+    @cached_property
+    def cat_devices(self) -> rdb.RdbCategory:
+        return self.report.create_category("Devices")
 
     def save(self, path: str):
         self.report.save(path)
@@ -176,4 +181,28 @@ class ExtractionReporter:
                     f"Child {child_index}: "
                     f"{child_index < len(all_layer_names) and all_layer_names[child_index] or 'None'}",
                     [geometry_restorer.restore_polygon(p) for p in polygons]
+                )
+
+    def output_devices(self,
+                       devices_by_name: Dict[str, KLayoutDeviceInfo]):
+        for d in devices_by_name.values():
+            self.output_device(d)
+
+    def output_device(self,
+                      device: KLayoutDeviceInfo):
+        cat_device = self.report.create_category(
+            self.cat_devices,
+            f"{device.name}: {device.class_name}"
+        )
+        cat_device_params = self.report.create_category(cat_device, 'Params')
+        for name, value in device.params.items():
+            self.report.create_category(cat_device_params, f"{name}: {value}")
+
+        cat_device_terminals = self.report.create_category(cat_device, 'Terminals')
+        for t in device.terminals.terminals:
+            for layer_name, regions in t.regions_by_layer_name.items():
+                self.output_shapes(
+                    cat_device_terminals,
+                    f"{t.name}: net {t.net_name}, layer {layer_name}",
+                    regions
                 )
