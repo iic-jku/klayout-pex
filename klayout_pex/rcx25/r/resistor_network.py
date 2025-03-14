@@ -31,6 +31,7 @@ import klayout.db as kdb
 from klayout_pex.log import (
     debug,
     error,
+    warning,
 )
 from .conductance import Conductance
 from ..types import LayerName
@@ -347,6 +348,9 @@ class ResistorNetworks:
                 if location.inside(point):
                     print(f"node {nid} is located ({point}) within search area {location}")
                     matches.append((nw, nid))
+
+        if len(matches) == 0:
+            warning(f"Could not find network nodes for location {location}")
 
         return matches
 
