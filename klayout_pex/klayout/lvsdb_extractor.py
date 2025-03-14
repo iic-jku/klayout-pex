@@ -385,14 +385,6 @@ class KLayoutExtractionContext:
             param_defs = d.device_class().parameter_definitions()
             params_by_name = {pd.name: d.parameter(pd.id()) for pd in param_defs}
 
-            # terminal_defs = [td.name for td in d.device_class().terminal_definitions()]
-            # info(f"Device id={d.id()}, name={d.name}, expanded_name={d.expanded_name()}, "
-            #      f"device_class={dc}, device_class.name={dc.name}, "
-            #      f"device_terminal_definitions={terminal_definitions}, "
-            #      f"trans={d.trans}, "
-            #      f"parameter_definitions={list(map(lambda p: p.description, param_defs))}, "
-            #      f"params={params}")
-
             terminals: List[KLayoutDeviceTerminal] = []
 
             for td in d.device_class().terminal_definitions():
@@ -422,20 +414,22 @@ class KLayoutExtractionContext:
 
                     shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
 
+                    def layer_name(idx: int) -> str:
+                        lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[self.layer_index_map[idx]]
+                        return self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
+
+                    shapes_by_lyr_name = {layer_name(idx): shapes for idx, shapes in shapes_by_lyr_idx.items()}
+
                     terminals.append(
                         KLayoutDeviceTerminal(
                             id=td.id(),
                             name=td.name,
-                            regions_by_layer_name=shapes_by_lyr_idx,  # TODO: key should be name
+                            regions_by_layer_name=shapes_by_lyr_name,
                             net_name=n.name,
                             net_terminal_ref=nt,
                             net=n
                         )
                     )
-
-            # params: Dict[str, str] = {}
-            # for pd in d.device_class().parameter_definitions():
-            #     params[pd.name] = params_by_name[pd.name]
 
             dd[d.expanded_name()] = KLayoutDeviceInfo(
                 id=d.id(),
