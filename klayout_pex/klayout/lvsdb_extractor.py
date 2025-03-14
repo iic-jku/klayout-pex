@@ -74,8 +74,8 @@ class KLayoutDeviceTerminal:
     net_name: str
 
     # internal data access
-    net_terminal_ref: kdb.NetTerminalRef
-    net: kdb.Net
+    net_terminal_ref: Optional[kdb.NetTerminalRef]
+    net: Optional[kdb.Net]
 
 
 @dataclass
@@ -397,6 +397,20 @@ class KLayoutExtractionContext:
 
             for td in d.device_class().terminal_definitions():
                 n: kdb.Net = d.net_for_terminal(td.id())
+                if n is None:
+                    warning(f"Skipping terminal {td.name} of device {d.expanded_name()} ({d.device_class().name}) "
+                            f"is not connected to any net")
+                    terminals.append(
+                        KLayoutDeviceTerminal(
+                            id=td.id(),
+                            name=td.name,
+                            regions_by_layer_name={},
+                            net_name='',
+                            net_terminal_ref=None,
+                            net=None
+                        )
+                    )
+                    continue
 
                 for nt in n.each_terminal():
                     nt: kdb.NetTerminalRef
