@@ -31,6 +31,7 @@ from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
 from ..log import (
     debug,
     warning,
+    error,
     info,
     subproc
 )
@@ -138,14 +139,12 @@ class RCExtractor:
             canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
 
             all_layer_shapes = self.shapes_of_layer(layer_name)
-            if all_layer_shapes is None:
-                continue
+            if all_layer_shapes is not None:
+                all_layer_shapes.enable_properties()
 
-            all_layer_shapes.enable_properties()
-
-            layer_regions_by_name[canonical_layer_name] += all_layer_shapes
-            layer_regions_by_name[canonical_layer_name].enable_properties()
-            all_region += all_layer_shapes
+                layer_regions_by_name[canonical_layer_name] += all_layer_shapes
+                layer_regions_by_name[canonical_layer_name].enable_properties()
+                all_region += all_layer_shapes
 
             if metal_layer.metal_layer.HasField('contact_above'):
                 contact = metal_layer.metal_layer.contact_above
@@ -154,8 +153,8 @@ class RCExtractor:
                 if via_regions is not None:
                     via_regions.enable_properties()
                     via_regions_by_via_name[contact.name] += via_regions
-                    via_name_above_layer_name[canonical_layer_name] = contact.name
-                    via_name_below_layer_name[canonical_layer_name] = previous_via_name
+                via_name_above_layer_name[canonical_layer_name] = contact.name
+                via_name_below_layer_name[canonical_layer_name] = previous_via_name
 
                 previous_via_name = contact.name
             else:
@@ -201,36 +200,65 @@ class RCExtractor:
             devices_by_name = self.pex_context.devices_by_name
             report.output_devices(devices_by_name)
 
+            node_count_by_net: Dict[str, int] = defaultdict(int)
+
             for layer_name, region in layer_regions_by_name.items():
                 if layer_name == self.tech_info.internal_substrate_layer_name:
+                    continue
+
+                layer_sheet_resistance = self.tech_info.layer_resistance_by_layer_name.get(layer_name, None)
+                if layer_sheet_resistance is None:
                     continue
 
                 gds_pair = self.gds_pair(layer_name)
                 pins = self.pex_context.pins_of_layer(gds_pair)
                 labels = self.pex_context.labels_of_layer(gds_pair)
 
-                layer_sheet_resistance = self.tech_info.layer_resistance_by_layer_name[layer_name]
-
-                # TODO: include device terminals
-
-
                 nodes = kdb.Region()
                 nodes.enable_properties()
 
-                nodes.insert(pins)
+                pin_labels: kdb.Texts = labels & pins
+                for l in pin_labels:
+                    l: kdb.Text
+                    # NOTE: because we want more like a point as a junction
+                    #       and folx create huge pins (covering the whole metal)
+                    #       we create our own "mini squares"
+                    #    (ResistorExtractor will subtract the pins from the metal polygons,
+                    #     so in the extreme case the polygons could become empty)
+                    pin_point = l.bbox().enlarge(5)
+                    nodes.insert(pin_point)
+
+                    report.output_pin(layer_name=layer_name,
+                                      pin_point=pin_point,
+                                      label=l)
+
+                def create_nodes_for_region(region: kdb.Region):
+                    for p in region:
+                        p: kdb.PolygonWithProperties
+                        cp: kdb.Point = p.bbox().center()
+                        b = kdb.Box(w=6, h=6)
+                        b.move(cp.x - b.width() / 2,
+                               cp.y - b.height() / 2)
+                        bwp = kdb.BoxWithProperties(b, p.properties())
+
+                        net = bwp.property('net')
+                        if net is None or net == '':
+                            error(f"Could not find net for via at {cp}")
+                        else:
+                            label_text = f"{net}.n{node_count_by_net[net]}"
+                            node_count_by_net[net] += 1
+                            label = kdb.Text(label_text, cp.x, cp.y)
+                            labels.insert(label)
+
+                        nodes.insert(bwp)
 
                 # create additional nodes for vias
                 via_above = via_name_above_layer_name.get(layer_name, None)
                 if via_above is not None:
-                    # labels.insert(kdb.Text())
-                    nodes.insert(via_regions_by_via_name[via_above])
+                    create_nodes_for_region(via_regions_by_via_name[via_above])
                 via_below = via_name_below_layer_name.get(layer_name, None)
                 if via_below is not None:
-                    nodes.insert(via_regions_by_via_name[via_below])
-
-                nodes = nodes.sized(-1)  # TODO: with the subtraction done in ResistorExtraction
-                                         #       we have the problem that
-                                         #       if metal_layer_region == via_region, the Region is empty
+                    create_nodes_for_region(via_regions_by_via_name[via_below])
 
                 resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
 
@@ -239,6 +267,9 @@ class RCExtractor:
                 subproc(f"Layer {layer_name}   (R_coeff = {layer_sheet_resistance.resistance}):")
                 for rn in resistor_networks.networks:
                     # print(rn.to_string(True))
+                    if not rn.node_to_s:
+                        continue
+
                     subproc("\tNodes:")
                     for node_id in rn.node_to_s.keys():
                         loc = rn.locations[node_id]
@@ -283,6 +314,7 @@ class RCExtractor:
                 networks_top = result_network.resistor_networks_by_layer[layer_name_top]
 
                 for via_polygon in via_region:
+                    net_name = via_polygon.property('net')
                     matches_bottom = networks_bottom.find_network_nodes(location=via_polygon)
                     # info(matches_bottom)
                     matches_top = networks_top.find_network_nodes(location=via_polygon)
@@ -291,12 +323,27 @@ class RCExtractor:
                     # given a drawn via area, we calculate the actual via matrix
                     approx_width = math.sqrt(via_polygon.area()) * dbu
                     n_xy = 1 + math.floor((approx_width - (via.width + 2 * via.border)) / (via.width + via.spacing))
+                    if n_xy < 1:
+                        n_xy = 1
                     r_via_ohm = r_coeff / n_xy**2 / 1000.0   # mΩ -> Ω
 
                     info(f"via ({canonical_via_name}) found between "
                          f"metals {layer_name_bottom} ↔ {layer_name_top} at {via_polygon}, "
                          f"{n_xy}x{n_xy} (w={via.width}, sp={via.spacing}, border={via.border}), "
                          f"{r_via_ohm} Ω")
+
+                    report.output_via(via_name=canonical_via_name,
+                                      bottom_layer=layer_name_bottom,
+                                      top_layer=layer_name_top,
+                                      net=net_name,
+                                      via_width=via.width,
+                                      via_spacing=via.spacing,
+                                      via_border=via.border,
+                                      polygon=via_polygon,
+                                      ohm=r_via_ohm)
+
+                    if len(matches_bottom) != 1:
+                        warning(f"found no net for via")
 
                     match_bottom = matches_bottom[0] if len(matches_bottom) == 1 else (None, -1)
                     match_top = matches_top[0] if len(matches_top) == 1 else (None, -1)
