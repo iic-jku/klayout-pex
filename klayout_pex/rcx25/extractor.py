@@ -199,8 +199,7 @@ class RCExtractor:
             )
 
             devices_by_name = self.pex_context.devices_by_name
-            info(devices_by_name)
-            print('')
+            report.output_devices(devices_by_name)
 
             for layer_name, region in layer_regions_by_name.items():
                 if layer_name == self.tech_info.internal_substrate_layer_name:
