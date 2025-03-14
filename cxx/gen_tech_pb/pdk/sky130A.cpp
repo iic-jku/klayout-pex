@@ -92,7 +92,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KCAP, "met3_vpp",  70, 20,  "met3", "Capacitor device metal");
     addComputedLayer(tech, KCAP, "met4_vpp",  71, 20,  "met4", "Capacitor device metal");
     addComputedLayer(tech, KCAP, "met5_vpp",  72, 20,  "met5", "Capacitor device metal");
-    addComputedLayer(tech, KCAP, "licon_vpp", 66, 44,  "licon", "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "licon_vpp", 66, 44,  "licon1", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "mcon_vpp",  67, 44,  "mcon", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "via1_vpp",  68, 44,  "via1", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "via2_vpp",  69, 44,  "via2", "Capacitor device contact");
@@ -293,7 +293,7 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     
     // resistance values are in mΩ / square
     //                   layer,         resistance
-    addViaResistance(ri, "licon_poly",  152000);
+    addViaResistance(ri, "licon1",  152000);       // licon over poly!
     addViaResistance(ri, "licon_ndiff", 185000);
     addViaResistance(ri, "licon_pdiff", 585000);
     addViaResistance(ri, "mcon",          9300);
