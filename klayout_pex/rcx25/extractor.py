@@ -46,6 +46,7 @@ from .r.resistor_network import (
     ResistorNetworks,
     ViaResistor,
     ViaJunction,
+    DeviceTerminal,
     MultiLayerResistanceNetwork
 )
 
@@ -306,7 +307,13 @@ class RCExtractor:
                 if via_region is None:
                     continue
 
-                r_coeff = self.tech_info.via_resistance_by_layer_name[canonical_via_name].resistance
+                # NOTE: poly layer stands for poly/nsdm/psdm, this will be in contacts, not in vias
+                via_resistance = self.tech_info.via_resistance_by_layer_name.get(canonical_via_name, None)
+                r_coeff: Optional[float] = None
+                if via_resistance is None:
+                    r_coeff = self.tech_info.contact_resistance_by_layer_name[layer_name_bottom].resistance
+                else:
+                    r_coeff = via_resistance.resistance
 
                 layer_name_top = all_layer_names[layer_idx_bottom + 1]
 
@@ -316,9 +323,37 @@ class RCExtractor:
                 for via_polygon in via_region:
                     net_name = via_polygon.property('net')
                     matches_bottom = networks_bottom.find_network_nodes(location=via_polygon)
-                    # info(matches_bottom)
+
+                    device_terminal: Optional[Tuple[DeviceTerminal, float]] = None
+
+                    if len(matches_bottom) == 0:
+                        ignored_device_layers: Set[str] = set()
+
+                        def find_device_terminal(via_region: kdb.Region) -> Optional[Tuple[DeviceTerminal, float]]:
+                            for d in devices_by_name.values():
+                                for dt in d.terminals.terminals:
+                                    for ln, r in dt.regions_by_layer_name.items():
+                                        res = self.tech_info.contact_resistance_by_layer_name.get(ln, None)
+                                        if res is None:
+                                            ignored_device_layers.add(ln)
+                                            continue
+                                        elif r.overlapping(via_region):
+                                            return (DeviceTerminal(device=d, device_terminal=dt), res)
+                            return None
+
+                        if layer_name_bottom in self.tech_info.contact_resistance_by_layer_name.keys():
+                            device_terminal = find_device_terminal(via_region=kdb.Region(via_polygon))
+                        if device_terminal is None:
+                            warning(f"Couldn't find bottom network node (on {layer_name_bottom}) "
+                                    f"for location {via_polygon}, "
+                                    f"but could not find a device terminal either "
+                                    f"(ignored layers: {ignored_device_layers})")
+                        else:
+                            r_coeff = device_terminal[1].resistance
+
                     matches_top = networks_top.find_network_nodes(location=via_polygon)
-                    # info(matches_top)
+                    if len(matches_top) == 0:
+                        error(f"Could not find top network nodes for location {via_polygon}")
 
                     # given a drawn via area, we calculate the actual via matrix
                     approx_width = math.sqrt(via_polygon.area()) * dbu
@@ -340,18 +375,22 @@ class RCExtractor:
                                       via_spacing=via.spacing,
                                       via_border=via.border,
                                       polygon=via_polygon,
-                                      ohm=r_via_ohm)
+                                      ohm=r_via_ohm,
+                                      comment=f"({len(matches_bottom)} bottom, {len(matches_top)} top)")
 
-                    if len(matches_bottom) != 1:
-                        warning(f"found no net for via")
-
-                    match_bottom = matches_bottom[0] if len(matches_bottom) == 1 else (None, -1)
                     match_top = matches_top[0] if len(matches_top) == 1 else (None, -1)
 
+                    bottom: ViaJunction | DeviceTerminal
+                    if device_terminal is None:
+                        match_bottom = matches_bottom[0] if len(matches_bottom) == 1 else (None, -1)
+                        bottom = ViaJunction(layer_name=layer_name_bottom,
+                                             network=match_bottom[0],
+                                             node_id=match_bottom[1])
+                    else:
+                        bottom = device_terminal[0]
+
                     via_resistor = ViaResistor(
-                        bottom=ViaJunction(layer_name=layer_name_bottom,
-                                           network=match_bottom[0],
-                                           node_id=match_bottom[1]),
+                        bottom=bottom,
                         top=ViaJunction(layer_name=layer_name_top,
                                         network=match_top[0],
                                         node_id=match_top[1]),
@@ -359,6 +398,8 @@ class RCExtractor:
                     )
                     result_network.via_resistors.append(via_resistor)
 
-            info(result_network)
+            # import rich.pretty
+            # rich.pretty.pprint(result_network)
+            results.resistor_network = result_network
 
         return results

@@ -669,12 +669,14 @@ class KpexCLI:
         extraction_results = extractor.extract()
 
         with open(netlist_csv_path, 'w') as f:
-            f.write('Device;Net1;Net2;Capacitance [fF]\n')
-            # f.write('Device;Net1;Net2;Capacitance [F];Capacitance [fF]\n')
             summary = extraction_results.summarize()
+
+            f.write('Device;Net1;Net2;Capacitance [fF];Resistance [Ω]\n')
             for idx, (key, cap_value) in enumerate(summary.capacitances.items()):
                 # f.write(f"C{idx + 1};{key.net1};{key.net2};{cap_value / 1e15};{round(cap_value, 3)}\n")
-                f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)}\n")
+                f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)};\n")
+            for idx, (key, res_value) in enumerate(summary.resistances.items()):
+                f.write(f"R{idx + 1};{key.net1};{key.net2};;{round(res_value, 3)}\n")
 
         rule("kpex/2.5D extracted netlist (CSV format):")
         with open(netlist_csv_path, 'r') as f:
