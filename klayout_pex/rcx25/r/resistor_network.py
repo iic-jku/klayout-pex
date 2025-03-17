@@ -35,7 +35,7 @@ from klayout_pex.log import (
 )
 from .conductance import Conductance
 from ..types import LayerName
-
+from ...klayout.lvsdb_extractor import KLayoutDeviceTerminal, KLayoutDeviceInfo
 
 NodeID = int
 
@@ -349,9 +349,6 @@ class ResistorNetworks:
                     print(f"node {nid} is located ({point}) within search area {location}")
                     matches.append((nw, nid))
 
-        if len(matches) == 0:
-            warning(f"Could not find network nodes for location {location}")
-
         return matches
 
 
@@ -363,8 +360,14 @@ class ViaJunction:
 
 
 @dataclass
+class DeviceTerminal:
+    device: KLayoutDeviceInfo
+    device_terminal: KLayoutDeviceTerminal
+
+
+@dataclass
 class ViaResistor:
-    bottom: ViaJunction
+    bottom: ViaJunction | DeviceTerminal
     top: ViaJunction
     resistance: float  # mΩ
 

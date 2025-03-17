@@ -230,7 +230,8 @@ class ExtractionReporter:
                    via_spacing: float,
                    via_border: float,
                    polygon: kdb.Polygon,
-                   ohm: float):
+                   ohm: float,
+                   comment: str):
         cat_via_layers = self.report.create_category(
             self.cat_vias,
             f"{via_name} ({bottom_layer} ↔ {top_layer}) (w={via_width}, sp={via_spacing}, b={via_border})"
@@ -241,7 +242,7 @@ class ExtractionReporter:
         self.output_shapes(
             cat_via_layers,
             f"#{self.category_name_counter[cat_via_layers.path()]} "
-            f"{ohm} Ω  (net {net})",
+            f"{ohm} Ω  (net {net}) | {comment}",
             [polygon]
         )
 

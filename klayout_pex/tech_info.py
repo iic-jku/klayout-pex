@@ -218,6 +218,10 @@ class TechInfo:
         return {r.layer_name: r for r in self.tech.process_parasitics.resistance.layers}
 
     @cached_property
+    def contact_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ContactResistance]:
+        return {r.device_layer_name: r for r in self.tech.process_parasitics.resistance.contacts}
+
+    @cached_property
     def via_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ViaResistance]:
         return {r.via_name: r for r in self.tech.process_parasitics.resistance.vias}
 
