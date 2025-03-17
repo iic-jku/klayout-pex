@@ -1657,6 +1657,10 @@ if self.respond_to?(:name)
     name(eval(l), l)
   end
 
+  %w(ptap_conn ntap_conn tap).each do |l|
+    name(eval(l), l)
+  end
+
   %w(poly_pin_con li_pin_con met1_pin_con met2_pin_con met3_pin_con met4_pin_con met5_pin_con).each do |l|
     name(eval(l), l)
   end

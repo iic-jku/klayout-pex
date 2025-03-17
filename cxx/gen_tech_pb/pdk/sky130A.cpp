@@ -293,9 +293,10 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     
     // resistance values are in mΩ / square
     //                   layer,         resistance
-    addViaResistance(ri, "licon1",  152000);       // licon over poly!
-    addViaResistance(ri, "licon_ndiff", 185000);
-    addViaResistance(ri, "licon_pdiff", 585000);
+    addContactResistance(ri, "nsdm",    185000); // licon over nsdm
+    addContactResistance(ri, "psdm",    585000); // licon over psdm
+    addContactResistance(ri, "poly",    152000); // licon over poly!
+    addViaResistance(ri, "poly",        152000); // licon over poly!
     addViaResistance(ri, "mcon",          9300);
     addViaResistance(ri, "via",           4500);
     addViaResistance(ri, "via2",          3410);

@@ -149,9 +149,14 @@ void addLayerResistance(kpex::tech::ResistanceInfo *ri,
                         double resistance,
                         double corner_adjustment_fraction);
 
+void addContactResistance(kpex::tech::ResistanceInfo *ri,
+                          const std::string &device_layer_name,
+                          double resistance);
+
 void addViaResistance(kpex::tech::ResistanceInfo *ri,
                       const std::string &via_name,
                       double resistance);
+
 
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
                      const std::string &layer_name,
