@@ -47,12 +47,14 @@ include = [
 
 [tool.poetry.scripts]
 kpex = 'klayout_pex.__main__:main'
+pmap = 'klayout_pex.util.pmap:main'  # mac, windows have no pmap preinstalled, but the LVS scripts use this
 
 [tool.poetry.dependencies]
 python = "^3.12"
 klayout = "^0.29.10"    # required minimum version because of EdgeNeighborhoodVisitor
-rich = "^13.9.4"
 protobuf = "^5.29.1"
+psutil = "^7.0.0"
+rich = "^13.9.4"
 rich-argparse = "^1.6.0"
 
 [tool.poetry.group.test.dependencies]
