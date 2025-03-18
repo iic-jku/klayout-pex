@@ -148,7 +148,12 @@ class KpexCLI:
         group_special.add_argument("--threads", dest='num_threads', type=int,
                                    default=os.cpu_count() * 4,
                                    help="number of threads (e.g. for FasterCap) (default is %(default)s)")
-        group_special.add_argument('--klayout', dest='klayout_exe_path', default='klayout',
+
+        klayout_exe_default = 'klayout'
+        if os.name == 'nt':
+            klayout_exe_default = 'klayout_app'
+        
+        group_special.add_argument('--klayout', dest='klayout_exe_path', default=klayout_exe_default,
                                    help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
