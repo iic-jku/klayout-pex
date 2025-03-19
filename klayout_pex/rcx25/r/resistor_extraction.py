@@ -59,7 +59,7 @@ class ResistorExtraction:
                 polygons: kdb.Region,
                 pins: kdb.Region,
                 labels: kdb.Texts,
-                doc_layer: kdb.Shapes = None) -> ResistorNetworks:
+                doc_layer: kdb.Shapes = None) -> List[ResistorNetwork]:
         """
         Extracts resistor networks from the polygons on the given regions
 
@@ -159,4 +159,4 @@ class ResistorExtraction:
 
             networks.append(rn)
 
-        return ResistorNetworks(networks)
+        return networks
