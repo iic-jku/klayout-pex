@@ -261,7 +261,12 @@ class RCExtractor:
                 if via_below is not None:
                     create_nodes_for_region(via_regions_by_via_name[via_below])
 
-                resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
+                extracted_resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
+                resistor_networks = ResistorNetworks(
+                    layer_name=layer_name,
+                    layer_sheet_resistance=layer_sheet_resistance.resistance,
+                    networks=extracted_resistor_networks
+                )
 
                 result_network.resistor_networks_by_layer[layer_name] = resistor_networks
 
@@ -295,6 +300,8 @@ class RCExtractor:
             for layer_idx_bottom, layer_name_bottom in enumerate(all_layer_names):
                 if layer_name_bottom == self.tech_info.internal_substrate_layer_name:
                     continue
+                if (layer_idx_bottom + 1) == len(all_layer_names):
+                    break
 
                 via = self.tech_info.contact_above_metal_layer_name.get(layer_name_bottom, None)
                 if via is None:

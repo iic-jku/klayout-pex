@@ -338,6 +338,8 @@ class ResistorNetwork:
 
 @dataclass
 class ResistorNetworks:
+    layer_name: str
+    layer_sheet_resistance: float  # mΩ/µm^2
     networks: List[ResistorNetwork]
 
     def find_network_nodes(self, location: kdb.Polygon) -> List[Tuple[ResistorNetwork, NodeID]]:

@@ -208,6 +208,21 @@ class CellExtractionResults:
             key2 = via_resistor.top.network.node_names[via_resistor.top.node_id]
             normalized_key = NetCoupleKey(key1, key2).normed()
             normalized_resistance_table[normalized_key] += via_resistor.resistance
+        for layer_name, networks in self.resistor_network.resistor_networks_by_layer.items():
+            for network in networks.networks:
+                visited_resistors: Set[Conductance] = set()
+                for node_id, resistors in network.node_to_s.items():
+                    node_name = network.node_names[node_id]
+                    for conductance, other_node_id in resistors:
+                        if conductance in visited_resistors:
+                            continue  # we don't want to add it twice, only once per direction!
+                        visited_resistors.add(conductance)
+
+                        other_node_name = network.node_names[other_node_id]
+                        ohm = networks.layer_sheet_resistance / 1000.0 / conductance.cond
+                        normalized_key = NetCoupleKey(node_name, other_node_name).normed()
+                        normalized_resistance_table[normalized_key] += ohm
+
         resistance_summary = ExtractionSummary(capacitances={},
                                                 resistances=normalized_resistance_table)
 
