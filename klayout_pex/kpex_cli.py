@@ -67,6 +67,7 @@ from .log import (
     rule
 )
 from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
+from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
 from .tech_info import TechInfo
@@ -99,7 +100,8 @@ class PDK(StrEnum):
         # NOTE: installation paths of resources in the distribution wheel differs from source repo
         base_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if os.path.isdir(os.path.join(base_dir, '..', '.git')): # in source repo
+        # NOTE: .git can be dir (standalone clone), or file (in case of submodule)
+        if os.path.exists(os.path.join(base_dir, '..', '.git')): # in source repo
             base_dir = os.path.dirname(base_dir)
             tech_pb_json_dir = os.path.join(base_dir, 'klayout_pex_protobuf')
         else:  # site-packages/klayout_pex -> site-packages/klayout_pex_protobuf
@@ -179,6 +181,9 @@ class KpexCLI:
                                      help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
         group_pex_input.add_argument("--cache-dir", dest="cache_dir_path", default=None,
                                      help="Path for cached LVSDB (default is .kpex_cache within --out_dir)")
+        group_pex_input.add_argument("--lvs-verbose", dest="klayout_lvs_verbose",
+                                     type=true_or_false, default=False,
+                                     help="Verbose KLayout LVS output (default is %(default)s)")
 
         group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
         group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
@@ -257,9 +262,13 @@ class KpexCLI:
                                  help="Threshold (in fF) for ignored parasitic capacitances (default is %(default)s). "
                                       "(MAGIC command: ext2spice cthresh <value>)")
         group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
-                                 type=float, default=100.0,
+                                 type=int, default=100,
                                  help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
                                       "(MAGIC command: ext2spice rthresh <value>)")
+        group_magic.add_argument("--magic_tolerance", dest="magic_tolerance",
+                                 type=float, default=1,
+                                 help="Set ratio between resistor and device tolerance (default is %(default)s). "
+                                      "(MAGIC command: extresist tolerance <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) "
@@ -535,10 +544,13 @@ class KpexCLI:
             return
 
         magic_run_dir = os.path.join(args.output_dir_path, f"magic_{args.magic_pex_mode}")
-        magic_log_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Output.txt")
-        magic_script_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_CC_Script.tcl")
+        magic_log_path = os.path.join(magic_run_dir,
+                                      f"{args.effective_cell_name}_MAGIC_{args.magic_pex_mode}_Output.txt")
+        magic_script_path = os.path.join(magic_run_dir,
+                                         f"{args.effective_cell_name}_MAGIC_{args.magic_pex_mode}_Script.tcl")
 
-        output_netlist_path = f"{magic_run_dir}/{args.effective_cell_name}.pex.spice"
+        output_netlist_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}.pex.spice")
+        report_db_path = os.path.join(magic_run_dir, f"{args.effective_cell_name}_MAGIC_report.rdb.gz")
 
         os.makedirs(magic_run_dir, exist_ok=True)
 
@@ -550,6 +562,7 @@ class KpexCLI:
                              pex_mode=args.magic_pex_mode,
                              c_threshold=args.magic_cthresh,
                              r_threshold=args.magic_rthresh,
+                             tolerance=args.magic_tolerance,
                              halo=args.magic_halo)
 
         run_magic(exe_path=args.magic_exe_path,
@@ -557,7 +570,20 @@ class KpexCLI:
                   script_path=magic_script_path,
                   log_path=magic_log_path)
 
+        layout = kdb.Layout()
+        layout.read(args.effective_gds_path)
+
+        report = rdb.ReportDatabase('')
+        magic_log_analyzer = MagicLogAnalyzer(magic_log_dir_path=magic_run_dir,
+                                              report=report,
+                                              dbu=layout.dbu)
+        magic_log_analyzer.analyze()
+        report.save(report_db_path)
+
+        rule("Paths")
+        subproc(f"Report DB saved at: {report_db_path}")
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
+
         rule("MAGIC PEX SPICE netlist")
         with open(output_netlist_path, 'r') as f:
             subproc(f.read())
@@ -731,7 +757,8 @@ class KpexCLI:
                                                gds_path=args.effective_gds_path,
                                                schematic_path=args.effective_schematic_path,
                                                log_path=lvs_log_path,
-                                               lvsdb_path=lvsdb_path)
+                                               lvsdb_path=lvsdb_path,
+                                               verbose=args.klayout_lvs_verbose)
                     if args.cache_lvs:
                         cache_dir_path = os.path.dirname(lvsdb_cache_path)
                         if not os.path.exists(cache_dir_path):

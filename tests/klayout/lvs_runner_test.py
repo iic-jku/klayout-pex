@@ -58,6 +58,7 @@ class Test(unittest.TestCase):
                                gds_path=gds_path,
                                schematic_path=schematic_path,
                                log_path=log_path,
-                               lvsdb_path=lvsdb_path)
+                               lvsdb_path=lvsdb_path,
+                               verbose=False)
         print(f"LVS log file: {log_path}")
         print(f"LVSDB file: {lvsdb_path}")
