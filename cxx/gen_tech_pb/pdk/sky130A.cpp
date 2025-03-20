@@ -32,38 +32,41 @@
 namespace sky130A {
 
 void buildLayers(kpex::tech::Technology *tech) {
-    addLayer(tech, "dnwell", 64, 18, "Deep N-well");
-    addLayer(tech, "nwell",  64, 20, "N-well region");
-    addLayer(tech, "diff",   65, 20, "Active (diffusion) area");
-    addLayer(tech, "tap",    65, 44, "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
-    addLayer(tech, "psdm",   94, 20, "");
-    addLayer(tech, "nsdm",   93, 44, "");
-    addLayer(tech, "poly",   66, 20, "Poly");
-    addLayer(tech, "licon1", 66, 44, "Contact to local interconnect");
-    addLayer(tech, "li1",    67, 20, "Local interconnect");
-    addLayer(tech, "mcon",   67, 44, "Contact from local interconnect to met1");
-    addLayer(tech, "met1",   68, 20, "Metal 1");
-    addLayer(tech, "via",    68, 44, "Contact from met1 to met2");
-    addLayer(tech, "met2",   69, 20, "Metal 2");
-    addLayer(tech, "via2",   69, 44, "Contact from met2 to met3");
-    addLayer(tech, "met3",   70, 20, "Metal 3");
-    addLayer(tech, "via3",   70, 44, "Contact from cap above met3 to met4");
-    addLayer(tech, "capm",   89, 44,  "MiM capacitor plate over metal 3");
-    addLayer(tech, "met4",   71, 20, "Metal 4");
-    addLayer(tech, "capm2",  97, 44,  "MiM capacitor plate over metal 4");
-    addLayer(tech, "via4",   71, 44, "Contact from met4 to met5 (no MiM cap)");
-    addLayer(tech, "met5",   72, 20, "Metal 5");
+    //             name,     drw_gds, pin_gds, label_gds, description
+    addLayer(tech, "dnwell", 64,18,  -1,-1,  -1,-1,  "Deep N-well");
+    addLayer(tech, "nwell",  64,20,  64,16,   64,5,   "N-well region");
+    addLayer(tech, "diff",   65,20,  65,16,   65,5,   "Active (diffusion) area");
+    addLayer(tech, "tap",    65,44,  -1,-1,  -1,-1,  "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)");
+    addLayer(tech, "psdm",   94,20,  -1,-1,  -1,-1,  "P+ source/drain implant");
+    addLayer(tech, "nsdm",   93,44,  -1,-1,  -1,-1,  "N+ source/drain implant");
+    addLayer(tech, "poly",   66,20,  66,16,   66,5,   "Polysilicon");
+    addLayer(tech, "licon1", 66,44,  -1,-1,  -1,-1,  "Contact to local interconnect");
+    addLayer(tech, "li1",    67,20,  67,16,   67,5,   "Local interconnect");
+    addLayer(tech, "mcon",   67,44,  -1,-1,  -1,-1,  "Contact from local interconnect to met1");
+    addLayer(tech, "met1",   68,20,  68,16,   68,5,   "Metal 1");
+    addLayer(tech, "via",    68,44,  -1,-1,  -1,-1,  "Contact from met1 to met2");
+    addLayer(tech, "met2",   69,20,  69,16,   69,5,   "Metal 2");
+    addLayer(tech, "via2",   69,44,  -1,-1,  -1,-1,  "Contact from met2 to met3");
+    addLayer(tech, "met3",   70,20,  70,16,   70,5,   "Metal 3");
+    addLayer(tech, "via3",   70,44,  -1,-1,  -1,-1,  "Contact from cap above met3 to met4");
+    addLayer(tech, "capm",   89,44,  -1,-1,  -1,-1,  "MiM capacitor plate over metal 3");
+    addLayer(tech, "met4",   71,20,  71,16,   71,5,   "Metal 4");
+    addLayer(tech, "capm2",  97,44,  -1,-1,  -1,-1,  "MiM capacitor plate over metal 4");
+    addLayer(tech, "via4",   71,44,  -1,-1,  -1,-1,  "Contact from met4 to met5 (no MiM cap)");
+    addLayer(tech, "met5",   72,20,  72,16,  72,5,   "Metal 5");
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
     kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
+    kpex::tech::ComputedLayerInfo::Kind KPIN = kpex::tech::ComputedLayerInfo_Kind_KIND_PIN;
     
+    //                     kind  lvs_name lvs_gds_pair  orig. layer   description
     addComputedLayer(tech, KREG, "dnwell",    64, 18,  "dnwell",     "Deep NWell");
-    addComputedLayer(tech, KREG, "li_con",    67, 20,  "li1",  "Computed layer for li");
+    addComputedLayer(tech, KREG, "li_con",    67, 20,  "li1",    "Computed layer for li");
     addComputedLayer(tech, KREG, "licon",     66, 44,  "licon1", "Computed layer for contact to li");
-    addComputedLayer(tech, KREG, "mcon",      67, 44,  "mcon", "");
+    addComputedLayer(tech, KREG, "mcon_con",  67, 44,  "mcon", "");
     addComputedLayer(tech, KREG, "met1_con",  68, 20,  "met1", "");
     addComputedLayer(tech, KREG, "met2_con",  69, 20,  "met2", "");
     addComputedLayer(tech, KREG, "met3_ncap", 70, 20,  "met3", "");
@@ -75,8 +78,8 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KREG, "poly_con",  66, 20,  "poly", "");
     addComputedLayer(tech, KREG, "psd",       94, 20,  "psdm", "borrow from psdm");
     addComputedLayer(tech, KREG, "ptap_conn", 65, 244, "tap", "Separate ptap, original tap is 65,44, we need seperate ntap/ptap");
-    addComputedLayer(tech, KREG, "via1",      68, 44,  "via1", "");
-    addComputedLayer(tech, KREG, "via2",      69, 44,  "via2", "");
+    addComputedLayer(tech, KREG, "via1_con",  68, 44,  "via1", "");
+    addComputedLayer(tech, KREG, "via2_con",  69, 44,  "via2", "");
     addComputedLayer(tech, KREG, "via3_ncap", 70, 144, "via3", "Original via3 is 70,44, case where no MiM cap");
     addComputedLayer(tech, KREG, "via4_ncap", 71, 144, "via4", "Original via4 is 71,44, case where no MiM cap");
     addComputedLayer(tech, KREG, "via3_cap",  70, 244, "via3", "Original via3 is 70,44, via above metal 3 MIM cap");
@@ -89,7 +92,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KCAP, "met3_vpp",  70, 20,  "met3", "Capacitor device metal");
     addComputedLayer(tech, KCAP, "met4_vpp",  71, 20,  "met4", "Capacitor device metal");
     addComputedLayer(tech, KCAP, "met5_vpp",  72, 20,  "met5", "Capacitor device metal");
-    addComputedLayer(tech, KCAP, "licon_vpp", 66, 44,  "licon", "Capacitor device contact");
+    addComputedLayer(tech, KCAP, "licon_vpp", 66, 44,  "licon1", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "mcon_vpp",  67, 44,  "mcon", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "via1_vpp",  68, 44,  "via1", "Capacitor device contact");
     addComputedLayer(tech, KCAP, "via2_vpp",  69, 44,  "via2", "Capacitor device contact");
@@ -99,363 +102,207 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, KCAP, "met4_cap",  71, 220, "met4", "metal4 part of MiM cap");
     addComputedLayer(tech, KCAP, "capm",      89, 44,  "capm", "MiM cap above metal3");
     addComputedLayer(tech, KCAP, "capm2",     97, 44,  "capm2", "MiM cap above metal4");
+    
+    addComputedLayer(tech, KPIN, "poly_pin_con", 66, 16,  "poly.pin", "Poly pin");
+    addComputedLayer(tech, KPIN, "li_pin_con",   67, 16,  "li1.pin",  "li1 pin");
+    addComputedLayer(tech, KPIN, "met1_pin_con", 68, 16,  "met1.pin", "met1 pin");
+    addComputedLayer(tech, KPIN, "met2_pin_con", 69, 16,  "met2.pin", "met2 pin");
+    addComputedLayer(tech, KPIN, "met3_pin_con", 70, 16,  "met3.pin", "met3 pin");
+    addComputedLayer(tech, KPIN, "met4_pin_con", 71, 16,  "met4.pin", "met4 pin");
+    addComputedLayer(tech, KPIN, "met5_pin_con", 72, 16,  "met5.pin", "met5 pin");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
-    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
-    li->set_name("subs");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SUBSTRATE);
-    kpex::tech::ProcessStackInfo::SubstrateLayer *sl = li->mutable_substrate_layer();
-    sl->set_height(0.1); // TODO
-    sl->set_thickness(0.33); // TODO
-    sl->set_reference("fox");
+    // SUBSTRATE:           name    height   thickness   reference
+    //                              (TODO)   (TODO)
+    //-----------------------------------------------------------------------------------------------
+    addSubstrateLayer(psi, "subs",  0.1,     0.33,       "fox");
 
-    li = psi->add_layers();
-    li->set_name("nwell");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_NWELL);
-    kpex::tech::ProcessStackInfo::NWellLayer *wl = li->mutable_nwell_layer();
-    wl->set_height(0.0);
-    wl->set_reference("fox");
-    kpex::tech::ProcessStackInfo::Contact *co = wl->mutable_contact_above();
-    co->set_name("licon1");
-    co->set_metal_above("li1");
-    co->set_thickness(0.9361);
-
-    li = psi->add_layers();
-    li->set_name("diff");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-    kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
-    dl->set_height(0.323);
-    dl->set_reference("fox");
-    co = dl->mutable_contact_above();
-    co->set_name("licon1");
-    co->set_metal_above("li1");
-    co->set_thickness(0.9361);
-
-//    li = psi->add_layers();
-//    li->set_name("mvdiff");
-//    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
-//    dl = li->mutable_diffusion_layer();
-//    dl->set_height(0.3152);
-//    dl->set_reference("fox");
-//
-    li = psi->add_layers();
-    li->set_name("fox");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_FIELD_OXIDE);
-    kpex::tech::ProcessStackInfo::FieldOxideLayer *fl = li->mutable_field_oxide_layer();
-    fl->set_dielectric_k(4.632); // fine-tuned for single_plate_100um_x_100um_li1_over_substrate to match foundry table data
+    // NWELL/DIFF:                     name     height  ref
+    //                                          (TODO)
+    //-----------------------------------------------------------------------------------------------
+    auto nwell =    addNWellLayer(psi, "nwell", 0.1,    "fox");
+    auto diff = addDiffusionLayer(psi, "diff",  0.323,  "fox");
     
-    li = psi->add_layers();
-    li->set_name("poly");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    kpex::tech::ProcessStackInfo::MetalLayer *ml = li->mutable_metal_layer();
-    ml->set_height(0.3262);
-    ml->set_thickness(0.18);
-    ml->set_reference_below("fox");
-    ml->set_reference_above("psg");
+    // FOX:                 name     dielectric_k
+    //-----------------------------------------------------------------------------------------------
+    addFieldOxideLayer(psi, "fox",   4.632);
+    // NOTE: fine-tuned dielectric_k for single_plate_100um_x_100um_li1_over_substrate to match foundry table data
 
-    co = ml->mutable_contact_above();
-    co->set_name("licon1");
-    co->set_metal_above("li1");
-    co->set_thickness(0.4299);
-
-    li = psi->add_layers();
-    li->set_name("iox");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    kpex::tech::ProcessStackInfo::SidewallDielectricLayer *swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(0.39);
-    swl->set_height_above_metal(0.18);
-    swl->set_width_outside_sidewall(0.006);
-    swl->set_reference("poly");
+    // METAL:                      name,   height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto poly = addMetalLayer(psi, "poly", 0.3262, 0.18,      "fox",     "psg");
     
-    li = psi->add_layers();
-    li->set_name("spnit");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(7.5);
-    swl->set_height_above_metal(0.121);
-    swl->set_width_outside_sidewall(0.0431);
-    swl->set_reference("iox");
+    // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
+    //-----------------------------------------------------------------------------------------------
+    addSidewallDielectric(psi, "iox",   0.39,         0.18,               0.006,            "poly");
+    addSidewallDielectric(psi, "spnit", 7.5,          0.121,              0.0431,           "iox");
+
+    // DIELECTRIC (simple)    name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "psg",   3.9,           "fox");
+
+    // METAL:                      name, height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto li1 = addMetalLayer(psi, "li1", 0.9361, 0.1,      "psg",      "lint");
+
+    // DIELECTRIC (conformal)   name,   dielectric_k, thickness,   thickness,      thickness  ref
+    //                                                over metal,  where no metal, sidewall
+    //-----------------------------------------------------------------------------------------------
+    addConformalDielectric(psi, "lint", 7.3,          0.075,       0.075,          0.075,     "li1");
     
-    li = psi->add_layers();
-    li->set_name("psg");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    kpex::tech::ProcessStackInfo::SimpleDielectricLayer *sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(3.9);
-    sdl->set_reference("fox");
-    
-    li = psi->add_layers();
-    li->set_name("li1");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(0.9361);
-    ml->set_thickness(0.1);
-    ml->set_reference_below("psg");
-    ml->set_reference_above("lint");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild2",  4.05,         "lint");
 
-    co = ml->mutable_contact_above();
-    co->set_name("mcon");
-    co->set_metal_above("met1");
-    co->set_thickness(1.3761 - (0.9361 + 0.1));
+    // METAL:                      name,   height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met1 = addMetalLayer(psi, "met1", 1.3761, 0.36,     "nild2",   "nild3");
 
-    li = psi->add_layers();
-    li->set_name("lint");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
-    kpex::tech::ProcessStackInfo::ConformalDielectricLayer *cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(7.3);
-    cl->set_thickness_over_metal(0.075);
-    cl->set_thickness_where_no_metal(0.075);
-    cl->set_thickness_sidewall(0.075);
-    cl->set_reference("li1");
+    // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
+    //-----------------------------------------------------------------------------------------------
+    addSidewallDielectric(psi, "nild3c", 3.5,          0.0,                0.03,            "met1");
 
-    li = psi->add_layers();
-    li->set_name("nild2");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.05);
-    sdl->set_reference("lint");
-    
-    li = psi->add_layers();
-    li->set_name("met1");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(1.3761);
-    ml->set_thickness(0.36);
-    ml->set_reference_below("nild2");
-    ml->set_reference_above("nild3");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild3",  4.5,         "nild2");
 
-    co = ml->mutable_contact_above();
-    co->set_name("via");
-    co->set_metal_above("met2");
-    co->set_thickness(0.27);
+    // METAL:                      name,   height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met2 = addMetalLayer(psi, "met2", 2.0061, 0.36,     "nild3",   "nild4");
 
-    li = psi->add_layers();
-    li->set_name("nild3c");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(3.5);
-    swl->set_height_above_metal(0.0);
-    swl->set_width_outside_sidewall(0.03);
-    swl->set_reference("met1");
-    
-    li = psi->add_layers();
-    li->set_name("nild3");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.5);
-    sdl->set_reference("nild2");
+    // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
+    //-----------------------------------------------------------------------------------------------
+    addSidewallDielectric(psi, "nild4c", 3.5,          0.0,                0.03,            "met2");
 
-    li = psi->add_layers();
-    li->set_name("met2");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(2.0061);
-    ml->set_thickness(0.36);
-    ml->set_reference_below("nild3");
-    ml->set_reference_above("nild4");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild4",  4.2,         "nild3");
 
-    co = ml->mutable_contact_above();
-    co->set_name("via2");
-    co->set_metal_above("met3");
-    co->set_thickness(0.42);
-
-    li = psi->add_layers();
-    li->set_name("nild4c");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(3.5);
-    swl->set_height_above_metal(0.0);
-    swl->set_width_outside_sidewall(0.03);
-    swl->set_reference("met2");
-    
-    li = psi->add_layers();
-    li->set_name("nild4");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.2);
-    sdl->set_reference("nild3");
-
-    li = psi->add_layers();
-    li->set_name("met3_ncap");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(2.7861);
-    ml->set_thickness(0.845);
-    ml->set_reference_below("nild4");
-    ml->set_reference_above("nild5");
-
-    co = ml->mutable_contact_above();
-    co->set_name("via3_ncap");
-    co->set_metal_above("met4");
-    co->set_thickness(0.39);
-    
-    li = psi->add_layers();
-    li->set_name("met3_cap");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(2.7861);
-    ml->set_thickness(0.845);
-    ml->set_reference_below("nild4");
-    ml->set_reference_above("nild5");
+    // METAL:                           name,        height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met3_ncap = addMetalLayer(psi, "met3_ncap", 2.7861, 0.845,     "nild4",   "nild5");
+    auto met3_cap  = addMetalLayer(psi, "met3_cap",  2.7861, 0.845,     "nild4",   "nild5");
 
     double capm_thickness = 0.1;
     double capild_k = 4.52;  // to match design cap_mim_m3_w18p9_l5p1_no_interconnect to 200fF
     double capild_thickness = 0.02;
-    
-    li = psi->add_layers();
-    li->set_name("capild");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
-    cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(capild_k);
-    cl->set_thickness_over_metal(capild_thickness);
-    cl->set_thickness_where_no_metal(0.0);
-    cl->set_thickness_sidewall(0.0);
-    cl->set_reference("met3_cap");
 
-    li = psi->add_layers();
-    li->set_name("nild5");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
-    
-    li = psi->add_layers();
-    li->set_name("capm");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(2.7861 + 0.845 + capild_thickness); // according to xsection
-    ml->set_thickness(capm_thickness); // according to xsection
-    ml->set_reference_below("nild5");
-    ml->set_reference_above("nild5");
-    
-    li = psi->add_layers();
-    li->set_name("nild5");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.1);
-    sdl->set_reference("nild4");
-    
-    co = ml->mutable_contact_above();
-    co->set_name("via3_cap");
-    co->set_metal_above("met4");
-    co->set_thickness(0.29);
-    
-    li = psi->add_layers();
-    li->set_name("met4_ncap");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(4.0211);
-    ml->set_thickness(0.845);
-    ml->set_reference_below("nild5"); // PDK mim cap section says capild
-    ml->set_reference_above("nild6");
+    // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness,  ref
+    //                                                   over metal,  where no metal, sidewall
+    //-----------------------------------------------------------------------------------------------
+    addConformalDielectric(psi, "capild", capild_k, capild_thickness,          0.0,        0.0,   "met3_cap");
 
-    li = psi->add_layers();
-    li->set_name("capild");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
-    cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(capild_k);
-    cl->set_thickness_over_metal(capild_thickness);
-    cl->set_thickness_where_no_metal(0.0);
-    cl->set_thickness_sidewall(0.0);
-    cl->set_reference("met4_cap");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild5",  4.1,         "nild4");
 
-    co = ml->mutable_contact_above();
-    co->set_name("via4_ncap");
-    co->set_metal_above("met5");
-    co->set_thickness(0.505);
+    // METAL:                      name,   height,                            thickness,      ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto capm = addMetalLayer(psi, "capm", 2.7861 + 0.845 + capild_thickness, capm_thickness, "nild5",   "nild5");
 
-    li = psi->add_layers();
-    li->set_name("met4_cap");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(4.0211);
-    ml->set_thickness(0.845);
-    ml->set_reference_below("nild5"); // PDK mim cap section says capild
-    ml->set_reference_above("nild6");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild5",  4.1,         "nild4");
 
-    li = psi->add_layers();
-    li->set_name("nild6");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.0);
-    sdl->set_reference("nild5");
+    // METAL:                           name,        height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met4_ncap = addMetalLayer(psi, "met4_ncap", 4.0211, 0.845,     "nild5",   "nild6");
+    // TODO:   ->set_reference_below("nild5"); // PDK mim cap section says capild
+
+    // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness,  ref
+    //                                                   over metal,  where no metal, sidewall
+    //-----------------------------------------------------------------------------------------------
+    addConformalDielectric(psi, "capild", capild_k, capild_thickness,          0.0,        0.0,   "met4_cap");
+
+    // METAL:                           name,        height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met4_cap  = addMetalLayer(psi, "met4_cap",  4.0211, 0.845,     "nild5",   "nild6");
     
-    li = psi->add_layers();
-    li->set_name("capm2");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(4.0211 + 0.845 + capild_thickness); // according to xsection
-    ml->set_thickness(capm_thickness); // according to xsection
-    ml->set_reference_below("nild6"); // PDK mim cap section says capild
-    ml->set_reference_above("nild6");
-    
-    li = psi->add_layers();
-    li->set_name("nild6");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(4.0);
-    sdl->set_reference("nild5");
-   
-    co = ml->mutable_contact_above();
-    co->set_name("via4_cap");
-    co->set_metal_above("met5");
-    co->set_thickness(0.505 - 0.1);
-    
-    li = psi->add_layers();
-    li->set_name("met5");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
-    ml = li->mutable_metal_layer();
-    ml->set_height(5.3711);
-    ml->set_thickness(1.26);
-    ml->set_reference_below("nild6");
-    ml->set_reference_above("topox");
+    // DIELECTRIC (simple)    name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild6",  4.0,         "nild5");
 
-    li = psi->add_layers();
-    li->set_name("topox");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(3.9);
-    swl->set_height_above_metal(0.09);
-    swl->set_width_outside_sidewall(0.07);
-    swl->set_reference("met5");
-    
-    li = psi->add_layers();
-    li->set_name("topnit");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
-    cl = li->mutable_conformal_dielectric_layer();
-    cl->set_dielectric_k(7.5);
-    cl->set_thickness_over_metal(0.54);
-    cl->set_thickness_where_no_metal(0.4223);
-    cl->set_thickness_sidewall(0.3777);
-    cl->set_reference("topox");
+    // METAL:                       name,    height,                            thickness,      ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto capm2 = addMetalLayer(psi, "capm2", 4.0211 + 0.845 + capild_thickness, capm_thickness, "nild6",   "nild6");
+    // TODO:   ->set_reference_below("nild6"); // PDK mim cap section says capild
 
-    li = psi->add_layers();
-    li->set_name("air");
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
-    sdl = li->mutable_simple_dielectric_layer();
-    sdl->set_dielectric_k(3.0);
-    sdl->set_reference("topnit");
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "nild6",  4.0,          "nild5");
+
+    // METAL:                      name,   height, thickness, ref_below, ref_above
+    //-----------------------------------------------------------------------------------------------
+    auto met5 = addMetalLayer(psi, "met5", 5.3711, 1.26,     "nild6",   "topox");
+
+    // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
+    //-----------------------------------------------------------------------------------------------
+    addSidewallDielectric(psi, "topox", 3.9,          0.09,               0.07,            "met5");
+
+    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
+    //                                                 over metal,  where no metal, sidewall
+    //-----------------------------------------------------------------------------------------------
+    addConformalDielectric(psi, "topnit", 7.5,         0.54,        0.4223,         0.3777,    "topox");
+
+    // DIELECTRIC (simple)   name,     dielectric_k, ref
+    //-----------------------------------------------------------------------------------------------
+    addSimpleDielectric(psi, "air",  3.0,          "topnit");
+
+    auto licon1n = nwell->mutable_contact_above();
+    auto licon1d = diff->mutable_contact_above();
+    auto licon1p = poly->mutable_contact_above();
+    auto mcon = li1->mutable_contact_above();
+    auto via = met1->mutable_contact_above();
+    auto via2 = met2->mutable_contact_above();
+    auto via3_ncap = met3_ncap->mutable_contact_above();
+    auto via3_cap = capm->mutable_contact_above();
+    auto via4_ncap = met4_ncap->mutable_contact_above();
+    auto via4_cap = capm2->mutable_contact_above();
+    
+    // CONTACT:           contact,     metal_above, thickness,              width, spacing,  border
+    //-----------------------------------------------------------------------------------------------
+    setContact(licon1n,   "licon1",    "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1d,   "licon1",    "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1p,   "licon1",    "li1",       0.4299,                  0.17,    0.17,  0.0);
+    setContact(mcon,      "mcon",      "met1",      1.3761 - (0.9361 + 0.1), 0.17,    0.19,  0.0);
+    setContact(via,       "via",       "met2",      0.27,                    0.15,    0.17,  0.055);
+    setContact(via2,      "via2",      "met3",      0.42,                    0.20,    0.20,  0.04);
+    setContact(via3_ncap, "via3_ncap", "met4",      0.39,                    0.20,    0.20,  0.06);
+    setContact(via3_cap,  "via3_cap",  "met4",      0.29,                    0.20,    0.20,  0.06);
+    setContact(via4_ncap, "via4_ncap", "met5",      0.505,                   0.80,    0.80,  0.19);
+    setContact(via4_cap,  "via4_cap",  "met5",      0.505 - 0.1,             0.80,    0.80,  0.19);
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
-    ex->set_side_halo(8);
+    // See  https://docs.google.com/spreadsheets/d/1N9To-xTiA7FLfQ1SNzWKe-wMckFEXVE9WPkPPjYkaxE/edit?pli=1&gid=1654372372#gid=1654372372
+    
+    ex->set_side_halo(8.0);
     
     kpex::tech::ResistanceInfo *ri = ex->mutable_resistance();
-    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
-    lr->set_layer_name("TODO ndiffres");
-    lr->set_resistance(120000);
-    lr->set_corner_adjustment_fraction(0.5);
-    //...
-    lr = ri->add_layers();
-    lr->set_layer_name("TODO poly");
-    lr->set_resistance(48200);
-    //...
+
+    // resistance values are in mΩ / square
+    //                     layer, resistance, [corner_adjustment_fraction]
+    addLayerResistance(ri, "poly", 48200);  // allpolynonres
+    addLayerResistance(ri, "li1",  12800);
+    addLayerResistance(ri, "met1",   125);
+    addLayerResistance(ri, "met2",   125);
+    addLayerResistance(ri, "met3",    47);
+    addLayerResistance(ri, "met4",    47);
+    addLayerResistance(ri, "met5",    29);
     
-    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
-    vr->set_via_name("TODO mcon");
-    vr->set_resistance(9300);
-    //...
-    
+    // resistance values are in mΩ / square
+    //                   layer,         resistance
+    addContactResistance(ri, "nsdm",    185000); // licon over nsdm
+    addContactResistance(ri, "psdm",    585000); // licon over psdm
+    addContactResistance(ri, "poly",    152000); // licon over poly!
+    addViaResistance(ri, "poly",        152000); // licon over poly!
+    addViaResistance(ri, "mcon",          9300);
+    addViaResistance(ri, "via",           4500);
+    addViaResistance(ri, "via2",          3410);
+    addViaResistance(ri, "via3",          3410);
+    addViaResistance(ri, "via4",           380);
+
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
     
     //                  layer,  area_cap,  perimeter_cap
@@ -597,7 +444,7 @@ void buildTech(kpex::tech::Technology &tech) {
     tech.set_name("sky130A");
 
     buildLayers(&tech);
-
+    
     buildLVSComputedLayers(&tech);
 
     kpex::tech::ProcessStackInfo *psi = tech.mutable_process_stack();

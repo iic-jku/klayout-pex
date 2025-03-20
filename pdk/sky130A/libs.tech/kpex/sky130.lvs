@@ -978,12 +978,30 @@ ntap_bjt  = tap.and(nsdm).not(diff_res).not(diff_cut)
 
 poly_con  = poly.not(poly_res).not(vpp).not(npnid)
 li_con    = li.not( li_res ).not(vpp)
+
+# NOTE: this was missing in the original sky130A LVS script!
+#       we want to split mcon into mcon_con and mcon_vpp
+#       (might not cause an issue in regular LVS, but in PEX context necessary)
+mcon_con  = mcon.not(vpp)
+via1_con  = via1.not(vpp)
+via2_con  = via2.not(vpp)
+via3_con  = via3.not(vpp)
+via4_con  = via4.not(vpp)
+
 met1_con  = met1.not(met1_res).not(vpp)
 met2_con  = met2.not(met2_res).not(inductor).not(met2_fuse).not(vpp)
 met3_con  = met3.not(met3_res).not(inductor).not(met3_fuse).not(vpp)
 met4_con  = met4.not(met4_res).not(met4_fuse).not(vpp)
 met5_con  = met5.not(met5_res).not(vpp)
 
+# Pins (NOTE: a regular LVS would not do this, we need it for PEX)
+poly_pin_con = poly_pin & poly_con
+li_pin_con   = li_pin   & li_con
+met1_pin_con = met1_pin & met1_con
+met2_pin_con = met2_pin & met2_con
+met3_pin_con = met3_pin & met3_con
+met4_pin_con = met4_pin & met4_con
+met5_pin_con = met5_pin & met5_con
 
 #==================================
 # ------ MOSFET DERIVATIONS -------
@@ -1286,14 +1304,14 @@ logger.info("Starting MIM DERIVATIONS")
 # mim on metal3
 met3_ncap = met3_con.not(capm)
 met3_cap  = met3_con.and(capm)
-via3_ncap = via3.not(capm)
-via3_cap  = via3.and(capm)
+via3_ncap = via3_con.not(capm)
+via3_cap  = via3_con.and(capm)
 
 # mim on metal4
 met4_ncap = met4_con.not(capm2)
 met4_cap  = met4_con.and(capm2)
-via4_ncap = via4.not(capm2)
-via4_cap  = via4.and(capm2)
+via4_ncap = via4_con.not(capm2)
+via4_cap  = via4_con.and(capm2)
 
 
 #==================================
@@ -1621,7 +1639,6 @@ sonos_ngate   = nsdm.and(sonos_tgate).not(psdm)
 sonos_gate    = sonos_ngate.and(lvtn).and(dnwell).and(tunm).and(ldntm).interacting(areaid_ce)
 sonos_nsd     = nsdm.and(sd).not(nwell).interacting(sonos_gate)
 
-
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
 #================================================
@@ -1636,7 +1653,19 @@ logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
 # export layer names
 if self.respond_to?(:name)
-  %w(dnwell li_con licon mcon met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1 via2 via3_ncap via4_ncap).each do |l|
+  %w(sub_label pwelliso_label nwell_label pwell_label tap_label diff_label poly_label poly_model li_label met1_label met2_label met3_label met4_label met5_label rdl_label pad_label txt_label).each do |l|
+    name(eval(l), l)
+  end
+
+  %w(ptap_conn ntap_conn tap).each do |l|
+    name(eval(l), l)
+  end
+
+  %w(poly_pin_con li_pin_con met1_pin_con met2_pin_con met3_pin_con met4_pin_con met5_pin_con).each do |l|
+    name(eval(l), l)
+  end
+  
+  %w(dnwell li_con licon mcon_con met1_con met2_con met3_ncap met4_ncap met5_con nsd ntap_conn nwell poly_con psd ptap_conn via1_con via2_con via3_ncap via4_ncap).each do |l|
     name(eval(l), l)
   end
   
@@ -1660,12 +1689,12 @@ connect(nsd         ,         licon)
 connect(poly_con    ,     licon_npc)
 connect(licon_npc   ,         licon)
 connect(licon       ,        li_con)
-connect(li_con      ,          mcon)
-connect(mcon        ,      met1_con)
-connect(met1_con    ,          via1)
-connect(via1        ,      met2_con)
-connect(met2_con    ,          via2)
-connect(via2        ,     met3_ncap)
+connect(li_con      ,      mcon_con)
+connect(mcon_con    ,      met1_con)
+connect(met1_con    ,      via1_con)
+connect(via1_con    ,      met2_con)
+connect(met2_con    ,      via2_con)
+connect(via2_con    ,     met3_ncap)
 connect(met3_ncap   ,     via3_ncap)
 connect(via3_ncap   ,     met4_ncap)
 connect(met4_ncap   ,     via4_ncap)
@@ -1688,6 +1717,15 @@ connect(met4_ncap   ,     met4_label)
 connect(met5_con    ,     met5_label)
 connect(rdl         ,      rdl_label)
 connect(pad         ,      pad_label)
+
+# Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(poly_con    ,      poly_pin_con)
+connect(li_con      ,      li_pin_con)
+connect(met1_con    ,      met1_pin_con)
+connect(met2_con    ,      met2_pin_con)
+connect(met3_ncap   ,      met3_pin_con)
+connect(met4_ncap   ,      met4_pin_con)
+connect(met5_con    ,      met5_pin_con)
 
 logger.info("Starting SKY130 LVS connectivity setup (Global connections)")
 

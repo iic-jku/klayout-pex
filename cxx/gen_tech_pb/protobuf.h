@@ -58,10 +58,16 @@ void convert(const std::string &inputPath,
              const std::string &outputPath,
              Format outputFormat);
 
+//-------------------------------------------------------------------------
+
 void addLayer(kpex::tech::Technology *tech,
               const std::string &name,
-              uint32_t gds_layer,
-              uint32_t gds_datatype,
+              uint32_t drw_gds_layer,
+              uint32_t drw_gds_datatype,
+              int64_t pin_gds_layer,      // -1 if not available
+              int64_t pin_gds_datatype,   // -1 if not available
+              int64_t label_gds_layer,    // -1 if not available
+              int64_t label_gds_datatype, // -1 if not available
               const std::string &description);
 
 void addComputedLayer(kpex::tech::Technology *tech,
@@ -71,6 +77,86 @@ void addComputedLayer(kpex::tech::Technology *tech,
                       uint32_t gds_datatype,
                       const std::string &original_layer_name,
                       const std::string &description);
+
+//-------------------------------------------------------------------------
+
+void addSubstrateLayer(kpex::tech::ProcessStackInfo *psi,
+                       const std::string &layer_name,
+                       double height,
+                       double thickness,
+                       const std::string &reference);
+
+kpex::tech::ProcessStackInfo::NWellLayer *
+addNWellLayer(kpex::tech::ProcessStackInfo *psi,
+              const std::string &layer_name,
+              double height,
+              const std::string &reference);
+
+void setContact(kpex::tech::ProcessStackInfo::Contact *co,
+                const std::string &name,
+                const std::string &layer_above,
+                double thickness,
+                double width,
+                double spacing,
+                double border);
+
+kpex::tech::ProcessStackInfo::DiffusionLayer *
+addDiffusionLayer(kpex::tech::ProcessStackInfo *psi,
+                  const std::string &layer_name,
+                  double height,
+                  const std::string &reference);
+
+void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
+                        const std::string &layer_name,
+                        double dielectric_k);
+
+kpex::tech::ProcessStackInfo::MetalLayer *
+addMetalLayer(kpex::tech::ProcessStackInfo *psi,
+              const std::string &layer_name,
+              double height,
+              double thickness,
+              const std::string &reference_below,
+              const std::string &reference_above);
+
+void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,
+                           const std::string &name,
+                           double dielectric_k,
+                           double height_above_metal,
+                           double width_outside_sidewall,
+                           const std::string &reference);
+
+void addSimpleDielectric(kpex::tech::ProcessStackInfo *psi,
+                         const std::string &name,
+                         double dielectric_k,
+                         const std::string &reference);
+
+void addConformalDielectric(kpex::tech::ProcessStackInfo *psi,
+                            const std::string &name,
+                            double dielectric_k,
+                            double thickness_over_metal,
+                            double thickness_where_mo_metal,
+                            double thickness_sidewall,
+                            const std::string &reference);
+
+//-------------------------------------------------------------------------
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance);
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance,
+                        double corner_adjustment_fraction);
+
+void addContactResistance(kpex::tech::ResistanceInfo *ri,
+                          const std::string &device_layer_name,
+                          double resistance);
+
+void addViaResistance(kpex::tech::ResistanceInfo *ri,
+                      const std::string &via_name,
+                      double resistance);
+
 
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
                      const std::string &layer_name,

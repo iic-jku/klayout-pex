@@ -49,13 +49,18 @@ message Technology {
     ProcessParasiticsInfo process_parasitics = 200;
 }
 
+message GDSPair {
+    uint32 layer = 1;
+    uint32 datatype = 2;
+}
+
 message LayerInfo {
     string name = 1;
+    string description = 10;
     
-    string description = 11;
-    
-    uint32 gds_layer = 21;
-    uint32 gds_datatype = 31;
+    GDSPair drw_gds_pair = 20;
+    GDSPair pin_gds_pair = 30;
+    GDSPair label_gds_pair = 40;
 }
 
 message ComputedLayerInfo {
@@ -66,9 +71,10 @@ message ComputedLayerInfo {
                                    // (or to ignore those devices in regular end user PEX use cases,
                                    //  where the SPICE models of the devices already handle this)
         KIND_DEVICE_RESISTOR = 3;  // same for resistors
+        KIND_PIN = 4;
     }
 
     Kind kind = 10;
     LayerInfo layer_info = 20;
-    string original_layer_name = 30; // name of the regular layer this is derived from
+    string original_layer_name = 40; // name of the regular layer this is derived from
 }

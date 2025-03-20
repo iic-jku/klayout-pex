@@ -56,6 +56,12 @@ message ProcessStackInfo {
         string name = 1;
         string metal_above = 10;
         double thickness = 20;
+        
+        // NOTE: if a drawn via polygon is larger than the actual via dimensions,
+        //       an array is created
+        double width = 30;
+        double spacing = 31;
+        double border = 32;
     }
 
     message SubstrateLayer {

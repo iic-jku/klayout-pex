@@ -32,7 +32,7 @@ package kpex.tech;
 message ProcessParasiticsInfo {
     // we do all in µm
     
-    int32 side_halo = 10;
+    double side_halo = 10;
     
     ResistanceInfo resistance = 110;
     CapacitanceInfo capacitance = 111;
@@ -48,14 +48,20 @@ message ResistanceInfo {
         double corner_adjustment_fraction = 3;
     }
     
-    // resistances are in milliohm / µm^2
+    message ContactResistance { // NOTE: poly falls under ViaResistance!
+        string device_layer_name = 1;  // e.g. nsdm, psdm, ...
+        double resistance = 2;  // resistances are in milliohm / CNT
+    }
+    
+    // resistances are in milliohm / CNT
     message ViaResistance {
         string via_name = 1;
         double resistance = 2;
     }
-    
-    repeated LayerResistance layers = 1;
-    repeated ViaResistance vias = 2;
+
+    repeated LayerResistance layers = 10;
+    repeated ContactResistance contacts = 20;
+    repeated ViaResistance vias = 30;
 }
 
 message CapacitanceInfo {

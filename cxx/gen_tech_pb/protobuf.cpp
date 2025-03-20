@@ -117,15 +117,35 @@ void convert(const std::string &inputPath,
 
 void addLayer(kpex::tech::Technology *tech,
               const std::string &name,
-              uint32_t gds_layer,
-              uint32_t gds_datatype,
+              uint32_t drw_gds_layer,
+              uint32_t drw_gds_datatype,
+              int64_t pin_gds_layer,
+              int64_t pin_gds_datatype,
+              int64_t label_gds_layer,
+              int64_t label_gds_datatype,
               const std::string &description)
 {
     kpex::tech::LayerInfo *layer = tech->add_layers();
     layer->set_name(name);
     layer->set_description(description);
-    layer->set_gds_layer(gds_layer);
-    layer->set_gds_datatype(gds_datatype);
+    
+    kpex::tech::GDSPair *gds;
+    
+    gds = layer->mutable_drw_gds_pair();
+    gds->set_layer(drw_gds_layer);
+    gds->set_datatype(drw_gds_datatype);
+    
+    if (pin_gds_layer >= 0 && pin_gds_datatype >= 0) {
+        gds = layer->mutable_pin_gds_pair();
+        gds->set_layer((uint32_t)pin_gds_layer);
+        gds->set_datatype((uint32_t)pin_gds_datatype);
+    }
+    
+    if (label_gds_layer >= 0 && label_gds_datatype >= 0) {
+        gds = layer->mutable_label_gds_pair();
+        gds->set_layer((uint32_t)label_gds_layer);
+        gds->set_datatype((uint32_t)label_gds_datatype);
+    }
 }
 
 void addComputedLayer(kpex::tech::Technology *tech,
@@ -142,8 +162,194 @@ void addComputedLayer(kpex::tech::Technology *tech,
     kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
     layer->set_name(name);
     layer->set_description(description);
-    layer->set_gds_layer(gds_layer);
-    layer->set_gds_datatype(gds_datatype);
+    kpex::tech::GDSPair *gds = layer->mutable_drw_gds_pair();
+    gds->set_layer(gds_layer);
+    gds->set_datatype(gds_datatype);
+}
+
+//-------------------------------------------------------------------------
+
+void addSubstrateLayer(kpex::tech::ProcessStackInfo *psi,
+                       const std::string &layer_name,
+                       double height,
+                       double thickness,
+                       const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(layer_name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SUBSTRATE);
+    kpex::tech::ProcessStackInfo::SubstrateLayer *sl = li->mutable_substrate_layer();
+    sl->set_height(height);
+    sl->set_thickness(thickness);
+    sl->set_reference(reference);
+}
+
+kpex::tech::ProcessStackInfo::NWellLayer *
+addNWellLayer(kpex::tech::ProcessStackInfo *psi,
+                   const std::string &layer_name,
+                   double height,
+                   const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(layer_name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_NWELL);
+    kpex::tech::ProcessStackInfo::NWellLayer *wl = li->mutable_nwell_layer();
+    wl->set_height(height);
+    wl->set_reference(reference);
+    return wl;
+}
+
+void setContact(kpex::tech::ProcessStackInfo::Contact *co,
+                const std::string &name,
+                const std::string &layer_above,
+                double thickness,
+                double width,
+                double spacing,
+                double border)
+{
+    co->set_name(name);
+    co->set_metal_above(layer_above);
+    co->set_thickness(thickness);
+    co->set_width(width);
+    co->set_spacing(spacing);
+    co->set_border(border);
+}
+
+kpex::tech::ProcessStackInfo::DiffusionLayer *
+addDiffusionLayer(kpex::tech::ProcessStackInfo *psi,
+                  const std::string &name,
+                  double height,
+                  const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
+    kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
+    dl->set_height(height);
+    dl->set_reference(reference);
+    return dl;
+}
+
+void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
+                        const std::string &name,
+                        double dielectric_k)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_FIELD_OXIDE);
+    kpex::tech::ProcessStackInfo::FieldOxideLayer *fl = li->mutable_field_oxide_layer();
+    fl->set_dielectric_k(dielectric_k);
+}
+
+kpex::tech::ProcessStackInfo::MetalLayer *
+addMetalLayer(kpex::tech::ProcessStackInfo *psi,
+              const std::string &layer_name,
+              double height,
+              double thickness,
+              const std::string &reference_below,
+              const std::string &reference_above)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(layer_name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
+    kpex::tech::ProcessStackInfo::MetalLayer *ml = li->mutable_metal_layer();
+    ml->set_height(height);
+    ml->set_thickness(thickness);
+    ml->set_reference_below(reference_below);
+    ml->set_reference_above(reference_above);
+    return ml;
+}
+
+void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,
+                           const std::string &name,
+                           double dielectric_k,
+                           double height_above_metal,
+                           double width_outside_sidewall,
+                           const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
+    kpex::tech::ProcessStackInfo::SidewallDielectricLayer *swl = li->mutable_sidewall_dielectric_layer();
+    swl->set_dielectric_k(dielectric_k);
+    swl->set_height_above_metal(height_above_metal);
+    swl->set_width_outside_sidewall(width_outside_sidewall);
+    swl->set_reference(reference);
+}
+
+void addSimpleDielectric(kpex::tech::ProcessStackInfo *psi,
+                         const std::string &name,
+                         double dielectric_k,
+                         const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIMPLE_DIELECTRIC);
+    kpex::tech::ProcessStackInfo::SimpleDielectricLayer *sdl = li->mutable_simple_dielectric_layer();
+    sdl->set_dielectric_k(dielectric_k);
+    sdl->set_reference(reference);
+}
+
+void addConformalDielectric(kpex::tech::ProcessStackInfo *psi,
+                            const std::string &name,
+                            double dielectric_k,
+                            double thickness_over_metal,
+                            double thickness_where_mo_metal,
+                            double thickness_sidewall,
+                            const std::string &reference)
+{
+    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
+    li->set_name(name);
+    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_CONFORMAL_DIELECTRIC);
+    kpex::tech::ProcessStackInfo::ConformalDielectricLayer *cl = li->mutable_conformal_dielectric_layer();
+    cl->set_dielectric_k(dielectric_k);
+    cl->set_thickness_over_metal(thickness_over_metal);
+    cl->set_thickness_where_no_metal(thickness_where_mo_metal);
+    cl->set_thickness_sidewall(thickness_sidewall);
+    cl->set_reference(reference);
+}
+
+
+//-------------------------------------------------------------------------
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance)
+{
+    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
+    lr->set_layer_name(layer_name);
+    lr->set_resistance(resistance);
+}
+
+void addLayerResistance(kpex::tech::ResistanceInfo *ri,
+                        const std::string &layer_name,
+                        double resistance,
+                        double corner_adjustment_fraction)
+{
+    kpex::tech::ResistanceInfo::LayerResistance *lr = ri->add_layers();
+    lr->set_layer_name(layer_name);
+    lr->set_resistance(resistance);
+    if (corner_adjustment_fraction != 0.0) {
+        lr->set_corner_adjustment_fraction(corner_adjustment_fraction);
+    }
+}
+
+void addContactResistance(kpex::tech::ResistanceInfo *ri,
+                          const std::string &device_layer_name,
+                          double resistance)
+{
+    kpex::tech::ResistanceInfo::ContactResistance *vr = ri->add_contacts();
+    vr->set_device_layer_name(device_layer_name);
+    vr->set_resistance(resistance);
+}
+
+void addViaResistance(kpex::tech::ResistanceInfo *ri,
+                      const std::string &via_name,
+                      double resistance)
+{
+    kpex::tech::ResistanceInfo::ViaResistance *vr = ri->add_vias();
+    vr->set_via_name(via_name);
+    vr->set_resistance(resistance);
 }
 
 void addSubstrateCap(kpex::tech::CapacitanceInfo *ci,
