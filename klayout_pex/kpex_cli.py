@@ -30,7 +30,7 @@ from functools import cached_property
 import logging
 import os
 import os.path
-
+from pathlib import Path
 import rich.console
 import rich.markdown
 import rich.text
@@ -66,6 +66,7 @@ from .log import (
     error,
     rule
 )
+from .magic.magic_ext_file_parser import parse_magic_pex_run
 from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
@@ -585,11 +586,13 @@ class KpexCLI:
                   script_path=magic_script_path,
                   log_path=magic_log_path)
 
+        magic_pex_run = parse_magic_pex_run(Path(magic_run_dir))
+
         layout = kdb.Layout()
         layout.read(args.effective_gds_path)
 
         report = rdb.ReportDatabase('')
-        magic_log_analyzer = MagicLogAnalyzer(magic_log_dir_path=magic_run_dir,
+        magic_log_analyzer = MagicLogAnalyzer(magic_pex_run=magic_pex_run,
                                               report=report,
                                               dbu=layout.dbu)
         magic_log_analyzer.analyze()

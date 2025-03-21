@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
 # SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
@@ -27,7 +26,58 @@ from typing import *
 from pathlib import Path
 import re
 
-from .magic_ext_data_structures import *
+from .magic_ext_data_structures import (
+    MagicPEXRun,
+    CellName,
+    CellExtData,
+    ExtData,
+    ResExtData,
+    Port,
+    Device,
+    DeviceType,
+    Node,
+    ResNode,
+    Resistor
+)
+
+
+def parse_magic_pex_run(run_dir: Path) -> MagicPEXRun:
+    # search for <cell>.ext files (C related)
+    # search for <cell>.res.ext files (R related)
+    # ext_files = [f.resolve() for f in self.magic_log_dir_path.glob('*.ext')]
+    ext_files = run_dir.glob('*.ext')
+
+    main_paths_by_cell_name: Dict[CellName, Path] = dict()
+    res_paths_by_cell_name: Dict[CellName, Path] = dict()
+
+    regex = r'(?P<cell>.*?)(?P<res>\.res)?\.ext'
+    for ef in ext_files:
+        m = re.match(regex, ef.name)
+        if not m:
+            continue
+
+        cell = m.group('cell')
+        res = m.group('res')
+
+        if res:
+            res_paths_by_cell_name[cell] = ef
+        else:
+            main_paths_by_cell_name[cell] = ef
+
+    if not main_paths_by_cell_name:
+        raise Exception(f"Could not find any *.ext files to analyze in {run_dir}")
+
+    cells: Dict[CellName, CellExtData] = {}
+    for cell, ext_path in main_paths_by_cell_name.items():
+        ext_data = parse_magic_ext_file(ext_path)
+        res_ext_path = res_paths_by_cell_name.get(cell, None)
+        res_ext_data = None if res_ext_path is None else parse_magic_res_ext_file(res_ext_path)
+        cells[cell] = CellExtData(ext_data=ext_data, res_ext_data=res_ext_data)
+
+    return MagicPEXRun(
+        run_dir=run_dir,
+        cells=cells
+    )
 
 
 def parse_magic_ext_file(path: Path) -> ExtData:
@@ -73,9 +123,7 @@ def parse_magic_ext_file(path: Path) -> ExtData:
                                       y_bot=int(m.group('y_bot')),
                                       x_top=int(m.group('x_top')),
                                       y_top=int(m.group('y_top'))))
-    return ExtData(ports=ports,
-                   nodes=nodes,
-                   devices=devices)
+    return ExtData(path=path, ports=ports, nodes=nodes, devices=devices)
 
 
 def parse_magic_res_ext_file(path: Path) -> ResExtData:
@@ -102,4 +150,4 @@ def parse_magic_res_ext_file(path: Path) -> ResExtData:
                                           node2=m.group('node2'),
                                           value_ohm=float(m.group('value'))))
 
-    return ResExtData(rnodes=rnodes, resistors=resistors)
+    return ResExtData(path=path, rnodes=rnodes, resistors=resistors)

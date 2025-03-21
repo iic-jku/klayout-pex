@@ -23,9 +23,15 @@
 # --------------------------------------------------------------------------------
 #
 
+from __future__ import annotations
+
 from enum import StrEnum
 from dataclasses import dataclass
+from pathlib import Path
 from typing import *
+
+
+CellName = str
 
 
 @dataclass
@@ -78,6 +84,7 @@ class Device:
 
 @dataclass
 class ExtData:
+    path: Path
     ports: List[Port]
     nodes: List[Node]
     devices: List[Device]
@@ -101,8 +108,21 @@ class Resistor:
 
 @dataclass
 class ResExtData:
+    path: Path
     rnodes: List[ResNode]
     resistors: List[Resistor]
 
     def rnodes_by_name(self, name: str) -> List[ResNode]:
         return [n for n in self.rnodes if n.name == name]
+
+
+@dataclass
+class CellExtData:
+    ext_data: ExtData
+    res_ext_data: Optional[ResExtData]
+
+
+@dataclass
+class MagicPEXRun:
+    run_dir: Path
+    cells: Dict[CellName, CellExtData]
