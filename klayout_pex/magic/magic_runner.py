@@ -78,6 +78,7 @@ select top cell
 extract path {run_dir_path}{halo_decl}
 extract all
 ext2spice cthresh {c_threshold}
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt"""
@@ -103,6 +104,7 @@ extresist all
 ext2spice cthresh {c_threshold}
 ext2spice rthresh {r_threshold}
 ext2spice extresist on
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt
@@ -130,6 +132,7 @@ extresist tolerance {tolerance}
 extresist all
 ext2spice rthresh {r_threshold}
 ext2spice extresist on
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt
