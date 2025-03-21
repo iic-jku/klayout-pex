@@ -67,7 +67,13 @@ from .log import (
     rule
 )
 from .magic.magic_ext_file_parser import parse_magic_pex_run
-from .magic.magic_runner import MagicPEXMode, run_magic, prepare_magic_script
+from .magic.magic_runner import (
+    MagicPEXMode,
+    MagicShortMode,
+    MagicMergeMode,
+    run_magic,
+    prepare_magic_script,
+)
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
 from .rcx25.extractor import RCExtractor, ExtractionResults
@@ -277,6 +283,12 @@ class KpexCLI:
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) "
                                       "(MAGIC command: extract halo <value>) (default is no custom halo)")
+        group_magic.add_argument("--magic_short", dest='magic_short_mode',
+                                 default=MagicShortMode.DEFAULT, type=MagicShortMode, choices=list(MagicShortMode),
+                                 help=render_enum_help(topic='magic_short', enum_cls=MagicShortMode))
+        group_magic.add_argument("--magic_merge", dest='magic_merge_mode',
+                                 default=MagicMergeMode.DEFAULT, type=MagicMergeMode, choices=list(MagicMergeMode),
+                                 help=render_enum_help(topic='magic_merge', enum_cls=MagicMergeMode))
         group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
                                   help="Path to magic executable (default is '%(default)s')")
 
@@ -579,7 +591,9 @@ class KpexCLI:
                              c_threshold=args.magic_cthresh,
                              r_threshold=args.magic_rthresh,
                              tolerance=args.magic_tolerance,
-                             halo=args.magic_halo)
+                             halo=args.magic_halo,
+                             short_mode=args.magic_short_mode,
+                             merge_mode=args.magic_merge_mode)
 
         run_magic(exe_path=args.magic_exe_path,
                   magicrc_path=args.magicrc_path,
