@@ -136,8 +136,8 @@ def test_single_plate_100um_x_100um_li1_over_substrate():
     # C0 PLATE VSUBS 0.38618p
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;PLATE;VSUBS;386.179"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;PLATE;VSUBS;386.179;"""
         )
 
 
@@ -159,10 +159,10 @@ def test_overlap_plates_100um_x_100um_li1_m1():
     #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;LOWER;VSUBS;386.179
-C2;UPPER;VSUBS;205.619
-C3;LOWER;UPPER;294.867"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;LOWER;VSUBS;386.179;
+C2;UPPER;VSUBS;205.619;
+C3;LOWER;UPPER;294.867;"""
     )
 
 @allure.parent_suite(parent_suite)
@@ -194,17 +194,17 @@ def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
 
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;VSUBS;li1;386.179
-C2;VSUBS;met1;205.619
-C3;VSUBS;met2;51.574
-C4;VSUBS;met3;136.063
-C5;li1;met1;294.867
-C6;li1;met2;99.518
-C7;met1;met2;680.769
-C8;li1;met3;6.013
-C9;met1;met3;0.016
-C10;met2;met3;0.056"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;VSUBS;li1;386.179;
+C2;VSUBS;met1;205.619;
+C3;VSUBS;met2;51.574;
+C4;VSUBS;met3;136.063;
+C5;li1;met1;294.867;
+C6;li1;met2;99.518;
+C7;met1;met2;680.769;
+C8;li1;met3;6.013;
+C9;met1;met3;0.016;
+C10;met2;met3;0.056;"""
     )
 
 
@@ -223,10 +223,10 @@ def test_sidewall_100um_x_100um_distance_200nm_li1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;B;VSUBS;8.231
-C2;A;VSUBS;8.231
-C3;A;B;7.5"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;B;VSUBS;8.231;
+C2;A;VSUBS;8.231;
+C3;A;B;7.5;"""
         )
 
 
@@ -245,10 +245,10 @@ def test_sidewall_net_uturn_l1_redux():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C1;VSUBS;12.588
-C2;C0;VSUBS;38.125
-C3;C0;C1;1.874"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;C1;VSUBS;12.588;
+C2;C0;VSUBS;38.125;
+C3;C0;C1;1.874;"""
         )
 
 
@@ -267,10 +267,10 @@ def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C1;VSUBS;0.087
-C2;C0;VSUBS;0.3
-C3;C0;C1;0.286"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;C1;VSUBS;0.087;
+C2;C0;VSUBS;0.3;
+C3;C0;C1;0.286;"""
         )
 
 
@@ -293,13 +293,13 @@ def test_near_body_shield_li1_m1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'near_body_shield_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;BOTTOM;VSUBS;405.081
-C2;BOTTOM;TOPB;215.972
-C3;BOTTOM;TOPA;215.972
-C4;TOPA;TOPB;0.503
-C5;TOPA;VSUBS;0.299
-C6;TOPB;VSUBS;0.299"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;BOTTOM;VSUBS;405.081;
+C2;BOTTOM;TOPB;215.972;
+C3;BOTTOM;TOPA;215.972;
+C4;TOPA;TOPB;0.503;
+C5;TOPA;VSUBS;0.299;
+C6;TOPB;VSUBS;0.299;"""
     )
 
 
@@ -315,8 +315,8 @@ def test_lateral_fringe_shield_by_same_polygon_li1():
     # C0 C0 VSUBS 6.41431f $ **FLOATING
     assert_expected_matches_obtained(
         'test_patterns', 'lateral_fringe_shield_by_same_polygon_li1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;C0;VSUBS;6.414"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;C0;VSUBS;6.414;"""
     )
 
 
@@ -337,10 +337,10 @@ def test_sideoverlap_simple_plates_li1_m1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;VSUBS;li1;7.931
-C2;VSUBS;met1;248.899
-C3;li1;met1;0.157"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;VSUBS;li1;7.931;
+C2;VSUBS;met1;248.899;
+C3;li1;met1;0.157;"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -366,13 +366,13 @@ def test_sideoverlap_shielding_simple_plates_li1_m1_m2():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_shielding_simple_plates_li1_m1_m2.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;VSUBS;li1;11.793
-C2;VSUBS;met1;57.99
-C3;li1;met1;15.71
-C4;met1;met2;257.488
-C5;VSUBS;met2;5.291
-C6;li1;met2;0.152"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;VSUBS;li1;11.793;
+C2;VSUBS;met1;57.99;
+C3;li1;met1;15.71;
+C4;met1;met2;257.488;
+C5;VSUBS;met2;5.291;
+C6;li1;met2;0.152;"""
         )
 
 
@@ -405,26 +405,26 @@ def test_sideoverlap_plates_li1_m1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_plates_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994
-C2;LOWER_OutsideHalo;VSUBS;73.274
-C3;LOWER_PartialSideHaloOverlap_Separated;VSUBS;90.618
-C4;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.931
-C5;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.637
-C6;LOWER_FullHaloOverlap;VSUBS;177.601
-C7;UPPER;VSUBS;214.85
-C8;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991
-C9;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.159
-C10;LOWER_FullHaloOverlap;UPPER;262.817
-C11;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126
-C12;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063
-C13;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063
-C14;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101
-C15;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001
-C16;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248
-C17;LOWER_OutsideHalo;UPPER;0.076
-C18;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.261
-C19;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.149"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;
+C2;LOWER_OutsideHalo;VSUBS;73.274;
+C3;LOWER_PartialSideHaloOverlap_Separated;VSUBS;90.618;
+C4;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.931;
+C5;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.637;
+C6;LOWER_FullHaloOverlap;VSUBS;177.601;
+C7;UPPER;VSUBS;214.85;
+C8;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;
+C9;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.159;
+C10;LOWER_FullHaloOverlap;UPPER;262.817;
+C11;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;
+C12;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;
+C13;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;
+C14;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;
+C15;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
+C16;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;
+C17;LOWER_OutsideHalo;UPPER;0.076;
+C18;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.261;
+C19;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.149;"""
         )
 
 
@@ -442,10 +442,10 @@ def test_sideoverlap_fingered_li1_m1_patternA():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1_patternA.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;LOWER;VSUBS;5.9
-C2;UPPER;VSUBS;72.327
-C3;LOWER;UPPER;0.358"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;LOWER;VSUBS;5.9;
+C2;UPPER;VSUBS;72.327;
+C3;LOWER;UPPER;0.358;"""
         )
 
 
@@ -469,19 +469,19 @@ def test_sideoverlap_fingered_li1_m1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;8.16
-C2;LOWER_PartialSideHaloOverlap_Fingered3;VSUBS;8.164
-C3;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.884
-C4;LOWER_PartialSideHaloOverlap_Fingered4;VSUBS;5.889
-C5;UPPER;VSUBS;215.281
-C6;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.002
-C7;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.003
-C8;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.016
-C9;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.159
-C10;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.466
-C11;LOWER_PartialSideHaloOverlap_Fingered4;UPPER;0.358
-C12;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.244"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;8.16;
+C2;LOWER_PartialSideHaloOverlap_Fingered3;VSUBS;8.164;
+C3;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.884;
+C4;LOWER_PartialSideHaloOverlap_Fingered4;VSUBS;5.889;
+C5;UPPER;VSUBS;215.281;
+C6;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.002;
+C7;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.003;
+C8;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.016;
+C9;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.159;
+C10;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.466;
+C11;LOWER_PartialSideHaloOverlap_Fingered4;UPPER;0.358;
+C12;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.244;"""
         )
 
 
@@ -505,14 +505,14 @@ def test_sideoverlap_complex_li1_m1():
 
     assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_complex_li1_m1.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-C1;Complex_Shape_L;VSUBS;3.2
-C2;Complex_Shape_T;VSUBS;3.2
-C3;Complex_Shape_R;VSUBS;3.2
-C4;Complex_Shape_B;VSUBS;3.2
-C5;UPPER;VSUBS;13.019
-C6;Complex_Shape_B;UPPER;1.348
-C7;Complex_Shape_T;UPPER;0.065
-C8;Complex_Shape_R;UPPER;0.089
-C9;Complex_Shape_L;UPPER;0.249"""
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;Complex_Shape_L;VSUBS;3.2;
+C2;Complex_Shape_T;VSUBS;3.2;
+C3;Complex_Shape_R;VSUBS;3.2;
+C4;Complex_Shape_B;VSUBS;3.2;
+C5;UPPER;VSUBS;13.019;
+C6;Complex_Shape_B;UPPER;1.348;
+C7;Complex_Shape_T;UPPER;0.065;
+C8;Complex_Shape_R;UPPER;0.089;
+C9;Complex_Shape_L;UPPER;0.249;"""
         )
