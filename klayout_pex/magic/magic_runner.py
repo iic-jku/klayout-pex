@@ -41,7 +41,21 @@ class MagicPEXMode(StrEnum):
     CC = "CC"
     RC = "RC"
     R = "R"
-    DEFAULT = "CC"
+    DEFAULT = CC
+
+
+class MagicShortMode(StrEnum):
+    NONE = "none"
+    RESISTOR = "resistor"
+    VOLTAGE = "voltage"
+    DEFAULT = NONE
+
+
+class MagicMergeMode(StrEnum):
+    NONE = "none"                  # don't merge parallel devices
+    CONSERVATIVE = "conservative"  # merge devices with same L, W
+    AGGRESSIVE = "aggressive"      # merge devices with same L
+    DEFAULT = NONE
 
 
 def prepare_magic_script(gds_path: str,
@@ -53,7 +67,9 @@ def prepare_magic_script(gds_path: str,
                          c_threshold: float,
                          r_threshold: float,
                          tolerance: float,
-                         halo: Optional[float]):
+                         halo: Optional[float],
+                         short_mode: MagicShortMode,
+                         merge_mode: MagicMergeMode):
     gds_path = os.path.abspath(gds_path)
     run_dir_path = os.path.abspath(run_dir_path)
     output_netlist_path = os.path.abspath(output_netlist_path)
@@ -77,7 +93,10 @@ cellname rename {cell_name}_flat {cell_name}
 select top cell
 extract path {run_dir_path}{halo_decl}
 extract all
+ext2spice short {short_mode}
+ext2spice merge {merge_mode}
 ext2spice cthresh {c_threshold}
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt"""
@@ -100,9 +119,12 @@ ext2sim labels on
 ext2sim
 extresist tolerance {tolerance}
 extresist all
+ext2spice short {short_mode}
+ext2spice merge {merge_mode}
 ext2spice cthresh {c_threshold}
 ext2spice rthresh {r_threshold}
 ext2spice extresist on
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt
@@ -128,8 +150,11 @@ ext2sim labels on
 ext2sim
 extresist tolerance {tolerance}
 extresist all
+ext2spice short {short_mode}
+ext2spice merge {merge_mode}
 ext2spice rthresh {r_threshold}
 ext2spice extresist on
+ext2spice subcircuits top on
 ext2spice format ngspice
 ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt

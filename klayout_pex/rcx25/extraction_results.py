@@ -26,12 +26,10 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
+from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal
+from .types import NetName, LayerName, CellName
 import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
-
-
-NetName = str
-LayerName = str
-CellName = str
+from ..log import error
 
 
 @dataclass
@@ -87,6 +85,16 @@ class SideOverlapKey:
         return f"{self.layer_inside}({self.net_inside})-"\
                f"{self.layer_outside}({self.net_outside})"
 
+    def __post_init__(self):
+        if self.layer_inside is None:
+            raise ValueError("layer_inside cannot be None")
+        if self.net_inside is None:
+            raise ValueError("net_inside cannot be None")
+        if self.layer_outside is None:
+            raise ValueError("layer_outside cannot be None")
+        if self.net_outside is None:
+            raise ValueError("net_outside cannot be None")
+
 
 @dataclass
 class SideOverlapCap:
@@ -105,6 +113,12 @@ class NetCoupleKey:
     def __repr__(self) -> str:
         return f"{self.net1}-{self.net2}"
 
+    def __post_init__(self):
+        if self.net1 is None:
+            raise ValueError("net1 cannot be None")
+        if self.net2 is None:
+            raise ValueError("net2 cannot be None")
+
     # NOTE: we norm net names alphabetically
     def normed(self) -> NetCoupleKey:
         if self.net1 < self.net2:
@@ -116,42 +130,105 @@ class NetCoupleKey:
 @dataclass
 class ExtractionSummary:
     capacitances: Dict[NetCoupleKey, float]
+    resistances: Dict[NetCoupleKey, float]
 
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
         merged_capacitances = defaultdict(float)
+        merged_resistances = defaultdict(float)
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
-        return ExtractionSummary(merged_capacitances)
+            for couple_key, res in s.resistances.items():
+                merged_resistances[couple_key.normed()] += res
+        return ExtractionSummary(capacitances=merged_capacitances,
+                                 resistances=merged_resistances)
 
 
 @dataclass
 class CellExtractionResults:
     cell_name: CellName
 
-    overlap_coupling: Dict[OverlapKey, OverlapCap] = field(default_factory=dict)
-    sidewall_table: Dict[SidewallKey, SidewallCap] = field(default_factory=dict)
-    sideoverlap_table: Dict[SideOverlapKey, SideOverlapCap] = field(default_factory=dict)
+    overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
+    sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
+    sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
+
+    resistor_network: MultiLayerResistanceNetwork = \
+        field(default_factory=lambda: MultiLayerResistanceNetwork(resistor_networks_by_layer={}, via_resistors=[]))
+
+    def add_overlap_cap(self, cap: OverlapCap):
+        self.overlap_table[cap.key].append(cap)
+
+    def add_sidewall_cap(self, cap: SidewallCap):
+        self.sidewall_table[cap.key].append(cap)
+
+    def add_sideoverlap_cap(self, cap: SideOverlapCap):
+        self.sideoverlap_table[cap.key].append(cap)
 
     def summarize(self) -> ExtractionSummary:
-        overlap_summary = ExtractionSummary({
-            NetCoupleKey(key.net_top, key.net_bot): cap.cap_value
-            for key, cap in self.overlap_coupling.items()
-        })
+        normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.overlap_table.items():
+            normalized_key = NetCoupleKey(key.net_bot, key.net_top).normed()
+            normalized_overlap_table[normalized_key] += sum((e.cap_value for e in entries))
+        overlap_summary = ExtractionSummary(capacitances=normalized_overlap_table,
+                                            resistances={})
 
-        sidewall_summary = ExtractionSummary({
-            NetCoupleKey(key.net1, key.net2): cap.cap_value
-            for key, cap in self.sidewall_table.items()
-        })
+        normalized_sidewall_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.sidewall_table.items():
+            normalized_key = NetCoupleKey(key.net1, key.net2).normed()
+            normalized_sidewall_table[normalized_key] += sum((e.cap_value for e in entries))
+        sidewall_summary = ExtractionSummary(capacitances=normalized_sidewall_table,
+                                             resistances={})
 
-        sideoverlap_summary = ExtractionSummary({
-            NetCoupleKey(key.net_inside, key.net_outside): cap.cap_value
-            for key, cap in self.sideoverlap_table.items()
-        })
+        normalized_sideoverlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, entries in self.sideoverlap_table.items():
+            normalized_key = NetCoupleKey(key.net_inside, key.net_outside).normed()
+            normalized_sideoverlap_table[normalized_key] += sum((e.cap_value for e in entries))
+        sideoverlap_summary = ExtractionSummary(capacitances=normalized_sideoverlap_table,
+                                                resistances={})
+
+        normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        for via_resistor in self.resistor_network.via_resistors:
+            key1: str = ''
+            match via_resistor.bottom:
+                case None:
+                    key1 = '__UNKNOWN__'
+                case ViaJunction():
+                    if via_resistor.bottom.network is None: # TODO: happened for ptap cell (VSS)!
+                        error(f"Bottom net is None: {via_resistor}")
+                        continue
+                    key1 = via_resistor.bottom.network.node_names[via_resistor.bottom.node_id]
+                case DeviceTerminal():
+                    key1 = via_resistor.bottom.device_terminal.net_name
+                case _:
+                    raise NotImplementedError("unexpected type")
+            if via_resistor.top.network is None:
+                error(f"Top net is None: {via_resistor}")
+                continue
+            key2 = via_resistor.top.network.node_names[via_resistor.top.node_id]
+            normalized_key = NetCoupleKey(key1, key2).normed()
+            normalized_resistance_table[normalized_key] += via_resistor.resistance
+        for layer_name, networks in self.resistor_network.resistor_networks_by_layer.items():
+            for network in networks.networks:
+                visited_resistors: Set[Conductance] = set()
+                for node_id, resistors in network.node_to_s.items():
+                    node_name = network.node_names[node_id]
+                    for conductance, other_node_id in resistors:
+                        if conductance in visited_resistors:
+                            continue  # we don't want to add it twice, only once per direction!
+                        visited_resistors.add(conductance)
+
+                        other_node_name = network.node_names[other_node_id]
+                        ohm = networks.layer_sheet_resistance / 1000.0 / conductance.cond
+                        normalized_key = NetCoupleKey(node_name, other_node_name).normed()
+                        normalized_resistance_table[normalized_key] += ohm
+
+        resistance_summary = ExtractionSummary(capacitances={},
+                                                resistances=normalized_resistance_table)
 
         return ExtractionSummary.merged([
-            overlap_summary, sidewall_summary, sideoverlap_summary
+            overlap_summary, sidewall_summary, sideoverlap_summary,
+            resistance_summary
         ])
 
 

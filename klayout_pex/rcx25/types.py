@@ -1,9 +1,10 @@
+#! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
 # SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
-# This file is part of KPEX 
+# This file is part of KPEX
 # (see https://github.com/martinjankoehler/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,4 +22,22 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-__version__ = "0.2.0"
+
+from enum import IntEnum
+from dataclasses import dataclass
+from typing import *
+
+import klayout.db as kdb
+
+
+NetName = str
+LayerName = str
+CellName = str
+
+ChildIndex = int
+
+PolygonNeighborhood = Dict[ChildIndex, List[kdb.PolygonWithProperties]]
+
+EdgeInterval = Tuple[float, float]
+EdgeDistance = float
+EdgeNeighborhood = List[Tuple[EdgeInterval, Dict[ChildIndex, List[kdb.PolygonWithProperties]]]]

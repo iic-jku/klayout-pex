@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
-# This file is part of KPEX 
+# This file is part of KPEX
 # (see https://github.com/martinjankoehler/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,4 +21,30 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-__version__ = "0.2.0"
+
+from enum import StrEnum
+
+
+class PEXMode(StrEnum):
+    CC = "CC"
+    RC = "RC"
+    R = "R"
+    DEFAULT = "CC"
+
+    def need_capacitance(self) -> bool:
+        match self:
+            case PEXMode.CC | PEXMode.RC | PEXMode.DEFAULT:
+                return True
+            case PEXMode.R:
+                return False
+            case _:
+                raise NotImplementedError()
+
+    def need_resistance(self) -> bool:
+        match self:
+            case PEXMode.R | PEXMode.RC:
+                return True
+            case PEXMode.CC | PEXMode.DEFAULT:
+                return False
+            case _:
+                raise NotImplementedError()

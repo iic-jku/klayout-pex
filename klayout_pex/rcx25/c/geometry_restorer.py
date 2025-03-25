@@ -1,9 +1,10 @@
+#! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
 # SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
-# This file is part of KPEX 
+# This file is part of KPEX
 # (see https://github.com/martinjankoehler/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,4 +22,25 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-__version__ = "0.2.0"
+
+import klayout.db as kdb
+
+from klayout_pex.rcx25.types import EdgeInterval
+
+
+class GeometryRestorer:
+    def __init__(self, transformation: kdb.IMatrix3d):
+        self.transformation = transformation
+
+    def restore_edge_interval(self, edge_interval: EdgeInterval) -> kdb.Edge:
+        return self.transformation * kdb.Edge(kdb.Point(edge_interval[0], 0),
+                                              kdb.Point(edge_interval[1], 0))
+
+    def restore_edge(self, edge: kdb.Edge) -> kdb.Edge:
+        return self.transformation * edge
+
+    def restore_polygon(self, polygon: kdb.Polygon) -> kdb.Polygon:
+        return self.transformation * polygon
+
+    def restore_region(self, region: kdb.Region) -> kdb.Region:
+        return region.transformed(self.transformation)

@@ -120,11 +120,11 @@ class FasterCapInputBuilder:
         for diel_name, diel_k in self.tech_info.dielectric_by_name.items():
             model_builder.add_material(name=diel_name, k=diel_k)
 
-        circuit = netlist.circuit_by_name(self.pex_context.top_cell.name)
+        circuit = netlist.circuit_by_name(self.pex_context.annotated_top_cell.name)
         # https://www.klayout.de/doc-qt5/code/class_Circuit.html
         if not circuit:
             circuits = [c.name for c in netlist.each_circuit()]
-            raise Exception(f"Expected circuit called {self.pex_context.top_cell.name} in extracted netlist, "
+            raise Exception(f"Expected circuit called {self.pex_context.annotated_top_cell.name} in extracted netlist, "
                             f"only available circuits are: {circuits}")
 
         diffusion_regions: List[kdb.Region] = []
