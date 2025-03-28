@@ -29,6 +29,10 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .util.multiple_choice import MultipleChoicePattern
+from .log import (
+    warning
+)
+
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
@@ -218,6 +222,28 @@ class TechInfo:
         return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
                 for lyr in self.process_metal_layers}
 
+    def gds_pair(self, layer_name) -> Optional[GDSPair]:
+        gds_pair = self.gds_pair_for_computed_layer_name.get(layer_name, None)
+        if not gds_pair:
+            gds_pair = self.gds_pair_for_layer_name.get(layer_name, None)
+        if not gds_pair:
+            warning(f"Can't find GDS pair for layer {layer_name}")
+            return None
+        return gds_pair
+
+    @cached_property
+    def bottom_and_top_layer_name_by_via_layer_name(self) -> Dict[str, Tuple[str, str]]:
+        d = {}
+        for metal_layer in self.process_metal_layers:
+            layer_name = metal_layer.name
+            gds_pair = self.gds_pair(layer_name)
+            canonical_layer_name = self.canonical_layer_name_by_gds_pair[gds_pair]
+
+            if metal_layer.metal_layer.HasField('contact_above'):
+                contact = metal_layer.metal_layer.contact_above
+                d[contact.name] = (canonical_layer_name, contact.metal_above)
+
+        return d
     #--------------------------------
 
     @cached_property

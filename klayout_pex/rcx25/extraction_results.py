@@ -229,7 +229,7 @@ class CellExtractionResults:
                         normalized_resistance_table[normalized_key] += ohm
 
         resistance_summary = ExtractionSummary(capacitances={},
-                                                resistances=normalized_resistance_table)
+                                               resistances=normalized_resistance_table)
 
         return ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary,
