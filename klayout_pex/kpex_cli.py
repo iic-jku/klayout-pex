@@ -423,9 +423,9 @@ class KpexCLI:
                                                                  f"{args.effective_cell_name}_dummy_schematic.spice")
                     with open(args.effective_schematic_path, 'w') as f:
                         f.writelines([
-                            f".subckt {args.effective_cell_name} VDD VSS",
-                            '.ends',
-                            '.end'
+                            f".subckt {args.effective_cell_name} VDD VSS\n",
+                            '.ends\n',
+                            '.end\n'
                         ])
 
         try:
