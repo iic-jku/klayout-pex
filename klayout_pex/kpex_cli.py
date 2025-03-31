@@ -317,6 +317,10 @@ class KpexCLI:
         args.tech_pbjson_path = pdk_config.tech_pb_json_path
         args.lvs_script_path = pdk_config.pex_lvs_script_path
 
+        def input_file_stem(path: str):
+            # could be *.gds, or *.gds.gz, so remove all extensions
+            return os.path.basename(path).split(sep='.')[0]
+
         if not os.path.isfile(args.klayout_exe_path):
             path = shutil.which(args.klayout_exe_path)
             if not path:
@@ -362,7 +366,11 @@ class KpexCLI:
                     if is_only_top_cell:
                         info(f"Found cell {args.cell_name} in GDS {args.gds_path} (only top cell)")
                     else:  # there are other cells => extract the top cell to a tmp layout
-                        args.effective_gds_path = os.path.join(args.output_dir_path, f"{args.cell_name}_exported.gds.gz")
+                        run_dir_id = f"{input_file_stem(args.gds_path)}__{args.effective_cell_name}"
+                        args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
+                        os.makedirs(args.output_dir_path, exist_ok=True)
+                        args.effective_gds_path = os.path.join(args.output_dir_path,
+                                                               f"{args.cell_name}_exported.gds.gz")
                         info(f"Found cell {args.cell_name} in GDS {args.gds_path}, "
                              f"but it is not the only top cell, "
                              f"so layout is exported to: {args.effective_gds_path}")
@@ -379,7 +387,8 @@ class KpexCLI:
                               f"Use --cell to specify the cell")
                         found_errors = True
 
-                args.effective_gds_path = args.gds_path
+                if not hasattr(args, 'effective_gds_path'):
+                    args.effective_gds_path = args.gds_path
         else:
             info(f"LVSDB input file passed, bypassing LVS")
             args.input_mode = InputMode.LVSDB
@@ -394,10 +403,6 @@ class KpexCLI:
                 lvsdb.read(args.lvsdb_path)
                 top_cell: kdb.Cell = lvsdb.internal_top_cell()
                 args.effective_cell_name = top_cell.name
-
-        def input_file_stem(path: str):
-            # could be *.gds, or *.gds.gz, so remove all extensions
-            return os.path.basename(path).split(sep='.')[0]
 
         if hasattr(args, 'effective_cell_name'):
             run_dir_id: str
