@@ -59,6 +59,7 @@ class NetlistJSONWriter:
                 'direction': 'input',
                 'bits': [bit]
             }
+
         return port_dict
 
     def dict_for_cells(self, circuit: kdb.Circuit) -> Dict[str, Any]:
@@ -70,6 +71,30 @@ class NetlistJSONWriter:
         vss_aliases = ('VSS', 'VEE')
 
         cells_dict = {}
+
+        for sc in circuit.each_subcircuit():
+            subcircuit: kdb.Circuit = sc.circuit_ref()
+
+            port_directions = {}
+            connections = {}
+
+            for pin in subcircuit.each_pin():
+                pin: kdb.Pin
+                net = sc.net_for_pin(pin.id())
+                pin_name = net.expanded_name()
+                pin_text = f"{pin.id()}={pin_name}"
+                port_directions[pin_text] = 'input'
+                connections[pin_text] = [self._get_or_create_id(net)]
+
+            cells_dict[f"{subcircuit.name}{subcircuit.cell_index}"] = {
+                'hide_name': 1,
+                'type': f"${subcircuit.name}",
+                'port_directions': port_directions,
+                'connections': connections,
+                'attributes': {
+                }
+            }
+
         for d in circuit.each_device():
             d: kdb.Device
             # https://www.klayout.de/doc-qt5/code/class_Device.html
@@ -106,6 +131,8 @@ class NetlistJSONWriter:
                         'value': f"{round(ohm, 3)}"
                     }
                 }
+            else:
+                raise NotImplementedError(f"Not yet implemented: {dc}")
 
         gnd_counter = 0
         for gnd_name in ('VSUBS', 'GND'):
