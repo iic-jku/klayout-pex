@@ -28,7 +28,6 @@ from functools import cached_property
 import tempfile
 from typing import *
 
-from klayout.dbcore import PolygonWithProperties
 from rich.pretty import pprint
 
 import klayout.db as kdb
@@ -338,7 +337,7 @@ class KLayoutExtractionContext:
                 for sl in lyr.source_layers:
                     iter, transform = sl.region.begin_shapes_rec()
                     while not iter.at_end():
-                        p = PolygonWithProperties(iter.shape().polygon, {'net': iter.shape().property('net')})
+                        p = kdb.PolygonWithProperties(iter.shape().polygon, {'net': iter.shape().property('net')})
                         shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
                                       iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
                                       p)
