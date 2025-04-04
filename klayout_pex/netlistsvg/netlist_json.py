@@ -173,6 +173,6 @@ class NetlistJSONWriter:
                    netlist: kdb.Netlist,
                    top_circuit: kdb.Circuit,
                    output_path: str):
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             d = self.netlist_json_dict(netlist=netlist, top_circuit=top_circuit)
             json.dump(d, f, indent=4)

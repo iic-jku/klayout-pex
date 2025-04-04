@@ -83,7 +83,7 @@ def run_fastcap(exe_path: str,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True,
                             text=True)
-    with open(log_path, 'w') as f:
+    with open(log_path, 'w', encoding='utf-8') as f:
         while True:
             line = proc.stdout.readline()
             if not line:
