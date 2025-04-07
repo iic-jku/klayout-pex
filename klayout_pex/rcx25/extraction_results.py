@@ -26,7 +26,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
-from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal
+from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal, Conductance
 from .types import NetName, LayerName, CellName
 import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
 from ..log import error
