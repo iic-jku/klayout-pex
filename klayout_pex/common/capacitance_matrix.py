@@ -59,7 +59,7 @@ class CapacitanceMatrix:
                                      rows=rows)
 
     def write_csv(self, output_path: str, separator: str = ';'):
-        with open(output_path, 'w') as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             header_line = separator.join(self.conductor_names)
             f.write(header_line)
             f.write('\n')

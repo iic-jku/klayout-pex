@@ -278,9 +278,8 @@ class TechInfo:
     def sidewall_cap_by_layer_name(self) -> Dict[str, process_parasitics_pb2.CapacitanceInfo.SidewallCapacitance]:
         return {sc.layer_name: sc for sc in self.tech.process_parasitics.capacitance.sidewalls}
 
-    @classmethod
     @property
-    def internal_substrate_layer_name(cls) -> str:
+    def internal_substrate_layer_name(self) -> str:
         return 'VSUBS'
 
     @cached_property

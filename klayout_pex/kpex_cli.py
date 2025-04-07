@@ -426,7 +426,7 @@ class KpexCLI:
                     info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
                     args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                                  f"{args.effective_cell_name}_dummy_schematic.spice")
-                    with open(args.effective_schematic_path, 'w') as f:
+                    with open(args.effective_schematic_path, 'w', encoding='utf-8') as f:
                         f.writelines([
                             f".subckt {args.effective_cell_name} VDD VSS\n",
                             '.ends\n',
@@ -690,7 +690,7 @@ class KpexCLI:
                                 report_path=report_path)
         extraction_results = extractor.extract()
 
-        with open(netlist_csv_path, 'w') as f:
+        with open(netlist_csv_path, 'w', encoding='utf-8') as f:
             summary = extraction_results.summarize()
 
             f.write('Device;Net1;Net2;Capacitance [fF];Resistance [Ω]\n')

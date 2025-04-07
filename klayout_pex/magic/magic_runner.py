@@ -160,7 +160,7 @@ ext2spice -p {run_dir_path} -o {output_netlist_path}
 quit -noprompt
 """
 
-    with open(script_path, 'w') as f:
+    with open(script_path, 'w', encoding='utf-8') as f:
         f.write(script)
 
 def run_magic(exe_path: str,
@@ -189,7 +189,7 @@ def run_magic(exe_path: str,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True,
                             text=True)
-    with open(log_path, 'w') as f:
+    with open(log_path, 'w', encoding='utf-8') as f:
         while True:
             line = proc.stdout.readline()
             if not line:

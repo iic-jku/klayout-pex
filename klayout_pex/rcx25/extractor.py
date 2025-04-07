@@ -100,8 +100,18 @@ class RCExtractor:
                                                dbu=self.pex_context.dbu)
         cell_extraction_results = CellExtractionResults(cell_name=cell_name)
 
-        self.extract_cell(results=cell_extraction_results,
-                          report=extraction_report)
+        # Explicitly log the stacktrace here, because otherwise Exceptions 
+        # raised in the callbacks of *NeighborhoodVisitors can cause RuntimeErrors
+        # that are not traceable beyond the Region.complex_op() calls
+        try:
+            self.extract_cell(results=cell_extraction_results,
+                              report=extraction_report)
+        except RuntimeError as e:
+            import traceback
+            print(f"Caught a RuntimeError: {e}")
+            traceback.print_exc()
+            raise
+
         extraction_results.cell_extraction_results[cell_name] = cell_extraction_results
 
         extraction_report.save(self.report_path)

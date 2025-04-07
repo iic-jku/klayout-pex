@@ -818,7 +818,7 @@ class FasterCapModelGenerator:
                 lst_file.append(f"C {fn}  {'%.12g' % k_outside}  0 0 0{collation_operator}")
 
         subproc(lst_fn)
-        with open(lst_fn, "w") as f:
+        with open(lst_fn, 'w', encoding='utf-8') as f:
             f.write('\n'.join(lst_file))
             f.write('\n')
 
@@ -831,7 +831,7 @@ class FasterCapModelGenerator:
                              cond_name: Optional[str],
                              rename_conductor: bool):
         subproc(output_path)
-        with open(output_path, "w") as f:
+        with open(output_path, 'w', encoding='utf-8') as f:
             f.write(f"0 GEO File\n")
             for t in data:
                 f.write(f"T {cond_number}")
@@ -981,7 +981,7 @@ class FasterCapModelGenerator:
             return
 
         subproc(file_name)
-        with open(file_name, "w") as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write("solid stl\n")
             for t in tris:
                 f.write("  facet normal 0 0 0\n")
