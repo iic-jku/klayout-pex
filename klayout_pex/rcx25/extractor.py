@@ -51,7 +51,7 @@ from .r.resistor_network import (
 )
 
 
-class RCExtractor:
+class RCX25Extractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
                  pex_mode: PEXMode,

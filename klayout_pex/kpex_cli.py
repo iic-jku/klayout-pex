@@ -77,7 +77,7 @@ from .magic.magic_runner import (
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
-from .rcx25.extractor import RCExtractor, ExtractionResults
+from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.pex_mode import PEXMode
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -676,13 +676,13 @@ class KpexCLI:
         args.rcx25d_delaunay_amax = 0
         args.rcx25d_delaunay_b = 0.5
 
-        extractor = RCExtractor(pex_context=pex_context,
-                                pex_mode=args.pex_mode,
-                                delaunay_amax=args.rcx25d_delaunay_amax,
-                                delaunay_b=args.rcx25d_delaunay_b,
-                                scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
-                                tech_info=tech_info,
-                                report_path=report_path)
+        extractor = RCX25Extractor(pex_context=pex_context,
+                                   pex_mode=args.pex_mode,
+                                   delaunay_amax=args.rcx25d_delaunay_amax,
+                                   delaunay_b=args.rcx25d_delaunay_b,
+                                   scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
+                                   tech_info=tech_info,
+                                   report_path=report_path)
         extraction_results = extractor.extract()
 
         with open(netlist_csv_path, 'w', encoding='utf-8') as f:
