@@ -105,7 +105,7 @@ class SideOverlapCap:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class NetCoupleKey:
     net1: NetName
     net2: NetName
