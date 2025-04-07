@@ -119,7 +119,7 @@ class PDK(StrEnum):
             case PDK.IHP_SG13G2:
                 return PDKConfig(
                     name=self,
-                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg130g2.lvs'),
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg13g2.lvs'),
                     tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
                 )
             case PDK.SKY130A:
