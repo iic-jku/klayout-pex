@@ -43,6 +43,7 @@ from typing import *
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from .env import EnvVar, Env
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
@@ -130,16 +131,13 @@ class PDK(StrEnum):
                 )
 
 
+
 class KpexCLI:
     @staticmethod
-    def parse_args(arg_list: List[str] = None) -> argparse.Namespace:
+    def parse_args(arg_list: List[str],
+                   env: Env) -> argparse.Namespace:
         # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
-        epilog = """
-| Variable | Example              | Description                             |
-| -------- | -------------------- | --------------------------------------- |
-| PDKPATH  | (e.g. $HOME/.volare) | Optional (required for default magicrc) |
-| PDK      | (e.g. sky130A)       | Optional (required for default magicrc) |
-"""
+        epilog = EnvVar.help_epilog_table()
         epilog_md = rich.console.Group(
             rich.text.Text('Environmental variables:', style='argparse.groups'),
             rich.markdown.Markdown(epilog, style='argparse.text')
@@ -158,13 +156,6 @@ class KpexCLI:
         group_special.add_argument("--threads", dest='num_threads', type=int,
                                    default=os.cpu_count() * 4,
                                    help="number of threads (e.g. for FasterCap) (default is %(default)s)")
-
-        klayout_exe_default = 'klayout'
-        if os.name == 'nt':
-            klayout_exe_default = 'klayout_app'
-        
-        group_special.add_argument('--klayout', dest='klayout_exe_path', default=klayout_exe_default,
-                                   help="Path to klayout executable (default is '%(default)s')")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
         group_pex.add_argument("--pdk", dest="pdk", required=True,
@@ -289,8 +280,6 @@ class KpexCLI:
         group_magic.add_argument("--magic_merge", dest='magic_merge_mode',
                                  default=MagicMergeMode.DEFAULT, type=MagicMergeMode, choices=list(MagicMergeMode),
                                  help=render_enum_help(topic='magic_merge', enum_cls=MagicMergeMode))
-        group_magic.add_argument('--magic_exe', dest='magic_exe_path', default='magic',
-                                  help="Path to magic executable (default is '%(default)s')")
 
         group_25d = main_parser.add_argument_group("2.5D options")
         group_25d.add_argument("--mode", dest='pex_mode',
@@ -307,6 +296,13 @@ class KpexCLI:
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+
+        # environmental variables and their defaults
+        args.fastcap_exe_path = env[EnvVar.FASTCAP_EXE]
+        args.fastercap_exe_path = env[EnvVar.FASTERCAP_EXE]
+        args.klayout_exe_path = env[EnvVar.KLAYOUT_EXE]
+        args.magic_exe_path = env[EnvVar.MAGIC_EXE]
+
         return args
 
     @staticmethod
@@ -506,7 +502,6 @@ class KpexCLI:
         info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
         os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
 
-        exe_path = "FasterCap"
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Output.txt")
         raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Result_Matrix_Raw.csv")
         avg_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Result_Matrix_Avg.csv")
@@ -516,7 +511,7 @@ class KpexCLI:
                                                  f"{args.effective_cell_name}_FasterCap_Expanded_Netlist.csv")
         reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Reduced_Netlist.cir")
 
-        run_fastercap(exe_path=exe_path,
+        run_fastercap(exe_path=args.fastercap_exe_path,
                       lst_file_path=lst_file,
                       log_path=log_path,
                       tolerance=args.fastercap_tolerance,
@@ -631,7 +626,7 @@ class KpexCLI:
                                pex_context: KLayoutExtractionContext,
                                lst_file: str):
         rule('FastCap2 Execution')
-        exe_path = "fastcap"
+
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
         raw_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Raw.csv")
         avg_csv_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Result_Matrix_Avg.csv")
@@ -640,7 +635,7 @@ class KpexCLI:
         reduced_netlist_path = os.path.join(args.output_dir_path,
                                             f"{args.effective_cell_name}_FastCap2_Reduced_Netlist.cir")
 
-        run_fastcap(exe_path=exe_path,
+        run_fastcap(exe_path=args.fastcap_exe_path,
                     lst_file_path=lst_file,
                     log_path=log_path)
 
@@ -824,7 +819,8 @@ class KpexCLI:
             rule('Command line arguments')
             subproc(' '.join(map(shlex.quote, sys.argv)))
 
-        args = self.parse_args(argv[1:])
+        env = Env.from_os_environ()
+        args = self.parse_args(arg_list=argv[1:], env=env)
 
         os.makedirs(args.output_dir_base_path, exist_ok=True)
         self.setup_logging(args)
