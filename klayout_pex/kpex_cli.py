@@ -77,7 +77,8 @@ from .magic.magic_runner import (
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .pdk_config import PDKConfig
-from .rcx25.extractor import RCExtractor, ExtractionResults
+from .rcx25.extractor import RCX25Extractor, ExtractionResults
+from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .tech_info import TechInfo
 from .util.multiple_choice import MultipleChoicePattern
@@ -670,39 +671,57 @@ class KpexCLI:
                              pex_context: KLayoutExtractionContext,
                              tech_info: TechInfo,
                              report_path: str,
-                             netlist_csv_path: str):
+                             netlist_csv_path: Optional[str],
+                             expanded_netlist_path: Optional[str]):
         # TODO: make this separatly configurable
         #       for now we use 0
         args.rcx25d_delaunay_amax = 0
         args.rcx25d_delaunay_b = 0.5
 
-        extractor = RCExtractor(pex_context=pex_context,
-                                pex_mode=args.pex_mode,
-                                delaunay_amax=args.rcx25d_delaunay_amax,
-                                delaunay_b=args.rcx25d_delaunay_b,
-                                scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
-                                tech_info=tech_info,
-                                report_path=report_path)
+        extractor = RCX25Extractor(pex_context=pex_context,
+                                   pex_mode=args.pex_mode,
+                                   delaunay_amax=args.rcx25d_delaunay_amax,
+                                   delaunay_b=args.rcx25d_delaunay_b,
+                                   scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
+                                   tech_info=tech_info,
+                                   report_path=report_path)
         extraction_results = extractor.extract()
 
-        with open(netlist_csv_path, 'w', encoding='utf-8') as f:
-            summary = extraction_results.summarize()
+        if netlist_csv_path is not None:
+            # TODO: merge this with klayout_pex/klayout/netlist_csv.py
 
-            f.write('Device;Net1;Net2;Capacitance [fF];Resistance [Ω]\n')
-            for idx, (key, cap_value) in enumerate(summary.capacitances.items()):
-                # f.write(f"C{idx + 1};{key.net1};{key.net2};{cap_value / 1e15};{round(cap_value, 3)}\n")
-                f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)};\n")
-            for idx, (key, res_value) in enumerate(summary.resistances.items()):
-                f.write(f"R{idx + 1};{key.net1};{key.net2};;{round(res_value, 3)}\n")
+            with open(netlist_csv_path, 'w', encoding='utf-8') as f:
+                summary = extraction_results.summarize()
 
-        rule("kpex/2.5D extracted netlist (CSV format):")
-        with open(netlist_csv_path, 'r') as f:
-            for line in f.readlines():
-                subproc(line[:-1])  # abusing subproc, simply want verbatim
+                f.write('Device;Net1;Net2;Capacitance [fF];Resistance [Ω]\n')
+                for idx, (key, cap_value) in enumerate(sorted(summary.capacitances.items())):
+                    f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)};\n")
+                for idx, (key, res_value) in enumerate(sorted(summary.resistances.items())):
+                    f.write(f"R{idx + 1};{key.net1};{key.net2};;{round(res_value, 3)}\n")
 
-        rule("Extracted netlist CSV")
-        subproc(f"{netlist_csv_path}")
+            rule('kpex/2.5D extracted netlist (CSV format)')
+            with open(netlist_csv_path, 'r') as f:
+                for line in f.readlines():
+                    subproc(line[:-1])  # abusing subproc, simply want verbatim
 
+            rule('Extracted netlist CSV')
+            subproc(f"{netlist_csv_path}")
+
+        if expanded_netlist_path is not None:
+            rule('kpex/2.5D extracted netlist (SPICE format)')
+            netlist_expander = RCX25NetlistExpander()
+            expanded_netlist = netlist_expander.expand(
+                extracted_netlist=pex_context.lvsdb.netlist(),
+                top_cell_name=pex_context.annotated_top_cell.name,
+                extraction_results=extraction_results,
+                blackbox_devices=args.blackbox_devices
+            )
+
+            spice_writer = kdb.NetlistSpiceWriter()
+            spice_writer.use_net_names = True
+            spice_writer.with_comments = False
+            expanded_netlist.write(expanded_netlist_path, spice_writer)
+            subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
         #       so that the marker browser could not load the report file
@@ -906,14 +925,18 @@ class KpexCLI:
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")
             report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
-            netlist_csv_path = os.path.abspath(os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_netlist.csv"))
+            netlist_csv_path = os.path.abspath(os.path.join(args.output_dir_path,
+                                                            f"{args.effective_cell_name}_k25d_pex_netlist.csv"))
+            netlist_spice_path = os.path.abspath(os.path.join(args.output_dir_path,
+                                                              f"{args.effective_cell_name}_k25d_pex_netlist.spice"))
 
             self._rcx25_extraction_results = self.run_kpex_2_5d_engine(  # NOTE: store for test case
                 args=args,
                 pex_context=pex_context,
                 tech_info=tech_info,
                 report_path=report_path,
-                netlist_csv_path=netlist_csv_path
+                netlist_csv_path=netlist_csv_path,
+                expanded_netlist_path=netlist_spice_path
             )
 
             self._rcx25_extracted_csv_path = netlist_csv_path

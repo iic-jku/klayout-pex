@@ -26,7 +26,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
-from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal
+from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal, Conductance
 from .types import NetName, LayerName, CellName
 import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
 from ..log import error
@@ -105,7 +105,7 @@ class SideOverlapCap:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class NetCoupleKey:
     net1: NetName
     net2: NetName
