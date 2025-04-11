@@ -92,7 +92,9 @@ def _extract_single_cell(*path_components) -> Tuple[CSVPath, PNGPath]:
               '--pdk', 'sky130A',
               '--gds', gds_path,
               '--out_dir', output_dir_path,
-              '--fastercap'])
+              '--fastercap',
+              '--ooc', '0',
+              '--diel', 'none'])
     assert cli.fastercap_extracted_csv_path is not None
     return cli.fastercap_extracted_csv_path, preview_png_path
 
@@ -131,5 +133,6 @@ def test_single_plate_100um_x_100um_li1_over_substrate():
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-Cext_0_1;VSUBS;PLATE;386.18"""
+Cext_0_1;VSUBS;PLATE;396.78
+Cext_1_1;PLATE;VSUBS;3.33"""
         )

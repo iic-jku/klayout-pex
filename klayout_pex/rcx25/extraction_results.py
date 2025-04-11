@@ -105,13 +105,18 @@ class SideOverlapCap:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=True)
 class NetCoupleKey:
     net1: NetName
     net2: NetName
 
     def __repr__(self) -> str:
         return f"{self.net1}-{self.net2}"
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, NetCoupleKey):
+            raise NotImplemented
+        return (self.net1.casefold(), self.net2.casefold()) < (other.net1.casefold(), other.net2.casefold())
 
     def __post_init__(self):
         if self.net1 is None:
