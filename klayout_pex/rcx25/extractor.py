@@ -395,11 +395,11 @@ class RCX25Extractor:
                                       ohm=r_via_ohm,
                                       comment=f"({len(matches_bottom)} bottom, {len(matches_top)} top)")
 
-                    match_top = matches_top[0] if len(matches_top) == 1 else (None, -1)
+                    match_top = matches_top[0] if len(matches_top) >= 1 else (None, -1)
 
                     bottom: ViaJunction | DeviceTerminal
                     if device_terminal is None:
-                        match_bottom = matches_bottom[0] if len(matches_bottom) == 1 else (None, -1)
+                        match_bottom = matches_bottom[0] if len(matches_bottom) >= 1 else (None, -1)
                         bottom = ViaJunction(layer_name=layer_name_bottom,
                                              network=match_bottom[0],
                                              node_id=match_bottom[1])
