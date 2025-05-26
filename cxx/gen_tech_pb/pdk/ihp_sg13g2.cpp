@@ -153,9 +153,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto topmet1_height   = met5_height + met5_thickness + topvia1_ncap_thickness;
     auto topmet2_height   = topmet1_height + topmet1_thickness + topvia2_thickness;
     
-    // METAL:                      name,      height,      thickness,      ref_below, ref_above
+    // METAL:                      name,      height,      thickness
     //-----------------------------------------------------------------------------------------------
-    auto poly = addMetalLayer(psi, "GatPoly", poly_height, poly_thickness, "fox",     "ild0");
+    auto poly = addMetalLayer(psi, "GatPoly", poly_height, poly_thickness);
     // thickness: from SG13G2_os_process_spec.pdf p17
     
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
@@ -167,49 +167,49 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild0",   4.1,          "fox");
     
-    // METAL:                      name,     height,      thickness,      ref_below, ref_above
+    // METAL:                      name,     height,      thickness
     //-----------------------------------------------------------------------------------------------
-    auto met1 = addMetalLayer(psi, "Metal1", met1_height, met1_thickness, "ild0",   "ild1");
+    auto met1 = addMetalLayer(psi, "Metal1", met1_height, met1_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild1",   4.1,          "ild0");
     
-    // METAL:                      name,     height,      thickness,      ref_below, ref_above
+    // METAL:                      name,     height,      thickness
     //-----------------------------------------------------------------------------------------------
-    auto met2 = addMetalLayer(psi, "Metal2", met2_height, met2_thickness, "ild1",   "ild2");
+    auto met2 = addMetalLayer(psi, "Metal2", met2_height, met2_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild2",   4.1,          "ild1");
     
-    // METAL:                      name,     height,      thickness,      ref_below, ref_above
+    // METAL:                      name,     height,      thickness
     //-----------------------------------------------------------------------------------------------
-    auto met3 = addMetalLayer(psi, "Metal3", met3_height, met3_thickness, "ild2",   "ild3");
+    auto met3 = addMetalLayer(psi, "Metal3", met3_height, met3_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild3",   4.1,          "ild2");
     
-    // METAL:                      name,     height,      thickness,      ref_below, ref_above
+    // METAL:                      name,     height,      thickness
     //-----------------------------------------------------------------------------------------------
-    auto met4 = addMetalLayer(psi, "Metal4", met4_height, met4_thickness, "ild3",   "ild4");
+    auto met4 = addMetalLayer(psi, "Metal4", met4_height, met4_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild4",   4.1,          "ild3");
     
-    // METAL:                           name,           height,           thickness,      ref_below, ref_above
+    // METAL:                           name,           height,           thickness
     //-----------------------------------------------------------------------------------------------
-    auto met5_ncap = addMetalLayer(psi, "metal5_n_cap", met5_height, met5_thickness, "ild4",   "ildtm1");
+    auto met5_ncap = addMetalLayer(psi, "metal5_n_cap", met5_height, met5_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,           height,        thickness,      ref_below, ref_above
+    // METAL:                           name,           height,        thickness
     //-----------------------------------------------------------------------------------------------------------
-    auto met5_cap = addMetalLayer(psi, "metal5_cap", met5_height, met5_thickness, "ild4",   "ildtm1");
+    auto met5_cap = addMetalLayer(psi, "metal5_cap", met5_height, met5_thickness);
     
     // DIELECTRIC (conformal)   name,    dielectric_k, thickness,        thickness,      thickness, ref
     //                                                 over metal,       where no metal, sidewall
@@ -220,25 +220,25 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,      height,      thickness,          ref_below, ref_above
+    // METAL:                           name,      height,      thickness
     //----------------------------------------------------------------------------------------------------
-    auto cmim_cap = addMetalLayer(psi, "cmim_top", cmim_height, cmim_cap_thickness, "ismim",   "ildtm1");
+    auto cmim_cap = addMetalLayer(psi, "cmim_top", cmim_height, cmim_cap_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,      height,         thickness,         ref_below, ref_above
+    // METAL:                           name,      height,         thickness
     //----------------------------------------------------------------------------------------------------
-    auto topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_height, topmet1_thickness, "ildtm1",  "ildtm2");
+    auto topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_height, topmet1_thickness);
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm2",   4.1,        "ildtm1");
     
-    // METAL:                           name,      height,         thickness,         ref_below, ref_above
+    // METAL:                           name,      height,         thickness
     //----------------------------------------------------------------------------------------------------
-    auto topmet2 = addMetalLayer(psi, "TopMetal2", topmet2_height, topmet2_thickness, "ildtm2",   "pass1");
+    auto topmet2 = addMetalLayer(psi, "TopMetal2", topmet2_height, topmet2_thickness);
     
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
     //                                                   over metal,  where no metal, sidewall

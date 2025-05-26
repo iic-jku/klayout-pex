@@ -129,9 +129,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     addFieldOxideLayer(psi, "fox",   4.632);
     // NOTE: fine-tuned dielectric_k for single_plate_100um_x_100um_li1_over_substrate to match foundry table data
 
-    // METAL:                      name,   height, thickness, ref_below, ref_above
+    // METAL:                      name,   height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto poly = addMetalLayer(psi, "poly", 0.3262, 0.18,      "fox",     "psg");
+    auto poly = addMetalLayer(psi, "poly", 0.3262, 0.18);
     
     // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
     //-----------------------------------------------------------------------------------------------
@@ -142,9 +142,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "psg",   3.9,           "fox");
 
-    // METAL:                      name, height, thickness, ref_below, ref_above
+    // METAL:                      name, height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto li1 = addMetalLayer(psi, "li1", 0.9361, 0.1,      "psg",      "lint");
+    auto li1 = addMetalLayer(psi, "li1", 0.9361, 0.1);
 
     // DIELECTRIC (conformal)   name,   dielectric_k, thickness,   thickness,      thickness  ref
     //                                                over metal,  where no metal, sidewall
@@ -155,9 +155,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild2",  4.05,         "lint");
 
-    // METAL:                      name,   height, thickness, ref_below, ref_above
+    // METAL:                      name,   height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met1 = addMetalLayer(psi, "met1", 1.3761, 0.36,     "nild2",   "nild3");
+    auto met1 = addMetalLayer(psi, "met1", 1.3761, 0.36);
 
     // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
     //-----------------------------------------------------------------------------------------------
@@ -167,9 +167,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild3",  4.5,         "nild2");
 
-    // METAL:                      name,   height, thickness, ref_below, ref_above
+    // METAL:                      name,   height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met2 = addMetalLayer(psi, "met2", 2.0061, 0.36,     "nild3",   "nild4");
+    auto met2 = addMetalLayer(psi, "met2", 2.0061, 0.36);
 
     // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
     //-----------------------------------------------------------------------------------------------
@@ -179,10 +179,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild4",  4.2,         "nild3");
 
-    // METAL:                           name,        height, thickness, ref_below, ref_above
+    // METAL:                           name,        height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met3_ncap = addMetalLayer(psi, "met3_ncap", 2.7861, 0.845,     "nild4",   "nild5");
-    auto met3_cap  = addMetalLayer(psi, "met3_cap",  2.7861, 0.845,     "nild4",   "nild5");
+    auto met3_ncap = addMetalLayer(psi, "met3_ncap", 2.7861, 0.845);
+    auto met3_cap  = addMetalLayer(psi, "met3_cap",  2.7861, 0.845);
 
     double capm_thickness = 0.1;
     double capild_k = 4.52;  // to match design cap_mim_m3_w18p9_l5p1_no_interconnect to 200fF
@@ -197,17 +197,17 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild5",  4.1,         "nild4");
 
-    // METAL:                      name,   height,                            thickness,      ref_below, ref_above
+    // METAL:                      name,   height,                            thickness
     //-----------------------------------------------------------------------------------------------
-    auto capm = addMetalLayer(psi, "capm", 2.7861 + 0.845 + capild_thickness, capm_thickness, "nild5",   "nild5");
+    auto capm = addMetalLayer(psi, "capm", 2.7861 + 0.845 + capild_thickness, capm_thickness);
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild5",  4.1,         "nild4");
 
-    // METAL:                           name,        height, thickness, ref_below, ref_above
+    // METAL:                           name,        height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met4_ncap = addMetalLayer(psi, "met4_ncap", 4.0211, 0.845,     "nild5",   "nild6");
+    auto met4_ncap = addMetalLayer(psi, "met4_ncap", 4.0211, 0.845);
     // TODO:   ->set_reference_below("nild5"); // PDK mim cap section says capild
 
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness,  ref
@@ -215,26 +215,26 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addConformalDielectric(psi, "capild", capild_k, capild_thickness,          0.0,        0.0,   "met4_cap");
 
-    // METAL:                           name,        height, thickness, ref_below, ref_above
+    // METAL:                           name,        height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met4_cap  = addMetalLayer(psi, "met4_cap",  4.0211, 0.845,     "nild5",   "nild6");
+    auto met4_cap  = addMetalLayer(psi, "met4_cap",  4.0211, 0.845);
     
     // DIELECTRIC (simple)    name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild6",  4.0,         "nild5");
 
-    // METAL:                       name,    height,                            thickness,      ref_below, ref_above
+    // METAL:                       name,    height,                            thickness
     //-----------------------------------------------------------------------------------------------
-    auto capm2 = addMetalLayer(psi, "capm2", 4.0211 + 0.845 + capild_thickness, capm_thickness, "nild6",   "nild6");
+    auto capm2 = addMetalLayer(psi, "capm2", 4.0211 + 0.845 + capild_thickness, capm_thickness);
     // TODO:   ->set_reference_below("nild6"); // PDK mim cap section says capild
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "nild6",  4.0,          "nild5");
 
-    // METAL:                      name,   height, thickness, ref_below, ref_above
+    // METAL:                      name,   height, thickness
     //-----------------------------------------------------------------------------------------------
-    auto met5 = addMetalLayer(psi, "met5", 5.3711, 1.26,     "nild6",   "topox");
+    auto met5 = addMetalLayer(psi, "met5", 5.3711, 1.26);
 
     // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
     //-----------------------------------------------------------------------------------------------

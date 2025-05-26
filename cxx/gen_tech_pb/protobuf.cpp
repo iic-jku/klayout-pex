@@ -245,9 +245,7 @@ kpex::tech::ProcessStackInfo::MetalLayer *
 addMetalLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
               double height,
-              double thickness,
-              const std::string &reference_below,
-              const std::string &reference_above)
+              double thickness)
 {
     kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
     li->set_name(layer_name);
@@ -255,8 +253,6 @@ addMetalLayer(kpex::tech::ProcessStackInfo *psi,
     kpex::tech::ProcessStackInfo::MetalLayer *ml = li->mutable_metal_layer();
     ml->set_height(height);
     ml->set_thickness(thickness);
-    ml->set_reference_below(reference_below);
-    ml->set_reference_above(reference_above);
     return ml;
 }
 
