@@ -1,6 +1,6 @@
 /*
  * --------------------------------------------------------------------------------
- * SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+ * SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
  * Johannes Kepler University, Institute for Integrated Circuits.
  *
  * This file is part of KPEX 
@@ -89,7 +89,7 @@ void addSubstrateLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::NWellLayer *
 addNWellLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
-              double height,
+              double z,
               const std::string &reference);
 
 void setContact(kpex::tech::ProcessStackInfo::Contact *co,
@@ -103,7 +103,7 @@ void setContact(kpex::tech::ProcessStackInfo::Contact *co,
 kpex::tech::ProcessStackInfo::DiffusionLayer *
 addDiffusionLayer(kpex::tech::ProcessStackInfo *psi,
                   const std::string &layer_name,
-                  double height,
+                  double z,
                   const std::string &reference);
 
 void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
@@ -113,10 +113,8 @@ void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::MetalLayer *
 addMetalLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
-              double height,
-              double thickness,
-              const std::string &reference_below,
-              const std::string &reference_above);
+              double z,
+              double thickness);
 
 void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,
                            const std::string &name,

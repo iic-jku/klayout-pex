@@ -1,6 +1,6 @@
 #
 # --------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+# SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
@@ -21,4 +21,4 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-__version__ = "0.2.5"
+__version__ = "0.2.6"

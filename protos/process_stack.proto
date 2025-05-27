@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------
-// SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+// SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 // Johannes Kepler University, Institute for Integrated Circuits.
 //
 // This file is part of KPEX 
@@ -65,19 +65,19 @@ message ProcessStackInfo {
     }
 
     message SubstrateLayer {
-        double height = 1;     // height in µm (of the layer bottom) below 0
+        double height = 1;     // height in µm (of the layer bottom) below 0, can be negative
         double thickness = 2;  // thickness of the substrate plane
         string reference = 30; // name of the dielectric type
     }
 
     message NWellLayer {
-        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        double z = 1;     // z-offset in µm (of the layer bottom), relative to the substrate
         string reference = 30; // name of the dielectric type above the substrate
         Contact contact_above = 40;
     }
 
     message DiffusionLayer {
-        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        double z = 1;     // z-offset in µm (of the layer bottom), relative to the substrate
         string reference = 30; // name of the dielectric type above the substrate
         Contact contact_above = 40;
     }
@@ -107,10 +107,8 @@ message ProcessStackInfo {
     }
 
     message MetalLayer { // Metal
-        double height = 1;     // height in µm (of the layer bottom) above the substrate
+        double z = 1;          // z-offset in µm (of the layer bottom), relative to the substrate
         double thickness = 2;  // thickness in µm
-        string reference_below = 30; // dielectric
-        string reference_above = 31; // dielectric
         Contact contact_above = 40;
     }
 

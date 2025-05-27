@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+# SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
@@ -205,7 +205,7 @@ class TechInfo:
                     diel_lyr = lyr
                 # search for next metal or end of stack
                 if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
-                    return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
+                    return diel_lyr, lyr.metal_layer.z - found_layer.metal_layer.z
         return diel_lyr, 5.0   # air TODO
 
     @cached_property
