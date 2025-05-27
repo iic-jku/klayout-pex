@@ -1,7 +1,7 @@
 #! /bin/bash
 ##
 ## --------------------------------------------------------------------------------
-## SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+## SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
@@ -25,7 +25,7 @@
 
 python3 -m licenseheaders \
 	--tmpl .copyright.tmpl \
-	--years "2024" \
+	--years "2024-2025" \
 	--owner "Martin Jan Köhler and Harald Pretl" \
 	--projname "KPEX" \
 	--projurl "https://github.com/martinjankoehler/klayout-pex" \

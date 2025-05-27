@@ -1,7 +1,7 @@
 #! /bin/bash
 ##
 ## --------------------------------------------------------------------------------
-## SPDX-FileCopyrightText: 2024 Martin Jan Köhler and Harald Pretl
+## SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
