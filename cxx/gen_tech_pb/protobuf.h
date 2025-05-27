@@ -89,7 +89,7 @@ void addSubstrateLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::NWellLayer *
 addNWellLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
-              double height,
+              double z,
               const std::string &reference);
 
 void setContact(kpex::tech::ProcessStackInfo::Contact *co,
@@ -103,7 +103,7 @@ void setContact(kpex::tech::ProcessStackInfo::Contact *co,
 kpex::tech::ProcessStackInfo::DiffusionLayer *
 addDiffusionLayer(kpex::tech::ProcessStackInfo *psi,
                   const std::string &layer_name,
-                  double height,
+                  double z,
                   const std::string &reference);
 
 void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
@@ -113,7 +113,7 @@ void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::MetalLayer *
 addMetalLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
-              double height,
+              double z,
               double thickness);
 
 void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,

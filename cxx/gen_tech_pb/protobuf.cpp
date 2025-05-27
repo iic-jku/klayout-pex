@@ -187,14 +187,14 @@ void addSubstrateLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::NWellLayer *
 addNWellLayer(kpex::tech::ProcessStackInfo *psi,
                    const std::string &layer_name,
-                   double height,
+                   double z,
                    const std::string &reference)
 {
     kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
     li->set_name(layer_name);
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_NWELL);
     kpex::tech::ProcessStackInfo::NWellLayer *wl = li->mutable_nwell_layer();
-    wl->set_height(height);
+    wl->set_z(z);
     wl->set_reference(reference);
     return wl;
 }
@@ -218,14 +218,14 @@ void setContact(kpex::tech::ProcessStackInfo::Contact *co,
 kpex::tech::ProcessStackInfo::DiffusionLayer *
 addDiffusionLayer(kpex::tech::ProcessStackInfo *psi,
                   const std::string &name,
-                  double height,
+                  double z,
                   const std::string &reference)
 {
     kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
     li->set_name(name);
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_DIFFUSION);
     kpex::tech::ProcessStackInfo::DiffusionLayer *dl = li->mutable_diffusion_layer();
-    dl->set_height(height);
+    dl->set_z(z);
     dl->set_reference(reference);
     return dl;
 }
@@ -244,14 +244,14 @@ void addFieldOxideLayer(kpex::tech::ProcessStackInfo *psi,
 kpex::tech::ProcessStackInfo::MetalLayer *
 addMetalLayer(kpex::tech::ProcessStackInfo *psi,
               const std::string &layer_name,
-              double height,
+              double z,
               double thickness)
 {
     kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
     li->set_name(layer_name);
     li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_METAL);
     kpex::tech::ProcessStackInfo::MetalLayer *ml = li->mutable_metal_layer();
-    ml->set_height(height);
+    ml->set_z(z);
     ml->set_thickness(thickness);
     return ml;
 }

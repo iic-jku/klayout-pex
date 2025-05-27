@@ -141,17 +141,17 @@ class FasterCapInputBuilder:
                 metal_layer_name = metal_layer.name
                 metal_layer = metal_layer.metal_layer
 
-                metal_z_bottom = metal_layer.height
+                metal_z_bottom = metal_layer.z
                 metal_z_top = metal_z_bottom + metal_layer.thickness
 
                 shapes = self.shapes_of_net(layer_name=metal_layer_name, net=net)
                 if shapes:
                     if shapes.count() >= 1:
                         info(f"Conductor {net_name}, metal {metal_layer_name}, "
-                             f"z={metal_layer.height}, height={metal_layer.thickness}")
+                             f"z={metal_layer.z}, height={metal_layer.thickness}")
                         model_builder.add_conductor(net_name=net_name,
                                                     layer=shapes,
-                                                    z=metal_layer.height,
+                                                    z=metal_layer.z,
                                                     height=metal_layer.thickness)
 
                 if metal_layer.HasField('contact_above'):
@@ -184,7 +184,7 @@ class FasterCapInputBuilder:
                     model_builder.add_conductor(net_name=net_name,
                                                 layer=shapes,
                                                 z=0,  # TODO
-                                                height=0.1)  # TODO: diffusion_layer.height
+                                                height=0.1)  # TODO: diffusion_layer.z
 
                 contact = diffusion_layer.contact_above
                 shapes = self.shapes_of_net(layer_name=contact.name, net=net)
@@ -227,7 +227,7 @@ class FasterCapInputBuilder:
         fox_region.insert(fox_block)
 
         # field oxide goes from substrate/diff/well up to below the gate-poly
-        gate_poly_height = self.tech_info.gate_poly_layer.metal_layer.height
+        gate_poly_height = self.tech_info.gate_poly_layer.metal_layer.z
         fox_z = 0
         fox_height = gate_poly_height - fox_z
         info(f"Simple dielectric (field oxide) {fox_layer.name}: "
@@ -241,7 +241,7 @@ class FasterCapInputBuilder:
             metal_layer_name = metal_layer.name
             metal_layer = metal_layer.metal_layer
 
-            metal_z_bottom = metal_layer.height
+            metal_z_bottom = metal_layer.z
 
             extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name)
 
@@ -271,10 +271,10 @@ class FasterCapInputBuilder:
                             # if h_delta == 0:
                             #     h_delta = metal_layer.thickness
                             sidewall_height += h_delta
-                            info(f"Sidewall dielectric {sidewall.name}: z={metal_layer.height}, height={sidewall_height}")
+                            info(f"Sidewall dielectric {sidewall.name}: z={metal_layer.z}, height={sidewall_height}")
                             model_builder.add_dielectric(material_name=sidewall.name,
                                                          layer=sidewall_region,
-                                                         z=metal_layer.height,
+                                                         z=metal_layer.z,
                                                          height=sidewall_height)
 
                         case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
@@ -284,10 +284,10 @@ class FasterCapInputBuilder:
                             h_delta = metal_layer.thickness + conf_diel.thickness_over_metal
                             sidewall_height += h_delta
                             info(f"Conformal dielectric (sidewall) {sidewall.name}: "
-                                 f"z={metal_layer.height}, height={sidewall_height}")
+                                 f"z={metal_layer.z}, height={sidewall_height}")
                             model_builder.add_dielectric(material_name=sidewall.name,
                                                          layer=sidewall_region,
-                                                         z=metal_layer.height,
+                                                         z=metal_layer.z,
                                                          height=sidewall_height)
                             if conf_diel.thickness_where_no_metal > 0.0:
                                 no_metal_block = enlarged_top_cell_bbox.dup()
@@ -296,10 +296,10 @@ class FasterCapInputBuilder:
                                 no_metal_region -= sidewall_region
                                 no_metal_height = conf_diel.thickness_where_no_metal
                                 info(f"Conformal dielectric (where no metal) {sidewall.name}: "
-                                     f"z={metal_layer.height}, height={no_metal_height}")
+                                     f"z={metal_layer.z}, height={no_metal_height}")
                                 model_builder.add_dielectric(material_name=sidewall.name,
                                                              layer=no_metal_region,
-                                                             z=metal_layer.height,
+                                                             z=metal_layer.z,
                                                              height=no_metal_height)
 
                     sidewallee = sidewall.name

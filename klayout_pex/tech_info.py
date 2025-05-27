@@ -205,7 +205,7 @@ class TechInfo:
                     diel_lyr = lyr
                 # search for next metal or end of stack
                 if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
-                    return diel_lyr, lyr.metal_layer.height - found_layer.metal_layer.height
+                    return diel_lyr, lyr.metal_layer.z - found_layer.metal_layer.z
         return diel_lyr, 5.0   # air TODO
 
     @cached_property
