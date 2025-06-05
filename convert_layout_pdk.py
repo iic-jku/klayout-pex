@@ -38,7 +38,7 @@ import xml.etree.ElementTree as ET
 
 import klayout.db as kdb
 
-from kpex.log import (
+from klayout_pex.log import (
     LogLevel,
     set_log_level,
     # debug,
@@ -48,8 +48,8 @@ from kpex.log import (
     warning,
     rule
 )
-from kpex.version import __version__
-from kpex.util.argparse_helpers import render_enum_help
+from klayout_pex.version import __version__
+from klayout_pex.util.argparse_helpers import render_enum_help
 
 # ------------------------------------------------------------------------------------
 
@@ -305,8 +305,8 @@ def main():
     tech_names = ("sky130A", "sg13g2")
 
     dir = os.path.dirname(os.path.realpath(__file__))
-    lyp_paths = (os.path.join(dir, "pdk", "sky130A", "kpex", "sky130A.lyp"),
-                 os.path.join(dir, "pdk", "ihp_sg13g2", "kpex", "sg13g2.lyp"))
+    lyp_paths = (os.path.join(dir, "pdk", "sky130A", "libs.tech", "kpex", "sky130A.lyp"),
+                 os.path.join(dir, "pdk", "ihp_sg13g2", "libs.tech", "kpex", "sg13g2.lyp"))
 
     warning(f"At the moment, only conversion between PDKs {tech_names} is supported!")
 
