@@ -258,18 +258,18 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto via4_ncap = met4_ncap->mutable_contact_above();
     auto via4_cap = capm2->mutable_contact_above();
     
-    // CONTACT:           contact,     metal_above, thickness,              width, spacing,  border
-    //-----------------------------------------------------------------------------------------------
-    setContact(licon1n,   "licon1",    "li1",       0.9361,                  0.17,    0.17,  0.0);
-    setContact(licon1d,   "licon1",    "li1",       0.9361,                  0.17,    0.17,  0.0);
-    setContact(licon1p,   "licon1",    "li1",       0.4299,                  0.17,    0.17,  0.0);
-    setContact(mcon,      "mcon",      "met1",      1.3761 - (0.9361 + 0.1), 0.17,    0.19,  0.0);
-    setContact(via,       "via",       "met2",      0.27,                    0.15,    0.17,  0.055);
-    setContact(via2,      "via2",      "met3",      0.42,                    0.20,    0.20,  0.04);
-    setContact(via3_ncap, "via3_ncap", "met4",      0.39,                    0.20,    0.20,  0.06);
-    setContact(via3_cap,  "via3_cap",  "met4",      0.29,                    0.20,    0.20,  0.06);
-    setContact(via4_ncap, "via4_ncap", "met5",      0.505,                   0.80,    0.80,  0.19);
-    setContact(via4_cap,  "via4_cap",  "met5",      0.505 - 0.1,             0.80,    0.80,  0.19);
+    // CONTACT:           contact,     layer_below, metal_above, thickness,              width, spacing,  border
+    //----------------------------------------------------------------------------------------------------------
+    setContact(licon1n,   "licon1",    "nsdm",      "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1d,   "licon1",    "psdm",      "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1p,   "licon1",    "poly",      "li1",       0.4299,                  0.17,    0.17,  0.0);
+    setContact(mcon,      "mcon",      "li1",       "met1",      1.3761 - (0.9361 + 0.1), 0.17,    0.19,  0.0);
+    setContact(via,       "via",       "met1",      "met2",      0.27,                    0.15,    0.17,  0.055);
+    setContact(via2,      "via2",      "met2",      "met3",      0.42,                    0.20,    0.20,  0.04);
+    setContact(via3_ncap, "via3_ncap", "met3",      "met4",      0.39,                    0.20,    0.20,  0.06);
+    setContact(via3_cap,  "via3_cap",  "met3",      "met4",      0.29,                    0.20,    0.20,  0.06);
+    setContact(via4_ncap, "via4_ncap", "met4",      "met5",      0.505,                   0.80,    0.80,  0.19);
+    setContact(via4_cap,  "via4_cap",  "met4",      "met5",      0.505 - 0.1,             0.80,    0.80,  0.19);
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
@@ -290,10 +290,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "met5",    29);
     
     // resistance values are in mΩ / square
-    //                   layer,         resistance
-    addContactResistance(ri, "nsdm",    185000); // licon over nsdm
-    addContactResistance(ri, "psdm",    585000); // licon over psdm
-    addContactResistance(ri, "poly",    152000); // licon over poly!
+    //                       contact_layer, layer_below,  resistance
+    addContactResistance(ri, "licon1",      "nsdm",       185000); // licon over nsdm
+    addContactResistance(ri, "licon1",      "psdm",       585000); // licon over psdm
+    addContactResistance(ri, "licon1",      "poly",       152000); // licon over poly!
+    
+    // resistance values are in mΩ / square
+    //                       via_layer,  resistance
     addViaResistance(ri, "poly",        152000); // licon over poly!
     addViaResistance(ri, "mcon",          9300);
     addViaResistance(ri, "via",           4500);

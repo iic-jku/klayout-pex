@@ -201,6 +201,7 @@ addNWellLayer(kpex::tech::ProcessStackInfo *psi,
 
 void setContact(kpex::tech::ProcessStackInfo::Contact *co,
                 const std::string &name,
+                const std::string &layer_below,
                 const std::string &layer_above,
                 double thickness,
                 double width,
@@ -208,6 +209,7 @@ void setContact(kpex::tech::ProcessStackInfo::Contact *co,
                 double border)
 {
     co->set_name(name);
+    co->set_layer_below(layer_below);
     co->set_metal_above(layer_above);
     co->set_thickness(thickness);
     co->set_width(width);
@@ -331,10 +333,12 @@ void addLayerResistance(kpex::tech::ResistanceInfo *ri,
 }
 
 void addContactResistance(kpex::tech::ResistanceInfo *ri,
+                          const std::string &contact_layer_name,
                           const std::string &device_layer_name,
                           double resistance)
 {
     kpex::tech::ResistanceInfo::ContactResistance *vr = ri->add_contacts();
+    vr->set_contact_name(contact_layer_name);
     vr->set_device_layer_name(device_layer_name);
     vr->set_resistance(resistance);
 }

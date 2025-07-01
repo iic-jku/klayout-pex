@@ -94,6 +94,7 @@ addNWellLayer(kpex::tech::ProcessStackInfo *psi,
 
 void setContact(kpex::tech::ProcessStackInfo::Contact *co,
                 const std::string &name,
+                const std::string &layer_below,
                 const std::string &layer_above,
                 double thickness,
                 double width,
@@ -148,6 +149,7 @@ void addLayerResistance(kpex::tech::ResistanceInfo *ri,
                         double corner_adjustment_fraction);
 
 void addContactResistance(kpex::tech::ResistanceInfo *ri,
+                          const std::string &contact_layer_name,
                           const std::string &device_layer_name,
                           double resistance);
 

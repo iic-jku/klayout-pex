@@ -266,18 +266,18 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto mim_via = cmim_cap->mutable_contact_above();
     auto topvia2 = topmet1->mutable_contact_above();
     
-    // CONTACT:               contact,         metal_above,   thickness,               width, spacing,         border
-    //----------------------------------------------------------------------------------------------------------------
-    setContact(contn,         "Cont",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contd,         "Cont",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contp,         "Cont",          "Metal1",      conp_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via1,          "Via1",          "Metal2",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via2,          "Via2",          "Metal3",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via3,          "Via3",          "Metal4",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via4,          "Via4",          "Metal5",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(topvia1_n_cap, "topvia1_n_cap", "TopMetal1",   topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(mim_via,       "mim_via",       "TopMetal1",   mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(topvia2,       "TopVia2",       "TopMetal2",   topvia2_thickness,       0.9,    1.06,           0.5);
+    // CONTACT:               contact,         layer_below, metal_above,   thickness,               width, spacing,         border
+    //----------------------------------------------------------------------------------------------------------------------------
+    setContact(contn,         "Cont",          "",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contd,         "Cont",          "",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contp,         "Cont",          "GatPoly",   "Metal1",      conp_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via1,          "Via1",          "Metal1",    "Metal2",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via2,          "Via2",          "Metal2",    "Metal3",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via3,          "Via3",          "Metal3",    "Metal4",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via4,          "Via4",          "Metal4",    "Metal5",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(topvia1_n_cap, "topvia1_n_cap", "Metal5",    "TopMetal1",   topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(mim_via,       "mim_via",       "cmim_top",  "TopMetal1",   mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(topvia2,       "TopVia2",       "TopMetal1", "TopMetal2",   topvia2_thickness,       0.9,    1.06,           0.5);
     
     // TODO: refine via rules!
     
@@ -297,7 +297,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
-    // NOTE: coefficients according to https://github.com/IHP-GmbH/IHP-Open-PDK/blob/8923b6c877bd755b8a04c655fd4c0e6f910120eb/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.tech#L4657
+    // NOTE: coefficients according to https://github.com/IHP-GmbH/IHP-Open-PDK/blob/7897c7f99fe5538656b4c08e300cfe4d2c8a5503/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.tech#L4515
 
     ex->set_side_halo(8);
     
@@ -305,7 +305,7 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 
     // resistance values are in mΩ / square
     //                     layer, resistance, [corner_adjustment_fraction]
-    // addLayerResistance(ri, "GatPoly", 48200); // TODO
+    addLayerResistance(ri, "GatPoly", 48200); // TODO: there is no value defined in the process spec!
     addLayerResistance(ri, "Metal1",    110);
     addLayerResistance(ri, "Metal2",     88);
     addLayerResistance(ri, "Metal3",     88);
@@ -313,18 +313,24 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "Metal5",     88);
     addLayerResistance(ri, "TopMetal1",  18);
     addLayerResistance(ri, "TopMetal2",  11);
-    
-    // resistance values are in mΩ / square
-    //                   layer,         resistance
-    addViaResistance(ri, "Cont",      17000);  // TODO: alldiffcont???
-    // addViaResistance(ri, "Cont",      15000);  // TODO: pc??
-    addViaResistance(ri, "Via1",       9000);
-    addViaResistance(ri, "Via2",       9000);
-    addViaResistance(ri, "Via3",       9000);
-    addViaResistance(ri, "Via4",       9000);
-    addViaResistance(ri, "TopVia1",    2200);
-    addViaResistance(ri, "TopVia2",    1100);
 
+    // resistance values are in mΩ / square
+    //                       contact_layer, layer_below,  resistance
+
+    addContactResistance(ri, "Cont",        "nSD",        17000);  // Cont over nSD-Activ
+    addContactResistance(ri, "Cont",        "pSD",        17000);  // Cont over pSD-Activ
+    addContactResistance(ri, "Cont",        "GatPoly",    15000);  // Cont over pSD-Activ
+
+    // resistance values are in mΩ / square
+    //                       via_layer,  resistance
+
+    addViaResistance(ri,     "Via1",       9000);
+    addViaResistance(ri,     "Via2",       9000);
+    addViaResistance(ri,     "Via3",       9000);
+    addViaResistance(ri,     "Via4",       9000);
+    addViaResistance(ri,     "TopVia1",    2200);
+    addViaResistance(ri,     "TopVia2",    1100);
+    
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
 
     //                  layer,    area_cap,  perimeter_cap
