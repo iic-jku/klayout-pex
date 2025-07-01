@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "klayout-pex"
-version = "0.2.6"
+version = "0.2.7"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
 homepage = "https://martinjankoehler.github.io/klayout-pex-website/"
@@ -51,25 +51,25 @@ netlist = 'klayout_pex.netlist.__main__:main'
 
 [tool.poetry.dependencies]
 python = "^3.12"
-cairosvg = "^2.7.1"
-klayout = "^0.30.0"    # required minimum version because of *NeighborhoodVisitor, *WithProperties
-matplotlib = "^3.10.1"
-protobuf = "^6.31.0"
-rich = "^13.9.4"
-rich-argparse = "^1.6.0"
+cairosvg = ">= 2.7.1"
+klayout = ">= 0.30.0"    # required minimum version because of *NeighborhoodVisitor, *WithProperties
+matplotlib = ">= 3.10.1"
+protobuf = ">= 6.31.0"
+rich = ">= 13.9.4"
+rich-argparse = ">= 1.6.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^8.3.3"
-pytest-cov = "^6.0.0"
-pytest-html = "^4.1.1"
-allure-pytest = "^2.13.5"
-csv-diff = "^1.2"
-coverage = "^7.6.8"
+pytest = ">= 8.3.3"
+pytest-cov = ">= 6.0.0"
+pytest-html = ">= 4.1.1"
+allure-pytest = ">= 2.13.5"
+csv-diff = ">= 1.2"
+coverage = ">= 7.6.8"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^3.3.1"
-pylint-json2html = "^0.5.0"
-licenseheaders = "^0.8.8"
+pylint = ">= 3.3.1"
+pylint-json2html = ">= 0.5.0"
+licenseheaders = ">= 0.8.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools>=42"]
