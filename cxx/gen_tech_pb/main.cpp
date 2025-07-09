@@ -25,24 +25,22 @@
 #include <iostream>
 #include <filesystem>
 
-#include "protobuf.h"
+#include "proto.h"
 #include "pdk/ihp_sg13g2.h"
 #include "pdk/sky130A.h"
 
+#include <capnp/message.h>
+
 void writeTech(const std::filesystem::path &output_directory,
                const std::string &tech_name,
-               const kpex::tech::Technology &tech)
+               capnp::MessageBuilder &msg,
+               kpex::tech::Technology::Builder &tech)
 {
     const std::filesystem::path json_pb_path = output_directory / (tech_name + "_tech" + ".pb.json");
-    write(tech, json_pb_path.string(), Format::JSON);
+    write(msg, tech, json_pb_path.string(), Format::JSON);
 }
 
 int main(int argc, char **argv) {
-    // Verify that the version of the library that we linked against is
-    // compatible with the version of the headers we compiled against.
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-    
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <output-directory>" << std::endl;
         return 1;
@@ -56,20 +54,19 @@ int main(int argc, char **argv) {
     std::filesystem::create_directories(output_directory);
 
     {
-        kpex::tech::Technology tech;
+        ::capnp::MallocMessageBuilder msg;
+        kpex::tech::Technology::Builder tech = msg.initRoot<kpex::tech::Technology>();
         sky130A::buildTech(tech);
-        writeTech(output_directory, "sky130A", tech);
+        writeTech(output_directory, "sky130A", msg, tech);
     }
     
     {
-        kpex::tech::Technology tech;
+        ::capnp::MallocMessageBuilder msg;
+        kpex::tech::Technology::Builder tech = msg.initRoot<kpex::tech::Technology>();
         ihp_sg13g2::buildTech(tech);
-        writeTech(output_directory, "ihp_sg13g2", tech);
+        writeTech(output_directory, "ihp_sg13g2", msg, tech);
     }
 
-    // Optional:  Delete all global objects allocated by libprotobuf.
-    google::protobuf::ShutdownProtobufLibrary();
-    
     return 0;
 }
 
