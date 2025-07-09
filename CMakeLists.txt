@@ -36,55 +36,54 @@ endif(MSVC)
 # add dependencies
 include(cmake/CPM.cmake)
 CPMAddPackage(
-    NAME protobuf
-    GIT_TAG v31.0
-    GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
+    NAME capnproto
+    GIT_TAG v2   #v1.2.0
+    GITHUB_REPOSITORY capnproto/capnproto
     OPTIONS
-        "protobuf_INSTALL OFF"
-        "protobuf_BUILD_TESTS OFF"
-        "protobuf_BUILD_SHARED_LIBS OFF"
-        "protobuf_BUILD_EXAMPLES OFF"
-        "ABSL_PROPAGATE_CXX_STD ON"
+        "WITH_OPENSSL OFF"
+        "BUILD_TESTING OFF"
 )
+
+add_definitions(${CAPNP_DEFINITIONS})
 
 #_____________________________________________________________________________________________
 
-# see https://github.com/protocolbuffers/protobuf/blob/main/docs/cmake_protobuf_generate.md
-include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
-set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
+set(CPNPROTO_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${CPNPROTO_OUT_DIR}")
 
-set(PROTOBUF_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/protos/tech.proto
-	${CMAKE_CURRENT_LIST_DIR}/protos/process_stack.proto
-	${CMAKE_CURRENT_LIST_DIR}/protos/process_parasitics.proto
+set(PROTO_DIR ${CMAKE_CURRENT_LIST_DIR}/schemas)
+set(PROTO_SCHEMA_SOURCES
+    ${PROTO_DIR}/kpex.capnp
+    ${PROTO_DIR}/tech.capnp
+    ${PROTO_DIR}/process_stack.capnp
+    ${PROTO_DIR}/process_parasitics.capnp
 )
 
-add_library(kpex-protobuf OBJECT ${PROTOBUF_SOURCES})
-
-target_link_libraries(kpex-protobuf PUBLIC protobuf::libprotobuf)
-
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
-set(PROTOBUF_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-target_include_directories(kpex-protobuf PUBLIC "$<BUILD_INTERFACE:${PROTOBUF_BINARY_DIR}>")
-
-protobuf_generate(
-	TARGET kpex-protobuf 
-	IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}/protos"
-	PROTOC_OUT_DIR "${PROTOBUF_BINARY_DIR}"
+set(GENERATED_CAPNP_SOURCES
+  "${CPNPROTO_OUT_DIR}/kpex.capnp.c++"
+  "${CPNPROTO_OUT_DIR}/tech.capnp.c++"
+  "${CPNPROTO_OUT_DIR}/process_stack.capnp.c++"
+  "${CPNPROTO_OUT_DIR}/process_parasitics.capnp.c++"
 )
+
+add_custom_target(generate_capnproto_cpp_files
+    COMMAND $<TARGET_FILE:capnp_tool> compile
+             -o$<TARGET_FILE:capnpc_cpp>:"${CPNPROTO_OUT_DIR}"
+             --src-prefix="${PROTO_DIR}"
+             --import-path="${capnproto_SOURCE_DIR}/c++/src"
+             ${PROTO_SCHEMA_SOURCES}
+    DEPENDS ${PROTO_SCHEMA_SOURCES}
+    COMMENT "Generating Cap'n Proto C++ bindings"
+)
+
+add_library(kpex-protos ${GENERATED_CAPNP_SOURCES})
+target_link_libraries(kpex-protos PRIVATE CapnProto::capnp CapnProto::capnp-json  ${capnproto_BINARY_DIR}/c++/src/capnp/libcapnpc.a)
+add_dependencies(kpex-protos generate_capnproto_cpp_files)
 
 #_____________________________________________________________________________________________
 
-set(PROTOBUF_PYTHON_GENERATED "${CMAKE_CURRENT_LIST_DIR}/klayout_pex_protobuf")
-file(MAKE_DIRECTORY "${PROTOBUF_PYTHON_GENERATED}")
-
-protobuf_generate(
-	TARGET kpex-protobuf
-	LANGUAGE python
-	IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}/protos"
-	PROTOC_OUT_DIR "${PROTOBUF_PYTHON_GENERATED}"
-)
+# NOTE: Python bindings are not compiled via C++ / CMake,
+#       instead install using: pip install pycapnp
 
 #_____________________________________________________________________________________________
 
@@ -92,11 +91,16 @@ include_directories(${PROJECT_SOURCE_DIR}/cxx/gen_tech_pb)
 set(GEN_TECH_PB_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/sky130A.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/ihp_sg13g2.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/protobuf.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/proto.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/main.cpp
 )
 add_executable(gen_tech_pb ${GEN_TECH_PB_SOURCES})
-target_include_directories(gen_tech_pb PUBLIC ${Protobuf_INCLUDE_DIRS})
-target_link_libraries(gen_tech_pb kpex-protobuf)
+target_include_directories(gen_tech_pb PUBLIC ${CPNPROTO_OUT_DIR})
+
+get_target_property(CAPNP_INCLUDE_DIR capnp INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "Cap’n Proto include dir: ${CAPNP_INCLUDE_DIR}")
+
+target_include_directories(gen_tech_pb PRIVATE ${CAPNP_INCLUDE_DIR})
+target_link_libraries(gen_tech_pb kpex-protos)
 
 #_____________________________________________________________________________________________

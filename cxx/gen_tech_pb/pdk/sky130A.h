@@ -24,9 +24,11 @@
 #ifndef __SKY130A_H__
 #define __SKY130A_H__
 
+#include "tech.capnp.h"
+
 namespace sky130A {
 
-void buildTech(kpex::tech::Technology &tech);
+void buildTech(kpex::tech::Technology::Builder &tech);
 
 }
 
