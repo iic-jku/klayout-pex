@@ -26,7 +26,7 @@
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 
 function printUsageAndBail() {
-	echo "Usage: $0 (debug|release)"
+	echo "Usage: $0 (debug|release|xcode)"
 	exit 1
 }
 
@@ -35,15 +35,24 @@ then
 	printUsageAndBail
 fi
 
-CMAKE_OPTIONS=""
+BUILD_ARG="$1"
 
-case $1 in
+CMAKE_OPTIONS=""
+CMAKE_GENERATOR=""
+
+case "$BUILD_ARG" in
 	debug)
+		CMAKE_GENERATOR="Unix Makefiles"
 		BUILD_TARGET=Debug
 		;;
 	release)
+		CMAKE_GENERATOR="Unix Makefiles"
 		BUILD_TARGET=RelWithDbgInfo
 		;;
+        xcode)
+                CMAKE_GENERATOR="Xcode"                
+                BUILD_TARGET=Debug
+                ;;    
 	*)
 		echo "Unknown option $1"
 		printUsageAndBail
@@ -59,16 +68,25 @@ fi
 set -x
 set -e
 
-BUILD_DIR=build/kpex_$BUILD_TARGET
+BUILD_DIR=build/kpex_$BUILD_ARG
 mkdir -p $BUILD_DIR
 pushd $BUILD_DIR
 
-cmake -G "Unix Makefiles" \
+cmake -G "${CMAKE_GENERATOR}" \
  	  -DCMAKE_BUILD_TYPE=$BUILD_TARGET \
 	  $CMAKE_OPTIONS \
 	  $DIR
 
-make
+case "$CMAKE_GENERATOR" in
+	"Unix Makefiles")
+		make
+		;;
+	"Xcode")
+		open *.xcodeproj
+		;;
+	*)
+		;;
+esac
 
 popd
 
