@@ -26,7 +26,6 @@ import pytest
 import unittest
 
 from klayout_pex.rcx25.extraction_results import *
-import klayout_pex_protobuf.process_parasitics_pb2 as process_parasitics_pb2
 
 
 @allure.parent_suite("Unit Tests")

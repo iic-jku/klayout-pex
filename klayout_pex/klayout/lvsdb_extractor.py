@@ -32,7 +32,7 @@ from rich.pretty import pprint
 
 import klayout.db as kdb
 
-import klayout_pex_protobuf.tech_pb2 as tech_pb2
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from ..log import (
     console,
     debug,

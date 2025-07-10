@@ -39,7 +39,7 @@ from klayout_pex.rcx25.extraction_results import *
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 from klayout_pex.rcx25.c.polygon_utils import find_polygon_with_nearest_edge, nearest_edge
 from klayout_pex.rcx25.types import EdgeInterval, EdgeNeighborhood
-from process_parasitics_pb2 import CapacitanceInfo
+from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
 
 
 class SidewallAndFringeExtractor:
