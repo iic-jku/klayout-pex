@@ -1,0 +1,70 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX 
+// (see https://github.com/martinjankoehler/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.result;
+
+message RNode {
+    enum Kind {
+        KIND_UNSPECIFIED = 0;
+        KIND_PIN = 1;
+        KIND_DEVICE_TERMINAL = 2;
+        KIND_WIRE_JUNCTION = 3;
+        KIND_VIA_JUNCTION = 4;
+    }
+
+    message Pin {}
+    message Via {}
+    message DeviceTerminal {}
+    message WireJunction {}
+
+    uint64 node_id = 1;
+    Kind node_type = 2;
+    string layer_name = 3;
+
+    oneof parameters {
+        Pin pin = 90;
+        DeviceTerminal device_terminal = 91;
+        Via via = 92;
+        WireJunction wire_junction = 93;
+    }
+}
+
+message RNodeRef {
+    uint64 node_id = 1;
+}
+
+message RElement {
+    uint64 element_id = 1;
+    RNodeRef node_a = 2;
+    RNodeRef node_b = 3;
+    double resistance = 4;
+}
+
+message RNetwork {
+    repeated RNode nodes = 1;
+    repeated RElement r_elements = 2;
+}
+
+message PEXResult {
+    repeated RNetwork networks = 1;
+}
