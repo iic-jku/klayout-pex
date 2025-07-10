@@ -35,28 +35,42 @@
 
 namespace ihp_sg13g2 {
 
+constexpr auto DNWELL = kpex::tech::LayerInfo_Purpose_PURPOSE_DNWELL;
+constexpr auto NWELL = kpex::tech::LayerInfo_Purpose_PURPOSE_NWELL;
+constexpr auto PWELL = kpex::tech::LayerInfo_Purpose_PURPOSE_PWELL;
+constexpr auto DIFF = kpex::tech::LayerInfo_Purpose_PURPOSE_DIFF;
+constexpr auto N_P_TAP = kpex::tech::LayerInfo_Purpose_PURPOSE_NTAP_OR_PTAP;
+constexpr auto NTAP = kpex::tech::LayerInfo_Purpose_PURPOSE_NTAP;
+constexpr auto PTAP = kpex::tech::LayerInfo_Purpose_PURPOSE_PTAP;
+constexpr auto PIMP = kpex::tech::LayerInfo_Purpose_PURPOSE_P_IMPLANT;
+constexpr auto NIMP = kpex::tech::LayerInfo_Purpose_PURPOSE_N_IMPLANT;
+constexpr auto CONT = kpex::tech::LayerInfo_Purpose_PURPOSE_CONTACT;
+constexpr auto METAL = kpex::tech::LayerInfo_Purpose_PURPOSE_METAL;
+constexpr auto VIA = kpex::tech::LayerInfo_Purpose_PURPOSE_VIA;
+constexpr auto MIM = kpex::tech::LayerInfo_Purpose_PURPOSE_MIM_CAP;
+
 void buildLayers(kpex::tech::Technology *tech) {
-    //             name,     drw_gds, pin_gds, label_gds, description
-    addLayer(tech, "Activ",       1,0,   1,2,  -1,-1, "Active (diffusion) area"); // ~ diff.drawing
-    addLayer(tech, "NWell",      31,0,  31,2,  -1,-1, "N-well region");
-    addLayer(tech, "PWell",      46,0,  46,2,  -1,-1, "P-well region");
-    addLayer(tech, "nSD",         7,0, -1,-1,  -1,-1, "Defines areas to receive N+ S/D implant");
-    addLayer(tech, "pSD",        14,0, -1,-1,  -1,-1, "Defines areas to receive P+ S/D implant");
-    addLayer(tech, "GatPoly",     5,0,   5,2,  -1,-1, "Poly"); // ~ poly.drawing
-    addLayer(tech, "Cont",        6,0, -1,-1,  -1,-1, "Defines 1-st metal contacts to Activ, GatPoly");
-    addLayer(tech, "Metal1",      8,0,   8,2,   8,25, "Defines 1-st metal interconnect");
-    addLayer(tech, "Via1",       19,0, -1,-1,  -1,-1, "Defines 1-st metal to 2-nd metal contact");
-    addLayer(tech, "Metal2",     10,0,  10,2,  10,25, "Defines 2-nd metal interconnect");
-    addLayer(tech, "Via2",       29,0, -1,-1,  -1,-1, "Defines 2-nd metal to 3-rd metal contact");
-    addLayer(tech, "Metal3",     30,0,  30,2,  30,25, "Defines 3-rd metal interconnect");
-    addLayer(tech, "Via3",       49,0, -1,-1,  -1,-1, "Defines 3-rd metal to 4-th metal contact");
-    addLayer(tech, "Metal4",     50,0,  50,2,  50,25, "Defines 4-th metal interconnect");
-    addLayer(tech, "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
-    addLayer(tech, "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
-    addLayer(tech, "TopVia1",   125,0, -1,-1,  -1,-1, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
-    addLayer(tech, "TopMetal1", 126,0, 126,2, 126,25, "Defines 1-st thick TopMetal layer");
-    addLayer(tech, "TopVia2",   133,0, -1,-1,  -1,-1, "Defines via between TopMetal1 and TopMetal2");
-    addLayer(tech, "TopMetal2", 134,0, 134,2, 134,25, "Defines 2-nd thick TopMetal layer");
+    //             purpose   name       drw_gds, pin_gds, label_gds, description
+    addLayer(tech, DIFF,     "Activ",       1,0,   1,2,  -1,-1, "Active (diffusion) area"); // ~ diff.drawing
+    addLayer(tech, NWELL,    "NWell",      31,0,  31,2,  -1,-1, "N-well region");
+    addLayer(tech, PWELL,    "PWell",      46,0,  46,2,  -1,-1, "P-well region");
+    addLayer(tech, NIMP,     "nSD",         7,0, -1,-1,  -1,-1, "Defines areas to receive N+ S/D implant");
+    addLayer(tech, PIMP,     "pSD",        14,0, -1,-1,  -1,-1, "Defines areas to receive P+ S/D implant");
+    addLayer(tech, METAL,    "GatPoly",     5,0,   5,2,  -1,-1, "Poly"); // ~ poly.drawing
+    addLayer(tech, CONT,     "Cont",        6,0, -1,-1,  -1,-1, "Defines 1-st metal contacts to Activ, GatPoly");
+    addLayer(tech, METAL,    "Metal1",      8,0,   8,2,   8,25, "Defines 1-st metal interconnect");
+    addLayer(tech, VIA,      "Via1",       19,0, -1,-1,  -1,-1, "Defines 1-st metal to 2-nd metal contact");
+    addLayer(tech, METAL,    "Metal2",     10,0,  10,2,  10,25, "Defines 2-nd metal interconnect");
+    addLayer(tech, VIA,      "Via2",       29,0, -1,-1,  -1,-1, "Defines 2-nd metal to 3-rd metal contact");
+    addLayer(tech, METAL,    "Metal3",     30,0,  30,2,  30,25, "Defines 3-rd metal interconnect");
+    addLayer(tech, VIA,      "Via3",       49,0, -1,-1,  -1,-1, "Defines 3-rd metal to 4-th metal contact");
+    addLayer(tech, METAL,    "Metal4",     50,0,  50,2,  50,25, "Defines 4-th metal interconnect");
+    addLayer(tech, VIA,      "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
+    addLayer(tech, METAL,    "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
+    addLayer(tech, VIA,      "TopVia1",   125,0, -1,-1,  -1,-1, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
+    addLayer(tech, METAL,    "TopMetal1", 126,0, 126,2, 126,25, "Defines 1-st thick TopMetal layer");
+    addLayer(tech, VIA,      "TopVia2",   133,0, -1,-1,  -1,-1, "Defines via between TopMetal1 and TopMetal2");
+    addLayer(tech, METAL,    "TopMetal2", 134,0, 134,2, 134,25, "Defines 2-nd thick TopMetal layer");
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
@@ -64,40 +78,36 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
     
-    //                     kind  lvs_name lvs_gds_pair  orig. layer   description
-    addComputedLayer(tech, KREG, "cont_drw",     6, 0,  "Cont", "Computed layer for contact to Metal1");
-    addComputedLayer(tech, KREG, "metal1_con",   8,  0,  "Metal1", "Computed layer for Metal1");
-    addComputedLayer(tech, KREG, "metal2_con",   10, 0,  "Metal2", "Computed layer for Metal2");
-    addComputedLayer(tech, KREG, "metal3_con",   30, 0,  "Metal3", "Computed layer for Metal3");
-    addComputedLayer(tech, KREG, "metal4_con",   50, 0,  "Metal4", "Computed layer for Metal4");
-    addComputedLayer(tech, KREG, "metal5_n_cap", 67, 200, "Metal5", "Computed layer for Metal5, case where no MiM cap");
-    addComputedLayer(tech, KREG, "topmetal1_con", 126, 0,  "TopMetal1", "Computed layer for TopMetal1");
-    addComputedLayer(tech, KREG, "topmetal2_con", 134, 0,  "TopMetal2", "Computed layer for TopMetal2");
+    //                     purpose kind  lvs_name lvs_gds_pair  orig. layer   description
+    addComputedLayer(tech, PWELL, KREG, "pwell",        46, 0,   "PWell", "Computed layer for PWell");
+    addComputedLayer(tech, PWELL, KREG, "pwell_sub",    46, 0,   "PWell", "Computed layer for PWell");
+    addComputedLayer(tech, NWELL, KREG, "nwell_drw",    31, 0,   "NWell", "Computed layer for NWell");
+    addComputedLayer(tech, NIMP,   KREG, "nsd_fet",      7, 0,   "nSD", "Computed layer for nSD");
+    addComputedLayer(tech, PIMP,   KREG, "psd_fet",     14, 0,  "pSD", "Computed layer for pSD");
+    addComputedLayer(tech, NTAP,   KREG, "ntap",        65, 144, "Activ", "Computed layer for ntap");
+    addComputedLayer(tech, PTAP,   KREG, "ptap",        65, 244, "Activ", "Computed layer for ptap");
 
-    addComputedLayer(tech, KREG, "nsd_fet",     7, 0,   "nSD", "Computed layer for nSD");
-    addComputedLayer(tech, KREG, "psd_fet",     14, 0,  "pSD", "Computed layer for pSD");
+    addComputedLayer(tech, METAL,  KREG, "poly_con",      5, 0,   "GatPoly", "Computed layer for GatPoly");
+    addComputedLayer(tech, METAL,  KREG, "metal1_con",    8, 0,   "Metal1", "Computed layer for Metal1");
+    addComputedLayer(tech, METAL,  KREG, "metal2_con",   10, 0,   "Metal2", "Computed layer for Metal2");
+    addComputedLayer(tech, METAL,  KREG, "metal3_con",   30, 0,   "Metal3", "Computed layer for Metal3");
+    addComputedLayer(tech, METAL,  KREG, "metal4_con",   50, 0,   "Metal4", "Computed layer for Metal4");
+    addComputedLayer(tech, METAL,  KREG, "metal5_n_cap", 67, 200, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
+    addComputedLayer(tech, METAL,  KREG, "topmetal1_con", 126, 0,  "TopMetal1", "Computed layer for TopMetal1");
+    addComputedLayer(tech, METAL,  KREG, "topmetal2_con", 134, 0,  "TopMetal2", "Computed layer for TopMetal2");
 
-    addComputedLayer(tech, KREG, "ntap",        65, 144, "Activ", "Computed layer for ntap");
-    addComputedLayer(tech, KREG, "ptap",        65, 244, "Activ", "Computed layer for ptap");
-
-    addComputedLayer(tech, KREG, "pwell",       46, 0,   "PWell", "Computed layer for PWell");
-    addComputedLayer(tech, KREG, "pwell_sub",   46, 0,   "PWell", "Computed layer for PWell");
-    addComputedLayer(tech, KREG, "nwell_drw",   31, 0,   "NWell", "Computed layer for NWell");
+    addComputedLayer(tech, CONT,   KREG, "cont_drw",       6, 0,    "Cont", "Computed layer for contact to Metal1");
+    addComputedLayer(tech, VIA,    KREG, "via1_drw",      19, 0, "Via1", "Computed layer for Via1");
+    addComputedLayer(tech, VIA,    KREG, "via2_drw",      29, 0, "Via2", "Computed layer for Via2");
+    addComputedLayer(tech, VIA,    KREG, "via3_drw",      49, 0, "Via3", "Computed layer for Via3");
+    addComputedLayer(tech, VIA,    KREG, "via4_drw",      66, 0, "Via4", "Computed layer for Via4");
     
-    addComputedLayer(tech, KREG, "poly_con",    5, 0,    "GatPoly", "Computed layer for GatPoly");
+    addComputedLayer(tech, VIA,    KREG, "topvia1_n_cap", 125, 200, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
+    addComputedLayer(tech, VIA,    KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
 
-    addComputedLayer(tech, KREG, "via1_drw", 19, 0, "Via1", "Computed layer for Via1");
-    addComputedLayer(tech, KREG, "via2_drw", 29, 0, "Via2", "Computed layer for Via2");
-    addComputedLayer(tech, KREG, "via3_drw", 49, 0, "Via3", "Computed layer for Via3");
-    addComputedLayer(tech, KREG, "via4_drw", 66, 0, "Via4", "Computed layer for Via4");
-    
-    addComputedLayer(tech, KREG, "topvia1_n_cap", 125, 200, "TopVia1", "Original TopVia1 is 125/0, case where no MiM cap");
-    
-    addComputedLayer(tech, KREG, "topvia2_drw", 133, 0, "TopVia2", "Computed layer for TopVia2");
-
-    addComputedLayer(tech, KCAP, "mim_via",  125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
-    addComputedLayer(tech, KCAP, "metal5_cap",   67, 100,  "Metal5", "Computed layer for Metal5, case MiM cap");
-    addComputedLayer(tech, KCAP, "cmim_top",   36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
+    addComputedLayer(tech, VIA,    KCAP, "mim_via",      125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
+    addComputedLayer(tech, MIM,    KCAP, "metal5_cap",   67, 100,  "Metal5", "Computed layer for Metal5, case MiM cap");
+    addComputedLayer(tech, MIM,    KCAP, "cmim_top",     36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
 
     // NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
     //       otherwise they should also be declared as ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR

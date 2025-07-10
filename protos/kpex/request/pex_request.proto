@@ -1,0 +1,49 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX 
+// (see https://github.com/martinjankoehler/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.request;
+
+import "kpex/layout/device.proto";
+import "kpex/layout/pin.proto";
+import "kpex/layout/layer_region.proto";
+import "kpex/klayout/r_extractor_tech.proto";
+
+message RNetExtractionRequest { // for a single net
+    string net_name = 10;
+    repeated kpex.layout.Device.Terminal device_terminals = 20;
+    repeated kpex.layout.Pin pins = 30;
+    repeated kpex.layout.LayerRegion region_by_layer = 40;   // wires, vias
+}
+
+message RExtractionRequest { // for multiple nets
+    kpex.klayout.RExtractorTech tech = 10;
+
+    repeated kpex.layout.Device devices = 20;
+    repeated kpex.layout.Pin pins = 30;
+
+    repeated RNetExtractionRequest net_extraction_requests = 40;
+}
+
+message PEXRequest {
+    RExtractionRequest r_request = 10;
+}

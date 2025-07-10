@@ -35,7 +35,7 @@
 #include <string>
 #include <sstream>
 
-#include "tech.pb.h"
+#include "kpex/tech/tech.pb.h"
 
 enum Format {
     PROTOBUF_TEXTUAL,
@@ -61,6 +61,7 @@ void convert(const std::string &inputPath,
 //-------------------------------------------------------------------------
 
 void addLayer(kpex::tech::Technology *tech,
+              kpex::tech::LayerInfo::Purpose purpose,
               const std::string &name,
               uint32_t drw_gds_layer,
               uint32_t drw_gds_datatype,
@@ -71,6 +72,7 @@ void addLayer(kpex::tech::Technology *tech,
               const std::string &description);
 
 void addComputedLayer(kpex::tech::Technology *tech,
+                      kpex::tech::LayerInfo::Purpose purpose,
                       kpex::tech::ComputedLayerInfo_Kind kind,
                       const std::string &name,
                       uint32_t gds_layer,
