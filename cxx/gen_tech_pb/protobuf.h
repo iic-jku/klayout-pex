@@ -35,7 +35,7 @@
 #include <string>
 #include <sstream>
 
-#include "tech.pb.h"
+#include "kpex/tech/tech.pb.h"
 
 enum Format {
     PROTOBUF_TEXTUAL,
