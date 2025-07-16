@@ -54,9 +54,11 @@ include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
 set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
 
 set(PROTOBUF_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/tech.proto
-	${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/process_stack.proto
-	${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/process_parasitics.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/geometry/shapes.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/result/pex_result.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/tech.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/process_stack.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/process_parasitics.proto
 )
 
 add_library(kpex-protobuf OBJECT ${PROTOBUF_SOURCES})
