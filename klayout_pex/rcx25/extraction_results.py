@@ -192,8 +192,18 @@ class CellExtractionResults:
             normalized_sideoverlap_table[normalized_key] += sum((e.cap_value for e in entries))
         sideoverlap_summary = ExtractionSummary(capacitances=normalized_sideoverlap_table,
                                                 resistances={})
+
         normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
 
+        for network in self.r_extraction_result.networks:
+            node_by_id: Dict[int, r_network_pb2.RNode] = {n.node_id: n for n in network.nodes}
+            for element in network.elements:
+                node_a = node_by_id[element.node_a.node_id]
+                node_b = node_by_id[element.node_b.node_id]
+                resistance = element.resistance
+                normalized_key = NetCoupleKey(node_a.net_name, node_b.net_name).normed()
+                normalized_resistance_table[normalized_key] += resistance
+                
         resistance_summary = ExtractionSummary(capacitances={},
                                                resistances=normalized_resistance_table)
 
