@@ -42,6 +42,10 @@ from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
+
+import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
+
 # from .r.conductance import Conductance
 # from .r.resistor_extraction import ResistorExtraction
 # from .r.resistor_network import (
@@ -198,10 +202,7 @@ class RCX25Extractor:
             c: kdb.Circuit = netlist.top_circuit()
             info(f"LVSDB: found {c.pin_count()}pins")
 
-            result_network = MultiLayerResistanceNetwork(
-                resistor_networks_by_layer={},
-                via_resistors=[]
-            )
+            rex_result = pex_result_pb2.RExtractionResult()
 
             devices_by_name = self.pex_context.devices_by_name
             report.output_devices(devices_by_name)
@@ -215,6 +216,7 @@ class RCX25Extractor:
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
             vertex_port_net_names: List[str] = []
+            polygon_port_net_names: List[str] = []
 
             # NOTE: we're providing all port pins as vertex_ports
             #       so we use all the polygon_ports for the device pins
@@ -275,66 +277,68 @@ class RCX25Extractor:
 
             resistor_networks = rex.extract(rex_tech, regions_by_klayout_index, vertex_ports, polygon_ports)
 
+            node_by_node_id: Dict[int, pex_results_pb2.RNode] = {}
+
             subproc("\tNodes:")
             for rn in resistor_networks.each_node():
-                # print(rn.to_string(True))
-
-                node_name = rn.to_s()
-                loc = rn.location().center()
-                node_id = rn.object_id()
-
+                loc = rn.location()
                 layer_id = rn.layer()
                 canonical_layer_name = layer_names_by_klayout_index[layer_id]
 
-                port_net_name: str
+                r_node = pex_result_pb2.RNode()
+                r_node.node_id = rn.object_id()
+                r_node.node_name = rn.to_s()
+                r_node.node_type = pex_result_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
+                r_node.layer_name = canonical_layer_name
+
+                match rn.type():
+                    case klp.RNodeType.VertexPort:
+                        r_node.location_type = pex_result_pb2.RNode.LocationType.LOCATION_TYPE_POINT
+                        r_node.location_point.x = loc.center().x
+                        r_node.location_point.y = loc.center().y
+                    case klp.RNodeType.PolygonPort | _:
+                        r_node.location_type = pex_result_pb2.RNode.LocationType.LOCATION_TYPE_BOX
+                        r_node.location_box.lower_left.x = loc.p1.x
+                        r_node.location_box.lower_left.y = loc.p1.y
+                        r_node.location_box.upper_right.x = loc.p2.x
+                        r_node.location_box.upper_right.y = loc.p2.y
+
                 match rn.type():
                     case klp.RNodeType.VertexPort:
                         port_idx = rn.port_index()
-                        port_net_name = vertex_port_net_names[port_idx]
+                        r_node.net_name = vertex_port_net_names[port_idx]
                     case klp.RNodeType.PolygonPort:
                         port_idx = rn.port_index()
-                        pass
-                        # TODO: port_net_name = polygon_port_net_names[port_idx]
+                        r_node.net_name = polygon_port_net_names[port_idx]
                     case _:
-                        port_net_name = node_name
+                        r_node.net_name = r_node.node_name
 
-                subproc(f"\t\tNode #{hex(node_id)} '{node_name}' of net '{port_net_name}' "
-                        f"on layer '{canonical_layer_name}' at {loc} ({loc.x * dbu} µm, {loc.y * dbu} µm)")
+                subproc(f"\t\tNode #{hex(r_node.node_id)} '{r_node.node_name}' "
+                        f"of net '{r_node.net_name}' "
+                        f"on layer '{r_node.layer_name}' "
+                        f"at {loc} ({loc.center().x * dbu} µm, {loc.center().y * dbu} µm)")
+
+                rex_result.nodes.append(r_node)
+                node_by_node_id[r_node.node_id] = r_node
 
             subproc("\tElements:")
             for el in resistor_networks.each_element():
-                node_a = el.a()
-                node_b = el.b()
-                ohm = el.resistance() / 1000.0
-                subproc(f"\t\t{node_a.to_s()} ↔︎ {node_b.to_s()}: {round(ohm, 3)} Ω")
+                r_element = pex_result_pb2.RElement()
+                r_element.element_id = el.object_id()
+                r_element.node_a.node_id = el.a().object_id()
+                r_element.node_b.node_id = el.b().object_id()
+                r_element.resistance = el.resistance() / 1000.0  # convert mΩ to Ω
 
-                # visited_resistors: Set[Conductance] = set()
-                # for node_id, resistors in rn.node_to_s.items():
-                #     node_name = rn.node_names[node_id]
-                #     for conductance, other_node_id in resistors:
-                #         if conductance in visited_resistors:
-                #             continue # we don't want to add it twice, only once per direction!
-                #         visited_resistors.add(conductance)
-                #
-                #         other_node_name = rn.node_names[other_node_id]
-                #         ohm = layer_sheet_resistance.resistance / 1000.0 / conductance.cond
-                #         # TODO: layer_sheet_resistance.corner_adjustment_fraction not yet used !!!
-                #         subproc(f"\t\t{node_name} ↔︎ {other_node_name}: {round(ohm, 3)} Ω    (internally: {conductance.cond})")
-                #
+                node_a = node_by_node_id[r_element.node_a.node_id]
+                node_b = node_by_node_id[r_element.node_b.node_id]
+                subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
+                        f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
+                        f"{round(r_element.resistance, 3)} Ω")
+                rex_result.elements.append(r_element)
 
-            # rex = ResistorExtraction(b=self.delaunay_b, amax=self.delaunay_amax)
-            #
-            # c: kdb.Circuit = netlist.top_circuit()
-            # info(f"LVSDB: found {c.pin_count()}pins")
-            #
-            # result_network = MultiLayerResistanceNetwork(
-            #     resistor_networks_by_layer={},
-            #     via_resistors=[]
-            # )
-            #
-            # devices_by_name = self.pex_context.devices_by_name
-            # report.output_devices(devices_by_name)
-            #
+            report.output_rex_result(result=rex_result)
+            print("")
+
             # node_count_by_net: Dict[str, int] = defaultdict(int)
             #
             # for layer_name, region in layer_regions_by_name.items():
