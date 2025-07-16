@@ -29,6 +29,10 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .util.multiple_choice import MultipleChoicePattern
+from .log import (
+    warning
+)
+
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
@@ -210,14 +214,72 @@ class TechInfo:
 
     @cached_property
     def contact_above_metal_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
-        return {lyr.name: lyr.metal_layer.contact_above
-                for lyr in self.process_metal_layers}
+        d = {}
+        for lyr in self.process_metal_layers:
+            contact = lyr.metal_layer.contact_above
+            via_gds_pair = self.gds_pair(contact)
+            canonical_via_name = self.canonical_layer_name_by_gds_pair[via_gds_pair]
+            d[lyr.name] = canonical_via_name
+        return d
 
     @cached_property
-    def contact_by_contact_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
-        return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
-                for lyr in self.process_metal_layers}
+    def contact_by_device_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+        d = {}
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
+        for lyr in self.tech.process_stack.layers:
+            match lyr.layer_type:
+                case LT.LAYER_TYPE_NWELL:
+                    d[lyr.name] = lyr.nwell_layer.contact_above
 
+                case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
+                    d[lyr.name] = lyr.diffusion_layer.contact_above
+        return d
+
+    @cached_property
+    def contact_by_contact_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+        d = {}
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
+        for lyr in self.tech.process_stack.layers:
+            match lyr.layer_type:
+                case LT.LAYER_TYPE_NWELL:
+                    d[lyr.nwell_layer.contact_above.name] = lyr.nwell_layer.contact_above
+
+                case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
+                    d[lyr.diffusion_layer.contact_above.name] = lyr.diffusion_layer.contact_above
+
+                case LT.LAYER_TYPE_METAL:
+                    d[lyr.metal_layer.contact_above.name] = lyr.metal_layer.contact_above
+        return d
+
+    def gds_pair(self, layer_name) -> Optional[GDSPair]:
+        gds_pair = self.gds_pair_for_computed_layer_name.get(layer_name, None)
+        if not gds_pair:
+            gds_pair = self.gds_pair_for_layer_name.get(layer_name, None)
+        if not gds_pair:
+            warning(f"Can't find GDS pair for layer {layer_name}")
+            return None
+        return gds_pair
+
+    @cached_property
+    def bottom_and_top_layer_name_by_via_computed_layer_name(self) -> Dict[str, Tuple[str, str]]:
+        # NOTE: vias under the same name can be used in multiple situations
+        #       e.g. in sky130A, via3 has two (bot, top) cases: {(met3, met4), (met3, cmim)},
+        #       therefore the canonical name must not be used,
+        #       but really the LVS computed name, that is also used in the process stack
+        #
+        #       the metal layers however are canonical!
+
+        d = {}
+        for metal_layer in self.process_metal_layers:
+            layer_name = metal_layer.name
+            gds_pair = self.gds_pair(layer_name)
+            canonical_layer_name = self.canonical_layer_name_by_gds_pair[gds_pair]
+
+            if metal_layer.metal_layer.HasField('contact_above'):
+                contact = metal_layer.metal_layer.contact_above
+                d[contact.name] = (canonical_layer_name, contact.metal_above)
+
+        return d
     #--------------------------------
 
     @cached_property
@@ -225,7 +287,7 @@ class TechInfo:
         return {r.layer_name: r for r in self.tech.process_parasitics.resistance.layers}
 
     @cached_property
-    def contact_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ContactResistance]:
+    def contact_resistance_by_device_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ContactResistance]:
         return {r.device_layer_name: r for r in self.tech.process_parasitics.resistance.contacts}
 
     @cached_property
