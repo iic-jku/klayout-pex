@@ -32,6 +32,9 @@ from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from .types import EdgeNeighborhood, LayerName
 from ..klayout.lvsdb_extractor import KLayoutDeviceInfo
 
+import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
+import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+
 VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
 
 
@@ -41,6 +44,7 @@ class ExtractionReporter:
                  dbu: float):
         self.report = rdb.ReportDatabase(f"PEX {cell_name}")
         self.cell = self.report.create_cell(cell_name)
+        self.dbu = dbu
         self.dbu_trans = kdb.CplxTrans(mag=dbu)
         self.category_name_counter: Dict[str, int] = defaultdict(int)
 
@@ -51,6 +55,18 @@ class ExtractionReporter:
     @cached_property
     def cat_pins(self) -> rdb.RdbCategory:
         return self.report.create_category("Pins")
+
+    @cached_property
+    def cat_rex_result(self) -> rdb.RdbCategory:
+        return self.report.create_category("R Extraction")
+
+    @cached_property
+    def cat_rex_nodes(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_result, "Nodes")
+
+    @cached_property
+    def cat_rex_elements(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_result, "Net Elements (Edges)")
 
     @cached_property
     def cat_devices(self) -> rdb.RdbCategory:
@@ -254,3 +270,72 @@ class ExtractionReporter:
         sh = kdb.Shapes()
         sh.insert(pin_point)
         self.output_shapes(cat_pin_layer, label.string, sh)
+
+    def output_rex_result(self,
+                          result: pex_result_pb2.RExtractionResult):
+        node_id_to_node: Dict[int, pex_result_pb2.RNode] = {}
+        for node in result.nodes:
+            self.output_node(node)
+            node_id_to_node[node.node_id] = node
+        for element in result.elements:
+            self.output_element(element, node_id_to_node)
+
+    def marker_box_for_pb_point(self, dpoint: shapes_pb2.Point) -> kdb.Box:
+        sized_value = 5
+        return kdb.Box(int(dpoint.x / self.dbu - sized_value),
+                       int(dpoint.y / self.dbu - sized_value),
+                       int(dpoint.x / self.dbu + sized_value),
+                       int(dpoint.y / self.dbu + sized_value))
+
+    def box_for_pb_box(self, dbox: shapes_pb2.Box) -> kdb.Box:
+        box = kdb.Box(int(dbox.lower_left.x / self.dbu),
+                      int(dbox.lower_left.y / self.dbu),
+                      int(dbox.upper_right.x / self.dbu),
+                      int(dbox.upper_right.y / self.dbu))
+        return box
+
+    def marker_box_for_node_location(self, node: pex_result_pb2.RNode) -> kdb.Box:
+        match node.location_type:
+            case pex_result_pb2.RNode.LocationType.LOCATION_TYPE_POINT:
+                # create marker around point for better visiblity
+                point_box = self.marker_box_for_pb_point(node.location_point)
+                return point_box
+            case pex_result_pb2.RNode.LocationType.LOCATION_TYPE_BOX:
+                box = self.box_for_pb_box(node.location_box)
+                return box
+            case _:
+                raise NotImplementedError("unknown location type: {node.location_type}")
+
+    def marker_arrow_between_nodes(self,
+                                   node_a: pex_result_pb2.RNode,
+                                   node_b: pex_result_pb2.RNode) -> kdb.Polygon:
+        a_center = self.marker_box_for_node_location(node_a).center()
+        b_center = self.marker_box_for_node_location(node_b).center()
+        path = kdb.Path([a_center, b_center], width=5)
+        return path.polygon()
+
+
+    def output_node(self,
+                    node: pex_result_pb2.RNode):
+        node_title = f"{node.node_name}, port net {node.net_name}, " \
+                     f"layer {node.layer_name}"
+        sh = kdb.Shapes()
+        sh.insert(self.marker_box_for_node_location(node))
+        self.output_shapes(self.cat_rex_nodes, node_title, sh)
+
+    def output_element(self,
+                       element: pex_result_pb2.RElement,
+                       node_id_to_node: Dict[int, pex_result_pb2.RNode]):
+        a = node_id_to_node[element.node_a.node_id]
+        b = node_id_to_node[element.node_b.node_id]
+
+        if element.resistance >= 0.001:
+            ohm = f"{round(element.resistance, 3)} Ω"
+        else:
+            ohm = f"{round(element.resistance * 1000.0, 6)} mΩ"
+
+        element_title = f"{a.node_name} ({a.layer_name}) ↔︎ " \
+                        f"{b.node_name} ({b.layer_name})" \
+                        f": {ohm}"
+        polygon = self.marker_arrow_between_nodes(a, b)
+        self.output_shapes(self.cat_rex_elements, element_title, [polygon])
