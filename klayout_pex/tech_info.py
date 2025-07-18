@@ -214,11 +214,16 @@ class TechInfo:
 
     @cached_property
     def contact_above_metal_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
-        return {lyr.name: lyr.metal_layer.contact_above
-                for lyr in self.process_metal_layers}
+        d = {}
+        for lyr in self.process_metal_layers:
+            contact = lyr.metal_layer.contact_above
+            via_gds_pair = self.gds_pair(contact)
+            canonical_via_name = self.canonical_layer_name_by_gds_pair[via_gds_pair]
+            d[lyr.name] = canonical_via_name
+        return d
 
     @cached_property
-    def contact_by_contact_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+    def contact_by_contact_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
         return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
                 for lyr in self.process_metal_layers}
 
@@ -232,7 +237,14 @@ class TechInfo:
         return gds_pair
 
     @cached_property
-    def bottom_and_top_layer_name_by_via_layer_name(self) -> Dict[str, Tuple[str, str]]:
+    def bottom_and_top_layer_name_by_via_computed_layer_name(self) -> Dict[str, Tuple[str, str]]:
+        # NOTE: vias under the same name can be used in multiple situations
+        #       e.g. in sky130A, via3 has two (bot, top) cases: {(met3, met4), (met3, cmim)},
+        #       therefore the canonical name must not be used,
+        #       but really the LVS computed name, that is also used in the process stack
+        #
+        #       the metal layers however are canonical!
+
         d = {}
         for metal_layer in self.process_metal_layers:
             layer_name = metal_layer.name
