@@ -34,7 +34,8 @@ from ..log import (
     warning,
     error,
     info,
-    subproc
+    subproc,
+    rule
 )
 from ..tech_info import TechInfo
 from .extraction_results import *
@@ -215,8 +216,8 @@ class RCX25Extractor:
             regions_by_klayout_index: Dict[int, kdb.Region] = defaultdict(kdb.Region)
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
-            vertex_port_net_names: List[str] = []
-            polygon_port_net_names: List[str] = []
+            vertex_port_net_names: Dict[int, List[str]] = defaultdict(list)
+            polygon_port_net_names: Dict[int, List[str]] = defaultdict(list)
 
             # NOTE: we're providing all port pins as vertex_ports
             #       so we use all the polygon_ports for the device pins
@@ -227,13 +228,21 @@ class RCX25Extractor:
                     for lyr_name, region in terminal.regions_by_layer_name.items():
                         gds_pair = self.tech_info.gds_pair(lyr_name)
                         klayout_index = self.pex_context.annotated_layout.layer(*gds_pair)
-                        layer_names_by_klayout_index[klayout_index] = lyr_name
                         device_regions_by_klayout_index[klayout_index] += region
-                        polygon_ports[klayout_index] += region.each()
+                        port_regions = list(region.each())
+                        polygon_ports[klayout_index] += port_regions
+                        port_name = f"Device_Port.{dev_name}.{terminal.name}"
+                        polygon_port_net_names[klayout_index] += [port_name] * len(port_regions)
 
-            for gds_pair, lyr_info in self.pex_context.extracted_layers.items():
-                canonical_layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair[gds_pair]
-
+            for lvs_gds_pair, lyr_info in self.pex_context.extracted_layers.items():
+                canonical_layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
+                # NOTE: LVS GDS Pair differs from real GDS Pair,
+                #       as in some cases we want to split a layer into different regions (ptap vs ntap, cap vs ncap)
+                #       so invent new datatype numbers, like adding 100 to the real GDS datatype
+                gds_pair = self.pex_context.tech.gds_pair_for_layer_name.get(canonical_layer_name, None)
+                if gds_pair is None:
+                    warning(f"ignoring layer {canonical_layer_name}, not in self.tech.gds_pair_for_layer_name!")
+                    continue
                 if gds_pair not in self.pex_context.tech.layer_info_by_gds_pair:
                     warning(f"ignoring layer {canonical_layer_name}, not in self.tech.layer_info_by_gds_pair!")
                     continue
@@ -257,7 +266,7 @@ class RCX25Extractor:
                         #     so in the extreme case the polygons could become empty)
 
                         vertex_ports[klayout_index].append(l.position())
-                        vertex_port_net_names.append(l.string)
+                        vertex_port_net_names[klayout_index] = l.string
 
                         pin_point = l.bbox().enlarge(5)
                         report.output_pin(layer_name=canonical_layer_name,
@@ -272,7 +281,11 @@ class RCX25Extractor:
                                                via_merge_distance=0,
                                                skip_simplify=True)
 
+            rule("[Debug]: klayout RExtractorTech")
             print(rex_tech)
+            rule("[Debug]: klayout index by layer_name")
+            print(layer_names_by_klayout_index)
+            rule()
             print("")
 
             resistor_networks = rex.extract(rex_tech, regions_by_klayout_index, vertex_ports, polygon_ports)
@@ -306,10 +319,10 @@ class RCX25Extractor:
                 match rn.type():
                     case klp.RNodeType.VertexPort:
                         port_idx = rn.port_index()
-                        r_node.net_name = vertex_port_net_names[port_idx]
+                        r_node.net_name = vertex_port_net_names[rn.layer()][port_idx]
                     case klp.RNodeType.PolygonPort:
                         port_idx = rn.port_index()
-                        r_node.net_name = polygon_port_net_names[port_idx]
+                        r_node.net_name = polygon_port_net_names[rn.layer()][port_idx]
                     case _:
                         r_node.net_name = r_node.node_name
 
