@@ -266,7 +266,7 @@ class RCX25Extractor:
                         #     so in the extreme case the polygons could become empty)
 
                         vertex_ports[klayout_index].append(l.position())
-                        vertex_port_net_names[klayout_index] = l.string
+                        vertex_port_net_names[klayout_index].append(l.string)
 
                         pin_point = l.bbox().enlarge(5)
                         report.output_pin(layer_name=canonical_layer_name,
@@ -284,7 +284,19 @@ class RCX25Extractor:
             rule("[Debug]: klayout RExtractorTech")
             print(rex_tech)
             rule("[Debug]: klayout index by layer_name")
-            print(layer_names_by_klayout_index)
+            subproc("\tDevice Terminals (Polygon Ports):")
+            for klayout_index, polygon_list in polygon_ports.items():
+                port_names = polygon_port_net_names[klayout_index]
+                for idx, polygon in enumerate(polygon_list):
+                    subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
+                            f"terminal #{idx}: {port_names[idx]} @ {polygon}")
+            subproc("\n\tPorts Pins (Vertex Ports):")
+            for klayout_index, point_list in vertex_ports.items():
+                port_names = vertex_port_net_names[klayout_index]
+                for idx, point in enumerate(point_list):
+                    subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
+                            f"pin #{idx}: {port_names[idx]} @ {point}")
+            subproc(f"\n\tLayers: {layer_names_by_klayout_index}")
             rule()
             print("")
 
