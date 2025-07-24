@@ -325,11 +325,11 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "TopMetal2",  11);
 
     // resistance values are in mΩ / square
-    //                       contact_layer, layer_below,  resistance
+    //                       contact_layer, layer_below,  layer_above, resistance
 
-    addContactResistance(ri, "Cont",        "nSD",        17000);  // Cont over nSD-Activ
-    addContactResistance(ri, "Cont",        "pSD",        17000);  // Cont over pSD-Activ
-    addContactResistance(ri, "Cont",        "GatPoly",    15000);  // Cont over pSD-Activ
+    addContactResistance(ri, "Cont",        "nSD",        "Metal1",    17000);  // Cont over nSD-Activ
+    addContactResistance(ri, "Cont",        "pSD",        "Metal1",    17000);  // Cont over pSD-Activ
+    addContactResistance(ri, "Cont",        "GatPoly",    "Metal1",    15000);  // Cont over GatPoly
 
     // resistance values are in mΩ / square
     //                       via_layer,  resistance
