@@ -226,6 +226,11 @@ class RCX25Extractor:
             for dev_name, device in devices_by_name.items():
                 for terminal in device.terminals.terminals:
                     for lyr_name, region in terminal.regions_by_layer_name.items():
+
+                        # TODO!
+                        if lyr_name.lower() == 'nwell':
+                            continue
+
                         gds_pair = self.tech_info.gds_pair(lyr_name)
                         klayout_index = self.pex_context.annotated_layout.layer(*gds_pair)
                         device_regions_by_klayout_index[klayout_index] += region
