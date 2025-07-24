@@ -979,9 +979,13 @@ ntap_bjt  = tap.and(nsdm).not(diff_res).not(diff_cut)
 poly_con  = poly.not(poly_res).not(vpp).not(npnid)
 li_con    = li.not( li_res ).not(vpp)
 
-# NOTE: this was missing in the original sky130A LVS script!
+# [PEX] NOTE: this was missing in the original sky130A LVS script!
 #       we want to split mcon into mcon_con and mcon_vpp
 #       (might not cause an issue in regular LVS, but in PEX context necessary)
+licon_poly_con = licon.and(poly)
+licon_nsd_con = licon.and(nsd)
+licon_psd_con = licon.and(psd)
+
 mcon_con  = mcon.not(vpp)
 via1_con  = via1.not(vpp)
 via2_con  = via2.not(vpp)
@@ -994,7 +998,7 @@ met3_con  = met3.not(met3_res).not(inductor).not(met3_fuse).not(vpp)
 met4_con  = met4.not(met4_res).not(met4_fuse).not(vpp)
 met5_con  = met5.not(met5_res).not(vpp)
 
-# Pins (NOTE: a regular LVS would not do this, we need it for PEX)
+# [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
 poly_pin_con = poly_pin & poly_con
 li_pin_con   = li_pin   & li_con
 met1_pin_con = met1_pin & met1_con
@@ -1651,7 +1655,7 @@ logger.info("Starting SKY130 LVS connectivity setup")
 
 logger.info("Starting SKY130 LVS connectivity setup (Inter-layer)")
 
-# export layer names
+# [PEX] export layer names
 if self.respond_to?(:name)
   %w(sub_label pwelliso_label nwell_label pwell_label tap_label diff_label poly_label poly_model li_label met1_label met2_label met3_label met4_label met5_label rdl_label pad_label txt_label).each do |l|
     name(eval(l), l)
@@ -1661,6 +1665,12 @@ if self.respond_to?(:name)
     name(eval(l), l)
   end
 
+  # [PEX] naming splitted licon (can be licon over nsd/psd/poly)
+  %w(licon_poly_con licon_nsd_con licon_psd_con).each do |l|
+    name(eval(l), l)
+  end
+
+  # [PEX] naming pins
   %w(poly_pin_con li_pin_con met1_pin_con met2_pin_con met3_pin_con met4_pin_con met5_pin_con).each do |l|
     name(eval(l), l)
   end
@@ -1674,6 +1684,11 @@ if self.respond_to?(:name)
   end
   
   %w(capm capm2 met3_cap via3_cap met4_cap via4_cap).each do |l|
+    name(eval(l), l)
+  end
+  
+  # name additional layers (not yet really needed necessarily)
+  %w(tgate pgate ngate pgate_1p8v pgate_1p8v_lvt pgate_1p8v_hvt pgate_5p0v_hv ngate_1p8v ngate_1p8v_lvt ngate_3p0v_nvt ngate_5p0v_nvt ngate_5p0v_hv    licon_npc).each do |l|
     name(eval(l), l)
   end
 end
@@ -1718,7 +1733,12 @@ connect(met5_con    ,     met5_label)
 connect(rdl         ,      rdl_label)
 connect(pad         ,      pad_label)
 
-# Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
+# [PEX] Explicitly splitting licon for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(licon_poly_con,   licon)
+connect(licon_nsd_con,    licon)
+connect(licon_psd_con,    licon)
+
+# [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
 connect(poly_con    ,      poly_pin_con)
 connect(li_con      ,      li_pin_con)
 connect(met1_con    ,      met1_pin_con)
