@@ -153,6 +153,7 @@ void addLayerResistance(kpex::tech::ResistanceInfo *ri,
 void addContactResistance(kpex::tech::ResistanceInfo *ri,
                           const std::string &contact_layer_name,
                           const std::string &device_layer_name,
+                          const std::string &layer_above,
                           double resistance);
 
 void addViaResistance(kpex::tech::ResistanceInfo *ri,
