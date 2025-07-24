@@ -69,32 +69,34 @@ def create_r_extractor_tech(extraction_context: KLayoutExtractionContext,
 
         canonical_layer_name = tech.canonical_layer_name_by_gds_pair[gds_pair]
 
-        match computed_layer_info.layer_info.purpose:
-            case tech_pb2.LayerInfo.Purpose.PURPOSE_METAL:
-                if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
-                    continue
+        LP = tech_pb2.LayerInfo.Purpose
 
-                layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
-                for source_layer in li.source_layers:
-                    cond = klp.RExtractorTechConductor()
-                    cond.triangulation_min_b = delaunay_b
-                    cond.triangulation_max_area = delaunay_amax
+        if computed_layer_info.kind != tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+            match computed_layer_info.layer_info.purpose:
+                case LP.PURPOSE_NWELL:
+                    pass   # TODO!
+                case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
+                    # device terminals
+                    #   - source/drain (e.g. sky130A: nsdm, psdm)
+                    #   - bulk (e.g. nwell)
+                    #
+                    # we will consider this only as an pin end-point, there are no wires at all on this layer,
+                    # so the resistance does not matter for PEX
+                    for source_layer in li.source_layers:
+                        cond = klp.RExtractorTechConductor()
+                        cond.triangulation_min_b = delaunay_b
+                        cond.triangulation_max_area = delaunay_amax
 
-                    if canonical_layer_name == tech.internal_substrate_layer_name:
                         cond.algorithm = substrate_algorithm
-                    else:
-                        cond.algorithm = wire_algorithm
-                    cond.layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
-                    cond.resistance = layer_resistance.resistance
-                    # TODO: ... = layer_resistance.corner_adjustment_fraction ????
-                    rex_tech.add_conductor(cond)
+                        cond.layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
+                        cond.resistance = 0  # see comment above
+                        rex_tech.add_conductor(cond)
 
-            case tech_pb2.LayerInfo.Purpose.PURPOSE_CONTACT:
-                contact_resistance = tech.contact_resistance_by_layer_name.get(canonical_layer_name, None)
-                if contact_resistance is None:
-                    warning(f"ignoring layer {canonical_layer_name}, no contact resistance found in tech info")
-                    continue
-                else:  # it's a contact
+                case LP.PURPOSE_METAL:
+                    if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                        continue
+
+                    layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
                     for source_layer in li.source_layers:
                         cond = klp.RExtractorTechConductor()
                         cond.triangulation_min_b = delaunay_b
@@ -105,29 +107,59 @@ def create_r_extractor_tech(extraction_context: KLayoutExtractionContext,
                         else:
                             cond.algorithm = wire_algorithm
                         cond.layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
-                        cond.resistance = contact_resistance.resistance
+                        cond.resistance = layer_resistance.resistance
+                        # TODO: ... = layer_resistance.corner_adjustment_fraction ????
                         rex_tech.add_conductor(cond)
 
-            case tech_pb2.LayerInfo.Purpose.PURPOSE_VIA:
-                via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
-                if via_resistance is None:
-                    warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
-                    continue
-                for source_layer in li.source_layers:
-                    via = klp.RExtractorTechVia()
+                case LP.PURPOSE_CONTACT:
+                    for source_layer in li.source_layers:
+                        contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
+                        if contact is None:
+                            warning(
+                                f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
+                                f"no contact found in tech info")
+                            continue
 
-                    (bot, top) = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(source_layer.lvs_layer_name, None)
-                    bot_gds_pair = tech.gds_pair(bot)
-                    top_gds_pair = tech.gds_pair(top)
+                        contact_resistance = tech.contact_resistance_by_device_layer_name.get(contact.layer_below, None)
+                        if contact_resistance is None:
+                            warning(f"ignoring layer {canonical_layer_name}, no contact resistance found in tech info")
+                            continue
 
-                    via.bottom_conductor = extraction_context.annotated_layout.layer(*bot_gds_pair)
-                    via.cut_layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
-                    via.top_conductor = extraction_context.annotated_layout.layer(*top_gds_pair)
+                        via = klp.RExtractorTechVia()
 
-                    contact = extraction_context.tech.contact_by_contact_lvs_layer_name[source_layer.lvs_layer_name]
+                        bot_gds_pair = tech.gds_pair(contact.layer_below)
+                        top_gds_pair = tech.gds_pair(contact.metal_above)
 
-                    via.resistance = via_resistance.resistance * contact.width**2
-                    via.merge_distance = via_merge_distance
-                    rex_tech.add_via(via)
+                        via.bottom_conductor = extraction_context.annotated_layout.layer(*bot_gds_pair)
+                        via.cut_layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
+                        via.top_conductor = extraction_context.annotated_layout.layer(*top_gds_pair)
+
+                        via.resistance = contact_resistance.resistance * contact.width**2
+                        via.merge_distance = via_merge_distance
+                        rex_tech.add_via(via)
+
+                case LP.PURPOSE_VIA:
+                    via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
+                    if via_resistance is None:
+                        warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
+                        continue
+                    for source_layer in li.source_layers:
+                        via = klp.RExtractorTechVia()
+
+                        (bot, top) = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(source_layer.lvs_layer_name, None)
+                        bot_gds_pair = tech.gds_pair(bot)
+                        top_gds_pair = tech.gds_pair(top)
+
+                        via.bottom_conductor = extraction_context.annotated_layout.layer(*bot_gds_pair)
+                        via.cut_layer = extraction_context.annotated_layout.layer(*source_layer.gds_pair)
+                        via.top_conductor = extraction_context.annotated_layout.layer(*top_gds_pair)
+
+                        contact = extraction_context.tech.contact_by_contact_lvs_layer_name[source_layer.lvs_layer_name]
+
+                        via.resistance = via_resistance.resistance * contact.width**2
+                        via.merge_distance = via_merge_distance
+                        rex_tech.add_via(via)
+                # case _:
+                #     raise NotImplementedError(f"unknown device purpose {computed_layer_info.layer_info.purpose}")
 
     return rex_tech
