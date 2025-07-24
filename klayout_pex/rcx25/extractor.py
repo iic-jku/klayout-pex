@@ -283,13 +283,25 @@ class RCX25Extractor:
 
             rule("[Debug]: klayout RExtractorTech")
             print(rex_tech)
+
             rule("[Debug]: klayout index by layer_name")
-            subproc("\tDevice Terminals (Polygon Ports):")
+
+            subproc("\tRExtractorTech:")
+            subproc("\t\tConductors:")
+            for idx, cond in enumerate(list(rex_tech.each_conductor())):
+                subproc(f"\t\t\tConductor #{idx}, layer {layer_names_by_klayout_index[cond.layer]} ({cond.layer})")
+
+            subproc("\n\t\tVias:")
+            for idx, via in enumerate(list(rex_tech.each_via())):
+                subproc(f"\t\t\tVia #{idx}, layer {layer_names_by_klayout_index[via.cut_layer]} ({via.cut_layer})")
+
+            subproc("\n\tDevice Terminals (Polygon Ports):")
             for klayout_index, polygon_list in polygon_ports.items():
                 port_names = polygon_port_net_names[klayout_index]
                 for idx, polygon in enumerate(polygon_list):
                     subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
                             f"terminal #{idx}: {port_names[idx]} @ {polygon}")
+
             subproc("\n\tPorts Pins (Vertex Ports):")
             for klayout_index, point_list in vertex_ports.items():
                 port_names = vertex_port_net_names[klayout_index]
@@ -297,6 +309,12 @@ class RCX25Extractor:
                     subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
                             f"pin #{idx}: {port_names[idx]} @ {point}")
             subproc(f"\n\tLayers: {layer_names_by_klayout_index}")
+
+            subproc(f"\n\tLayer Polygons (summary):")
+            for klayout_index, region in regions_by_klayout_index.items():
+                subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
+                        f"{region.count()} polygons")
+
             rule()
             print("")
 
