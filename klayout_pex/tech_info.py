@@ -223,6 +223,19 @@ class TechInfo:
         return d
 
     @cached_property
+    def contact_by_device_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
+        d = {}
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
+        for lyr in self.tech.process_stack.layers:
+            match lyr.layer_type:
+                case LT.LAYER_TYPE_NWELL:
+                    d[lyr.name] = lyr.nwell_layer.contact_above
+
+                case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
+                    d[lyr.name] = lyr.diffusion_layer.contact_above
+        return d
+
+    @cached_property
     def contact_by_contact_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
         return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
                 for lyr in self.process_metal_layers}
