@@ -23,6 +23,7 @@
 #
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
 import tempfile
@@ -32,7 +33,6 @@ from rich.pretty import pprint
 
 import klayout.db as kdb
 
-import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from ..log import (
     console,
     debug,
@@ -43,7 +43,11 @@ from ..log import (
 )
 
 from ..tech_info import TechInfo
-
+import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
+import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 GDSPair = Tuple[int, int]
 
@@ -65,35 +69,35 @@ class KLayoutMergedExtractedLayerInfo:
     gds_pair: GDSPair
 
 
-@dataclass
-class KLayoutDeviceTerminal:
-    id: int
-    name: str
-    regions_by_layer_name: Dict[str, kdb.Region]
-    net_name: str
-
-    # internal data access
-    net_terminal_ref: Optional[kdb.NetTerminalRef]
-    net: Optional[kdb.Net]
-
-
-@dataclass
-class KLayoutDeviceTerminalList:
-    terminals: List[KLayoutDeviceTerminal]
-
-
-@dataclass
-class KLayoutDeviceInfo:
-    id: str
-    name: str   # expanded name
-    class_name: str
-    abstract_name: str
-
-    terminals: KLayoutDeviceTerminalList
-    params: Dict[str, str]
-
-    # internal data access
-    device: kdb.Device
+# @dataclass
+# class KLayoutDeviceTerminal:
+#     id: int
+#     name: str
+#     regions_by_layer_name: Dict[str, kdb.Region]
+#     net_name: str
+#
+#     # internal data access
+#     net_terminal_ref: Optional[kdb.NetTerminalRef]
+#     net: Optional[kdb.Net]
+#
+#
+# @dataclass
+# class KLayoutDeviceTerminalList:
+#     terminals: List[KLayoutDeviceTerminal]
+#
+#
+# @dataclass
+# class KLayoutDeviceInfo:
+#     id: str
+#     name: str   # expanded name
+#     class_name: str
+#     abstract_name: str
+#
+#     terminals: KLayoutDeviceTerminalList
+#     params: Dict[str, str]
+#
+#     # internal data access
+#     device: kdb.Device
 
 
 @dataclass
@@ -374,70 +378,118 @@ class KLayoutExtractionContext:
         return self.lvsdb.netlist().top_circuit()
 
     @cached_property
-    def devices_by_name(self) -> Dict[str, KLayoutDeviceInfo]:
+    def devices_by_name(self) -> Dict[str, device_pb2.Device]:
         dd = {}
 
-        for d in self.top_circuit.each_device():
+        for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html
-            d: kdb.Device
+            d_kly: kdb.Device
 
-            param_defs = d.device_class().parameter_definitions()
-            params_by_name = {pd.name: d.parameter(pd.id()) for pd in param_defs}
+            d = device_pb2.Device()
+            d.id = d_kly.id()
+            d.device_name = d_kly.expanded_name()
+            d.device_class_name = d_kly.device_class().name
+            d.device_abstract_name = d_kly.device_abstract.name
 
-            terminals: List[KLayoutDeviceTerminal] = []
+            for pd in d_kly.device_class().parameter_definitions():
+                p = d.parameters.add()
+                p.id = pd.id()
+                p.name = pd.name
+                p.value = d_kly.parameter(pd.id())
 
-            for td in d.device_class().terminal_definitions():
-                n: kdb.Net = d.net_for_terminal(td.id())
+            for td in d_kly.device_class().terminal_definitions():
+                n: kdb.Net = d_kly.net_for_terminal(td.id())
                 if n is None:
-                    warning(f"Skipping terminal {td.name} of device {d.expanded_name()} ({d.device_class().name}) "
+                    warning(f"Skipping terminal {td.name} of device {d.name} ({d.device_class}) "
                             f"is not connected to any net")
-                    terminals.append(
-                        KLayoutDeviceTerminal(
-                            id=td.id(),
-                            name=td.name,
-                            regions_by_layer_name={},
-                            net_name='',
-                            net_terminal_ref=None,
-                            net=None
-                        )
-                    )
+                    terminal = d.terminals.add()
+                    terminal.id = td.id()
+                    terminal.name = td.name
+                    terminal.net_name = ''  # TODO
                     continue
 
                 for nt in n.each_terminal():
                     nt: kdb.NetTerminalRef
 
-                    if nt.device().expanded_name() != d.expanded_name():
+                    if nt.device().expanded_name() != d_kly.expanded_name():
                         continue
-                    if nt.terminal_id() != td.id():
+                    if nt.terminal_id() != d_kly.id():
                         continue
 
                     shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
 
-                    def layer_name(idx: int) -> str:
-                        lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[self.layer_index_map[idx]]
-                        return self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
+                    terminal = d.terminals.add()
+                    terminal.id = td.id()
+                    terminal.name = td.name
+                    terminal.net_name = n.name
 
-                    shapes_by_lyr_name = {layer_name(idx): shapes for idx, shapes in shapes_by_lyr_idx.items()}
+                    for idx, shapes in shapes_by_lyr_idx.items():
+                        lyr_idx = self.layer_index_map[idx]
+                        lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
-                    terminals.append(
-                        KLayoutDeviceTerminal(
-                            id=td.id(),
-                            name=td.name,
-                            regions_by_layer_name=shapes_by_lyr_name,
-                            net_name=n.name,
-                            net_terminal_ref=nt,
-                            net=n
-                        )
-                    )
+                        region_by_layer = terminal.regions_by_layer.add()
+                        region_by_layer.layer.id = lyr_idx
 
-            dd[d.expanded_name()] = KLayoutDeviceInfo(
-                id=d.id(),
-                name=d.expanded_name(),
-                class_name=d.device_class().name,
-                abstract_name=d.device_abstract.name,
-                params=params_by_name,
-                terminals=KLayoutDeviceTerminalList(terminals=terminals),
-                device=d
-            )
+                        # region.layer.lvs_layer_name = self.tech.computed_layer_info_by_gds_pair[lyr_info.layer, lyr_info.datatype].layer_info.name
+                        region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
+
+                        for s in shapes:
+                            pgn = region_by_layer.region.polygons.add()
+                            for p_kly in s.each_point_hull():
+                                pt = pgn.hull_points.add()
+                                pt.x = p_kly.x
+                                pt.y = p_kly.y
+
+            dd[d.device_name] = d
 
         return dd
+
+    @cached_property
+    def pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:
+        d = defaultdict(list)
+
+        for lvs_gds_pair, lyr_info in self.extracted_layers.items():
+            canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
+            # NOTE: LVS GDS Pair differs from real GDS Pair,
+            #       as in some cases we want to split a layer into different regions (ptap vs ntap, cap vs ncap)
+            #       so invent new datatype numbers, like adding 100 to the real GDS datatype
+            gds_pair = self.tech.gds_pair_for_layer_name.get(canonical_layer_name, None)
+            if gds_pair is None:
+                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.gds_pair_for_layer_name!")
+                continue
+            if gds_pair not in self.tech.layer_info_by_gds_pair:
+                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.layer_info_by_gds_pair!")
+                continue
+
+            for lyr in lyr_info.source_layers:
+                klayout_index = self.annotated_layout.layer(*lyr.gds_pair)
+
+                # regions_by_klayout_index[klayout_index] = lyr.region
+                # layer_names_by_klayout_index[klayout_index] = canonical_layer_name
+
+                pins = self.pins_of_layer(gds_pair)
+                labels = self.labels_of_layer(gds_pair)
+
+                pin_labels: kdb.Texts = labels & pins
+                for l in pin_labels:
+                    l: kdb.Text
+                    # NOTE: because we want more like a point as a junction
+                    #       and folx create huge pins (covering the whole metal)
+                    #       we create our own "mini squares"
+                    #    (ResistorExtractor will subtract the pins from the metal polygons,
+                    #     so in the extreme case the polygons could become empty)
+
+                    pin = pin_pb2.Pin()
+                    pin.label = l.string
+                    pin.net_name = ''  # TODO!
+
+                    pin.layer.id = klayout_index
+                    pin.layer.canonical_layer_name = '' # TODO
+                    pin.layer.lvs_layer_name = '' # TODO
+
+                    pin.label_point.x = l.position().x
+                    pin.label_point.y = l.position().y
+
+                    d[gds_pair].append(pin)
+
+        return d

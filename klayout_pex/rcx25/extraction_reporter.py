@@ -28,12 +28,16 @@ import klayout.rdb as rdb
 import klayout.db as kdb
 
 from .extraction_results import *
-from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from .types import EdgeNeighborhood, LayerName
-from ..klayout.lvsdb_extractor import KLayoutDeviceInfo
+from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
+from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 
-import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
+import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
+import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 
 VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
 
@@ -47,6 +51,7 @@ class ExtractionReporter:
         self.dbu = dbu
         self.dbu_trans = kdb.CplxTrans(mag=dbu)
         self.category_name_counter: Dict[str, int] = defaultdict(int)
+        self.shapes_converter = ShapesConverter(dbu=dbu)
 
     @cached_property
     def cat_common(self) -> rdb.RdbCategory:
@@ -57,8 +62,16 @@ class ExtractionReporter:
         return self.report.create_category("Pins")
 
     @cached_property
+    def cat_rex_request(self) -> rdb.RdbCategory:
+        return self.report.create_category("R Extraction Request")
+
+    @cached_property
+    def cat_rex_tech(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_request, "R Extraction Tech")
+
+    @cached_property
     def cat_rex_result(self) -> rdb.RdbCategory:
-        return self.report.create_category("R Extraction")
+        return self.report.create_category("R Extraction Result")
 
     @cached_property
     def cat_rex_nodes(self) -> rdb.RdbCategory:
@@ -208,29 +221,30 @@ class ExtractionReporter:
                 )
 
     def output_devices(self,
-                       devices_by_name: Dict[str, KLayoutDeviceInfo]):
+                       devices_by_name: Dict[str, device_pb2.Device]):
         for d in devices_by_name.values():
             self.output_device(d)
 
     def output_device(self,
-                      device: KLayoutDeviceInfo):
+                      device: device_pb2.Device):
         cat_device = self.report.create_category(
             self.cat_devices,
-            f"{device.name}: {device.class_name}"
+            f"{device.device_name}: {device.device_class_name}"
         )
         cat_device_params = self.report.create_category(cat_device, 'Params')
-        for name, value in device.params.items():
-            self.report.create_category(cat_device_params, f"{name}: {value}")
+        for p in device.parameters:
+            self.report.create_category(cat_device_params, f"{p.name}: {p.value}")
 
         cat_device_terminals = self.report.create_category(cat_device, 'Terminals')
-        for t in device.terminals.terminals:
-            if t.regions_by_layer_name:
-                for layer_name, regions in t.regions_by_layer_name.items():
-                    self.output_shapes(
-                        cat_device_terminals,
-                        f"{t.name}: net {t.net_name}, layer {layer_name}",
-                        regions
-                    )
+        for t in device.terminals:
+            for l2r in t.regions_by_layer:
+                r = self.shapes_converter.klayout_region(l2r.region)
+
+                self.output_shapes(
+                    cat_device_terminals,
+                    f"{t.name}: net {t.net_name}, layer {l2r.layer.canonical_layer_name}",
+                    r
+                )
             else:
                 self.report.create_category(
                     cat_device_terminals,
@@ -271,6 +285,30 @@ class ExtractionReporter:
         sh.insert(pin_point)
         self.output_shapes(cat_pin_layer, label.string, sh)
 
+    def output_rex_tech(self, tech: r_extractor_tech_pb2.RExtractorTech):
+        layer_by_id = {c.layer.id: c.layer for c in tech.conductors}
+
+        self.report.create_category(self.cat_rex_tech, f"Skip simplify: {tech.skip_simplify}")
+        cat_conductors = self.report.create_category(self.cat_rex_tech, 'Conductors')
+        cat_vias = self.report.create_category(self.cat_rex_tech, 'Vias')
+        for c in tech.conductors:
+            self.report.create_category(
+                cat_conductors,
+                f"{c.layer.id}: {c.layer.canonical_layer_name} (LVS {c.layer.lvs_layer_name}), {c.resistance} mΩ/µm^2"
+            )
+        for v in tech.vias:
+            bot = layer_by_id[v.bottom_conductor.id].canonical_layer_name
+            top = layer_by_id[v.top_conductor.id].canonical_layer_name
+            self.report.create_category(
+                cat_vias,
+                f"{v.layer.id}: {v.layer.canonical_layer_name} (LVS {v.layer.lvs_layer_name}, "
+                f"{bot}↔︎{top}), "
+                f"{v.resistance} mΩ/µm^2"
+            )
+
+    def output_rex_request(self, request: pex_request_pb2.RExtractionRequest):
+        self.output_rex_tech(request.tech)
+
     def output_rex_result(self,
                           result: pex_result_pb2.RExtractionResult):
         node_id_to_node: Dict[int, pex_result_pb2.RNode] = {}
@@ -295,13 +333,13 @@ class ExtractionReporter:
         return box
 
     def marker_box_for_node_location(self, node: pex_result_pb2.RNode) -> kdb.Box:
-        match node.location_type:
-            case pex_result_pb2.RNode.LocationType.LOCATION_TYPE_POINT:
+        match node.location.kind:
+            case location_pb2.Location.Kind.LOCATION_KIND_POINT:
                 # create marker around point for better visiblity
-                point_box = self.marker_box_for_pb_point(node.location_point)
+                point_box = self.marker_box_for_pb_point(node.location.point)
                 return point_box
-            case pex_result_pb2.RNode.LocationType.LOCATION_TYPE_BOX:
-                box = self.box_for_pb_box(node.location_box)
+            case location_pb2.Location.Kind.LOCATION_KIND_BOX:
+                box = self.box_for_pb_box(node.location.box)
                 return box
             case _:
                 raise NotImplementedError("unknown location type: {node.location_type}")

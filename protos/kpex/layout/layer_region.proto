@@ -21,24 +21,13 @@
 // --------------------------------------------------------------------------------
 syntax = "proto3";
 
-package kpex.geometry;
+package kpex.layout;
 
-// NOTE: all coordinates are in database units, (not floating point coordinates in µm)
+import "kpex/geometry/shapes.proto";
+import "kpex/layout/layer_ref.proto";
 
-message Point {
-    int64 x = 1;
-    int64 y = 2;
+message LayerRegion {
+    kpex.layout.LayerRef layer = 10;
+    kpex.geometry.Region region = 20;
 }
 
-message Box {
-    Point lower_left = 1;
-    Point upper_right = 2;
-}
-
-message Polygon {
-    repeated Point hull_points = 1;
-}
-
-message Region {
-    repeated Polygon polygons = 1;
-}

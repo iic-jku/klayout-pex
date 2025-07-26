@@ -35,7 +35,7 @@ from klayout_pex.log import (
 )
 from .conductance import Conductance
 from ..types import LayerName
-from ...klayout.lvsdb_extractor import KLayoutDeviceTerminal, KLayoutDeviceInfo
+# from ...klayout.lvsdb_extractor import KLayoutDeviceTerminal, KLayoutDeviceInfo
 
 NodeID = int
 

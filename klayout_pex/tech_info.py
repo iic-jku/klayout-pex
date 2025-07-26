@@ -237,8 +237,19 @@ class TechInfo:
 
     @cached_property
     def contact_by_contact_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
-        return {lyr.metal_layer.contact_above.name: lyr.metal_layer.contact_above
-                for lyr in self.process_metal_layers}
+        d = {}
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
+        for lyr in self.tech.process_stack.layers:
+            match lyr.layer_type:
+                case LT.LAYER_TYPE_NWELL:
+                    d[lyr.nwell_layer.contact_above.name] = lyr.nwell_layer.contact_above
+
+                case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
+                    d[lyr.diffusion_layer.contact_above.name] = lyr.diffusion_layer.contact_above
+
+                case LT.LAYER_TYPE_METAL:
+                    d[lyr.metal_layer.contact_above.name] = lyr.metal_layer.contact_above
+        return d
 
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
         gds_pair = self.gds_pair_for_computed_layer_name.get(layer_name, None)

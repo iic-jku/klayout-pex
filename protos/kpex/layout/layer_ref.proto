@@ -21,24 +21,11 @@
 // --------------------------------------------------------------------------------
 syntax = "proto3";
 
-package kpex.geometry;
+package kpex.layout;
 
-// NOTE: all coordinates are in database units, (not floating point coordinates in µm)
-
-message Point {
-    int64 x = 1;
-    int64 y = 2;
+message LayerRef {
+    uint32 id = 1;
+    string canonical_layer_name = 10;
+    string lvs_layer_name = 11;
 }
 
-message Box {
-    Point lower_left = 1;
-    Point upper_right = 2;
-}
-
-message Polygon {
-    repeated Point hull_points = 1;
-}
-
-message Region {
-    repeated Polygon polygons = 1;
-}

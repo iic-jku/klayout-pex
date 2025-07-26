@@ -55,6 +55,13 @@ set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
 
 set(PROTOBUF_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/geometry/shapes.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/device.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/layer_ref.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/layer_region.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/location.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/pin.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/klayout/r_extractor_tech.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/request/pex_request.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/result/pex_result.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/tech.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/tech/process_stack.proto

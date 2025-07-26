@@ -67,6 +67,7 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, MIM,     "capm2",  97,44,  -1,-1,  -1,-1,   "MiM capacitor plate over metal 4");
     addLayer(tech, VIA,     "via4",   71,44,  -1,-1,  -1,-1,   "Contact from met4 to met5 (no MiM cap)");
     addLayer(tech, METAL,   "met5",   72,20,  72,16,  72,5,    "Metal 5");
+
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
@@ -281,8 +282,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // CONTACT:             contact,         layer_below, metal_above, thickness,              width, spacing,  border
     //-----------------------------------------------------------------------------------------------------------------
     // setContact(nwellc,  "TODO",           "nwell",      "li1",       0.9361,                  0.17,    0.17,  0.0); // TODO
-    setContact(licon1n,    "licon_nsd_con",  "nsdm",      "li1",       0.9361,                  0.17,    0.17,  0.0);
-    setContact(licon1p,    "licon_psd_con",  "psdm",      "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1n,    "licon_nsd_con",  "nsdm",       "li1",       0.9361,                  0.17,    0.17,  0.0);
+    setContact(licon1p,    "licon_psd_con",  "psdm",       "li1",       0.9361,                  0.17,    0.17,  0.0);
     setContact(licon1poly, "licon_poly_con", "poly",      "li1",       0.4299,                  0.17,    0.17,  0.0);
     setContact(mcon,       "mcon_con",       "li1",       "met1",      1.3761 - (0.9361 + 0.1), 0.17,    0.19,  0.0);
     setContact(via,        "via1_con",       "met1",      "met2",      0.27,                    0.15,    0.17,  0.055);

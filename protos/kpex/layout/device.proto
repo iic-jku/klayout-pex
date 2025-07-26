@@ -21,24 +21,30 @@
 // --------------------------------------------------------------------------------
 syntax = "proto3";
 
-package kpex.geometry;
+package kpex.layout;
 
-// NOTE: all coordinates are in database units, (not floating point coordinates in µm)
+import "kpex/layout/layer_ref.proto";
+import "kpex/layout/layer_region.proto";
 
-message Point {
-    int64 x = 1;
-    int64 y = 2;
+message Device {
+    message Parameter {
+        uint32 id = 1;
+        string name = 10;
+        double value = 20;
+    }
+
+    message Terminal {
+        uint32 id = 1;
+        string name = 10;
+        string net_name = 11;
+        repeated kpex.layout.LayerRegion regions_by_layer = 30;
+    }
+
+    uint32 id = 1;
+    string device_name = 10;
+    string device_class_name = 20;
+    string device_abstract_name = 30;
+    repeated Parameter parameters = 40;
+    repeated Terminal terminals = 50;
 }
 
-message Box {
-    Point lower_left = 1;
-    Point upper_right = 2;
-}
-
-message Polygon {
-    repeated Point hull_points = 1;
-}
-
-message Region {
-    repeated Polygon polygons = 1;
-}
