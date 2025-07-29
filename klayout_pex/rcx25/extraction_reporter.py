@@ -35,6 +35,7 @@ from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
+import klayout_pex_protobuf.kpex.layout.layer_ref_pb2 as layer_ref_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
@@ -370,7 +371,6 @@ class ExtractionReporter:
         b_center = self.marker_box_for_node_location(node_b).center()
         path = kdb.Path([a_center, b_center], width=5)
         return path.polygon()
-
 
     def output_node(self,
                     node: pex_result_pb2.RNode):

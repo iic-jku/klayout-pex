@@ -463,9 +463,6 @@ class KLayoutExtractionContext:
             for lyr in lyr_info.source_layers:
                 klayout_index = self.annotated_layout.layer(*lyr.gds_pair)
 
-                # regions_by_klayout_index[klayout_index] = lyr.region
-                # layer_names_by_klayout_index[klayout_index] = canonical_layer_name
-
                 pins = self.pins_of_layer(gds_pair)
                 labels = self.labels_of_layer(gds_pair)
 
@@ -480,14 +477,24 @@ class KLayoutExtractionContext:
 
                     pin = pin_pb2.Pin()
                     pin.label = l.string
-                    pin.net_name = ''  # TODO!
 
+                    pos = l.position()
+
+                    # is there more elegant / faster way to do this?
+                    for p in pins:
+                        p: kdb.PolygonWithProperties
+                        if p.inside(pos):
+                            pin.net_name = p.property('net')
+                            break
+
+                    canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr.gds_pair]
+                    lvs_layer_name = self.tech.computed_layer_info_by_gds_pair[lyr.gds_pair].layer_info.name
                     pin.layer.id = klayout_index
-                    pin.layer.canonical_layer_name = '' # TODO
-                    pin.layer.lvs_layer_name = '' # TODO
+                    pin.layer.canonical_layer_name = canonical_layer_name
+                    pin.layer.lvs_layer_name = lvs_layer_name
 
-                    pin.label_point.x = l.position().x
-                    pin.label_point.y = l.position().y
+                    pin.label_point.x = pos.x
+                    pin.label_point.y = pos.y
 
                     d[gds_pair].append(pin)
 

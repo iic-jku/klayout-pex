@@ -222,193 +222,6 @@ class RExtractor:
 
         return rex_request
 
-    def prepare_request__OLD(self) -> pex_request_pb2.RExtractionRequest:
-        rex_request = pex_request_pb2.RExtractionRequest()
-
-        devices_by_name = self.pex_context.devices_by_name
-
-        node_count_by_net: Dict[str, int] = defaultdict(int)
-
-        layer_names_by_klayout_index: Dict[int, str] = {}
-        regions_by_klayout_index: Dict[int, kdb.Region] = defaultdict(kdb.Region)
-        vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
-        polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
-        vertex_port_net_names: Dict[int, List[str]] = defaultdict(list)
-        polygon_port_net_names: Dict[int, List[str]] = defaultdict(list)
-
-        # NOTE: we're providing all port pins as vertex_ports
-        #       so we use all the polygon_ports for the device pins
-
-        device_regions_by_klayout_index: Dict[int, kdb.Region] = defaultdict(kdb.Region)
-        for dev_name, device in devices_by_name.items():
-            for terminal in device.terminals:
-                for lyr_name, region in terminal.regions_by_layer_name.items():
-
-                    # TODO!
-                    if lyr_name.lower() == 'nwell':
-                        continue
-
-                    gds_pair = self.tech_info.gds_pair(lyr_name)
-                    klayout_index = self.pex_context.annotated_layout.layer(*gds_pair)
-                    device_regions_by_klayout_index[klayout_index] += region
-                    port_regions = list(region.each())
-                    for r in port_regions:
-                        polygon_ports[klayout_index].append(r.to_dtype(dbu=dbu))
-                    port_name = f"Device_Port.{dev_name}.{terminal.name}"
-                    polygon_port_net_names[klayout_index] += [port_name] * len(port_regions)
-                    layer_names_by_klayout_index[klayout_index] = lyr_name
-
-        for lvs_gds_pair, lyr_info in self.pex_context.extracted_layers.items():
-            canonical_layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
-            # NOTE: LVS GDS Pair differs from real GDS Pair,
-            #       as in some cases we want to split a layer into different regions (ptap vs ntap, cap vs ncap)
-            #       so invent new datatype numbers, like adding 100 to the real GDS datatype
-            gds_pair = self.pex_context.tech.gds_pair_for_layer_name.get(canonical_layer_name, None)
-            if gds_pair is None:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.gds_pair_for_layer_name!")
-                continue
-            if gds_pair not in self.pex_context.tech.layer_info_by_gds_pair:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.layer_info_by_gds_pair!")
-                continue
-
-            for lyr in lyr_info.source_layers:
-                klayout_index = self.pex_context.annotated_layout.layer(*lyr.gds_pair)
-
-                regions_by_klayout_index[klayout_index] = lyr.region
-                layer_names_by_klayout_index[klayout_index] = canonical_layer_name
-
-                pins = self.pex_context.pins_of_layer(gds_pair)
-                labels = self.pex_context.labels_of_layer(gds_pair)
-
-                pin_labels: kdb.Texts = labels & pins
-                for l in pin_labels:
-                    l: kdb.Text
-                    # NOTE: because we want more like a point as a junction
-                    #       and folx create huge pins (covering the whole metal)
-                    #       we create our own "mini squares"
-                    #    (ResistorExtractor will subtract the pins from the metal polygons,
-                    #     so in the extreme case the polygons could become empty)
-
-                    vertex_ports[klayout_index].append(l.position())
-                    vertex_port_net_names[klayout_index].append(l.string)
-
-                    pin_point = l.bbox().enlarge(5)
-                    report.output_pin(layer_name=canonical_layer_name,
-                                      pin_point=pin_point,
-                                      label=l)
-
-        rex_tech_pb = create_r_extractor_tech_pb(extraction_context=self.pex_context,
-                                                 substrate_algorithm=rex_tech_pb2.RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
-                                                 wire_algorithm=rex_tech_pb2.RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
-                                                 delaunay_b=self.delaunay_b,
-                                                 delaunay_amax=self.delaunay_amax,
-                                                 via_merge_distance=0,
-                                                 skip_simplify=True)
-
-        rex_request.tech.CopyFrom(rex_tech_pb)
-        report.output_rex_request(rex_request)
-
-        rex_tech_kly = klayout_r_extractor_tech(rex_tech_pb)
-
-        rule("[Debug]: klayout RExtractorTech")
-        print(rex_tech_kly)
-
-        rule("[Debug]: klayout index by layer_name")
-
-        subproc("\tRExtractorTech:")
-        subproc("\t\tConductors:")
-        for idx, cond in enumerate(list(rex_tech_kly.each_conductor())):
-            subproc(f"\t\t\tConductor #{idx}, layer {layer_names_by_klayout_index[cond.layer]} ({cond.layer})")
-
-        subproc("\n\t\tVias:")
-        for idx, via in enumerate(list(rex_tech_kly.each_via())):
-            subproc(f"\t\t\tVia #{idx}, layer {layer_names_by_klayout_index[via.cut_layer]} ({via.cut_layer})")
-
-        subproc("\n\tDevice Terminals (Polygon Ports):")
-        for klayout_index, polygon_list in polygon_ports.items():
-            port_names = polygon_port_net_names[klayout_index]
-            for idx, polygon in enumerate(polygon_list):
-                subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
-                        f"terminal #{idx}: {port_names[idx]} @ {polygon}")
-
-        subproc("\n\tPorts Pins (Vertex Ports):")
-        for klayout_index, point_list in vertex_ports.items():
-            port_names = vertex_port_net_names[klayout_index]
-            for idx, point in enumerate(point_list):
-                subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
-                        f"pin #{idx}: {port_names[idx]} @ {point}")
-        subproc(f"\n\tLayers: {layer_names_by_klayout_index}")
-
-        subproc(f"\n\tLayer Polygons (summary):")
-        for klayout_index, region in regions_by_klayout_index.items():
-            subproc(f"\t\tLayer {layer_names_by_klayout_index[klayout_index]} ({klayout_index}),  "
-                    f"{region.count()} polygons")
-
-        rule()
-        print("")
-
-        rex = klp.RNetExtractor(self.pex_context.dbu)
-        resistor_networks = rex.extract(rex_tech_kly, regions_by_klayout_index, vertex_ports, polygon_ports)
-
-        node_by_node_id: Dict[int, pex_result_pb2.RNode] = {}
-
-        subproc("\tNodes:")
-        for rn in resistor_networks.each_node():
-            loc = rn.location()
-            layer_id = rn.layer()
-            canonical_layer_name = layer_names_by_klayout_index[layer_id]
-
-            r_node = pex_result_pb2.RNode()
-            r_node.node_id = rn.object_id()
-            r_node.node_name = rn.to_s()
-            r_node.node_type = pex_result_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
-            r_node.layer_name = canonical_layer_name
-
-            match rn.type():
-                case klp.RNodeType.VertexPort:
-                    r_node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_POINT
-                    r_node.location.point.x = loc.center().x
-                    r_node.location.point.y = loc.center().y
-                case klp.RNodeType.PolygonPort | _:
-                    r_node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_BOX
-                    r_node.location.box.lower_left.x = loc.p1.x
-                    r_node.location.box.lower_left.y = loc.p1.y
-                    r_node.location.box.upper_right.x = loc.p2.x
-                    r_node.location.box.upper_right.y = loc.p2.y
-
-            match rn.type():
-                case klp.RNodeType.VertexPort:
-                    port_idx = rn.port_index()
-                    r_node.net_name = vertex_port_net_names[rn.layer()][port_idx]
-                case klp.RNodeType.PolygonPort:
-                    port_idx = rn.port_index()
-                    r_node.net_name = polygon_port_net_names[rn.layer()][port_idx]
-                case _:
-                    r_node.net_name = r_node.node_name
-
-            subproc(f"\t\tNode #{hex(r_node.node_id)} '{r_node.node_name}' "
-                    f"of net '{r_node.net_name}' "
-                    f"on layer '{r_node.layer_name}' "
-                    f"at {loc} ({loc.center().x * dbu} µm, {loc.center().y * dbu} µm)")
-
-            rex_result.nodes.append(r_node)
-            node_by_node_id[r_node.node_id] = r_node
-
-        subproc("\tElements:")
-        for el in resistor_networks.each_element():
-            r_element = pex_result_pb2.RElement()
-            r_element.element_id = el.object_id()
-            r_element.node_a.node_id = el.a().object_id()
-            r_element.node_b.node_id = el.b().object_id()
-            r_element.resistance = el.resistance() / 1000.0  # convert mΩ to Ω
-
-            node_a = node_by_node_id[r_element.node_a.node_id]
-            node_b = node_by_node_id[r_element.node_b.node_id]
-            subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
-                    f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
-                    f"{round(r_element.resistance, 3)} Ω")
-            rex_result.elements.append(r_element)
-
     def extract(self, rex_request: pex_request_pb2.RExtractionRequest) -> pex_result_pb2.RExtractionResult:
         rex_result = pex_result_pb2.RExtractionResult()
 
@@ -443,17 +256,23 @@ class RExtractor:
                         p_kly = shapes_converter.klayout_polygon(p)
                         polygon_ports[l2r.layer.id].append(p_kly)
                         polygon_port_device_terminals[l2r.layer.id].append((d.id, t.id, t.name, t.net_name))
-                        print(f"{d.device_name} {t.name} at {p_kly}")
 
         for pin in rex_request.pins:
             p = shapes_converter.klayout_point(pin.label_point)
             vertex_ports[pin.layer.id].append(p)
             vertex_port_pins[pin.layer.id].append((pin.label, pin.net_name))
 
+        LK = tech_pb2.ComputedLayerInfo.Kind
         for lvs_gds_pair, lyr_info in self.pex_context.extracted_layers.items():
             for lyr in lyr_info.source_layers:
-                klayout_index = self.pex_context.annotated_layout.layer(*lyr.gds_pair)
-                regions[klayout_index] = lyr.region
+                li = self.pex_context.tech.computed_layer_info_by_gds_pair[lyr.gds_pair]
+                match li.kind:
+                    case LK.KIND_PIN:
+                        continue  # skip
+                    case LK.KIND_REGULAR | LK.KIND_DEVICE_CAPACITOR | LK.KIND_DEVICE_RESISTOR:
+                        klayout_index = self.pex_context.annotated_layout.layer(*lyr.gds_pair)
+                        regions[klayout_index] = lyr.region
+
 
         rex = klp.RNetExtractor(self.pex_context.dbu)
         resistor_networks = rex.extract(rex_tech_kly,

@@ -205,16 +205,22 @@ class RCX25Extractor:
             c: kdb.Circuit = netlist.top_circuit()
             info(f"LVSDB: found {c.pin_count()}pins")
 
+            # FIXME:
+            #   currenly, tesselation does not work:
+            #   https://github.com/KLayout/klayout/issues/2100
             r_extractor = RExtractor(pex_context=self.pex_context,
-                                     substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
+                                     substrate_algorithm=pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     #substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
                                      wire_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
                                      delaunay_b = self.delaunay_b,
                                      delaunay_amax = self.delaunay_amax,
                                      via_merge_distance = 0,
                                      skip_simplify = True)
             rex_request = r_extractor.prepare_request()
+            report.output_rex_request(request=rex_request)
 
             rex_result = r_extractor.extract(rex_request)
+            report.output_rex_result(result=rex_result)
 
             node_by_id: Dict[int, pex_result_pb2.RNode] = {}
             subproc("\tNodes:")
@@ -244,12 +250,6 @@ class RCX25Extractor:
                 subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
                         f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
                         f"{round(element.resistance, 3)} Ω")
-
-            report.output_rex_request(request=rex_request)
-            print("")
-
-            report.output_rex_result(result=rex_result)
-            print("")
 
             # rex_request = pex_request_pb2.RExtractionRequest()
             # rex_result = pex_result_pb2.RExtractionResult()
