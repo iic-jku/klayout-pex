@@ -273,6 +273,10 @@ class RExtractor:
                         klayout_index = self.pex_context.annotated_layout.layer(*lyr.gds_pair)
                         regions[klayout_index] = lyr.region
 
+        # for nfet example, region contains keys
+        #       nsdm.drw       poly.drw       li1.drw      licon_poly_con     licon_nsd_con
+        #  [(8, 93 / 44), (19, 66 / 20), (20, 67 / 20), (21, 66 / 4403), (22, 66 / 4401)]
+        del regions[21]  # removing only poly makes the error disappear
 
         rex = klp.RNetExtractor(self.pex_context.dbu)
         resistor_networks = rex.extract(rex_tech_kly,
