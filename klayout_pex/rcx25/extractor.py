@@ -245,6 +245,12 @@ class RCX25Extractor:
                         f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
                         f"{round(element.resistance, 3)} Ω")
 
+            report.output_rex_request(request=rex_request)
+            print("")
+
+            report.output_rex_result(result=rex_result)
+            print("")
+
             # rex_request = pex_request_pb2.RExtractionRequest()
             # rex_result = pex_result_pb2.RExtractionResult()
             #
@@ -432,9 +438,6 @@ class RCX25Extractor:
             #             f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
             #             f"{round(r_element.resistance, 3)} Ω")
             #     rex_result.elements.append(r_element)
-
-            report.output_rex_result(result=rex_result)
-            print("")
 
             # node_count_by_net: Dict[str, int] = defaultdict(int)
             #

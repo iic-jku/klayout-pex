@@ -218,7 +218,7 @@ class RExtractor:
             rex_request.pins.MergeFrom(pin_list)
 
         # prepare layer regions
-        #     TODO -> in-memory from GDS
+        #     currently not part of request PB, but in-memory from GDS
 
         return rex_request
 
@@ -443,6 +443,7 @@ class RExtractor:
                         p_kly = shapes_converter.klayout_polygon(p)
                         polygon_ports[l2r.layer.id].append(p_kly)
                         polygon_port_device_terminals[l2r.layer.id].append((d.id, t.id, t.name, t.net_name))
+                        print(f"{d.device_name} {t.name} at {p_kly}")
 
         for pin in rex_request.pins:
             p = shapes_converter.klayout_point(pin.label_point)

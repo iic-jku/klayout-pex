@@ -41,6 +41,7 @@ def klayout_r_extractor_tech(pb_tech: pb_RExtractorTech) -> klp.RExtractorTech:
                 kly_c.algorithm = klp.Algorithm.Tesselation
         kly_c.triangulation_min_b = pb_c.triangulation_min_b
         kly_c.triangulation_max_area = pb_c.triangulation_max_area
+        kly_c.resistance = pb_c.resistance
         kly_tech.add_conductor(kly_c)
 
     for pb_v in pb_tech.vias:

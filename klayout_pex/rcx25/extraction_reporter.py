@@ -34,12 +34,13 @@ from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
+import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 
-VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon]
+VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon | kdb.Box]
 
 
 class ExtractionReporter:
@@ -68,6 +69,14 @@ class ExtractionReporter:
     @cached_property
     def cat_rex_tech(self) -> rdb.RdbCategory:
         return self.report.create_category(self.cat_rex_request, "R Extraction Tech")
+
+    @cached_property
+    def cat_rex_request_devices(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_request, "Devices")
+
+    @cached_property
+    def cat_rex_request_pins(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_request, "Pins")
 
     @cached_property
     def cat_rex_result(self) -> rdb.RdbCategory:
@@ -221,14 +230,14 @@ class ExtractionReporter:
                 )
 
     def output_devices(self,
-                       devices_by_name: Dict[str, device_pb2.Device]):
-        for d in devices_by_name.values():
+                       devices: List[device_pb2.Device]):
+        for d in devices:
             self.output_device(d)
 
     def output_device(self,
                       device: device_pb2.Device):
         cat_device = self.report.create_category(
-            self.cat_devices,
+            self.cat_rex_request_devices,
             f"{device.device_name}: {device.device_class_name}"
         )
         cat_device_params = self.report.create_category(cat_device, 'Params')
@@ -245,11 +254,18 @@ class ExtractionReporter:
                     f"{t.name}: net {t.net_name}, layer {l2r.layer.canonical_layer_name}",
                     r
                 )
-            else:
-                self.report.create_category(
-                    cat_device_terminals,
-                    f"{t.name}: net <NOT CONNECTED> (TODO layer/shapes)",
-                )
+
+    def output_pins(self, pins: List[pin_pb2.Pin]):
+        for p in pins:
+            self.output_pb_pin(p)
+
+    def output_pb_pin(self, pin: pin_pb2.Pin):
+        cat_pin = self.report.create_category(
+            self.cat_rex_request_pins,
+            f"{pin.label} (net {pin.net_name} on layer {pin.layer.canonical_layer_name})"
+        )
+        self.output_shapes(cat_pin, "label point",
+                           [self.marker_box_for_pb_point(pin.label_point)])
 
     def output_via(self,
                    via_name: LayerName,
@@ -294,7 +310,8 @@ class ExtractionReporter:
         for c in tech.conductors:
             self.report.create_category(
                 cat_conductors,
-                f"{c.layer.id}: {c.layer.canonical_layer_name} (LVS {c.layer.lvs_layer_name}), {c.resistance} mΩ/µm^2"
+                f"{c.layer.id}: {c.layer.canonical_layer_name} (LVS {c.layer.lvs_layer_name}), "
+                f"{round(c.resistance, 3)} mΩ/µm^2"
             )
         for v in tech.vias:
             bot = layer_by_id[v.bottom_conductor.id].canonical_layer_name
@@ -303,11 +320,13 @@ class ExtractionReporter:
                 cat_vias,
                 f"{v.layer.id}: {v.layer.canonical_layer_name} (LVS {v.layer.lvs_layer_name}, "
                 f"{bot}↔︎{top}), "
-                f"{v.resistance} mΩ/µm^2"
+                f"{round(v.resistance, 3)} mΩ/µm^2"
             )
 
     def output_rex_request(self, request: pex_request_pb2.RExtractionRequest):
         self.output_rex_tech(request.tech)
+        self.output_devices(request.devices)
+        self.output_pins(request.pins)
 
     def output_rex_result(self,
                           result: pex_result_pb2.RExtractionResult):
@@ -318,18 +337,18 @@ class ExtractionReporter:
         for element in result.elements:
             self.output_element(element, node_id_to_node)
 
-    def marker_box_for_pb_point(self, dpoint: shapes_pb2.Point) -> kdb.Box:
+    def marker_box_for_pb_point(self, point: shapes_pb2.Point) -> kdb.Box:
         sized_value = 5
-        return kdb.Box(int(dpoint.x / self.dbu - sized_value),
-                       int(dpoint.y / self.dbu - sized_value),
-                       int(dpoint.x / self.dbu + sized_value),
-                       int(dpoint.y / self.dbu + sized_value))
+        return kdb.Box(point.x - sized_value,
+                       point.y - sized_value,
+                       point.x + sized_value,
+                       point.y + sized_value)
 
-    def box_for_pb_box(self, dbox: shapes_pb2.Box) -> kdb.Box:
-        box = kdb.Box(int(dbox.lower_left.x / self.dbu),
-                      int(dbox.lower_left.y / self.dbu),
-                      int(dbox.upper_right.x / self.dbu),
-                      int(dbox.upper_right.y / self.dbu))
+    def box_for_pb_box(self, box: shapes_pb2.Box) -> kdb.Box:
+        box = kdb.Box(box.lower_left.x,
+                      box.lower_left.y,
+                      box.upper_right.x,
+                      box.upper_right.y)
         return box
 
     def marker_box_for_node_location(self, node: pex_result_pb2.RNode) -> kdb.Box:

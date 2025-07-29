@@ -413,7 +413,7 @@ class KLayoutExtractionContext:
 
                     if nt.device().expanded_name() != d_kly.expanded_name():
                         continue
-                    if nt.terminal_id() != d_kly.id():
+                    if nt.terminal_id() != td.id():
                         continue
 
                     shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
@@ -430,7 +430,6 @@ class KLayoutExtractionContext:
                         region_by_layer = terminal.regions_by_layer.add()
                         region_by_layer.layer.id = lyr_idx
 
-                        # region.layer.lvs_layer_name = self.tech.computed_layer_info_by_gds_pair[lyr_info.layer, lyr_info.datatype].layer_info.name
                         region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
 
                         for s in shapes:
