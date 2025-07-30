@@ -25,16 +25,23 @@ package kpex.request;
 
 import "kpex/layout/device.proto";
 import "kpex/layout/pin.proto";
+import "kpex/layout/layer_region.proto";
 import "kpex/klayout/r_extractor_tech.proto";
 
+message RNetExtractionRequest { // for a single net
+    string net_name = 10;
+    repeated kpex.layout.Device.Terminal device_terminals = 20;
+    repeated kpex.layout.Pin pins = 30;
+    repeated kpex.layout.LayerRegion region_by_layer = 40;   // wires, vias
+}
 
-message RExtractionRequest {
+message RExtractionRequest { // for multiple nets
     kpex.klayout.RExtractorTech tech = 10;
 
     repeated kpex.layout.Device devices = 20;
     repeated kpex.layout.Pin pins = 30;
 
-    // NOTE: layer_regions are not yet included here, they are in memory from the GDS
+    repeated RNetExtractionRequest net_extraction_requests = 40;
 }
 
 message PEXRequest {
