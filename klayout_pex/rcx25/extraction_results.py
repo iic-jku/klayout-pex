@@ -26,10 +26,12 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
-from .r.resistor_network import MultiLayerResistanceNetwork, ViaJunction, DeviceTerminal, Conductance
 from .types import NetName, LayerName, CellName
-import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
 from ..log import error
+
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
+import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
 
 
 @dataclass
@@ -158,8 +160,7 @@ class CellExtractionResults:
     sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
     sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
 
-    resistor_network: MultiLayerResistanceNetwork = \
-        field(default_factory=lambda: MultiLayerResistanceNetwork(resistor_networks_by_layer={}, via_resistors=[]))
+    r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
 
     def add_overlap_cap(self, cap: OverlapCap):
         self.overlap_table[cap.key].append(cap)
@@ -191,42 +192,45 @@ class CellExtractionResults:
             normalized_sideoverlap_table[normalized_key] += sum((e.cap_value for e in entries))
         sideoverlap_summary = ExtractionSummary(capacitances=normalized_sideoverlap_table,
                                                 resistances={})
-
         normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
-        for via_resistor in self.resistor_network.via_resistors:
-            key1: str = ''
-            match via_resistor.bottom:
-                case None:
-                    key1 = '__UNKNOWN__'
-                case ViaJunction():
-                    if via_resistor.bottom.network is None: # TODO: happened for ptap cell (VSS)!
-                        error(f"Bottom net is None: {via_resistor}")
-                        continue
-                    key1 = via_resistor.bottom.network.node_names[via_resistor.bottom.node_id]
-                case DeviceTerminal():
-                    key1 = via_resistor.bottom.device_terminal.net_name
-                case _:
-                    raise NotImplementedError("unexpected type")
-            if via_resistor.top.network is None:
-                error(f"Top net is None: {via_resistor}")
-                continue
-            key2 = via_resistor.top.network.node_names[via_resistor.top.node_id]
-            normalized_key = NetCoupleKey(key1, key2).normed()
-            normalized_resistance_table[normalized_key] += via_resistor.resistance
-        for layer_name, networks in self.resistor_network.resistor_networks_by_layer.items():
-            for network in networks.networks:
-                visited_resistors: Set[Conductance] = set()
-                for node_id, resistors in network.node_to_s.items():
-                    node_name = network.node_names[node_id]
-                    for conductance, other_node_id in resistors:
-                        if conductance in visited_resistors:
-                            continue  # we don't want to add it twice, only once per direction!
-                        visited_resistors.add(conductance)
 
-                        other_node_name = network.node_names[other_node_id]
-                        ohm = networks.layer_sheet_resistance / 1000.0 / conductance.cond
-                        normalized_key = NetCoupleKey(node_name, other_node_name).normed()
-                        normalized_resistance_table[normalized_key] += ohm
+        # raise NotImplementedError()
+
+        # normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        # for via_resistor in self.resistor_network.via_resistors:
+        #     key1: str = ''
+        #     match via_resistor.bottom:
+        #         case None:
+        #             key1 = '__UNKNOWN__'
+        #         case ViaJunction():
+        #             if via_resistor.bottom.network is None: # TODO: happened for ptap cell (VSS)!
+        #                 error(f"Bottom net is None: {via_resistor}")
+        #                 continue
+        #             key1 = via_resistor.bottom.network.node_names[via_resistor.bottom.node_id]
+        #         case DeviceTerminal():
+        #             key1 = via_resistor.bottom.device_terminal.net_name
+        #         case _:
+        #             raise NotImplementedError("unexpected type")
+        #     if via_resistor.top.network is None:
+        #         error(f"Top net is None: {via_resistor}")
+        #         continue
+        #     key2 = via_resistor.top.network.node_names[via_resistor.top.node_id]
+        #     normalized_key = NetCoupleKey(key1, key2).normed()
+        #     normalized_resistance_table[normalized_key] += via_resistor.resistance
+        # for layer_name, networks in self.resistor_network.resistor_networks_by_layer.items():
+        #     for network in networks.networks:
+        #         visited_resistors: Set[Conductance] = set()
+        #         for node_id, resistors in network.node_to_s.items():
+        #             node_name = network.node_names[node_id]
+        #             for conductance, other_node_id in resistors:
+        #                 if conductance in visited_resistors:
+        #                     continue  # we don't want to add it twice, only once per direction!
+        #                 visited_resistors.add(conductance)
+        #
+        #                 other_node_name = network.node_names[other_node_id]
+        #                 ohm = networks.layer_sheet_resistance / 1000.0 / conductance.cond
+        #                 normalized_key = NetCoupleKey(node_name, other_node_name).normed()
+        #                 normalized_resistance_table[normalized_key] += ohm
 
         resistance_summary = ExtractionSummary(capacitances={},
                                                resistances=normalized_resistance_table)

@@ -42,6 +42,8 @@ from ..log import (
     rule
 )
 
+from .shapes_pb2_converter import ShapesConverter
+
 from ..tech_info import TechInfo
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
@@ -67,37 +69,6 @@ class KLayoutExtractedLayerInfo:
 class KLayoutMergedExtractedLayerInfo:
     source_layers: List[KLayoutExtractedLayerInfo]
     gds_pair: GDSPair
-
-
-# @dataclass
-# class KLayoutDeviceTerminal:
-#     id: int
-#     name: str
-#     regions_by_layer_name: Dict[str, kdb.Region]
-#     net_name: str
-#
-#     # internal data access
-#     net_terminal_ref: Optional[kdb.NetTerminalRef]
-#     net: Optional[kdb.Net]
-#
-#
-# @dataclass
-# class KLayoutDeviceTerminalList:
-#     terminals: List[KLayoutDeviceTerminal]
-#
-#
-# @dataclass
-# class KLayoutDeviceInfo:
-#     id: str
-#     name: str   # expanded name
-#     class_name: str
-#     abstract_name: str
-#
-#     terminals: KLayoutDeviceTerminalList
-#     params: Dict[str, str]
-#
-#     # internal data access
-#     device: kdb.Device
 
 
 @dataclass
@@ -291,7 +262,7 @@ class KLayoutExtractionContext:
         else:
             return b2
 
-    def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net) -> Optional[kdb.Region]:
+    def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net | str) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
             return None
@@ -299,12 +270,14 @@ class KLayoutExtractionContext:
         shapes = kdb.Region()
         shapes.enable_properties()
 
+        requested_net_name = net.name if isinstance(net, kdb.Net) else net
+
         def add_shapes_from_region(source_region: kdb.Region):
             iter, transform = source_region.begin_shapes_rec()
             while not iter.at_end():
                 shape = iter.shape()
                 net_name = shape.property('net')
-                if net_name == net.name:
+                if net_name == requested_net_name:
                     shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
                                   iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
                                   shape.polygon)
@@ -381,6 +354,8 @@ class KLayoutExtractionContext:
     def devices_by_name(self) -> Dict[str, device_pb2.Device]:
         dd = {}
 
+        shapes_converter = ShapesConverter(dbu=self.dbu)
+
         for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html
             d_kly: kdb.Device
@@ -419,7 +394,8 @@ class KLayoutExtractionContext:
                     shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
 
                     terminal = d.terminals.add()
-                    terminal.id = td.id()
+                    terminal.device_id = d.id
+                    terminal.terminal_id = td.id()
                     terminal.name = td.name
                     terminal.net_name = n.name
 
@@ -427,17 +403,11 @@ class KLayoutExtractionContext:
                         lyr_idx = self.layer_index_map[idx]
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
-                        region_by_layer = terminal.regions_by_layer.add()
+                        region_by_layer = terminal.region_by_layer.add()
                         region_by_layer.layer.id = lyr_idx
-
                         region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
 
-                        for s in shapes:
-                            pgn = region_by_layer.region.polygons.add()
-                            for p_kly in s.each_point_hull():
-                                pt = pgn.hull_points.add()
-                                pt.x = p_kly.x
-                                pt.y = p_kly.y
+                        shapes_converter.klayout_region_to_pb(shapes, region_by_layer.region)
 
             dd[d.device_name] = d
 

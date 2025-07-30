@@ -37,6 +37,7 @@ import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 
@@ -79,8 +80,16 @@ class ExtractionReporter:
         return self.report.create_category(self.cat_rex_request, "Pins")
 
     @cached_property
+    def cat_rex_request_network_extraction(self) -> rdb.RdbCategory:
+            return self.report.create_category(self.cat_rex_request, "Network Extraction Request")
+
+    @cached_property
     def cat_rex_result(self) -> rdb.RdbCategory:
         return self.report.create_category("R Extraction Result")
+
+    @cached_property
+    def cat_rex_result_networks(self) -> rdb.RdbCategory:
+        return self.report.create_category(self.cat_rex_result, "Networks")
 
     @cached_property
     def cat_rex_nodes(self) -> rdb.RdbCategory:
@@ -234,6 +243,19 @@ class ExtractionReporter:
         for d in devices:
             self.output_device(d)
 
+    def output_device_terminals(self,
+                                terminals: List[device_pb2.Device.Terminal],
+                                category: rdb.RdbCategory):
+        for t in terminals:
+            for l2r in t.region_by_layer:
+                r = self.shapes_converter.klayout_region(l2r.region)
+
+                self.output_shapes(
+                    category,
+                    f"{t.name}: net {t.net_name}, layer {l2r.layer.canonical_layer_name}",
+                    r
+                )
+
     def output_device(self,
                       device: device_pb2.Device):
         cat_device = self.report.create_category(
@@ -245,23 +267,15 @@ class ExtractionReporter:
             self.report.create_category(cat_device_params, f"{p.name}: {p.value}")
 
         cat_device_terminals = self.report.create_category(cat_device, 'Terminals')
-        for t in device.terminals:
-            for l2r in t.regions_by_layer:
-                r = self.shapes_converter.klayout_region(l2r.region)
+        self.output_device_terminals(terminals=device.terminals, category=cat_device_terminals)
 
-                self.output_shapes(
-                    cat_device_terminals,
-                    f"{t.name}: net {t.net_name}, layer {l2r.layer.canonical_layer_name}",
-                    r
-                )
-
-    def output_pins(self, pins: List[pin_pb2.Pin]):
+    def output_pins(self, pins: List[pin_pb2.Pin], category: rdb.RdbCategory):
         for p in pins:
-            self.output_pb_pin(p)
+            self.output_pb_pin(p, category)
 
-    def output_pb_pin(self, pin: pin_pb2.Pin):
+    def output_pb_pin(self, pin: pin_pb2.Pin, category: rdb.RdbCategory):
         cat_pin = self.report.create_category(
-            self.cat_rex_request_pins,
+            category,
             f"{pin.label} (net {pin.net_name} on layer {pin.layer.canonical_layer_name})"
         )
         marker_box = self.marker_box_for_pb_point(pin.label_point)
@@ -324,19 +338,42 @@ class ExtractionReporter:
                 f"{round(v.resistance, 3)} mΩ/µm^2"
             )
 
+    def output_net_extraction_request(self, request: pex_request_pb2.RNetExtractionRequest):
+        cat_req = self.report.create_category(self.cat_rex_request_network_extraction, f"Net {request.net_name}")
+        cat_pins = self.report.create_category(cat_req, "Pins")
+        cat_device_terminals = self.report.create_category(cat_req, "Device Terminals")
+        cat_layer_regions = self.report.create_category(cat_req, "Layer Regions")
+        self.output_pins(request.pins, cat_pins)
+        self.output_device_terminals(terminals=request.device_terminals, category=cat_device_terminals)
+        for l2r in request.region_by_layer:
+            self.output_shapes(cat_layer_regions, f"Layer {l2r.layer.canonical_layer_name}",
+                               self.shapes_converter.klayout_region(l2r.region))
+
     def output_rex_request(self, request: pex_request_pb2.RExtractionRequest):
         self.output_rex_tech(request.tech)
         self.output_devices(request.devices)
-        self.output_pins(request.pins)
+        self.output_pins(request.pins, category=self.cat_rex_request_pins)
+
+        for r in request.net_extraction_requests:
+            self.output_net_extraction_request(r)
+
+    def output_rex_result_network(self, network: r_network_pb2.RNetwork):
+        cat_network = self.report.create_category(self.cat_rex_result_networks, f"Net {network.net_name}")
+        cat_nodes = self.report.create_category(cat_network, f"Nodes")
+        cat_elements = self.report.create_category(cat_network, f"Elements")
+
+        node_id_to_node: Dict[int, r_network_pb2.RNode] = {}
+
+        for node in network.nodes:
+            self.output_node(node, category=cat_nodes)
+            node_id_to_node[node.node_id] = node
+        for element in network.elements:
+            self.output_element(element, node_id_to_node, category=cat_elements)
 
     def output_rex_result(self,
                           result: pex_result_pb2.RExtractionResult):
-        node_id_to_node: Dict[int, pex_result_pb2.RNode] = {}
-        for node in result.nodes:
-            self.output_node(node)
-            node_id_to_node[node.node_id] = node
-        for element in result.elements:
-            self.output_element(element, node_id_to_node)
+        for network in result.networks:
+            self.output_rex_result_network(network)
 
     def marker_box_for_pb_point(self, point: shapes_pb2.Point) -> shapes_pb2.Box:
         sized_value = 5
@@ -349,7 +386,7 @@ class ExtractionReporter:
             box.net = point.net
         return box
 
-    def marker_box_for_node_location(self, node: pex_result_pb2.RNode) -> kdb.Box:
+    def marker_box_for_node_location(self, node: r_network_pb2.RNode) -> kdb.Box:
         box: shapes_pb2.Box
         match node.location.kind:
             case location_pb2.Location.Kind.LOCATION_KIND_POINT:
@@ -362,8 +399,8 @@ class ExtractionReporter:
         return self.shapes_converter.klayout_box(box)
 
     def marker_arrow_between_nodes(self,
-                                   node_a: pex_result_pb2.RNode,
-                                   node_b: pex_result_pb2.RNode) -> kdb.Polygon:
+                                   node_a: r_network_pb2.RNode,
+                                   node_b: r_network_pb2.RNode) -> kdb.Polygon:
         a_center = self.marker_box_for_node_location(node_a).center()
         b_center = self.marker_box_for_node_location(node_b).center()
         path = kdb.Path([self.shapes_converter.klayout_point(a_center),
@@ -372,16 +409,18 @@ class ExtractionReporter:
         return path.polygon()
 
     def output_node(self,
-                    node: pex_result_pb2.RNode):
+                    node: r_network_pb2.RNode,
+                    category: rdb.RdbCategory):
         node_title = f"{node.node_name}, port net {node.net_name}, " \
                      f"layer {node.layer_name}"
         sh = kdb.Shapes()
         sh.insert(self.marker_box_for_node_location(node))
-        self.output_shapes(self.cat_rex_nodes, node_title, sh)
+        self.output_shapes(category, node_title, sh)
 
     def output_element(self,
-                       element: pex_result_pb2.RElement,
-                       node_id_to_node: Dict[int, pex_result_pb2.RNode]):
+                       element: r_network_pb2.RElement,
+                       node_id_to_node: Dict[int, r_network_pb2.RNode],
+                       category: rdb.RdbCategory):
         a = node_id_to_node[element.node_a.node_id]
         b = node_id_to_node[element.node_b.node_id]
 
@@ -394,4 +433,4 @@ class ExtractionReporter:
                         f"{b.node_name} ({b.layer_name})" \
                         f": {ohm}"
         polygon = self.marker_arrow_between_nodes(a, b)
-        self.output_shapes(self.cat_rex_elements, element_title, [polygon])
+        self.output_shapes(category, element_title, [polygon])

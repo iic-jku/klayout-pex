@@ -55,3 +55,24 @@ class ShapesConverter:
         if box.net:
             box_kly = kdb.BoxWithProperties(box_kly, {'net': box.net})
         return box_kly
+
+    def klayout_point_to_pb(self,
+                            point_kly: kdb.Point,
+                            point_pb: shapes_pb2.Point):
+        point_pb.x = point_kly.x
+        point_pb.y = point_kly.y
+
+    def klayout_polygon_to_pb(self,
+                              polygon_kly: kdb.Polygon,
+                              polygon_pb: shapes_pb2.Polygon):
+        net_name = polygon_kly.property('net')
+        if net_name:
+            polygon_pb.net = net_name
+        for p_kly in polygon_kly.each_point_hull():
+            self.klayout_point_to_pb(p_kly, polygon_pb.hull_points.add())
+
+    def klayout_region_to_pb(self,
+                             region_kly: kdb.Region,
+                             region_pb: shapes_pb2.Region):
+        for pgn_kly in region_kly:
+            self.klayout_polygon_to_pb(pgn_kly, region_pb.polygons.add())
