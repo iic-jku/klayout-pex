@@ -495,6 +495,7 @@ class KLayoutExtractionContext:
 
                     pin.label_point.x = pos.x
                     pin.label_point.y = pos.y
+                    pin.label_point.net = pin.net_name
 
                     d[gds_pair].append(pin)
 

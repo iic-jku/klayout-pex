@@ -35,7 +35,6 @@ from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
-import klayout_pex_protobuf.kpex.layout.layer_ref_pb2 as layer_ref_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as r_extractor_tech_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
@@ -265,8 +264,9 @@ class ExtractionReporter:
             self.cat_rex_request_pins,
             f"{pin.label} (net {pin.net_name} on layer {pin.layer.canonical_layer_name})"
         )
+        marker_box = self.marker_box_for_pb_point(pin.label_point)
         self.output_shapes(cat_pin, "label point",
-                           [self.marker_box_for_pb_point(pin.label_point)])
+                           [self.shapes_converter.klayout_box(marker_box)])
 
     def output_via(self,
                    via_name: LayerName,
@@ -338,38 +338,37 @@ class ExtractionReporter:
         for element in result.elements:
             self.output_element(element, node_id_to_node)
 
-    def marker_box_for_pb_point(self, point: shapes_pb2.Point) -> kdb.Box:
+    def marker_box_for_pb_point(self, point: shapes_pb2.Point) -> shapes_pb2.Box:
         sized_value = 5
-        return kdb.Box(point.x - sized_value,
-                       point.y - sized_value,
-                       point.x + sized_value,
-                       point.y + sized_value)
-
-    def box_for_pb_box(self, box: shapes_pb2.Box) -> kdb.Box:
-        box = kdb.Box(box.lower_left.x,
-                      box.lower_left.y,
-                      box.upper_right.x,
-                      box.upper_right.y)
+        box = shapes_pb2.Box()
+        box.lower_left.x = point.x - sized_value
+        box.lower_left.y = point.y - sized_value
+        box.upper_right.x = point.x + sized_value
+        box.upper_right.y = point.y + sized_value
+        if point.net:
+            box.net = point.net
         return box
 
     def marker_box_for_node_location(self, node: pex_result_pb2.RNode) -> kdb.Box:
+        box: shapes_pb2.Box
         match node.location.kind:
             case location_pb2.Location.Kind.LOCATION_KIND_POINT:
                 # create marker around point for better visiblity
-                point_box = self.marker_box_for_pb_point(node.location.point)
-                return point_box
+                box = self.marker_box_for_pb_point(node.location.point)
             case location_pb2.Location.Kind.LOCATION_KIND_BOX:
-                box = self.box_for_pb_box(node.location.box)
-                return box
+                box = node.location.box
             case _:
                 raise NotImplementedError("unknown location type: {node.location_type}")
+        return self.shapes_converter.klayout_box(box)
 
     def marker_arrow_between_nodes(self,
                                    node_a: pex_result_pb2.RNode,
                                    node_b: pex_result_pb2.RNode) -> kdb.Polygon:
         a_center = self.marker_box_for_node_location(node_a).center()
         b_center = self.marker_box_for_node_location(node_b).center()
-        path = kdb.Path([a_center, b_center], width=5)
+        path = kdb.Path([self.shapes_converter.klayout_point(a_center),
+                         self.shapes_converter.klayout_point(b_center)],
+                        width=5)
         return path.polygon()
 
     def output_node(self,

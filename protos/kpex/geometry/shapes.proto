@@ -28,15 +28,21 @@ package kpex.geometry;
 message Point {
     int64 x = 1;
     int64 y = 2;
+
+    string net = 10; // property
 }
 
 message Box {
     Point lower_left = 1;
     Point upper_right = 2;
+
+    string net = 10; // property
 }
 
 message Polygon {
     repeated Point hull_points = 1;
+
+    string net = 10; // property
 }
 
 message Region {

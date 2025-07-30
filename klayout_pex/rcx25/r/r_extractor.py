@@ -316,11 +316,14 @@ class RExtractor:
                 case klp.RNodeType.VertexPort:
                     port_idx = rn.port_index()
                     r_node.net_name = vertex_port_pins[rn.layer()][port_idx][1]
+                    r_node.location.point.net = r_node.net_name
                 case klp.RNodeType.PolygonPort:
                     port_idx = rn.port_index()
                     r_node.net_name = polygon_port_device_terminals[rn.layer()][port_idx][3]
+                    r_node.location.box.net = r_node.net_name
                 case _:
                     r_node.net_name = r_node.node_name
+                    r_node.location.box.net = r_node.net_name
 
             rex_result.nodes.append(r_node)
             node_by_node_id[r_node.node_id] = r_node

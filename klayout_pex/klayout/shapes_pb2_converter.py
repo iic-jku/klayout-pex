@@ -31,11 +31,14 @@ class ShapesConverter:
         self.dbu = dbu
 
     def klayout_point(self, point: shapes_pb2.Point) -> kdb.Point:
+        # FIXME: there is no PointWithProperties yet
         return kdb.Point(point.x, point.y)
 
     def klayout_polygon(self, polygon: shapes_pb2.Polygon) -> kdb.Polygon:
         points_kly = [self.klayout_point(pt) for pt in polygon.hull_points]
         polygon_kly = kdb.Polygon(points_kly)
+        if len(polygon.net) >= 1:
+            polygon_kly = kdb.PolygonWithProperties(polygon_kly, {'net': polygon.net})
         return polygon_kly
 
     def klayout_region(self, region: shapes_pb2.Region) -> kdb.Region:
@@ -44,3 +47,11 @@ class ShapesConverter:
             region_kly.insert(self.klayout_polygon(polygon))
         return region_kly
 
+    def klayout_box(self, box: shapes_pb2.Box) -> kdb.Box:
+        box_kly = kdb.Box(box.lower_left.x,
+                          box.lower_left.y,
+                          box.upper_right.x,
+                          box.upper_right.y)
+        if box.net:
+            box_kly = kdb.BoxWithProperties(box_kly, {'net': box.net})
+        return box_kly
