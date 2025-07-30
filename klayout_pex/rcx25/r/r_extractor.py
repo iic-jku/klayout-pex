@@ -287,6 +287,12 @@ class RExtractor:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
 
         for net_extraction_request in rex_request.net_extraction_requests:
+            # FIXME: remove this, temporarily commented out due to bug
+            #        https://github.com/KLayout/klayout/issues/2102
+            # !!!!!!!!!!!!!!!!!!!!
+            if net_extraction_request.net_name == 'G':
+                continue
+            # !!!!!!!!!!!!!!!!!!!!
 
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
