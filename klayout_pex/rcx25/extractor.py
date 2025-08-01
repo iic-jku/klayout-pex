@@ -22,18 +22,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-import math
 
 import klayout.db as kdb
 
-from .r.conductance import Conductance
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
 from ..log import (
     debug,
     warning,
     error,
     info,
-    subproc
+    subproc,
+    rule
 )
 from ..tech_info import TechInfo
 from .extraction_results import *
@@ -41,14 +40,14 @@ from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
-from .r.resistor_extraction import ResistorExtraction
-from .r.resistor_network import (
-    ResistorNetworks,
-    ViaResistor,
-    ViaJunction,
-    DeviceTerminal,
-    MultiLayerResistanceNetwork
-)
+from klayout_pex.rcx25.r.r_extractor import RExtractor
+
+import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
+import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
+import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as rex_tech_pb2
+from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech as pb_RExtractorTech
 
 
 class RCX25Extractor:
@@ -71,14 +70,9 @@ class RCX25Extractor:
         if "PolygonWithProperties" not in kdb.__all__:
             raise Exception("KLayout version does not support properties (needs 0.30 at least)")
 
+    # TODO: remove this function by inlining
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
-        gds_pair = self.tech_info.gds_pair_for_computed_layer_name.get(layer_name, None)
-        if not gds_pair:
-            gds_pair = self.tech_info.gds_pair_for_layer_name.get(layer_name, None)
-        if not gds_pair:
-            warning(f"Can't find GDS pair for layer {layer_name}")
-            return None
-        return gds_pair
+        return self.tech_info.gds_pair(layer_name)
 
     def shapes_of_layer(self, layer_name: str) -> Optional[kdb.Region]:
         gds_pair = self.gds_pair(layer_name=layer_name)
@@ -198,225 +192,56 @@ class RCX25Extractor:
 
         # ------------------------------------------------------------------------
         if self.pex_mode.need_resistance():
-            rex = ResistorExtraction(b=self.delaunay_b, amax=self.delaunay_amax)
-
             c: kdb.Circuit = netlist.top_circuit()
             info(f"LVSDB: found {c.pin_count()}pins")
 
-            result_network = MultiLayerResistanceNetwork(
-                resistor_networks_by_layer={},
-                via_resistors=[]
-            )
+            # FIXME:
+            #   currenly, tesselation does not work:
+            #   https://github.com/KLayout/klayout/issues/2100
+            r_extractor = RExtractor(pex_context=self.pex_context,
+                                     substrate_algorithm=pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     #substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
+                                     wire_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     delaunay_b = self.delaunay_b,
+                                     delaunay_amax = self.delaunay_amax,
+                                     via_merge_distance = 0,
+                                     skip_simplify = True)
+            rex_request = r_extractor.prepare_request()
+            report.output_rex_request(request=rex_request)
 
-            devices_by_name = self.pex_context.devices_by_name
-            report.output_devices(devices_by_name)
+            rex_result = r_extractor.extract(rex_request)
+            report.output_rex_result(result=rex_result)
 
-            node_count_by_net: Dict[str, int] = defaultdict(int)
+            #
+            # node_by_id: Dict[int, r_network_pb2.RNode] = {}
+            # subproc("\tNodes:")
+            # for node in rex_result.nodes:
+            #     node_by_id[node.node_id] = node
+            #
+            #     msg = f"\t\tNode #{hex(node.node_id)} '{node.node_name}' " \
+            #           f"of net '{node.net_name}' " \
+            #           f"on layer '{node.layer_name}' "
+            #     match node.location.kind:
+            #         case location_pb2.Location.Kind.LOCATION_KIND_POINT:
+            #             p = node.location.point
+            #             msg += f"at {p.x},{p.y} ({p.x * dbu} µm, {p.y * dbu} µm)"
+            #         case location_pb2.Location.Kind.LOCATION_KIND_BOX:
+            #             b = node.location.box
+            #             msg += f"at {b.lower_left.x},{b.lower_left.y};{b.upper_right.x},{b.upper_right.y} (" \
+            #                    f"B/L {round(b.lower_left.x * dbu, 3)},"\
+            #                    f"{round(b.lower_left.y * dbu, 3)} µm, " \
+            #                    f"T/R {round(b.upper_right.x * dbu, 3)},"\
+            #                    f"{round(b.upper_right.y * dbu)} µm)"
+            #     subproc(msg)
+            #
+            # subproc("\tElements:")
+            # for element in rex_result.elements:
+            #     node_a = node_by_id[element.node_a.node_id]
+            #     node_b = node_by_id[element.node_b.node_id]
+            #     subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
+            #             f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
+            #             f"{round(element.resistance, 3)} Ω")
 
-            for layer_name, region in layer_regions_by_name.items():
-                if layer_name == self.tech_info.internal_substrate_layer_name:
-                    continue
-
-                layer_sheet_resistance = self.tech_info.layer_resistance_by_layer_name.get(layer_name, None)
-                if layer_sheet_resistance is None:
-                    continue
-
-                gds_pair = self.gds_pair(layer_name)
-                pins = self.pex_context.pins_of_layer(gds_pair)
-                labels = self.pex_context.labels_of_layer(gds_pair)
-
-                nodes = kdb.Region()
-                nodes.enable_properties()
-
-                pin_labels: kdb.Texts = labels & pins
-                for l in pin_labels:
-                    l: kdb.Text
-                    # NOTE: because we want more like a point as a junction
-                    #       and folx create huge pins (covering the whole metal)
-                    #       we create our own "mini squares"
-                    #    (ResistorExtractor will subtract the pins from the metal polygons,
-                    #     so in the extreme case the polygons could become empty)
-                    pin_point = l.bbox().enlarge(5)
-                    nodes.insert(pin_point)
-
-                    report.output_pin(layer_name=layer_name,
-                                      pin_point=pin_point,
-                                      label=l)
-
-                def create_nodes_for_region(region: kdb.Region):
-                    for p in region:
-                        p: kdb.PolygonWithProperties
-                        cp: kdb.Point = p.bbox().center()
-                        b = kdb.Box(w=6, h=6)
-                        b.move(cp.x - b.width() / 2,
-                               cp.y - b.height() / 2)
-                        bwp = kdb.BoxWithProperties(b, p.properties())
-
-                        net = bwp.property('net')
-                        if net is None or net == '':
-                            error(f"Could not find net for via at {cp}")
-                        else:
-                            label_text = f"{net}.n{node_count_by_net[net]}"
-                            node_count_by_net[net] += 1
-                            label = kdb.Text(label_text, cp.x, cp.y)
-                            labels.insert(label)
-
-                        nodes.insert(bwp)
-
-                # create additional nodes for vias
-                via_above = via_name_above_layer_name.get(layer_name, None)
-                if via_above is not None:
-                    create_nodes_for_region(via_regions_by_via_name[via_above])
-                via_below = via_name_below_layer_name.get(layer_name, None)
-                if via_below is not None:
-                    create_nodes_for_region(via_regions_by_via_name[via_below])
-
-                extracted_resistor_networks = rex.extract(polygons=region, pins=nodes, labels=labels)
-                resistor_networks = ResistorNetworks(
-                    layer_name=layer_name,
-                    layer_sheet_resistance=layer_sheet_resistance.resistance,
-                    networks=extracted_resistor_networks
-                )
-
-                result_network.resistor_networks_by_layer[layer_name] = resistor_networks
-
-                subproc(f"Layer {layer_name}   (R_coeff = {layer_sheet_resistance.resistance}):")
-                for rn in resistor_networks.networks:
-                    # print(rn.to_string(True))
-                    if not rn.node_to_s:
-                        continue
-
-                    subproc("\tNodes:")
-                    for node_id in rn.node_to_s.keys():
-                        loc = rn.locations[node_id]
-                        node_name = rn.node_names[node_id]
-                        subproc(f"\t\tNode #{node_id} {node_name} at {loc} ({loc.x * dbu} µm, {loc.y * dbu} µm)")
-
-                    subproc("\tResistors:")
-                    visited_resistors: Set[Conductance] = set()
-                    for node_id, resistors in rn.node_to_s.items():
-                        node_name = rn.node_names[node_id]
-                        for conductance, other_node_id in resistors:
-                            if conductance in visited_resistors:
-                                continue # we don't want to add it twice, only once per direction!
-                            visited_resistors.add(conductance)
-
-                            other_node_name = rn.node_names[other_node_id]
-                            ohm = layer_sheet_resistance.resistance / 1000.0 / conductance.cond
-                            # TODO: layer_sheet_resistance.corner_adjustment_fraction not yet used !!!
-                            subproc(f"\t\t{node_name} ↔︎ {other_node_name}: {round(ohm, 3)} Ω    (internally: {conductance.cond})")
-
-            # "Stitch" in the VIAs into the graph
-            for layer_idx_bottom, layer_name_bottom in enumerate(all_layer_names):
-                if layer_name_bottom == self.tech_info.internal_substrate_layer_name:
-                    continue
-                if (layer_idx_bottom + 1) == len(all_layer_names):
-                    break
-
-                via = self.tech_info.contact_above_metal_layer_name.get(layer_name_bottom, None)
-                if via is None:
-                    continue
-
-                via_gds_pair = self.gds_pair(via.name)
-                canonical_via_name = self.tech_info.canonical_layer_name_by_gds_pair[via_gds_pair]
-
-                via_region = via_regions_by_via_name.get(canonical_via_name)
-                if via_region is None:
-                    continue
-
-                # NOTE: poly layer stands for poly/nsdm/psdm, this will be in contacts, not in vias
-                via_resistance = self.tech_info.via_resistance_by_layer_name.get(canonical_via_name, None)
-                r_coeff: Optional[float] = None
-                if via_resistance is None:
-                    r_coeff = self.tech_info.contact_resistance_by_layer_name[layer_name_bottom].resistance
-                else:
-                    r_coeff = via_resistance.resistance
-
-                layer_name_top = all_layer_names[layer_idx_bottom + 1]
-
-                networks_bottom = result_network.resistor_networks_by_layer[layer_name_bottom]
-                networks_top = result_network.resistor_networks_by_layer[layer_name_top]
-
-                for via_polygon in via_region:
-                    net_name = via_polygon.property('net')
-                    matches_bottom = networks_bottom.find_network_nodes(location=via_polygon)
-
-                    device_terminal: Optional[Tuple[DeviceTerminal, float]] = None
-
-                    if len(matches_bottom) == 0:
-                        ignored_device_layers: Set[str] = set()
-
-                        def find_device_terminal(via_region: kdb.Region) -> Optional[Tuple[DeviceTerminal, float]]:
-                            for d in devices_by_name.values():
-                                for dt in d.terminals.terminals:
-                                    for ln, r in dt.regions_by_layer_name.items():
-                                        res = self.tech_info.contact_resistance_by_layer_name.get(ln, None)
-                                        if res is None:
-                                            ignored_device_layers.add(ln)
-                                            continue
-                                        elif r.overlapping(via_region):
-                                            return (DeviceTerminal(device=d, device_terminal=dt), res)
-                            return None
-
-                        if layer_name_bottom in self.tech_info.contact_resistance_by_layer_name.keys():
-                            device_terminal = find_device_terminal(via_region=kdb.Region(via_polygon))
-                        if device_terminal is None:
-                            warning(f"Couldn't find bottom network node (on {layer_name_bottom}) "
-                                    f"for location {via_polygon}, "
-                                    f"but could not find a device terminal either "
-                                    f"(ignored layers: {ignored_device_layers})")
-                        else:
-                            r_coeff = device_terminal[1].resistance
-
-                    matches_top = networks_top.find_network_nodes(location=via_polygon)
-                    if len(matches_top) == 0:
-                        error(f"Could not find top network nodes for location {via_polygon}")
-
-                    # given a drawn via area, we calculate the actual via matrix
-                    approx_width = math.sqrt(via_polygon.area()) * dbu
-                    n_xy = 1 + math.floor((approx_width - (via.width + 2 * via.border)) / (via.width + via.spacing))
-                    if n_xy < 1:
-                        n_xy = 1
-                    r_via_ohm = r_coeff / n_xy**2 / 1000.0   # mΩ -> Ω
-
-                    info(f"via ({canonical_via_name}) found between "
-                         f"metals {layer_name_bottom} ↔ {layer_name_top} at {via_polygon}, "
-                         f"{n_xy}x{n_xy} (w={via.width}, sp={via.spacing}, border={via.border}), "
-                         f"{r_via_ohm} Ω")
-
-                    report.output_via(via_name=canonical_via_name,
-                                      bottom_layer=layer_name_bottom,
-                                      top_layer=layer_name_top,
-                                      net=net_name,
-                                      via_width=via.width,
-                                      via_spacing=via.spacing,
-                                      via_border=via.border,
-                                      polygon=via_polygon,
-                                      ohm=r_via_ohm,
-                                      comment=f"({len(matches_bottom)} bottom, {len(matches_top)} top)")
-
-                    match_top = matches_top[0] if len(matches_top) >= 1 else (None, -1)
-
-                    bottom: ViaJunction | DeviceTerminal
-                    if device_terminal is None:
-                        match_bottom = matches_bottom[0] if len(matches_bottom) >= 1 else (None, -1)
-                        bottom = ViaJunction(layer_name=layer_name_bottom,
-                                             network=match_bottom[0],
-                                             node_id=match_bottom[1])
-                    else:
-                        bottom = device_terminal[0]
-
-                    via_resistor = ViaResistor(
-                        bottom=bottom,
-                        top=ViaJunction(layer_name=layer_name_top,
-                                        network=match_top[0],
-                                        node_id=match_top[1]),
-                        resistance=r_via_ohm
-                    )
-                    result_network.via_resistors.append(via_resistor)
-
-            # import rich.pretty
-            # rich.pretty.pprint(result_network)
-            results.resistor_network = result_network
+            results.r_extraction_result = rex_result
 
         return results

@@ -201,7 +201,7 @@ jobs:
     - name: "CMake: Verify python protobuf generation"
       run: |
         # check if protobuf python modules were created
-        ls klayout_pex_protobuf/tech_pb2.py
+        ls klayout_pex_protobuf/kpex/tech/tech_pb2.py
       shell: bash
       working-directory: ${{github.workspace}}
 

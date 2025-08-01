@@ -51,18 +51,32 @@ class RCX25NetlistExpander:
 
             for d in top_circuit.each_device():
                 name = d.name or d.expanded_name()
-                info(f"Removing whiteboxed device {name}")
-                top_circuit.remove_device(d)
+                match d.device_class().__class__:
+                    case kdb.DeviceClassResistor | kdb.DeviceClassResistorWithBulk:
+                        pass
+
+                    case kdb.DeviceClassCapacitor | kdb.DeviceClassCapacitorWithBulk:
+                        info(f"Removing whiteboxed device {name}")
+                        top_circuit.remove_device(d)
+
+                    case kdb.DeviceClassInductor:
+                        pass
+
+                    case kdb.DeviceClassBJT3Transistor | kdb.DeviceClassBJT4Transistor | kdb.DeviceClassDiode | \
+                         kdb.DeviceClassMOS3Transistor | kdb.DeviceClassMOS4Transistor:
+                        pass
 
         # create capacitor device class
         cap = kdb.DeviceClassCapacitor()
         # cap.name = 'KPEX_CAP'
+        cap.name = 'C'
         cap.description = "Extracted by KPEX/2.5D"
         expanded_netlist.add(cap)
 
         # create resistor device class
         res = kdb.DeviceClassResistor()
         # res.name = 'KPEX_RES'
+        res.name = 'R'
         res.description = "Extracted by KPEX/2.5D"
         expanded_netlist.add(res)
 

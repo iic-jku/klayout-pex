@@ -116,6 +116,7 @@ void convert(const std::string &inputPath,
 }
 
 void addLayer(kpex::tech::Technology *tech,
+              kpex::tech::LayerInfo::Purpose purpose,
               const std::string &name,
               uint32_t drw_gds_layer,
               uint32_t drw_gds_datatype,
@@ -126,6 +127,7 @@ void addLayer(kpex::tech::Technology *tech,
               const std::string &description)
 {
     kpex::tech::LayerInfo *layer = tech->add_layers();
+    layer->set_purpose(purpose);
     layer->set_name(name);
     layer->set_description(description);
     
@@ -149,6 +151,7 @@ void addLayer(kpex::tech::Technology *tech,
 }
 
 void addComputedLayer(kpex::tech::Technology *tech,
+                      kpex::tech::LayerInfo::Purpose purpose,
                       kpex::tech::ComputedLayerInfo_Kind kind,
                       const std::string &name,
                       uint32_t gds_layer,
@@ -160,6 +163,7 @@ void addComputedLayer(kpex::tech::Technology *tech,
     cl->set_kind(kind);
     cl->set_original_layer_name(original_layer_name);
     kpex::tech::LayerInfo *layer = cl->mutable_layer_info();
+    layer->set_purpose(purpose);
     layer->set_name(name);
     layer->set_description(description);
     kpex::tech::GDSPair *gds = layer->mutable_drw_gds_pair();
@@ -335,11 +339,13 @@ void addLayerResistance(kpex::tech::ResistanceInfo *ri,
 void addContactResistance(kpex::tech::ResistanceInfo *ri,
                           const std::string &contact_layer_name,
                           const std::string &device_layer_name,
+                          const std::string &layer_above,
                           double resistance)
 {
     kpex::tech::ResistanceInfo::ContactResistance *vr = ri->add_contacts();
     vr->set_contact_name(contact_layer_name);
     vr->set_device_layer_name(device_layer_name);
+    vr->set_layer_above(layer_above);
     vr->set_resistance(resistance);
 }
 

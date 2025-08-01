@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "klayout-pex"
-version = "0.2.7"
+version = "0.3.0"
 description = "Parasitic Extraction Tool for KLayout"
 authors = ["Martin Köhler <info@martinjankoehler.com>"]
 homepage = "https://martinjankoehler.github.io/klayout-pex-website/"
@@ -37,9 +37,20 @@ include = [
     #       otherwise the .gitignore entries would suppress them
     { path = "klayout_pex_protobuf/ihp_sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/tech_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/process_stack_pb2.py", format = ["sdist", "wheel"] }
+    { path = "klayout_pex_protobuf/kpex/geometry/shapes_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/location_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/device_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/layer_ref_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/layer_region_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/pin_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/klayout/r_extractor_tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/c/capacitance_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/r/r_network_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/request/pex_request_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/result/pex_result_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/process_stack_pb2.py", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.urls]
@@ -52,7 +63,11 @@ netlist = 'klayout_pex.netlist.__main__:main'
 [tool.poetry.dependencies]
 python = "^3.12"
 cairosvg = ">= 2.7.1"
-klayout = ">= 0.30.0"    # required minimum version because of *NeighborhoodVisitor, *WithProperties
+# NOTE klayout version info:
+#      0.30.0 … *NeighborhoodVisitor, *WithProperties
+#      0.30.2 … klayout.pex module
+#      0.30.3 … bugfixes for resistance extraction
+klayout = ">= 0.30.2"  # FIXME: 0.30.3 not yet released
 matplotlib = ">= 3.10.1"
 protobuf = ">= 6.31.0"
 rich = ">= 13.9.4"

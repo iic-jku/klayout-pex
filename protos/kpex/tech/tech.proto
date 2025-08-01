@@ -55,12 +55,31 @@ message GDSPair {
 }
 
 message LayerInfo {
-    string name = 1;
-    string description = 10;
+    enum Purpose {
+        PURPOSE_UNSPECIFIED = 0;
+        PURPOSE_DNWELL = 1;
+        PURPOSE_NWELL = 2;
+        PURPOSE_PWELL = 3;
+        PURPOSE_DIFF = 4;
+        PURPOSE_NTAP_OR_PTAP = 5;
+        PURPOSE_NTAP = 6;
+        PURPOSE_PTAP = 7;
+        PURPOSE_P_IMPLANT = 8;
+        PURPOSE_N_IMPLANT = 9;
+        PURPOSE_CONTACT = 10;
+        PURPOSE_METAL = 11;
+        PURPOSE_VIA = 12;
+        PURPOSE_MIM_CAP = 13; // cap plate over metal
+    }
+
+    Purpose purpose = 10;
+
+    string name = 20;
+    string description = 30;
     
-    GDSPair drw_gds_pair = 20;
-    GDSPair pin_gds_pair = 30;
-    GDSPair label_gds_pair = 40;
+    GDSPair drw_gds_pair = 40;
+    GDSPair pin_gds_pair = 50;
+    GDSPair label_gds_pair = 60;
 }
 
 message ComputedLayerInfo {
