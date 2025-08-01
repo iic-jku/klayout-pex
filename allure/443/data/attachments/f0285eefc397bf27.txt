@@ -1,0 +1,25 @@
+
+* cell nmos_diode2
+* pin VDD
+* pin VSS
+* pin sky130_gnd
+.SUBCKT nmos_diode2 1 2 3
+* net 1 VDD
+* net 2 VSS
+* net 3 sky130_gnd
+* net 5 FC_GND
+* net 6 VSUBS
+* net 7 GND
+* device instance Cext_0_1 r0 *1 0,0 PEX_CAP
+CCext_0_1 6 1 6.37145e-16 PEX_CAP
+* device instance Cext_0_2 r0 *1 0,0 PEX_CAP
+CCext_0_2 6 2 3.16676e-16 PEX_CAP
+* device instance Cext_1_2 r0 *1 0,0 PEX_CAP
+CCext_1_2 1 2 9.51584e-16 PEX_CAP
+* device instance Cext_1_1 r0 *1 0,0 PEX_CAP
+CCext_1_1 1 6 8.74091e-16 PEX_CAP
+* device instance Rext_FC_GND_GND r0 *1 0,0 PEX_RES
+RRext_FC_GND_GND 5 7 0 PEX_RES
+* device instance Rext_VSUBS_GND r0 *1 0,0 PEX_RES
+RRext_VSUBS_GND 6 7 0 PEX_RES
+.ENDS nmos_diode2
