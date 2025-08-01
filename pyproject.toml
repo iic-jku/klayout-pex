@@ -37,9 +37,20 @@ include = [
     #       otherwise the .gitignore entries would suppress them
     { path = "klayout_pex_protobuf/ihp_sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/tech_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
-    { path = "klayout_pex_protobuf/process_stack_pb2.py", format = ["sdist", "wheel"] }
+    { path = "klayout_pex_protobuf/kpex/geometry/shapes_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/location_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/device_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/layer_ref_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/layer_region_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/layout/pin_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/klayout/r_extractor_tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/c/capacitance_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/r/r_network_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/request/pex_request_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/result/pex_result_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/tech_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/process_parasitics_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/process_stack_pb2.py", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.urls]
