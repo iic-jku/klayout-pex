@@ -341,7 +341,9 @@ all_layer_names += %w(
   res_metal1 res_metal2 res_metal3 res_metal4 res_metal5 res_topmetal1 res_topmetal2
 )
 
-# special layers needed for KPEX
+#=====================================================================
+# [KPEX] special layers needed for parasitic extraction
+#=====================================================================
 
 # metal5_n_cap: metal5 region where no MiM cap is above metal5
 # metal5_cap: metal5 region where MiM cap is above
@@ -354,6 +356,43 @@ all_layer_names += %w(
   metal5_cap metal5_n_cap 
 )
 
+# [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+cont_poly_con = cont_drw.and(poly_con)
+cont_nsd_con = cont_drw.and(nsd_fet)
+cont_psd_con = cont_drw.and(psd_fet)
+
+all_layer_names += %w(
+  cont_poly_con cont_nsd_con cont_psd_con
+)
+
+# [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
+poly_pin       = polygons(5  , 2)
+metal1_pin     = polygons(8  , 2)
+metal2_pin     = polygons(10 , 2)
+metal3_pin     = polygons(30 , 2)
+metal4_pin     = polygons(50 , 2)
+metal5_pin     = polygons(67 , 2)
+topmetal1_pin  = polygons(126, 2)
+topmetal2_pin  = polygons(134, 2)
+
+all_layer_names += %w(
+  poly_pin metal1_pin metal2_pin metal3_pin metal4_pin metal5_pin topmetal1_pin topmetal2_pin
+)
+
+poly_pin_con      = poly_pin      & poly_con
+metal1_pin_con    = metal1_pin    & metal1_con
+metal2_pin_con    = metal2_pin    & metal2_con
+metal3_pin_con    = metal3_pin    & metal3_con
+metal4_pin_con    = metal4_pin    & metal4_con
+metal5_pin_con    = metal5_pin    & metal5_con
+topmetal1_pin_con = topmetal1_pin & topmetal1_con
+topmetal2_pin_con = topmetal2_pin & topmetal2_con
+
+all_layer_names += %w(
+  poly_pin_con metal1_pin_con metal2_pin_con metal3_pin_con metal4_pin_con metal5_pin_con
+  topmetal1_pin_con topmetal2_pin_con
+)
+
 if self.respond_to?(:name)
   all_layer_names.each do |l|
     name(eval(l), l)
@@ -362,6 +401,21 @@ end
 
 connect(metal5_n_cap, metal5_con)
 connect(metal5_cap, metal5_con)
+
+# [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(cont_poly_con,   cont_drw)
+connect(cont_nsd_con,    cont_drw)
+connect(cont_psd_con,    cont_drw)
+
+# [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(poly_con      ,    poly_pin_con)
+connect(metal1_con    ,    metal1_pin_con)
+connect(metal2_con    ,    metal2_pin_con)
+connect(metal3_con    ,    metal3_pin_con)
+connect(metal4_con    ,    metal4_pin_con)
+connect(metal5_con    ,    metal5_pin_con)
+connect(topmetal1_con ,    topmetal1_pin_con)
+connect(topmetal2_con ,    topmetal2_pin_con)
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
