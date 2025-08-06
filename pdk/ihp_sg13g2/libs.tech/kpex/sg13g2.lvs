@@ -393,6 +393,12 @@ all_layer_names += %w(
   topmetal1_pin_con topmetal2_pin_con
 )
 
+# NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
+poly_text = labels(5, 25)
+all_layer_names += %w(
+    poly_text
+)
+
 if self.respond_to?(:name)
   all_layer_names.each do |l|
     name(eval(l), l)
@@ -416,6 +422,9 @@ connect(metal4_con    ,    metal4_pin_con)
 connect(metal5_con    ,    metal5_pin_con)
 connect(topmetal1_con ,    topmetal1_pin_con)
 connect(topmetal2_con ,    topmetal2_pin_con)
+
+# NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
+connect(poly_text,  poly_con)
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
