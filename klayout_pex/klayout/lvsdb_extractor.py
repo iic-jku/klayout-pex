@@ -424,10 +424,8 @@ class KLayoutExtractionContext:
             #       so invent new datatype numbers, like adding 100 to the real GDS datatype
             gds_pair = self.tech.gds_pair_for_layer_name.get(canonical_layer_name, None)
             if gds_pair is None:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.gds_pair_for_layer_name!")
                 continue
             if gds_pair not in self.tech.layer_info_by_gds_pair:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.layer_info_by_gds_pair!")
                 continue
 
             for lyr in lyr_info.source_layers:
