@@ -337,7 +337,7 @@ class KLayoutExtractionContext:
         labels_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].label_gds_pair
         labels_gds_pair = labels_gds_pair.layer, labels_gds_pair.datatype
 
-        lay: kdb.Layout = self.lvsdb.internal_layout()
+        lay: kdb.Layout = self.annotated_layout
         label_layer_idx = lay.find_layer(labels_gds_pair)  # sky130 layer dt = 5
         if label_layer_idx is None:
             return kdb.Texts()
