@@ -340,7 +340,7 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 
     // resistance values are in mΩ / square
     //                     layer, resistance, [corner_adjustment_fraction]
-    addLayerResistance(ri, "GatPoly", 48200); // TODO: there is no value defined in the process spec!
+    addLayerResistance(ri, "GatPoly",  7000); // TODO: there is no value defined in the process spec!
     addLayerResistance(ri, "Metal1",    110);
     addLayerResistance(ri, "Metal2",     88);
     addLayerResistance(ri, "Metal3",     88);
