@@ -56,7 +56,7 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, PWELL,    "PWell",      46,0,  46,2,  -1,-1, "P-well region");
     addLayer(tech, NIMP,     "nSD",         7,0, -1,-1,  -1,-1, "Defines areas to receive N+ S/D implant");
     addLayer(tech, PIMP,     "pSD",        14,0, -1,-1,  -1,-1, "Defines areas to receive P+ S/D implant");
-    addLayer(tech, METAL,    "GatPoly",     5,0,   5,2,  -1,-1, "Poly"); // ~ poly.drawing
+    addLayer(tech, METAL,    "GatPoly",     5,0,   5,2,   5,25, "Poly"); // ~ poly.drawing
     addLayer(tech, CONT,     "Cont",        6,0, -1,-1,  -1,-1, "Defines 1-st metal contacts to Activ, GatPoly");
     addLayer(tech, METAL,    "Metal1",      8,0,   8,2,   8,25, "Defines 1-st metal interconnect");
     addLayer(tech, VIA,      "Via1",       19,0, -1,-1,  -1,-1, "Defines 1-st metal to 2-nd metal contact");
@@ -74,10 +74,11 @@ void buildLayers(kpex::tech::Technology *tech) {
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
-    kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
-    kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
-    kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
+    auto KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
+    auto KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
+    auto KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
     auto KPIN = kpex::tech::ComputedLayerInfo_Kind_KIND_PIN;
+    auto KLBL = kpex::tech::ComputedLayerInfo_Kind_KIND_LABEL;
 
     //                     purpose kind  lvs_name lvs_gds_pair  orig. layer   description
     addComputedLayer(tech, PWELL, KREG, "pwell",        46, 0,   "PWell", "Computed layer for PWell");
@@ -125,6 +126,15 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL,   KPIN, "metal5_pin_con",     67, 2,  "Metal5.pin",    "Metal5 pin");
     addComputedLayer(tech, METAL,   KPIN, "topmetal1_pin_con", 126, 2,  "TopMetal1.pin", "TopMetal1 pin");
     addComputedLayer(tech, METAL,   KPIN, "topmetal2_pin_con", 134, 2,  "TopMetal2.pin", "TopMetal2 pin");
+    
+    addComputedLayer(tech, METAL,   KLBL, "poly_text",        5, 25,  "GatPoly.text",   "Poly label");
+    addComputedLayer(tech, METAL,   KLBL, "metal1_text",      8, 25,  "Metal1.text",    "Metal1 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal2_text",     10, 25,  "Metal2.text",    "Metal2 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal3_text",     30, 25,  "Metal3.text",    "Metal3 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal4_text",     50, 25,  "Metal4.text",    "Metal4 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal5_text",     67, 25,  "Metal5.text",    "Metal5 label");
+    addComputedLayer(tech, METAL,   KLBL, "topmetal1_text", 126, 25,  "TopMetal1.text", "TopMetal1 label");
+    addComputedLayer(tech, METAL,   KLBL, "topmetal2_text", 134, 25,  "TopMetal2.text", "TopMetal2 label");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {

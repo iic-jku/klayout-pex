@@ -67,7 +67,6 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, MIM,     "capm2",  97,44,  -1,-1,  -1,-1,   "MiM capacitor plate over metal 4");
     addLayer(tech, VIA,     "via4",   71,44,  -1,-1,  -1,-1,   "Contact from met4 to met5 (no MiM cap)");
     addLayer(tech, METAL,   "met5",   72,20,  72,16,  72,5,    "Metal 5");
-
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
@@ -75,6 +74,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     auto KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     auto KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
     auto KPIN = kpex::tech::ComputedLayerInfo_Kind_KIND_PIN;
+    auto KLBL = kpex::tech::ComputedLayerInfo_Kind_KIND_LABEL;
     
     //                     purpose  kind  lvs_name lvs_gds_pair orig. layer  description
     addComputedLayer(tech, DNWELL,  KREG, "dnwell",    64, 18,  "dnwell",     "Deep NWell");
@@ -127,6 +127,14 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL,   KPIN, "met3_pin_con", 70, 16,  "met3.pin", "met3 pin");
     addComputedLayer(tech, METAL,   KPIN, "met4_pin_con", 71, 16,  "met4.pin", "met4 pin");
     addComputedLayer(tech, METAL,   KPIN, "met5_pin_con", 72, 16,  "met5.pin", "met5 pin");
+
+    addComputedLayer(tech, METAL,   KLBL, "poly_label",   66, 5,  "poly.label", "Poly label");
+    addComputedLayer(tech, METAL,   KLBL, "li_label",     67, 5,  "li1.label",  "li1 label");
+    addComputedLayer(tech, METAL,   KLBL, "met1_pin_con", 68, 5,  "met1.label", "met1 label");
+    addComputedLayer(tech, METAL,   KLBL, "met2_pin_con", 69, 5,  "met2.label", "met2 label");
+    addComputedLayer(tech, METAL,   KLBL, "met3_pin_con", 70, 5,  "met3.label", "met3 label");
+    addComputedLayer(tech, METAL,   KLBL, "met4_pin_con", 71, 5,  "met4.label", "met4 label");
+    addComputedLayer(tech, METAL,   KLBL, "met5_pin_con", 72, 5,  "met5.label", "met5 label");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
