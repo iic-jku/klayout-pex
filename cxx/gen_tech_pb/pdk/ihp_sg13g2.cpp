@@ -301,18 +301,19 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto mim_via = cmim_cap->mutable_contact_above();
     auto topvia2 = topmet1->mutable_contact_above();
     
-    // CONTACT:               contact,         layer_below, metal_above,   thickness,               width, spacing,         border
+    // CONTACT:               contact,         layer_below,     metal_above,     thickness,               width, spacing,         border
+    //                        (LVS)            (LVS)            (LVS)
     //----------------------------------------------------------------------------------------------------------------------------
-    setContact(contn,         "cont_nsd_con",  "nSD",       "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contd,         "cont_psd_con",  "pSD",       "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contp,         "cont_poly_con", "GatPoly",   "Metal1",      conp_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via1,          "Via1",          "Metal1",    "Metal2",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via2,          "Via2",          "Metal2",    "Metal3",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via3,          "Via3",          "Metal3",    "Metal4",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via4,          "Via4",          "Metal4",    "Metal5",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(topvia1_n_cap, "topvia1_n_cap", "Metal5",    "TopMetal1",   topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(mim_via,       "mim_via",       "cmim_top",  "TopMetal1",   mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(topvia2,       "TopVia2",       "TopMetal1", "TopMetal2",   topvia2_thickness,       0.9,    1.06,           0.5);
+    setContact(contn,         "cont_nsd_con",  "nsd_fet",       "metal1_con",    0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contd,         "cont_psd_con",  "psd_fet",       "metal1_con",    0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contp,         "cont_poly_con", "poly_con",      "metal1_con",    conp_thickness,          0.16,   0.18 /*TODO*/,  0.0);
+    setContact(via1,          "via1_drw",      "metal1_con",    "metal2_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via2,          "via2_drw",      "metal2_con",    "metal3_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via3,          "via3_drw",      "metal3_con",    "metal4_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
     
     // TODO: refine via rules!
     
@@ -349,14 +350,14 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "TopMetal1",  18);
     addLayerResistance(ri, "TopMetal2",  11);
 
-    // resistance values are in mΩ / square
-    //                       contact_layer,   layer_below,  layer_above, resistance
+    // resistance values are in mΩ / CNT
+    //                       contact_layer,   layer_below,  layer_above,     resistance
+    //                       (LVS)            (LVS)         (LVS)
+    addContactResistance(ri, "cont_nsd_con",  "nsd_fet",    "metal1_con",    17000);  // Cont over nSD-Activ
+    addContactResistance(ri, "cont_psd_con",  "psd_fet",    "metal1_con",    17000);  // Cont over pSD-Activ
+    addContactResistance(ri, "cont_poly_con", "poly_con",   "metal1_con",    15000);  // Cont over GatPoly
 
-    addContactResistance(ri, "cont_nsd_con",  "nSD",        "Metal1",    17000);  // Cont over nSD-Activ
-    addContactResistance(ri, "cont_psd_con",  "pSD",        "Metal1",    17000);  // Cont over pSD-Activ
-    addContactResistance(ri, "cont_poly_con", "GatPoly",    "Metal1",    15000);  // Cont over GatPoly
-
-    // resistance values are in mΩ / square
+    // resistance values are in mΩ / CNT
     //                       via_layer,  resistance
 
     addViaResistance(ri,     "Via1",       9000);

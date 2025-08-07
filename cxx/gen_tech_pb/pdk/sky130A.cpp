@@ -287,6 +287,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto via4_cap = capm2->mutable_contact_above();
     
     // CONTACT:             contact,         layer_below, metal_above, thickness,              width, spacing,  border
+    //                      (LVS)            (LVS)        (LVS)
     //-----------------------------------------------------------------------------------------------------------------
     // setContact(nwellc,  "TODO",           "nwell",      "li1",       0.9361,                  0.17,    0.17,  0.0); // TODO
     setContact(licon1n,    "licon_nsd_con",  "nsdm",       "li1",       0.9361,                  0.17,    0.17,  0.0);
@@ -318,13 +319,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "met4",    47);
     addLayerResistance(ri, "met5",    29);
     
-    // resistance values are in mΩ / square
+    // resistance values are in mΩ / CNT
     //                       contact_layer,    layer_below,  layer_above, resistance
     addContactResistance(ri, "licon_nsd_con",  "nsdm",       "li1",        185000); // licon over nsdm!
     addContactResistance(ri, "licon_psd_con",  "psdm",       "li1",        585000); // licon over psdm!
     addContactResistance(ri, "licon_poly_con", "poly",       "li1",        152000); // licon over poly!
 
-    // resistance values are in mΩ / square
+    // resistance values are in mΩ / CNT
     //                   via_layer,  resistance
     addViaResistance(ri, "poly",        152000); // licon over poly!
     addViaResistance(ri, "mcon",          9300);
