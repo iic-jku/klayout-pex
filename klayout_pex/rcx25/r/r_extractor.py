@@ -111,7 +111,7 @@ class RExtractor:
                         #   - source/drain (e.g. sky130A: nsdm, psdm)
                         #   - bulk (e.g. nwell)
                         #
-                        # we will consider this only as an pin end-point, there are no wires at all on this layer,
+                        # we will consider this only as a pin end-point, there are no wires at all on this layer,
                         # so the resistance does not matter for PEX
                         for source_layer in li.source_layers:
                             cond = rex_tech.conductors.add()
@@ -145,7 +145,7 @@ class RExtractor:
                                 cond.algorithm = self.substrate_algorithm
                             else:
                                 cond.algorithm = self.wire_algorithm
-                            cond.resistance = layer_resistance.resistance
+                            cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
 
                     case LP.PURPOSE_CONTACT:
                         for source_layer in li.source_layers:
@@ -160,7 +160,8 @@ class RExtractor:
                                                                                                   None)
                             if contact_resistance is None:
                                 warning(
-                                    f"ignoring layer {canonical_layer_name}, no contact resistance found in tech info")
+                                    f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
+                                    f"no contact resistance found in tech info")
                                 continue
 
                             via = rex_tech.vias.add()
@@ -169,13 +170,16 @@ class RExtractor:
                             top_gds_pair = tech.gds_pair(contact.metal_above)
 
                             via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            via.layer.canonical_layer_name = source_layer.lvs_layer_name
+                            via.layer.canonical_layer_name = canonical_layer_name
                             via.layer.lvs_layer_name = source_layer.lvs_layer_name
 
                             via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
                             via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
 
-                            via.resistance = contact_resistance.resistance * contact.width ** 2
+                            via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                                contact=contact,
+                                contact_resistance=contact_resistance
+                            )
                             via.merge_distance = self.via_merge_distance
 
                     case LP.PURPOSE_VIA:
@@ -185,14 +189,18 @@ class RExtractor:
                             continue
                         for source_layer in li.source_layers:
                             via = rex_tech.vias.add()
-
-                            (bot, top) = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
+                            bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
                                 source_layer.lvs_layer_name, None)
+                            if bot_top is None:
+                                warning(f"ignoring layer {canonical_layer_name} (LVS {source_layer.lvs_layer_name}), no bottom/top layers found in tech info")
+                                continue
+
+                            (bot, top) = bot_top
                             bot_gds_pair = tech.gds_pair(bot)
                             top_gds_pair = tech.gds_pair(top)
 
                             via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            via.layer.canonical_layer_name = source_layer.lvs_layer_name
+                            via.layer.canonical_layer_name = canonical_layer_name
                             via.layer.lvs_layer_name = source_layer.lvs_layer_name
 
                             via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
@@ -201,7 +209,11 @@ class RExtractor:
                             contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[
                                 source_layer.lvs_layer_name]
 
-                            via.resistance = via_resistance.resistance * contact.width ** 2
+                            via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
+                                contact=contact,
+                                via_resistance=via_resistance
+                            )
+
                             via.merge_distance = self.via_merge_distance
 
         return rex_tech
@@ -363,7 +375,7 @@ class RExtractor:
                 r_element.element_id = el.object_id()
                 r_element.node_a.node_id = el.a().object_id()
                 r_element.node_b.node_id = el.b().object_id()
-                r_element.resistance = el.resistance() / 1000.0  # convert mΩ to Ω
+                r_element.resistance = el.resistance()
 
         return rex_result
 

@@ -273,11 +273,10 @@ class TechInfo:
         for metal_layer in self.process_metal_layers:
             layer_name = metal_layer.name
             gds_pair = self.gds_pair(layer_name)
-            canonical_layer_name = self.canonical_layer_name_by_gds_pair[gds_pair]
 
             if metal_layer.metal_layer.HasField('contact_above'):
                 contact = metal_layer.metal_layer.contact_above
-                d[contact.name] = (canonical_layer_name, contact.metal_above)
+                d[contact.name] = (contact.layer_below, contact.metal_above)
 
         return d
     #--------------------------------
@@ -293,6 +292,28 @@ class TechInfo:
     @cached_property
     def via_resistance_by_layer_name(self) -> Dict[str, process_parasitics_pb2.ResistanceInfo.ViaResistance]:
         return {r.via_name: r for r in self.tech.process_parasitics.resistance.vias}
+
+    @staticmethod
+    def milliohm_to_ohm(milliohm: float) -> float:
+        # NOTE: tech_pb2 has mΩ/µm^2
+        #       RExtractorTech.Conductor.resistance is in Ω/µm^2
+        return milliohm / 1000.0
+
+    @staticmethod
+    def milliohm_by_cnt_to_ohm_by_square_for_contact(
+            contact: process_stack_pb2.ProcessStackInfo.Contact,
+            contact_resistance: process_parasitics_pb2.ResistanceInfo.ContactResistance) -> float:
+        # NOTE: ContactResistance ... mΩ/CNT
+        #
+        ohm_by_square = contact_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_by_square
+
+    @staticmethod
+    def milliohm_by_cnt_to_ohm_by_square_for_via(
+            contact: process_stack_pb2.ProcessStackInfo.Contact,
+            via_resistance: process_parasitics_pb2.ResistanceInfo.ViaResistance) -> float:
+        ohm_by_square = via_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_by_square
 
     #--------------------------------
 
