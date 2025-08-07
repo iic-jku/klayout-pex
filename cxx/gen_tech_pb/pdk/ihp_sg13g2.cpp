@@ -56,7 +56,7 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, PWELL,    "PWell",      46,0,  46,2,  -1,-1, "P-well region");
     addLayer(tech, NIMP,     "nSD",         7,0, -1,-1,  -1,-1, "Defines areas to receive N+ S/D implant");
     addLayer(tech, PIMP,     "pSD",        14,0, -1,-1,  -1,-1, "Defines areas to receive P+ S/D implant");
-    addLayer(tech, METAL,    "GatPoly",     5,0,   5,2,  -1,-1, "Poly"); // ~ poly.drawing
+    addLayer(tech, METAL,    "GatPoly",     5,0,   5,2,   5,25, "Poly"); // ~ poly.drawing
     addLayer(tech, CONT,     "Cont",        6,0, -1,-1,  -1,-1, "Defines 1-st metal contacts to Activ, GatPoly");
     addLayer(tech, METAL,    "Metal1",      8,0,   8,2,   8,25, "Defines 1-st metal interconnect");
     addLayer(tech, VIA,      "Via1",       19,0, -1,-1,  -1,-1, "Defines 1-st metal to 2-nd metal contact");
@@ -74,44 +74,67 @@ void buildLayers(kpex::tech::Technology *tech) {
 }
 
 void buildLVSComputedLayers(kpex::tech::Technology *tech) {
-    kpex::tech::ComputedLayerInfo::Kind KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
-    kpex::tech::ComputedLayerInfo::Kind KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
-    kpex::tech::ComputedLayerInfo::Kind KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
-    
+    auto KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
+    auto KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
+    auto KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
+    auto KPIN = kpex::tech::ComputedLayerInfo_Kind_KIND_PIN;
+    auto KLBL = kpex::tech::ComputedLayerInfo_Kind_KIND_LABEL;
+
     //                     purpose kind  lvs_name lvs_gds_pair  orig. layer   description
     addComputedLayer(tech, PWELL, KREG, "pwell",        46, 0,   "PWell", "Computed layer for PWell");
     addComputedLayer(tech, PWELL, KREG, "pwell_sub",    46, 0,   "PWell", "Computed layer for PWell");
     addComputedLayer(tech, NWELL, KREG, "nwell_drw",    31, 0,   "NWell", "Computed layer for NWell");
-    addComputedLayer(tech, NIMP,   KREG, "nsd_fet",      7, 0,   "nSD", "Computed layer for nSD");
-    addComputedLayer(tech, PIMP,   KREG, "psd_fet",     14, 0,  "pSD", "Computed layer for pSD");
-    addComputedLayer(tech, NTAP,   KREG, "ntap",        65, 144, "Activ", "Computed layer for ntap");
-    addComputedLayer(tech, PTAP,   KREG, "ptap",        65, 244, "Activ", "Computed layer for ptap");
+    addComputedLayer(tech, NIMP,  KREG, "nsd_fet",       7, 0,   "nSD", "Computed layer for nSD");
+    addComputedLayer(tech, PIMP,  KREG, "psd_fet",      14, 0,   "pSD", "Computed layer for pSD");
+    addComputedLayer(tech, NTAP,  KREG, "ntap",         65, 144, "Activ", "Computed layer for ntap");
+    addComputedLayer(tech, PTAP,  KREG, "ptap",         65, 244, "Activ", "Computed layer for ptap");
 
-    addComputedLayer(tech, METAL,  KREG, "poly_con",      5, 0,   "GatPoly", "Computed layer for GatPoly");
-    addComputedLayer(tech, METAL,  KREG, "metal1_con",    8, 0,   "Metal1", "Computed layer for Metal1");
-    addComputedLayer(tech, METAL,  KREG, "metal2_con",   10, 0,   "Metal2", "Computed layer for Metal2");
-    addComputedLayer(tech, METAL,  KREG, "metal3_con",   30, 0,   "Metal3", "Computed layer for Metal3");
-    addComputedLayer(tech, METAL,  KREG, "metal4_con",   50, 0,   "Metal4", "Computed layer for Metal4");
-    addComputedLayer(tech, METAL,  KREG, "metal5_n_cap", 67, 200, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
-    addComputedLayer(tech, METAL,  KREG, "topmetal1_con", 126, 0,  "TopMetal1", "Computed layer for TopMetal1");
-    addComputedLayer(tech, METAL,  KREG, "topmetal2_con", 134, 0,  "TopMetal2", "Computed layer for TopMetal2");
+    addComputedLayer(tech, METAL, KREG, "poly_con",       5, 0,   "GatPoly", "Computed layer for GatPoly");
+    addComputedLayer(tech, METAL, KREG, "metal1_con",     8, 0,   "Metal1", "Computed layer for Metal1");
+    addComputedLayer(tech, METAL, KREG, "metal2_con",    10, 0,   "Metal2", "Computed layer for Metal2");
+    addComputedLayer(tech, METAL, KREG, "metal3_con",    30, 0,   "Metal3", "Computed layer for Metal3");
+    addComputedLayer(tech, METAL, KREG, "metal4_con",    50, 0,   "Metal4", "Computed layer for Metal4");
+    addComputedLayer(tech, METAL, KREG, "metal5_n_cap",  67, 200, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
+    addComputedLayer(tech, METAL, KREG, "topmetal1_con", 126, 0, "TopMetal1", "Computed layer for TopMetal1");
+    addComputedLayer(tech, METAL, KREG, "topmetal2_con", 134, 0, "TopMetal2", "Computed layer for TopMetal2");
 
-    addComputedLayer(tech, CONT,   KREG, "cont_drw",       6, 0,    "Cont", "Computed layer for contact to Metal1");
-    addComputedLayer(tech, VIA,    KREG, "via1_drw",      19, 0, "Via1", "Computed layer for Via1");
-    addComputedLayer(tech, VIA,    KREG, "via2_drw",      29, 0, "Via2", "Computed layer for Via2");
-    addComputedLayer(tech, VIA,    KREG, "via3_drw",      49, 0, "Via3", "Computed layer for Via3");
-    addComputedLayer(tech, VIA,    KREG, "via4_drw",      66, 0, "Via4", "Computed layer for Via4");
+    addComputedLayer(tech, CONT,  KREG, "cont_nsd_con",   6, 4401,  "Cont", "Computed layer for contact from nSD to Metal1");
+    addComputedLayer(tech, CONT,  KREG, "cont_psd_con",   6, 4402,  "Cont", "Computed layer for contact from pSD to Metal1");
+    addComputedLayer(tech, CONT,  KREG, "cont_poly_con",  6, 4403,  "Cont", "Computed layer for contact from GatPoly to Metal1");
     
-    addComputedLayer(tech, VIA,    KREG, "topvia1_n_cap", 125, 200, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
-    addComputedLayer(tech, VIA,    KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
+    addComputedLayer(tech, VIA,   KREG, "via1_drw",      19, 0,  "Via1", "Computed layer for Via1");
+    addComputedLayer(tech, VIA,   KREG, "via2_drw",      29, 0,  "Via2", "Computed layer for Via2");
+    addComputedLayer(tech, VIA,   KREG, "via3_drw",      49, 0,  "Via3", "Computed layer for Via3");
+    addComputedLayer(tech, VIA,   KREG, "via4_drw",      66, 0,  "Via4", "Computed layer for Via4");
+    
+    addComputedLayer(tech, VIA,   KREG, "topvia1_n_cap", 125, 200, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
+    addComputedLayer(tech, VIA,   KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
 
-    addComputedLayer(tech, VIA,    KCAP, "mim_via",      125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
-    addComputedLayer(tech, MIM,    KCAP, "metal5_cap",   67, 100,  "Metal5", "Computed layer for Metal5, case MiM cap");
-    addComputedLayer(tech, MIM,    KCAP, "cmim_top",     36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
+    addComputedLayer(tech, VIA,   KCAP, "mim_via",       125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
+    addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 100,  "Metal5", "Computed layer for Metal5, case MiM cap");
+    addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
 
     // NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
     //       otherwise they should also be declared as ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR
     //       and extracted accordingly in the LVS script, to allow blackboxing
+    
+    addComputedLayer(tech, METAL,   KPIN, "poly_pin_con",        5, 2,  "GatPoly.pin",   "Poly pin");
+    addComputedLayer(tech, METAL,   KPIN, "metal1_pin_con",      8, 2,  "Metal1.pin",    "Metal1 pin");
+    addComputedLayer(tech, METAL,   KPIN, "metal2_pin_con",     10, 2,  "Metal2.pin",    "Metal2 pin");
+    addComputedLayer(tech, METAL,   KPIN, "metal3_pin_con",     30, 2,  "Metal3.pin",    "Metal3 pin");
+    addComputedLayer(tech, METAL,   KPIN, "metal4_pin_con",     50, 2,  "Metal4.pin",    "Metal4 pin");
+    addComputedLayer(tech, METAL,   KPIN, "metal5_pin_con",     67, 2,  "Metal5.pin",    "Metal5 pin");
+    addComputedLayer(tech, METAL,   KPIN, "topmetal1_pin_con", 126, 2,  "TopMetal1.pin", "TopMetal1 pin");
+    addComputedLayer(tech, METAL,   KPIN, "topmetal2_pin_con", 134, 2,  "TopMetal2.pin", "TopMetal2 pin");
+    
+    addComputedLayer(tech, METAL,   KLBL, "poly_text",        5, 25,  "GatPoly.text",   "Poly label");
+    addComputedLayer(tech, METAL,   KLBL, "metal1_text",      8, 25,  "Metal1.text",    "Metal1 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal2_text",     10, 25,  "Metal2.text",    "Metal2 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal3_text",     30, 25,  "Metal3.text",    "Metal3 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal4_text",     50, 25,  "Metal4.text",    "Metal4 label");
+    addComputedLayer(tech, METAL,   KLBL, "metal5_text",     67, 25,  "Metal5.text",    "Metal5 label");
+    addComputedLayer(tech, METAL,   KLBL, "topmetal1_text", 126, 25,  "TopMetal1.text", "TopMetal1 label");
+    addComputedLayer(tech, METAL,   KLBL, "topmetal2_text", 134, 25,  "TopMetal2.text", "TopMetal2 label");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
@@ -124,8 +147,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //                                          (TODO)
     //-----------------------------------------------------------------------------------------------
     auto nwell =    addNWellLayer(psi, "ntap",  0.0,    "fox");
-    auto diff = addDiffusionLayer(psi, "ptap",  0.0,    "fox");
     
+    auto ndiff = addDiffusionLayer(psi, "nSD",  0.0,    "fox");
+    auto pdiff = addDiffusionLayer(psi, "pSD",  0.0,    "fox");
+
     // FOX:                 name     dielectric_k
     //-----------------------------------------------------------------------------------------------
     addFieldOxideLayer(psi, "fox",   3.95); // from SG13G2_os_process_spec.pdf p6
@@ -264,9 +289,9 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "air",   1.0,          "pass2");
     
-    
-    auto contn = nwell->mutable_contact_above();
-    auto contd = diff->mutable_contact_above();
+    // TODO: cont over ptap/ntap/nwell!
+    auto contn = ndiff->mutable_contact_above();
+    auto contd = pdiff->mutable_contact_above();
     auto contp = poly->mutable_contact_above();
     auto via1 = met1->mutable_contact_above();
     auto via2 = met2->mutable_contact_above();
@@ -276,18 +301,19 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto mim_via = cmim_cap->mutable_contact_above();
     auto topvia2 = topmet1->mutable_contact_above();
     
-    // CONTACT:               contact,         layer_below, metal_above,   thickness,               width, spacing,         border
+    // CONTACT:               contact,         layer_below,     metal_above,     thickness,               width, spacing,         border
+    //                        (LVS)            (LVS)            (LVS)
     //----------------------------------------------------------------------------------------------------------------------------
-    setContact(contn,         "Cont",          "",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contd,         "Cont",          "",          "Metal1",      0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
-    setContact(contp,         "Cont",          "GatPoly",   "Metal1",      conp_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via1,          "Via1",          "Metal1",    "Metal2",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via2,          "Via2",          "Metal2",    "Metal3",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via3,          "Via3",          "Metal3",    "Metal4",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via4,          "Via4",          "Metal4",    "Metal5",      via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(topvia1_n_cap, "topvia1_n_cap", "Metal5",    "TopMetal1",   topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(mim_via,       "mim_via",       "cmim_top",  "TopMetal1",   mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(topvia2,       "TopVia2",       "TopMetal1", "TopMetal2",   topvia2_thickness,       0.9,    1.06,           0.5);
+    setContact(contn,         "cont_nsd_con",  "nsd_fet",       "metal1_con",    0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contd,         "cont_psd_con",  "psd_fet",       "metal1_con",    0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
+    setContact(contp,         "cont_poly_con", "poly_con",      "metal1_con",    conp_thickness,          0.16,   0.18 /*TODO*/,  0.0);
+    setContact(via1,          "via1_drw",      "metal1_con",    "metal2_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via2,          "via2_drw",      "metal2_con",    "metal3_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via3,          "via3_drw",      "metal3_con",    "metal4_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
+    setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
     
     // TODO: refine via rules!
     
@@ -315,7 +341,7 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 
     // resistance values are in mΩ / square
     //                     layer, resistance, [corner_adjustment_fraction]
-    addLayerResistance(ri, "GatPoly", 48200); // TODO: there is no value defined in the process spec!
+    addLayerResistance(ri, "GatPoly",  7000); // TODO: there is no value defined in the process spec!
     addLayerResistance(ri, "Metal1",    110);
     addLayerResistance(ri, "Metal2",     88);
     addLayerResistance(ri, "Metal3",     88);
@@ -324,14 +350,14 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "TopMetal1",  18);
     addLayerResistance(ri, "TopMetal2",  11);
 
-    // resistance values are in mΩ / square
-    //                       contact_layer, layer_below,  layer_above, resistance
+    // resistance values are in mΩ / CNT
+    //                       contact_layer,   layer_below,  layer_above,     resistance
+    //                       (LVS)            (LVS)         (LVS)
+    addContactResistance(ri, "cont_nsd_con",  "nsd_fet",    "metal1_con",    17000);  // Cont over nSD-Activ
+    addContactResistance(ri, "cont_psd_con",  "psd_fet",    "metal1_con",    17000);  // Cont over pSD-Activ
+    addContactResistance(ri, "cont_poly_con", "poly_con",   "metal1_con",    15000);  // Cont over GatPoly
 
-    addContactResistance(ri, "Cont",        "nSD",        "Metal1",    17000);  // Cont over nSD-Activ
-    addContactResistance(ri, "Cont",        "pSD",        "Metal1",    17000);  // Cont over pSD-Activ
-    addContactResistance(ri, "Cont",        "GatPoly",    "Metal1",    15000);  // Cont over GatPoly
-
-    // resistance values are in mΩ / square
+    // resistance values are in mΩ / CNT
     //                       via_layer,  resistance
 
     addViaResistance(ri,     "Via1",       9000);

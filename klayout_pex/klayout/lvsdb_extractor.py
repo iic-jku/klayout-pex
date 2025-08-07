@@ -337,7 +337,7 @@ class KLayoutExtractionContext:
         labels_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].label_gds_pair
         labels_gds_pair = labels_gds_pair.layer, labels_gds_pair.datatype
 
-        lay: kdb.Layout = self.lvsdb.internal_layout()
+        lay: kdb.Layout = self.annotated_layout
         label_layer_idx = lay.find_layer(labels_gds_pair)  # sky130 layer dt = 5
         if label_layer_idx is None:
             return kdb.Texts()
@@ -424,10 +424,8 @@ class KLayoutExtractionContext:
             #       so invent new datatype numbers, like adding 100 to the real GDS datatype
             gds_pair = self.tech.gds_pair_for_layer_name.get(canonical_layer_name, None)
             if gds_pair is None:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.gds_pair_for_layer_name!")
                 continue
             if gds_pair not in self.tech.layer_info_by_gds_pair:
-                warning(f"ignoring layer {canonical_layer_name}, not in self.tech.layer_info_by_gds_pair!")
                 continue
 
             for lyr in lyr_info.source_layers:
