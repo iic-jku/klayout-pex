@@ -37,7 +37,7 @@ message RExtractorTech {
         Algorithm algorithm = 20;
         double triangulation_min_b = 30;
         double triangulation_max_area = 31;
-        double resistance = 40;
+        double resistance = 40;  // NOTE: in Ω/square!
     }
 
     message Via {
@@ -45,7 +45,7 @@ message RExtractorTech {
         kpex.layout.LayerRef bottom_conductor = 20;
         kpex.layout.LayerRef top_conductor = 30;
 
-        double resistance = 40;
+        double resistance = 40; // NOTE: in Ω/µm^2, not Ω/CNT!!!
         double merge_distance = 50;
     }
 

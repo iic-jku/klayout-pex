@@ -40,11 +40,10 @@ message ProcessParasiticsInfo {
 
 
 message ResistanceInfo {
-    
-    // resistances are in milliohm / µm^2
+
     message LayerResistance {
         string layer_name = 1;
-        double resistance = 2;
+        double resistance = 2;  // mΩ / µm^2
         double corner_adjustment_fraction = 3;
     }
     
@@ -52,13 +51,12 @@ message ResistanceInfo {
         string contact_name = 1; // e.g. licon1
         string device_layer_name = 2;  // e.g. nsdm, psdm, poly, ...
         string layer_above = 3;
-        double resistance = 10;  // resistances are in milliohm / CNT
+        double resistance = 10;  // mΩ/CNT
     }
     
-    // resistances are in milliohm / CNT
     message ViaResistance {
         string via_name = 1;
-        double resistance = 2;
+        double resistance = 2;  // mΩ/CNT
     }
 
     repeated LayerResistance layers = 10;
