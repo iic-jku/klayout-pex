@@ -78,6 +78,10 @@ def set_log_level(log_level: LogLevel):
     __logger.setLevel(log_level)
 
 
+def get_log_level() -> LogLevel:
+    return LogLevel(__logger.level)
+
+
 def register_additional_handler(handler: logging.Handler):
     """
     Adds a new handler to the default logger.
