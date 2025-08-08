@@ -1,0 +1,329 @@
+Wrote reduced netlist to: /tmp/sky130_fd_sc_hd__inv_1_netlistsvg_input_filedz376lxw.json
+{
+    "modules": {
+        "SKY130_FD_SC_HD__INV_1": {
+            "ports": {
+                "A": {
+                    "direction": "input",
+                    "bits": [
+                        0
+                    ]
+                },
+                "Y": {
+                    "direction": "input",
+                    "bits": [
+                        1
+                    ]
+                },
+                "VPB": {
+                    "direction": "input",
+                    "bits": [
+                        2
+                    ]
+                },
+                "VPWR": {
+                    "direction": "input",
+                    "bits": [
+                        3
+                    ]
+                },
+                "VGND": {
+                    "direction": "input",
+                    "bits": [
+                        4
+                    ]
+                }
+            },
+            "cells": {
+                "SKY130_FD_PR__NFET_01V8(AD=0.169,AS=0.169,L=0.15,PD=1.82,PS=1.82,W=0.65)0": {
+                    "hide_name": 1,
+                    "type": "$SKY130_FD_PR__NFET_01V8(AD=0.169,AS=0.169,L=0.15,PD=1.82,PS=1.82,W=0.65)",
+                    "port_directions": {
+                        "0=Y": "input",
+                        "1=A": "input",
+                        "2=VGND": "input",
+                        "3=VNB": "input"
+                    },
+                    "connections": {
+                        "0=Y": [
+                            1
+                        ],
+                        "1=A": [
+                            0
+                        ],
+                        "2=VGND": [
+                            4
+                        ],
+                        "3=VNB": [
+                            5
+                        ]
+                    },
+                    "attributes": {}
+                },
+                "SKY130_FD_PR__PFET_01V8_HVT(AD=0.26,AS=0.26,L=0.15,PD=2.52,PS=2.52,W=1)0": {
+                    "hide_name": 1,
+                    "type": "$SKY130_FD_PR__PFET_01V8_HVT(AD=0.26,AS=0.26,L=0.15,PD=2.52,PS=2.52,W=1)",
+                    "port_directions": {
+                        "0=Y": "input",
+                        "1=A": "input",
+                        "2=VPWR": "input",
+                        "3=VPB": "input"
+                    },
+                    "connections": {
+                        "0=Y": [
+                            1
+                        ],
+                        "1=A": [
+                            0
+                        ],
+                        "2=VPWR": [
+                            3
+                        ],
+                        "3=VPB": [
+                            2
+                        ]
+                    },
+                    "attributes": {}
+                },
+                "C0": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            1
+                        ],
+                        "B": [
+                            4
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.1f"
+                    }
+                },
+                "C1": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            3
+                        ],
+                        "B": [
+                            4
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.034f"
+                    }
+                },
+                "C2": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            3
+                        ],
+                        "B": [
+                            1
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.128f"
+                    }
+                },
+                "C3": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            0
+                        ],
+                        "B": [
+                            4
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.04f"
+                    }
+                },
+                "C4": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            0
+                        ],
+                        "B": [
+                            1
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.048f"
+                    }
+                },
+                "C5": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            2
+                        ],
+                        "B": [
+                            1
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.018f"
+                    }
+                },
+                "C6": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            0
+                        ],
+                        "B": [
+                            3
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.037f"
+                    }
+                },
+                "C7": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            2
+                        ],
+                        "B": [
+                            3
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.054f"
+                    }
+                },
+                "C8": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            2
+                        ],
+                        "B": [
+                            0
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.045f"
+                    }
+                },
+                "R0": {
+                    "type": "r_v",
+                    "connections": {
+                        "A": [
+                            6
+                        ],
+                        "B": [
+                            7
+                        ]
+                    },
+                    "attributes": {
+                        "value": "230.576"
+                    }
+                },
+                "R1": {
+                    "type": "r_v",
+                    "connections": {
+                        "A": [
+                            0
+                        ],
+                        "B": [
+                            6
+                        ]
+                    },
+                    "attributes": {
+                        "value": "158.667"
+                    }
+                },
+                "R2": {
+                    "type": "r_v",
+                    "connections": {
+                        "A": [
+                            6
+                        ],
+                        "B": [
+                            8
+                        ]
+                    },
+                    "attributes": {
+                        "value": "158.275"
+                    }
+                },
+                "C9": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            4
+                        ],
+                        "B": [
+                            5
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.251f"
+                    }
+                },
+                "C10": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            1
+                        ],
+                        "B": [
+                            5
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.096f"
+                    }
+                },
+                "C11": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            3
+                        ],
+                        "B": [
+                            5
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.219f"
+                    }
+                },
+                "C12": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            0
+                        ],
+                        "B": [
+                            5
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.167f"
+                    }
+                },
+                "C13": {
+                    "type": "c_v",
+                    "connections": {
+                        "A": [
+                            2
+                        ],
+                        "B": [
+                            5
+                        ]
+                    },
+                    "attributes": {
+                        "value": "0.339f"
+                    }
+                }
+            }
+        }
+    }
+}
