@@ -65,11 +65,11 @@ class ExtractionReporter:
 
     @cached_property
     def cat_rex_request(self) -> rdb.RdbCategory:
-        return self.report.create_category("R Extraction Request")
+        return self.report.create_category("[R] Extraction Request")
 
     @cached_property
     def cat_rex_tech(self) -> rdb.RdbCategory:
-        return self.report.create_category(self.cat_rex_request, "R Extraction Tech")
+        return self.report.create_category(self.cat_rex_request, "[R] Extraction Tech")
 
     @cached_property
     def cat_rex_request_devices(self) -> rdb.RdbCategory:
@@ -85,7 +85,7 @@ class ExtractionReporter:
 
     @cached_property
     def cat_rex_result(self) -> rdb.RdbCategory:
-        return self.report.create_category("R Extraction Result")
+        return self.report.create_category("[R] Extraction Result")
 
     @cached_property
     def cat_rex_result_networks(self) -> rdb.RdbCategory:
