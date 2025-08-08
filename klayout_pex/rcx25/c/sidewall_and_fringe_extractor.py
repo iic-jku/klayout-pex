@@ -30,7 +30,9 @@ import klayout.db as kdb
 
 from klayout_pex.log import (
     info,
-    warning
+    warning,
+    get_log_level,
+    LogLevel
 )
 from klayout_pex.tech_info import TechInfo
 
@@ -153,11 +155,12 @@ class SidewallAndFringeExtractor:
             #
             geometry_restorer = GeometryRestorer(self.to_original_trans(edge))
 
-            self.report.output_edge_neighborhood(inside_layer=self.inside_layer_name,
-                                                 all_layer_names=self.all_layer_names,
-                                                 edge=edge,
-                                                 neighborhood=neighborhood,
-                                                 geometry_restorer=geometry_restorer)
+            if get_log_level() == LogLevel.DEBUG:
+                self.report.output_edge_neighborhood(inside_layer=self.inside_layer_name,
+                                                     all_layer_names=self.all_layer_names,
+                                                     edge=edge,
+                                                     neighborhood=neighborhood,
+                                                     geometry_restorer=geometry_restorer)
 
             for edge_interval, polygons_by_child in neighborhood:
                 if not polygons_by_child:
