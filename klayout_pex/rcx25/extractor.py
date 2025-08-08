@@ -199,7 +199,8 @@ class RCX25Extractor:
             #   currenly, tesselation does not work:
             #   https://github.com/KLayout/klayout/issues/2100
             r_extractor = RExtractor(pex_context=self.pex_context,
-                                     substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
+                                     substrate_algorithm=pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     #substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
                                      wire_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
                                      delaunay_b = self.delaunay_b,
                                      delaunay_amax = self.delaunay_amax,
