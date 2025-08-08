@@ -168,11 +168,13 @@ class KpexCLI:
 
         group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
                                                          description="Either LVS is run, or an existing LVSDB is used")
-        group_pex_input.add_argument("--gds", "-g", dest="gds_path", help="GDS path (for LVS)")
+        group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
+                                     help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
                                      help="Schematic SPICE netlist path (for LVS). "
                                           "If none given, a dummy schematic will be created")
-        group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", help="KLayout LVSDB path (bypass LVS)")
+        group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", default=None,
+                                     help="KLayout LVSDB path (bypass LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
 
@@ -334,6 +336,29 @@ class KpexCLI:
 
         rule('Input Layout')
 
+        # check engines VS input possiblities
+        match (args.run_magic, args.run_fastcap, args.run_fastercap, args.run_2_5D,
+               args.gds_path, args.lvsdb_path):
+            case (True, _, _, _, None, _):
+                error(f"Running PEX engine MAGIC requires --gds (--lvsdb not possible)")
+                found_errors = True
+            case (False, False, False, False, _, _): # at least one engine must be activated
+                error("No PEX engines activated")
+                engine_help = """
+        | Argument     | Description                     |
+        | ------------ | ------------------------------- |
+        | --2.5D       | Run KPEX/2.5D analytical engine |
+        | --fastercap  | Run KPEX/FastCap 3D engine      |
+        | --fastercap  | Run KPEX/FasterCap 3D engine    |
+        | --magic      | Run MAGIC wrapper engine        |
+        """
+                subproc(f"\n\nPlease activate one or more engines using the arguments:")
+                rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
+                found_errors = True
+            case (_, _, _, _, None, None):
+                error(f"Neither GDS nor LVSDB was provided")
+                found_errors = True
+
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
             info(f"GDS input file passed, running in LVS mode")
@@ -386,13 +411,10 @@ class KpexCLI:
 
                 if not hasattr(args, 'effective_gds_path'):
                     args.effective_gds_path = args.gds_path
-        else:
+        elif args.lvsdb_path is not None:
             info(f"LVSDB input file passed, bypassing LVS")
             args.input_mode = InputMode.LVSDB
-            if not hasattr(args, 'lvsdb_path'):
-                error(f"LVSDB input path not specified (argument --lvsdb)")
-                found_errors = True
-            elif not os.path.isfile(args.lvsdb_path):
+            if not os.path.isfile(args.lvsdb_path):
                 error(f"Can't read KLayout LVSDB file at path {args.lvsdb_path}")
                 found_errors = True
             else:
@@ -442,21 +464,6 @@ class KpexCLI:
             args.dielectric_filter = MultipleChoicePattern(pattern=pattern_string)
         except ValueError as e:
             error("Failed to parse --diel arg", e)
-            found_errors = True
-
-        # at least one engine must be activated
-
-        if not (args.run_magic or args.run_fastcap or args.run_fastercap or args.run_2_5D):
-            error("No PEX engines activated")
-            engine_help = """
-| Argument     | Description               |
-| ------------ | ------------------------- |
-| --fastercap  | Run kpex/FasterCap engine |
-| --2.5D       | Run kpex/2.5D engine      |
-| --magic      | Run MAGIC engine          |
-"""
-            subproc(f"\n\nPlease activate one or more engines using the arguments:")
-            rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
             found_errors = True
 
         if args.cache_dir_path is None:
