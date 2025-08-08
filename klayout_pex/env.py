@@ -73,7 +73,7 @@ class Env:
     def from_os_environ(cls) -> Env:
         d = {}
         for env_var in EnvVar:
-            value = os.environ.get(env_var.name, None)
+            value = os.environ.get(env_var.value, None)
             if value is None:
                 value = env_var.default_value
             d[env_var] = value
