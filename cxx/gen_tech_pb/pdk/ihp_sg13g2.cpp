@@ -94,7 +94,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL, KREG, "metal2_con",    10, 0,   "Metal2", "Computed layer for Metal2");
     addComputedLayer(tech, METAL, KREG, "metal3_con",    30, 0,   "Metal3", "Computed layer for Metal3");
     addComputedLayer(tech, METAL, KREG, "metal4_con",    50, 0,   "Metal4", "Computed layer for Metal4");
-    addComputedLayer(tech, METAL, KREG, "metal5_n_cap",  67, 200, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
+    addComputedLayer(tech, METAL, KREG, "metal5_n_cap",  67,  0, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
     addComputedLayer(tech, METAL, KREG, "topmetal1_con", 126, 0, "TopMetal1", "Computed layer for TopMetal1");
     addComputedLayer(tech, METAL, KREG, "topmetal2_con", 134, 0, "TopMetal2", "Computed layer for TopMetal2");
 
@@ -107,11 +107,17 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, VIA,   KREG, "via3_drw",      49, 0,  "Via3", "Computed layer for Via3");
     addComputedLayer(tech, VIA,   KREG, "via4_drw",      66, 0,  "Via4", "Computed layer for Via4");
     
-    addComputedLayer(tech, VIA,   KREG, "topvia1_n_cap", 125, 200, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
+    addComputedLayer(tech, VIA,   KREG, "topvia1_n_cap", 125, 0, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
     addComputedLayer(tech, VIA,   KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
 
+    // NOTE: for CC whiteboxing to work,
+    //       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
+    //       to ensure they are be merged
+    //
+    //       for R mode, MIM cap vias should point to a different GDS number than the regular via
+    //       as they have different resistances
     addComputedLayer(tech, VIA,   KCAP, "mim_via",       125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
-    addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 100,  "Metal5", "Computed layer for Metal5, case MiM cap");
+    addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 0,  "Metal5", "Computed layer for Metal5, case MiM cap");
     addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
 
     // NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
