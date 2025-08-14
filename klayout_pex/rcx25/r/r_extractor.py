@@ -101,120 +101,129 @@ class RExtractor:
 
             LP = tech_pb2.LayerInfo.Purpose
 
-            if computed_layer_info.kind != tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
-                match computed_layer_info.layer_info.purpose:
-                    case LP.PURPOSE_NWELL:
-                        pass  # TODO!
+            match computed_layer_info.kind:
+                case tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                    continue
 
-                    case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
-                        # device terminals
-                        #   - source/drain (e.g. sky130A: nsdm, psdm)
-                        #   - bulk (e.g. nwell)
-                        #
-                        # we will consider this only as a pin end-point, there are no wires at all on this layer,
-                        # so the resistance does not matter for PEX
-                        for source_layer in li.source_layers:
-                            cond = rex_tech.conductors.add()
+                case tech_pb2.ComputedLayerInfo.Kind.KIND_LABEL:
+                    continue
 
-                            cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            cond.layer.canonical_layer_name = canonical_layer_name
-                            cond.layer.lvs_layer_name = source_layer.lvs_layer_name
+                case _:
+                    pass
 
-                            cond.triangulation_min_b = self.delaunay_b
-                            cond.triangulation_max_area = self.delaunay_amax
+            match computed_layer_info.layer_info.purpose:
+                case LP.PURPOSE_NWELL:
+                    pass  # TODO!
 
+                case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
+                    # device terminals
+                    #   - source/drain (e.g. sky130A: nsdm, psdm)
+                    #   - bulk (e.g. nwell)
+                    #
+                    # we will consider this only as a pin end-point, there are no wires at all on this layer,
+                    # so the resistance does not matter for PEX
+                    for source_layer in li.source_layers:
+                        cond = rex_tech.conductors.add()
+
+                        cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
+                        cond.layer.canonical_layer_name = canonical_layer_name
+                        cond.layer.lvs_layer_name = source_layer.lvs_layer_name
+
+                        cond.triangulation_min_b = self.delaunay_b
+                        cond.triangulation_max_area = self.delaunay_amax
+
+                        cond.algorithm = self.substrate_algorithm
+                        cond.resistance = 0  # see comment above
+
+                case LP.PURPOSE_METAL:
+                    if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                        continue
+
+                    layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
+                    for source_layer in li.source_layers:
+                        cond = rex_tech.conductors.add()
+
+                        cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
+                        cond.layer.canonical_layer_name = canonical_layer_name
+                        cond.layer.lvs_layer_name = source_layer.lvs_layer_name
+
+                        cond.triangulation_min_b = self.delaunay_b
+                        cond.triangulation_max_area = self.delaunay_amax
+
+                        if canonical_layer_name == tech.internal_substrate_layer_name:
                             cond.algorithm = self.substrate_algorithm
-                            cond.resistance = 0  # see comment above
+                        else:
+                            cond.algorithm = self.wire_algorithm
+                        cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
 
-                    case LP.PURPOSE_METAL:
-                        if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                case LP.PURPOSE_CONTACT:
+                    for source_layer in li.source_layers:
+                        contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
+                        if contact is None:
+                            warning(
+                                f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
+                                f"no contact found in tech info")
                             continue
 
-                        layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
-                        for source_layer in li.source_layers:
-                            cond = rex_tech.conductors.add()
-
-                            cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            cond.layer.canonical_layer_name = canonical_layer_name
-                            cond.layer.lvs_layer_name = source_layer.lvs_layer_name
-
-                            cond.triangulation_min_b = self.delaunay_b
-                            cond.triangulation_max_area = self.delaunay_amax
-
-                            if canonical_layer_name == tech.internal_substrate_layer_name:
-                                cond.algorithm = self.substrate_algorithm
-                            else:
-                                cond.algorithm = self.wire_algorithm
-                            cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
-
-                    case LP.PURPOSE_CONTACT:
-                        for source_layer in li.source_layers:
-                            contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
-                            if contact is None:
-                                warning(
-                                    f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
-                                    f"no contact found in tech info")
-                                continue
-
-                            contact_resistance = tech.contact_resistance_by_device_layer_name.get(contact.layer_below,
-                                                                                                  None)
-                            if contact_resistance is None:
-                                warning(
-                                    f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
-                                    f"no contact resistance found in tech info")
-                                continue
-
-                            via = rex_tech.vias.add()
-
-                            bot_gds_pair = tech.gds_pair(contact.layer_below)
-                            top_gds_pair = tech.gds_pair(contact.metal_above)
-
-                            via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            via.layer.canonical_layer_name = canonical_layer_name
-                            via.layer.lvs_layer_name = source_layer.lvs_layer_name
-
-                            via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
-                            via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
-
-                            via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_contact(
-                                contact=contact,
-                                contact_resistance=contact_resistance
-                            )
-                            via.merge_distance = self.via_merge_distance
-
-                    case LP.PURPOSE_VIA:
-                        via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
-                        if via_resistance is None:
-                            warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
+                        contact_resistance = tech.contact_resistance_by_device_layer_name.get(contact.layer_below,
+                                                                                              None)
+                        if contact_resistance is None:
+                            warning(
+                                f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
+                                f"no contact resistance found in tech info")
                             continue
-                        for source_layer in li.source_layers:
-                            via = rex_tech.vias.add()
-                            bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
-                                source_layer.lvs_layer_name, None)
-                            if bot_top is None:
-                                warning(f"ignoring layer {canonical_layer_name} (LVS {source_layer.lvs_layer_name}), no bottom/top layers found in tech info")
-                                continue
 
-                            (bot, top) = bot_top
-                            bot_gds_pair = tech.gds_pair(bot)
-                            top_gds_pair = tech.gds_pair(top)
+                        via = rex_tech.vias.add()
 
-                            via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
-                            via.layer.canonical_layer_name = canonical_layer_name
-                            via.layer.lvs_layer_name = source_layer.lvs_layer_name
+                        bot_gds_pair = tech.gds_pair(contact.layer_below)
+                        top_gds_pair = tech.gds_pair(contact.metal_above)
 
-                            via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
-                            via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
+                        via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
+                        via.layer.canonical_layer_name = canonical_layer_name
+                        via.layer.lvs_layer_name = source_layer.lvs_layer_name
 
-                            contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[
-                                source_layer.lvs_layer_name]
+                        via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
+                        via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
 
-                            via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
-                                contact=contact,
-                                via_resistance=via_resistance
-                            )
+                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                            contact=contact,
+                            contact_resistance=contact_resistance
+                        )
+                        via.merge_distance = self.via_merge_distance
 
-                            via.merge_distance = self.via_merge_distance
+                case LP.PURPOSE_VIA:
+                    via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
+                    if via_resistance is None:
+                        warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
+                        continue
+                    for source_layer in li.source_layers:
+                        via = rex_tech.vias.add()
+                        bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
+                            source_layer.lvs_layer_name, None)
+                        if bot_top is None:
+                            warning(f"ignoring layer {canonical_layer_name} (LVS {source_layer.lvs_layer_name}), no bottom/top layers found in tech info")
+                            continue
+
+                        (bot, top) = bot_top
+                        bot_gds_pair = tech.gds_pair(bot)
+                        top_gds_pair = tech.gds_pair(top)
+
+                        via.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
+                        via.layer.canonical_layer_name = canonical_layer_name
+                        via.layer.lvs_layer_name = source_layer.lvs_layer_name
+
+                        via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
+                        via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
+
+                        contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[
+                            source_layer.lvs_layer_name]
+
+                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
+                            contact=contact,
+                            via_resistance=via_resistance
+                        )
+
+                        via.merge_distance = self.via_merge_distance
 
         return rex_tech
 
