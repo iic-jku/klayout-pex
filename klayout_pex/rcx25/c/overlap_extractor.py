@@ -130,9 +130,9 @@ class OverlapExtractor:
 
                     overlap_area_um2 = overlap_area.area() * self.dbu ** 2
                     cap_femto = overlap_area_um2 * overlap_cap_spec.capacitance / 1000.0
-                    info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
-                         f"cap: {round(cap_femto, 2)} fF, "
-                         f"area: {overlap_area_um2} µm^2")
+                    # info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
+                    #     f"cap: {round(cap_femto, 2)} fF, "
+                    #     f"area: {overlap_area_um2} µm^2")
 
                     if cap_femto > 0.0:
                         ovk = OverlapKey(layer_top=top_layer_name,
