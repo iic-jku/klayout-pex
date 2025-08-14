@@ -400,7 +400,12 @@ class KLayoutExtractionContext:
                     terminal.net_name = n.name
 
                     for idx, shapes in shapes_by_lyr_idx.items():
-                        lyr_idx = self.layer_index_map[idx]
+                        lyr_idx = self.layer_index_map.get(idx, None)
+                        if lyr_idx is None:
+                            warning(f"Could not find a layer for device {d.device_name}, class {d.device_class_name}, "
+                                    f"terminal {td.name}, net {n.name}")
+                            continue
+
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
                         region_by_layer = terminal.region_by_layer.add()
