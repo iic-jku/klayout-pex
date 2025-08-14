@@ -197,12 +197,12 @@ class RExtractor:
                         warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
                         continue
                     for source_layer in li.source_layers:
-                        via = rex_tech.vias.add()
                         bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
                             source_layer.lvs_layer_name, None)
                         if bot_top is None:
                             warning(f"ignoring layer {canonical_layer_name} (LVS {source_layer.lvs_layer_name}), no bottom/top layers found in tech info")
                             continue
+                        via = rex_tech.vias.add()
 
                         (bot, top) = bot_top
                         bot_gds_pair = tech.gds_pair(bot)
