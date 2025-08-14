@@ -99,26 +99,31 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, VIA,     KREG, "via3_ncap", 70, 144, "via3",       "Computed layer for via3 (no MIM cap)");
     addComputedLayer(tech, VIA,     KREG, "via4_ncap", 71, 144, "via4",       "Computed layer for via4 (no MIM cap)");
     
+    // NOTE: for CC whiteboxing to work,
+    //       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
+    //       to ensure they are be merged
+    //
+    //       for R mode, MIM cap vias should point to a different GDS number than the regular via
+    //       as they have different resistances
     addComputedLayer(tech, VIA,     KCAP, "via3_cap",  70, 244, "via3",       "Computed layer for via3 (with MIM cap)");
     addComputedLayer(tech, VIA,     KCAP, "via4_cap",  71, 244, "via4",       "Computed layer for via4 (with MIM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met3_cap",  70, 220, "met3",       "metal3 part of MiM cap");
-    addComputedLayer(tech, METAL,   KCAP, "met4_cap",  71, 220, "met4",       "metal4 part of MiM cap");
+    addComputedLayer(tech, METAL,   KCAP, "met3_cap",  70, 20, "met3",       "metal3 part of MiM cap");
+    addComputedLayer(tech, METAL,   KCAP, "met4_cap",  71, 20, "met4",       "metal4 part of MiM cap");
     addComputedLayer(tech, MIM,     KCAP, "capm",      89, 44,  "capm",       "MiM cap above metal3");
     addComputedLayer(tech, MIM,     KCAP, "capm2",     97, 44,  "capm2",      "MiM cap above metal4");
-
-    addComputedLayer(tech, METAL,   KCAP, "poly_vpp",  66, 200,  "poly",       "Computed layer for poly (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "li_vpp",    67, 200,  "li1",        "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met1_vpp",  68, 200,  "met1",       "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met2_vpp",  69, 200,  "met2",       "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met3_vpp",  70, 200,  "met3",       "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met4_vpp",  71, 200,  "met4",       "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, METAL,   KCAP, "met5_vpp",  72, 200,  "met5",       "Capacitor device metal (MOM cap)");
-    addComputedLayer(tech, CONT,    KCAP, "licon_vpp", 66, 440,  "licon1",     "Capacitor device contact (MOM cap)");
-    addComputedLayer(tech, VIA,     KCAP, "mcon_vpp",  67, 440,  "mcon",       "Capacitor device contact (MOM cap)");
-    addComputedLayer(tech, VIA,     KCAP, "via1_vpp",  68, 440,  "via",        "Capacitor device contact (MOM cap)");
-    addComputedLayer(tech, VIA,     KCAP, "via2_vpp",  69, 440,  "via2",       "Capacitor device contact (MOM cap)");
-    addComputedLayer(tech, VIA,     KCAP, "via3_vpp",  70, 440,  "via3",       "Capacitor device contact (MOM cap)");
-    addComputedLayer(tech, VIA,     KCAP, "via4_vpp",  71, 440,  "via4",       "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "poly_vpp",  66, 20,  "poly",       "Computed layer for poly (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "li_vpp",    67, 20,  "li1",        "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "met1_vpp",  68, 20,  "met1",       "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "met2_vpp",  69, 20,  "met2",       "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "met3_vpp",  70, 20,  "met3",       "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "met4_vpp",  71, 20,  "met4",       "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, METAL,   KCAP, "met5_vpp",  72, 20,  "met5",       "Capacitor device metal (MOM cap)");
+    addComputedLayer(tech, CONT,    KCAP, "licon_vpp", 66, 44,  "licon1",     "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, VIA,     KCAP, "mcon_vpp",  67, 44,  "mcon",       "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, VIA,     KCAP, "via1_vpp",  68, 44,  "via",        "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, VIA,     KCAP, "via2_vpp",  69, 44,  "via2",       "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, VIA,     KCAP, "via3_vpp",  70, 44,  "via3",       "Capacitor device contact (MOM cap)");
+    addComputedLayer(tech, VIA,     KCAP, "via4_vpp",  71, 44,  "via4",       "Capacitor device contact (MOM cap)");
     
     addComputedLayer(tech, METAL,   KPIN, "poly_pin_con", 66, 16,  "poly.pin", "Poly pin");
     addComputedLayer(tech, METAL,   KPIN, "li_pin_con",   67, 16,  "li1.pin",  "li1 pin");
