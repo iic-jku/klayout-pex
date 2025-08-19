@@ -133,13 +133,13 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL,   KPIN, "met4_pin_con", 71, 16,  "met4.pin", "met4 pin");
     addComputedLayer(tech, METAL,   KPIN, "met5_pin_con", 72, 16,  "met5.pin", "met5 pin");
 
-    addComputedLayer(tech, METAL,   KLBL, "poly_label",   66, 5,  "poly.label", "Poly label");
-    addComputedLayer(tech, METAL,   KLBL, "li_label",     67, 5,  "li1.label",  "li1 label");
-    addComputedLayer(tech, METAL,   KLBL, "met1_pin_con", 68, 5,  "met1.label", "met1 label");
-    addComputedLayer(tech, METAL,   KLBL, "met2_pin_con", 69, 5,  "met2.label", "met2 label");
-    addComputedLayer(tech, METAL,   KLBL, "met3_pin_con", 70, 5,  "met3.label", "met3 label");
-    addComputedLayer(tech, METAL,   KLBL, "met4_pin_con", 71, 5,  "met4.label", "met4 label");
-    addComputedLayer(tech, METAL,   KLBL, "met5_pin_con", 72, 5,  "met5.label", "met5 label");
+    addComputedLayer(tech, METAL,   KLBL, "poly_label", 66, 5,  "poly.label", "Poly label");
+    addComputedLayer(tech, METAL,   KLBL, "li_label",   67, 5,  "li1.label",  "li1 label");
+    addComputedLayer(tech, METAL,   KLBL, "met1_label", 68, 5,  "met1.label", "met1 label");
+    addComputedLayer(tech, METAL,   KLBL, "met2_label", 69, 5,  "met2.label", "met2 label");
+    addComputedLayer(tech, METAL,   KLBL, "met3_label", 70, 5,  "met3.label", "met3 label");
+    addComputedLayer(tech, METAL,   KLBL, "met4_label", 71, 5,  "met4.label", "met4 label");
+    addComputedLayer(tech, METAL,   KLBL, "met5_label", 72, 5,  "met5.label", "met5 label");
 }
 
 void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
