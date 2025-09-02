@@ -1,0 +1,610 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[09:19:15] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:364
+[09:19:15] INFO     No explicit top cell specified, using top    kpex_cli.py:404
+                    cell                                                        
+                    'single_plate_100um_x_100um_li1_over_substra                
+                    te'                                                         
+[09:19:15] INFO     LVS input schematic not specified (argument  kpex_cli.py:445
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[09:19:15] INFO     Cache miss: extracted LVSDB does not exist   kpex_cli.py:812
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sin
+gle_plate_100um_x_100um_li1_over_substrate.gds.gz/single_plate_100um_x_100um_li1
+_over_substrate.lvsdb.gz                                                        
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs 
+-rd                                                                             
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_pa
+tterns/single_plate_100um_x_100um_li1_over_substrate.gds.gz -rd                 
+report=/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100
+um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/sin
+gle_plate_100um_x_100um_li1_over_substrate.lvsdb.gz -rd                         
+schematic=/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_
+100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/
+single_plate_100um_x_100um_li1_over_substrate_dummy_schematic.spice -rd thr=22  
+-rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd         
+scale=false -rd verbose=false -rd schematic_simplify=false -rd net_only=false   
+-rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd           
+purge=false -rd purge_nets=false -rd no_simplify=true                           
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_lvs.log                                     
+2025-09-02 09:19:20 +0000: Memory Usage (430452K) : Starting running SKY130     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/single_plate_100um_x_100um_li1_over_substrate.gds.gz                           
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Layout file:                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/single_plate_100um_x_100um_li1_over_substrate.gds.gz                           
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Number of threads: 22       
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Final report:               
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate.lvsdb.gz                                    
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : No substrate name given,    
+default name is sky130_gnd                                                      
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Extracted netlist with net  
+names: true                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Extracted netlist with      
+comments in details: false                                                      
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Extracted netlist file:     
+single_plate_100um_x_100um_li1_over_substrate_extracted.cir                     
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : device_scaling: false       
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : Verbose mode: false         
+2025-09-02 09:19:20 +0000: Memory Usage (431844K) : deep mode is enabled.       
+2025-09-02 09:19:20 +0000: Memory Usage (431972K) : Netlist file:               
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_dummy_schematic.spice                       
+2025-09-02 09:19:20 +0000: Memory Usage (431972K) : Read in polygons from       
+layers.                                                                         
+2025-09-02 09:19:20 +0000: Memory Usage (438372K) : Read in labels from layers. 
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : Evaluate switches start     
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : SCH_SIMPLE enabled  false   
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : NET_ONLY enabled  false     
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : TOP_LVL_PINS enabled  true  
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : COMBINE enabled  false      
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : PURGE enabled  false        
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : PURGE_NETS enabled  false   
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : SIMPLIFY enabled  false     
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : Evaluate switches end.      
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : SKY130 LVS rules started    
+2025-09-02 09:19:20 +0000: Memory Usage (439652K) : Starting deriving base      
+layers.                                                                         
+2025-09-02 09:19:20 +0000: Memory Usage (446876K) : Starting MOSFET DERIVATIONS 
+2025-09-02 09:19:20 +0000: Memory Usage (446876K) : Starting PMOS layers        
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (447772K) : Starting NMOS layers        
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (449180K) : Starting BJT DERIVATIONS    
+2025-09-02 09:19:20 +0000: Memory Usage (449692K) : Starting NPN layers         
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (451920K) : Starting PNP layers         
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (452688K) : Starting DIODE DERIVATIONS  
+2025-09-02 09:19:20 +0000: Memory Usage (454224K) : Starting PHOTODIODE         
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (454864K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (458192K) : Starting FUSE DERIVATIONS   
+2025-09-02 09:19:20 +0000: Memory Usage (458192K) : Starting MIM DERIVATIONS    
+2025-09-02 09:19:20 +0000: Memory Usage (458576K) : Starting VARACTOR           
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (459600K) : Starting INDUCTOR           
+DERIVATIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (461008K) : Starting VPP CAP DERIVATIONS
+2025-09-02 09:19:20 +0000: Memory Usage (463668K) : Starting SONOS DERIVATIONS  
+2025-09-02 09:19:20 +0000: Memory Usage (463668K) : Starting SKY130 LVS         
+connectivity setup                                                              
+2025-09-02 09:19:20 +0000: Memory Usage (463668K) : Starting SKY130 LVS         
+connectivity setup (Inter-layer)                                                
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting SKY130 LVS         
+connectivity setup (Attaching labels)                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting SKY130 LVS         
+connectivity setup (Global connections)                                         
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting SKY130 LVS         
+connectivity setup (Multifinger Devices)                                        
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS BJT CONNECTIONS
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS PHOTODIODE     
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS MIMCAP         
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS VARACTOR       
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS RESISTOR       
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS INDUCTOR       
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS VPP CAP        
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting LVS SONOS          
+CONNECTIONS                                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting MOSFET EXTRACTION  
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Starting PMOS EXTRACTION    
+2025-09-02 09:19:20 +0000: Memory Usage (463796K) : Extracting 1.8V PMOS        
+transistor standard                                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 1.8V PMOS        
+transistor low threshold voltage                                                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 1.8V PMOS        
+transistor high threshold voltage                                               
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V gate 10.5V    
+drain PMOS transistor                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting NMOS EXTRACTION    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 1.8V NMOS        
+transistor standard                                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 1.8V NMOS        
+transistor low threshold voltage                                                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 3.3V NMOS        
+transistor native voltage                                                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V NMOS          
+transistor native voltage                                                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V gate 10.5V    
+drain NMOS transistor                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting BJT EXTRACTION     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting NPN BJT EXTRACTION 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L1p00 BJT                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L2p00 BJT                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__npn_11v0_W1p00L1p00 BJT                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting PNP BJT EXTRACTION 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting DIODE EXTRACTION   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V N+ diffusion  
+diode                                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V N+ diffusion  
+diode low threshold voltage                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V N+ diffusion  
+diode native threshold voltage                                                  
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 11V N+ diffusion 
+diode                                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V P+ diffusion  
+diode                                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting5V P+ diffusion   
+diode low threshold voltage                                                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 5V P+ diffusion  
+diode high threshold voltage                                                    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting 11V P+ diffusion 
+diode                                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting PHOTODIODE         
+EXTRACTION                                                                      
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting Photodiode       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting RESISTOR EXTRACTION
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_iso_pw device                                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_po device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_high_po_0p35 device                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_high_po_0p69 device                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_high_po_1p41 device                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_high_po_2p85 device                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_high_po_5p73 device                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p35 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p69 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_1p41 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_2p85 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_5p73 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_l1 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_m1 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_m2 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_m3 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_m4 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__res_generic_m5 device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting FUSE EXTRACTION    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__fuse_m4 device                                                    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting MIMCAP EXTRACTION  
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__model__cap_mim device                                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__model__cap_mim_m4 device                                          
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting VARACTOR EXTRACTION
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting low threshold    
+voltage varactor                                                                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting high threshold   
+voltage varactor                                                                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting VARACTOR EXTRACTION
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2                    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2                                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4                               
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap                     
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting vpp cap          
+sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4                               
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3                               
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5                             
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5                               
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1                                 
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4                       
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield                                   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield                         
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin                
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test                    
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting SONOS EXTRACTION   
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Extracting Build space flash
+special SONOSFET star                                                           
+2025-09-02 09:19:20 +0000: Memory Usage (463924K) : Starting SKY130 LVS         
+comparison section                                                              
+2025-09-02 09:19:20 +0000: Memory Usage (464180K) : LVS Total Run time 0.517037 
+seconds                                                                         
+2025-09-02 09:19:20 +0000: Memory Usage (464180K) :                             
+==========================================                                      
+2025-09-02 09:19:20 +0000: Memory Usage (464180K) : INFO : Congratulations!     
+Netlists match.                                                                 
+2025-09-02 09:19:20 +0000: Memory Usage (464180K) :                             
+==========================================                                      
+────────────────────────────────────────────────────────────────────────────────
+[09:19:21] INFO     klayout LVS succeeded after 6.021s          lvs_runner.py:96
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[09:19:21] INFO     (67, 20) -> (li_con)                         kpex_cli.py:878
+[09:19:21] INFO     (67, 16) -> (li_pin_con)                     kpex_cli.py:878
+─────────────────────────────── Process stackup ────────────────────────────────
+[09:19:21] INFO     DBU: 0.001                  fastercap_model_generator.py:120
+[09:19:21] INFO     Delaunay b: 0.5             fastercap_model_generator.py:121
+[09:19:21] INFO     Delaunay area_max: 50       fastercap_model_generator.py:122
+[09:19:21] INFO     Conductor PLATE, metal li1,   fastercap_input_builder.py:150
+                    z=0.9361, height=0.1                                        
+[09:19:21] INFO     Substrate VSUBS,              fastercap_input_builder.py:214
+                    z=-0.43000000000000005,                                     
+                    height=0.33                                                 
+[09:19:21] INFO     Simple dielectric (field      fastercap_input_builder.py:233
+                    oxide) fox: z=0,                                            
+                    height=0.3262                                               
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_1_outside=(void)_inside=fox.geo                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_2_outside=(void)_net=VSUBS.geo                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_3_outside=(void)_net=PLATE.geo                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst                                                
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/diel_fox.stl                                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/cond_PLATE.stl                                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/cond_VSUBS.stl                                                                 
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[09:19:21] INFO     Configure number of OpenMP threads           kpex_cli.py:510
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[09:19:21] INFO     Calling FasterCap                     fastercap_runner.py:73
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f0.0 -ap                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst, output file:                                  
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_FasterCap_Output.txt                        
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.0.8                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst                                                
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 0                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 7168                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 7168                                         
+Number of links to be computed: 14336                                           
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Jacobi                                                    
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_VSUBS  7.42793e-08 -5.59982e-08                                              
+g2_PLATE  -6.50185e-08 6.45244e-08                                              
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 7168                                         
+Number of potential estimates: 14158                                            
+Number of links: 21504 (uncompressed 51380224, compression ratio is 100.0%)     
+Max recursion level: 20                                                         
+Max Mesh relative refinement value: 0.000522624                                 
+Time for reading input file: 0.103538s                                          
+Time for building super hierarchy: 0.035318s                                    
+Time for discretization: 0.052769s                                              
+Time for building potential matrix: 0.018753s                                   
+Time for precond calculation: 0.001156s                                         
+Time for gmres solving: 0.040558s                                               
+Memory allocated for panel hierarchy: 2873768 bytes                             
+Memory allocated for links structure: 16834576 bytes                            
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 1137848 bytes                                       
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.430911s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 20372 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Refinement completed                                                            
+Mesh refinement (-m): 0.000369551                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 9736                                         
+Number of links to be computed: 608110                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18                 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_VSUBS  3.94355e-07 -3.77926e-07                                              
+g2_PLATE  -3.75869e-07 3.77454e-07                                              
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.829622                                                                        
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 9736                                         
+Number of potential estimates: 597235                                           
+Number of links: 617846 (uncompressed 94789696, compression ratio is 99.3%)     
+Max recursion level: 31                                                         
+Max Mesh relative refinement value: 0.000369539                                 
+Time for reading input file: 0.016356s                                          
+Time for building super hierarchy: 0.006049s                                    
+Time for discretization: 0.516072s                                              
+Time for building potential matrix: 0.570150s                                   
+Time for precond calculation: 0.000295s                                         
+Time for gmres solving: 0.163341s                                               
+Memory allocated for panel hierarchy: 3903536 bytes                             
+Memory allocated for links structure: 16855120 bytes                            
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 2464232 bytes                                       
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 1.899276s (0 days, 0 hours, 0 mins, 1 s)                        
+Iteration allocated memory: 22693 kilobytes                                     
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Refinement completed                                                            
+Mesh refinement (-m): 0.000261304                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 14848                                        
+Number of links to be computed: 1276248                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+78 79                                                                           
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_VSUBS  4.05414e-07 -3.90448e-07                                              
+g2_PLATE  -3.9121e-07 3.94524e-07                                               
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0358936                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 14848                                        
+Number of potential estimates: 1215432                                          
+Number of links: 1291096 (uncompressed 220463104, compression ratio is 99.4%)   
+Max recursion level: 32                                                         
+Max Mesh relative refinement value: 0.000261296                                 
+Time for reading input file: 0.017541s                                          
+Time for building super hierarchy: 0.006065s                                    
+Time for discretization: 1.045696s                                              
+Time for building potential matrix: 1.157689s                                   
+Time for precond calculation: 0.010804s                                         
+Time for gmres solving: 3.721991s                                               
+Memory allocated for panel hierarchy: 5953448 bytes                             
+Memory allocated for links structure: 33673248 bytes                            
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 11002720 bytes                                      
+Memory allocated for preconditioner: 268619776 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 17.991732s (0 days, 0 hours, 0 mins, 17 s)                      
+Iteration allocated memory: 311781 kilobytes                                    
+                                                                                
+Total allocated memory: 311781 kilobytes                                        
+Total time: 7.343468s (0 days, 0 hours, 0 mins, 7 s)                            
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[09:19:29] INFO     FasterCap succeeded after 7.732s      fastercap_runner.py:99
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_1;VSUBS;PLATE;390.83                                                     
+Cext_1_1;PLATE;VSUBS;3.7                                                        
+────────────────────────────────────────────────────────────────────────────────
+[09:19:29] INFO     Wrote expanded netlist CSV to:               kpex_cli.py:559
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Expanded_Netli                
+                    st.csv                                                      
+[09:19:29] INFO     Wrote expanded netlist to:                   kpex_cli.py:565
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Expanded_Netli                
+                    st.cir                                                      
+[09:19:29] INFO     Wrote reduced netlist to:                    kpex_cli.py:571
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Reduced_Netlis                
+                    t.cir                                                       
