@@ -124,7 +124,7 @@ jobs:
         key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache
 
     - name: "Download and merge Python dist artifacts"
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         pattern: python-dist-ubuntu-latest* 
         merge-multiple: true
