@@ -32,7 +32,7 @@ There a multiple engines supported:
   - MAGIC wrapper (requires [MAGIC](https://github.com/RTimothyEdwards/magic) installation)
   - 2.5D engine (**under development**)
 
-Check out the [documentation website](https://martinjankoehler.github.io/klayout-pex-website) for more information.
+Check out the [documentation website](https://iic-jku.github.io/klayout-pex-website) for more information.
 
 ## Install
 
