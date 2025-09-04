@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/rcx25/c/polygon_utils.py: 38%</title>
+    <title>Coverage for klayout_pex/rcx25/c/polygon_utils.py: 92%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_6b508a39.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex/rcx25/c/polygon_utils.py</b>:
-            <span class="pc_cov">38%</span>
+            <span class="pc_cov">92%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">24 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">9<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">15<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">22<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_b380357104c01a76_sidewall_and_fringe_extractor_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-02 09:21 +0000
+            created at 2025-09-04 15:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -87,7 +87,7 @@
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="com"># Johannes Kepler University, Institute for Integrated Circuits.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="com">#</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="com"># This file is part of KPEX </span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="com"># (see https://github.com/martinjankoehler/klayout-pex).</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="com"># (see https://github.com/iic-jku/klayout-pex).</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="com">#</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="com"># This program is free software: you can redistribute it and/or modify</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="com"># it under the terms of the GNU General Public License as published by</span>&nbsp;</span><span class="r"></span></p>
@@ -117,32 +117,32 @@
     <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t"><span class="com"># NOTE: first lateral nearby shape blocks everything beyond (like sidewall situation) up to halo</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t"><span class="key">def</span> <span class="nam">nearest_edge_distance</span><span class="op">(</span><span class="nam">polygon</span><span class="op">:</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Polygon</span><span class="op">)</span> <span class="op">-></span> <span class="nam">float</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="nam">bbox</span><span class="op">:</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Box</span> <span class="op">=</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">bbox</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="nam">bbox</span><span class="op">:</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Box</span> <span class="op">=</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">bbox</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">is_box</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">is_box</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">        <span class="nam">warning</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Side overlap, outside polygon </span><span class="op">{</span><span class="nam">polygon</span><span class="op">}</span><span class="fst"> is not a box. </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Currently, only boxes are supported, will be using bounding box </span><span class="op">{</span><span class="nam">bbox</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">    <span class="com">## distance_near = (bbox.p1.y + bbox.p2.y) / 2.0</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">    <span class="nam">distance_near</span> <span class="op">=</span> <span class="nam">min</span><span class="op">(</span><span class="nam">bbox</span><span class="op">.</span><span class="nam">p1</span><span class="op">.</span><span class="nam">y</span><span class="op">,</span> <span class="nam">bbox</span><span class="op">.</span><span class="nam">p2</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">    <span class="key">if</span> <span class="nam">distance_near</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">    <span class="nam">distance_near</span> <span class="op">=</span> <span class="nam">min</span><span class="op">(</span><span class="nam">bbox</span><span class="op">.</span><span class="nam">p1</span><span class="op">.</span><span class="nam">y</span><span class="op">,</span> <span class="nam">bbox</span><span class="op">.</span><span class="nam">p2</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">    <span class="key">if</span> <span class="nam">distance_near</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">        <span class="nam">distance_near</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">    <span class="key">return</span> <span class="nam">distance_near</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">    <span class="key">return</span> <span class="nam">distance_near</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t"><span class="key">def</span> <span class="nam">find_polygon_with_nearest_edge</span><span class="op">(</span><span class="nam">polygons_on_same_layer</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">kdb</span><span class="op">.</span><span class="nam">PolygonWithProperties</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Tuple</span><span class="op">[</span><span class="nam">EdgeDistance</span><span class="op">,</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">PolygonWithProperties</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="nam">nearest_lateral_shape</span> <span class="op">=</span> <span class="op">(</span><span class="nam">math</span><span class="op">.</span><span class="nam">inf</span><span class="op">,</span> <span class="nam">polygons_on_same_layer</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="nam">nearest_lateral_shape</span> <span class="op">=</span> <span class="op">(</span><span class="nam">math</span><span class="op">.</span><span class="nam">inf</span><span class="op">,</span> <span class="nam">polygons_on_same_layer</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="key">for</span> <span class="nam">p</span> <span class="key">in</span> <span class="nam">polygons_on_same_layer</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">        <span class="nam">dnear</span> <span class="op">=</span> <span class="nam">nearest_edge_distance</span><span class="op">(</span><span class="nam">p</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="key">if</span> <span class="nam">dnear</span> <span class="op">&lt;</span> <span class="nam">nearest_lateral_shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">            <span class="nam">nearest_lateral_shape</span> <span class="op">=</span> <span class="op">(</span><span class="nam">dnear</span><span class="op">,</span> <span class="nam">p</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="key">for</span> <span class="nam">p</span> <span class="key">in</span> <span class="nam">polygons_on_same_layer</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">        <span class="nam">dnear</span> <span class="op">=</span> <span class="nam">nearest_edge_distance</span><span class="op">(</span><span class="nam">p</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="key">if</span> <span class="nam">dnear</span> <span class="op">&lt;</span> <span class="nam">nearest_lateral_shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">            <span class="nam">nearest_lateral_shape</span> <span class="op">=</span> <span class="op">(</span><span class="nam">dnear</span><span class="op">,</span> <span class="nam">p</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">    <span class="key">return</span> <span class="nam">nearest_lateral_shape</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">    <span class="key">return</span> <span class="nam">nearest_lateral_shape</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t"><span class="key">def</span> <span class="nam">nearest_edge</span><span class="op">(</span><span class="nam">polygon</span><span class="op">:</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">PolygonWithProperties</span><span class="op">)</span> <span class="op">-></span> <span class="nam">EdgeWithProperties</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">    <span class="nam">edge</span> <span class="op">=</span> <span class="op">[</span><span class="nam">e</span> <span class="key">for</span> <span class="nam">e</span> <span class="key">in</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">each_edge</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">e</span><span class="op">.</span><span class="nam">d</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">x</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="num">1</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="key">return</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">EdgeWithProperties</span><span class="op">(</span><span class="nam">edge</span><span class="op">,</span> <span class="nam">properties</span><span class="op">=</span><span class="op">{</span><span class="str">'net'</span><span class="op">:</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">property</span><span class="op">(</span><span class="str">'net'</span><span class="op">)</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">    <span class="nam">edge</span> <span class="op">=</span> <span class="op">[</span><span class="nam">e</span> <span class="key">for</span> <span class="nam">e</span> <span class="key">in</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">each_edge</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">e</span><span class="op">.</span><span class="nam">d</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">x</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">]</span><span class="op">[</span><span class="op">-</span><span class="num">1</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="key">return</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">EdgeWithProperties</span><span class="op">(</span><span class="nam">edge</span><span class="op">,</span> <span class="nam">properties</span><span class="op">=</span><span class="op">{</span><span class="str">'net'</span><span class="op">:</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">property</span><span class="op">(</span><span class="str">'net'</span><span class="op">)</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -152,7 +152,7 @@
             <a class="nav" href="z_b380357104c01a76_sidewall_and_fringe_extractor_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-02 09:21 +0000
+            created at 2025-09-04 15:40 +0000
         </p>
     </div>
 </footer>
