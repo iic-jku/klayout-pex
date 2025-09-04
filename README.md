@@ -4,7 +4,7 @@ SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
 Johannes Kepler University, Institute for Integrated Circuits.
 
 This file is part of KPEX 
-(see https://github.com/martinjankoehler/klayout-pex).
+(see https://github.com/iic-jku/klayout-pex).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -22,17 +22,17 @@ SPDX-License-Identifier: GPL-3.0-or-later
 --------------------------------------------------------------------------------
 -->
 [![PyPi](https://img.shields.io/pypi/v/klayout-pex)](https://pypi.org/project/klayout-pex/)
-[![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/martinjankoehler/klayout-pex/issues)
+[![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/iic-jku/klayout-pex/issues)
 
 # KLayout-PEX
 
 KLayout-PEX is a parasitic extraction tool for [KLayout](https://klayout.org).
 There a multiple engines supported:
-  - FasterCap (requires [FasterCap](https://github.com/martinjankoehler/FasterCap) installation)
+  - FasterCap (requires [FasterCap](https://github.com/iic-jku/FasterCap) installation)
   - MAGIC wrapper (requires [MAGIC](https://github.com/RTimothyEdwards/magic) installation)
   - 2.5D engine (**under development**)
 
-Check out the [documentation website](https://martinjankoehler.github.io/klayout-pex-website) for more information.
+Check out the [documentation website](https://iic-jku.github.io/klayout-pex-website) for more information.
 
 ## Install
 

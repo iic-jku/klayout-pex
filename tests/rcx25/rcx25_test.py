@@ -4,7 +4,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/martinjankoehler/klayout-pex).
+# (see https://github.com/iic-jku/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -156,7 +156,7 @@ def test_overlap_plates_100um_x_100um_li1_m1():
     # C0 LOWER UPPER 0.294867p
     # C1 UPPER VSUBS 0.205621p
     # NOTE: magic with --magic_halo=50 (µm) gives UPPER-VSUBS of 0.205621p
-    #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
+    #       which is due to the handling of https://github.com/iic-jku/magic/issues/1
     assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
@@ -289,7 +289,7 @@ def test_near_body_shield_li1_m1():
     # C4 TOPA VSUBS 0.737292f   # DIFFERS, but that's a MAGIC issue (see test_overlap_plates_100um_x_100um_li1_m1)
     #_______________________________ NOTE: with halo=50µm __________________________________
     # NOTE: with halo=50µm, C3/C4 becomes 0.29976f
-    # see https://github.com/martinjankoehler/magic/issues/2
+    # see https://github.com/iic-jku/magic/issues/2
 
     assert_expected_matches_obtained(
         'test_patterns', 'near_body_shield_li1_m1.gds.gz',
