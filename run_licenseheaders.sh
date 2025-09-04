@@ -5,7 +5,7 @@
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
 ## This file is part of KPEX 
-## (see https://github.com/martinjankoehler/klayout-pex).
+## (see https://github.com/iic-jku/klayout-pex).
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,5 +28,5 @@ python3 -m licenseheaders \
 	--years "2024-2025" \
 	--owner "Martin Jan Köhler and Harald Pretl" \
 	--projname "KPEX" \
-	--projurl "https://github.com/martinjankoehler/klayout-pex" \
+	--projurl "https://github.com/iic-jku/klayout-pex" \
 	$*

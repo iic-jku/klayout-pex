@@ -5,7 +5,7 @@
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
-# (see https://github.com/martinjankoehler/klayout-pex).
+# (see https://github.com/iic-jku/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
