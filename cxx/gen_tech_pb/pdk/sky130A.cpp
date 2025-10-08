@@ -94,7 +94,7 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, CONT,    KREG, "licon_psd_con",  66, 4402,  "licon1", "Computed layer for contact from psdm to li1");
     addComputedLayer(tech, CONT,    KREG, "licon_poly_con", 66, 4403,  "licon1", "Computed layer for contact from poly to li1");
     addComputedLayer(tech, VIA,     KREG, "mcon_con",  67, 44,  "mcon",       "Computed layer for contact between li1 and met1");
-    addComputedLayer(tech, VIA,     KREG, "via1_con",  68, 44,  "via1",       "Computed layer for contact between met1 and met2");
+    addComputedLayer(tech, VIA,     KREG, "via1_con",  68, 44,  "via",       "Computed layer for contact between met1 and met2");
     addComputedLayer(tech, VIA,     KREG, "via2_con",  69, 44,  "via2",       "Computed layer for contact between met2 and met3");
     addComputedLayer(tech, VIA,     KREG, "via3_ncap", 70, 144, "via3",       "Computed layer for via3 (no MIM cap)");
     addComputedLayer(tech, VIA,     KREG, "via4_ncap", 71, 144, "via4",       "Computed layer for via4 (no MIM cap)");
