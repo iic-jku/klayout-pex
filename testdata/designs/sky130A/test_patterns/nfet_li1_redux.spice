@@ -1,0 +1,10 @@
+* cell nfet_li1_redux
+* pin S
+* pin G
+* pin D
+* pin sky130_gnd
+.SUBCKT nfet_li1_redux S D G sky130_gnd
+* device instance $1 r0 *1 0.48,0.205 sky130_fd_pr__nfet_01v8
+XM$1 S G D sky130_gnd sky130_fd_pr__nfet_01v8 L=150000 W=150000
++ AS=42000000000 AD=42000000000 PS=860000 PD=860000
+.ENDS nfet_li1_redux
