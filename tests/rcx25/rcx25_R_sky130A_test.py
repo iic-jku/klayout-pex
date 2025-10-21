@@ -51,6 +51,40 @@ def test_single_wire_li1():
 R1;A;B;;840.533"""
         )
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_contact_1x1_minsize_mcon():
+    # MAGIC GIVES (8.3 revision 540):
+    #_______________________________ NOTE: with halo=8µm __________________________________
+    # R0 TOP BOT 15.763     (why not 9? Magic takes the bottom-left of each port)
+    #    but in the debug version we see 9.3 is calculated for the via
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_contact_1x1_minsize_mcon.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$0.16;$1.23;;9.3
+R2;$0.16;BOT;;0.0
+R3;$1.23;TOP;;0.0"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_wire_voltage_divider_li1():
+    # MAGIC GIVES (8.3 revision 540):
+    #_______________________________ NOTE: with halo=8µm __________________________________
+    # R0 A B 840.534
+    # R1 B A 840.534   # reported twice!
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_wire_voltage_divider_li1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1.16;A;;426.667
+R2;$1.16;B;;413.867
+R3;$1.16;C;;72.533"""
+        )
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
@@ -90,5 +124,24 @@ R15;$7.43;$8.43;;0.0
 R16;$7.43;met3;;0.0
 R17;$8.43;$9.40;;3.41
 R18;$9.40;met4;;0.0"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nfet_li1_redux():
+    # MAGIC GIVES (8.3 revision 540):
+    #_______________________________ NOTE: with halo=8µm __________________________________
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'nfet_li1_redux.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$0.13;$1.18;;419.333
+R2;$0.13;D;;0.0
+R3;$0.13;S;;0.0
+R4;$0.17;$1.18;;172.267
+R5;$1.18;D;;47.059
+R6;$1.18;G;;2.133
+R7;$1.18;S;;68.894"""
         )
 
