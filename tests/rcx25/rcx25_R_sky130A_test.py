@@ -46,9 +46,9 @@ def test_single_wire_li1():
     # R0 A B 840.534
     # R1 B A 840.534   # reported twice!
     pex_whiteboxed.assert_expected_matches_obtained(
-        'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
+        'test_patterns', 'r_single_wire_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A,B;A,B;;840.533"""
+R1;A;B;;840.533"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -70,17 +70,25 @@ def test_via_stack_1x1_minsize_poly_to_met5():
     # R5 li1.n2 li1.n1 3.4105     # via3, should be 3.41Ω
     # (and some redundant listings of the same)
     pex_whiteboxed.assert_expected_matches_obtained(
-        'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
+        'test_patterns', 'r_via_stack_1x1_minsize_poly_to_met5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$0.17;$1.18;;152.0
-R2;$0.17;li1,met1,met2,met3,met4,met5,poly;;0.0
+R2;$0.17;poly;;0.0
 R3;$1.18;$2.18;;0.0
-R4;$1.18;li1,met1,met2,met3,met4,met5,poly;;0.0
-R5;$2.18;$3.25;;9.3
-R6;$4.26;$5.38;;3.41
-R7;$5.38;$8.38;;0.0
-R8;$6.36;$7.27;;0.38
-R9;$6.36;$9.36;;0.0
-R10;$8.38;$9.36;;3.41"""
+R4;$1.18;li1;;0.0
+R5;$10.40;$11.27;;0.38
+R6;$10.40;$9.40;;0.0
+R7;$11.27;met5;;0.0
+R8;$2.18;$3.25;;9.3
+R9;$3.25;$4.25;;0.0
+R10;$3.25;met1;;0.0
+R11;$4.25;$5.26;;4.5
+R12;$5.26;$6.26;;0.0
+R13;$5.26;met2;;0.0
+R14;$6.26;$7.43;;3.41
+R15;$7.43;$8.43;;0.0
+R16;$7.43;met3;;0.0
+R17;$8.43;$9.40;;3.41
+R18;$9.40;met4;;0.0"""
         )
 
