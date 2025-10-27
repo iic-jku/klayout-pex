@@ -45,6 +45,7 @@ import klayout.rdb as rdb
 
 from .common.path_validation import validate_files, FileValidationResult
 from .env import EnvVar, Env
+from .extraction_engine import ExtractionEngine
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
@@ -53,6 +54,7 @@ from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
+from .klayout.netlist_printer import NetlistPrinter
 from .klayout.netlist_reducer import NetlistReducer
 from .klayout.repair_rdb import repair_rdb
 from .log import (
@@ -493,6 +495,13 @@ class KpexCLI:
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
 
+    def create_netlist_printer(self,
+                               args: argparse.Namespace,
+                               extraction_engine: ExtractionEngine):
+        printer = NetlistPrinter(extraction_engine=extraction_engine,
+                                 pdk=args.pdk)
+        return printer
+
     def build_fastercap_input(self,
                               args: argparse.Namespace,
                               pex_context: KLayoutExtractionContext,
@@ -579,21 +588,19 @@ class KpexCLI:
 
         info(f"Wrote expanded netlist CSV to: {expanded_netlist_csv_path}")
 
-        spice_writer = kdb.NetlistSpiceWriter()
-        spice_writer.use_net_names = True
-        spice_writer.with_comments = False
-        expanded_netlist.write(expanded_netlist_path, spice_writer)
+        netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTERCAP)
+        netlist_printer.write(expanded_netlist, expanded_netlist_path)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
         # FIXME: should this be already reduced?
         if args.output_spice_path:
-            expanded_netlist.write(args.output_spice_path, spice_writer)
+            netlist_printer.write(expanded_netlist, args.output_spice_path)
             info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
                                                  top_cell_name=pex_context.annotated_top_cell.name)
-        reduced_netlist.write(reduced_netlist_path, spice_writer)
+        netlist_printer.write(reduced_netlist, reduced_netlist_path)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
         self._fastercap_extracted_csv_path = expanded_netlist_csv_path
@@ -692,21 +699,20 @@ class KpexCLI:
             blackbox_devices=args.blackbox_devices
         )
 
-        spice_writer = kdb.NetlistSpiceWriter()
-        spice_writer.use_net_names = True
-        spice_writer.with_comments = False
-        expanded_netlist.write(expanded_netlist_path, spice_writer)
+        netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTCAP2)
+        netlist_printer.write(expanded_netlist, expanded_netlist_path)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
         # FIXME: should this be already reduced?
         if args.output_spice_path:
-            expanded_netlist.write(args.output_spice_path, spice_writer)
+            netlist_printer.write(expanded_netlist, args.output_spice_path)
             info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
                                                  top_cell_name=pex_context.annotated_top_cell.name)
-        reduced_netlist.write(reduced_netlist_path, spice_writer)
+        netlist_printer.write(reduced_netlist, reduced_netlist_path)
+
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
     def run_kpex_2_5d_engine(self,
@@ -760,15 +766,13 @@ class KpexCLI:
                 blackbox_devices=args.blackbox_devices
             )
 
-            spice_writer = kdb.NetlistSpiceWriter()
-            spice_writer.use_net_names = True
-            spice_writer.with_comments = False
-            expanded_netlist.write(expanded_netlist_path, spice_writer)
+            netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D)
+            netlist_printer.write(expanded_netlist, expanded_netlist_path)
             subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
             # FIXME: should this be already reduced?
             if args.output_spice_path:
-                expanded_netlist.write(args.output_spice_path, spice_writer)
+                netlist_printer.write(expanded_netlist, args.output_spice_path)
                 info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
