@@ -43,6 +43,7 @@ from typing import *
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from .common.path_validation import validate_files, FileValidationResult
 from .env import EnvVar, Env
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
@@ -251,13 +252,17 @@ class KpexCLI:
                                      action='store_true', default=False,
                                      help="FasterCap -pj Use Jacobi preconditioner (default is %(default)s)")
 
-        PDKPATH = os.environ.get('PDKPATH', None)
-        default_magicrc_path = \
-            None if PDKPATH is None \
-            else os.path.abspath(f"{PDKPATH}/libs.tech/magic/{os.environ['PDK']}.magicrc")
         group_magic = main_parser.add_argument_group("MAGIC options")
+
+        default_magicrc_path = env.default_magicrc_path
+        if default_magicrc_path:
+            magicrc_help = f"Path to magicrc configuration file (default is '{default_magicrc_path}')"
+        else:
+            magicrc_help = "Path to magicrc configuration file "\
+                           "(default not available, PDK and PDK_ROOT must be set!)"
+
         group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
-                                  help=f"Path to magicrc configuration file (default is '%(default)s')")
+                                  help=magicrc_help)
         group_magic.add_argument("--magic_mode", dest='magic_pex_mode',
                                  default=MagicPEXMode.DEFAULT, type=MagicPEXMode, choices=list(MagicPEXMode),
                                  help=render_enum_help(topic='magic_mode', enum_cls=MagicPEXMode))
@@ -358,6 +363,19 @@ class KpexCLI:
             case (_, _, _, _, None, None):
                 error(f"Neither GDS nor LVSDB was provided")
                 found_errors = True
+
+        # check if we find magicrc
+        if args.run_magic:
+            if args.magicrc_path is None:
+                error(f"magicrc not available, requires any those:\n"
+                      f"\t• set environmental variables PDK_ROOT / PDK\n"
+                      f"\t• pass argument --magicrc")
+                found_errors = True
+            else:
+                result = validate_files([args.magicrc_path])
+                for f in result.failures:
+                    error(f"Invalid magicrc: {f.reason} at {str(f.path)}")
+                    found_errors = True
 
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
