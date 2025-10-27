@@ -35,7 +35,7 @@ class EnvVar(StrEnum):
     FASTERCAP_EXE = 'KPEX_FASTERCAP_EXE'
     KLAYOUT_EXE = 'KPEX_KLAYOUT_EXE'
     MAGIC_EXE = 'KPEX_MAGIC_EXE'
-    PDK_PATH = 'PDKPATH'
+    PDK_ROOT = 'PDK_ROOT'
     PDK = 'PDK'
 
     @property
@@ -47,7 +47,7 @@ class EnvVar(StrEnum):
                 return 'klayout_app' if os.name == 'nt' \
                                      else 'klayout'
             case EnvVar.MAGIC_EXE: return 'magic'
-            case EnvVar.PDK_PATH: return None
+            case EnvVar.PDK_ROOT: return None
             case EnvVar.PDK: return None
             case _: raise NotImplementedError(f"Unexpected env var '{self.name}'")
 
@@ -60,7 +60,7 @@ class EnvVar(StrEnum):
 | KPEX_FASTERCAP_EXE | Path to FasterCap Executable. Defaults to '{cls.FASTERCAP_EXE.default_value}' |
 | KPEX_KLAYOUT_EXE   | Path to KLayout Executable. Defaults to '{cls.KLAYOUT_EXE.default_value}'     |
 | KPEX_MAGIC_EXE     | Path to MAGIC Executable. Defaults to '{cls.MAGIC_EXE.default_value}'         |
-| PDKPATH            | Optional (required for default magicrc), e.g. $HOME/.volare                   |
+| PDK_ROOT           | Optional (required for default magicrc), e.g. $HOME/.volare                   |
 | PDK                | Optional (required for default magicrc), (e.g. sky130A)                       |
 """
 
@@ -78,6 +78,15 @@ class Env:
                 value = env_var.default_value
             d[env_var] = value
         return Env(d)
+
+    @property
+    def default_magicrc_path(self) -> Optional[str]:
+        PDK_ROOT = self[EnvVar.PDK_ROOT]
+        PDK = self[EnvVar.PDK]
+        default_magicrc_path = \
+            None if PDK_ROOT is None or PDK is None \
+            else os.path.abspath(f"{PDK_ROOT}/{PDK}/libs.tech/magic/{PDK}.magicrc")
+        return default_magicrc_path
 
     def __getitem__(self, env_var: EnvVar) -> Optional[str]:
         return self._data[env_var]
