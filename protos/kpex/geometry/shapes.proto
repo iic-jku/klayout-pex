@@ -45,6 +45,21 @@ message Polygon {
     string net = 10; // property
 }
 
+message Shape {
+    enum Kind {
+        SHAPE_KIND_UNSPECIFIED = 0;
+        SHAPE_KIND_BOX = 1;
+        SHAPE_KIND_POLYGON = 2;
+    }
+
+    Kind kind = 10;
+
+    oneof shape {
+        kpex.geometry.Box box = 20;
+        kpex.geometry.Polygon polygon = 30;
+    }
+}
+
 message Region {
-    repeated Polygon polygons = 1;
+    repeated Shape shapes = 1;
 }

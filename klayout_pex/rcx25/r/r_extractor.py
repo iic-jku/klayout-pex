@@ -281,6 +281,8 @@ class RExtractor:
                             l2r.layer.canonical_layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
                             l2r.layer.lvs_layer_name = lyr.lvs_layer_name
                             self.shapes_converter.klayout_region_to_pb(r, l2r.region)
+                        case _:
+                            raise NotImplementedError()
 
         return rex_request
 
@@ -305,7 +307,6 @@ class RExtractor:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
 
         for net_extraction_request in rex_request.net_extraction_requests:
-
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]] = defaultdict(list)
@@ -314,9 +315,9 @@ class RExtractor:
 
             for t in net_extraction_request.device_terminals:
                 for l2r in t.region_by_layer:
-                    for p in l2r.region.polygons:
-                        p_kly = self.shapes_converter.klayout_polygon(p)
-                        polygon_ports[l2r.layer.id].append(p_kly)
+                    for sh in l2r.region.shapes:
+                        sh_kly = self.shapes_converter.klayout_shape(sh)
+                        polygon_ports[l2r.layer.id].append(sh_kly)
                         polygon_port_device_terminals[l2r.layer.id].append(t)
 
             for pin in net_extraction_request.pins:
