@@ -33,6 +33,7 @@ from ..log import (
     warning,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
+from ..util.unit_formatter import format_spice_number
 
 
 class NetlistExpander:
@@ -84,13 +85,13 @@ class NetlistExpander:
                 c: kdb.Device = top_circuit.create_device(cap, f"Cext_{i}_{j}")
                 c.connect_terminal('A', net1)
                 c.connect_terminal('B', net2)
-                c.set_parameter('C', cap_value)
+                c.set_parameter('C', cap_value)  # Farad
                 if net1 == net2:
                     raise Exception(f"Invalid attempt to create cap {c.name} between "
-                                    f"same net {net1} with value {'%.12g' % cap_value}")
+                                    f"same net {net1} with value format_capacitance(cap_value)")
             else:
                 warning(f"Ignoring capacitance matrix cell [{i},{j}], "
-                        f"{'%.12g' % cap_value} is below threshold {'%.12g' % cap_threshold}")
+                        f"{format_spice_number(cap_value)} is below threshold {format_spice_number(cap_threshold)}")
 
         # -------------------------------------------------------------
         # Example capacitance matrix:

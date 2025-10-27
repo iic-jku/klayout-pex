@@ -103,14 +103,16 @@ class RCX25NetlistExpander:
             add_net_if_needed(key.net1)
             add_net_if_needed(key.net2)
 
-        for idx, (key, cap_value) in enumerate(cap_items):
+        for idx, (key, cap_value_femto) in enumerate(cap_items):
             net1 = name2net[key.net1]
             net2 = name2net[key.net2]
+
+            cap_value_farad = cap_value_femto / 1e15
 
             c: kdb.Device = top_circuit.create_device(cap, f"ext_{idx+1}")
             c.connect_terminal('A', net1)
             c.connect_terminal('B', net2)
-            c.set_parameter('C', cap_value)
+            c.set_parameter('C', cap_value_farad)
             if net1 == net2:
                 warning(f"Invalid attempt to create cap {c.name} between "
                         f"same net {net1} with value {'%.12g' % cap_value}")
