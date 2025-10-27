@@ -164,8 +164,11 @@ class KpexCLI:
                                type=PDK, choices=list(PDK),
                                help=render_enum_help(topic='pdk', enum_cls=PDK))
 
-        group_pex.add_argument("--out_dir", "-o", dest="output_dir_base_path", default="output",
-                               help="Output directory path (default is '%(default)s')")
+        group_pex.add_argument("--out_dir", dest="output_dir_base_path", default="output",
+                               help="Run directory path (default is '%(default)s')")
+
+        group_pex.add_argument("--out_spice", "-o", dest="output_spice_path", default=None,
+                               help="Optional additional SPICE output path (default is none)")
 
         group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
                                                          description="Either LVS is run, or an existing LVSDB is used")
@@ -582,6 +585,11 @@ class KpexCLI:
         expanded_netlist.write(expanded_netlist_path, spice_writer)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
+        # FIXME: should this be already reduced?
+        if args.output_spice_path:
+            expanded_netlist.write(args.output_spice_path, spice_writer)
+            info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
                                                  top_cell_name=pex_context.annotated_top_cell.name)
@@ -642,10 +650,15 @@ class KpexCLI:
         subproc(f"Report DB saved at: {report_db_path}")
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
 
-        rule("MAGIC PEX SPICE netlist")
-        with open(output_netlist_path, 'r') as f:
-            subproc(f.read())
-        rule()
+        if os.path.exists(output_netlist_path):
+            if args.output_spice_path and os.path.exists(output_netlist_path):
+                shutil.copy(output_netlist_path, args.output_spice_path)
+                info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+
+            rule("MAGIC PEX SPICE netlist")
+            with open(output_netlist_path, 'r') as f:
+                subproc(f.read())
+            rule()
 
     def run_fastcap_extraction(self,
                                args: argparse.Namespace,
@@ -684,6 +697,11 @@ class KpexCLI:
         spice_writer.with_comments = False
         expanded_netlist.write(expanded_netlist_path, spice_writer)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
+
+        # FIXME: should this be already reduced?
+        if args.output_spice_path:
+            expanded_netlist.write(args.output_spice_path, spice_writer)
+            info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
@@ -747,6 +765,11 @@ class KpexCLI:
             spice_writer.with_comments = False
             expanded_netlist.write(expanded_netlist_path, spice_writer)
             subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
+
+            # FIXME: should this be already reduced?
+            if args.output_spice_path:
+                expanded_netlist.write(args.output_spice_path, spice_writer)
+                info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
         #       so that the marker browser could not load the report file
