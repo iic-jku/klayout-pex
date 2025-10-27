@@ -294,7 +294,7 @@ class SidewallAndFringeExtractor:
                          / 2.0  # non-bidirectional (half)
                          / 1000.0)  # aF -> fF
 
-            info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
+            # info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
             sw_cap = SidewallCap(key=swk,
@@ -445,10 +445,10 @@ class SidewallAndFringeExtractor:
                                                 sideoverlap_cap_spec=sideoverlap_cap_spec)
 
                     if cap_femto > 0.0001:  # TODO: configurable threshold, but keeping accumulation might also be nice
-                        info(f"(Side Overlap) "
-                             f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
-                             f"{round(cap_femto, 5)} fF, "
-                             f"edge interval length = {round(edge_interval_length_um, 2)} µm")
+                        # info(f"(Side Overlap) "
+                        #      f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
+                        #      f"{round(cap_femto, 5)} fF, "
+                        #      f"edge interval length = {round(edge_interval_length_um, 2)} µm")
 
                         sok = SideOverlapKey(layer_inside=inside_layer_name,
                                              net_inside=inside_net_name,
