@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">188 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">171<span class="text"> run</span></button>
+            <span class="text">186 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">169<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">17<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_4810bfbf6fbd806c_extraction_reporter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -376,7 +376,7 @@
     <p class="run run2"><span class="n"><a id="t294" href="#t294">294</a></span><span class="t">                         <span class="op">/</span> <span class="num">2.0</span>  <span class="com"># non-bidirectional (half)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t295" href="#t295">295</a></span><span class="t">                         <span class="op">/</span> <span class="num">1000.0</span><span class="op">)</span>  <span class="com"># aF -> fF</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t296" href="#t296">296</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t297" href="#t297">297</a></span><span class="t">            <span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">(Sidewall) layer </span><span class="op">{</span><span class="nam">layer_name</span><span class="op">}</span><span class="fst">: Nets </span><span class="op">{</span><span class="nam">net1</span><span class="op">}</span><span class="fst"> &lt;-> </span><span class="op">{</span><span class="nam">net2</span><span class="op">}</span><span class="fst">: </span><span class="op">{</span><span class="nam">round</span><span class="op">(</span><span class="nam">cap_femto</span><span class="op">,</span> <span class="num">5</span><span class="op">)</span><span class="op">}</span><span class="fst"> fF</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t297" href="#t297">297</a></span><span class="t">            <span class="com"># info(f"(Sidewall) layer {layer_name}: Nets {net1} &lt;-> {net2}: {round(cap_femto, 5)} fF")</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t298" href="#t298">298</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t299" href="#t299">299</a></span><span class="t">            <span class="nam">swk</span> <span class="op">=</span> <span class="nam">SidewallKey</span><span class="op">(</span><span class="nam">layer</span><span class="op">=</span><span class="nam">layer_name</span><span class="op">,</span> <span class="nam">net1</span><span class="op">=</span><span class="nam">net1</span><span class="op">,</span> <span class="nam">net2</span><span class="op">=</span><span class="nam">net2</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t300" href="#t300">300</a></span><span class="t">            <span class="nam">sw_cap</span> <span class="op">=</span> <span class="nam">SidewallCap</span><span class="op">(</span><span class="nam">key</span><span class="op">=</span><span class="nam">swk</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -527,10 +527,10 @@
     <p class="run run2"><span class="n"><a id="t445" href="#t445">445</a></span><span class="t">                                                <span class="nam">sideoverlap_cap_spec</span><span class="op">=</span><span class="nam">sideoverlap_cap_spec</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t446" href="#t446">446</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t447" href="#t447">447</a></span><span class="t">                    <span class="key">if</span> <span class="nam">cap_femto</span> <span class="op">></span> <span class="num">0.0001</span><span class="op">:</span>  <span class="com"># TODO: configurable threshold, but keeping accumulation might also be nice</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t448" href="#t448">448</a></span><span class="t">                        <span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">(Side Overlap) </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t449" href="#t449">449</a></span><span class="t">                             <span class="fst">f"</span><span class="op">{</span><span class="nam">inside_layer_name</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">inside_net_name</span><span class="op">}</span><span class="fst">)-</span><span class="op">{</span><span class="nam">outside_layer_name</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">outside_net_name</span><span class="op">}</span><span class="fst">): </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t450" href="#t450">450</a></span><span class="t">                             <span class="fst">f"</span><span class="op">{</span><span class="nam">round</span><span class="op">(</span><span class="nam">cap_femto</span><span class="op">,</span> <span class="num">5</span><span class="op">)</span><span class="op">}</span><span class="fst"> fF, </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t451" href="#t451">451</a></span><span class="t">                             <span class="fst">f"</span><span class="fst">edge interval length = </span><span class="op">{</span><span class="nam">round</span><span class="op">(</span><span class="nam">edge_interval_length_um</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span><span class="op">}</span><span class="fst"> &#181;m</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t448" href="#t448">448</a></span><span class="t">                        <span class="com"># info(f"(Side Overlap) "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t449" href="#t449">449</a></span><span class="t">                        <span class="com">#      f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t450" href="#t450">450</a></span><span class="t">                        <span class="com">#      f"{round(cap_femto, 5)} fF, "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t451" href="#t451">451</a></span><span class="t">                        <span class="com">#      f"edge interval length = {round(edge_interval_length_um, 2)} &#181;m")</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t452" href="#t452">452</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t453" href="#t453">453</a></span><span class="t">                        <span class="nam">sok</span> <span class="op">=</span> <span class="nam">SideOverlapKey</span><span class="op">(</span><span class="nam">layer_inside</span><span class="op">=</span><span class="nam">inside_layer_name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t454" href="#t454">454</a></span><span class="t">                                             <span class="nam">net_inside</span><span class="op">=</span><span class="nam">inside_net_name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -554,8 +554,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_4810bfbf6fbd806c_extraction_reporter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
     </div>
 </footer>

@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">62 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">56<span class="text"> run</span></button>
+            <span class="text">61 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">55<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">6<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_b380357104c01a76_polygon_utils_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -212,9 +212,9 @@
     <p class="pln"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">                    <span class="nam">overlap_area_um2</span> <span class="op">=</span> <span class="nam">overlap_area</span><span class="op">.</span><span class="nam">area</span><span class="op">(</span><span class="op">)</span> <span class="op">*</span> <span class="nam">self</span><span class="op">.</span><span class="nam">dbu</span> <span class="op">**</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">                    <span class="nam">cap_femto</span> <span class="op">=</span> <span class="nam">overlap_area_um2</span> <span class="op">*</span> <span class="nam">overlap_cap_spec</span><span class="op">.</span><span class="nam">capacitance</span> <span class="op">/</span> <span class="num">1000.0</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">                    <span class="nam">info</span><span class="op">(</span><span class="fst">f"</span><span class="fst">(Overlap): </span><span class="op">{</span><span class="nam">top_layer_name</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">net_top</span><span class="op">}</span><span class="fst">)-</span><span class="op">{</span><span class="nam">bot_layer_name</span><span class="op">}</span><span class="fst">(</span><span class="op">{</span><span class="nam">net_bot</span><span class="op">}</span><span class="fst">): </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">                         <span class="fst">f"</span><span class="fst">cap: </span><span class="op">{</span><span class="nam">round</span><span class="op">(</span><span class="nam">cap_femto</span><span class="op">,</span> <span class="num">2</span><span class="op">)</span><span class="op">}</span><span class="fst"> fF, </span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">                         <span class="fst">f"</span><span class="fst">area: </span><span class="op">{</span><span class="nam">overlap_area_um2</span><span class="op">}</span><span class="fst"> &#181;m^2</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">                    <span class="com"># info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">                    <span class="com">#     f"cap: {round(cap_femto, 2)} fF, "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">                    <span class="com">#     f"area: {overlap_area_um2} &#181;m^2")</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">                    <span class="key">if</span> <span class="nam">cap_femto</span> <span class="op">></span> <span class="num">0.0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">                        <span class="nam">ovk</span> <span class="op">=</span> <span class="nam">OverlapKey</span><span class="op">(</span><span class="nam">layer_top</span><span class="op">=</span><span class="nam">top_layer_name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -243,8 +243,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_b380357104c01a76_polygon_utils_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
     </div>
 </footer>

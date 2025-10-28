@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/env.py: 93%</title>
+    <title>Coverage for klayout_pex/env.py: 94%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_6b508a39.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex/env.py</b>:
-            <span class="pc_cov">93%</span>
+            <span class="pc_cov">94%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -54,18 +54,18 @@
             </div>
         </aside>
         <h2>
-            <span class="text">43 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">40<span class="text"> run</span></button>
+            <span class="text">49 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">46<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">3<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_cf86fb25343e11a6_capacitance_matrix_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_cf86fb25343e11a6_path_validation_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a id="nextFileLink" class="nav" href="z_b142ed8301d2aaf1___init___py.html">&#xbb; next</a>
+            <a id="nextFileLink" class="nav" href="z_9c05d59a441cce45_extraction_engine_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -117,7 +117,7 @@
     <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="nam">FASTERCAP_EXE</span> <span class="op">=</span> <span class="str">'KPEX_FASTERCAP_EXE'</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">    <span class="nam">KLAYOUT_EXE</span> <span class="op">=</span> <span class="str">'KPEX_KLAYOUT_EXE'</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">    <span class="nam">MAGIC_EXE</span> <span class="op">=</span> <span class="str">'KPEX_MAGIC_EXE'</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="nam">PDK_PATH</span> <span class="op">=</span> <span class="str">'PDKPATH'</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="nam">PDK_ROOT</span> <span class="op">=</span> <span class="str">'PDK_ROOT'</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">    <span class="nam">PDK</span> <span class="op">=</span> <span class="str">'PDK'</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
@@ -129,7 +129,7 @@
     <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">                <span class="key">return</span> <span class="str">'klayout_app'</span> <span class="key">if</span> <span class="nam">os</span><span class="op">.</span><span class="nam">name</span> <span class="op">==</span> <span class="str">'nt'</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">                                     <span class="key">else</span> <span class="str">'klayout'</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">            <span class="key">case</span> <span class="nam">EnvVar</span><span class="op">.</span><span class="nam">MAGIC_EXE</span><span class="op">:</span> <span class="key">return</span> <span class="str">'magic'</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">            <span class="key">case</span> <span class="nam">EnvVar</span><span class="op">.</span><span class="nam">PDK_PATH</span><span class="op">:</span> <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">            <span class="key">case</span> <span class="nam">EnvVar</span><span class="op">.</span><span class="nam">PDK_ROOT</span><span class="op">:</span> <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">            <span class="key">case</span> <span class="nam">EnvVar</span><span class="op">.</span><span class="nam">PDK</span><span class="op">:</span> <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">            <span class="key">case</span> <span class="nam">_</span><span class="op">:</span> <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Unexpected env var '</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst">'</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -142,7 +142,7 @@
     <p class="run run2"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t"><span class="fst">| KPEX_FASTERCAP_EXE | Path to FasterCap Executable. Defaults to '</span><span class="op">{</span><span class="nam">cls</span><span class="op">.</span><span class="nam">FASTERCAP_EXE</span><span class="op">.</span><span class="nam">default_value</span><span class="op">}</span><span class="fst">' |</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t"><span class="fst">| KPEX_KLAYOUT_EXE   | Path to KLayout Executable. Defaults to '</span><span class="op">{</span><span class="nam">cls</span><span class="op">.</span><span class="nam">KLAYOUT_EXE</span><span class="op">.</span><span class="nam">default_value</span><span class="op">}</span><span class="fst">'     |</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t"><span class="fst">| KPEX_MAGIC_EXE     | Path to MAGIC Executable. Defaults to '</span><span class="op">{</span><span class="nam">cls</span><span class="op">.</span><span class="nam">MAGIC_EXE</span><span class="op">.</span><span class="nam">default_value</span><span class="op">}</span><span class="fst">'         |</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t"><span class="fst">| PDKPATH            | Optional (required for default magicrc), e.g. $HOME/.volare                   |</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t"><span class="fst">| PDK_ROOT           | Optional (required for default magicrc), e.g. $HOME/.volare                   |</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t"><span class="fst">| PDK                | Optional (required for default magicrc), (e.g. sky130A)                       |</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="fst">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -161,25 +161,34 @@
     <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">            <span class="nam">d</span><span class="op">[</span><span class="nam">env_var</span><span class="op">]</span> <span class="op">=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">        <span class="key">return</span> <span class="nam">Env</span><span class="op">(</span><span class="nam">d</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="key">def</span> <span class="nam">__getitem__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">env_var</span><span class="op">:</span> <span class="nam">EnvVar</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_data</span><span class="op">[</span><span class="nam">env_var</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="key">def</span> <span class="nam">__contains__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">env_var</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">        <span class="key">return</span> <span class="nam">env_var</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_data</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="fst">Env(</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">_data</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">    <span class="key">def</span> <span class="nam">default_magicrc_path</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="nam">PDK_ROOT</span> <span class="op">=</span> <span class="nam">self</span><span class="op">[</span><span class="nam">EnvVar</span><span class="op">.</span><span class="nam">PDK_ROOT</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">        <span class="nam">PDK</span> <span class="op">=</span> <span class="nam">self</span><span class="op">[</span><span class="nam">EnvVar</span><span class="op">.</span><span class="nam">PDK</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">        <span class="nam">default_magicrc_path</span> <span class="op">=</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">            <span class="key">None</span> <span class="key">if</span> <span class="nam">PDK_ROOT</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">PDK</span> <span class="key">is</span> <span class="key">None</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">            <span class="key">else</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">abspath</span><span class="op">(</span><span class="fst">f"</span><span class="op">{</span><span class="nam">PDK_ROOT</span><span class="op">}</span><span class="fst">/</span><span class="op">{</span><span class="nam">PDK</span><span class="op">}</span><span class="fst">/libs.tech/magic/</span><span class="op">{</span><span class="nam">PDK</span><span class="op">}</span><span class="fst">.magicrc</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">        <span class="key">return</span> <span class="nam">default_magicrc_path</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="key">def</span> <span class="nam">__getitem__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">env_var</span><span class="op">:</span> <span class="nam">EnvVar</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_data</span><span class="op">[</span><span class="nam">env_var</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">    <span class="key">def</span> <span class="nam">__contains__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">env_var</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">return</span> <span class="nam">env_var</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_data</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">    <span class="key">def</span> <span class="nam">__repr__</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">        <span class="key">return</span> <span class="fst">f"</span><span class="fst">Env(</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">_data</span><span class="op">}</span><span class="fst">)</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_cf86fb25343e11a6_capacitance_matrix_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_cf86fb25343e11a6_path_validation_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a class="nav" href="z_b142ed8301d2aaf1___init___py.html">&#xbb; next</a>
+            <a class="nav" href="z_9c05d59a441cce45_extraction_engine_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-04 15:43 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
+            created at 2025-10-28 16:14 +0000
         </p>
     </div>
 </footer>
