@@ -374,6 +374,7 @@ class KLayoutExtractionContext:
 
             for td in d_kly.device_class().terminal_definitions():
                 n: kdb.Net = d_kly.net_for_terminal(td.id())
+                net_name = n.name or f"${n.cluster_id}"
                 if n is None:
                     warning(f"Skipping terminal {td.name} of device {d.name} ({d.device_class}) "
                             f"is not connected to any net")
@@ -397,10 +398,15 @@ class KLayoutExtractionContext:
                     terminal.device_id = d.id
                     terminal.terminal_id = td.id()
                     terminal.name = td.name
-                    terminal.net_name = n.name
+                    terminal.net_name = net_name
 
                     for idx, shapes in shapes_by_lyr_idx.items():
-                        lyr_idx = self.layer_index_map[idx]
+                        lyr_idx = self.layer_index_map.get(idx, None)
+                        if lyr_idx is None:
+                            warning(f"Could not find a layer for device {d.device_name}, class {d.device_class_name}, "
+                                    f"terminal {td.name}, net {n.name}")
+                            continue
+
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
                         region_by_layer = terminal.region_by_layer.add()
