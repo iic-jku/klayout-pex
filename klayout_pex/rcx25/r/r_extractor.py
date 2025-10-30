@@ -266,6 +266,7 @@ class RExtractor:
                             f"only available circuits are: {circuits}")
         LK = tech_pb2.ComputedLayerInfo.Kind
         for net in circuit.each_net():
+            net_name = net.name or f"${net.cluster_id}"
             for lvs_gds_pair, lyr_info in self.pex_context.extracted_layers.items():
                 for lyr in lyr_info.source_layers:
                     li = self.pex_context.tech.computed_layer_info_by_gds_pair[lyr.gds_pair]
@@ -276,7 +277,7 @@ class RExtractor:
                             r = self.pex_context.shapes_of_net(lyr.gds_pair, net)
                             if not r:
                                 continue
-                            l2r = get_or_create_net_request(net.name).region_by_layer.add()
+                            l2r = get_or_create_net_request(net_name).region_by_layer.add()
                             l2r.layer.id = self.pex_context.annotated_layout.layer(*lvs_gds_pair)
                             l2r.layer.canonical_layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
                             l2r.layer.lvs_layer_name = lyr.lvs_layer_name
