@@ -374,7 +374,8 @@ class RExtractor:
 
                     case klp.RNodeType.PolygonPort:
                         port_idx = rn.port_index()
-                        r_node.net_name = polygon_port_device_terminals[rn.layer()][port_idx].net_name
+                        nn = polygon_port_device_terminals[rn.layer()][port_idx].net_name
+                        r_node.net_name = f"{result_network.net_name}.{r_node.node_name}"
                         r_node.location.box.net = r_node.net_name
                     case _:
                         # NOTE: network prefix, as node name is only unique per network
