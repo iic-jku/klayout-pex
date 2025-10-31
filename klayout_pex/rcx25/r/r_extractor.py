@@ -335,12 +335,12 @@ class RExtractor:
                                            vertex_ports,
                                            polygon_ports)
 
-            node_by_node_id: Dict[int, r_network_pb2.RNode] = {}
-
             result_network = rex_result.networks.add()
             result_network.net_name = net_extraction_request.net_name
 
             for rn in resistor_network.each_node():
+                node_by_node_id: Dict[int, r_network_pb2.RNode] = {}
+
                 loc = rn.location()
                 layer_id = rn.layer()
                 canonical_layer_name = layer_names[layer_id]
