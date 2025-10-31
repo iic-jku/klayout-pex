@@ -196,13 +196,15 @@ class CellExtractionResults:
 
         normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
 
-        def node_name(node: r_network_pb2.RNode) -> str:
+        def node_name(network: r_network_pb2.RNetwork,
+                      node: r_network_pb2.RNode) -> str:
             # NOTE: if we have an electrical short between 2 pins A and B
             #       and a parasitic resistance between the two,
             #       KLayout will call the net of both pins "A,B"
             #       but we really want the pin name as the node name
             if not node.net_name or ',' in node.net_name:
-                return node.node_name
+                # NOTE: network prefix, as node name is only unique per network
+                return f"{network.net_name}.{node.node_name}"
             return node.net_name
 
         for network in self.r_extraction_result.networks:
@@ -211,7 +213,8 @@ class CellExtractionResults:
                 node_a = node_by_id[element.node_a.node_id]
                 node_b = node_by_id[element.node_b.node_id]
                 resistance = element.resistance
-                normalized_key = NetCoupleKey(node_name(node_a), node_name(node_b)).normed()
+                normalized_key = NetCoupleKey(node_name(network, node_a),
+                                              node_name(network, node_b)).normed()
                 normalized_resistance_table[normalized_key] += resistance
                 
         resistance_summary = ExtractionSummary(capacitances={},
