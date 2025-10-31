@@ -301,11 +301,16 @@ class RExtractor:
         # dicts keyed by id / klayout_index
         layer_names: Dict[int, LayerName] = {}
 
+        wire_layer_ids: Set[int] = set()
+        via_layer_ids: Set[int] = set()
+
         for c in rex_request.tech.conductors:
             layer_names[c.layer.id] = c.layer.canonical_layer_name
+            wire_layer_ids.add(c.layer.id)
 
         for v in rex_request.tech.vias:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
+            via_layer_ids.add(c.layer.id)
 
         for net_extraction_request in rex_request.net_extraction_requests:
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
@@ -335,12 +340,12 @@ class RExtractor:
                                            vertex_ports,
                                            polygon_ports)
 
-            node_by_node_id: Dict[int, r_network_pb2.RNode] = {}
-
             result_network = rex_result.networks.add()
             result_network.net_name = net_extraction_request.net_name
 
             for rn in resistor_network.each_node():
+                node_by_node_id: Dict[int, r_network_pb2.RNode] = {}
+
                 loc = rn.location()
                 layer_id = rn.layer()
                 canonical_layer_name = layer_names[layer_id]
@@ -348,16 +353,16 @@ class RExtractor:
                 r_node = result_network.nodes.add()
                 r_node.node_id = rn.object_id()
                 r_node.node_name = rn.to_s()
-                r_node.node_type = r_network_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
+                r_node.node_kind = r_network_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
                 r_node.layer_name = canonical_layer_name
 
                 match rn.type():
-                    case klp.RNodeType.VertexPort:
+                    case klp.RNodeType.VertexPort:   # pins!
                         r_node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_POINT
                         p = loc.center().to_itype(self.pex_context.dbu)
                         r_node.location.point.x = p.x
                         r_node.location.point.y = p.y
-                    case klp.RNodeType.PolygonPort | _:
+                    case klp.RNodeType.PolygonPort | klp.RNodeType.Internal:
                         r_node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_BOX
                         p1 = loc.p1.to_itype(self.pex_context.dbu)
                         p2 = loc.p2.to_itype(self.pex_context.dbu)
@@ -365,20 +370,35 @@ class RExtractor:
                         r_node.location.box.lower_left.y = p1.y
                         r_node.location.box.upper_right.x = p2.x
                         r_node.location.box.upper_right.y = p2.y
+                    case _:
+                        raise NotImplementedError()
 
                 match rn.type():
                     case klp.RNodeType.VertexPort:
+                        r_node.node_kind = r_network_pb2.RNode.Kind.KIND_PIN
                         port_idx = rn.port_index()
                         r_node.node_name, r_node.net_name = vertex_port_pins[rn.layer()][port_idx][0:2]
                         r_node.location.point.net = r_node.net_name
 
                     case klp.RNodeType.PolygonPort:
+                        r_node.node_kind = r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL
                         port_idx = rn.port_index()
-                        r_node.net_name = polygon_port_device_terminals[rn.layer()][port_idx].net_name
+                        nn = polygon_port_device_terminals[rn.layer()][port_idx].net_name
+                        r_node.net_name = f"{result_network.net_name}.{r_node.node_name}"
+                        r_node.location.box.net = r_node.net_name
+                    case klp.RNodeType.Internal:
+                        if rn.layer() in via_layer_ids:
+                            r_node.node_kind = r_network_pb2.RNode.Kind.KIND_VIA_JUNCTION
+                        elif rn.layer() in wire_layer_ids:
+                            r_node.node_kind = r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION
+                        else:
+                            raise NotImplementedError()
+
+                        # NOTE: network prefix, as node name is only unique per network
+                        r_node.net_name = f"{result_network.net_name}.{r_node.node_name}"
                         r_node.location.box.net = r_node.net_name
                     case _:
-                        r_node.net_name = r_node.node_name
-                        r_node.location.box.net = r_node.net_name
+                        raise NotImplementedError()
 
                 node_by_node_id[r_node.node_id] = r_node
 
