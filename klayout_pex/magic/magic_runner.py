@@ -77,6 +77,12 @@ def prepare_magic_script(gds_path: str,
     halo_scale = 200.0
     halo_decl = '' if halo is None else f"\nextract halo {round(halo * halo_scale)}"
 
+    # NOTE: do not that those are doing nothing useful:
+    #       extract do resistance
+    #       ext2spice rthresh {r_threshold}
+    #
+    #       see https://github.com/martinjankoehler/magic/issues/4#issuecomment-3381935719
+
     script: str = ""
     match pex_mode:
         case MagicPEXMode.CC:
@@ -113,7 +119,6 @@ cellname delete {cell_name} -noprompt
 cellname rename {cell_name}_flat {cell_name}
 select top cell
 extract path {run_dir_path}{halo_decl}
-extract do resistance
 extract all
 ext2sim labels on
 ext2sim
@@ -122,7 +127,6 @@ extresist all
 ext2spice short {short_mode}
 ext2spice merge {merge_mode}
 ext2spice cthresh {c_threshold}
-ext2spice rthresh {r_threshold}
 ext2spice extresist on
 ext2spice subcircuits top on
 ext2spice format ngspice
@@ -142,7 +146,6 @@ cellname delete {cell_name} -noprompt
 cellname rename {cell_name}_flat {cell_name}
 select top cell
 extract path {run_dir_path}{halo_decl}
-extract do resistance
 extract no capacitance
 extract no coupling
 extract all
@@ -152,7 +155,6 @@ extresist tolerance {tolerance}
 extresist all
 ext2spice short {short_mode}
 ext2spice merge {merge_mode}
-ext2spice rthresh {r_threshold}
 ext2spice extresist on
 ext2spice subcircuits top on
 ext2spice format ngspice
