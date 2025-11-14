@@ -1,0 +1,32 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:36:30] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:387
+[15:36:30] INFO     No explicit top cell specified, using top    kpex_cli.py:427
+                    cell 'sidewall_cap_vpp_04p4x04p6_l1_redux'                  
+[15:36:30] INFO     LVS input schematic not specified (argument  kpex_cli.py:468
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:36:30] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:863
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+ewall_cap_vpp_04p4x04p6_l1_redux.gds.gz/sidewall_cap_vpp_04p4x04p6_l1_redux.lvsd
+b.gz                                                                            
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:36:30] INFO     (67, 20) -> (li_con)                         kpex_cli.py:923
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;C0;C1;0.286;                                                                 
+C2;C0;VSUBS;0.3;                                                                
+C3;C1;VSUBS;0.087;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_cap_vpp_04p4x0
+4p6_l1_redux__sidewall_cap_vpp_04p4x04p6_l1_redux/sidewall_cap_vpp_04p4x04p6_l1_
+redux_k25d_pex_netlist.csv                                                      
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_cap_vpp_04p4x0
+4p6_l1_redux__sidewall_cap_vpp_04p4x04p6_l1_redux/sidewall_cap_vpp_04p4x04p6_l1_
+redux_k25d_pex_netlist.spice                                                    
