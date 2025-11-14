@@ -144,7 +144,7 @@ jobs:
 
     - name: "[🐍] Store coverage results"
       if: success() || failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: python-integration-tests-coverage-report-${{ matrix.os }}_py${{ matrix.python-version }}
         path: ${{ env.COVERAGE_DATA_PATH }}   # NOTE: pytest-cov coverage binary file, can be combined later!
@@ -153,7 +153,7 @@ jobs:
         
     - name: "[🐍] Store allure test results"
       if: success() || failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: python-integration-tests-allure-report-${{ matrix.os }}_py${{ matrix.python-version }}
         path: ${{ env.ALLURE_RESULTS_PATH }}
