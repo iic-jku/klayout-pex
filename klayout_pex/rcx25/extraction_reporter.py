@@ -411,7 +411,22 @@ class ExtractionReporter:
     def output_node(self,
                     node: r_network_pb2.RNode,
                     category: rdb.RdbCategory):
-        node_title = f"{node.node_name}, port net {node.net_name}, " \
+        node_kind: str
+        match node.node_kind:
+            case r_network_pb2.RNode.Kind.KIND_UNSPECIFIED:
+                node_kind = '???'
+            case r_network_pb2.RNode.Kind.KIND_PIN:
+                node_kind = 'Pin'
+            case r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL:
+                node_kind = 'Device Terminal'
+            case r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION:
+                node_kind = 'Wire Junction'
+            case r_network_pb2.RNode.Kind.KIND_VIA_JUNCTION:
+                node_kind = 'Via Junction'
+            case _:
+                raise NotImplementedError()
+
+        node_title = f"[{node_kind}] {node.node_name}, port net {node.net_name}, " \
                      f"layer {node.layer_name}"
         sh = kdb.Shapes()
         sh.insert(self.marker_box_for_node_location(node))
