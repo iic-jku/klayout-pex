@@ -42,8 +42,18 @@ After that, you should be able to run `kpex --help`.
 
 ## Acknowledgements
 
-Special thanks to the public funded German project FMD-QNC (16ME0831)
-https://www.elektronikforschung.de/projekte/fmd-qnc for financial
-support to this work.
+This project is funded by the JKU/SAL [IWS Lab](https://research.jku.at/de/projects/jku-lit-sal-intelligent-wireless-systems-lab-iws-lab/), a collaboration of [Johannes Kepler University](https://jku.at) and [Silicon Austria Labs](https://silicon-austria-labs.com).
+
+This project is further funded by the German project [FMD-QNC (16ME0831)](https://www.elektronikforschung.de/projekte/fmd-qnc).
+
+<p align="center">
+  <img src="https://iic-jku.github.io/klayout-pex-website/figures/funding/iic-jku.svg" alt="Johannes Kepler University: Institute for Integrated Circuits and Quantum Computing" width="300">
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://iic-jku.github.io/klayout-pex-website/figures/funding/silicon-austria-labs-logo.svg" alt="Silicon Austria Labs" width="300">
+</p>
+
+<p align="center">
+  <img src="https://iic-jku.github.io/klayout-pex-website/figures/funding/bfmtr-bund-de-logo.svg" alt="Bundesministerium für Forschung, Technologie und Raumfahrt" width="300">
+</p>
 
 
