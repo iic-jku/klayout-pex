@@ -42,8 +42,22 @@ After that, you should be able to run `kpex --help`.
 
 ## Acknowledgements
 
-Special thanks to the public funded German project FMD-QNC (16ME0831)
-https://www.elektronikforschung.de/projekte/fmd-qnc for financial
-support to this work.
+This project is funded by the JKU/SAL [IWS Lab](https://research.jku.at/de/projects/jku-lit-sal-intelligent-wireless-systems-lab-iws-lab/), a collaboration of [Johannes Kepler University](https://jku.at) and [Silicon Austria Labs](https://silicon-austria-labs.com).
 
+This project is further funded by the German project [FMD-QNC (16ME0831)](https://www.elektronikforschung.de/projekte/fmd-qnc).
 
+<p align="center">
+  <a href="https://iic.jku.at" target="_blank">
+    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/iic-jku.svg" alt="Johannes Kepler University: Institute for Integrated Circuits and Quantum Computing" width="300"/>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://silicon-austria-labs.com" target="_blank">
+    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/silicon-austria-labs-logo.svg" alt="Silicon Austria Labs" width="300"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.elektronikforschung.de/projekte/fmd-qnc" target="_blank">
+    <img src="https://github.com/iic-jku/klayout-pex-website/raw/main/figures/funding/bfmtr-bund-de-logo.svg" alt="Bundesministerium für Forschung, Technologie und Raumfahrt" width="300">
+  </a>
+</p>
