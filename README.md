@@ -23,6 +23,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 -->
 [![PyPi](https://img.shields.io/pypi/v/klayout-pex)](https://pypi.org/project/klayout-pex/)
 [![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/iic-jku/klayout-pex/issues)
+[![DOI](https://zenodo.org/badge/897408519.svg)](https://doi.org/10.5281/zenodo.17822625)
 
 # KLayout-PEX
 
