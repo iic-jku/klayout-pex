@@ -60,7 +60,7 @@ Calling `./build.sh release` will:
 
 ### Generating KPEX Tech Info JSON files
 
-Calling `./gen_tech_pb` will create the JSON tech info files: 
+Calling `./gen_tech_pb klayout_pex_protobuf` will create the JSON tech info files: 
    - `build/sky130A_tech.pb.json`
    - `build/ihp_sg13g2_tech.pb.json`
 
