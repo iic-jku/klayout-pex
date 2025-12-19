@@ -121,7 +121,7 @@ select top cell
 extract path {run_dir_path}{halo_decl}
 extract all
 ext2sim labels on
-ext2sim
+ext2sim -p {run_dir_path}
 extresist tolerance {tolerance}
 extresist all
 ext2spice short {short_mode}
@@ -150,7 +150,7 @@ extract no capacitance
 extract no coupling
 extract all
 ext2sim labels on
-ext2sim
+ext2sim -p {run_dir_path}
 extresist tolerance {tolerance}
 extresist all
 ext2spice short {short_mode}
