@@ -1,0 +1,33 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:49:56] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:387
+[18:49:56] INFO     No explicit top cell specified, using top    kpex_cli.py:427
+                    cell 'near_body_shield_li1_m1'                              
+[18:49:56] INFO     LVS input schematic not specified (argument  kpex_cli.py:468
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:49:56] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:863
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nea
+r_body_shield_li1_m1.gds.gz/near_body_shield_li1_m1.lvsdb.gz                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:49:56] INFO     (67, 20) -> (li_con)                         kpex_cli.py:923
+[18:49:56] INFO     (68, 20) -> (met1_con)                       kpex_cli.py:923
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;BOTTOM;TOPA;215.972;                                                         
+C2;BOTTOM;TOPB;215.972;                                                         
+C3;BOTTOM;VSUBS;405.081;                                                        
+C4;TOPA;TOPB;0.503;                                                             
+C5;TOPA;VSUBS;0.299;                                                            
+C6;TOPB;VSUBS;0.299;                                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/near_body_shield_li1_m1
+__near_body_shield_li1_m1/near_body_shield_li1_m1_k25d_pex_netlist.csv          
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/near_body_shield_li1_m1
+__near_body_shield_li1_m1/near_body_shield_li1_m1_k25d_pex_netlist.spice        
