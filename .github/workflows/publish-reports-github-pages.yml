@@ -144,7 +144,7 @@ jobs:
 
       - name: "[🐍] Store merged coverage reports"
         if: success() || failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: merged-coverage-report
           path: pycov
