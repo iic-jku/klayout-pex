@@ -38,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # NOTE: actions/download-artifact@v6 now has merging functionality built in => no need for actions/upload-artifact/merge@v4
+      # NOTE: actions/download-artifact@v7 now has merging functionality built in => no need for actions/upload-artifact/merge@v4
       # - name: "Merge test results (Allure)"
       #   uses: actions/upload-artifact/merge@v4
       #   with:
@@ -48,7 +48,7 @@ jobs:
       #     retention-days: 1
 
       - name: "Download and merge Allure coverage artifacts"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: python-*-tests-allure-report-*
           merge-multiple: true
@@ -96,7 +96,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: "[🐍] Download and merge 📦 artifacts"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: python-dist-ubuntu-latest* 
           merge-multiple: true
@@ -107,7 +107,7 @@ jobs:
           tar xvfz dist/klayout_pex*.tar.gz --strip-components=1
       
       - name: "[🐍] Download and merge coverage artifacts"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: python-*-tests-coverage-report-ubuntu-*
           merge-multiple: false
@@ -157,7 +157,7 @@ jobs:
     needs: merge-coverage-reports
     steps:
       - name: "Download merged coverage artifact"
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: merged-coverage-report
           path: pycov   # destination
