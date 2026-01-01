@@ -124,7 +124,7 @@ jobs:
     
     - name: "[🐍] Load cached venv"
       id: cached-poetry-dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -147,7 +147,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: "[C++] Cache CMake dependency source code"
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       env:
         cache-name: cache-cmake-dependency-sources
       with:
@@ -161,7 +161,7 @@ jobs:
           ${{ env.cache-name }}-
 
     - name: "[C++] Cache CMake dependency build objects"
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       env:
         cache-name: cache-cmake-dependency-builds
       with:
