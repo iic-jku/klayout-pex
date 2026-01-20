@@ -1,0 +1,47 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:00:58] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:387
+[16:00:58] INFO     No explicit top cell specified, using top    kpex_cli.py:427
+                    cell                                                        
+                    'overlap_plates_100um_x_100um_li1_m1_m2_m3'                 
+[16:00:58] INFO     LVS input schematic not specified (argument  kpex_cli.py:468
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:00:58] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:863
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/ove
+rlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz/overlap_plates_100um_x_100um_li1_m
+1_m2_m3.lvsdb.gz                                                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:00:58] INFO     (67, 20) -> (li_con)                         kpex_cli.py:923
+[16:00:58] INFO     (68, 20) -> (met1_con)                       kpex_cli.py:923
+[16:00:58] INFO     (69, 20) -> (met2_con)                       kpex_cli.py:923
+[16:00:58] INFO     (67, 16) -> (li_pin_con)                     kpex_cli.py:923
+[16:00:58] INFO     (68, 16) -> (met1_pin_con)                   kpex_cli.py:923
+[16:00:58] INFO     (69, 16) -> (met2_pin_con)                   kpex_cli.py:923
+[16:00:58] INFO     (70, 16) -> (met3_pin_con)                   kpex_cli.py:923
+[16:00:58] INFO     (70, 20) -> (met3_ncap)                      kpex_cli.py:923
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;li1;met1;294.867;                                                            
+C2;li1;met2;99.518;                                                             
+C3;li1;met3;6.013;                                                              
+C4;met1;met2;680.769;                                                           
+C5;met1;met3;0.016;                                                             
+C6;met2;met3;0.056;                                                             
+C7;VSUBS;li1;386.179;                                                           
+C8;VSUBS;met1;205.619;                                                          
+C9;VSUBS;met2;51.574;                                                           
+C10;VSUBS;met3;136.063;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_plates_100um_x_
+100um_li1_m1_m2_m3__overlap_plates_100um_x_100um_li1_m1_m2_m3/overlap_plates_100
+um_x_100um_li1_m1_m2_m3_k25d_pex_netlist.csv                                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_plates_100um_x_
+100um_li1_m1_m2_m3__overlap_plates_100um_x_100um_li1_m1_m2_m3/overlap_plates_100
+um_x_100um_li1_m1_m2_m3_k25d_pex_netlist.spice                                  
