@@ -1,0 +1,48 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:57:32] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:387
+[15:57:32] INFO     No explicit top cell specified, using top    kpex_cli.py:427
+                    cell 'sideoverlap_plates_li1_m1'                            
+[15:57:32] INFO     LVS input schematic not specified (argument  kpex_cli.py:468
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:57:32] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:863
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+eoverlap_plates_li1_m1.gds.gz/sideoverlap_plates_li1_m1.lvsdb.gz                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:57:32] INFO     (67, 20) -> (li_con)                         kpex_cli.py:923
+[15:57:32] INFO     (68, 20) -> (met1_con)                       kpex_cli.py:923
+[15:57:32] INFO     (67, 16) -> (li_pin_con)                     kpex_cli.py:923
+[15:57:32] INFO     (68, 16) -> (met1_pin_con)                   kpex_cli.py:923
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;                   
+C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;                               
+C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
+C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;          
+C5;LOWER_FullHaloOverlap;UPPER;262.817;                                         
+C6;LOWER_FullHaloOverlap;VSUBS;177.601;                                         
+C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;                       
+C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;   
+C9;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;                                 
+C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;                                 
+C11;LOWER_OutsideHalo;UPPER;0.076;                                              
+C12;LOWER_OutsideHalo;VSUBS;73.274;                                             
+C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.261;               
+C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.931;               
+C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.149;                         
+C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;90.618;                        
+C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.159;                         
+C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.637;                         
+C19;UPPER;VSUBS;214.85;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_
+m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.csv    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_
+m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.spice  
