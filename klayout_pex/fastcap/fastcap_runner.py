@@ -53,8 +53,6 @@ def run_fastcap(exe_path: str,
     log_path = os.path.abspath(log_path)
     lst_file_path = os.path.basename(lst_file_path)
 
-    info(f"Chdir to {work_dir}")
-    os.chdir(work_dir)
     args = [
         exe_path,
         f"-o{expansion_order}",
@@ -71,13 +69,14 @@ def run_fastcap(exe_path: str,
         f"-l{lst_file_path}",
     ]
 
-    info(f"Calling FastCap2")
+    info(f"Calling FastCap2 in {work_dir}")
     subproc(f"{' '.join(args)}, output file: {log_path}")
 
     rule('FastCap Output')
     start = time.time()
 
     proc = subprocess.Popen(args,
+                            cwd=work_dir,
                             stdin=subprocess.DEVNULL,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
