@@ -1,0 +1,33 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:13:42] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:387
+[13:13:42] INFO     No explicit top cell specified, using top    kpex_cli.py:427
+                    cell                                                        
+                    'single_plate_100um_x_100um_li1_over_substra                
+                    te'                                                         
+[13:13:42] INFO     LVS input schematic not specified (argument  kpex_cli.py:468
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:13:42] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:863
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sin
+gle_plate_100um_x_100um_li1_over_substrate.gds.gz/single_plate_100um_x_100um_li1
+_over_substrate.lvsdb.gz                                                        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:13:42] INFO     (67, 20) -> (li_con)                         kpex_cli.py:923
+[13:13:42] INFO     (67, 16) -> (li_pin_con)                     kpex_cli.py:923
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;PLATE;VSUBS;386.179;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_k25d_pex_netlist.spice                      
