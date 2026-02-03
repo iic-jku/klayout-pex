@@ -70,6 +70,7 @@ class DeviceType(StrEnum):
     RSUBCKT = "rsubckt"
     MSUBCKT = "msubckt"
     CSUBCKT = "csubckt"
+    DSUBCKT = "dsubckt"
 
 
 @dataclass
