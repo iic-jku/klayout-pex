@@ -37,7 +37,7 @@ endif(MSVC)
 include(cmake/CPM.cmake)
 CPMAddPackage(
     NAME protobuf
-    GIT_TAG v31.0
+    GIT_TAG v33.5
     GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
     OPTIONS
         "protobuf_INSTALL OFF"
