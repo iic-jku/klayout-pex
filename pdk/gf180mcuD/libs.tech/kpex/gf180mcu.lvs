@@ -14,6 +14,13 @@
 # limitations under the License.
 ################################################################################################
 
+
+#===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===
+# WARNING: this version is not a regular LVS script,
+#          instead tailored for parasitic extraction (PEX) by the klayout-pex tool
+#===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===
+
+
 #=======================================================================================================================
 #--------------------------------------------- GF 0.18um MCU LVS RULE DECK ---------------------------------------------
 #=======================================================================================================================
@@ -287,6 +294,28 @@ logger.info('Starting base layers derivations')
 #================================
 
 # %include rule_decks/efuse_derivations.lvs
+
+
+#
+# [PEX] export layer names
+#
+# NOTE: Names must be assigned before the layers are used for the first time
+#       in connect, soft_connect, connect_global, soft_connect_global
+#       and extract_devices statements.
+#
+
+if self.respond_to?(:name)
+  # names in layer_definitions
+  %w(comp dnwell nwell lvpwell dualgate poly2 nplus pplus sab esd resistor fhres fusetop fusewindow_d polyfuse mvsd mvpsd nat comp_dummy poly2_dummy schottky_diode zener res_mk opc_drc ndmy pmndmy v5_xtor cap_mk mos_cap_mk ind_mk diode_mk drc_bjt lvs_bjt mim_l_mk latchup_mk guard_ring_mk otp_mk mtpmark neo_ee_mk sramcore lvs_rf lvs_drain ind_mk hvpolyrs lvs_io probe_mk esd_mk lvs_source well_diode_mk ldmos_xtor plfuse efuse_mk mcell_feol_mk ymtp_mk dev_wf_mk comp_label poly2_label mdiode contact metal1_drawn metal1_dummy metal1 metal1_slot metal1_blk metal1_res via1 metal2_drawn metal2_dummy metal2 metal2_label metal2_slot metal2_blk metal2_res via2 metal3_drawn metal3_dummy metal3 metal3_label metal3_slot metal3_blk metal3_res via3 metal4_drawn metal4_dummy metal4 metal4_label metal4_slot metal4_blk metal4_res via4 metal5_drawn metal5_dummy metal5 metal5_label metal5_slot metal5_blk metal5_res via5 metaltop_drawn metaltop_dummy metaltop_label metaltop_slot metaltop_blk metal6_res pad ubmpperi ubmparray ubmeplate pr_bndry border sub topmin1_metal).each do |l|
+    name(eval(l), l)
+  end
+  
+  # names in general_derivations
+  %w(ncomp pcomp tgate ngate pgate ptap nsd psd ntap ngate_dw ptap_dw pgate_dw ntap_dw psd_dw nwell_con lvpwell_con poly2_con pgate_lv_base pgate_5v_base pgate_6v_base pgate_lv_n_dw pgate_5v_n_dw pgate_6v_n_dw pgate_lv_dw_base pgate_5v_dw_base pgate_6v_dw_base ngate_lv_base ngate_5v_base ngate_6v_base ngate_lv_n_dw ngate_5v_n_dw ngate_6v_n_dw ngate_lv_dw_base ngate_5v_dw_base ngate_6v_dw_base metal1_con metal2_con metal3_con via2_n_cap via2_cap metal4_con via3_n_cap via3_cap metal5_con via4_n_cap via4_cap metaltop_con via5_n_cap via5_cap top_metal_con top_via_n_cap top_via_cap top_metal_cap).each do |l|
+    name(eval(l), l)
+  end
+
+end
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
