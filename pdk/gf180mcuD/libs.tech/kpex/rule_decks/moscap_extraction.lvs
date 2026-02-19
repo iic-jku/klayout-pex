@@ -1,0 +1,80 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#==================================
+# ------- MOSCAP EXTRACTION -------
+#==================================
+
+logger.info('Starting MOSCAP EXTRACTION')
+
+# cap_nmos_03v3
+logger.info('Extracting cap_nmos_03v3 device')
+extract_devices(capacitor('cap_nmos_03v3', 4.4e-15, MosCap),
+                { 'P1' => nmos_gate_3p3, 'P2' => lvpwell_con, 'tA' => poly2_con, 'tB' => nsd })
+
+# cap_nmos_03v3_dn
+logger.info('Extracting cap_nmos_03v3_dn device')
+extract_devices(capacitor('cap_nmos_03v3_dn', 4.4e-15, MosCap),
+                { 'P1' => nmos_gate_3p3_dw, 'P2' => lvpwell_con, 'tA' => poly2_con, 'tB' => nsd })
+
+# cap_pmos_03v3
+logger.info('Extracting cap_pmos_03v3 device')
+extract_devices(capacitor('cap_pmos_03v3', 4.4e-15, MosCap),
+                { 'P1' => pmos_gate_3p3, 'P2' => nwell_con, 'tA' => poly2_con, 'tB' => psd })
+
+# cap_pmos_03v3_dn
+logger.info('Extracting cap_pmos_03v3_dn device')
+extract_devices(capacitor('cap_pmos_03v3_dn', 4.4e-15, MosCap),
+                { 'P1' => pmos_gate_3p3_dw, 'P2' => dnwell, 'tA' => poly2_con, 'tB' => psd_dw })
+
+# cap_nmos_06v0
+logger.info('Extracting cap_nmos_06v0 device')
+extract_devices(capacitor('cap_nmos_06v0', 2.3e-15, MosCap),
+                { 'P1' => nmos_gate_6p0, 'P2' => lvpwell_con, 'tA' => poly2_con, 'tB' => nsd })
+
+# cap_nmos_06v0_dn
+logger.info('Extracting cap_nmos_06v0_dn device')
+extract_devices(capacitor('cap_nmos_06v0_dn', 2.3e-15, MosCap),
+                { 'P1' => nmos_gate_6p0_dw, 'P2' => lvpwell_con, 'tA' => poly2_con, 'tB' => nsd })
+
+# cap_pmos_06v0
+logger.info('Extracting cap_pmos_06v0 device')
+extract_devices(capacitor('cap_pmos_06v0', 2.3e-15, MosCap),
+                { 'P1' => pmos_gate_6p0, 'P2' => nwell_con, 'tA' => poly2_con, 'tB' => psd })
+
+# cap_pmos_06v0
+logger.info('Extracting cap_pmos_06v0 device')
+extract_devices(capacitor('cap_pmos_06v0_dn', 2.3e-15, MosCap),
+                { 'P1' => pmos_gate_6p0_dw, 'P2' => dnwell, 'tA' => poly2_con, 'tB' => psd_dw })
+
+# cap_nmos_03v3_b capacitor
+extract_devices(capacitor('cap_nmos_03v3_b', 4.4e-15, MosCap),
+                { 'P1' => cap_nmos_03v3_b, 'P2' => nwell_con, 'tA' => poly2_con, 'tB' => ntap })
+
+# cap_pmos_03v3_b
+logger.info('Extracting cap_pmos_03v3_b device')
+extract_devices(capacitor('cap_pmos_03v3_b', 4.4e-15, MosCap),
+                { 'P1' => cap_pmos_03v3_b, 'P2' => ptap, 'tA' => poly2_con, 'tB' => ptap })
+
+# cap_nmos_06v0_b
+logger.info('Extracting cap_nmos_06v0_b device')
+extract_devices(capacitor('cap_nmos_06v0_b', 2.3e-15, MosCap),
+                { 'P1' => cap_nmos_06v0_b, 'P2' => nwell_con, 'tA' => poly2_con, 'tB' => ntap })
+
+# cap_pmos_06v0_b
+logger.info('Extracting cap_pmos_06v0_b device')
+extract_devices(capacitor('cap_pmos_06v0_b', 2.3e-15, MosCap),
+                { 'P1' => cap_pmos_06v0_b, 'P2' => ptap, 'tA' => poly2_con, 'tB' => ptap })

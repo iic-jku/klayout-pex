@@ -1,0 +1,83 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ------ DIODE EXTRACTION -------
+#================================
+
+logger.info('Starting DIODE EXTRACTION')
+
+# diode_nd2ps_03v3 diode
+logger.info('Extracting diode_nd2ps_03v3 diode')
+extract_devices(diode('diode_nd2ps_03v3'), { 'N' => diode_nd2ps_03v3_terminal_n, 'P' => lvpwell_con })
+
+# diode_nd2ps_03v3_dn diode
+logger.info('Extracting diode_nd2ps_03v3_dn diode')
+extract_devices(diode('diode_nd2ps_03v3_dn'), { 'N' => diode_nd2ps_03v3_dn_terminal_n, 'P' => lvpwell_con })
+
+# diode_nd2ps_06v0 diode
+logger.info('Extracting diode_nd2ps_06v0 diode')
+extract_devices(diode('diode_nd2ps_06v0'), { 'N' => diode_nd2ps_06v0_terminal_n, 'P' => lvpwell_con })
+
+# diode_nd2ps_06v0_dn diode
+logger.info('Extracting diode_nd2ps_06v0_dn diode')
+extract_devices(diode('diode_nd2ps_06v0_dn'), { 'N' => diode_nd2ps_06v0_dn_terminal_n, 'P' => lvpwell_con })
+
+# diode_pd2nw_03v3 diode
+logger.info('Extracting diode_pd2nw_03v3 diode')
+extract_devices(diode('diode_pd2nw_03v3'), { 'N' => diode_pd2nw_03v3_terminal_n, 'P' => diode_pd2nw_03v3_terminal_p })
+
+# diode_pd2nw_03v3_dn diode
+logger.info('Extractingdiode_pd2nw_03v3_dn diode')
+extract_devices(diode('diode_pd2nw_03v3_dn'),
+                { 'N' => diode_pd2nw_03v3_dn_terminal_n, 'P' => diode_pd2nw_03v3_dn_terminal_p })
+
+# diode_pd2nw_06v0 diode
+logger.info('Extracting diode_pd2nw_06v0 diode')
+extract_devices(diode('diode_pd2nw_06v0'), { 'N' => diode_pd2nw_06v0_terminal_n, 'P' => diode_pd2nw_06v0_terminal_p })
+
+# diode_pd2nw_06v0_dn diode
+logger.info('Extracting diode_pd2nw_06v0_dn diode')
+extract_devices(diode('diode_pd2nw_06v0_dn'),
+                { 'N' => diode_pd2nw_06v0_dn_terminal_n, 'P' => diode_pd2nw_06v0_dn_terminal_p })
+
+# diode_nw2ps_03v3 diode
+logger.info('Extracting diode_nw2ps_03v3 diode')
+extract_devices(diode('diode_nw2ps_03v3'), { 'N' => diode_nw2ps_03v3_terminal_n, 'P' => diode_nw2ps_03v3_terminal_p })
+
+# diode_nw2ps_06v0 diode
+logger.info('Extracting diode_nw2ps_06v0 diode')
+extract_devices(diode('diode_nw2ps_06v0'), { 'N' => diode_nw2ps_06v0_terminal_n, 'P' => diode_nw2ps_06v0_terminal_p })
+
+# diode_pw2dw_03v3 diode
+logger.info('Extracting diode_pw2dw_03v3 diode')
+extract_devices(diode('diode_pw2dw_03v3'), { 'N' => dnwell, 'P' => diode_pw2dw_03v3_terminal_p })
+
+# diode_pw2dw_06v0 diode
+logger.info('Extracting diode_pw2dw_06v0 diode')
+extract_devices(diode('diode_pw2dw_06v0'), { 'N' => dnwell, 'P' => diode_pw2dw_06v0_terminal_p })
+
+# diode_dw2ps_03v3 diode
+logger.info('Extracting diode_dw2ps_03v3 diode')
+extract_devices(diode('diode_dw2ps_03v3'), { 'N' => dnwell, 'P' => diode_dw2ps_03v3_terminal_p })
+
+# diode_dw2ps_06v0 diode
+logger.info('Extracting diode_dw2ps_06v0 diode')
+extract_devices(diode('diode_dw2ps_06v0'), { 'N' => dnwell, 'P' => diode_dw2ps_06v0_terminal_p })
+
+# sc_diode diode
+logger.info('Extracting sc_diode diode')
+extract_devices(diode('sc_diode'), { 'N' => sc_diode_terminal_n, 'P' => schottky_diode })

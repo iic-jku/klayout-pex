@@ -1,0 +1,150 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ---- RESISTOR DERIVATIONS -----
+#================================
+
+logger.info('Starting RESISTOR DERIVATIONS')
+
+res_exclude = esd.join(fusewindow_d).join(polyfuse)
+                 .join(diode_mk).join(drc_bjt).join(nat)
+                 .join(mos_cap_mk).join(esd_mk).join(lvs_source)
+                 .join(efuse_mk).join(plfuse).join(mvsd)
+                 .join(mvpsd).join(ldmos_xtor).join(schottky_diode)
+
+# ===============
+# --DIFF & WELL--
+# ===============
+
+# NPLUS
+nplus_exclude = nwell.join(dualgate).join(resistor)
+                     .join(poly2).join(pplus).join(res_exclude)
+
+## NPLUS_U
+nplus_u_layer = ncomp.and(sab).and(res_mk).not(dnwell).not(nplus_exclude)
+nplus_cont = ncomp.not(nwell).not_interacting(ngate)
+                  .interacting(res_mk).not(res_mk).not(nplus_exclude)
+
+## NPLUS_U_DW
+nplus_u_dw_layer = ncomp.and(lvpwell).and(sab).and(res_mk).and(dnwell).not(nplus_exclude)
+
+## NPLUS_S
+nplus_s_layer = ncomp.and(res_mk).not_interacting(sab).not(dnwell).not(nplus_exclude)
+
+## NPLUS_S_DW
+nplus_s_dw_layer = ncomp.and(lvpwell).and(res_mk).and(dnwell).not_interacting(sab).not(nplus_exclude)
+
+# PPLUS
+pplus_exclude = lvpwell.join(dualgate).join(poly2)
+                       .join(nplus).join(resistor).join(res_exclude)
+
+## PPLUS_U
+pplus_u_layer = pcomp.and(nwell).and(sab).and(res_mk).not(dnwell).not(pplus_exclude)
+pplus_cont = pcomp.inside(nwell).not_interacting(pgate)
+                  .interacting(res_mk).not(res_mk).not(pplus_exclude)
+
+## PPLUS_U_DW
+pplus_u_dw_layer = pcomp.and(sab).and(res_mk).and(dnwell).not(pplus_exclude)
+pplus_dw_cont    = pcomp.not(lvpwell).and(dnwell).not_interacting(pgate)
+                        .interacting(res_mk).not(res_mk).not(pplus_exclude)
+
+## PPLUS_S
+pplus_s_layer = pcomp.and(nwell).and(res_mk).not_interacting(sab).not(dnwell).not(pplus_exclude)
+
+## PPLUS_S_DW
+pplus_s_dw_layer = pcomp.not_interacting(sab).and(res_mk).and(dnwell)
+                        .not_interacting(sab).not(pplus_exclude)
+
+# WELL
+well_exclude = poly2.join(dualgate).join(resistor)
+                    .join(sab).join(res_exclude)
+## NWELL
+nwell_res = nwell.interacting(ncomp).and(res_mk).not(dnwell).not(well_exclude)
+
+## PWELL
+pwell_res = lvpwell.interacting(pcomp).and(res_mk).and(dnwell).not(well_exclude)
+
+# ==============
+# ---- POLY ----
+# ==============
+
+# POLY
+poly_exclude = comp.join(res_exclude)
+
+# NPOLY
+npoly_exclude = poly_exclude.join(pplus).join(resistor)
+
+## NPOLYF_U
+npolyf_u_layer = nplus.and(poly2).and(sab).and(res_mk).not(dnwell).not(npoly_exclude)
+
+## NPOLYF_U_DW
+npolyf_u_dw_layer = nplus.and(poly2).and(sab).and(res_mk).and(dnwell).not(npoly_exclude)
+
+## NPOLYF_S
+npolyf_s_layer = nplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab).not(npoly_exclude)
+
+## NPOLYF_S_DW
+npolyf_s_dw_layer = nplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab).not(npoly_exclude)
+
+# PPOLY
+ppoly_exclude = poly_exclude.join(nplus)
+
+## PPOLYF_U
+ppolyf_u_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor).not(dnwell).not(ppoly_exclude)
+
+## PPOLYF_U_DW
+ppolyf_u_dw_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor).and(dnwell).not(ppoly_exclude)
+
+## PPOLYF_S
+ppolyf_s_layer = pplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
+                      .not_interacting(resistor).not(ppoly_exclude)
+
+## PPOLYF_S_DW
+ppolyf_s_dw_layer = pplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab)
+                         .not_interacting(resistor).not(ppoly_exclude)
+
+# ==============
+# --H-POLY RES--
+# ==============
+
+# PPOLYF_U_1K
+ppolyf_u_h = poly2.and(sab).and(res_mk).and(resistor).not(dnwell).not(v5_xtor).not(dualgate).not(ppoly_exclude)
+
+# PPOLYF_U_DW_1K
+ppolyf_u_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor).not(dualgate).not(ppoly_exclude)
+
+# PPOLYF_U_1K_6p0
+ppolyf_u_6p0_h = poly2.and(sab).and(res_mk).and(resistor).not(dnwell).not(v5_xtor).and(dualgate).not(ppoly_exclude)
+
+# PPOLYF_U_DW_1K_6p0
+ppolyf_u_6p0_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor).and(dualgate).not(ppoly_exclude)
+
+# ===============
+# ---- METAL ----
+# ===============
+
+# Metal1 resistor
+rm1_res = metal1.and(metal1_res)
+
+# Metal2 resistor
+rm2_res = metal2.and(metal2_res)
+
+# Metal3 resistor
+rm3_res = metal3.and(metal3_res)
+
+# Metaltop resistor
+tm_res = top_metal.and(top_metal_res)

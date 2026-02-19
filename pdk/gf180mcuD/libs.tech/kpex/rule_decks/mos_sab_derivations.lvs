@@ -1,0 +1,85 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ---- MOS-SAB DERIVATIONS ------
+#================================
+
+logger.info('Starting MOS SAB DERIVATIONS')
+
+mos_sab_exclude = resistor.join(fusewindow_d).join(polyfuse)
+                          .join(res_mk).join(diode_mk).join(drc_bjt)
+                          .join(nat).join(mos_cap_mk).join(efuse_mk)
+                          .join(plfuse).join(mvsd).join(mvpsd)
+                          .join(ldmos_xtor).join(schottky_diode)
+
+# ==============
+# ---- PMOS ----
+# ==============
+logger.info('Starting PMOS SAB DERIVATIONS')
+
+# 3.3V ESD PMOS transistor outside DNWELL
+pgate_sab_3p3v = pgate_lv_n_dw.and(esd_mk).interacting(sab)
+                              .interacting(lvs_source).not(mos_sab_exclude)
+
+# 5V ESD PMOS transistor outside DNWELL
+pgate_sab_5v = pgate_5v_n_dw.and(esd_mk).interacting(sab)
+                            .interacting(lvs_source).not(mos_sab_exclude)
+
+# 6V ESD PMOS transistor outside DNWELL
+pgate_sab_6v = pgate_6v_n_dw.and(esd_mk).interacting(sab)
+                            .interacting(lvs_source).not(mos_sab_exclude)
+
+# 3.3V ESD PMOS transistor inside DNWELL
+pgate_dw_sab_3p3v = pgate_lv_dw_base.and(esd_mk).interacting(sab)
+                                    .interacting(lvs_source).not(mos_sab_exclude)
+
+# 5V ESD PMOS transistor inside DNWELL
+pgate_dw_sab_5v = pgate_5v_dw_base.and(esd_mk).interacting(sab)
+                                  .interacting(lvs_source).not(mos_sab_exclude)
+
+# 6V ESD PMOS transistor inside DNWELL
+pgate_dw_sab_6v = pgate_6v_dw_base.and(esd_mk).interacting(sab)
+                                  .interacting(lvs_source).not(mos_sab_exclude)
+
+# ==============
+# ---- NMOS ----
+# ==============
+logger.info('Starting NMOS SAB DERIVATIONS')
+
+# 3.3V ESD NMOS transistor outside DNWELL
+ngate_sab_3p3v = ngate_lv_n_dw.and(esd_mk).interacting(sab)
+                              .interacting(lvs_source).not(mos_sab_exclude)
+
+# 5V ESD NMOS transistor outside DNWELL
+ngate_sab_5v = ngate_5v_n_dw.and(esd_mk).interacting(sab)
+                            .interacting(lvs_source).not(mos_sab_exclude)
+
+# 6V ESD NMOS transistor outside DNWELL
+ngate_sab_6v = ngate_6v_n_dw.and(esd_mk).interacting(sab)
+                            .interacting(lvs_source).not(mos_sab_exclude)
+
+# 3.3V ESD NMOS transistor inside DNWELL
+ngate_dw_sab_3p3v = ngate_lv_dw_base.and(esd_mk).interacting(sab)
+                                    .interacting(lvs_source).not(mos_sab_exclude)
+
+# 5V ESD NMOS transistor inside DNWELL
+ngate_dw_sab_5v = ngate_5v_dw_base.and(esd_mk).interacting(sab)
+                                  .interacting(lvs_source).not(mos_sab_exclude)
+
+# 6V ESD NMOS transistor inside DNWELL
+ngate_dw_sab_6v = ngate_6v_dw_base.and(esd_mk).interacting(sab)
+                                  .interacting(lvs_source).not(mos_sab_exclude)
