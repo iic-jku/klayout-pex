@@ -26,6 +26,7 @@
 #include <filesystem>
 
 #include "protobuf.h"
+#include "pdk/gf180mcuD.h"
 #include "pdk/ihp_sg13g2.h"
 #include "pdk/sky130A.h"
 
@@ -54,6 +55,12 @@ int main(int argc, char **argv) {
         return 2;
     }
     std::filesystem::create_directories(output_directory);
+
+    {
+        kpex::tech::Technology tech;
+        gf180mcuD::buildTech(tech);
+        writeTech(output_directory, "gf180mcuD", tech);
+    }
 
     {
         kpex::tech::Technology tech;

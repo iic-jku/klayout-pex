@@ -1,0 +1,121 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ----- DIODE DERIVATIONS -------
+#================================
+
+logger.info('Starting DIODE DERIVATIONS')
+
+diode_exclude = poly2.join(resistor).join(esd).join(sab)
+                     .join(fusewindow_d).join(polyfuse).join(res_mk)
+                     .join(drc_bjt).join(nat).join(mos_cap_mk)
+                     .join(efuse_mk).join(plfuse).join(mvsd)
+                     .join(mvpsd).join(ldmos_xtor)
+
+ncomp_lv = ncomp.not(v5_xtor).not(dualgate)
+ncomp_mv = ncomp.and(dualgate)
+
+pcomp_lv = pcomp.not(v5_xtor).not(dualgate)
+pcomp_mv = pcomp.and(dualgate)
+
+lvpwell_lv = lvpwell.not(v5_xtor).not(dualgate)
+lvpwell_mv = lvpwell.and(dualgate)
+
+nwell_lv = nwell.not(v5_xtor).not(dualgate)
+nwell_mv = nwell.overlapping(dualgate)
+
+# diode_nd2ps_03v3 diode
+diode_nd2ps_exclude = nwell.join(diode_exclude)
+diode_nd2ps_03v3_terminal_n = ncomp_lv.not(dnwell).and(diode_mk)
+                                      .not(diode_nd2ps_exclude)
+
+# diode_nd2ps_03v3_dn diode
+diode_nd2ps_03v3_dn_terminal_n = ncomp_lv.and(dnwell).and(diode_mk)
+                                         .not(diode_nd2ps_exclude)
+
+# diode_nd2ps_06v0 diode
+diode_nd2ps_06v0_terminal_n = ncomp_mv.not(dnwell).and(diode_mk)
+                                      .not(diode_nd2ps_exclude)
+
+# diode_nd2ps_06v0_dn diode
+diode_nd2ps_06v0_dn_terminal_n = ncomp_mv.and(dnwell).and(diode_mk)
+                                         .not(diode_nd2ps_exclude)
+
+# diode_pd2nw_03v3 diode
+diode_pd2nw_exclude = lvpwell.join(diode_exclude)
+diode_pd2nw_03v3_terminal_p = pcomp_lv.not(dnwell).and(diode_mk)
+                                      .not(diode_pd2nw_exclude)
+
+diode_pd2nw_03v3_terminal_n = nwell_lv.not(dnwell).interacting(ncomp)
+                                      .not(diode_pd2nw_exclude)
+# diode_pd2nw_03v3_dn diode
+diode_pd2nw_03v3_dn_terminal_p = pcomp_lv.and(dnwell).and(diode_mk)
+                                         .not(diode_pd2nw_exclude)
+
+diode_pd2nw_03v3_dn_terminal_n = nwell_lv.and(dnwell).interacting(ncomp)
+                                         .not(diode_pd2nw_exclude)
+
+# diode_pd2nw_06v0 diode
+diode_pd2nw_06v0_terminal_p = pcomp_mv.not(dnwell).and(diode_mk)
+                                      .not(diode_pd2nw_exclude)
+
+diode_pd2nw_06v0_terminal_n = nwell_mv.not(dnwell).interacting(ncomp)
+                                      .not(diode_pd2nw_exclude)
+
+# diode_pd2nw_06v0_dn diode
+diode_pd2nw_06v0_dn_terminal_p = pcomp_mv.and(dnwell).and(diode_mk)
+                                         .not(diode_pd2nw_exclude)
+
+diode_pd2nw_06v0_dn_terminal_n = nwell_mv.and(dnwell).interacting(ncomp)
+                                         .not(diode_pd2nw_exclude)
+
+# diode_nw2ps_03v3 diode
+diode_nw2ps_03v3_terminal_p = pcomp_lv.and(well_diode_mk).not(diode_exclude)
+diode_nw2ps_03v3_terminal_n = well_diode_mk.covering(nwell_lv.covering(ncomp))
+                                           .not(diode_exclude)
+
+# diode_nw2ps_06v0 diode
+diode_nw2ps_06v0_terminal_p = pcomp_mv.and(well_diode_mk).not(diode_exclude)
+diode_nw2ps_06v0_terminal_n = well_diode_mk.covering(nwell_mv.covering(ncomp))
+                                           .not(diode_exclude)
+
+# diode_pw2dw_03v3 diode
+diode_pw2dw_exclude = nwell.join(diode_exclude)
+diode_pw2dw_03v3_terminal_p = lvpwell_lv.interacting(well_diode_mk)
+                                        .interacting(comp).not(diode_pw2dw_exclude)
+
+# diode_pw2dw_06v0 diode
+diode_pw2dw_06v0_terminal_p = lvpwell_mv.interacting(well_diode_mk)
+                                        .interacting(comp).not(diode_pw2dw_exclude)
+
+# diode_dw2ps_03v3 diode
+ptap_extent = ptap.extents
+diode_dw2ps_03v3_terminal_p = ptap_extent.not_interacting(lvpwell)
+                                         .covering(ncomp_lv).interacting(well_diode_mk)
+                                         .not_interacting(diode_exclude)
+
+# diode_dw2ps_06v0 diode
+diode_dw2ps_06v0_terminal_p = ptap_extent.not_interacting(lvpwell)
+                                         .covering(ncomp_mv).interacting(well_diode_mk)
+                                         .not_interacting(diode_exclude)
+
+# sc_diode diode
+sc_diode_exclude = dualgate.join(pplus).join(diode_mk)
+                           .join(esd_mk).join(lvs_source).join(diode_exclude)
+
+sc_diode_terminal_n = ncomp.and(dnwell).and(schottky_diode).not(sc_diode_exclude)
+sc_diode_terminal_p = metal1.and(dnwell).not_interacting(sc_diode_terminal_n).not(sc_diode_exclude)

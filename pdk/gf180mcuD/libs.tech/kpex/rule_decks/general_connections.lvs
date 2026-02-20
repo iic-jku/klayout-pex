@@ -1,0 +1,100 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ----- GENERAL CONNECTIONS -----
+#================================
+
+logger.info('Starting GF180 LVS connectivity setup (Inter-layer)')
+
+# Inter-layer
+connect(sub, ptap)
+connect(lvpwell_con, ptap)
+connect(lvpwell_con, ptap_dw)
+connect(dnwell, ntap_dw)
+connect(nwell_con, ntap)
+connect(ptap, contact)
+connect(ptap_dw, contact)
+connect(ntap, contact)
+connect(ntap_dw, contact)
+connect(psd, contact)
+connect(psd_dw, contact)
+connect(nsd, contact)
+connect(poly2_con, contact)
+connect(contact, metal1_con)
+connect(metal1_con, via1)
+connect(via1, metal2_con)
+
+case METAL_LEVEL
+when '3LM', '4LM', '5LM', '6LM'
+  connect(metal2_con, via2_n_cap)
+  connect(via2_n_cap, metal3_con)
+  connect(metal3_con, metal3_label)
+end
+case METAL_LEVEL
+when '4LM', '5LM', '6LM'
+  connect(metal3_con, via3_n_cap)
+  connect(via3_n_cap, metal4_con)
+  connect(metal4_con, metal4_label)
+end
+case METAL_LEVEL
+when '5LM', '6LM'
+  connect(metal4_con, via4_n_cap)
+  connect(via4_n_cap, metal5_con)
+  connect(metal5_con, metal5_label)
+end
+case METAL_LEVEL
+when '6LM'
+  connect(metal5_con, via5_n_cap)
+  connect(via5_n_cap, metaltop_con)
+  connect(metaltop_con, metaltop_label)
+end
+
+case METAL_LEVEL
+when '3LM'
+  connect(metal2_con, topmin1_metal)
+  connect(metal3_con, top_metal_cap)
+when '4LM'
+  connect(metal3_con, topmin1_metal)
+  connect(metal4_con, top_metal_cap)
+when '5LM'
+  connect(metal4_con, topmin1_metal)
+  connect(metal5_con, top_metal_cap)
+when '6LM'
+  connect(metal5_con, topmin1_metal)
+  connect(metaltop_con, top_metal_cap)
+else
+  logger.error("Unknown metal stack #{METAL_LEVEL}")
+  raise
+end
+connect(top_via, top_metal_con)
+connect(top_metal, top_metal_label)
+
+# Attaching labels
+connect(comp, comp_label)
+connect(poly2_con, poly2_label)
+connect(metal1_con, metal1_label)
+connect(metal2_con, metal2_label)
+
+logger.info('Starting GF180 LVS connectivity setup (Global)')
+
+# Global
+connect_global(sub, substrate_name)
+
+logger.info('Starting GF180 LVS connectivity setup (Multifinger Devices)')
+
+# Multifinger Devices
+connect_implicit('*')

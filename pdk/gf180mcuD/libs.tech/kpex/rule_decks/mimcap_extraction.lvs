@@ -1,0 +1,112 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#==================================
+# ------- MIMCAP EXTRACTION -------
+#==================================
+
+logger.info('Starting MIMCAP EXTRACTION')
+
+case MIM_OPTION
+when 'A'
+
+  case MIM_CAP
+  when '1'
+    # cap_mim1f0 capacitor
+    logger.info('Extracting cap_mim1f0 device')
+    extract_devices(capacitor('cap_mim_1f0_m2m3_noshield', 1.0e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+
+  when '1.5'
+    # cap_mim1f5 capacitor
+    logger.info('Extracting cap_mim1f5 device')
+    extract_devices(capacitor('cap_mim_1f5_m2m3_noshield', 1.5e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+
+  when '2'
+    # cap_mim2f0 capacitor
+    logger.info('Extracting cap_mim2f0 device')
+    extract_devices(capacitor('cap_mim_2f0_m2m3_noshield', 2.0e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+  end
+
+when 'B'
+
+  case METAL_LEVEL
+  when '6LM'
+
+    case MIM_CAP
+    when '1'
+      # cap_mim1f0 capacitor
+      logger.info('Extracting cap_mim1f0 device')
+      extract_devices(capacitor('cap_mim_1f0_m5m6_noshield', 1.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '1.5'
+      # cap_mim1f5 capacitor
+      logger.info('Extracting cap_mim1f5 device')
+      extract_devices(capacitor('cap_mim_1f5_m5m6_noshield', 1.5e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '2'
+      # cap_mim2f0 capacitor
+      logger.info('Extracting cap_mim2f0 device')
+      extract_devices(capacitor('cap_mim_2f0_m5m6_noshield', 2.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+    end
+
+  when '5LM'
+
+    case MIM_CAP
+    when '1'
+      # cap_mim1f0 capacitor
+      logger.info('Extracting cap_mim1f0 device')
+      extract_devices(capacitor('cap_mim_1f0_m4m5_noshield', 1.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '1.5'
+      # cap_mim1f5 capacitor
+      logger.info('Extracting cap_mim1f5 device')
+      extract_devices(capacitor('cap_mim_1f5_m4m5_noshield', 1.5e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '2'
+      # cap_mim2f0 capacitor
+      logger.info('Extracting cap_mim2f0 device')
+      extract_devices(capacitor('cap_mim_2f0_m4m5_noshield', 2.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+    end
+
+  when '4LM'
+
+    case MIM_CAP
+    when '1'
+      # cap_mim1f0 capacitor
+      logger.info('Extracting cap_mim1f0 device')
+      extract_devices(capacitor('cap_mim_1f0_m3m4_noshield', 1.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '1.5'
+      # cap_mim1f5 capacitor
+      logger.info('Extracting cap_mim1f5 device')
+      extract_devices(capacitor('cap_mim_1f5_m3m4_noshield', 1.5e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+
+    when '2'
+      # cap_mim2f0 capacitor
+      logger.info('Extracting cap_mim2f0 device')
+      extract_devices(capacitor('cap_mim_2f0_m3m4_noshield', 2.0e-15, MIMCap),
+                      { 'P1' => mimtm_virtual, 'P2' => fuse_cap })
+    end
+  end
+end

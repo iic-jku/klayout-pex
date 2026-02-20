@@ -1,0 +1,33 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#==================================
+# ------ MIMCAP DERIVATIONS -------
+#==================================
+
+logger.info('Starting MIMCAP DERIVATIONS')
+
+mimcap_exclude = efuse_mk.join(plfuse)
+
+# mim option A
+mim_virtual = fusetop.sized(1.06.um).and(metal2.interacting(fusetop))
+                     .not(mimcap_exclude)
+metal2_ncap = metal2_con.not(mim_virtual)
+fuse_cap    = fusetop.interacting(cap_mk).interacting(mim_l_mk)
+                     .not(mimcap_exclude)
+
+# mim_option B
+mimtm_virtual = fusetop.sized(1.06.um).and(topmin1_metal.interacting(fusetop))

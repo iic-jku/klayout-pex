@@ -101,6 +101,7 @@ protobuf_generate(
 
 include_directories(${PROJECT_SOURCE_DIR}/cxx/gen_tech_pb)
 set(GEN_TECH_PB_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/gf180mcuD.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/sky130A.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/pdk/ihp_sg13g2.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cxx/gen_tech_pb/protobuf.cpp

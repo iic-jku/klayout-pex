@@ -105,6 +105,7 @@ class InputMode(StrEnum):
 
 # TODO: this should be externally configurable
 class PDK(StrEnum):
+    GF180MCUD = 'gf180mcuD'
     IHP_SG13G2 = 'ihp_sg13g2'
     SKY130A = 'sky130A'
 
@@ -121,6 +122,12 @@ class PDK(StrEnum):
             tech_pb_json_dir = os.path.join(os.path.dirname(base_dir), 'klayout_pex_protobuf')
 
         match self:
+            case PDK.GF180MCUD:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'gf180mcu.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
             case PDK.IHP_SG13G2:
                 return PDKConfig(
                     name=self,
@@ -133,6 +140,8 @@ class PDK(StrEnum):
                     pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sky130.lvs'),
                     tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
                 )
+            case _:
+                raise NotImplementedError(f"Unhandled enum case {self}")
 
 
 

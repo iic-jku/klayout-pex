@@ -1,0 +1,125 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#==================================
+# ------ GENERAL DERIVATIONS ------
+#==================================
+
+ncomp           = comp.and(nplus)
+pcomp           = comp.and(pplus)
+tgate           = poly2.and(comp).not(res_mk)
+
+ngate           = nplus.and(tgate)
+nsd             = ncomp.outside(nwell).interacting(ngate).not(ngate).not(res_mk)
+ptap            = pcomp.outside(nwell).outside(dnwell).not(res_mk)
+
+pgate           = pplus.and(tgate)
+psd             = pcomp.and(nwell).interacting(pgate).not(pgate).not(res_mk)
+ntap            = ncomp.and(nwell).not(res_mk)
+
+ngate_dw        = ngate.and(lvpwell).and(dnwell)
+ptap_dw         = pcomp.and(lvpwell).and(dnwell).outside(well_diode_mk).not(res_mk)
+
+pgate_dw        = pgate.and(dnwell).not(lvpwell)
+ntap_dw         = ncomp.not(lvpwell).and(dnwell).not(res_mk)
+
+psd_dw          = pcomp.not(lvpwell).and(dnwell).interacting(pgate).not(pgate).not(res_mk)
+nwell_con       = nwell.not(res_mk)
+lvpwell_con     = lvpwell.not(res_mk)
+poly2_con       = poly2.not(res_mk).not(plfuse)
+
+pgate_lv_base = pgate.not(v5_xtor).not(dualgate)
+pgate_5v_base = pgate.and(v5_xtor).and(dualgate)
+pgate_6v_base = pgate.not(v5_xtor).and(dualgate)
+
+pgate_lv_n_dw = pgate_lv_base.not(dnwell)
+pgate_5v_n_dw = pgate_5v_base.not(dnwell)
+pgate_6v_n_dw = pgate_6v_base.not(dnwell)
+
+pgate_lv_dw_base = pgate_lv_base.and(pgate_dw)
+pgate_5v_dw_base = pgate_5v_base.and(pgate_dw)
+pgate_6v_dw_base = pgate_6v_base.and(pgate_dw)
+
+ngate_lv_base = ngate.not(v5_xtor).not(dualgate)
+ngate_5v_base = ngate.and(v5_xtor).and(dualgate)
+ngate_6v_base = ngate.not(v5_xtor).and(dualgate)
+
+ngate_lv_n_dw = ngate_lv_base.not(dnwell)
+ngate_5v_n_dw = ngate_5v_base.not(dnwell)
+ngate_6v_n_dw = ngate_6v_base.not(dnwell)
+
+ngate_lv_dw_base = ngate_lv_base.and(ngate_dw)
+ngate_5v_dw_base = ngate_5v_base.and(ngate_dw)
+ngate_6v_dw_base = ngate_6v_base.and(ngate_dw)
+
+metal1_con      = metal1.not(metal1_res)
+metal2_con      = metal2.not(metal2_res)
+
+case METAL_LEVEL
+when '3LM', '4LM', '5LM', '6LM'
+  metal3_con = metal3.not(metal3_res)
+  via2_n_cap = via2.not(fusetop)
+  via2_cap = via2.and(fusetop)
+end
+case METAL_LEVEL
+when '4LM', '5LM', '6LM'
+  metal4_con = metal4.not(metal4_res)
+  via3_n_cap = via3.not(fusetop)
+  via3_cap = via3.and(fusetop)
+end
+case METAL_LEVEL
+when '5LM', '6LM'
+  metal5_con = metal5.not(metal5_res)
+  via4_n_cap = via4.not(fusetop)
+  via4_cap = via4.and(fusetop)
+end
+case METAL_LEVEL
+when '6LM'
+  metaltop_con = metaltop.not(metal6_res)
+  via5_n_cap = via5.not(fusetop)
+  via5_cap = via5.and(fusetop)
+end
+
+case METAL_LEVEL
+when '2LM'
+  top_metal_con = metal2_con.not(fusetop)
+  top_via_n_cap = via1.not(fusetop)
+  top_via_cap = via1.and(fusetop)
+  top_metal_cap = metal2_con.and(fusetop)
+when '3LM'
+  top_metal_con = metal3_con.not(fusetop)
+  top_via_n_cap = via2.not(fusetop)
+  top_via_cap = via2.and(fusetop)
+  top_metal_cap = metal3_con.and(fusetop)
+when '4LM'
+  top_metal_con = metal4_con.not(fusetop)
+  top_via_n_cap = via3.not(fusetop)
+  top_via_cap = via3.and(fusetop)
+  top_metal_cap = metal4_con.and(fusetop)
+when '5LM'
+  top_metal_con = metal5_con.not(fusetop)
+  top_via_n_cap = via4.not(fusetop)
+  top_via_cap = via4.and(fusetop)
+  top_metal_cap = metal5_con.and(fusetop)
+when '6LM'
+  top_metal_con = metaltop_con.not(fusetop)
+  top_via_n_cap = via5.not(fusetop)
+  top_via_cap = via5.and(fusetop)
+  top_metal_cap = metaltop.and(fusetop)
+else
+  logger.error("Unknown metal stack #{METAL_LEVEL}")
+  raise
+end

@@ -1,0 +1,111 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#==================================
+# ------ MOSFET DERIVATIONS -------
+#==================================
+
+logger.info('Starting MOSFET DERIVATIONS')
+
+mos_exclude = resistor.join(esd).join(sab)
+                      .join(fusewindow_d).join(polyfuse).join(res_mk)
+                      .join(drc_bjt).join(mos_cap_mk).join(esd_mk)
+                      .join(lvs_source).join(efuse_mk).join(plfuse)
+                      .join(schottky_diode)
+
+# ==============
+# ---- PMOS ----
+# ==============
+logger.info('Starting PMOS layers DERIVATIONS')
+
+pmos_exclude = lvpwell.join(diode_mk).join(nat)
+                      .join(mvsd).join(mvpsd).join(ldmos_xtor)
+                      .join(mos_exclude)
+
+# 3.3V PMOS transistor outside DNWELL
+pgate_3p3v = pgate_lv_n_dw.not(pmos_exclude)
+
+# 5V PMOS transistor outside DNWELL
+pgate_5v = pgate_5v_n_dw.not(pmos_exclude)
+
+# 6V PMOS transistor outside DNWELL
+pgate_6v = pgate_6v_n_dw.not(pmos_exclude)
+
+# 3.3V PMOS transistor inside DNWELL
+pgate_3p3v_dw = pgate_lv_dw_base.not(pmos_exclude)
+
+# 5V PMOS transistor inside DNWELL
+pgate_5v_dw = pgate_5v_dw_base.not(pmos_exclude)
+
+# 6V PMOS transistor inside DNWELL
+pgate_6v_dw = pgate_6v_dw_base.not(pmos_exclude)
+
+# ================
+# ---- LDPMOS ----
+# ================
+ldpmos_exclude = nwell.join(lvpwell).join(diode_mk)
+                      .join(nat).join(mvsd).join(mos_exclude)
+
+pgate_ldmos = pgate_6v_dw_base.interacting(mvpsd).and(ldmos_xtor).not(mvpsd).not(ldpmos_exclude)
+pd_sd_ldmos = psd_dw.not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell)
+pd_ldmos    = pd_sd_ldmos.and(mvpsd)
+ps_ldmos    = pd_sd_ldmos.not(mvpsd)
+psd_ldmos   = pcomp.not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell)
+                   .interacting(mvpsd).sized(0.29.um).sized(-0.29.um).extents.not(pgate_ldmos)
+
+# ==============
+# ---- NMOS ----
+# ==============
+logger.info('Starting NMOS layers DERIVATIONS')
+
+nmos_exclude_ = nwell.join(diode_mk).join(mvsd)
+                     .join(mvpsd).join(ldmos_xtor).join(mos_exclude)
+
+nmos_exclude = nmos_exclude_.join(nat)
+
+# 3.3V NMOS transistor outside DNWELL
+ngate_3p3v = ngate_lv_n_dw.not(nmos_exclude)
+
+# 5V NMOS transistor outside DNWELL
+ngate_5v = ngate_5v_n_dw.not(nmos_exclude)
+
+# 6V NMOS transistor outside DNWELL
+ngate_6v = ngate_6v_n_dw.not(nmos_exclude)
+
+# 3.3V NMOS transistor inside DNWELL
+ngate_3p3v_dw = ngate_lv_dw_base.not(nmos_exclude)
+
+# 5V NMOS transistor inside DNWELL
+ngate_5v_dw = ngate_5v_dw_base.not(nmos_exclude)
+
+# 6V NMOS transistor inside DNWELL
+ngate_6v_dw = ngate_6v_dw_base.not(nmos_exclude)
+
+# Native Vt NMOS transistor
+# ngate_nat = ngate_6v.and(nat).not(nmos_exclude_)
+ngate_nat = ngate_6v_n_dw.and(nat).not(nmos_exclude_)
+
+# ================
+# ---- LDNMOS ----
+# ================
+ldnmos_exclude = nwell.join(lvpwell).join(diode_mk)
+                      .join(nat).join(mvpsd).join(mos_exclude)
+
+ngate_ldmos = ngate_6v_n_dw.interacting(mvsd).and(ldmos_xtor).not(mvsd).not(ldnmos_exclude)
+nd_ldmos    = ncomp.not(ngate).not(v5_xtor).and(dualgate).and(ldmos_xtor).not(dnwell).and(mvsd)
+ns_ldmos    = nsd.not(v5_xtor).and(dualgate).and(ldmos_xtor).not(dnwell).not(mvsd)
+nsd_ldmos   = ncomp.not(v5_xtor).and(dualgate).and(ldmos_xtor).not(dnwell)
+                   .interacting(mvsd).sized(0.37.um).sized(-0.37.um).extents.not(ngate_ldmos)

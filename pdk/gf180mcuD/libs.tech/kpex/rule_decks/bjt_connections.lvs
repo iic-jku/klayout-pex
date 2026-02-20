@@ -1,0 +1,78 @@
+################################################################################################
+# Copyright 2023 GlobalFoundries PDK Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+#================================
+# ------ BJT CONNECTIONS --------
+#================================
+logger.info('Starting LVS BJT CONNECTIONS')
+
+# ==============
+# ---- vnpn ----
+# ==============
+
+# npn_10p00x10p00 nodes connections
+connect(npn_10p00x10p00_e, contact)
+connect(npn_10p00x10p00_b, contact)
+connect(npn_10p00x10p00_c, contact)
+
+# npn_05p00x05p00 nodes connections
+connect(npn_05p00x05p00_e, contact)
+connect(npn_05p00x05p00_b, contact)
+connect(npn_05p00x05p00_c, contact)
+
+# npn_00p54x16p00 nodes connections
+connect(npn_00p54x16p00_e, contact)
+connect(npn_00p54x16p00_b, contact)
+connect(npn_00p54x16p00_c, contact)
+
+# npn_00p54x08p00 nodes connections
+connect(npn_00p54x08p00_e, contact)
+connect(npn_00p54x08p00_b, contact)
+connect(npn_00p54x08p00_c, contact)
+
+# npn_00p54x04p00 nodes connections
+connect(npn_00p54x04p00_e, contact)
+connect(npn_00p54x04p00_b, contact)
+connect(npn_00p54x04p00_c, contact)
+
+# npn_00p54x02p00 nodes connections
+connect(npn_00p54x02p00_e, contact)
+connect(npn_00p54x02p00_b, contact)
+connect(npn_00p54x02p00_c, contact)
+
+# ==============
+# ---- vpnp ----
+# ==============
+
+# pnp_10p00x10p00 nodes connections
+connect(pnp_10p00x10p00_e, contact)
+connect(pnp_10p00x10p00_b, contact)
+connect(pnp_10p00x10p00_c, contact)
+
+# pnp_05p00x05p00 nodes connections
+connect(pnp_05p00x05p00_e, contact)
+connect(pnp_05p00x05p00_b, contact)
+connect(pnp_05p00x05p00_c, contact)
+
+# pnp_10p00x00p42 nodes connections
+connect(pnp_10p00x00p42_e, contact)
+connect(pnp_10p00x00p42_b, contact)
+connect(pnp_10p00x00p42_c, contact)
+
+# pnp_05p00x00p42 nodes connections
+connect(pnp_05p00x00p42_e, contact)
+connect(pnp_05p00x00p42_b, contact)
+connect(pnp_05p00x00p42_c, contact)
