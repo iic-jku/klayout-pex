@@ -1,0 +1,35 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[11:45:56] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:396
+[11:45:56] INFO     No explicit top cell specified, using top    kpex_cli.py:436
+                    cell 'sideoverlap_fingered_li1_m1_patternA'                 
+[11:45:56] INFO     LVS input schematic not specified (argument  kpex_cli.py:477
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[11:45:56] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:872
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+eoverlap_fingered_li1_m1_patternA.gds.gz/sideoverlap_fingered_li1_m1_patternA.lv
+sdb.gz                                                                          
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[11:45:56] INFO     (67, 20) -> (li_con)                         kpex_cli.py:932
+[11:45:56] INFO     (68, 20) -> (met1_con)                       kpex_cli.py:932
+[11:45:56] INFO     (67, 16) -> (li_pin_con)                     kpex_cli.py:932
+[11:45:56] INFO     (68, 16) -> (met1_pin_con)                   kpex_cli.py:932
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LOWER;UPPER;0.358;                                                           
+C2;LOWER;VSUBS;5.9;                                                             
+C3;UPPER;VSUBS;72.327;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_fingered_li
+1_m1_patternA__sideoverlap_fingered_li1_m1_patternA/sideoverlap_fingered_li1_m1_
+patternA_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_fingered_li
+1_m1_patternA__sideoverlap_fingered_li1_m1_patternA/sideoverlap_fingered_li1_m1_
+patternA_k25d_pex_netlist.spice                                                 
