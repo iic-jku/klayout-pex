@@ -1,0 +1,39 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pyt
+est/__main__.py -m slow --alluredir build/allure-results --color no             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[12:23:34] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:396
+[12:23:34] INFO     No explicit top cell specified, using top    kpex_cli.py:436
+                    cell                                                        
+                    'sideoverlap_shielding_simple_plates_li1_m1_                
+                    m2'                                                         
+[12:23:34] INFO     LVS input schematic not specified (argument  kpex_cli.py:477
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[12:23:34] WARNING  Cache hit: Reusing cached LVSDB              kpex_cli.py:872
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+eoverlap_shielding_simple_plates_li1_m1_m2.gds.gz/sideoverlap_shielding_simple_p
+lates_li1_m1_m2.lvsdb.gz                                                        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[12:23:34] INFO     (67, 20) -> (li_con)                         kpex_cli.py:932
+[12:23:34] INFO     (68, 20) -> (met1_con)                       kpex_cli.py:932
+[12:23:34] INFO     (69, 20) -> (met2_con)                       kpex_cli.py:932
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;li1;met1;15.71;                                                              
+C2;li1;met2;0.152;                                                              
+C3;met1;met2;257.488;                                                           
+C4;VSUBS;li1;11.793;                                                            
+C5;VSUBS;met1;57.99;                                                            
+C6;VSUBS;met2;5.291;                                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_shielding_s
+imple_plates_li1_m1_m2__sideoverlap_shielding_simple_plates_li1_m1_m2/sideoverla
+p_shielding_simple_plates_li1_m1_m2_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_shielding_s
+imple_plates_li1_m1_m2__sideoverlap_shielding_simple_plates_li1_m1_m2/sideoverla
+p_shielding_simple_plates_li1_m1_m2_k25d_pex_netlist.spice                      
