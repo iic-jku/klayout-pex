@@ -92,40 +92,40 @@ class RExtractor:
         tech = self.pex_context.tech
 
         for gds_pair, li in self.pex_context.extracted_layers.items():
-            computed_layer_info = tech.computed_layer_info_by_gds_pair.get(gds_pair, None)
-            if computed_layer_info is None:
-                warning(f"ignoring layer {gds_pair}, no computed layer info found in tech info")
-                continue
-
-            canonical_layer_name = tech.canonical_layer_name_by_gds_pair[gds_pair]
-
-            LP = tech_pb2.LayerInfo.Purpose
-
-            match computed_layer_info.kind:
-                case tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+            for source_layer in li.source_layers:
+                computed_layer_info = tech.computed_layer_info_by_name.get(source_layer.lvs_layer_name, None)
+                if computed_layer_info is None:
+                    warning(f"ignoring layer {gds_pair}, no computed layer info found in tech info")
                     continue
 
-                case tech_pb2.ComputedLayerInfo.Kind.KIND_LABEL:
-                    continue
+                canonical_layer_name = tech.canonical_layer_name_by_gds_pair[gds_pair]
 
-                case _:
-                    pass
+                LP = tech_pb2.LayerInfo.Purpose
 
-            match computed_layer_info.layer_info.purpose:
+                match computed_layer_info.kind:
+                    case tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                        continue
+
+                    case tech_pb2.ComputedLayerInfo.Kind.KIND_LABEL:
+                        continue
+
+                    case _:
+                        pass
+
+                match computed_layer_info.layer_info.purpose:
                     case LP.PURPOSE_NWELL | LP.PURPOSE_PWELL:
                         pass  # TODO!?
 
                     case LP.PURPOSE_NTAP | LP.PURPOSE_PTAP:
                         pass  # TODO!?
 
-                case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
-                    # device terminals
-                    #   - source/drain (e.g. sky130A: nsdm, psdm)
-                    #   - bulk (e.g. nwell)
-                    #
-                    # we will consider this only as a pin end-point, there are no wires at all on this layer,
-                    # so the resistance does not matter for PEX
-                    for source_layer in li.source_layers:
+                    case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
+                        # device terminals
+                        #   - source/drain (e.g. sky130A: nsdm, psdm)
+                        #   - bulk (e.g. nwell)
+                        #
+                        # we will consider this only as a pin end-point, there are no wires at all on this layer,
+                        # so the resistance does not matter for PEX
                         cond = rex_tech.conductors.add()
 
                         cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
@@ -138,12 +138,9 @@ class RExtractor:
                         cond.algorithm = self.substrate_algorithm
                         cond.resistance = 0  # see comment above
 
-                case LP.PURPOSE_METAL:
-                    if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
-                        continue
+                    case LP.PURPOSE_METAL:
+                        layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
 
-                    layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
-                    for source_layer in li.source_layers:
                         cond = rex_tech.conductors.add()
 
                         cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
@@ -159,8 +156,7 @@ class RExtractor:
                             cond.algorithm = self.wire_algorithm
                         cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
 
-                case LP.PURPOSE_CONTACT:
-                    for source_layer in li.source_layers:
+                    case LP.PURPOSE_CONTACT:
                         contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
                         if contact is None:
                             warning(
@@ -194,12 +190,11 @@ class RExtractor:
                         )
                         via.merge_distance = self.via_merge_distance
 
-                case LP.PURPOSE_VIA:
-                    via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
-                    if via_resistance is None:
-                        warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
-                        continue
-                    for source_layer in li.source_layers:
+                    case LP.PURPOSE_VIA:
+                        via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
+                        if via_resistance is None:
+                            warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
+                            continue
                         bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
                             source_layer.lvs_layer_name, None)
                         if bot_top is None:
