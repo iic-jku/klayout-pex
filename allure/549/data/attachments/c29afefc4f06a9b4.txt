@@ -1,0 +1,27 @@
+SUBPROCESS __kpex__:kpex_cli.py:900 /home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m slow --alluredir build/allure-results --color no
+INFO     __kpex__:kpex_cli.py:396 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:436 No explicit top cell specified, using top cell 'overlap_plates_100um_x_100um_li1_m1_m2_m3'
+INFO     __kpex__:kpex_cli.py:477 LVS input schematic not specified (argument --schematic), using dummy schematic
+WARNING  __kpex__:kpex_cli.py:872 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:873 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/overlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz/overlap_plates_100um_x_100um_li1_m1_m2_m3.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:932 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:932 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:932 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:932 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:932 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:932 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:932 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:932 (70, 20) -> (met3_ncap)
+SUBPROCESS __kpex__:kpex_cli.py:763 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:763 C1;li1;met1;294.867;
+SUBPROCESS __kpex__:kpex_cli.py:763 C2;li1;met2;99.518;
+SUBPROCESS __kpex__:kpex_cli.py:763 C3;li1;met3;6.013;
+SUBPROCESS __kpex__:kpex_cli.py:763 C4;met1;met2;680.769;
+SUBPROCESS __kpex__:kpex_cli.py:763 C5;met1;met3;0.016;
+SUBPROCESS __kpex__:kpex_cli.py:763 C6;met2;met3;0.056;
+SUBPROCESS __kpex__:kpex_cli.py:763 C7;VSUBS;li1;386.179;
+SUBPROCESS __kpex__:kpex_cli.py:763 C8;VSUBS;met1;205.619;
+SUBPROCESS __kpex__:kpex_cli.py:763 C9;VSUBS;met2;51.574;
+SUBPROCESS __kpex__:kpex_cli.py:763 C10;VSUBS;met3;136.063;
+SUBPROCESS __kpex__:kpex_cli.py:766 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_plates_100um_x_100um_li1_m1_m2_m3__overlap_plates_100um_x_100um_li1_m1_m2_m3/overlap_plates_100um_x_100um_li1_m1_m2_m3_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:780 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_plates_100um_x_100um_li1_m1_m2_m3__overlap_plates_100um_x_100um_li1_m1_m2_m3/overlap_plates_100um_x_100um_li1_m1_m2_m3_k25d_pex_netlist.spice
