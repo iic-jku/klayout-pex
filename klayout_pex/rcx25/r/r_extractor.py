@@ -112,8 +112,11 @@ class RExtractor:
                     pass
 
             match computed_layer_info.layer_info.purpose:
-                case LP.PURPOSE_NWELL:
-                    pass  # TODO!
+                    case LP.PURPOSE_NWELL | LP.PURPOSE_PWELL:
+                        pass  # TODO!?
+
+                    case LP.PURPOSE_NTAP | LP.PURPOSE_PTAP:
+                        pass  # TODO!?
 
                 case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
                     # device terminals
@@ -224,6 +227,13 @@ class RExtractor:
                         )
 
                         via.merge_distance = self.via_merge_distance
+
+                    case _:
+                        warning(f"prepare_r_extractor_tech_pb: Unhandled layer purpose "
+                                f"{LP.Name(computed_layer_info.layer_info.purpose)}"
+                                f"({computed_layer_info.layer_info.purpose}), "
+                                f"LVS computed layer is {source_layer.lvs_layer_name} ({source_layer.gds_pair}), "
+                                f"original layer is {canonical_layer_name}")
 
         return rex_tech
 
