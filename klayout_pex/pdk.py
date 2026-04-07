@@ -33,7 +33,7 @@ from .pdk_config import PDKConfig
 # TODO: this should be externally configurable
 class PDK(StrEnum):
     GF180MCUD = 'gf180mcuD'
-    IHP_SG13G2 = 'ihp_sg13g2'
+    IHP_SG13G2 = 'ihp-sg13g2'
     SKY130A = 'sky130A'
 
     @cached_property
