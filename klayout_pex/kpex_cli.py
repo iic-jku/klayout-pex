@@ -26,7 +26,6 @@
 import argparse
 from datetime import datetime
 from enum import StrEnum
-from functools import cached_property
 import logging
 import os
 import os.path
@@ -79,6 +78,7 @@ from .magic.magic_runner import (
     prepare_magic_script,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
+from .pdk import PDK
 from .pdk_config import PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
@@ -101,48 +101,6 @@ class ArgumentValidationError(Exception):
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
-
-
-# TODO: this should be externally configurable
-class PDK(StrEnum):
-    GF180MCUD = 'gf180mcuD'
-    IHP_SG13G2 = 'ihp_sg13g2'
-    SKY130A = 'sky130A'
-
-    @cached_property
-    def config(self) -> PDKConfig:
-        # NOTE: installation paths of resources in the distribution wheel differs from source repo
-        base_dir = os.path.dirname(os.path.realpath(__file__))
-
-        # NOTE: .git can be dir (standalone clone), or file (in case of submodule)
-        if os.path.exists(os.path.join(base_dir, '..', '.git')): # in source repo
-            base_dir = os.path.dirname(base_dir)
-            tech_pb_json_dir = os.path.join(base_dir, 'klayout_pex_protobuf')
-        else:  # site-packages/klayout_pex -> site-packages/klayout_pex_protobuf
-            tech_pb_json_dir = os.path.join(os.path.dirname(base_dir), 'klayout_pex_protobuf')
-
-        match self:
-            case PDK.GF180MCUD:
-                return PDKConfig(
-                    name=self,
-                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'gf180mcu.lvs'),
-                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
-                )
-            case PDK.IHP_SG13G2:
-                return PDKConfig(
-                    name=self,
-                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg13g2.lvs'),
-                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
-                )
-            case PDK.SKY130A:
-                return PDKConfig(
-                    name=self,
-                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sky130.lvs'),
-                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
-                )
-            case _:
-                raise NotImplementedError(f"Unhandled enum case {self}")
-
 
 
 class KpexCLI:
