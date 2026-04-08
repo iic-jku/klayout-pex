@@ -23,9 +23,11 @@
 # --------------------------------------------------------------------------------
 #
 
+from __future__ import annotations
 from enum import StrEnum
 from functools import cached_property
 import os
+from typing import *
 
 from .pdk_config import PDKConfig
 
@@ -35,6 +37,17 @@ class PDK(StrEnum):
     GF180MCUD = 'gf180mcuD'
     IHP_SG13G2 = 'ihp-sg13g2'
     SKY130A = 'sky130A'
+
+    @classmethod
+    def from_string(cls, value: str) -> PDK:
+        return PDK(cls.legacy_aliases().get(value, value))
+
+    @classmethod
+    def legacy_aliases(cls) -> Dict[str, str]:
+        aliases = {
+            'ihp_sg13g2': 'ihp-sg13g2',
+        }
+        return aliases
 
     @cached_property
     def config(self) -> PDKConfig:

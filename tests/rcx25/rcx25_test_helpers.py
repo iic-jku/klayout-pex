@@ -44,7 +44,7 @@ from klayout_pex.rcx25.pex_mode import PEXMode
 
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
-    IHP_SG13G2 = 'ihp_sg13g2'
+    IHP_SG13G2 = 'ihp-sg13g2'
 
 
 @dataclass

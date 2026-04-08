@@ -129,8 +129,11 @@ class KpexCLI:
                                    help="number of threads (e.g. for FasterCap) (default is %(default)s)")
 
         group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
+
+        all_pdk_choices = list(PDK) + list(PDK.legacy_aliases().keys())
+
         group_pex.add_argument("--pdk", dest="pdk", required=True,
-                               type=PDK, choices=list(PDK),
+                               type=PDK.from_string, choices=all_pdk_choices,
                                help=render_enum_help(topic='pdk', enum_cls=PDK))
 
         group_pex.add_argument("--out_dir", dest="output_dir_base_path", default="output",

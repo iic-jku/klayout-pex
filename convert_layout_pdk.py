@@ -170,7 +170,7 @@ class PDK(StrEnum):
             case PDK.GF180MCU:
                 return os.path.join(script_dir, "pdk", "gf180mcuD",   "libs.tech", "kpex", "gf180mcu.lyp")
             case PDK.IHP_SG13G2:
-                return os.path.join(script_dir, "pdk", "ihp_sg13g2", "libs.tech", "kpex", "sg13g2.lyp")
+                return os.path.join(script_dir, "pdk", "ihp-sg13g2", "libs.tech", "kpex", "sg13g2.lyp")
             case PDK.SKY130A:
                 return os.path.join(script_dir, "pdk", "sky130A",    "libs.tech", "kpex", "sky130A.lyp")
             case _:

@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     {
         kpex::tech::Technology tech;
         ihp_sg13g2::buildTech(tech);
-        writeTech(output_directory, "ihp_sg13g2", tech);
+        writeTech(output_directory, "ihp-sg13g2", tech);
     }
 
     // Optional:  Delete all global objects allocated by libprotobuf.
