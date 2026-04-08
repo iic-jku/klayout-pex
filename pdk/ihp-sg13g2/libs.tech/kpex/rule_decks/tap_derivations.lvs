@@ -26,17 +26,26 @@ logger.info('Starting Taps DERIVATIONS')
 taps_exclude = gatpoly.join(nsd_drw).join(trans_drw)
                 .join(emwind_drw).join(emwihv_drw).join(salblock_drw)
                 .join(polyres_drw).join(extblock_drw).join(res_drw)
-                .join(activ_mask).join(recog_diode).join(recog_esd)
+                .join(activ_mask).join(recog_diode)
                 .join(ind_drw).join(ind_pin)
 
 # === ntap1 ===
 ntap1_exc = pwell.join(psd_drw).join(taps_exclude)
 
-ntap1_tie = nactiv.and(ntap1_mk).extents.not(ntap1_exc)
-ntap1_well = ntap1_mk.covering(ntap1_tie)
+ntap1_tie = nactiv.and(ntap1_mk).not(ntap1_exc)
+# NOTE: the initial "nwell_drw.and(...)" does not change the layer
+# logically, but does a re-hierarchisation of the layer in deep mode
+# This is important to support cheats for cell-local extraction of 
+# guard rings through "cheats" (see tap_extraction.lvs).
+ntap1_well = nwell_drw.and(ntap1_mk.covering(ntap1_tie))
 
 # === ptap1 ===
 ptap1_exc = nwell_drw.join(taps_exclude)
 
-ptap1_tie = pactiv.and(ptap1_mk).extents.not(ptap1_exc)
-ptap1_sub = pwell.covering(ptap1_tie)
+ptap1_tie = pactiv.and(ptap1_mk).not(ptap1_exc)
+# NOTE: the initial "substrate_drw.and(...)" does not change the layer
+# logically, but does a re-hierarchisation of the layer in deep mode
+# This is important to support cheats for cell-local extraction of 
+# guard rings through "cheats" (see tap_extraction.lvs).
+ptap1_sub = substrate_drw.and(ptap1_mk.covering(ptap1_tie))
+

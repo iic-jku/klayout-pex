@@ -32,11 +32,41 @@ require 'etc'
 
 exec_start_time = Time.now
 
-logger = Logger.new($stdout)
-
-logger.formatter = proc do |_severity, datetime, _progname, msg|
-  "#{datetime}: Memory Usage (#{RBA::Timer.memory_size / 1024}K) : #{msg}\n"
+# Custom formatter including timestamp and memory usage
+formatter = proc do |_severity, datetime, _progname, msg|
+  memory_usage = "#{RBA::Timer.memory_size / 1024}K"
+  "#{datetime}: Memory Usage (#{memory_usage}) : #{msg}\n"
 end
+
+# Create file logger
+file_logger = Logger.new($log)
+file_logger.formatter = formatter
+
+# Create stdout logger
+stdout_logger = Logger.new($stdout)
+stdout_logger.formatter = formatter
+
+# MultiLogger class to broadcast to multiple loggers
+class MultiLogger
+  def initialize(*targets)
+    @targets = targets
+  end
+
+  def info(msg)
+    @targets.each { |t| t.info(msg) }
+  end
+
+  def warn(msg)
+    @targets.each { |t| t.warn(msg) }
+  end
+
+  def error(msg)
+    @targets.each { |t| t.error(msg) }
+  end
+end
+
+# Use the multi-logger for your application
+logger = MultiLogger.new(stdout_logger, file_logger)
 
 #================================================
 #----------------- FILE SETUP -------------------
@@ -47,9 +77,9 @@ logger.info("Ruby Version for klayout: #{RUBY_VERSION}")
 
 if $input
   if $topcell
-    source($input, $topcell)
+    src = source($input, $topcell)
   else
-    source($input)
+    src = source($input)
   end
 end
 
@@ -64,6 +94,12 @@ else
   logger.info("SG13G2 Klayout LVS runset output at default location: #{source.cell_name}.lvsdb")
   report_lvs($report_path)
 end
+
+#================================================
+#---------------- SRAM SUPPORT ------------------
+#================================================
+
+# %include rule_decks/sram_integration.lvs
 
 #================================================
 #------------------ SWITCHES --------------------
@@ -93,6 +129,26 @@ logger.info("Extracted netlist with comments in details: #{SPICE_WITH_COMMENTS}"
 NET_ONLY = bool_check?($net_only)
 
 logger.info("Selected NET_ONLY option: #{NET_ONLY}")
+
+# LAYOUT_NETLIST
+LAYOUT_NETLIST_PATH = ($layout_netlist || '').to_s.strip
+LAYOUT_NETLIST = !LAYOUT_NETLIST_PATH.empty?
+
+logger.info("Selected LAYOUT_NETLIST option: #{LAYOUT_NETLIST ? LAYOUT_NETLIST_PATH : '(none)'}")
+
+# IGNORE_TOP_PORTS_MISMATCH
+floating_bulk_sram_top = src && floating_bulk_sram_cell?(src.cell_name)
+IGNORE_TOP_PORTS_MISMATCH = bool_check?($ignore_top_ports_mismatch) || floating_bulk_sram_top
+
+logger.info("Selected IGNORE_TOP_PORTS_MISMATCH option: #{IGNORE_TOP_PORTS_MISMATCH}")
+if floating_bulk_sram_top && !bool_check?($ignore_top_ports_mismatch)
+  logger.info("Floating-bulk SRAM top cell '#{src.cell_name}' detected: enabling IGNORE_TOP_PORTS_MISMATCH.")
+end
+
+# IMPLICIT_NETS
+IMPLICIT_NETS = ($implicit_nets || '').to_s.strip
+
+logger.info("Selected IMPLICIT_NETS option: #{IMPLICIT_NETS.empty? ? '(none)' : IMPLICIT_NETS}")
 
 # TOP_LVL_PINS
 TOP_LVL_PINS = bool_check?($top_lvl_pins)
@@ -129,14 +185,6 @@ PARALLEL_RES = !bool_check?($no_parallel_res)
 
 logger.info("Selected PARALLEL_RES option: #{PARALLEL_RES}")
 
-#=== PRINT DETAILS ===
-logger.info("Verbose mode: #{$verbose}")
-if $verbose == 'true'
-  verbose(true)
-else
-  verbose(false)
-end
-
 # === RUN MODE ===
 case $run_mode
 when 'deep'
@@ -150,6 +198,27 @@ else
 end
 
 # === Tech Switches ===
+
+#==================================================
+# --------------- IMPLICIT CONNECTIONS -------------
+#==================================================
+# KLayout LVS docs:
+# https://www.klayout.de/doc/manual/lvs.html
+# "connect_implicit" creates a virtual combined physical net
+# that is matched against the corresponding logical net name.
+if !IMPLICIT_NETS.empty?
+  nets_to_connect = IMPLICIT_NETS.split(',').map(&:strip).reject(&:empty?)
+  if nets_to_connect.empty?
+    logger.info('WARNING : IMPLICIT_NETS was set but no valid entries were found after parsing.')
+  else
+    logger.info(
+      "Applying implicit connections (case-sensitive, pattern supported) for nets: #{nets_to_connect.join(', ')}"
+    )
+    nets_to_connect.each do |net_pattern|
+      connect_implicit(net_pattern)
+    end
+  end
+end
 
 #================================================
 # --------------- CUSTOM CLASSES ----------------
@@ -195,11 +264,8 @@ else
   logger.info("SG13G2 Klayout LVS extracted netlist file at: #{source.cell_name}_extracted.cir")
 end
 
-#================================================
-#------------- LAYERS DEFINITIONS ---------------
-#================================================
-
-# %include rule_decks/layers_definitions.lvs
+logger.info('Applying SRAM integration support.')
+apply_sram_integration
 
 #================================================================
 #------------------------- MAIN RUNSET --------------------------
@@ -207,290 +273,321 @@ end
 
 logger.info('Starting SG13G2 LVS runset')
 
-#================================================
-#------------- LAYERS DERIVATIONS ---------------
-#================================================
+if LAYOUT_NETLIST
+  logger.info('LAYOUT_NETLIST enabled: skipping derivations/connectivity/extraction and loading layout netlist from file.')
+  unless File.file?(LAYOUT_NETLIST_PATH)
+    error("LAYOUT_NETLIST file does not exist: #{LAYOUT_NETLIST_PATH}")
+  end
 
-logger.info('Starting base layers derivations')
+  begin
+    netlist.read(LAYOUT_NETLIST_PATH, reader)
+    logger.info("Layout-side netlist file: #{LAYOUT_NETLIST_PATH}")
+  rescue StandardError => e
+    error("Failed to read LAYOUT_NETLIST '#{LAYOUT_NETLIST_PATH}': #{e.message}")
+  end
+else
+  #================================================
+  #------------- LAYERS DEFINITIONS ---------------
+  #================================================
 
-#==================================
-# ------ GENERAL DERIVATIONS ------
-#==================================
+  # %include rule_decks/layers_definitions.lvs
 
-# %include rule_decks/general_derivations.lvs
+  #================================================
+  #------------- LAYERS DERIVATIONS ---------------
+  #================================================
 
-#==================================
-# ------ MOSFET DERIVATIONS -------
-#==================================
+  logger.info('Starting base layers derivations')
 
-# %include rule_decks/mos_derivations.lvs
+  #==================================
+  # ------ GENERAL DERIVATIONS ------
+  #==================================
 
-#==================================
-# ----- RF-MOSFET DERIVATIONS -----
-#==================================
+  # %include rule_decks/general_derivations.lvs
 
-# %include rule_decks/rfmos_derivations.lvs
+  #==================================
+  # ------ MOSFET DERIVATIONS -------
+  #==================================
 
-#================================
-# ------ BJT DERIVATIONS --------
-#================================
+  # %include rule_decks/mos_derivations.lvs
 
-# %include rule_decks/bjt_derivations.lvs
+  #==================================
+  # ----- RF-MOSFET DERIVATIONS -----
+  #==================================
 
-#================================
-# ----- DIODE DERIVATIONS -------
-#================================
+  # %include rule_decks/rfmos_derivations.lvs
 
-# %include rule_decks/diode_derivations.lvs
+  #================================
+  # ------ BJT DERIVATIONS --------
+  #================================
 
-#================================
-# ---- RESISTOR DERIVATIONS -----
-#================================
+  # %include rule_decks/bjt_derivations.lvs
 
-# %include rule_decks/res_derivations.lvs
+  #================================
+  # ----- DIODE DERIVATIONS -------
+  #================================
 
-#==================================
-# -------- CAP DERIVATIONS --------
-#==================================
+  # %include rule_decks/diode_derivations.lvs
 
-# %include rule_decks/cap_derivations.lvs
+  #================================
+  # ---- RESISTOR DERIVATIONS -----
+  #================================
 
-#================================
-# ------ ESD DERIVATIONS --------
-#================================
+  # %include rule_decks/res_derivations.lvs
 
-# %include rule_decks/esd_derivations.lvs
+  #==================================
+  # -------- CAP DERIVATIONS --------
+  #==================================
 
-#=================================
-# ----- Inductor DERIVATIONS -----
-#=================================
+  # %include rule_decks/cap_derivations.lvs
 
-# %include rule_decks/ind_derivations.lvs
+  #================================
+  # ------ ESD DERIVATIONS --------
+  #================================
 
-#================================
-# ------ Taps DERIVATIONS -------
-#================================
+  # %include rule_decks/esd_derivations.lvs
 
-# %include rule_decks/tap_derivations.lvs
+  #=================================
+  # ----- Inductor DERIVATIONS -----
+  #=================================
 
+  # %include rule_decks/ind_derivations.lvs
 
+  #================================
+  # ------ Taps DERIVATIONS -------
+  #================================
 
-#================================================================
-#---------------------- SAVE LAYER NAMES ------------------------
-#================================================================
+  # %include rule_decks/tap_derivations.lvs
 
-all_layer_names = []
+  #================================================================
+  #---------------------- SAVE LAYER NAMES ------------------------
+  #================================================================
 
-# layer names generated by lvs_layer_names version 0.1
-all_layer_names += %w(
-  activ activ_OPC activ_drw activ_filler activ_iOPC activ_mask activ_nofill activ_noqrc activ_pin alcustop_drw 
-  antmetal1_drw antmetal2_drw antvia1_drw backmetal1_OPC backmetal1_diffprb backmetal1_drw backmetal1_filler backmetal1_iprobe backmetal1_mask backmetal1_nofill 
-  backmetal1_noqrc backmetal1_pin backmetal1_res backmetal1_slit backmetal1_text backpassiv_drw baspoly_drw baspoly_pin biwind_OPC biwind_drw 
-  colopen_drw colwind_drw cont_OPC cont_drw ctrgat_drw deepco_drw deepvia_drw devbondmet_drw devbondvia_drw devtrench_drw 
-  dfpad_drw dfpad_pillar dfpad_sbump digibnd_drw digisub_drw edgeseal_drw empoly_drw emwihv3_drw emwihv_drw emwind3_drw 
-  emwind_OPC emwind_drw exchange0_drw exchange0_pin exchange0_text exchange1_drw exchange1_pin exchange1_text exchange2_drw exchange2_pin 
-  exchange2_text exchange3_drw exchange3_pin exchange3_text exchange4_drw exchange4_pin exchange4_text extblock_drw fbe_drw fgetch_drw 
-  fgimp_drw flm_drw gatpoly gatpoly_OPC gatpoly_drw gatpoly_filler gatpoly_iOPC gatpoly_nofill gatpoly_noqrc gatpoly_pin 
-  graphbot_drw graphcont_drw graphgate_drw graphmet1l_OPC graphmet1l_drw graphmet1l_filler graphmet1l_nofill graphmet1l_slit graphmetal1_OPC graphmetal1_drw 
-  graphmetal1_filler graphmetal1_nofill graphmetal1_slit graphpad_drw graphpas_drw graphtop_drw hafniumox_drw heatres_drw heattrans_drw ic_drw 
-  ind_drw ind_pin ind_text inldpwl_drw intbondmet_drw intbondvia_drw isonwell_drw lbe_drw memcap_drw mempad_drw 
-  memvia_drw metal1 metal1_OPC metal1_diffprb metal1_drw metal1_filler metal1_iprobe metal1_mask metal1_nofill metal1_noqrc 
-  metal1_pin metal1_res metal1_slit metal1_text metal2 metal2_OPC metal2_diffprb metal2_drw metal2_filler metal2_iprobe 
-  metal2_mask metal2_nofill metal2_noqrc metal2_pin metal2_res metal2_slit metal2_text metal3 metal3_OPC metal3_diffprb 
-  metal3_drw metal3_filler metal3_iprobe metal3_mask metal3_nofill metal3_noqrc metal3_pin metal3_res metal3_slit metal3_text 
-  metal4 metal4_OPC metal4_diffprb metal4_drw metal4_filler metal4_iprobe metal4_mask metal4_nofill metal4_noqrc metal4_pin 
-  metal4_res metal4_slit metal4_text metal5 metal5_OPC metal5_diffprb metal5_drw metal5_filler metal5_iprobe metal5_mask 
-  metal5_nofill metal5_noqrc metal5_pin metal5_res metal5_slit metal5_text mim_drw nbulay_block nbulay_drw nbulay_pin 
-  nbulaycut_drw next_drw nexthv_drw nldb_drw nldd_drw nometfiller_drw norcx_drw norcx_m1sub norcx_m2m3 norcx_m2m4 
-  norcx_m2m5 norcx_m2sub norcx_m2tm1 norcx_m2tm2 norcx_m3m4 norcx_m3m5 norcx_m3sub norcx_m3tm1 norcx_m3tm2 norcx_m4m5 
-  norcx_m4sub norcx_m4tm1 norcx_m4tm2 norcx_m5sub norcx_m5tm1 norcx_m5tm2 norcx_tm1sub norcx_tm1tm2 norcx_tm2sub nsd_block 
-  nsd_drw nwell_drw nwell_pin passiv_drw passiv_pdl passiv_pillar passiv_pin passiv_sbump pext_drw pexthv_drw 
-  pldb_drw pldd_drw polimide_drw polimide_pin polyres_drw polyres_pin prboundary_drw psd_drw pwell_block pwell_drw 
-  pwell_pin radhard_drw recog_diffprb recog_diode recog_drw recog_esd recog_iprobe recog_mom recog_otp recog_pcm 
-  recog_pdiode recog_pillar recog_pin recog_sbump recog_tsv redbulay_drw redist_drw res_drw rfmem_drw salblock_drw 
-  sensor_drw sigrating_drw singrating_drw sinwg_drw sinwg_filler sinwg_nofill siwg_drw siwg_filler siwg_nofill smos_drw 
-  snsarms_drw snsbotvia_drw snscmosvia_drw snsring_drw snstopvia_drw sram_drw substrate_drw substrate_text text_drw thickgateox_drw 
-  thinfilmres_drw topmetal1 topmetal1_diffprb topmetal1_drw topmetal1_filler topmetal1_iprobe topmetal1_mask topmetal1_nofill topmetal1_noqrc topmetal1_pin 
-  topmetal1_res topmetal1_slit topmetal1_text topmetal2 topmetal2_diffprb topmetal2_drw topmetal2_filler topmetal2_iprobe topmetal2_mask topmetal2_nofill 
-  topmetal2_noqrc topmetal2_pin topmetal2_res topmetal2_slit topmetal2_text topvia1_drw topvia2_drw trans_drw varicap_drw via1_drw 
-  via2_drw via3_drw via4_drw vmim_drw 
-)
-  
-# general_derivations.lvs
-all_layer_names += %w(
-  nwell_iso nwell_holes pwell_allowed digisub_gap pwell pwell_sub nactiv pactiv
-  res_mk poly_con metal1_con metal2_con metal3_con metal4_con metal5_con topmetal1_con topmetal2_con
-  tgate ngate pgate ngate_lv_base pgate_lv_base ngate_hv_base pgate_hv_base
-  nsd_fet psd_fet ntap1_lbl ntap1_mk 
-  ntap ptap ptap_holes ntap_holes
-  nsd_sal psd_sal ntap_sal ptap_sal nsd_ptap_abutt psd_ntap_abutt  
-)  
+  all_layer_names = []
 
-# cap_derivations.lvs
-all_layer_names += %w(
-  mimcap_exclude mim_top mim_btm mim_via topvia1_n_cap 
-  cmim_top cmim_btm cmim_dev
-  rfmim_area rfmim_top rfmim_btm rfmim_dev rfmim_sub rfmeas_mk
-  cap_exc varicap_exc varicap_core varicap_diff_port varicap_poly_port varicap_ports varicap_sub varicap_dev_mk 
-)
+  # layer names generated by lvs_layer_names version 0.1
+  all_layer_names += %w(
+    activ activ_OPC activ_drw activ_filler activ_iOPC activ_mask activ_nofill activ_noqrc activ_pin alcustop_drw
+    antmetal1_drw antmetal2_drw antvia1_drw backmetal1_OPC backmetal1_diffprb backmetal1_drw backmetal1_filler backmetal1_iprobe backmetal1_mask backmetal1_nofill
+    backmetal1_noqrc backmetal1_pin backmetal1_res backmetal1_slit backmetal1_text backpassiv_drw baspoly_drw baspoly_pin biwind_OPC biwind_drw
+    colopen_drw colwind_drw cont_OPC cont_drw ctrgat_drw deepco_drw deepvia_drw devbondmet_drw devbondvia_drw devtrench_drw
+    dfpad_drw dfpad_pillar dfpad_sbump digibnd_drw digisub_drw edgeseal_drw empoly_drw emwihv3_drw emwihv_drw emwind3_drw
+    emwind_OPC emwind_drw exchange0_drw exchange0_pin exchange0_text exchange1_drw exchange1_pin exchange1_text exchange2_drw exchange2_pin
+    exchange2_text exchange3_drw exchange3_pin exchange3_text exchange4_drw exchange4_pin exchange4_text extblock_drw fbe_drw fgetch_drw
+    fgimp_drw flm_drw gatpoly gatpoly_OPC gatpoly_drw gatpoly_filler gatpoly_iOPC gatpoly_nofill gatpoly_noqrc gatpoly_pin
+    graphbot_drw graphcont_drw graphgate_drw graphmet1l_OPC graphmet1l_drw graphmet1l_filler graphmet1l_nofill graphmet1l_slit graphmetal1_OPC graphmetal1_drw
+    graphmetal1_filler graphmetal1_nofill graphmetal1_slit graphpad_drw graphpas_drw graphtop_drw hafniumox_drw heatres_drw heattrans_drw ic_drw
+    ind_drw ind_pin ind_text inldpwl_drw intbondmet_drw intbondvia_drw isonwell_drw lbe_drw memcap_drw mempad_drw
+    memvia_drw metal1 metal1_OPC metal1_diffprb metal1_drw metal1_filler metal1_iprobe metal1_mask metal1_nofill metal1_noqrc
+    metal1_pin metal1_res metal1_slit metal1_text metal2 metal2_OPC metal2_diffprb metal2_drw metal2_filler metal2_iprobe
+    metal2_mask metal2_nofill metal2_noqrc metal2_pin metal2_res metal2_slit metal2_text metal3 metal3_OPC metal3_diffprb
+    metal3_drw metal3_filler metal3_iprobe metal3_mask metal3_nofill metal3_noqrc metal3_pin metal3_res metal3_slit metal3_text
+    metal4 metal4_OPC metal4_diffprb metal4_drw metal4_filler metal4_iprobe metal4_mask metal4_nofill metal4_noqrc metal4_pin
+    metal4_res metal4_slit metal4_text metal5 metal5_OPC metal5_diffprb metal5_drw metal5_filler metal5_iprobe metal5_mask
+    metal5_nofill metal5_noqrc metal5_pin metal5_res metal5_slit metal5_text mim_drw nbulay_block nbulay_drw nbulay_pin
+    nbulaycut_drw next_drw nexthv_drw nldb_drw nldd_drw nometfiller_drw norcx_drw norcx_m1sub norcx_m2m3 norcx_m2m4
+    norcx_m2m5 norcx_m2sub norcx_m2tm1 norcx_m2tm2 norcx_m3m4 norcx_m3m5 norcx_m3sub norcx_m3tm1 norcx_m3tm2 norcx_m4m5
+    norcx_m4sub norcx_m4tm1 norcx_m4tm2 norcx_m5sub norcx_m5tm1 norcx_m5tm2 norcx_tm1sub norcx_tm1tm2 norcx_tm2sub nsd_block
+    nsd_drw nwell_drw nwell_pin passiv_drw passiv_pdl passiv_pillar passiv_pin passiv_sbump pext_drw pexthv_drw
+    pldb_drw pldd_drw polimide_drw polimide_pin polyres_drw polyres_pin prboundary_drw psd_drw pwell_block pwell_drw
+    pwell_pin radhard_drw recog_diffprb recog_diode recog_drw recog_esd recog_iprobe recog_mom recog_otp recog_pcm
+    recog_pdiode recog_pillar recog_pin recog_sbump recog_tsv redbulay_drw redist_drw res_drw rfmem_drw salblock_drw
+    sensor_drw sigrating_drw singrating_drw sinwg_drw sinwg_filler sinwg_nofill siwg_drw siwg_filler siwg_nofill smos_drw
+    snsarms_drw snsbotvia_drw snscmosvia_drw snsring_drw snstopvia_drw sram_drw substrate_drw substrate_text text_drw thickgateox_drw
+    thinfilmres_drw topmetal1 topmetal1_diffprb topmetal1_drw topmetal1_filler topmetal1_iprobe topmetal1_mask topmetal1_nofill topmetal1_noqrc topmetal1_pin
+    topmetal1_res topmetal1_slit topmetal1_text topmetal2 topmetal2_diffprb topmetal2_drw topmetal2_filler topmetal2_iprobe topmetal2_mask topmetal2_nofill
+    topmetal2_noqrc topmetal2_pin topmetal2_res topmetal2_slit topmetal2_text topvia1_drw topvia2_drw trans_drw varicap_drw via1_drw
+    via2_drw via3_drw via4_drw vmim_drw
+  )
+    
+  # general_derivations.lvs
+  all_layer_names += %w(
+    nwell_iso nwell_holes pwell_allowed digisub_gap pwell pwell_sub nactiv pactiv
+    res_mk poly_con metal1_con metal2_con metal3_con metal4_con metal5_con topmetal1_con topmetal2_con
+    tgate ngate pgate ngate_lv_base pgate_lv_base ngate_hv_base pgate_hv_base
+    nsd_fet psd_fet ntap1_lbl ntap1_mk
+    ntap ptap ptap_holes ntap_holes
+    nsd_sal psd_sal ntap_sal ptap_sal nsd_ptap_abutt psd_ntap_abutt
+  )
 
-# res_derivations.lvs
-all_layer_names += %w(
-  polyres_exclude polyres_mk
-  rhigh_res rhigh_ports rppd_res rppd_ports rsil_exc rsil_res rsil_ports
-  res_metal1 res_metal2 res_metal3 res_metal4 res_metal5 res_topmetal1 res_topmetal2
-)
+  # cap_derivations.lvs
+  all_layer_names += %w(
+    mimcap_exclude mim_top mim_btm mim_via topvia1_n_cap
+    cmim_top cmim_btm cmim_dev
+    rfmim_area rfmim_top rfmim_btm rfmim_dev rfmim_sub rfmeas_mk
+    cap_exc varicap_exc varicap_core varicap_diff_port varicap_poly_port varicap_ports varicap_dev_mk
+  )
 
-#=====================================================================
-# [KPEX] special layers needed for parasitic extraction
-#=====================================================================
+  # diode_derivations.lvs
+  all_layer_names += %w(
+    dantenna_n dantenna_p
+  )
 
-# metal5_n_cap: metal5 region where no MiM cap is above metal5
-# metal5_cap: metal5 region where MiM cap is above
-# cmim_top: the MiM cap itself (connected to mim_via)
+  # res_derivations.lvs
+  all_layer_names += %w(
+    polyres_exclude polyres_mk
+    rhigh_res rhigh_ports rppd_res rppd_ports rsil_exc rsil_res rsil_ports
+    res_metal1 res_metal2 res_metal3 res_metal4 res_metal5 res_topmetal1 res_topmetal2
+  )
 
-metal5_n_cap = metal5_drw.not(mim_drw)
-metal5_cap   = metal5_drw.and(mim_drw)
+  #=====================================================================
+  # [KPEX] special layers needed for parasitic extraction
+  #=====================================================================
 
-all_layer_names += %w(
-  metal5_cap metal5_n_cap 
-)
+  # metal5_n_cap: metal5 region where no MiM cap is above metal5
+  # metal5_cap: metal5 region where MiM cap is above
+  # cmim_top: the MiM cap itself (connected to mim_via)
 
-# [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
-cont_poly_con = cont_drw.and(poly_con)
-cont_nsd_con = cont_drw.and(nsd_fet)
-cont_psd_con = cont_drw.and(psd_fet)
+  metal5_n_cap = metal5_drw.not(mim_drw)
+  metal5_cap   = metal5_drw.and(mim_drw)
 
-all_layer_names += %w(
-  cont_poly_con cont_nsd_con cont_psd_con
-)
+  all_layer_names += %w(
+    metal5_cap metal5_n_cap
+  )
 
-# [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
-poly_pin       = polygons(5  , 2)
-metal1_pin     = polygons(8  , 2)
-metal2_pin     = polygons(10 , 2)
-metal3_pin     = polygons(30 , 2)
-metal4_pin     = polygons(50 , 2)
-metal5_pin     = polygons(67 , 2)
-topmetal1_pin  = polygons(126, 2)
-topmetal2_pin  = polygons(134, 2)
+  # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+  cont_poly_con = cont_drw.and(poly_con)
+  cont_nsd_con = cont_drw.and(nsd_fet)
+  cont_psd_con = cont_drw.and(psd_fet)
 
-all_layer_names += %w(
-  poly_pin metal1_pin metal2_pin metal3_pin metal4_pin metal5_pin topmetal1_pin topmetal2_pin
-)
+  all_layer_names += %w(
+    cont_poly_con cont_nsd_con cont_psd_con
+  )
 
-poly_pin_con      = poly_pin      & poly_con
-metal1_pin_con    = metal1_pin    & metal1_con
-metal2_pin_con    = metal2_pin    & metal2_con
-metal3_pin_con    = metal3_pin    & metal3_con
-metal4_pin_con    = metal4_pin    & metal4_con
-metal5_pin_con    = metal5_pin    & metal5_con
-topmetal1_pin_con = topmetal1_pin & topmetal1_con
-topmetal2_pin_con = topmetal2_pin & topmetal2_con
+  # [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
+  poly_pin       = polygons(5  , 2)
+  metal1_pin     = polygons(8  , 2)
+  metal2_pin     = polygons(10 , 2)
+  metal3_pin     = polygons(30 , 2)
+  metal4_pin     = polygons(50 , 2)
+  metal5_pin     = polygons(67 , 2)
+  topmetal1_pin  = polygons(126, 2)
+  topmetal2_pin  = polygons(134, 2)
 
-all_layer_names += %w(
-  poly_pin_con metal1_pin_con metal2_pin_con metal3_pin_con metal4_pin_con metal5_pin_con
-  topmetal1_pin_con topmetal2_pin_con
-)
+  all_layer_names += %w(
+    poly_pin metal1_pin metal2_pin metal3_pin metal4_pin metal5_pin topmetal1_pin topmetal2_pin
+  )
 
-# NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
-poly_text = labels(5, 25)
-all_layer_names += %w(
-    poly_text
-)
+  poly_pin_con      = poly_pin      & poly_con
+  metal1_pin_con    = metal1_pin    & metal1_con
+  metal2_pin_con    = metal2_pin    & metal2_con
+  metal3_pin_con    = metal3_pin    & metal3_con
+  metal4_pin_con    = metal4_pin    & metal4_con
+  metal5_pin_con    = metal5_pin    & metal5_con
+  topmetal1_pin_con = topmetal1_pin & topmetal1_con
+  topmetal2_pin_con = topmetal2_pin & topmetal2_con
 
-if self.respond_to?(:name)
-  all_layer_names.each do |l|
-    name(eval(l), l)
-  end 
+  all_layer_names += %w(
+    poly_pin_con metal1_pin_con metal2_pin_con metal3_pin_con metal4_pin_con metal5_pin_con
+    topmetal1_pin_con topmetal2_pin_con
+  )
+
+  # NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
+  poly_text = labels(5, 25)
+  all_layer_names += %w(
+      poly_text
+  )
+
+  if self.respond_to?(:name)
+    all_layer_names.each do |l|
+      name(eval(l), l)
+    end
+  end
+
+  connect(metal5_n_cap, metal5_con)
+  connect(metal5_cap, metal5_con)
+
+  # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+  connect(cont_poly_con,   cont_drw)
+  connect(cont_nsd_con,    cont_drw)
+  connect(cont_psd_con,    cont_drw)
+
+  # [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
+  connect(poly_con      ,    poly_pin_con)
+  connect(metal1_con    ,    metal1_pin_con)
+  connect(metal2_con    ,    metal2_pin_con)
+  connect(metal3_con    ,    metal3_pin_con)
+  connect(metal4_con    ,    metal4_pin_con)
+  connect(metal5_con    ,    metal5_pin_con)
+  connect(topmetal1_con ,    topmetal1_pin_con)
+  connect(topmetal2_con ,    topmetal2_pin_con)
+
+  # NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
+  connect(poly_text,  poly_con)
+
+  #================================================
+  #------------ DEVICES CONNECTIVITY --------------
+  #================================================
+
+  # %include rule_decks/devices_connections.lvs
+
+  #================================================
+  #------------- DEVICES EXTRACTION ---------------
+  #================================================
+
+  logger.info('Starting SG13G2 LVS DEVICES EXTRACTION')
+
+  #================================
+  # ----- MOSFET EXTRACTION -------
+  #================================
+
+  cheat(SRAM_SHAREDSD_CELLS) {
+
+  # %include rule_decks/mos_extraction.lvs
+
+  }
+
+  #================================
+  # ---- RF-MOSFET EXTRACTION -----
+  #================================
+
+  # %include rule_decks/rfmos_extraction.lvs
+
+  #================================
+  # ------- BJT EXTRACTION --------
+  #================================
+
+  # %include rule_decks/bjt_extraction.lvs
+
+  #================================
+  # ------ DIODE EXTRACTION -------
+  #================================
+
+  # %include rule_decks/diode_extraction.lvs
+
+  #================================
+  # ---- RESISTOR EXTRACTIONS -----
+  #================================
+
+  # %include rule_decks/res_extraction.lvs
+
+  #==================================
+  # --------- CAP EXTRACTION --------
+  #==================================
+
+  # %include rule_decks/cap_extraction.lvs
+
+  #================================
+  # ------- ESD EXTRACTION --------
+  #================================
+
+  # %include rule_decks/esd_extraction.lvs
+
+  #=================================
+  # ----- Inductor EXTRACTIONS -----
+  #=================================
+
+  # %include rule_decks/ind_extraction.lvs
+
+  #================================
+  # ------- Taps EXTRACTIONS ------
+  #================================
+
+  # %include rule_decks/tap_extraction.lvs
 end
 
-connect(metal5_n_cap, metal5_con)
-connect(metal5_cap, metal5_con)
-
-# [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
-connect(cont_poly_con,   cont_drw)
-connect(cont_nsd_con,    cont_drw)
-connect(cont_psd_con,    cont_drw)
-
-# [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
-connect(poly_con      ,    poly_pin_con)
-connect(metal1_con    ,    metal1_pin_con)
-connect(metal2_con    ,    metal2_pin_con)
-connect(metal3_con    ,    metal3_pin_con)
-connect(metal4_con    ,    metal4_pin_con)
-connect(metal5_con    ,    metal5_pin_con)
-connect(topmetal1_con ,    topmetal1_pin_con)
-connect(topmetal2_con ,    topmetal2_pin_con)
-
-# NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
-connect(poly_text,  poly_con)
-
-#================================================
-#------------ DEVICES CONNECTIVITY --------------
-#================================================
-
-# %include rule_decks/devices_connections.lvs
-
-#================================================
-#------------- DEVICES EXTRACTION ---------------
-#================================================
-
-logger.info('Starting SG13G2 LVS DEVICES EXTRACTION')
-
-#================================
-# ----- MOSFET EXTRACTION -------
-#================================
-
-# %include rule_decks/mos_extraction.lvs
-
-#================================
-# ---- RF-MOSFET EXTRACTION -----
-#================================
-
-# %include rule_decks/rfmos_extraction.lvs
-
-#================================
-# ------- BJT EXTRACTION --------
-#================================
-
-# %include rule_decks/bjt_extraction.lvs
-
-#================================
-# ------ DIODE EXTRACTION -------
-#================================
-
-# %include rule_decks/diode_extraction.lvs
-
-#================================
-# ---- RESISTOR EXTRACTIONS -----
-#================================
-
-# %include rule_decks/res_extraction.lvs
-
-#==================================
-# --------- CAP EXTRACTION --------
-#==================================
-
-# %include rule_decks/cap_extraction.lvs
-
-#================================
-# ------- ESD EXTRACTION --------
-#================================
-
-# %include rule_decks/esd_extraction.lvs
-
-#=================================
-# ----- Inductor EXTRACTIONS -----
-#=================================
-
-# %include rule_decks/ind_extraction.lvs
-
-#================================
-# ------- Taps EXTRACTIONS ------
-#================================
-
-# %include rule_decks/tap_extraction.lvs
+# RF MOS model mapping
+logger.info('Starting SG13G2 LVS RF MOS Model Mapping')
+# %include rule_decks/rfmos_model_mapping.lvs
 
 #==================================================
 # ------------ COMPARISON PREPARATIONS ------------
@@ -498,56 +595,80 @@ logger.info('Starting SG13G2 LVS DEVICES EXTRACTION')
 
 logger.info('Starting SG13G2 LVS Options Preparations')
 
-# === Extract Netlist Only ===
-netlist if NET_ONLY
-return if NET_ONLY
+log_option_action = lambda do |label, option_name, enabled|
+  state = enabled ? 'ENABLED' : 'SKIPPED'
+  logger.info("[#{label}] #{option_name}: #{state}")
+end
 
-# === Aligns the extracted netlist vs. the schematic ===
-logger.info('Starting SG13G2 LVS Alignment')
-align
+apply_netlist_options = lambda do |target_netlist, label|
+  log_option_action.call(label, 'simplify', SIMPLIFY)
+  target_netlist.simplify if SIMPLIFY
 
-#=== NETLIST OPTIONS ===
-logger.info('Starting SG13G2 LVS Simplification')
-# SIMPLIFY
-netlist.simplify if SIMPLIFY
-schematic.simplify if SIMPLIFY
+  log_option_action.call(label, 'make_top_level_pins', TOP_LVL_PINS)
+  target_netlist.make_top_level_pins if TOP_LVL_PINS
 
-# TOP_LVL_PINS
-netlist.make_top_level_pins if TOP_LVL_PINS
-schematic.make_top_level_pins if TOP_LVL_PINS
+  log_option_action.call(label, 'combine_devices', COMBINE_DEVICES)
+  target_netlist.combine_devices if COMBINE_DEVICES
 
-# COMBINE_DEVICES
-netlist.combine_devices if COMBINE_DEVICES
-schematic.combine_devices if COMBINE_DEVICES
+  log_option_action.call(label, 'purge', PURGE)
+  target_netlist.purge if PURGE
 
-# PURGE
-netlist.purge if PURGE
-schematic.purge if PURGE
+  log_option_action.call(label, 'purge_nets', PURGE_NETS)
+  target_netlist.purge_nets if PURGE_NETS
+end
 
-# PURGE_NETS
-netlist.purge_nets if PURGE_NETS
-schematic.purge_nets if PURGE_NETS
-
-#=== IGNORE EXTREME VALUES ===
-max_res(1e9)
-min_caps(1e-18)
-
-# === COMPARISON === 
-logger.info('Starting SG13G2 LVS Comparison')
-compare
-
-#================================================
-#------------- COMPARISON RESULTS ---------------
-#================================================
-
-if !compare
-  logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-  logger.error("ERROR : Netlists don't match")
-  logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+if NET_ONLY
+  logger.info('NET_ONLY enabled: apply extraction netlist options and skip comparison.')
+  if LAYOUT_NETLIST
+    logger.info('SG13G2 LVS flow: layout_netlist input -> option preparation -> write netlist -> exit.')
+  else
+    logger.info('SG13G2 LVS flow: extraction -> option preparation -> write netlist -> exit.')
+  end
+  logger.info('Starting SG13G2 LVS Simplification')
+  apply_netlist_options.call(netlist, 'layout_netlist')
+  netlist
 else
-  logger.info('==========================================')
-  logger.info('INFO : Congratulations! Netlists match.')
-  logger.info('==========================================')
+  if LAYOUT_NETLIST
+    logger.info('SG13G2 LVS flow: layout_netlist input -> alignment -> option preparation -> comparison.')
+  else
+    logger.info('SG13G2 LVS flow: extraction -> alignment -> option preparation -> comparison.')
+  end
+  # === Aligns the extracted netlist vs. the schematic ===
+  logger.info('Starting SG13G2 LVS Alignment')
+  align
+
+  #=== NETLIST OPTIONS ===
+  logger.info('Starting SG13G2 LVS Simplification')
+  apply_netlist_options.call(netlist, 'layout_netlist')
+  apply_netlist_options.call(schematic, 'schematic_netlist')
+
+  #=== IGNORE EXTREME VALUES ===
+  max_res(1e9)
+  min_caps(1e-18)
+
+  # === COMPARISON ===
+  if IGNORE_TOP_PORTS_MISMATCH
+    logger.info('Starting SG13G2 LVS Comparison')
+    success = compare
+  else
+    logger.info('Starting SG13G2 LVS Comparison in strict port mode.')
+    logger.info('flag_missing_ports enabled: missing/mislabeled top-level ports are treated as errors.')
+    success = compare && flag_missing_ports
+  end
+
+  #================================================
+  #------------- COMPARISON RESULTS ---------------
+  #================================================
+
+  if ! success
+    logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    logger.error("ERROR : Netlists don't match")
+    logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+  else
+    logger.info('==========================================')
+    logger.info('INFO : Congratulations! Netlists match.')
+    logger.info('==========================================')
+  end
 end
 
 exec_end_time = Time.now
