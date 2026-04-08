@@ -550,7 +550,7 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 }
 
 void buildTech(kpex::tech::Technology &tech) {
-    tech.set_name("ihp_sg13g2");
+    tech.set_name("ihp-sg13g2");
     
     buildLayers(&tech);
 
