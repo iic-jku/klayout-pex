@@ -35,6 +35,7 @@ include = [
     "klayout_pex_protobuf/__init__.py",
     # NOTE: explicitly mention generated protobuf files,
     #       otherwise the .gitignore entries would suppress them
+    { path = "klayout_pex_protobuf/gf180mcuD_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/ihp-sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/sky130A_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/geometry/shapes_pb2.py", format = ["sdist", "wheel"] },
