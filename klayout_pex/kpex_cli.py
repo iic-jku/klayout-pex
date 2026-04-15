@@ -78,8 +78,7 @@ from .magic.magic_runner import (
     prepare_magic_script,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
-from .pdk import PDK
-from .pdk_config import PDKConfig
+from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
