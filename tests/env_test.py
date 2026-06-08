@@ -30,6 +30,7 @@ from typing import *
 import unittest
 
 from klayout_pex.env import Env, EnvVar
+from klayout_pex.pdk_config import PDK
 
 
 @allure.parent_suite("Unit Tests")
@@ -63,3 +64,13 @@ class Test(unittest.TestCase):
             self.assertEqual(value_for_var(var), val,
                              f"Envrionmental variable {var.value} was set to '{value_for_var(var)}', "
                              f"but Env['{var.value}'] returns '{val}'!")
+
+    def test_valid_pdk_from_env(self):
+        os.environ[EnvVar.PDK.value] = 'sky130A'
+        env = Env.from_os_environ()
+        self.assertEqual(PDK.SKY130A, env.default_pdk)
+
+    def test_invalid_pdk_from_env(self):
+        os.environ[EnvVar.PDK.value] = 'invalid_pdk'
+        env = Env.from_os_environ()
+        self.assertIsNone(env.default_pdk)

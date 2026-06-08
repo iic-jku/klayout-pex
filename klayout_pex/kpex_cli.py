@@ -131,9 +131,14 @@ class KpexCLI:
 
         all_pdk_choices = list(PDK) + list(PDK.legacy_aliases().keys())
 
-        group_pex.add_argument("--pdk", dest="pdk", required=True,
+        default_pdk = env.default_pdk
+        pdk_help = render_enum_help(topic='pdk', enum_cls=PDK, print_default=False)
+        if default_pdk:
+            pdk_help += f" (default is '{default_pdk}')"
+
+        group_pex.add_argument("--pdk", dest="pdk", required=default_pdk is None,
                                type=PDK.from_string, choices=all_pdk_choices,
-                               help=render_enum_help(topic='pdk', enum_cls=PDK))
+                               help=pdk_help, default=default_pdk)
 
         group_pex.add_argument("--out_dir", dest="output_dir_base_path", default="output",
                                help="Run directory path (default is '%(default)s')")

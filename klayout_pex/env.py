@@ -29,6 +29,9 @@ from enum import StrEnum
 import os
 from typing import *
 
+from .pdk_config import PDK
+from .log import warning
+
 
 class EnvVar(StrEnum):
     FASTCAP_EXE = 'KPEX_FASTCAP_EXE'
@@ -87,6 +90,17 @@ class Env:
             None if PDK_ROOT is None or PDK is None \
             else os.path.abspath(f"{PDK_ROOT}/{PDK}/libs.tech/magic/{PDK}.magicrc")
         return default_magicrc_path
+
+    @property
+    def default_pdk(self) -> Optional[PDK]:
+        pdk_str = self[EnvVar.PDK]
+        if pdk_str is None:
+            return None
+        try:
+            return PDK.from_string(pdk_str)
+        except ValueError:
+            warning(f"Ignoring invalid PDK specified in environment variable {EnvVar.PDK.value}: '{pdk_str}'")
+            return None
 
     def __getitem__(self, env_var: EnvVar) -> Optional[str]:
         return self._data[env_var]
