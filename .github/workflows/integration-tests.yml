@@ -59,7 +59,7 @@ jobs:
       COVERAGE_DATA_PATH: build/python-coverage.sqlite
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
 
     - name: "[🐍] Setup python ${{ matrix.python-version }}"
       id: setup-python
@@ -181,7 +181,7 @@ jobs:
   #   continue-on-error: true
   # 
   #   steps:
-  #   - uses: actions/checkout@v6
+  #   - uses: actions/checkout@v7
   # 
   #   - name: Generate Cache Key from Dockerfiles
   #     id: generate_cache_key

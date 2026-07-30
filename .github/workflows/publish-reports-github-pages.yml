@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # NOTE: actions/download-artifact@v8 now has merging functionality built in => no need for actions/upload-artifact/merge@v4
       # - name: "Merge test results (Allure)"
@@ -61,7 +61,7 @@ jobs:
           java-version: 17
 
       - name: "Load test report history (Allure)"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         if: always()
         continue-on-error: true
         with:
@@ -93,7 +93,7 @@ jobs:
     name: "Generate Coverage Report (Aggregated Suites)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: "[🐍] Download and merge 📦 artifacts"
         uses: actions/download-artifact@v8
