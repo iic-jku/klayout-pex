@@ -609,7 +609,6 @@ class KpexCLI:
                 raise Exception("No top cells found in the input layout.")
             for top in tops:
                 top.flatten(True)
-            #flattened_gds_path=magic_run_dir+"/"+args.effective_cell_name+".gds"
             flattened_gds_path=os.path.join(magic_run_dir, f"{args.effective_cell_name}.gds")
             layout.write(flattened_gds_path)
             gds_path = flattened_gds_path
