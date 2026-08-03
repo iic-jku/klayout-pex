@@ -267,6 +267,9 @@ class KpexCLI:
         group_magic.add_argument("--magic_merge", dest='magic_merge_mode',
                                  default=MagicMergeMode.DEFAULT, type=MagicMergeMode, choices=list(MagicMergeMode),
                                  help=render_enum_help(topic='magic_merge', enum_cls=MagicMergeMode))
+        group_magic.add_argument("--magic_pre_flatten", dest='magic_pre_flatten',
+                                 action='store_true', default=False,
+                                 help="Flatten GDS before reading it with Magic (default is %(default)s).")
 
         group_25d = main_parser.add_argument_group("2.5D options")
         group_25d.add_argument("--mode", dest='pex_mode',
@@ -597,7 +600,23 @@ class KpexCLI:
 
         os.makedirs(magic_run_dir, exist_ok=True)
 
-        prepare_magic_script(gds_path=args.effective_gds_path,
+        layout = kdb.Layout()
+        layout.read(args.effective_gds_path)
+
+        if args.magic_pre_flatten:
+            tops = list(layout.top_cells())
+            if not tops:
+                raise Exception("No top cells found in the input layout.")
+            for top in tops:
+                top.flatten(True)
+            #flattened_gds_path=magic_run_dir+"/"+args.effective_cell_name+".gds"
+            flattened_gds_path=os.path.join(magic_run_dir, f"{args.effective_cell_name}.gds")
+            layout.write(flattened_gds_path)
+            gds_path = flattened_gds_path
+        else:
+            gds_path = args.effective_gds_path
+
+        prepare_magic_script(gds_path=gds_path,
                              cell_name=args.effective_cell_name,
                              run_dir_path=magic_run_dir,
                              script_path=magic_script_path,
@@ -616,9 +635,6 @@ class KpexCLI:
                   log_path=magic_log_path)
 
         magic_pex_run = parse_magic_pex_run(Path(magic_run_dir))
-
-        layout = kdb.Layout()
-        layout.read(args.effective_gds_path)
 
         report = rdb.ReportDatabase('')
         magic_log_analyzer = MagicLogAnalyzer(magic_pex_run=magic_pex_run,
