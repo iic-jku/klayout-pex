@@ -268,10 +268,6 @@ class KpexCLI:
                                  help="Minimum delay threshold (in ps) to trigger network extraction. "
                                       "If not supplied, MAGIC's default is implicitly used. "
                                       "(MAGIC command: extresist mindelay <value>)")
-        group_magic.add_argument("--magic_tolerance", dest="magic_tolerance",
-                                 type=float, default=1,
-                                 help="Set ratio between resistor and device tolerance (default is %(default)s). "
-                                      "(MAGIC command: extresist tolerance <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) "
@@ -638,7 +634,6 @@ class KpexCLI:
                              pex_mode=args.magic_pex_mode,
                              c_threshold=args.magic_cthresh,
                              r_threshold=args.magic_rthresh,
-                             tolerance=args.magic_tolerance,
                              threshold=args.magic_thresh,
                              min_res=args.magic_minres,
                              min_delay=args.magic_mindel,
