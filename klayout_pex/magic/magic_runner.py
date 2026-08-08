@@ -119,11 +119,8 @@ cellname delete {cell_name} -noprompt
 cellname rename {cell_name}_flat {cell_name}
 select top cell
 extract path {run_dir_path}{halo_decl}
+extract do resistance
 extract all
-ext2sim labels on
-ext2sim -p {run_dir_path}
-extresist tolerance {tolerance}
-extresist all
 ext2spice short {short_mode}
 ext2spice merge {merge_mode}
 ext2spice cthresh {c_threshold}
@@ -148,11 +145,8 @@ select top cell
 extract path {run_dir_path}{halo_decl}
 extract no capacitance
 extract no coupling
+extract do resistance
 extract all
-ext2sim labels on
-ext2sim -p {run_dir_path}
-extresist tolerance {tolerance}
-extresist all
 ext2spice short {short_mode}
 ext2spice merge {merge_mode}
 ext2spice extresist on
