@@ -168,7 +168,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     
     auto poly_thickness = 0.16;
     auto met1_thickness = 0.42;
-    auto met2_thickness = 0.36;
+    auto met2_thickness = 0.49;
     auto met3_thickness = 0.49;
     auto met4_thickness = 0.49;
     auto met5_thickness = 0.49;
