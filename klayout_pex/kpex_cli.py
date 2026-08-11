@@ -154,7 +154,7 @@ class KpexCLI:
                                      help="Schematic SPICE netlist path (for LVS). "
                                           "If none given, a dummy schematic will be created")
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", default=None,
-                                     help="KLayout LVSDB path (bypass LVS)")
+                                     help="KLayout PEX-LVSDB path from a previous run (bypass PEX-LVS)")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
 
