@@ -30,7 +30,7 @@ import shlex
 import sys
 from typing import *
 
-from kpex.log import (
+from klayout_pex.log import (
     LogLevel,
     set_log_level,
     # debug,
@@ -39,8 +39,8 @@ from kpex.log import (
     error, warning
 )
 
-from kpex.version import __version__
-from kpex.util.argparse_helpers import render_enum_help
+from klayout_pex.version import __version__
+from klayout_pex.util.argparse_helpers import render_enum_help
 
 # ------------------------------------------------------------------------------------
 
