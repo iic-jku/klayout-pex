@@ -57,6 +57,24 @@ class MagicMergeMode(StrEnum):
     AGGRESSIVE = "aggressive"      # merge devices with same L
     DEFAULT = NONE
 
+class MagicUniqueMode(StrEnum):
+    IMPLICIT = "implicit"            # use Magic's default value
+    OFF = "off"                      # Force off
+    ON = "on"                        # Force on all nets
+    NO_TOP_PORTS = "no_top_ports"    # Force all nets, except top-level ports
+    DEFAULT = IMPLICIT
+
+    def to_cmd(self) -> str:
+        """Translates enum to Magic command"""
+        match self:
+            case MagicUniqueMode.OFF:
+                return "extract no unique"
+            case MagicUniqueMode.ON:
+                return "extract do unique"
+            case MagicUniqueMode.NO_TOP_PORTS:
+                return "extract do unique notopports"
+            case MagicUniqueMode.IMPLICIT | _:
+                return ""
 
 def prepare_magic_script(gds_path: str,
                          cell_name: str,
@@ -71,7 +89,8 @@ def prepare_magic_script(gds_path: str,
                          min_delay: float,
                          halo: Optional[float],
                          short_mode: MagicShortMode,
-                         merge_mode: MagicMergeMode):
+                         merge_mode: MagicMergeMode,
+                         unique_mode: MagicUniqueMode):
     gds_path = os.path.abspath(gds_path)
     run_dir_path = os.path.abspath(run_dir_path)
     output_netlist_path = os.path.abspath(output_netlist_path)
@@ -111,7 +130,7 @@ def prepare_magic_script(gds_path: str,
         f"extract {ext_cap} capacitance",
         f"extract {ext_coupling} coupling",
         f"extract {ext_res} resistance",
-        "extract do unique",
+        f"{unique_mode.to_cmd()}",
         "extract all",
         f"ext2spice short {short_mode}",
         f"ext2spice merge {merge_mode}",

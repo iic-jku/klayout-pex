@@ -74,6 +74,7 @@ from .magic.magic_runner import (
     MagicPEXMode,
     MagicShortMode,
     MagicMergeMode,
+    MagicUniqueMode,
     run_magic,
     prepare_magic_script,
 )
@@ -281,6 +282,11 @@ class KpexCLI:
         group_magic.add_argument("--magic_pre_flatten", dest='magic_pre_flatten',
                                  action='store_true', default=False,
                                  help="Flatten GDS before reading it with Magic (default is %(default)s).")
+        group_magic.add_argument("--magic_unique", dest='magic_unique_mode',
+                                 default=MagicUniqueMode.DEFAULT, type=MagicUniqueMode, choices=list(MagicUniqueMode),
+                                 help="Control net uniqueness during extraction "
+                                 " ('implicit' omits the command, uses MAGIC's default value). "
+                                 + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
 
         group_25d = main_parser.add_argument_group("2.5D options")
         group_25d.add_argument("--mode", dest='pex_mode',
@@ -639,7 +645,8 @@ class KpexCLI:
                              min_delay=args.magic_mindel,
                              halo=args.magic_halo,
                              short_mode=args.magic_short_mode,
-                             merge_mode=args.magic_merge_mode)
+                             merge_mode=args.magic_merge_mode,
+                             unique_mode=args.magic_unique_mode)
 
         run_magic(exe_path=args.magic_exe_path,
                   magicrc_path=args.magicrc_path,
