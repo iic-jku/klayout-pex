@@ -1,6 +1,6 @@
 /*
  * --------------------------------------------------------------------------------
- * SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+ * SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
  * Johannes Kepler University, Institute for Integrated Circuits.
  *
  * This file is part of KPEX 
@@ -21,12 +21,19 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  * --------------------------------------------------------------------------------
  */
-#ifndef __IHP_SG13G2_H__
-#define __IHP_SG13G2_H__
+#ifndef __IHP_SG13_H__
+#define __IHP_SG13_H__
 
-namespace ihp_sg13g2 {
+#include "protobuf.h"
 
-void buildTech(kpex::tech::Technology &tech);
+namespace ihp_sg13 {
+
+enum LayerStackVariant {
+    SG13G2 = 0,
+    SG13CMOS5L = 1,
+};
+
+void buildTech(kpex::tech::Technology &tech, LayerStackVariant variant);
 
 }
 

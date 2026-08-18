@@ -27,7 +27,7 @@
 
 #include "protobuf.h"
 #include "pdk/gf180mcuD.h"
-#include "pdk/ihp_sg13g2.h"
+#include "pdk/ihp_sg13.h"
 #include "pdk/sky130A.h"
 
 void writeTech(const std::filesystem::path &output_directory,
@@ -59,19 +59,25 @@ int main(int argc, char **argv) {
     {
         kpex::tech::Technology tech;
         gf180mcuD::buildTech(tech);
-        writeTech(output_directory, "gf180mcuD", tech);
+        writeTech(output_directory, tech.name(), tech);
     }
 
     {
         kpex::tech::Technology tech;
         sky130A::buildTech(tech);
-        writeTech(output_directory, "sky130A", tech);
+        writeTech(output_directory, tech.name(), tech);
     }
     
     {
         kpex::tech::Technology tech;
-        ihp_sg13g2::buildTech(tech);
-        writeTech(output_directory, "ihp-sg13g2", tech);
+        ihp_sg13::buildTech(tech, ihp_sg13::LayerStackVariant::SG13G2);
+        writeTech(output_directory, tech.name(), tech);
+    }
+
+    {
+        kpex::tech::Technology tech;
+        ihp_sg13::buildTech(tech, ihp_sg13::LayerStackVariant::SG13CMOS5L);
+        writeTech(output_directory, tech.name(), tech);
     }
 
     // Optional:  Delete all global objects allocated by libprotobuf.
