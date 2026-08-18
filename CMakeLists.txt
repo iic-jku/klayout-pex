@@ -33,6 +33,26 @@ endif(MSVC)
 
 #_____________________________________________________________________________________________
 
+# NOTE: CMake functions allow extra compiler options for specific target
+function(require_exhaustive_enum_switches target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE
+            /W4     # Enable high warning level; required for C4061
+            /we4061 # Error: an enum member is missing a case label
+                    #        when the switch contains a default case.
+            /we4062 # Error: an enum member is missing a case label
+                    #        when the switch has no default case.
+        )
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+        target_compile_options(${target} PRIVATE
+            -Wswitch-enum
+            -Werror=switch-enum
+        )
+    endif()
+endfunction()
+
+#_____________________________________________________________________________________________
+
 # add dependencies
 include(cmake/CPM.cmake)
 CPMAddPackage(
@@ -110,5 +130,6 @@ set(GEN_TECH_PB_SOURCES
 add_executable(gen_tech_pb ${GEN_TECH_PB_SOURCES})
 target_include_directories(gen_tech_pb PUBLIC ${Protobuf_INCLUDE_DIRS})
 target_link_libraries(gen_tech_pb kpex-protobuf)
+require_exhaustive_enum_switches(gen_tech_pb)
 
 #_____________________________________________________________________________________________
