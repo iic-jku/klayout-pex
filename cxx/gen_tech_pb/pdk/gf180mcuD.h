@@ -24,6 +24,8 @@
 #ifndef __GF180MCU_H__
 #define __GF180MCU_H__
 
+#include "protobuf.h"
+
 namespace gf180mcuD {
 
 void buildTech(kpex::tech::Technology &tech);
