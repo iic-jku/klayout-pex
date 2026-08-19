@@ -41,6 +41,7 @@ class PDKConfig:
 class PDK(StrEnum):
     GF180MCUD = 'gf180mcuD'
     IHP_SG13G2 = 'ihp-sg13g2'
+    IHP_SG13CMOS5L = 'ihp-sg13cmos5l'
     SKY130A = 'sky130A'
 
     @classmethod
@@ -77,6 +78,12 @@ class PDK(StrEnum):
                 return PDKConfig(
                     name=self,
                     pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg13g2.lvs'),
+                    tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
+                )
+            case PDK.IHP_SG13CMOS5L:
+                return PDKConfig(
+                    name=self,
+                    pex_lvs_script_path=os.path.join(base_dir, 'pdk', self, 'libs.tech', 'kpex', 'sg13cmos5l.lvs'),
                     tech_pb_json_path=os.path.join(tech_pb_json_dir, f"{self}_tech.pb.json")
                 )
             case PDK.SKY130A:
