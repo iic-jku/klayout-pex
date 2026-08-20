@@ -1,6 +1,6 @@
 /*
  * --------------------------------------------------------------------------------
- * SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+ * SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
  * Johannes Kepler University, Institute for Integrated Circuits.
  *
  * This file is part of KPEX 
@@ -31,9 +31,11 @@
 //
 //
 
+#include "ihp_sg13.h"
 #include "protobuf.h"
+#include <stdexcept>
 
-namespace ihp_sg13g2 {
+namespace ihp_sg13 {
 
 constexpr auto DNWELL = kpex::tech::LayerInfo_Purpose_PURPOSE_DNWELL;
 constexpr auto NWELL = kpex::tech::LayerInfo_Purpose_PURPOSE_NWELL;
@@ -49,7 +51,37 @@ constexpr auto METAL = kpex::tech::LayerInfo_Purpose_PURPOSE_METAL;
 constexpr auto VIA = kpex::tech::LayerInfo_Purpose_PURPOSE_VIA;
 constexpr auto MIM = kpex::tech::LayerInfo_Purpose_PURPOSE_MIM_CAP;
 
-void buildLayers(kpex::tech::Technology *tech) {
+class TechBuilder {
+public:
+    TechBuilder(LayerStackVariant variant);
+    void buildTech(kpex::tech::Technology &tech);
+
+private:
+    void buildLayers(kpex::tech::Technology *tech);
+    void buildLVSComputedLayers(kpex::tech::Technology *tech);
+    void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi);
+    void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex);
+
+    constexpr bool is_g2() const {
+        switch (_variant) {
+            case SG13G2:
+                return true;
+            
+            case SG13CMOS5L:
+                return false;
+        }
+    }
+
+private:
+    LayerStackVariant _variant;
+};
+
+TechBuilder::TechBuilder(LayerStackVariant variant)
+    : _variant(variant)
+{
+}
+
+void TechBuilder::buildLayers(kpex::tech::Technology *tech) {
     //             purpose   name       drw_gds, pin_gds, label_gds, description
     addLayer(tech, DIFF,     "Activ",       1,0,   1,2,  -1,-1, "Active (diffusion) area"); // ~ diff.drawing
     addLayer(tech, NWELL,    "NWell",      31,0,  31,2,  -1,-1, "N-well region");
@@ -65,15 +97,22 @@ void buildLayers(kpex::tech::Technology *tech) {
     addLayer(tech, METAL,    "Metal3",     30,0,  30,2,  30,25, "Defines 3-rd metal interconnect");
     addLayer(tech, VIA,      "Via3",       49,0, -1,-1,  -1,-1, "Defines 3-rd metal to 4-th metal contact");
     addLayer(tech, METAL,    "Metal4",     50,0,  50,2,  50,25, "Defines 4-th metal interconnect");
-    addLayer(tech, VIA,      "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
-    addLayer(tech, METAL,    "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
+    
+    if (is_g2()) {
+        addLayer(tech, VIA,      "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
+        addLayer(tech, METAL,    "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
+    }
+
     addLayer(tech, VIA,      "TopVia1",   125,0, -1,-1,  -1,-1, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
     addLayer(tech, METAL,    "TopMetal1", 126,0, 126,2, 126,25, "Defines 1-st thick TopMetal layer");
-    addLayer(tech, VIA,      "TopVia2",   133,0, -1,-1,  -1,-1, "Defines via between TopMetal1 and TopMetal2");
-    addLayer(tech, METAL,    "TopMetal2", 134,0, 134,2, 134,25, "Defines 2-nd thick TopMetal layer");
+    
+    if (is_g2()) {
+        addLayer(tech, VIA,      "TopVia2",   133,0, -1,-1,  -1,-1, "Defines via between TopMetal1 and TopMetal2");
+        addLayer(tech, METAL,    "TopMetal2", 134,0, 134,2, 134,25, "Defines 2-nd thick TopMetal layer");
+    }
 }
 
-void buildLVSComputedLayers(kpex::tech::Technology *tech) {
+void TechBuilder::buildLVSComputedLayers(kpex::tech::Technology *tech) {
     auto KREG = kpex::tech::ComputedLayerInfo_Kind_KIND_REGULAR;
     auto KCAP = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR;
     auto KRES = kpex::tech::ComputedLayerInfo_Kind_KIND_DEVICE_RESISTOR;
@@ -94,9 +133,16 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL, KREG, "metal2_con",    10, 0,   "Metal2", "Computed layer for Metal2");
     addComputedLayer(tech, METAL, KREG, "metal3_con",    30, 0,   "Metal3", "Computed layer for Metal3");
     addComputedLayer(tech, METAL, KREG, "metal4_con",    50, 0,   "Metal4", "Computed layer for Metal4");
-    addComputedLayer(tech, METAL, KREG, "metal5_n_cap",  67,  0, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
+
+    if (is_g2()) {
+        addComputedLayer(tech, METAL, KREG, "metal5_n_cap",  67,  0, "Metal5", "Computed layer for Metal5 (case where no MiM cap)");
+    }
+
     addComputedLayer(tech, METAL, KREG, "topmetal1_con", 126, 0, "TopMetal1", "Computed layer for TopMetal1");
-    addComputedLayer(tech, METAL, KREG, "topmetal2_con", 134, 0, "TopMetal2", "Computed layer for TopMetal2");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, METAL, KREG, "topmetal2_con", 134, 0, "TopMetal2", "Computed layer for TopMetal2");
+    }
 
     addComputedLayer(tech, CONT,  KREG, "cont_nsd_con",   6, 4401,  "Cont", "Computed layer for contact from nSD to Metal1");
     addComputedLayer(tech, CONT,  KREG, "cont_psd_con",   6, 4402,  "Cont", "Computed layer for contact from pSD to Metal1");
@@ -105,10 +151,16 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, VIA,   KREG, "via1_drw",      19, 0,  "Via1", "Computed layer for Via1");
     addComputedLayer(tech, VIA,   KREG, "via2_drw",      29, 0,  "Via2", "Computed layer for Via2");
     addComputedLayer(tech, VIA,   KREG, "via3_drw",      49, 0,  "Via3", "Computed layer for Via3");
-    addComputedLayer(tech, VIA,   KREG, "via4_drw",      66, 0,  "Via4", "Computed layer for Via4");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, VIA,   KREG, "via4_drw",      66, 0,  "Via4", "Computed layer for Via4");
+    }
     
     addComputedLayer(tech, VIA,   KREG, "topvia1_n_cap", 125, 0, "TopVia1", "Original TopVia1 is 125/0 (case where no MiM cap)");
-    addComputedLayer(tech, VIA,   KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, VIA,   KREG, "topvia2_drw",   133, 0, "TopVia2", "Computed layer for TopVia2");
+    }
 
     // NOTE: for CC whiteboxing to work,
     //       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
@@ -116,9 +168,12 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     //
     //       for R mode, MIM cap vias should point to a different GDS number than the regular via
     //       as they have different resistances
-    addComputedLayer(tech, VIA,   KCAP, "mim_via",       125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
-    addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 0,  "Metal5", "Computed layer for Metal5, case MiM cap");
-    addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, VIA,   KCAP, "mim_via",       125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
+        addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 0,  "Metal5", "Computed layer for Metal5, case MiM cap");
+        addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
+    }
 
     // NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
     //       otherwise they should also be declared as ComputedLayerInfo_Kind_KIND_DEVICE_CAPACITOR
@@ -129,21 +184,33 @@ void buildLVSComputedLayers(kpex::tech::Technology *tech) {
     addComputedLayer(tech, METAL,   KPIN, "metal2_pin_con",     10, 2,  "Metal2.pin",    "Metal2 pin");
     addComputedLayer(tech, METAL,   KPIN, "metal3_pin_con",     30, 2,  "Metal3.pin",    "Metal3 pin");
     addComputedLayer(tech, METAL,   KPIN, "metal4_pin_con",     50, 2,  "Metal4.pin",    "Metal4 pin");
-    addComputedLayer(tech, METAL,   KPIN, "metal5_pin_con",     67, 2,  "Metal5.pin",    "Metal5 pin");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, METAL,   KPIN, "metal5_pin_con",     67, 2,  "Metal5.pin",    "Metal5 pin");
+    }
+    
     addComputedLayer(tech, METAL,   KPIN, "topmetal1_pin_con", 126, 2,  "TopMetal1.pin", "TopMetal1 pin");
-    addComputedLayer(tech, METAL,   KPIN, "topmetal2_pin_con", 134, 2,  "TopMetal2.pin", "TopMetal2 pin");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, METAL,   KPIN, "topmetal2_pin_con", 134, 2,  "TopMetal2.pin", "TopMetal2 pin");
+    }
     
     addComputedLayer(tech, METAL,   KLBL, "poly_text",        5, 25,  "GatPoly.text",   "Poly label");
     addComputedLayer(tech, METAL,   KLBL, "metal1_text",      8, 25,  "Metal1.text",    "Metal1 label");
     addComputedLayer(tech, METAL,   KLBL, "metal2_text",     10, 25,  "Metal2.text",    "Metal2 label");
     addComputedLayer(tech, METAL,   KLBL, "metal3_text",     30, 25,  "Metal3.text",    "Metal3 label");
     addComputedLayer(tech, METAL,   KLBL, "metal4_text",     50, 25,  "Metal4.text",    "Metal4 label");
-    addComputedLayer(tech, METAL,   KLBL, "metal5_text",     67, 25,  "Metal5.text",    "Metal5 label");
+    
+    if (is_g2()) {
+        addComputedLayer(tech, METAL,   KLBL, "metal5_text",     67, 25,  "Metal5.text",    "Metal5 label");
+    }
     addComputedLayer(tech, METAL,   KLBL, "topmetal1_text", 126, 25,  "TopMetal1.text", "TopMetal1 label");
-    addComputedLayer(tech, METAL,   KLBL, "topmetal2_text", 134, 25,  "TopMetal2.text", "TopMetal2 label");
+    if (is_g2()) {
+        addComputedLayer(tech, METAL,   KLBL, "topmetal2_text", 134, 25,  "TopMetal2.text", "TopMetal2 label");
+    }
 }
 
-void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
+void TechBuilder::buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // SUBSTRATE:           name    height   thickness         reference
     //                                       (below height 0)
     //-----------------------------------------------------------------------------------------------
@@ -185,14 +252,15 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto mim_via_thickness = topvia1_ncap_thickness - capild_thickness - cmim_cap_thickness;
     auto topvia2_thickness = 2.8;
     
-    auto met1_z      = poly_z + poly_thickness + conp_thickness;
-    auto met2_z      = met1_z + met1_thickness + via1_thickness;
-    auto met3_z      = met2_z + met2_thickness + via2_thickness;
-    auto met4_z      = met3_z + met3_thickness + via3_thickness;
-    auto met5_z      = met4_z + met4_thickness + via4_thickness;
-    auto cmim_z      = met5_z + met5_thickness + capild_thickness;
-    auto topmet1_z   = met5_z + met5_thickness + topvia1_ncap_thickness;
-    auto topmet2_z   = topmet1_z + topmet1_thickness + topvia2_thickness;
+    auto met1_z           = poly_z + poly_thickness + conp_thickness;
+    auto met2_z           = met1_z + met1_thickness + via1_thickness;
+    auto met3_z           = met2_z + met2_thickness + via2_thickness;
+    auto met4_z           = met3_z + met3_thickness + via3_thickness;
+    auto met5_z           = met4_z + met4_thickness + via4_thickness;
+    auto cmim_z           = met5_z + met5_thickness + capild_thickness;
+    auto topmet1_g2_z     = met5_z + met5_thickness + topvia1_ncap_thickness;
+    auto topmet1_cmos5l_z = met4_z + met4_thickness + topvia1_ncap_thickness;
+    auto topmet2_z        = topmet1_g2_z + topmet1_thickness + topvia2_thickness;
     
     // METAL:                      name,      z,           thickness
     //-----------------------------------------------------------------------------------------------
@@ -240,51 +308,71 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ild4",   4.1,          "ild3");
     
-    // METAL:                           name,           z,           thickness
-    //-----------------------------------------------------------------------------------------------
-    auto met5_ncap = addMetalLayer(psi, "metal5_n_cap", met5_z, met5_thickness);
+    kpex::tech::ProcessStackInfo::MetalLayer *met5_ncap = NULL;
+    if (is_g2()) {
+        // METAL:                           name,           z,           thickness
+        //-----------------------------------------------------------------------------------------------
+        met5_ncap = addMetalLayer(psi, "metal5_n_cap", met5_z, met5_thickness);
+    }
     
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,        z,      thickness
-    //-----------------------------------------------------------------------------------------------------------
-    auto met5_cap = addMetalLayer(psi, "metal5_cap", met5_z, met5_thickness);
-    
-    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,        thickness,      thickness, ref
-    //                                                 over metal,       where no metal, sidewall
-    //------------------------------------------------------------------------------------------------------------
-    addConformalDielectric(psi, "ismim", capild_k,     capild_thickness, 0.0,            0.0,       "metal5_cap");
-    
+    kpex::tech::ProcessStackInfo::MetalLayer *met5_cap = NULL;
+    if (is_g2()) {
+        
+        // METAL:                           name,        z,      thickness
+        //-----------------------------------------------------------------------------------------------------------
+        met5_cap = addMetalLayer(psi, "metal5_cap", met5_z, met5_thickness);
+        
+        // DIELECTRIC (conformal)   name,    dielectric_k, thickness,        thickness,      thickness, ref
+        //                                                 over metal,       where no metal, sidewall
+        //------------------------------------------------------------------------------------------------------------
+        addConformalDielectric(psi, "ismim", capild_k,     capild_thickness, 0.0,            0.0,       "metal5_cap");
+    }
+        
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,      z,      thickness
-    //----------------------------------------------------------------------------------------------------
-    auto cmim_cap = addMetalLayer(psi, "cmim_top", cmim_z, cmim_cap_thickness);
-    
+    kpex::tech::ProcessStackInfo::MetalLayer *cmim_cap = NULL;
+    if (is_g2()) {
+        // METAL:                           name,      z,      thickness
+        //----------------------------------------------------------------------------------------------------
+        cmim_cap = addMetalLayer(psi, "cmim_top", cmim_z, cmim_cap_thickness);
+    }
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //----------------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
-    // METAL:                           name,      z,         thickness
-    //----------------------------------------------------------------------------------------------------
-    auto topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_z, topmet1_thickness);
-    
-    // DIELECTRIC (simple)   name,     dielectric_k, ref
-    //----------------------------------------------------------------------------------------------------
-    addSimpleDielectric(psi, "ildtm2",   4.1,        "ildtm1");
-    
-    // METAL:                           name,      z,         thickness
-    //----------------------------------------------------------------------------------------------------
-    auto topmet2 = addMetalLayer(psi, "TopMetal2", topmet2_z, topmet2_thickness);
+    kpex::tech::ProcessStackInfo::MetalLayer *topmet1 = NULL;
+    kpex::tech::ProcessStackInfo::MetalLayer *topmet2 = NULL;
+    const char *pass1_ref = NULL;
+    if (is_g2()) {
+        // METAL:                           name,      z,         thickness
+        //----------------------------------------------------------------------------------------------------
+        topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_g2_z, topmet1_thickness);
+
+        // DIELECTRIC (simple)   name,     dielectric_k, ref
+        //----------------------------------------------------------------------------------------------------
+        addSimpleDielectric(psi, "ildtm2",   4.1,        "ildtm1");
+        
+        // METAL:                           name,      z,         thickness
+        //----------------------------------------------------------------------------------------------------
+        topmet2 = addMetalLayer(psi, "TopMetal2", topmet2_z, topmet2_thickness);
+        pass1_ref = "TopMetal2";
+    } else {
+        // METAL:                           name,      z,         thickness
+        //----------------------------------------------------------------------------------------------------
+        topmet1 = addMetalLayer(psi, "TopMetal1", topmet1_cmos5l_z, topmet1_thickness);
+        pass1_ref = "TopMetal1";
+    }
     
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addConformalDielectric(psi, "pass1",          4.1,         1.5,            1.5,      0.3,    "TopMetal2");
+    addConformalDielectric(psi, "pass1",          4.1,         1.5,            1.5,      0.3,    pass1_ref);
     
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness, ref
     //                                                   over metal,  where no metal, sidewall
@@ -302,10 +390,19 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     auto via1 = met1->mutable_contact_above();
     auto via2 = met2->mutable_contact_above();
     auto via3 = met3->mutable_contact_above();
-    auto via4 = met4->mutable_contact_above();
-    auto topvia1_n_cap = met5_ncap->mutable_contact_above();
-    auto mim_via = cmim_cap->mutable_contact_above();
-    auto topvia2 = topmet1->mutable_contact_above();
+    kpex::tech::ProcessStackInfo::Contact *via4 = NULL;
+    kpex::tech::ProcessStackInfo::Contact *mim_via = NULL;
+    kpex::tech::ProcessStackInfo::Contact *topvia1_n_cap = NULL;
+    kpex::tech::ProcessStackInfo::Contact *topvia2 = NULL;
+    if (is_g2()) {
+        via4 = met4->mutable_contact_above();
+        mim_via = cmim_cap->mutable_contact_above();
+        topvia1_n_cap = met5_ncap->mutable_contact_above();
+        topvia2 = topmet1->mutable_contact_above();
+    } else {
+        topvia1_n_cap = met4->mutable_contact_above();
+    }
+    
     
     // CONTACT:               contact,         layer_below,     metal_above,     thickness,               width, spacing,         border
     //                        (LVS)            (LVS)            (LVS)
@@ -316,11 +413,14 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     setContact(via1,          "via1_drw",      "metal1_con",    "metal2_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
     setContact(via2,          "via2_drw",      "metal2_con",    "metal3_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
     setContact(via3,          "via3_drw",      "metal3_con",    "metal4_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
-    setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
-    
+    if (is_g2()) {
+        setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+        setContact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
+        setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
+        setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
+    } else {
+        
+    }
     // TODO: refine via rules!
     
     // NOTE:  Contact arrays defined at 200 spacing for large array rule (5x5), otherwise spacing is 180.
@@ -338,8 +438,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     
 }
 
-void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
-    // NOTE: coefficients according to https://github.com/IHP-GmbH/IHP-Open-PDK/blob/7897c7f99fe5538656b4c08e300cfe4d2c8a5503/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.tech#L4515
+void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
+    // NOTE: coefficients according to
+    //    - G2: https://github.com/IHP-GmbH/IHP-Open-PDK/blob/970a7688e7dcce2a6172797df9ef47bde2f60f9f/ihp-sg13g2/libs.tech/magic/ihp-sg13g2-extract.tech#L20
+    //    - CMOS5L: https://github.com/IHP-GmbH/ihp-sg13cmos5l/blob/91e2a084bbc18960451532194727aef4ce533cdc/libs.tech/magic/ihp-sg13cmos5l-extract.tech#L20
 
     ex->set_side_halo(8);
     
@@ -352,9 +454,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addLayerResistance(ri, "Metal2",     88);
     addLayerResistance(ri, "Metal3",     88);
     addLayerResistance(ri, "Metal4",     88);
-    addLayerResistance(ri, "Metal5",     88);
+    if (is_g2()) {
+        addLayerResistance(ri, "Metal5",     88);
+    }
     addLayerResistance(ri, "TopMetal1",  18);
-    addLayerResistance(ri, "TopMetal2",  11);
+    if (is_g2()) {
+        addLayerResistance(ri, "TopMetal2",  11);
+    }
 
     // resistance values are in mΩ / CNT
     //                       contact_layer,   layer_below,  layer_above,     resistance
@@ -369,9 +475,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addViaResistance(ri,     "Via1",       9000);
     addViaResistance(ri,     "Via2",       9000);
     addViaResistance(ri,     "Via3",       9000);
-    addViaResistance(ri,     "Via4",       9000);
+    if (is_g2()) {
+        addViaResistance(ri,     "Via4",       9000);
+    }
     addViaResistance(ri,     "TopVia1",    2200);
-    addViaResistance(ri,     "TopVia2",    1100);
+    if (is_g2()) {
+        addViaResistance(ri,     "TopVia2",    1100);
+    }
     
     kpex::tech::CapacitanceInfo *ci = ex->mutable_capacitance();
 
@@ -381,9 +491,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addSubstrateCap(ci, "Metal2",   18.180,   34.798);
     addSubstrateCap(ci, "Metal3",   11.994,   31.352);
     addSubstrateCap(ci, "Metal4",    8.948,   29.083);
-    addSubstrateCap(ci, "Metal5",    7.136,   27.527);
-    addSubstrateCap(ci, "TopMetal1", 5.649,   37.383);
-    addSubstrateCap(ci, "TopMetal2", 3.233,   31.175);
+    if (is_g2()) {
+        addSubstrateCap(ci, "Metal5",    7.136,   27.527);
+        addSubstrateCap(ci, "TopMetal1", 5.649,   37.383);
+        addSubstrateCap(ci, "TopMetal2", 3.233,   31.175);
+    } else {
+        addSubstrateCap(ci, "TopMetal1", 6.727,   34.527);
+    }
     
     const std::string diff_lv_nonfet = "Activ";   // TODO: diff must be non-fet!
     const std::string diff_hv_nonfet = "Activ";   // TODO: diff must be non-fet!
@@ -417,36 +531,48 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addOverlapCap(ci, "Metal4",     "Metal1",       13.962);
     addOverlapCap(ci, "Metal4",     "Metal2",       23.122);
     addOverlapCap(ci, "Metal4",     "Metal3",       67.225);
-    addOverlapCap(ci, "Metal5",     "NWell",         7.136);
-    addOverlapCap(ci, "Metal5",     "PWell",         7.136);
-    addOverlapCap(ci, "Metal5",     diff_lv_nonfet,  7.766);
-    addOverlapCap(ci, "Metal5",     diff_hv_nonfet,  7.758);
-    addOverlapCap(ci, "Metal5",     "GatPoly",       8.046);
-    addOverlapCap(ci, "Metal5",     "Metal1",       10.000);
-    addOverlapCap(ci, "Metal5",     "Metal2",       13.962);
-    addOverlapCap(ci, "Metal5",     "Metal3",       23.122);
-    addOverlapCap(ci, "Metal5",     "Metal4",       67.225);
-    addOverlapCap(ci, "TopMetal1",  "NWell",         5.649);
-    addOverlapCap(ci, "TopMetal1",  "PWell",         5.649);
-    addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  6.036);
-    addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  6.031);
-    addOverlapCap(ci, "TopMetal1",  "GatPoly",       6.204);
-    addOverlapCap(ci, "TopMetal1",  "Metal1",        7.304);
-    addOverlapCap(ci, "TopMetal1",  "Metal2",        9.214);
-    addOverlapCap(ci, "TopMetal1",  "Metal3",       12.475);
-    addOverlapCap(ci, "TopMetal1",  "Metal4",       19.309);
-    addOverlapCap(ci, "TopMetal1",  "Metal5",       42.708);
-    addOverlapCap(ci, "TopMetal2",  "NWell",         3.233);
-    addOverlapCap(ci, "TopMetal2",  "PWell",         3.233);
-    addOverlapCap(ci, "TopMetal2",  diff_lv_nonfet,  3.357);
-    addOverlapCap(ci, "TopMetal2",  diff_hv_nonfet,  3.355);
-    addOverlapCap(ci, "TopMetal2",  "GatPoly",       3.408);
-    addOverlapCap(ci, "TopMetal2",  "Metal1",        3.716);
-    addOverlapCap(ci, "TopMetal2",  "Metal2",        4.154);
-    addOverlapCap(ci, "TopMetal2",  "Metal3",        4.708);
-    addOverlapCap(ci, "TopMetal2",  "Metal4",        5.434);
-    addOverlapCap(ci, "TopMetal2",  "Metal5",        6.425);
-    addOverlapCap(ci, "TopMetal2",  "TopMetal1",    12.965);
+    if (is_g2()) {
+        addOverlapCap(ci, "Metal5",     "NWell",         7.136);
+        addOverlapCap(ci, "Metal5",     "PWell",         7.136);
+        addOverlapCap(ci, "Metal5",     diff_lv_nonfet,  7.766);
+        addOverlapCap(ci, "Metal5",     diff_hv_nonfet,  7.758);
+        addOverlapCap(ci, "Metal5",     "GatPoly",       8.046);
+        addOverlapCap(ci, "Metal5",     "Metal1",       10.000);
+        addOverlapCap(ci, "Metal5",     "Metal2",       13.962);
+        addOverlapCap(ci, "Metal5",     "Metal3",       23.122);
+        addOverlapCap(ci, "Metal5",     "Metal4",       67.225);
+        addOverlapCap(ci, "TopMetal1",  "NWell",         5.649);
+        addOverlapCap(ci, "TopMetal1",  "PWell",         5.649);
+        addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  6.036);
+        addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  6.031);
+        addOverlapCap(ci, "TopMetal1",  "GatPoly",       6.204);
+        addOverlapCap(ci, "TopMetal1",  "Metal1",        7.304);
+        addOverlapCap(ci, "TopMetal1",  "Metal2",        9.214);
+        addOverlapCap(ci, "TopMetal1",  "Metal3",       12.475);
+        addOverlapCap(ci, "TopMetal1",  "Metal4",       19.309);
+        addOverlapCap(ci, "TopMetal1",  "Metal5",       42.708);
+        addOverlapCap(ci, "TopMetal2",  "NWell",         3.233);
+        addOverlapCap(ci, "TopMetal2",  "PWell",         3.233);
+        addOverlapCap(ci, "TopMetal2",  diff_lv_nonfet,  3.357);
+        addOverlapCap(ci, "TopMetal2",  diff_hv_nonfet,  3.355);
+        addOverlapCap(ci, "TopMetal2",  "GatPoly",       3.408);
+        addOverlapCap(ci, "TopMetal2",  "Metal1",        3.716);
+        addOverlapCap(ci, "TopMetal2",  "Metal2",        4.154);
+        addOverlapCap(ci, "TopMetal2",  "Metal3",        4.708);
+        addOverlapCap(ci, "TopMetal2",  "Metal4",        5.434);
+        addOverlapCap(ci, "TopMetal2",  "Metal5",        6.425);
+        addOverlapCap(ci, "TopMetal2",  "TopMetal1",    12.965);
+    } else { // CMOS5L: overlap situations differ as Metal5 and TopMetal2 are missing!
+        addOverlapCap(ci, "TopMetal1",  "NWell",         6.727);
+        addOverlapCap(ci, "TopMetal1",  "PWell",         6.727);
+        addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  7.284);
+        addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  7.276);
+        addOverlapCap(ci, "TopMetal1",  "GatPoly",       7.529);
+        addOverlapCap(ci, "TopMetal1",  "Metal1",        9.213);
+        addOverlapCap(ci, "TopMetal1",  "Metal2",       12.475);
+        addOverlapCap(ci, "TopMetal1",  "Metal3",       19.309);
+        addOverlapCap(ci, "TopMetal1",  "Metal4",       42.708);
+    }
 
     //                 layer_name,      cap,  offset
     addSidewallCap(ci, "GatPoly",    11.722, -0.023);
@@ -454,9 +580,13 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addSidewallCap(ci, "Metal2",     40.981, -0.033);
     addSidewallCap(ci, "Metal3",     37.679, -0.045);
     addSidewallCap(ci, "Metal4",     49.526,  0.004);
-    addSidewallCap(ci, "Metal5",     53.129,  0.021);
+    if (is_g2()) {
+        addSidewallCap(ci, "Metal5",     53.129,  0.021);
+    }
     addSidewallCap(ci, "TopMetal1", 162.172,  0.343);
-    addSidewallCap(ci, "TopMetal2", 227.323,  1.893);
+    if (is_g2()) {
+        addSidewallCap(ci, "TopMetal2", 227.323,  1.893);
+    }
 
     //                        in_layer,       out_layer,      cap
     addSidewallOverlapCap(ci, "GatPoly",      "NWell",        44.537);
@@ -497,60 +627,87 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addSidewallOverlapCap(ci, "Metal2",       "Metal4",       22.327);
     addSidewallOverlapCap(ci, "Metal4",       "Metal3",       49.537);
     addSidewallOverlapCap(ci, "Metal3",       "Metal4",       40.019);
-    addSidewallOverlapCap(ci, "Metal5",       "NWell",        27.527);
-    addSidewallOverlapCap(ci, "Metal5",       "PWell",        27.527);
-    addSidewallOverlapCap(ci, "Metal5",       diff_lv_nonfet, 28.227);
-    addSidewallOverlapCap(ci, "Metal5",       diff_hv_nonfet, 28.221);
-    addSidewallOverlapCap(ci, "Metal5",       "GatPoly",      28.414);
-    addSidewallOverlapCap(ci, "GatPoly",      "Metal5",        4.178);
-    addSidewallOverlapCap(ci, "Metal5",       "Metal1",       29.935);
-    addSidewallOverlapCap(ci, "Metal1",       "Metal5",        9.725);
-    addSidewallOverlapCap(ci, "Metal5",       "Metal2",       32.116);
-    addSidewallOverlapCap(ci, "Metal2",       "Metal5",       16.534);
-    addSidewallOverlapCap(ci, "Metal5",       "Metal3",       36.971);
-    addSidewallOverlapCap(ci, "Metal3",       "Metal5",       24.785);
-    addSidewallOverlapCap(ci, "Metal5",       "Metal4",       49.517);
-    addSidewallOverlapCap(ci, "Metal4",       "Metal5",       41.956);
-    
-    addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        37.383);
-    addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        37.383);
-    addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 38.084);
-    addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 38.085);
-    addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      38.376);
-    addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.316);
-    addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       39.678);
-    addSidewallOverlapCap(ci, "Metal1",       "TopMetal1",     7.669);
-    addSidewallOverlapCap(ci, "TopMetal1",    "Metal2",       42.268);
-    addSidewallOverlapCap(ci, "Metal2",       "TopMetal1",    12.649);
-    addSidewallOverlapCap(ci, "TopMetal1",    "Metal3",       46.611);
-    addSidewallOverlapCap(ci, "Metal3",       "TopMetal1",    17.848);
-    addSidewallOverlapCap(ci, "TopMetal1",    "Metal4",       52.657);
-    addSidewallOverlapCap(ci, "Metal4",       "TopMetal1",    24.526);
-    addSidewallOverlapCap(ci, "TopMetal1",    "Metal5",       65.859);
-    addSidewallOverlapCap(ci, "Metal5",       "TopMetal1",    36.377);
-    
-    addSidewallOverlapCap(ci, "TopMetal2",    "NWell",        31.175);
-    addSidewallOverlapCap(ci, "TopMetal2",    "PWell",        31.175);
-    addSidewallOverlapCap(ci, "TopMetal2",    diff_lv_nonfet, 31.484);
-    addSidewallOverlapCap(ci, "TopMetal2",    diff_hv_nonfet, 30.835);
-    addSidewallOverlapCap(ci, "TopMetal2",    "GatPoly",      30.971);
-    addSidewallOverlapCap(ci, "GatPoly",      "TopMetal2",     1.909);
-    addSidewallOverlapCap(ci, "TopMetal2",    "Metal1",       32.318);
-    addSidewallOverlapCap(ci, "Metal1",       "TopMetal2",     4.344);
-    addSidewallOverlapCap(ci, "TopMetal2",    "Metal2",       33.245);
-    addSidewallOverlapCap(ci, "Metal2",       "TopMetal2",     6.975);
-    addSidewallOverlapCap(ci, "TopMetal2",    "Metal3",       34.339);
-    addSidewallOverlapCap(ci, "Metal3",       "TopMetal2",     9.381);
-    addSidewallOverlapCap(ci, "TopMetal2",    "Metal4",       35.630);
-    addSidewallOverlapCap(ci, "Metal4",       "TopMetal2",    11.825);
-    addSidewallOverlapCap(ci, "TopMetal2",    "Metal5",       37.206);
-    addSidewallOverlapCap(ci, "Metal5",       "TopMetal2",    14.415);
-    addSidewallOverlapCap(ci, "TopMetal2",    "TopMetal1",    44.735);
-    addSidewallOverlapCap(ci, "TopMetal1",    "TopMetal2",    33.071);
+    if (is_g2()) {
+        addSidewallOverlapCap(ci, "Metal5",       "NWell",        27.527);
+        addSidewallOverlapCap(ci, "Metal5",       "PWell",        27.527);
+        addSidewallOverlapCap(ci, "Metal5",       diff_lv_nonfet, 28.227);
+        addSidewallOverlapCap(ci, "Metal5",       diff_hv_nonfet, 28.221);
+        addSidewallOverlapCap(ci, "Metal5",       "GatPoly",      28.414);
+        addSidewallOverlapCap(ci, "GatPoly",      "Metal5",        4.178);
+        addSidewallOverlapCap(ci, "Metal5",       "Metal1",       29.935);
+        addSidewallOverlapCap(ci, "Metal1",       "Metal5",        9.725);
+        addSidewallOverlapCap(ci, "Metal5",       "Metal2",       32.116);
+        addSidewallOverlapCap(ci, "Metal2",       "Metal5",       16.534);
+        addSidewallOverlapCap(ci, "Metal5",       "Metal3",       36.971);
+        addSidewallOverlapCap(ci, "Metal3",       "Metal5",       24.785);
+        addSidewallOverlapCap(ci, "Metal5",       "Metal4",       49.517);
+        addSidewallOverlapCap(ci, "Metal4",       "Metal5",       41.956);
+        addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        37.383);
+        addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        37.383);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 38.084);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 38.085);
+        addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      38.376);
+        addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.316);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       39.678);
+        addSidewallOverlapCap(ci, "Metal1",       "TopMetal1",     7.669);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal2",       42.268);
+        addSidewallOverlapCap(ci, "Metal2",       "TopMetal1",    12.649);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal3",       46.611);
+        addSidewallOverlapCap(ci, "Metal3",       "TopMetal1",    17.848);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal4",       52.657);
+        addSidewallOverlapCap(ci, "Metal4",       "TopMetal1",    24.526);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal5",       65.859);
+        addSidewallOverlapCap(ci, "Metal5",       "TopMetal1",    36.377);
+        
+        addSidewallOverlapCap(ci, "TopMetal2",    "NWell",        31.175);
+        addSidewallOverlapCap(ci, "TopMetal2",    "PWell",        31.175);
+        addSidewallOverlapCap(ci, "TopMetal2",    diff_lv_nonfet, 31.484);
+        addSidewallOverlapCap(ci, "TopMetal2",    diff_hv_nonfet, 30.835);
+        addSidewallOverlapCap(ci, "TopMetal2",    "GatPoly",      30.971);
+        addSidewallOverlapCap(ci, "GatPoly",      "TopMetal2",     1.909);
+        addSidewallOverlapCap(ci, "TopMetal2",    "Metal1",       32.318);
+        addSidewallOverlapCap(ci, "Metal1",       "TopMetal2",     4.344);
+        addSidewallOverlapCap(ci, "TopMetal2",    "Metal2",       33.245);
+        addSidewallOverlapCap(ci, "Metal2",       "TopMetal2",     6.975);
+        addSidewallOverlapCap(ci, "TopMetal2",    "Metal3",       34.339);
+        addSidewallOverlapCap(ci, "Metal3",       "TopMetal2",     9.381);
+        addSidewallOverlapCap(ci, "TopMetal2",    "Metal4",       35.630);
+        addSidewallOverlapCap(ci, "Metal4",       "TopMetal2",    11.825);
+        addSidewallOverlapCap(ci, "TopMetal2",    "Metal5",       37.206);
+        addSidewallOverlapCap(ci, "Metal5",       "TopMetal2",    14.415);
+        addSidewallOverlapCap(ci, "TopMetal2",    "TopMetal1",    44.735);
+        addSidewallOverlapCap(ci, "TopMetal1",    "TopMetal2",    33.071);
+    } else { // CMOS5L: fringe situations differ as Metal5 and TopMetal2 are missing!
+        addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        34.527);
+        addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        34.527);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 35.162);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 35.228);
+        addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      35.513);
+        addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.942);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       37.397);
+        addSidewallOverlapCap(ci, "Metal1",       "TopMetal1",     9.198);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal2",       40.400);
+        addSidewallOverlapCap(ci, "Metal2",       "TopMetal1",    15.402);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal3",       45.197);
+        addSidewallOverlapCap(ci, "Metal3",       "TopMetal1",    22.609);
+        addSidewallOverlapCap(ci, "TopMetal1",    "Metal4",       55.229);
+        addSidewallOverlapCap(ci, "Metal4",       "TopMetal1",    35.146);
+    }
 }
 
-void buildTech(kpex::tech::Technology &tech) {
-    tech.set_name("ihp-sg13g2");
+void TechBuilder::buildTech(kpex::tech::Technology &tech) {
+    const char *TECH_NAME;
+    switch (_variant) {
+        case SG13G2:
+            TECH_NAME = "ihp-sg13g2";
+            break;
+            
+        case SG13CMOS5L:
+            TECH_NAME = "ihp-sg13cmos5l";
+            break;
+    }
+    
+    tech.set_name(TECH_NAME);
     
     buildLayers(&tech);
 
@@ -562,5 +719,12 @@ void buildTech(kpex::tech::Technology &tech) {
     kpex::tech::ProcessParasiticsInfo *ex = tech.mutable_process_parasitics();
     buildProcessParasiticsInfo(ex);
 }
+
+void buildTech(kpex::tech::Technology &tech, LayerStackVariant variant)
+{
+    TechBuilder builder(variant);
+    builder.buildTech(tech);
+}
+
 
 }
