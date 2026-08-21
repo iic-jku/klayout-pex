@@ -74,6 +74,7 @@ from .magic.magic_runner import (
     MagicPEXMode,
     MagicShortMode,
     MagicMergeMode,
+    MagicUniqueMode,
     run_magic,
     prepare_magic_script,
 )
@@ -253,10 +254,21 @@ class KpexCLI:
                                  type=int, default=100,
                                  help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
                                       "(MAGIC command: ext2spice rthresh <value>)")
-        group_magic.add_argument("--magic_tolerance", dest="magic_tolerance",
-                                 type=float, default=1,
-                                 help="Set ratio between resistor and device tolerance (default is %(default)s). "
-                                      "(MAGIC command: extresist tolerance <value>)")
+        group_magic.add_argument("--magic_thresh", dest="magic_thresh",
+                                 type=int, default=None,
+                                 help="Lumped resistance threshold (in mΩ) to trigger network extraction. "
+                                      "If not supplied, MAGIC's default is implicitly used. "
+                                      "(MAGIC command: extresist threshold <value>)")
+        group_magic.add_argument("--magic_minres", dest="magic_minres",
+                                 type=int, default=None,
+                                 help="Threshold (in mΩ) for removing individual resistors during network simplification. "
+                                      "If not supplied, MAGIC's default is implicitly used. "
+                                      "(MAGIC command: extresist minres <value>)")
+        group_magic.add_argument("--magic_mindel", dest="magic_mindel",
+                                 type=int, default=None,
+                                 help="Minimum delay threshold (in ps) to trigger network extraction. "
+                                      "If not supplied, MAGIC's default is implicitly used. "
+                                      "(MAGIC command: extresist mindelay <value>)")
         group_magic.add_argument("--magic_halo", dest="magic_halo",
                                  type=float, default=None,
                                  help="Custom sidewall halo distance (in µm) "
@@ -270,6 +282,11 @@ class KpexCLI:
         group_magic.add_argument("--magic_pre_flatten", dest='magic_pre_flatten',
                                  action='store_true', default=False,
                                  help="Flatten GDS before reading it with Magic (default is %(default)s).")
+        group_magic.add_argument("--magic_unique", dest='magic_unique_mode',
+                                 default=MagicUniqueMode.DEFAULT, type=MagicUniqueMode, choices=list(MagicUniqueMode),
+                                 help="Control net uniqueness during extraction "
+                                 " ('implicit' omits the command, uses MAGIC's default value). "
+                                 + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
 
         group_25d = main_parser.add_argument_group("2.5D options")
         group_25d.add_argument("--mode", dest='pex_mode',
@@ -623,10 +640,13 @@ class KpexCLI:
                              pex_mode=args.magic_pex_mode,
                              c_threshold=args.magic_cthresh,
                              r_threshold=args.magic_rthresh,
-                             tolerance=args.magic_tolerance,
+                             threshold=args.magic_thresh,
+                             min_res=args.magic_minres,
+                             min_delay=args.magic_mindel,
                              halo=args.magic_halo,
                              short_mode=args.magic_short_mode,
-                             merge_mode=args.magic_merge_mode)
+                             merge_mode=args.magic_merge_mode,
+                             unique_mode=args.magic_unique_mode)
 
         run_magic(exe_path=args.magic_exe_path,
                   magicrc_path=args.magicrc_path,
