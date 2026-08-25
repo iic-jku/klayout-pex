@@ -167,7 +167,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     
     // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
     //-----------------------------------------------------------------------------------------------
-    addSidewallDielectric(psi, "iox",   0.39,         0.18,               0.006,            "poly");
+    addSidewallDielectric(psi, "iox",   3.9,          0.18,               0.006,            "poly");
     addSidewallDielectric(psi, "spnit", 7.5,          0.121,              0.0431,           "iox");
 
     // DIELECTRIC (simple)    name,     dielectric_k, ref
