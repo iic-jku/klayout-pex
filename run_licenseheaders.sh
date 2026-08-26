@@ -25,7 +25,7 @@
 
 python3 -m licenseheaders \
 	--tmpl .copyright.tmpl \
-	--years "2024-2025" \
+	--years "2024-2026" \
 	--owner "Martin Jan Köhler and Harald Pretl" \
 	--projname "KPEX" \
 	--projurl "https://github.com/iic-jku/klayout-pex" \
