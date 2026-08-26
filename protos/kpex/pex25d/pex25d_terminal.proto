@@ -1,0 +1,141 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Terminals — the ports of a PEX25D scene.
+//
+// OPTIONAL, and only resistance extraction has any use for one: a capacitance
+// problem has no ports, because every conductor is a single equipotential body
+// and there is nowhere for current to enter. A resistance problem cannot do
+// without them. PEX25D deliberately excludes compact-device geometry so that
+// device capacitances are not counted twice, which means the places where
+// interconnect meets an excluded device are otherwise not in the file at all,
+// and the resistive network of a net would have nothing to terminate on.
+//
+// A TERMINAL IS A NODE. Two consequences run through everything below: it
+// SHORTS whatever it covers, and — when it is a DEVICE_TERMINAL — it OPENS the
+// face beneath what it covers. Both are about the intersection, never about the
+// declared region and never about the whole shape.
+//
+// `TerminalKind` is a top-level enum, like `DielectricKind`, so that
+// pex25d_scene.proto can name a kind without importing the unresolved AST.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_source_ref.proto";
+import "kpex/pex25d/pex25d_geometry.proto";
+
+// -----------------------------------------------------------------------------
+
+// `KIND <kind>` on a TERMINAL record.
+//
+// Mirrors kpex.r.RNode.Kind, so that a terminal maps onto a node of an
+// extracted R network without a translation table. The junction kinds of that
+// enum have no counterpart here: they are produced by an extractor, never
+// declared in a file.
+enum TerminalKind {
+    TERMINAL_KIND_UNSPECIFIED = 0;
+
+    // A port of the net — a top-level pin, a probe point, anything the
+    // enclosing flow wants to see as a node of the extracted network.
+    TERMINAL_KIND_PIN = 1;
+
+    // Where interconnect meets a compact device model whose geometry PEX25D
+    // excludes. The device owns everything BELOW the node — the diffusion, the
+    // channel, the spreading resistance between contacts on one diffusion —
+    // and everything above it, the contact included, is extracted here. A
+    // consumer must not add a contact resistance of its own on top of that.
+    //
+    // THIS BOUNDARY APPLIES TO BOTH PROBLEMS. The lower face of the terminal's
+    // intersection is an OPEN BOUNDARY of the extracted region, not contact
+    // with whatever lies beyond it. That is what keeps a diffusion contact from
+    // being shorted to 0 V where its lower face coincides with the ground
+    // plane's upper face, and keeps the junction capacitance — which belongs to
+    // the device model — from being counted here as well.
+    //
+    // A substrate or well tap is the contrasting case: same coincident face, no
+    // DEVICE_TERMINAL, so the ordinary rule applies and it is connected to 0 V,
+    // which is the point of a tap.
+    TERMINAL_KIND_DEVICE_TERMINAL = 2;
+}
+
+// `TERMINAL <name> CONDUCTOR <c> LAYER <l> [KIND <k>] LL <x> <y> UR <x> <y>`
+//
+// A place where current enters or leaves a conductor.
+//
+// THE TERMINAL IS THE INTERSECTION of `region` with the conductor's geometry on
+// `layer`, and that intersection must be non-empty. `region` itself is only a
+// marker: it may extend over the gaps between shapes, and one region may
+// therefore cover several disjoint shapes — the four licon cuts of a
+// source/drain, the fingers of one gate — which then form a SINGLE node. That
+// is what the device model on the other side of the boundary expects; one
+// terminal per cut would produce four nodes where the device has one, parse
+// cleanly, and report nothing.
+//
+// On a VIA profile the intersection must cover each cut ENTIRELY. A region that
+// clips a cut is an error: a cut is atomic, one lumped resistor with one face
+// at each end. Selecting some cuts and not others is fine; taking part of a cut
+// is not. This is also what lets the open-boundary rule have a single form —
+// see TERMINAL_KIND_DEVICE_TERMINAL.
+//
+// A TERMINAL MAKES ITS INTERSECTION AN EQUIPOTENTIAL NODE. Everything it covers
+// is shorted together, so an oversized region silently deletes the resistance
+// beneath it — a gate terminal spanning the whole gate poly removes exactly the
+// gate resistance the extraction was for, and no validator can catch it,
+// because both files are legal and merely describe different circuits. Writers
+// size a terminal to the boundary it marks, not to the shape it sits on.
+//
+// The region is XY only: on a METAL profile it spans the full z extent of
+// `layer`, which is the 2.5D reading and what a square-counting or tessellating
+// extractor wants. A 3D solver that would rather drive a single face may
+// restrict it; the format does not say which, because in 2.5D there is no
+// answer.
+//
+// On a VIA profile a terminal is instead a NODE AT THE VIA'S LOWER FACE, not a
+// region spanning it — otherwise the via's own resistance would be shorted out
+// by its own terminal. LOWER is a convention: either end would avoid the short,
+// and the lower one is chosen because that is where a DEVICE_TERMINAL belongs.
+// A PIN normally sits on a METAL, where the question does not arise; placed on
+// a VIA it resolves to the lower face like any other terminal.
+message Terminal {
+    // Unique among terminals — a namespace of its own, distinct from both the
+    // profile namespace and the conductor/net namespace. Carried through to
+    // the node name of the extracted network.
+    string name = 1;
+
+    // Names a CONDUCTOR shortname. The net follows from the conductor and is
+    // never restated here.
+    string conductor = 2;
+
+    // Names a METAL or VIA profile, exactly as ShapeRecord.layer does, and the
+    // conductor must have geometry on it.
+    string layer = 3;
+
+    TerminalKind kind = 4;
+
+    // `LL <x> <y> UR <x> <y>`, grid units.
+    Box2D region = 5;
+
+    SourceRef source = 100;
+}

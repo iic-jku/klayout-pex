@@ -1,0 +1,102 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Units and the coordinate grid for the PEX25D (Parasitic Extraction 2.5D) format.
+// See https://github.com/iic-jku/klayout-pex/issues/184
+//
+// COORDINATES
+// -----------
+// Every coordinate, thickness and z-offset in the PEX25D protos is an *integer
+// multiple of the declared grid*, NOT a floating point value in the declared
+// length unit.
+//
+// This is deliberate. The PEX25D geometry model is relative: via extents come
+// from CONNECTS, dielectric films from WRAPS, inter-metal fill from BETWEEN.
+// That model only closes if faces coincide *exactly*. At 4-decimal um
+// precision a large fraction of realistic `a + b` sums do not compare equal to
+// the decimal literal of their own result once they have been through a
+// binary double, so readers must never round-trip PEX25D numbers through
+// double / float. Scan the decimal digits straight into a scaled integer.
+//
+// Along z every operation in the format is an addition of such values, so
+// every derived z is again an exact multiple of the grid: coincident faces
+// compare equal and the occupancy rule needs no tolerance. In XY that holds
+// for Manhattan geometry only — a lateral offset of a non-Manhattan edge lands
+// off grid and MUST be snapped by the reader, so that two readers of one file
+// produce identical geometry.
+//
+// Checking that a literal is on the grid: parse it, divide by the grid, round
+// to the nearest integer, and require the quotient to be within 1e-6 of that
+// integer. Do NOT test with a modulo — in binary floating point
+// 0.3262 % 0.0001 is 9.9999999999e-05, not 0, and an exact-modulo check
+// rejects legal files.
+//
+// A reader converts back for solver adapters only at the very last step:
+//
+//     length_in_units = grid_value * grid_numerator / grid_denominator
+//
+// This also matches kpex.geometry, whose Point/Box coordinates are already
+// int64 database units.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+// `UNITS LENGTH um GRID 0.0001`
+message Units {
+    enum LengthUnit {
+        LENGTH_UNIT_UNSPECIFIED = 0;
+        LENGTH_UNIT_UM = 1;
+        LENGTH_UNIT_NM = 2;
+        LENGTH_UNIT_M = 3;
+    }
+
+    LengthUnit length = 1;
+
+    // The grid as an exact rational in `length` units, so that no reader ever
+    // has to represent the grid itself as a double:
+    //
+    //     grid = grid_numerator / grid_denominator
+    //
+    // `GRID 0.0001` with LENGTH_UNIT_UM is therefore 1 / 10000.
+    // Writers should normalize to the smallest denominator.
+    int64 grid_numerator = 2;
+    int64 grid_denominator = 3;
+
+    // Optional: the layout database unit the geometry was derived from, as an
+    // exact rational in `length` units (sky130A: 1/1000 um).
+    //
+    // NOTE: the text format has no UNITS clause for this yet — see the
+    // `META source_dbu` proposal in issue #184. Until that lands, a reader
+    // fills these from that META key if present and leaves them zero
+    // otherwise. Zero means "unknown", not "1".
+    //
+    // The layout DBU and the PEX25D grid are BOTH int64 and are NOT the same
+    // space — with GRID 0.0001 um and a 0.001 um DBU they differ by 10x. A
+    // writer scales; a reader handing geometry back to klayout.db scales back.
+    // Recording the DBU here means the reader does not have to guess, and lets
+    // the validator check that the grid divides the DBU exactly (any writer
+    // for which it does not cannot represent its own geometry on the grid).
+    int64 source_dbu_numerator = 4;
+    int64 source_dbu_denominator = 5;
+}

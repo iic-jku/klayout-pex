@@ -1,0 +1,326 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// PEX25DScene — the *resolved* form of a PEX25D file.
+//
+//     text --[reader]--> PEX25DFile --[resolver]--> PEX25DScene --[adapter]--> solver
+//
+// Everything the text leaves implicit has been computed here:
+//   * every profile carries an absolute z extent in grid units;
+//   * every WRAPS / CONNECTS / BETWEEN reference has been resolved and the
+//     wrap chain flattened to a depth number;
+//   * conductor geometry is grouped per layer;
+//   * the computational domain is an explicit box.
+//
+// Solver adapters (FasterCap, ElmerFEM, ...) should consume ONLY this message
+// and never PEX25DFile, so that adapters never re-implement resolution and never
+// have to know which form the numbers arrived in.
+//
+// This is also the natural machine-to-machine exchange: a PEX25DScene in binary
+// protobuf is far cheaper to read than a layout-sized PEX25D text file, and is
+// readable in every language protobuf supports without anyone writing a second
+// text reader.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_geometry.proto";
+import "kpex/pex25d/pex25d_units.proto";
+import "kpex/pex25d/pex25d_meta.proto";
+import "kpex/pex25d/pex25d_dielectric.proto";
+import "kpex/pex25d/pex25d_source_ref.proto";
+import "kpex/pex25d/pex25d_domain.proto";
+import "kpex/pex25d/pex25d_resistance.proto";
+import "kpex/pex25d/pex25d_terminal.proto";
+
+// -----------------------------------------------------------------------------
+
+message PEX25DScene {
+    uint32 format_version_major = 1;
+    uint32 format_version_minor = 2;
+    string format_version_suffix = 5;  // the `rc1` of `PEX25D 1.0-rc1`, no '-'
+
+    Units units = 3;
+    repeated Meta meta = 4;
+
+    // The infinite ground plane, if the file declared one.
+    ResolvedGroundPlane ground_plane = 10;
+
+    // Conductive profiles (METAL, VIA), z resolved.
+    repeated ResolvedLayer layers = 11;
+
+    // Dielectric profiles, z and wrap chain resolved, ordered by ascending
+    // `wrap_depth` so that a consumer walking the list in order sees the
+    // occupancy winner first at any point it tests.
+    repeated ResolvedDielectric dielectrics = 12;
+
+    // Fills every point not claimed by a conductor, the ground plane, or a
+    // dielectric.
+    ResolvedBackground background = 13;
+
+    // Conductors with their geometry grouped per layer.
+    repeated ResolvedConductor conductors = 20;
+
+    // A DOMAIN_MARGIN applied to the finite geometry bounding box, or the
+    // file's DOMAIN_BOX copied. UNSET if the file gave neither: the resolver
+    // does not invent a domain, because it cannot know what a given solver
+    // wants. Adapters must handle an absent domain themselves.
+    ResolvedDomain domain = 30;
+
+    // The reference temperature every resistance value in this scene is quoted
+    // at, copied from `RESISTANCE TEMPERATURE`. Unset when the file gave none.
+    // The resolver never substitutes an operating temperature of its own: it
+    // carries T_ref and the per-profile coefficients through and leaves the
+    // scaling to whoever knows what temperature is being extracted at.
+    ResistanceTemperature resistance_temperature = 40;
+}
+
+// -----------------------------------------------------------------------------
+// Profiles
+// -----------------------------------------------------------------------------
+
+message ResolvedGroundPlane {
+    string name = 1;
+    int64 zlow = 2;   // grid units
+    int64 zhigh = 3;  // grid units
+
+    SourceRef source = 100;
+}
+
+message ResolvedLayer {
+    enum Kind {
+        RESOLVED_LAYER_KIND_UNSPECIFIED = 0;
+        RESOLVED_LAYER_KIND_METAL = 1;
+        RESOLVED_LAYER_KIND_VIA = 2;
+    }
+
+    string name = 1;
+    Kind kind = 2;
+
+    // Absolute, grid units. For a VIA these are derived from CONNECTS:
+    // zlow = top face of the layer below, zhigh = bottom face of the layer
+    // above.
+    int64 zlow = 3;
+    int64 zhigh = 4;
+
+    // VIA only: the resolved endpoints, kept so that adapters and error
+    // messages can talk about the connection rather than about two numbers.
+    string connects_below = 5;
+    string connects_above = 6;
+
+    // OPTIONAL, from a `RESISTANCE METAL` / `RESISTANCE VIA` record, carried
+    // through verbatim including its temperature coefficients. UNSET means the
+    // file stated no resistance for this profile, which is NOT zero: an
+    // adapter asked for resistance must refuse such a scene rather than solve
+    // it with a perfect conductor in it. `kind` decides which arm is legal.
+    //
+    // An ANCHOR profile is the exception: a METAL that no ResolvedConductor has
+    // a region on has no solid, carries no current, and is expected to carry no
+    // resistance. The refusal rule is about profiles carrying geometry.
+    oneof resistance {
+        MetalResistance metal_resistance = 10;
+        ViaResistance via_resistance = 11;
+    }
+
+    SourceRef source = 100;
+}
+
+// A dielectric with its geometry fully determined.
+message ResolvedDielectric {
+    string name = 1;
+
+    // Which PEX25D statement produced it; the thickness fields that are
+    // meaningful depend on this.
+    DielectricKind kind = 2;
+
+    double permittivity = 3;
+
+    // The profile this film or fill is built on, resolved.
+    string wraps = 4;
+
+    // Number of WRAPS links from this dielectric down to the non-dielectric
+    // root of its chain (a METAL, VIA or GROUND_PLANE). The film directly on a
+    // conductor has depth 1, the film on that film has depth 2, and so on.
+    //
+    // OCCUPANCY: where several dielectrics claim the same point, the one with
+    // the SMALLEST wrap_depth wins — the innermost film is nearest the
+    // conductor it was built on. A tie between two dielectrics at the same
+    // point and the same depth is a validation error, which is why a
+    // DIELECTRIC_SIMPLE must wrap the outermost film of its `between_below`
+    // object. The background is not in this list and never competes: it fills
+    // only what no dielectric claims. Conductors and the ground plane always
+    // win over any dielectric.
+    uint32 wrap_depth = 5;
+
+    // The non-dielectric profile at the root of the wrap chain.
+    string root = 6;
+
+    // Absolute z extent in grid units.
+    //
+    // For a CONFORMAL film, `zhigh` is the height reached OVER the wrapped
+    // object; where there is no metal the film's top does not reach it. The
+    // pair is the bounding extent, not a constant-height slab.
+    int64 zlow = 7;
+    int64 zhigh = 8;
+
+    // Thicknesses carried through from the statement, in grid units.
+    // Which of these are set depends on `kind`:
+    //   SIMPLE     — none
+    //   CONFORMAL  — thickness_over_wrapped, thickness_beside_wrapped,
+    //                thickness_on_field
+    //
+    // Lateral offsets have already been snapped to the grid by the resolver,
+    // so a 45-degree edge grown by thickness_beside_wrapped is on grid here.
+    int64 thickness_beside_wrapped = 10;
+    int64 thickness_over_wrapped = 11;
+    int64 thickness_on_field = 12;
+
+    // SIMPLE only: the resolved BETWEEN endpoints.
+    string between_below = 20;
+    string between_above = 21;
+
+    SourceRef source = 100;
+}
+
+message ResolvedBackground {
+    string name = 1;
+    double permittivity = 2;
+
+    SourceRef source = 100;
+}
+
+// -----------------------------------------------------------------------------
+// Conductors
+// -----------------------------------------------------------------------------
+
+message ResolvedConductor {
+    string name = 1;
+    string net = 2;
+
+    // True when `net` is exactly the reserved name FLOATING, case-sensitive:
+    // a conductor belonging to no net (dummy fill, tiling, anything that
+    // shields without being connected). Exempt from the
+    // same-net-one-potential constraint — each is an independent body at its
+    // own unknown potential, solved as a conductor and reported under its
+    // shortname.
+    bool floating = 3;
+
+    // Geometry grouped by layer. Shapes are as written; whether the resolver
+    // merges overlapping shapes within one conductor and layer is an
+    // implementation choice, but it must not merge across conductors —
+    // overlap between distinct conductors is an error.
+    repeated ConductorLayerRegion regions = 4;
+
+    // OPTIONAL. Empty for a capacitance-only scene, and empty for a FLOATING
+    // conductor, which by construction has no port. A conductor with fewer
+    // than two terminals contributes no resistive elements and is absent from
+    // a resistance result, while remaining a full participant in the
+    // capacitance problem.
+    repeated ResolvedTerminal terminals = 5;
+
+    SourceRef source = 100;
+}
+
+message ConductorLayerRegion {
+    // Names a ResolvedLayer (METAL or VIA).
+    string layer = 1;
+
+    repeated Box2D boxes = 2;
+    repeated Polygon2D polygons = 3;
+}
+
+// -----------------------------------------------------------------------------
+// Terminals
+// -----------------------------------------------------------------------------
+
+// A TERMINAL with its layer resolved to an absolute z extent and its region
+// intersected against the conductor's geometry.
+//
+// On a METAL layer the z pair is the full extent of the layer: in 2.5D a
+// terminal is the whole thickness of the metal over its footprint, and the
+// format has no way to name one face of it. On a VIA layer the node is at
+// `zlow` — the cut's lower face — so that the cut's own resistance lies between
+// the terminal and the layer above.
+//
+// For a TERMINAL_KIND_DEVICE_TERMINAL the lower face of `boxes` / `polygons` is
+// an OPEN BOUNDARY of the extracted region rather than contact with whatever
+// lies below. Adapters read that off `kind`; it is not repeated as a field.
+message ResolvedTerminal {
+    string name = 1;
+    TerminalKind kind = 2;
+
+    // Names a ResolvedLayer (METAL or VIA).
+    string layer = 3;
+
+    // The region as declared, kept for diagnostics. It is a MARKER, not the
+    // node: it may extend over the gaps between the shapes it selects, so it is
+    // not itself geometry and an adapter must not treat it as such.
+    Box2D region = 4;
+
+    // THE NODE: `region` intersected with the conductor's geometry on `layer`,
+    // computed once by the resolver so that no adapter repeats the boolean.
+    // Non-empty by construction — an empty intersection is a validation error.
+    //
+    // One terminal may cover several disjoint shapes; together they are ONE
+    // node, not several. On a VIA layer each shape here is a WHOLE cut, because
+    // a region that clips a cut is rejected during resolution.
+    repeated Box2D boxes = 7;
+    repeated Polygon2D polygons = 8;
+
+    // Copied from the resolved layer, grid units.
+    int64 zlow = 5;
+    int64 zhigh = 6;
+
+    SourceRef source = 100;
+}
+
+// -----------------------------------------------------------------------------
+// Domain
+// -----------------------------------------------------------------------------
+
+message ResolvedDomain {
+    enum Origin {
+        ORIGIN_UNSPECIFIED = 0;
+        ORIGIN_DOMAIN_BOX = 1;      // copied from an explicit DOMAIN_BOX
+        ORIGIN_DOMAIN_MARGIN = 2;   // bounding box expanded by DOMAIN_MARGIN
+    }
+
+    Box3D box = 1;
+    Origin origin = 2;
+
+    // The margins actually applied, for ORIGIN_DOMAIN_MARGIN. An adapter may
+    // enlarge the box further but must not shrink it below this.
+    DomainMargin applied_margin = 3;
+
+    // Bounding box of all FINITE, non-ground-plane geometry, in grid units.
+    // Useful to adapters that want to place their own boundary.
+    //
+    // "Finite" means bounded in XY: conductor shapes, and conformal films whose
+    // `thickness_on_field` is zero (which do reach past their conductor by
+    // `thickness_beside_wrapped`). The ground plane, the background, every
+    // DIELECTRIC_SIMPLE band and every conformal with a non-zero
+    // `thickness_on_field` are laterally unbounded and contribute nothing here.
+    // Neither does a METAL declared without shapes.
+    Box3D geometry_bounds = 4;
+}

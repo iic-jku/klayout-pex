@@ -1,0 +1,80 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Shape types for the PEX25D (Parasitic Extraction 2.5D) format.
+// See https://github.com/iic-jku/klayout-pex/issues/184
+//
+// All coordinates are int64 grid units. The grid itself is declared once per
+// file by kpex.pex25d.Units, in pex25d_units.proto.
+//
+// These deliberately do not reuse kpex.geometry.{Box,Polygon}:
+//   * kpex.geometry.Polygon has only `hull_points` and cannot express the
+//     HOLE rings that PEX25D POLYGON records carry;
+//   * kpex.geometry.Box/Polygon carry a `net` property, whereas in PEX25D the
+//     net lives on the CONDUCTOR the shape belongs to, never on the shape.
+// If holes are added to kpex.geometry.Polygon later, Polygon2D can be
+// replaced by it; the conversion is mechanical.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+message Point2D {
+    int64 x = 1;  // grid units
+    int64 y = 2;  // grid units
+}
+
+message Point3D {
+    int64 x = 1;  // grid units
+    int64 y = 2;  // grid units
+    int64 z = 3;  // grid units
+}
+
+// `LL <x> <y> UR <x> <y>`
+message Box2D {
+    Point2D lower_left = 1;
+    Point2D upper_right = 2;
+}
+
+// `LL <x> <y> <z> UR <x> <y> <z>`
+message Box3D {
+    Point3D lower_left = 1;
+    Point3D upper_right = 2;
+}
+
+// One closed ring. Implicitly closed: the first vertex is NOT repeated at the
+// end. Must be simple (non-self-intersecting). Winding is not significant;
+// readers may normalize it.
+message Ring {
+    repeated Point2D points = 1;
+}
+
+// `OUTER <x1> <y1> ... [HOLE <x1> <y1> ...]`
+//
+// Each hole must lie strictly inside `outer` and must not intersect or touch
+// any other ring. Disconnected regions, and islands inside holes, are separate
+// Polygon2D records.
+message Polygon2D {
+    Ring outer = 1;
+    repeated Ring holes = 2;
+}

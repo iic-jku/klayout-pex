@@ -1,0 +1,169 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Conductor resistance parameters for the PEX25D (Parasitic Extraction 2.5D)
+// format. See https://github.com/iic-jku/klayout-pex/issues/184
+//
+// OPTIONAL, AND WHY IT IS A SEPARATE TOP-LEVEL RECORD
+// --------------------------------------------------
+// `RESISTANCE ...` is a top-level record rather than an extra clause on METAL
+// or VIA, and that is forced by the format's own compatibility rules: an
+// unrecognized *top-level record* is skipped with a warning, while an
+// unrecognized *clause inside a record* is a parse error. A capacitance-only
+// reader therefore loads a file carrying resistance data unchanged, and a file
+// with no RESISTANCE record means exactly what it meant before these records
+// existed.
+//
+// NOT GRID-QUANTIZED
+// ------------------
+// Unlike every coordinate, thickness and margin in this format, resistance
+// parameters are NOT integer multiples of GRID. They are physical material
+// values, carried as double exactly like `permittivity`, and the
+// divide-round-compare grid check must not be applied to them.
+//
+// UNITS
+// -----
+// Resistance is in OHM. `sheet` is ohm per square and `per_cut` is ohm per via
+// cut; neither depends on the declared LENGTH unit, because a square is
+// dimensionless and a cut is a shape.
+//
+// NOTE that `kpex.tech.ResistanceInfo` stores MILLIOHM, so a converter from
+// that model divides by 1000. Ohm is used here because it is how every PDK
+// document quotes these values, and an interchange format read by several
+// groups should not require arithmetic to check a number against its source.
+//
+// TEMPERATURE
+// -----------
+// A resistance value without a temperature is not reproducible. The optional
+// `RESISTANCE TEMPERATURE <celsius>` record states the temperature at which
+// every value in the file is quoted; TC1/TC2 let a consumer move them:
+//
+//     R(T) = R_ref * (1 + tc1*(T - T_ref) + tc2*(T - T_ref)^2)
+//
+// The resolver does NOT apply this — it cannot know the operating temperature
+// a consumer wants. It carries T_ref and the coefficients through and leaves
+// the substitution to the adapter.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_source_ref.proto";
+
+// -----------------------------------------------------------------------------
+
+// `RESISTANCE TEMPERATURE <celsius>`
+//
+// The reference temperature for every resistance value in the file. At most
+// one per file and its includes. Absent means the values carry no stated
+// temperature; a consumer that needs one must then get it from elsewhere and
+// SHOULD say so, rather than assume 25 C.
+//
+// This cannot be a META key: META is informational only and must not change
+// how anything else in the file is interpreted, whereas T_ref is exactly what
+// TC1/TC2 are measured against.
+message ResistanceTemperature {
+    double celsius = 1;
+
+    SourceRef source = 100;
+}
+
+// `TC1 <1/K>` / `TC2 <1/K^2>` — optional on any resistance record.
+// Both default to zero, i.e. a temperature-independent value.
+message TemperatureCoefficients {
+    double tc1 = 1;  // 1/K
+    double tc2 = 2;  // 1/K^2
+}
+
+// `RESISTANCE METAL <name> SHEET <ohm_per_square> [TC1 <v>] [TC2 <v>]`
+//
+// SHEET is the only form. A bulk-resistivity alternative (RHO) was drafted and
+// cut before 1.0: no PDK in this repo carries one, and an unused alternative
+// implemented independently by three groups is how dialects start.
+//
+// It could not be reintroduced in a minor version in any case. An unknown
+// clause inside a KNOWN record is a parse error in PEX25D, so a 1.0 reader
+// would reject an entire file over one `RHO`. If bulk resistivity is ever
+// needed it has to arrive as a new top-level record, never as a clause here.
+//
+// SHEET IS NOT DERIVABLE FROM THE DRAWN THICKNESS, and must not be inverted to
+// a resistivity either. A metal's electrical thickness differs from its drawn
+// z extent — barrier and liner layers, dishing, and plain calibration against
+// silicon. sky130A met1 is the worked case: drawn 0.36 um, so bulk aluminium
+// at 2.65e-8 ohm*m would give 0.0736 ohm/square; the PDK says 0.125, 1.7x
+// higher.
+//
+// Corresponds to `kpex.klayout.RExtractorTech.Conductor.resistance`, which is
+// likewise ohm/square.
+message MetalResistance {
+    // Names a METAL profile. A VIA, a dielectric or the ground plane here is
+    // an error; the ground plane is an ideal 0 V node in PEX25D 1.x and
+    // substrate resistance is out of scope.
+    //
+    // An ANCHOR profile — a METAL carrying no shapes, declared only to give a
+    // via its zlow — needs no MetalResistance and must not be required to have
+    // one. The "every profile carrying geometry needs a resistance" rule is
+    // about geometry, not about declarations.
+    string metal = 1;
+
+    // Ohm per square. `optional` for field presence: a plain proto3 scalar
+    // cannot distinguish 0 from unset, and a missing sheet resistance must
+    // never read as a superconductor.
+    optional double sheet = 2;
+
+    TemperatureCoefficients tc = 3;
+
+    SourceRef source = 100;
+}
+
+// `RESISTANCE VIA <name> PER_CUT <ohm> [TC1 <v>] [TC2 <v>]`
+//
+// PER_CUT is the resistance of one via cut, and the only form. An area-based
+// contact resistivity (AREA) was drafted and cut for the same reason as RHO:
+// the PDK data in this repo is per-CNT, and the ohm/um^2 form used by
+// `kpex.klayout.RExtractorTech.Via.resistance` is one division away in an
+// adapter that wants it.
+//
+// PER_CUT works as a per-profile constant only because PEX25D has no via-array
+// construct: every cut is its own BOX or POLYGON record, so "one cut" is a
+// shape rather than something a consumer reconstructs from width/spacing/
+// border rules. That is also why a Terminal on a VIA profile must cover each
+// cut entirely — half a cut has no resistance to speak of.
+//
+// One VIA profile per connected pair, already required so that CONNECTS can
+// derive the height, carries a second and independent benefit here: profiles
+// that are geometrically IDENTICAL may still need different resistances. In
+// sky130A a licon over n+ diffusion is 185 ohm and one over p+ is 585 ohm, at
+// the same height and the same size.
+message ViaResistance {
+    // Names a VIA profile.
+    string via = 1;
+
+    // Ohm per cut, independent of the drawn cut area. `optional` for field
+    // presence, as on MetalResistance.
+    optional double per_cut = 2;
+
+    TemperatureCoefficients tc = 3;
+
+    SourceRef source = 100;
+}
