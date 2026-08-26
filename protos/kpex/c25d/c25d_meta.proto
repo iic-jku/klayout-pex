@@ -1,0 +1,53 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// The META statements of a C25D file.
+//
+syntax = "proto3";
+
+package kpex.c25d;
+
+import "kpex/c25d/c25d_source_ref.proto";
+
+// `META <key> <value>` — kept as an ordered list of opaque key/value pairs so
+// that unknown keys survive a read/write round trip.
+//
+// META is informational ONLY: it must not change how any geometry or material
+// is interpreted, and a reader ignoring every META record must produce exactly
+// the same scene as one reading them all. Unknown keys are ignored silently —
+// unlike an unknown top-level record, which warns.
+//
+// A key appears at most ONCE across the file and everything it INCLUDEs. A
+// repeat is an error whether the values agree or not: record order is not
+// significant, so "last one wins" would have no meaning. This list is
+// therefore effectively a map; it stays repeated to keep ordering and a
+// SourceRef per entry.
+//
+// Keys defined by the specification: technology, process_corner, source_cell,
+// source_layout_hash, generator. Private keys are prefixed "x-<vendor>-".
+message Meta {
+    string key = 1;
+    string value = 2;
+
+    SourceRef source = 100;
+}

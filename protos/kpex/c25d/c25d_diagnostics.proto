@@ -1,0 +1,68 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Validator output for C25D files: coded, positioned diagnostics that other
+// tools can consume without parsing human-readable message text.
+//
+syntax = "proto3";
+
+package kpex.c25d;
+
+import "kpex/c25d/c25d_source_ref.proto";
+
+// Machine-readable validator output. The stable `code` is what lets other
+// readers groups test their C25D *writers* against the reference
+// validator without depending on kpex internals or on message wording.
+message Diagnostic {
+    enum Severity {
+        SEVERITY_UNSPECIFIED = 0;
+        SEVERITY_NOTE = 1;
+        SEVERITY_WARNING = 2;
+        SEVERITY_ERROR = 3;
+    }
+
+    enum Tier {
+        TIER_UNSPECIFIED = 0;
+        TIER_SYNTAX = 1;     // arity, clause order, literal not a grid multiple,
+                             // unrecognized top-level record (a WARNING, per
+                             // the version-compatibility rules; an unknown
+                             // clause keyword inside a record is an ERROR)
+        TIER_SEMANTIC = 2;   // name resolution, acyclic WRAPS, depth ties, ...
+        TIER_GEOMETRIC = 3;  // ring simplicity, hole containment, overlap (--strict)
+    }
+
+    string code = 1;  // stable identifier, e.g. "C25D-E0203"
+    Severity severity = 2;
+    Tier tier = 3;
+    string message = 4;
+
+    SourceRef source = 100;
+
+    // Additional positions, e.g. the earlier declaration of a duplicate name,
+    // or the other member of a same-depth WRAPS tie.
+    repeated SourceRef related = 101;
+}
+
+message DiagnosticList {
+    repeated Diagnostic diagnostics = 1;
+}

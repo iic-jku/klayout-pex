@@ -1,0 +1,222 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// C25DFile — the *literal*, unresolved form of a C25D text file.
+//
+// This is the parser's output and nothing more. Every message here maps 1:1
+// onto one C25D statement, references are still plain strings, and no z
+// extent that the text leaves implicit has been computed. Reading a C25D file
+// is therefore two independent steps:
+//
+//     text --[reader, per language]--> C25DFile --[resolver, shared]--> C25DScene
+//
+// Only the first step has to be written per language. Everything expensive and
+// bug-prone — CONNECTS / BETWEEN / WRAPS resolution, wrap depth, validation —
+// operates on C25DFile and is written once.
+//
+// STATEMENT ORDER
+// ---------------
+// C25D line order is not significant (except that `C25D` comes first and
+// `UNITS` precedes any number), because occupancy is decided by wrap depth
+// rather than by later-wins layering. Records are therefore grouped into typed
+// repeated fields rather than kept as one flat statement list. The cost is
+// that a byte-exact rewrite of the original file is not possible; SourceRef on
+// every record preserves what diagnostics actually need.
+//
+// Clause order WITHIN a record is significant, and a record may be split over
+// several physical lines with a trailing `\`. Both are the reader's business;
+// neither survives into this message.
+//
+// INCLUDE is textual and is resolved by the reader: one C25DFile is the whole
+// tree flattened, with no record of where the boundaries were. Only
+// `SourceRef.file` carries that back, which is why it exists.
+//
+syntax = "proto3";
+
+package kpex.c25d;
+
+import "kpex/c25d/c25d_source_ref.proto";
+import "kpex/c25d/c25d_meta.proto";
+import "kpex/c25d/c25d_geometry.proto";
+import "kpex/c25d/c25d_units.proto";
+import "kpex/c25d/c25d_dielectric.proto";
+import "kpex/c25d/c25d_domain.proto";
+
+// -----------------------------------------------------------------------------
+
+message C25DFile {
+    // `C25D 1.0` — split so that "accept 1.x, reject 2.x" is a comparison
+    // rather than a string parse.
+    uint32 format_version_major = 1;
+    uint32 format_version_minor = 2;
+
+    // Optional pre-release / build suffix: the `rc1` of `C25D 1.0-rc1`, stored
+    // without the leading '-'. Empty for a plain release version.
+    //
+    // It takes no part in compatibility: a reader accepts a file by
+    // major/minor alone and MUST NOT reject one because it does not recognise
+    // the suffix. Carried so that a writer can round-trip it and so that a
+    // generator can tell "1.0" from "1.0-rc1" when reporting provenance.
+    string format_version_suffix = 5;
+
+    // `UNITS LENGTH um GRID 0.0001`
+    Units units = 3;
+
+    // `META <key> <value>`
+    repeated Meta meta = 4;
+
+    // Profiles. GROUND_PLANE, METAL, VIA and DIELECTRIC_* names share ONE
+    // namespace and must be unique across all of them; the split into typed
+    // fields here is a convenience for consumers, not four namespaces. This is
+    // the namespace WRAPS, CONNECTS, BETWEEN and LAYER resolve against.
+    //
+    // CONDUCTOR shortnames and net names form a separate namespace of their
+    // own, so a conductor may share a name with a layer.
+    //
+    // Exactly one ground plane, always present — the DOMAIN_MARGIN rules
+    // depend on it forming the lower boundary.
+    GroundPlane ground_plane = 10;
+    repeated Metal metals = 11;
+    repeated Via vias = 12;
+    repeated Dielectric dielectrics = 13;
+
+    // `DIELECTRIC_BACKGROUND <name> PERMITTIVITY <k>` — exactly one required.
+    Background background = 14;
+
+    // `CONDUCTOR <shortname> <net>`
+    repeated Conductor conductors = 20;
+
+    // `BOX CONDUCTOR ... LAYER ...` / `POLYGON CONDUCTOR ... LAYER ...`
+    repeated ShapeRecord shapes = 21;
+
+    // Optional solver-adapter hint; DOMAIN_BOX takes precedence if both appear
+    // (which is itself a warning).
+    oneof domain {
+        DomainMargin domain_margin = 30;
+        DomainBox domain_box = 31;
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Conductive profiles
+// -----------------------------------------------------------------------------
+
+// `GROUND_PLANE <name> Z_OFFSETS <zlow> <zhigh>`
+//
+// Infinite in XY, held at 0 V. Exactly one per file. One of only two record
+// kinds that carry absolute z (the other is METAL); everything else is
+// positioned relative to these, so moving a metal or changing its thickness
+// (another process corner) propagates through the stack with no other edit.
+message GroundPlane {
+    string name = 1;
+    int64 zlow = 2;   // grid units, absolute
+    int64 zhigh = 3;  // grid units, absolute; must be > zlow
+
+    SourceRef source = 100;
+}
+
+// `METAL <name> Z_OFFSETS <zlow> <zhigh>`
+message Metal {
+    string name = 1;
+    int64 zlow = 2;   // grid units, absolute
+    int64 zhigh = 3;  // grid units, absolute; must be > zlow
+
+    SourceRef source = 100;
+}
+
+// `VIA <name> CONNECTS <below> <above>`
+//
+// A via has no z of its own: it spans from the top face of `connects_below` to
+// the bottom face of `connects_above`. Either may name any profile with a z
+// extent, GROUND_PLANE included (substrate and well taps). The two are
+// ordered — `connects_below` must be the lower.
+//
+// This is why a contact landing on different layers needs one VIA profile per
+// connected pair: in sky130A a licon from field poly and one from diffusion
+// have different heights, and CONNECTS derives both rather than restating two
+// hand-matched numbers.
+message Via {
+    string name = 1;
+    string connects_below = 2;
+    string connects_above = 3;
+
+    SourceRef source = 100;
+}
+
+// -----------------------------------------------------------------------------
+// Conductors and geometry
+// -----------------------------------------------------------------------------
+
+// `CONDUCTOR <shortname> <net>`
+//
+// One equipotential body. All of its shapes are unioned and need not be
+// geometrically connected. Two conductors may share a net and remain separate
+// named bodies; all conductors with the same net are constrained to one
+// potential, and the capacitance matrix is reported per net.
+//
+// `FLOATING` (case-sensitive, exactly that spelling) is the reserved net name
+// for a conductor belonging to no net — dummy fill, tiling, anything that
+// shields without being connected. It is exempt from the same-net constraint:
+// each such conductor is an independent body at its own unknown potential,
+// never tied to the others. It is solved as a conductor and reported under its
+// shortname; eliminating it from the net-level matrix is the consumer's
+// business, not the format's. FLOATING is not a legal net name for a connected
+// conductor.
+message Conductor {
+    string name = 1;  // shortname, unique among conductors
+    string net = 2;
+
+    SourceRef source = 100;
+}
+
+// `BOX CONDUCTOR <c> LAYER <l> LL <x> <y> UR <x> <y>`
+// `POLYGON CONDUCTOR <c> LAYER <l> OUTER <x> <y> ... [HOLE <x> <y> ...]`
+//
+// `layer` must resolve to a METAL or VIA profile (never a dielectric, never
+// the ground plane, which is infinite and has no drawn geometry) even though
+// all four share one namespace.
+//
+// There is no via-array construct: every cut is its own record, so that the
+// dielectric between cuts is present in the scene. A writer starting from a
+// drawn via polygon larger than one cut emits the individual cuts; a reader
+// never synthesises geometry from spacing or border rules.
+message ShapeRecord {
+    enum Kind {
+        SHAPE_KIND_UNSPECIFIED = 0;
+        SHAPE_KIND_BOX = 1;
+        SHAPE_KIND_POLYGON = 2;
+    }
+
+    string conductor = 1;
+    string layer = 2;
+
+    // Discriminator alongside the oneof, matching kpex.geometry.Shape.
+    Kind kind = 3;
+
+    oneof shape {
+        Box2D box = 10;
+        Polygon2D polygon = 11;
+    }
+
+    SourceRef source = 100;
+}
