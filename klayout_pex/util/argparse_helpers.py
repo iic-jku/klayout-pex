@@ -27,6 +27,24 @@ import argparse
 from enum import Enum, StrEnum
 from typing import *
 
+from rich_argparse import RichHelpFormatter
+
+
+def _group_name(name: str) -> str:
+    """
+    Title-case only the group names argparse invents.
+
+    rich-argparse title-cases every group name, which mangles the acronyms this
+    project uses — PEX25D would render as "Pex25D", FasterCap as "Fastercap".
+    A title carrying an uppercase letter was written deliberately and is left
+    alone; argparse's own all-lowercase defaults ("positional arguments",
+    "options") still get capitalized.
+    """
+    return name if any(c.isupper() for c in name) else name.title()
+
+
+RichHelpFormatter.group_name_formatter = _group_name
+
 
 def render_enum_help(topic: str,
                      enum_cls: Type[Enum],
