@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
-# This file is part of KPEX
+# This file is part of KPEX 
 # (see https://github.com/iic-jku/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
