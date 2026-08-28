@@ -352,7 +352,6 @@ class KpexCLI:
         | Argument     | Description                     |
         | ------------ | ------------------------------- |
         | --2.5D       | Run KPEX/2.5D analytical engine |
-        | --fastercap  | Run KPEX/FastCap 3D engine      |
         | --fastercap  | Run KPEX/FasterCap 3D engine    |
         | --magic      | Run MAGIC wrapper engine        |
         """
@@ -362,6 +361,7 @@ class KpexCLI:
             case (_, _, _, _, None, None):
                 error(f"Neither GDS nor LVSDB was provided")
                 found_errors = True
+            | --fastcap    | Run KPEX/FastCap2 3D engine     |
 
         # check if we find magicrc
         if args.run_magic:
