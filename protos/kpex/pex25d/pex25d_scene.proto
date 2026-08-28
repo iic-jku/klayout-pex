@@ -83,9 +83,13 @@ message PEX25DScene {
     repeated ResolvedConductor conductors = 20;
 
     // A DOMAIN_MARGIN applied to the finite geometry bounding box, or the
-    // file's DOMAIN_BOX copied. UNSET if the file gave neither: the resolver
-    // does not invent a domain, because it cannot know what a given solver
-    // wants. Adapters must handle an absent domain themselves.
+    // file's DOMAIN_BOX copied.
+    //
+    // TEST `origin`, NOT FIELD PRESENCE. When the file gave neither record the
+    // resolver does not invent a domain — `box` and `applied_margin` stay unset
+    // and `origin` is ORIGIN_UNSPECIFIED — but the message itself is still
+    // present, carrying `geometry_bounds` for an adapter that wants to place a
+    // boundary of its own. Adapters must handle an absent domain themselves.
     ResolvedDomain domain = 30;
 
     // The reference temperature every resistance value in this scene is quoted

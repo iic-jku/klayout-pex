@@ -24,6 +24,7 @@
 #
 
 import argparse
+import contextlib
 from datetime import datetime
 from enum import StrEnum
 import logging
@@ -79,6 +80,15 @@ from .magic.magic_runner import (
     prepare_magic_script,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
+from .pex25d.artifact import (
+    ArtifactFormat,
+    ArtifactKind,
+    ArtifactNamingError,
+    infer_artifact_spec,
+)
+from .klayout.pex25d_builder import DEFAULT_GRID_UM
+from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
+from .pex25d.pex25d_cli import Pex25DCLI
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
@@ -104,31 +114,33 @@ class InputMode(StrEnum):
 
 
 class KpexCLI:
-    @staticmethod
-    def parse_args(arg_list: List[str],
-                   env: Env) -> argparse.Namespace:
-        # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
-        epilog = EnvVar.help_epilog_table()
-        epilog_md = rich.console.Group(
-            rich.text.Text('Environmental variables:', style='argparse.groups'),
-            rich.markdown.Markdown(epilog, style='argparse.text')
-        )
-        main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
-                                                          f"KLayout-integrated Parasitic Extraction Tool",
-                                              epilog=epilog_md,
-                                              add_help=False,
-                                              formatter_class=RichHelpFormatter)
+    # ---------------------------------------------------------- argument groups
+    #
+    # Each group is attached to a *given* parser rather than to one flat parser,
+    # so that a subcommand declares exactly the options it can act on. That is
+    # the point of the verb layer: `kpex pex25d` cannot be handed --magic_halo,
+    # and the validation below no longer has to hand-check which combinations
+    # of flags make sense together.
 
-        group_special = main_parser.add_argument_group("Special options")
-        group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
-        group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
+    @staticmethod
+    def _add_special_options(parser: argparse.ArgumentParser,
+                             include_threads: bool = False) -> None:
+        group_special = parser.add_argument_group("Special Options")
+        group_special.add_argument("--help", "-h", action='help',
+                                   help="show this help message and exit")
         group_special.add_argument("--log_level", dest='log_level', default='subprocess',
                                    help=render_enum_help(topic='log_level', enum_cls=LogLevel))
-        group_special.add_argument("--threads", dest='num_threads', type=int,
-                                   default=os.cpu_count() * 4,
-                                   help="number of threads (e.g. for FasterCap) (default is %(default)s)")
+        if include_threads:
+            group_special.add_argument("--threads", dest='num_threads', type=int,
+                                       default=os.cpu_count() * 4,
+                                       help="number of threads (e.g. for FasterCap) "
+                                            "(default is %(default)s)")
 
-        group_pex = main_parser.add_argument_group("Parasitic Extraction Setup")
+    @staticmethod
+    def _add_pex_setup_arguments(parser: argparse.ArgumentParser,
+                                 env: Env,
+                                 include_spice_output: bool = True) -> None:
+        group_pex = parser.add_argument_group("Parasitic Extraction Setup")
 
         all_pdk_choices = list(PDK) + list(PDK.legacy_aliases().keys())
 
@@ -144,18 +156,31 @@ class KpexCLI:
         group_pex.add_argument("--out_dir", dest="output_dir_base_path", default="output",
                                help="Run directory path (default is '%(default)s')")
 
-        group_pex.add_argument("--out_spice", "-o", dest="output_spice_path", default=None,
-                               help="Optional additional SPICE output path (default is none)")
+        if include_spice_output:
+            group_pex.add_argument("--out_spice", "-o", dest="output_spice_path", default=None,
+                                   help="Optional additional SPICE output path (default is none)")
 
-        group_pex_input = main_parser.add_argument_group("Parasitic Extraction Input",
+
+    @staticmethod
+    def _add_pex_input_arguments(parser: argparse.ArgumentParser) -> None:
+        group_pex_input = parser.add_argument_group("Parasitic Extraction Input",
                                                          description="Either LVS is run, or an existing LVSDB is used")
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
                                      help="Schematic SPICE netlist path (for LVS). "
                                           "If none given, a dummy schematic will be created")
+        # Developer shortcut, not a supported entry point. It exists so that a
+        # PEX25D or engine run can be repeated without paying for LVS again while
+        # working on the code downstream of it. An LVSDB is tied to the kpex
+        # version and PDK that produced it and is not an interchange format —
+        # PEX25D is. Anyone who wants to hand a scene to somebody else, or keep
+        # one, should be writing PEX25D, not passing LVSDBs around.
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", default=None,
-                                     help="KLayout PEX-LVSDB path from a previous run (bypass PEX-LVS)")
+                                     help="KLayout PEX-LVSDB path from a previous run "
+                                          "(bypass PEX-LVS). Developer shortcut for "
+                                          "re-running without repeating LVS; not an "
+                                          "interchange format — use PEX25D for that")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
 
@@ -168,11 +193,10 @@ class KpexCLI:
                                      type=true_or_false, default=False,
                                      help="Verbose KLayout LVS output (default is %(default)s)")
 
-        group_pex_options = main_parser.add_argument_group("Parasitic Extraction Options")
-        group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
-                                      type=true_or_false, default=False,  # TODO: in the future this should be True by default
-                                      help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
-                                           "(default is %(default)s for testing now)")
+
+    @staticmethod
+    def _add_engine_arguments(parser: argparse.ArgumentParser) -> None:
+        group_pex_options = parser.add_argument_group("Extraction Engines")
         group_pex_options.add_argument("--fastercap", dest="run_fastercap",
                                       action='store_true', default=False,
                                       help="Run FasterCap engine (default is %(default)s)")
@@ -186,7 +210,27 @@ class KpexCLI:
                                       action='store_true', default=False,
                                       help="Run 2.5D analytical engine (default is %(default)s)")
 
-        group_fastercap = main_parser.add_argument_group("FasterCap options")
+
+    @staticmethod
+    def _add_extraction_options(parser: argparse.ArgumentParser) -> None:
+        group_pex_options = parser.add_argument_group("Parasitic Extraction Options")
+        group_pex_options.add_argument("--blackbox", dest="blackbox_devices",
+                                      type=true_or_false, default=False,  # TODO: in the future this should be True by default
+                                      help="Blackbox devices like MIM/MOM caps, as they are handled by SPICE models "
+                                           "(default is %(default)s for testing now)")
+
+    @staticmethod
+    def _add_tech_arguments(parser: argparse.ArgumentParser) -> None:
+        group_tech = parser.add_argument_group("Technology Options")
+        group_tech.add_argument("--diel", dest="dielectric_filter",
+                                type=str, default="all",
+                                help=f"Comma separated list of dielectric filter patterns. "
+                                     f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
+                                     f"(default is %(default)s)")
+
+    @staticmethod
+    def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
+        group_fastercap = parser.add_argument_group("FasterCap Options")
         group_fastercap.add_argument("--k_void", "-k", dest="k_void",
                                      type=float, default=3.9,
                                      help="Dielectric constant of void (default is %(default)s)")
@@ -202,12 +246,6 @@ class KpexCLI:
                                      type=true_or_false, default=False,
                                      help=f"Validate geometries before passing to FasterCap "
                                           f"(default is False)")
-        group_fastercap.add_argument("--diel", dest="dielectric_filter",
-                                     type=str, default="all",
-                                     help=f"Comma separated list of dielectric filter patterns. "
-                                          f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
-                                          f"(default is %(default)s)")
-
         group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                      type=float, default=0.05,
                                      help="FasterCap -aX error tolerance (default is %(default)s)")
@@ -232,7 +270,10 @@ class KpexCLI:
                                      action='store_true', default=False,
                                      help="FasterCap -pj Use Jacobi preconditioner (default is %(default)s)")
 
-        group_magic = main_parser.add_argument_group("MAGIC options")
+
+    @staticmethod
+    def _add_magic_arguments(parser: argparse.ArgumentParser, env: Env) -> None:
+        group_magic = parser.add_argument_group("MAGIC Options")
 
         default_magicrc_path = env.default_magicrc_path
         if default_magicrc_path:
@@ -288,7 +329,10 @@ class KpexCLI:
                                  " ('implicit' omits the command, uses MAGIC's default value). "
                                  + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
 
-        group_25d = main_parser.add_argument_group("2.5D options")
+
+    @staticmethod
+    def _add_analytical_25d_arguments(parser: argparse.ArgumentParser) -> None:
+        group_25d = parser.add_argument_group("2.5D Options")
         group_25d.add_argument("--mode", dest='pex_mode',
                                default=PEXMode.DEFAULT, type=PEXMode, choices=list(PEXMode),
                                help=render_enum_help(topic='mode', enum_cls=PEXMode))
@@ -300,9 +344,144 @@ class KpexCLI:
                                 type=true_or_false, default=True,
                                 help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
 
+
+    @staticmethod
+    def _add_pex25d_output_arguments(parser: argparse.ArgumentParser) -> None:
+        group_out = parser.add_argument_group(
+            "PEX25D Output",
+            description="At least one of --output_file / --output_scene must be given. "
+                        "They are two options rather than one --emit switch because the "
+                        "two artifacts are different things with different consumers, and "
+                        "a single switch would leave it unclear where each one lands."
+        )
+        group_out.add_argument("--output_file", dest='pex25d_file_path',
+                               default=None, metavar='PATH',
+                               help="Write the unresolved PEX25DFile here ('-' for stdout). "
+                                    "The literal form: one message per PEX25D record, "
+                                    "references still plain strings, nothing derived. This is "
+                                    "what a reader produces and what a validator checks.")
+        group_out.add_argument("--output_scene", dest='pex25d_scene_path',
+                               default=None, metavar='PATH',
+                               help="Write the resolved PEX25DScene here ('-' for stdout). "
+                                    "The adapter-ready form: absolute z extents, CONNECTS / "
+                                    "BETWEEN / WRAPS resolved, wrap depth flattened, terminal "
+                                    "intersections computed.")
+        group_out.add_argument("--format", dest='pex25d_format',
+                               default=ArtifactFormat.AUTO, type=ArtifactFormat,
+                               choices=list(ArtifactFormat),
+                               help="Override the encoding otherwise inferred from the output "
+                                    "file names (default is '%(default)s'). Naming convention: "
+                                    "NAME.pex25d is text, NAME.pex25d.pb is binary protobuf, "
+                                    "NAME.pex25d.textpb is protobuf text format, and a .scene "
+                                    "infix marks a resolved scene. A trailing .gz is honoured.")
+        group_out.add_argument("--grid", dest='pex25d_grid',
+                               default=DEFAULT_GRID_UM, metavar='UM',
+                               help="Coordinate grid in µm (default is %(default)s). "
+                                    "Every z offset, thickness and coordinate must be "
+                                    "an integer multiple of it, and it must divide the "
+                                    "layout DBU exactly.")
+        group_out.add_argument("--domain_margin", dest='pex25d_domain_margin',
+                               type=float, default=None, metavar='UM',
+                               help="Emit DOMAIN_MARGIN with this clearance in µm "
+                                    "(default is none, leaving the domain unset for "
+                                    "the solver adapter to choose)")
+        group_out.add_argument("--validate", dest='pex25d_validate',
+                               type=true_or_false, default=True,
+                               help="Check the generated artifacts against the reference "
+                                    "validator before reporting (default is %(default)s). "
+                                    "A defect in the technology data — a profile declared "
+                                    "twice, a film anchored on the wrong link — otherwise "
+                                    "shows up only when somebody runs 'pex25d validate' on "
+                                    "the result. The artifacts are written either way; the "
+                                    "diagnostics decide the exit code.")
+        group_out.add_argument("--comments", dest='pex25d_comments',
+                               type=true_or_false, default=False,
+                               help="Include the syntax hints from the specification as "
+                                    "comments (default is %(default)s). Text format only — "
+                                    "the protobuf encodings have no comments.")
+        group_out.add_argument("--with_source_refs", dest='pex25d_with_source_refs',
+                               type=true_or_false, default=False,
+                               help="Populate every SourceRef (default is %(default)s). "
+                                    "Protobuf output formats only — the text format has no "
+                                    "spelling for a source reference. Roughly doubles the size "
+                                    "of a layout-scale file, and means little for geometry "
+                                    "built in memory rather than parsed from text; useful "
+                                    "mainly when diffing generated output against a "
+                                    "hand-written file.")
+
+    # ------------------------------------------------------------------ parsing
+
+    @staticmethod
+    def parse_args(arg_list: List[str],
+                   env: Env) -> argparse.Namespace:
+        # epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand"
+        epilog = EnvVar.help_epilog_table()
+        epilog_md = rich.console.Group(
+            rich.text.Text('Environmental variables:', style='argparse.groups'),
+            rich.markdown.Markdown(epilog, style='argparse.text')
+        )
+        main_parser = argparse.ArgumentParser(prog=PROGRAM_NAME,
+                                              description=f"{PROGRAM_NAME}: "
+                                                          f"KLayout-integrated Parasitic Extraction Tool",
+                                              epilog=epilog_md,
+                                              add_help=False,
+                                              formatter_class=RichHelpFormatter)
+
+        group_special = main_parser.add_argument_group("Special Options")
+        group_special.add_argument("--help", "-h", action='help',
+                                   help="show this help message and exit")
+        group_special.add_argument("--version", "-v", action='version',
+                                   version=f'{PROGRAM_NAME} {__version__}')
+
+        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>',
+                                                help="Sub-commands help")
+
+        parser_extract = subparsers.add_parser(
+            "extract",
+            help="Run one or more parasitic extraction engines",
+            description="Run PEX end to end: LVS for connectivity, then the selected "
+                        "engine(s), then netlist expansion and reduction.",
+            add_help=False, formatter_class=RichHelpFormatter, epilog=epilog_md)
+        KpexCLI._add_special_options(parser_extract, include_threads=True)
+        KpexCLI._add_pex_setup_arguments(parser_extract, env)
+        KpexCLI._add_pex_input_arguments(parser_extract)
+        KpexCLI._add_engine_arguments(parser_extract)
+        KpexCLI._add_extraction_options(parser_extract)
+        KpexCLI._add_tech_arguments(parser_extract)
+        KpexCLI._add_fastercap_arguments(parser_extract)
+        KpexCLI._add_magic_arguments(parser_extract, env)
+        KpexCLI._add_analytical_25d_arguments(parser_extract)
+
+        parser_pex25d = subparsers.add_parser(
+            "pex25d",
+            help="Generate PEX25D solver input from a layout, without running a solver",
+            description="Run LVS for connectivity and write the scene as PEX25D, stopping "
+                        "before any engine is started. This is the cut point in the "
+                        "pipeline that lets the geometry be inspected, archived, diffed, "
+                        "or handed to somebody else's solver. Format-only work on the "
+                        "result — validating, re-encoding, exporting to an engine's "
+                        "native input — is the standalone 'pex25d' tool's job.",
+            add_help=False, formatter_class=RichHelpFormatter, epilog=epilog_md)
+        KpexCLI._add_special_options(parser_pex25d)
+        KpexCLI._add_pex_setup_arguments(parser_pex25d, env, include_spice_output=False)
+        KpexCLI._add_pex_input_arguments(parser_pex25d)
+        KpexCLI._add_extraction_options(parser_pex25d)
+        KpexCLI._add_tech_arguments(parser_pex25d)
+        KpexCLI._add_pex25d_output_arguments(parser_pex25d)
+        Pex25DCLI._add_diagnostics_arguments(parser_pex25d)
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+        if args.command is None:
+            main_parser.print_help()
+            sys.exit(ExitCode.USAGE)
+
+        # The engine switches only exist on 'extract'. Defaulting them here keeps
+        # the shared validation and logging paths free of subcommand checks.
+        for engine_attr in ('run_magic', 'run_fastcap', 'run_fastercap', 'run_2_5D'):
+            if not hasattr(args, engine_attr):
+                setattr(args, engine_attr, False)
 
         # environmental variables and their defaults
         args.fastcap_exe_path = env[EnvVar.FASTCAP_EXE]
@@ -340,28 +519,31 @@ class KpexCLI:
 
         rule('Input Layout')
 
-        # check engines VS input possiblities
-        match (args.run_magic, args.run_fastcap, args.run_fastercap, args.run_2_5D,
-               args.gds_path, args.lvsdb_path):
-            case (True, _, _, _, None, _):
-                error(f"Running PEX engine MAGIC requires --gds (--lvsdb not possible)")
-                found_errors = True
-            case (False, False, False, False, _, _): # at least one engine must be activated
-                error("No PEX engines activated")
-                engine_help = """
-        | Argument     | Description                     |
-        | ------------ | ------------------------------- |
-        | --2.5D       | Run KPEX/2.5D analytical engine |
-        | --fastercap  | Run KPEX/FasterCap 3D engine    |
-        | --magic      | Run MAGIC wrapper engine        |
-        """
-                subproc(f"\n\nPlease activate one or more engines using the arguments:")
-                rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
-                found_errors = True
-            case (_, _, _, _, None, None):
-                error(f"Neither GDS nor LVSDB was provided")
-                found_errors = True
+        # Which engines may be combined with which inputs is a question only
+        # 'extract' has; a dump run has no engine to disagree with.
+        if args.command == 'extract':
+            # check engines VS input possiblities
+            match (args.run_magic, args.run_fastcap, args.run_fastercap, args.run_2_5D,
+                   args.gds_path, args.lvsdb_path):
+                case (True, _, _, _, None, _):
+                    error(f"Running PEX engine MAGIC requires --gds (--lvsdb not possible)")
+                    found_errors = True
+                case (False, False, False, False, _, _): # at least one engine must be activated
+                    error("No PEX engines activated")
+                    engine_help = """
+            | Argument     | Description                     |
+            | ------------ | ------------------------------- |
+            | --2.5D       | Run KPEX/2.5D analytical engine |
             | --fastcap    | Run KPEX/FastCap2 3D engine     |
+            | --fastercap  | Run KPEX/FasterCap 3D engine    |
+            | --magic      | Run MAGIC wrapper engine        |
+            """
+                    subproc(f"\n\nPlease activate one or more engines using the arguments:")
+                    rich.print(rich.markdown.Markdown(engine_help, style='argparse.text'))
+                    found_errors = True
+                case (_, _, _, _, None, None):
+                    error(f"Neither GDS nor LVSDB was provided")
+                    found_errors = True
 
         # check if we find magicrc
         if args.run_magic:
@@ -485,6 +667,38 @@ class KpexCLI:
 
         if args.cache_dir_path is None:
             args.cache_dir_path = os.path.join(args.output_dir_base_path, '.kpex_cache')
+
+        if args.command == 'pex25d':
+            if args.pex25d_file_path is None and args.pex25d_scene_path is None:
+                error("Nothing to write. Give --output_file (the unresolved PEX25DFile), "
+                      "--output_scene (the resolved PEX25DScene), or both.")
+                found_errors = True
+
+            if args.pex25d_file_path is not None \
+                    and args.pex25d_file_path == args.pex25d_scene_path:
+                error("--output_file and --output_scene point at the same destination")
+                found_errors = True
+
+            # Resolved here rather than at write time so that a mistyped output
+            # name fails now, and not after a multi-minute LVS run.
+            args.pex25d_file_spec = None
+            args.pex25d_scene_spec = None
+            try:
+                if args.pex25d_file_path is not None:
+                    args.pex25d_file_spec = infer_artifact_spec(
+                        args.pex25d_file_path,
+                        kind=ArtifactKind.FILE,
+                        format=args.pex25d_format,
+                        default_format=ArtifactFormat.TEXT)
+                if args.pex25d_scene_path is not None:
+                    args.pex25d_scene_spec = infer_artifact_spec(
+                        args.pex25d_scene_path,
+                        kind=ArtifactKind.SCENE,
+                        format=args.pex25d_format,
+                        default_format=ArtifactFormat.PB)
+            except ArtifactNamingError as e:
+                error(str(e))
+                found_errors = True
 
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
@@ -891,23 +1105,175 @@ class KpexCLI:
                 lvsdb.read(lvsdb_path)
         return lvsdb
 
+    SUBCOMMANDS = ('extract', 'pex25d')
+    LEGACY_SUBCOMMAND = 'extract'
+
+    @classmethod
+    def normalize_argv(cls, argv: List[str]) -> List[str]:
+        """
+        Accept the pre-subcommand, flat command line.
+
+        Before the verb layer, kpex was invoked as
+        ``kpex --pdk sky130A --gds foo.gds --2.5D``. Every such run still works
+        and means ``kpex extract <same options>``; it just warns. The two forms
+        cannot be confused, because a subcommand name never begins with '-' and
+        every legacy option does — so the fallback needs no heuristics and can
+        never mistake one for the other.
+
+        This exists for the scripts, CI jobs and docs that already say
+        ``kpex --gds ...``, including the test suite. It is meant to be removed
+        once those have moved on.
+        """
+        tail = argv[1:]
+        if not tail:
+            return argv
+        first = tail[0]
+        if first in ('-h', '--help', '-v', '--version'):
+            return argv
+        if not first.startswith('-'):
+            return argv  # a subcommand, or a typo argparse will report better than we can
+        if any(arg in cls.SUBCOMMANDS for arg in tail):
+            # A subcommand is present, just not first — most likely a top-level
+            # option that now belongs to the subcommand. Leave it alone and let
+            # argparse say so, rather than silently rewriting it into something
+            # that fails somewhere else.
+            return argv
+        warning(f"Calling {PROGRAM_NAME} without a subcommand is deprecated; "
+                f"treating this run as '{PROGRAM_NAME} {cls.LEGACY_SUBCOMMAND} …'. "
+                f"See '{PROGRAM_NAME} --help' for the available subcommands.")
+        return [argv[0], cls.LEGACY_SUBCOMMAND] + tail
+
+    @staticmethod
+    def _writes_artifact_to_stdout(argv: List[str]) -> bool:
+        """
+        Whether this invocation sends a PEX25D artifact to stdout.
+
+        Answered from the raw argv rather than from parsed arguments, because
+        the redirect has to be in place before anything — argument validation
+        included — has a chance to print.
+        """
+        return any(previous in ('--output_file', '--output_scene') and current == '-'
+                   for previous, current in zip(argv, argv[1:]))
+
     def main(self, argv: List[str]):
-        if '-v' not in argv and \
-           '--version' not in argv and \
-           '-h' not in argv and \
-           '--help' not in argv:
-            rule('Command line arguments')
-            subproc(' '.join(map(shlex.quote, sys.argv)))
-
         env = Env.from_os_environ()
-        args = self.parse_args(arg_list=argv[1:], env=env)
+        argv = self.normalize_argv(argv)
 
-        os.makedirs(args.output_dir_base_path, exist_ok=True)
-        self.setup_logging(args)
+        # A PEX25D artifact may be destined for stdout, and in that case stdout
+        # belongs to the artifact alone — one stray log line and whatever is on
+        # the other end of the pipe is parsing garbage. Redirecting sys.stdout to
+        # stderr for the whole run is blunt but total: the rich console resolves
+        # sys.stdout at write time, so every rule()/info()/subproc() follows,
+        # including ones written by code that never considered being in a
+        # pipeline. Artifact I/O uses sys.__stdout__ and is unaffected.
+        writes_to_stdout = self._writes_artifact_to_stdout(argv)
 
-        tech_info = TechInfo.from_json(args.tech_pbjson_path,
-                                       dielectric_filter=args.dielectric_filter)
+        with contextlib.ExitStack() as stack:
+            if writes_to_stdout:
+                stack.enter_context(contextlib.redirect_stdout(sys.stderr))
 
+            if not ({'-v', '--version', '-h', '--help'} & set(argv)):
+                rule('Command line arguments')
+                subproc(' '.join(map(shlex.quote, argv)))
+
+            args = self.parse_args(arg_list=argv[1:], env=env)
+
+            os.makedirs(args.output_dir_base_path, exist_ok=True)
+            self.setup_logging(args)
+
+            tech_info = TechInfo.from_json(args.tech_pbjson_path,
+                                           dielectric_filter=args.dielectric_filter)
+
+            match args.command:
+                case 'pex25d':
+                    self.run_pex25d_generation(args=args, tech_info=tech_info)
+                case _:
+                    self.run_extraction(args=args, tech_info=tech_info)
+
+    def run_pex25d_generation(self,
+                              args: argparse.Namespace,
+                              tech_info: TechInfo):
+        """
+        The dump path: LVS for connectivity, then PEX25D out, and stop.
+
+        Deliberately does not touch any engine. Everything downstream of the
+        artifacts written here — validating them, re-encoding them, exporting
+        them to a solver's native input — is the standalone ``pex25d`` tool's
+        job, and needs neither a layout nor KLayout to do it.
+        """
+        from .klayout.pex25d_builder import BuilderOptions, build_pex25d_file
+        from .pex25d.codec import save_artifact
+        from .pex25d.resolver import ResolveError, resolve
+        from .pex25d.validator import validate
+
+        report = DiagnosticsReport(warnings_are_errors=args.warnings_are_errors)
+
+        rule('Prepare LVSDB')
+        lvsdb = self.create_lvsdb(args)
+
+        pex_context = KLayoutExtractionContext.prepare_extraction(
+            top_cell=args.effective_cell_name,
+            lvsdb=lvsdb,
+            tech=tech_info,
+            blackbox_devices=args.blackbox_devices)
+
+        rule('Non-empty layers in LVS database')
+        for gds_pair, layer_info in pex_context.extracted_layers.items():
+            names = [l.lvs_layer_name for l in layer_info.source_layers]
+            info(f"{gds_pair} -> ({' '.join(names)})")
+
+        rule('PEX25D Generation')
+        try:
+            pex25d_file = build_pex25d_file(
+                pex_context=pex_context,
+                tech_info=tech_info,
+                cell_name=args.effective_cell_name,
+                options=BuilderOptions(
+                    grid_um=args.pex25d_grid,
+                    with_source_refs=args.pex25d_with_source_refs,
+                    dielectric_filter=args.dielectric_filter,
+                    domain_margin_um=args.pex25d_domain_margin))
+
+            if args.pex25d_file_spec is not None:
+                save_artifact(pex25d_file, args.pex25d_file_spec,
+                              comments=args.pex25d_comments)
+                info(f"Wrote {args.pex25d_file_spec}")
+
+            scene = None
+            if args.pex25d_scene_spec is not None:
+                # The geometric tier belongs to whichever of the two runs it
+                # once: the validator when it is on, the resolver otherwise.
+                scene = resolve(pex25d_file, report=report,
+                                strict=args.strict and not args.pex25d_validate)
+                save_artifact(scene, args.pex25d_scene_spec,
+                              comments=args.pex25d_comments)
+                info(f"Wrote {args.pex25d_scene_spec}")
+
+            if args.pex25d_validate:
+                validate(pex25d_file, report=report, strict=args.strict,
+                         scene=scene)
+
+        except ResolveError as e:
+            # The scene is not written: the diagnostics say why, and half a
+            # scene is worse than none.
+            error(str(e))
+            report.render(args.diagnostics_format)
+            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+        except NotImplementedError as e:
+            error(f"Not implemented yet: {e}")
+            sys.exit(ExitCode.NOT_IMPLEMENTED)
+
+        writes_to_stdout = any(spec is not None and spec.is_stdio
+                               for spec in (args.pex25d_file_spec, args.pex25d_scene_spec))
+        with diagnostics_stream(writes_to_stdout=writes_to_stdout) as stream:
+            report.render(args.diagnostics_format, stream=stream)
+
+        if report.exit_code != ExitCode.OK:
+            sys.exit(report.exit_code)
+
+    def run_extraction(self,
+                       args: argparse.Namespace,
+                       tech_info: TechInfo):
         if args.halo is not None:
             tech_info.tech.process_parasitics.side_halo = args.halo
 

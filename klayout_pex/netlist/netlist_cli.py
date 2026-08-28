@@ -78,7 +78,7 @@ class NetlistCLI:
                                               formatter_class=RichHelpFormatter,
         epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand")
 
-        group_special = main_parser.add_argument_group("Special options")
+        group_special = main_parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
         group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
         group_special.add_argument("--log_level", dest='log_level',
