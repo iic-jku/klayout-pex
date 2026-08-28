@@ -262,23 +262,6 @@ addMetalLayer(kpex::tech::ProcessStackInfo *psi,
     return ml;
 }
 
-void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,
-                           const std::string &name,
-                           double dielectric_k,
-                           double height_above_metal,
-                           double width_outside_sidewall,
-                           const std::string &reference)
-{
-    kpex::tech::ProcessStackInfo::LayerInfo *li = psi->add_layers();
-    li->set_name(name);
-    li->set_layer_type(kpex::tech::ProcessStackInfo::LAYER_TYPE_SIDEWALL_DIELECTRIC);
-    kpex::tech::ProcessStackInfo::SidewallDielectricLayer *swl = li->mutable_sidewall_dielectric_layer();
-    swl->set_dielectric_k(dielectric_k);
-    swl->set_height_above_metal(height_above_metal);
-    swl->set_width_outside_sidewall(width_outside_sidewall);
-    swl->set_reference(reference);
-}
-
 void addSimpleDielectric(kpex::tech::ProcessStackInfo *psi,
                          const std::string &name,
                          double dielectric_k,

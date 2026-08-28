@@ -119,13 +119,6 @@ addMetalLayer(kpex::tech::ProcessStackInfo *psi,
               double z,
               double thickness);
 
-void addSidewallDielectric(kpex::tech::ProcessStackInfo *psi,
-                           const std::string &name,
-                           double dielectric_k,
-                           double height_above_metal,
-                           double width_outside_sidewall,
-                           const std::string &reference);
-
 void addSimpleDielectric(kpex::tech::ProcessStackInfo *psi,
                          const std::string &name,
                          double dielectric_k,

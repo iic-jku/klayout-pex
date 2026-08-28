@@ -39,8 +39,15 @@ message ProcessStackInfo {
         LAYER_TYPE_FIELD_OXIDE = 40;
         LAYER_TYPE_SIMPLE_DIELECTRIC = 50;
         LAYER_TYPE_CONFORMAL_DIELECTRIC = 60;
-        LAYER_TYPE_SIDEWALL_DIELECTRIC = 70;
         LAYER_TYPE_METAL = 80;
+
+        // A sidewall dielectric is a conformal one whose thickness on the field
+        // is zero, so the separate kind was redundant. Its `height_above_metal`
+        // was also used with two different meanings — measured from the metal
+        // bottom in one PDK entry and from the metal top in the others — which
+        // is why it is gone rather than merely deprecated.
+        reserved 70;
+        reserved "LAYER_TYPE_SIDEWALL_DIELECTRIC";
     }
 
     message Contact { // Contact/Via
@@ -100,13 +107,6 @@ message ProcessStackInfo {
         string reference = 30;
     }
 
-    message SidewallDielectricLayer { // Sidewall dielectric
-        double dielectric_k = 10;
-        double height_above_metal = 20; // might be 0 if none
-        double width_outside_sidewall = 21;
-        string reference = 30;
-    }
-
     message MetalLayer { // Metal
         double z = 1;          // z-offset in µm (of the layer bottom), relative to the substrate
         double thickness = 2;  // thickness in µm
@@ -123,9 +123,12 @@ message ProcessStackInfo {
             FieldOxideLayer field_oxide_layer = 11;
             SimpleDielectricLayer simple_dielectric_layer = 12;
             ConformalDielectricLayer conformal_dielectric_layer = 13;
-            SidewallDielectricLayer sidewall_dielectric_layer = 14;
             MetalLayer metal_layer = 15;
         }
+
+        // was SidewallDielectricLayer sidewall_dielectric_layer, in the oneof above
+        reserved 14;
+        reserved "sidewall_dielectric_layer";
     }
     
     repeated LayerInfo layers = 100;

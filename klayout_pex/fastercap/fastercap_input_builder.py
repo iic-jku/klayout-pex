@@ -46,7 +46,6 @@ from ..log import (
 )
 from ..tech_info import TechInfo
 
-import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 
 
 class FasterCapInputBuilder:
@@ -252,57 +251,45 @@ class FasterCapInputBuilder:
             no_metal_height = 0
 
             #
-            # add sidewall dielectrics
+            # add the conformal dielectric films anchored on this metal
             #
             if extracted_shapes:
-                sidewall_height = 0
+                # Films grow incrementally along the chain: each one is measured from
+                # the surface of the film it wraps, so the metal's own thickness is
+                # added once, by the first link, and not again by the ones above it.
+                sidewall_height = metal_layer.thickness
                 sidewall_region = extracted_shapes
-                sidewallee = metal_layer_name
+                wrapped = metal_layer_name
 
                 while True:
-                    sidewall = self.tech_info.sidewall_dielectric_layer(sidewallee)
-                    if not sidewall:
+                    film = self.tech_info.conformal_dielectric_wrapping(wrapped)
+                    if not film:
                         break
-                    match sidewall.layer_type:
-                        case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                            d = math.floor(sidewall.sidewall_dielectric_layer.width_outside_sidewall / self.dbu)
-                            sidewall_region = sidewall_region.sized(d)
-                            h_delta = sidewall.sidewall_dielectric_layer.height_above_metal or metal_layer.thickness
-                            # if h_delta == 0:
-                            #     h_delta = metal_layer.thickness
-                            sidewall_height += h_delta
-                            info(f"Sidewall dielectric {sidewall.name}: z={metal_layer.z}, height={sidewall_height}")
-                            model_builder.add_dielectric(material_name=sidewall.name,
-                                                         layer=sidewall_region,
-                                                         z=metal_layer.z,
-                                                         height=sidewall_height)
 
-                        case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
-                            conf_diel = sidewall.conformal_dielectric_layer
-                            d = math.floor(conf_diel.thickness_sidewall / self.dbu)
-                            sidewall_region = sidewall_region.sized(d)
-                            h_delta = metal_layer.thickness + conf_diel.thickness_over_metal
-                            sidewall_height += h_delta
-                            info(f"Conformal dielectric (sidewall) {sidewall.name}: "
-                                 f"z={metal_layer.z}, height={sidewall_height}")
-                            model_builder.add_dielectric(material_name=sidewall.name,
-                                                         layer=sidewall_region,
-                                                         z=metal_layer.z,
-                                                         height=sidewall_height)
-                            if conf_diel.thickness_where_no_metal > 0.0:
-                                no_metal_block = enlarged_top_cell_bbox.dup()
-                                no_metal_region = kdb.Region()
-                                no_metal_region.insert(no_metal_block)
-                                no_metal_region -= sidewall_region
-                                no_metal_height = conf_diel.thickness_where_no_metal
-                                info(f"Conformal dielectric (where no metal) {sidewall.name}: "
-                                     f"z={metal_layer.z}, height={no_metal_height}")
-                                model_builder.add_dielectric(material_name=sidewall.name,
-                                                             layer=no_metal_region,
-                                                             z=metal_layer.z,
-                                                             height=no_metal_height)
+                    conf_diel = film.conformal_dielectric_layer
+                    d = math.floor(conf_diel.thickness_sidewall / self.dbu)
+                    sidewall_region = sidewall_region.sized(d)
+                    sidewall_height += conf_diel.thickness_over_metal
+                    info(f"Conformal dielectric (sidewall) {film.name}: "
+                         f"z={metal_layer.z}, height={sidewall_height}")
+                    model_builder.add_dielectric(material_name=film.name,
+                                                 layer=sidewall_region,
+                                                 z=metal_layer.z,
+                                                 height=sidewall_height)
+                    if conf_diel.thickness_where_no_metal > 0.0:
+                        no_metal_block = enlarged_top_cell_bbox.dup()
+                        no_metal_region = kdb.Region()
+                        no_metal_region.insert(no_metal_block)
+                        no_metal_region -= sidewall_region
+                        no_metal_height = conf_diel.thickness_where_no_metal
+                        info(f"Conformal dielectric (where no metal) {film.name}: "
+                             f"z={metal_layer.z}, height={no_metal_height}")
+                        model_builder.add_dielectric(material_name=film.name,
+                                                     layer=no_metal_region,
+                                                     z=metal_layer.z,
+                                                     height=no_metal_height)
 
-                    sidewallee = sidewall.name
+                    wrapped = film.name
 
             #
             # add simple dielectric
