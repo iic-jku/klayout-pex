@@ -66,14 +66,21 @@ Calling `./gen_tech_pb klayout_pex_protobuf` will create the JSON tech info file
 
 ### Running KPEX
 
-To quickly run a PEX example with KPEX/2.5D and KPEX/FasterCap engines:
+`kpex` is organized into subcommands. `kpex extract` runs the extraction engines;
+`kpex pex25d` stops before them and writes the scene out as PEX25D.
+
+To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 ```bash
-./kpex.sh --tech build/sky130A_tech.pb.json \
+./kpex.sh extract \
+  --pdk sky130A \
   --out_dir output_sky130A \
-  --2.5D yes \
-  --fastercap yes \
+  --2.5D \
+  --fastercap \
   --gds testdata/sky130A/test_patterns/sideoverlap_complex_li1_m1.gds.gz
 ```
+
+> The older flat form without a subcommand (`./kpex.sh --pdk sky130A --gds …`) still
+> works and is treated as `kpex extract …`, but it warns and will be removed.
 
 ## Debugging Hints for PyCharm
 
