@@ -64,7 +64,7 @@ from ..log import (
 from ..util.argparse_helpers import render_enum_help, true_or_false
 from ..version import __version__
 
-from .exporters import SolverTarget
+from .exporters import ExportError, ExporterOptions, SolverTarget
 from .artifact import (
     ArtifactFormat,
     ArtifactKind,
@@ -279,7 +279,27 @@ class Pex25DCLI:
                                    help="Directory to export the solver input files into")
         parser_export.add_argument("--prefix", dest='prefix', default='',
                                    help="Prefix for the generated file names "
-                                        "(default is none)")
+                                        "(default is the target's own)")
+        parser_export.add_argument("--field_margin", dest='field_margin',
+                                   type=float, default=8.0, metavar='UM',
+                                   help="How far to draw the laterally unbounded "
+                                        "materials beyond the geometry, in µm "
+                                        "(default is %(default)s). Ignored when the "
+                                        "scene carries a DOMAIN_BOX.")
+        parser_export.add_argument("--delaunay_amax", dest='delaunay_amax',
+                                   type=float, default=0.0, metavar='AREA',
+                                   help="Maximum triangle area (default is "
+                                        "%(default)s, i.e. unconstrained)")
+        parser_export.add_argument("--delaunay_b", dest='delaunay_b',
+                                   type=float, default=1.0, metavar='B',
+                                   help="Minimum mesh angle as b = 2·sin(angle) "
+                                        "(default is %(default)s, i.e. 30 degrees)")
+        parser_export.add_argument("--stl", dest='write_stl',
+                                   action='store_true', default=False,
+                                   help="Also dump the generated solids as STL")
+        parser_export.add_argument("--geo_check", dest='geometry_check',
+                                   action='store_true', default=False,
+                                   help="Validate the geometry before writing")
         self._add_diagnostics_arguments(parser_export)
 
         # -------------------------------------------------------------- show
@@ -468,6 +488,9 @@ class Pex25DCLI:
             error(str(e))
             sys.exit(ExitCode.NOT_IMPLEMENTED)
         except ArgumentValidationError as e:
+            error(str(e))
+            sys.exit(ExitCode.USAGE)
+        except ExportError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)
         except (ReadError, ResolveError) as e:
