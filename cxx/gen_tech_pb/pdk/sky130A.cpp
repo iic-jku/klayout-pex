@@ -165,10 +165,11 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     auto poly = addMetalLayer(psi, "poly", 0.3262, 0.18);
     
-    // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
+    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
+    //                                                 over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addSidewallDielectric(psi, "iox",   3.9,          0.18,               0.006,            "poly");
-    addSidewallDielectric(psi, "spnit", 7.5,          0.121,              0.0431,           "iox");
+    addConformalDielectric(psi, "iox",    3.9,         0.0,         0.0,            0.006,     "poly");
+    addConformalDielectric(psi, "spnit",  7.5,         0.121,       0.0,            0.0431,    "iox");
 
     // DIELECTRIC (simple)    name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
@@ -191,9 +192,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     auto met1 = addMetalLayer(psi, "met1", 1.3761, 0.36);
 
-    // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
+    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
+    //                                                 over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addSidewallDielectric(psi, "nild3c", 3.5,          0.0,                0.03,            "met1");
+    addConformalDielectric(psi, "nild3c", 3.5,         0.0,         0.0,            0.03,      "met1");
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
@@ -203,9 +205,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     auto met2 = addMetalLayer(psi, "met2", 2.0061, 0.36);
 
-    // DIELECTRIC (sidewall)   name,     dielectric_k, height_above_metal, width_outside_sw, ref
+    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
+    //                                                 over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addSidewallDielectric(psi, "nild4c", 3.5,          0.0,                0.03,            "met2");
+    addConformalDielectric(psi, "nild4c", 3.5,         0.0,         0.0,            0.03,      "met2");
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
@@ -266,9 +269,10 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     auto met5 = addMetalLayer(psi, "met5", 5.3711, 1.26);
 
-    // DIELECTRIC (sidewall)   name,    dielectric_k, height_above_metal, width_outside_sw, ref
+    // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
+    //                                                 over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addSidewallDielectric(psi, "topox", 3.9,          0.09,               0.07,            "met5");
+    addConformalDielectric(psi, "topox",  3.9,         0.09,        0.0,            0.07,      "met5");
 
     // DIELECTRIC (conformal)   name,    dielectric_k, thickness,   thickness,      thickness, ref
     //                                                 over metal,  where no metal, sidewall
