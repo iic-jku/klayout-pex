@@ -1,0 +1,41 @@
+SUBPROCESS __kpex__:pex25d_cli.py:473 /Users/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m 'not slow' --alluredir build/allure-results --color no
+INFO     __kpex__:pex25d_cli.py:417 Wrote /var/folders/df/djsxfhc17x95674wsm_g8s980000gn/T/tmps4ofwrhg/out.pex25d.scene.pb (scene, pb)
+SUBPROCESS __kpex__:pex25d_cli.py:473 /Users/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m 'not slow' --alluredir build/allure-results --color no
+INFO     __kpex__:show.py:71 PEX25D 1.0-rc1 (file)
+SUBPROCESS __kpex__:show.py:75 units: length: LENGTH_UNIT_UM grid_numerator: 1 grid_denominator: 10000 
+SUBPROCESS __kpex__:show.py:84 technology = testpdk
+SUBPROCESS __kpex__:show.py:84 source_cell = tiny
+SUBPROCESS __kpex__:show.py:91 GROUND_PLANE subs  z -4000 … -1000
+SUBPROCESS __kpex__:show.py:101 METAL met1  z 10000 … 14000
+SUBPROCESS __kpex__:show.py:101 METAL met2  z 20000 … 24000
+SUBPROCESS __kpex__:show.py:103 VIA via1  connects met1 → met2
+SUBPROCESS __kpex__:show.py:111 fox  k=3.9  wraps subs
+SUBPROCESS __kpex__:show.py:111 lint  k=7.3  wraps met1
+SUBPROCESS __kpex__:show.py:111 ild  k=4.1  wraps lint
+SUBPROCESS __kpex__:show.py:114 air  k=1.0  (background)
+SUBPROCESS __kpex__:show.py:121 A  net neta
+SUBPROCESS __kpex__:show.py:121 B  net netb
+INFO     __kpex__:show.py:123 4 shape record(s)
+SUBPROCESS __kpex__:show.py:132 t1  layer met1
+SUBPROCESS __kpex__:show.py:139 temperature: celsius: 25 
+SUBPROCESS __kpex__:show.py:141 metal met1: metal: "met1" sheet: 0.125 
+SUBPROCESS __kpex__:show.py:141 metal met2: metal: "met2" sheet: 0.125 
+SUBPROCESS __kpex__:show.py:143 via via1: via: "via1" per_cut: 4.5 
+SUBPROCESS __kpex__:show.py:158 domain_margin: x: 40000 y: 40000 z: 20000 
+SUBPROCESS __kpex__:pex25d_cli.py:473 /Users/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m 'not slow' --alluredir build/allure-results --color no
+INFO     __kpex__:show.py:71 PEX25D 1.0-rc1 (scene)
+SUBPROCESS __kpex__:show.py:75 units: length: LENGTH_UNIT_UM grid_numerator: 1 grid_denominator: 10000 
+SUBPROCESS __kpex__:show.py:84 technology = testpdk
+SUBPROCESS __kpex__:show.py:84 source_cell = tiny
+SUBPROCESS __kpex__:show.py:91 GROUND_PLANE subs  z -4000 … -1000
+SUBPROCESS __kpex__:show.py:98 met1  z 10000 … 14000
+SUBPROCESS __kpex__:show.py:98 met2  z 20000 … 24000
+SUBPROCESS __kpex__:show.py:98 via1  z 14000 … 20000  connects met1 → met2
+SUBPROCESS __kpex__:show.py:111 fox  k=3.9  wraps subs  depth 1
+SUBPROCESS __kpex__:show.py:111 lint  k=7.3  wraps met1  depth 1
+SUBPROCESS __kpex__:show.py:111 ild  k=4.1  wraps lint  depth 2
+SUBPROCESS __kpex__:show.py:114 air  k=1.0  (background)
+SUBPROCESS __kpex__:show.py:121 A  net neta
+SUBPROCESS __kpex__:show.py:121 B  net netb
+SUBPROCESS __kpex__:show.py:139 temperature: celsius: 25 
+SUBPROCESS __kpex__:show.py:152 box {   lower_left {     x: -40800     y: -40800     z: -1000   }   upper_right {     x: 70800     y: 50800     z: 44000   } } origin: ORIGIN_DOMAIN_MARGIN applied_margin {   x: 40000   y: 40000   z: 20000 } geometry_bounds {   lower_left {     x: -800     y: -800     z: 10000   }   upper_right {     x: 30800     y: 10800     z: 24000   } }

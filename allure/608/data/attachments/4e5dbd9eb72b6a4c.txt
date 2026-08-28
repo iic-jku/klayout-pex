@@ -1,0 +1,68 @@
+─────────────────────────── Command line arguments ────────────────────────────
+'D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py' -m   
+'not slow' --alluredir build/allure-results --color no                         
+[21:30:09] INFO     Wrote                                     pex25d_cli.py:417
+                    C:\Users\RUNNER~1\AppData\Local\Temp\tmpa                  
+                    fabqk_g\out.pex25d.scene.pb (scene, pb)                    
+─────────────────────────── Command line arguments ────────────────────────────
+'D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py' -m   
+'not slow' --alluredir build/allure-results --color no                         
+─────────────────────────────────── Header ────────────────────────────────────
+[21:30:09] INFO     PEX25D 1.0-rc1 (file)                            show.py:71
+units: length: LENGTH_UNIT_UM grid_numerator: 1 grid_denominator: 10000        
+────────────────────────────────── Metadata ───────────────────────────────────
+technology = testpdk                                                           
+source_cell = tiny                                                             
+─────────────────────────── Ground plane and layers ───────────────────────────
+GROUND_PLANE subs  z -4000 … -1000                                             
+METAL met1  z 10000 … 14000                                                    
+METAL met2  z 20000 … 24000                                                    
+VIA via1  connects met1 → met2                                                 
+───────────────────────────────── Dielectrics ─────────────────────────────────
+fox  k=3.9  wraps subs                                                         
+lint  k=7.3  wraps met1                                                        
+ild  k=4.1  wraps lint                                                         
+air  k=1.0  (background)                                                       
+───────────────────────────────── Conductors ──────────────────────────────────
+A  net neta                                                                    
+B  net netb                                                                    
+[21:30:09] INFO     4 shape record(s)                               show.py:123
+────────────────────────────────── Terminals ──────────────────────────────────
+t1  layer met1                                                                 
+───────────────────────────────── Resistance ──────────────────────────────────
+temperature: celsius: 25                                                       
+metal met1: metal: "met1" sheet: 0.125                                         
+metal met2: metal: "met2" sheet: 0.125                                         
+via via1: via: "via1" per_cut: 4.5                                             
+──────────────────────────── Computational domain ─────────────────────────────
+domain_margin: x: 40000 y: 40000 z: 20000                                      
+─────────────────────────── Command line arguments ────────────────────────────
+'D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py' -m   
+'not slow' --alluredir build/allure-results --color no                         
+─────────────────────────────────── Header ────────────────────────────────────
+[21:30:10] INFO     PEX25D 1.0-rc1 (scene)                           show.py:71
+units: length: LENGTH_UNIT_UM grid_numerator: 1 grid_denominator: 10000        
+────────────────────────────────── Metadata ───────────────────────────────────
+technology = testpdk                                                           
+source_cell = tiny                                                             
+─────────────────────────── Ground plane and layers ───────────────────────────
+GROUND_PLANE subs  z -4000 … -1000                                             
+met1  z 10000 … 14000                                                          
+met2  z 20000 … 24000                                                          
+via1  z 14000 … 20000  connects met1 → met2                                    
+───────────────────────────────── Dielectrics ─────────────────────────────────
+fox  k=3.9  wraps subs  depth 1                                                
+lint  k=7.3  wraps met1  depth 1                                               
+ild  k=4.1  wraps lint  depth 2                                                
+air  k=1.0  (background)                                                       
+───────────────────────────────── Conductors ──────────────────────────────────
+A  net neta                                                                    
+B  net netb                                                                    
+───────────────────────────────── Resistance ──────────────────────────────────
+temperature: celsius: 25                                                       
+──────────────────────────── Computational domain ─────────────────────────────
+box {   lower_left {     x: -40800     y: -40800     z: -1000   }   upper_right
+{     x: 70800     y: 50800     z: 44000   } } origin: ORIGIN_DOMAIN_MARGIN    
+applied_margin {   x: 40000   y: 40000   z: 20000 } geometry_bounds {          
+lower_left {     x: -800     y: -800     z: 10000   }   upper_right {     x:   
+30800     y: 10800     z: 24000   } }                                          
