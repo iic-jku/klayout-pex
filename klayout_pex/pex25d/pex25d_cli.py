@@ -202,8 +202,9 @@ class Pex25DCLI:
                                 "('-' for stdout)")
         group.add_argument("--strict", dest='strict',
                            action='store_true', default=False,
-                           help="Also run the geometric tier: ring simplicity, hole "
-                                "containment, same-depth overlap (default is %(default)s)")
+                           help="Also run the geometric tier: ring and box "
+                                "wellformedness, hole containment, conductor "
+                                "overlap (default is %(default)s)")
         group.add_argument("--werror", dest='warnings_are_errors',
                            action='store_true', default=False,
                            help="Treat warnings as errors for the exit code "

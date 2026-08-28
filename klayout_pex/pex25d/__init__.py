@@ -55,3 +55,4 @@ from .diagnostics import (
     DiagnosticsReport,
     ExitCode,
 )
+from .validator import validate
