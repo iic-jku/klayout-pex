@@ -1194,7 +1194,7 @@ class KpexCLI:
         """
         from .klayout.pex25d_builder import BuilderOptions, build_pex25d_file
         from .pex25d.codec import save_artifact
-        from .pex25d.resolver import resolve
+        from .pex25d.resolver import ResolveError, resolve
 
         report = DiagnosticsReport(warnings_are_errors=args.warnings_are_errors)
 
@@ -1235,6 +1235,12 @@ class KpexCLI:
                               comments=args.pex25d_comments)
                 info(f"Wrote {args.pex25d_scene_spec}")
 
+        except ResolveError as e:
+            # The scene is not written: the diagnostics say why, and half a
+            # scene is worse than none.
+            error(str(e))
+            report.render(args.diagnostics_format)
+            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
         except NotImplementedError as e:
             error(f"Not implemented yet: {e}")
             sys.exit(ExitCode.NOT_IMPLEMENTED)
