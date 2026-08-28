@@ -302,9 +302,19 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     setContact(via,        "via1_con",       "met1",      "met2",      0.27,                    0.15,    0.17,  0.055);
     setContact(via2,       "via2_con",       "met2",      "met3",      0.42,                    0.20,    0.20,  0.04);
     setContact(via3_ncap,  "via3_ncap",      "met3",      "met4",      0.39,                    0.20,    0.20,  0.06);
-    setContact(via3_cap,   "via3_cap",       "met3",      "met4",      0.29,                    0.20,    0.20,  0.06);
     setContact(via4_ncap,  "via4_ncap",      "met4",      "met5",      0.505,                   0.80,    0.80,  0.19);
-    setContact(via4_cap,   "via4_cap",       "met4",      "met5",      0.505 - 0.1,             0.80,    0.80,  0.19);
+
+    // The MiM variants land on the capacitor top plate, not on the metal below it:
+    // via3_cap and via4_cap are attached to capm / capm2 above. Their thickness is
+    // derived rather than written out, because the gap they have to fill depends on
+    // capild_thickness, which the two literals it replaces did not account for
+    // (0.29 and 0.405 against actual gaps of 0.27 and 0.385).
+    //
+    // CONTACT:             contact,         layer_below, metal_above, thickness,                                     width, spacing,  border
+    //                      (LVS)            (LVS)        (LVS)
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    setContact(via3_cap,   "via3_cap",       "capm",      "met4",      met4_ncap->z() - (capm->z() + capm->thickness()),   0.20,    0.20,  0.06);
+    setContact(via4_cap,   "via4_cap",       "capm2",     "met5",      met5->z() - (capm2->z() + capm2->thickness()),      0.80,    0.80,  0.19);
 }
 
 void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
