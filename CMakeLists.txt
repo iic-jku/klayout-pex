@@ -75,6 +75,17 @@ set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
 
 set(PROTOBUF_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/c/capacitance.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_source_ref.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_units.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_geometry.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_meta.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_diagnostics.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_dielectric.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_resistance.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_terminal.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_domain.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_file.proto
+    ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/pex25d/pex25d_scene.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/geometry/shapes.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/device.proto
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/layout/layer_ref.proto

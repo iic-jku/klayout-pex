@@ -1,0 +1,76 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Optional computational-domain settings for a PEX25D file.
+//
+// DOMAIN_MARGIN and DOMAIN_BOX are solver-adapter *hints* for selecting a
+// finite computational region. Neither prescribes a boundary condition; each
+// solver adapter applies its native open-domain treatment. DOMAIN_BOX takes
+// precedence when both are present.
+//
+// "FINITE GEOMETRY" throughout this file means the solids that are BOUNDED IN
+// XY: the conductor shapes, and the conformal films grown on them whose
+// `thickness_on_field` is zero. The ground plane, the background, every
+// DIELECTRIC_SIMPLE band and every conformal with a non-zero
+// `thickness_on_field` are laterally unbounded — they take no part in the
+// bounding box and are simply clipped to whatever domain the adapter settles
+// on. A METAL declared without shapes has no solid and likewise takes no part,
+// so an anchor profile lying below the domain's lower face is neither a
+// DOMAIN_BOX violation nor a reason to enlarge the margin box.
+//
+// Note that a conformal film with `thickness_on_field` 0 DOES push the box out
+// past its conductor by `thickness_beside_wrapped` — small against a typical
+// margin, but it is the difference between a rule an adapter can apply and one
+// it has to guess at.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_source_ref.proto";
+import "kpex/pex25d/pex25d_geometry.proto";
+
+// `DOMAIN_MARGIN X <x> Y <y> Z <z>`
+//
+// Minimum clearance from all finite geometry to the outer computational
+// boundary. X/Y expand the finite bounding box in -X/+X/-Y/+Y; Z expands only
+// above the highest finite geometry, because the ground plane forms the lower
+// boundary. An adapter may increase these margins but must not use smaller
+// ones. This is a hint: it prescribes no boundary condition, and each adapter
+// applies its native open-domain treatment.
+message DomainMargin {
+    int64 x = 1;  // grid units
+    int64 y = 2;  // grid units
+    int64 z = 3;  // grid units
+}
+
+// `DOMAIN_BOX LL <x> <y> <z> UR <x> <y> <z>`
+//
+// Explicit outer box; takes precedence over DOMAIN_MARGIN. All finite
+// non-ground-plane geometry must lie WITHIN it — faces may touch it. The
+// box's lower Z face normally coincides with the ground plane's zhigh.
+message DomainBox {
+    Box3D box = 1;
+
+    SourceRef source = 100;
+}

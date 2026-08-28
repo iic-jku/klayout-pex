@@ -1,0 +1,146 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// The DIELECTRIC_* statements of a PEX25D file: the two dielectric kinds and the
+// required background.
+//
+// There is no DIELECTRIC_SIDEWALL. A sidewall film is the special case of a
+// conformal with THICKNESS_ON_FIELD 0, so the two statements were folded into
+// one. That also removes the "height above the metal" ambiguity: every
+// conformal thickness is measured from a named face of the WRAPPED object.
+//
+// Growth is incremental along a WRAPS chain: each profile is measured from the
+// surface of the profile it wraps, not from the conductor underneath it. The
+// lateral and vertical parameters work the same way, which is what makes a
+// chain composable. A profile's solid is the wrapped object grown by those
+// thicknesses, and so CONTAINS it — profiles are not shells, a writer never
+// subtracts anything, and the occupancy rule decides what is visible where two
+// profiles claim the same point.
+//
+// A dielectric's solid *contains* what it wraps — films are not shells, and a
+// writer subtracts nothing. Where two dielectrics claim the same point, the one
+// nearer the conductor it was built on wins; that ordering is made explicit as
+// ResolvedDielectric.wrap_depth in pex25d_scene.proto.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_source_ref.proto";
+
+// Which DIELECTRIC_* statement a dielectric came from. Lives here rather than
+// nested in Dielectric so that the resolved scene can name the kind without
+// depending on the unresolved AST.
+enum DielectricKind {
+    DIELECTRIC_KIND_UNSPECIFIED = 0;
+    DIELECTRIC_KIND_SIMPLE = 1;
+    DIELECTRIC_KIND_CONFORMAL = 2;
+}
+
+// There is deliberately no SIDEWALL kind. A sidewall film is a conformal with
+// THICKNESS_ON_FIELD 0, which is what makes every conformal thickness
+// measurable from a named face of the wrapped object
+
+// The two DIELECTRIC_* statement kinds.
+message Dielectric {
+    string name = 1;
+    DielectricKind kind = 2;
+
+    // `PERMITTIVITY <k>` — relative, isotropic, frequency-independent.
+    // Conductor properties (conductivity, sheet resistance) are out of scope
+    // for PEX25D 1.x.
+    double permittivity = 3;
+
+    // `WRAPS <name>` — a previously defined METAL, VIA, GROUND_PLANE or
+    // DIELECTRIC profile. Must be acyclic. Never the background.
+    string wraps = 4;
+
+    oneof parameters {
+        SimpleDielectric simple = 10;
+        ConformalDielectric conformal = 11;
+    }
+
+    SourceRef source = 100;
+}
+
+// `DIELECTRIC_SIMPLE <name> WRAPS <n> PERMITTIVITY <k> BETWEEN <below> <above>`
+//
+// Inter-metal fill: the full band from the BOTTOM face of `between_below` to
+// the BOTTOM face of `between_above`, across the whole XY plane. Anchoring on
+// the two bottom faces means the band joins the neighbouring levels
+// seamlessly, whatever the films inside it reach.
+//
+// For a simple dielectric, `wraps` does NOT shape the solid — `between` does.
+// `wraps` fixes only the profile's depth, i.e. its precedence against the
+// films it encloses: "PSG WRAPS SPNIT" is what makes PSG lose to SPNIT and to
+// IOX instead of tying with them.
+//
+// It follows that `wraps` must name the OUTERMOST profile anchored on the
+// `between_below` object — the last link of that object's WRAPS chain.
+// Wrapping an inner link gives the fill the same depth as a film it contains,
+// which is exactly the tie the validator rejects.
+message SimpleDielectric {
+    string between_below = 1;
+    string between_above = 2;
+}
+
+// `DIELECTRIC_CONFORMAL <name> WRAPS <n> PERMITTIVITY <k>
+//                              THICKNESS_OVER_WRAPPED <v>
+//                              THICKNESS_BESIDE_WRAPPED <v>
+//                              THICKNESS_ON_FIELD <v>`
+//
+// A film that follows the profile of the wrapped object. All three thicknesses
+// are relative to that object, and the film's absolute z extent is derived.
+//
+// This is also how a pure sidewall film is written: THICKNESS_ON_FIELD 0
+// leaves the parent dielectric in place away from the object, and
+// THICKNESS_OVER_WRAPPED is how far the film rises above its top face.
+message ConformalDielectric {
+    // Film on the TOP face of the wrapped object. 0 = flush with that face.
+    int64 thickness_over_wrapped = 1;    // grid units
+
+    // Film on the SIDE faces of the wrapped object.
+    //
+    // Exact for Manhattan edges only: offsetting a 45-degree edge lands off
+    // grid (0.03 um at 45 degrees is 212.132 grid units at GRID 0.0001), so a
+    // reader MUST snap the offset result to the nearest grid multiple, which
+    // is what makes two readers of one file produce identical geometry.
+    int64 thickness_beside_wrapped = 2;  // grid units
+
+    // Film over the whole XY area where the wrapped object is ABSENT,
+    // measured upward from that object's BOTTOM face. 0 means the film exists
+    // only on the object itself.
+    int64 thickness_on_field = 3;        // grid units
+}
+
+// `DIELECTRIC_BACKGROUND <name> PERMITTIVITY <k>`
+//
+// Wraps nothing and fills every point not claimed by a conductor, the ground
+// plane or a dielectric. Exactly one per file. Position in the file has no
+// significance.
+message Background {
+    string name = 1;
+    double permittivity = 2;
+
+    SourceRef source = 100;
+}

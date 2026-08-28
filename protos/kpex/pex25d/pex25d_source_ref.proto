@@ -1,0 +1,49 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+//
+// Source positions, so that validator diagnostics and downstream tools can
+// point back into the original PEX25D text.
+//
+// Every `source` field in this package is OPTIONAL. A reader populates them
+// when asked to (`--pex25d-debug`) and otherwise leaves them unset, so that a
+// layout-sized scene does not carry a line number per shape. Nothing may
+// depend on a SourceRef being present — it is for diagnostics only.
+//
+// `file` matters because INCLUDE is textual: one PEX25DFile is a whole include
+// tree flattened, and without `file` a line number alone is ambiguous.
+//
+// For a record continued over several physical lines with a trailing `\`,
+// `line` and `column` are those of the token that STARTS the record.
+//
+syntax = "proto3";
+
+package kpex.pex25d;
+
+// Position of the statement that produced a record, so that the validator can
+// emit `file:line:col` diagnostics against the original text, and so that a
+// PEX25DFile parsed from binary still points back at a human-readable source.
+message SourceRef {
+    uint32 line = 1;    // 1-based
+    uint32 column = 2;  // 1-based, in Unicode code points
+    string file = 3;    // optional; set by the reader, not present in the text
+}
