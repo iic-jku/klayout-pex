@@ -74,6 +74,7 @@ from .artifact import (
     infer_artifact_spec,
 )
 from .protobuf import ProtobufNotGeneratedError
+from .reader import ReadError
 from .resolver import ResolveError
 from .diagnostics import (
     DiagnosticsFormat,
@@ -154,6 +155,12 @@ class Pex25DCLI:
                            choices=list(ArtifactFormat),
                            help="How the input is encoded "
                                 "(default is '%(default)s', i.e. inferred from the file name)")
+        group.add_argument("--with_source_refs", dest='with_source_refs',
+                           action='store_true', default=False,
+                           help="Record where each record came from while reading the "
+                                "text format (default is %(default)s). Useful when an "
+                                "INCLUDE tree has been flattened; diagnostics carry "
+                                "positions either way.")
 
     @staticmethod
     def _add_output_arguments(parser: argparse.ArgumentParser,
@@ -371,7 +378,8 @@ class Pex25DCLI:
                 f"{args.output_spec.kind.value}. Use 'resolve' to turn a file into a scene."
             )
 
-        message = load_artifact(args.input_spec, report=report)
+        message = load_artifact(args.input_spec, report=report,
+                                with_source_refs=args.with_source_refs)
         save_artifact(message, args.output_spec, comments=args.comments)
         if not args.output_spec.is_stdio:
             info(f"Wrote {args.output_spec}")
@@ -380,7 +388,8 @@ class Pex25DCLI:
         from .codec import load_artifact, save_artifact
         from .resolver import resolve
 
-        message = load_artifact(args.input_spec, report=report)
+        message = load_artifact(args.input_spec, report=report,
+                                with_source_refs=args.with_source_refs)
         scene = resolve(message, report=report, strict=args.strict)
         save_artifact(scene, args.output_spec, comments=args.comments)
         if not args.output_spec.is_stdio:
@@ -391,7 +400,8 @@ class Pex25DCLI:
         from .codec import load_artifact
         from .resolver import resolve
 
-        message = load_artifact(args.input_spec, report=report)
+        message = load_artifact(args.input_spec, report=report,
+                                with_source_refs=args.with_source_refs)
         if args.input_spec.kind == ArtifactKind.FILE:
             info("Input is an unresolved PEX25DFile, resolving it first")
             message = resolve(message, report=report, strict=args.strict)
@@ -408,7 +418,8 @@ class Pex25DCLI:
         from .codec import load_artifact
         from .show import show
 
-        message = load_artifact(args.input_spec, report=report)
+        message = load_artifact(args.input_spec, report=report,
+                                with_source_refs=args.with_source_refs)
         show(message, kind=args.input_spec.kind, sections=args.sections or ['all'])
 
     # --------------------------------------------------------------------- main
@@ -459,7 +470,7 @@ class Pex25DCLI:
         except ArgumentValidationError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)
-        except ResolveError as e:
+        except (ReadError, ResolveError) as e:
             error(str(e))
             self._emit_diagnostics(args, report)
             sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
