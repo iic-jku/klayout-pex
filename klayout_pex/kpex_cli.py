@@ -385,6 +385,15 @@ class KpexCLI:
                                help="Emit DOMAIN_MARGIN with this clearance in µm "
                                     "(default is none, leaving the domain unset for "
                                     "the solver adapter to choose)")
+        group_out.add_argument("--validate", dest='pex25d_validate',
+                               type=true_or_false, default=True,
+                               help="Check the generated artifacts against the reference "
+                                    "validator before reporting (default is %(default)s). "
+                                    "A defect in the technology data — a profile declared "
+                                    "twice, a film anchored on the wrong link — otherwise "
+                                    "shows up only when somebody runs 'pex25d validate' on "
+                                    "the result. The artifacts are written either way; the "
+                                    "diagnostics decide the exit code.")
         group_out.add_argument("--comments", dest='pex25d_comments',
                                type=true_or_false, default=False,
                                help="Include the syntax hints from the specification as "
@@ -1195,6 +1204,7 @@ class KpexCLI:
         from .klayout.pex25d_builder import BuilderOptions, build_pex25d_file
         from .pex25d.codec import save_artifact
         from .pex25d.resolver import ResolveError, resolve
+        from .pex25d.validator import validate
 
         report = DiagnosticsReport(warnings_are_errors=args.warnings_are_errors)
 
@@ -1229,11 +1239,19 @@ class KpexCLI:
                               comments=args.pex25d_comments)
                 info(f"Wrote {args.pex25d_file_spec}")
 
+            scene = None
             if args.pex25d_scene_spec is not None:
-                scene = resolve(pex25d_file, report=report, strict=args.strict)
+                # The geometric tier belongs to whichever of the two runs it
+                # once: the validator when it is on, the resolver otherwise.
+                scene = resolve(pex25d_file, report=report,
+                                strict=args.strict and not args.pex25d_validate)
                 save_artifact(scene, args.pex25d_scene_spec,
                               comments=args.pex25d_comments)
                 info(f"Wrote {args.pex25d_scene_spec}")
+
+            if args.pex25d_validate:
+                validate(pex25d_file, report=report, strict=args.strict,
+                         scene=scene)
 
         except ResolveError as e:
             # The scene is not written: the diagnostics say why, and half a
