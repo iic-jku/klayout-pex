@@ -156,8 +156,7 @@ class TechInfo:
         for pl in self.tech.process_stack.layers:
             match pl.layer_type:
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC | \
-                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC | \
-                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
+                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     if self.dielectric_filter.is_included(pl.name):
                         layers.append(pl)
         return layers
@@ -171,17 +170,19 @@ class TechInfo:
                     diel_by_name[pl.name] = pl.simple_dielectric_layer.dielectric_k
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     diel_by_name[pl.name] = pl.conformal_dielectric_layer.dielectric_k
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                    diel_by_name[pl.name] = pl.sidewall_dielectric_layer.dielectric_k
         return diel_by_name
 
-    def sidewall_dielectric_layer(self, layer_name: str) -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+    def conformal_dielectric_wrapping(self, layer_name: str) \
+            -> Optional[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        """
+        The conformal dielectric anchored on ``layer_name``, if any.
+
+        Films form a chain: a metal is wrapped by a film, which may itself be
+        wrapped by the next one. Calling this repeatedly walks that chain.
+        """
         found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
         for lyr in self.filtered_dielectric_layers:
             match lyr.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIDEWALL_DIELECTRIC:
-                    if lyr.sidewall_dielectric_layer.reference == layer_name:
-                        found_layers.append(lyr)
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     if lyr.conformal_dielectric_layer.reference == layer_name:
                         found_layers.append(lyr)
@@ -191,7 +192,7 @@ class TechInfo:
         if len(found_layers) == 0:
             return None
         if len(found_layers) >= 2:
-            raise Exception(f"found multiple sidewall dielectric layers for {layer_name}")
+            raise Exception(f"found multiple conformal dielectric layers wrapping {layer_name}")
         return found_layers[0]
 
     def simple_dielectric_above_metal(self, layer_name: str) -> Tuple[Optional[process_stack_pb2.ProcessStackInfo.LayerInfo], float]:
