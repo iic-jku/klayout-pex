@@ -57,9 +57,21 @@ option(PROTOBUF_USE_SYSTEM "Use system-wide Protobuf installation" OFF)
 #_____________________________________________________________________________________________
 
 # add dependencies
+
+# Protobuf minimum version for system check, and for CPM download
+set(KPEX_PROTOBUF_VERSION "33.5")
+
 if(PROTOBUF_USE_SYSTEM)
     # Try to find Protobuf system-wide
     find_package(Protobuf CONFIG REQUIRED)
+
+    if(Protobuf_VERSION VERSION_LESS KPEX_PROTOBUF_VERSION)
+        message(FATAL_ERROR
+            "System Protobuf version (${Protobuf_VERSION}) is older than "
+            "the required minimum (${KPEX_PROTOBUF_VERSION})."
+        )
+    endif()
+
     message(STATUS "Found Protobuf: ${Protobuf_VERSION}")
 else()
     # Download Protobuf using CPM
@@ -67,7 +79,7 @@ else()
     include(cmake/CPM.cmake)
     CPMAddPackage(
         NAME protobuf
-        GIT_TAG v33.5
+        GIT_TAG "v${KPEX_PROTOBUF_VERSION}"
         GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
         OPTIONS
             "protobuf_INSTALL OFF"
