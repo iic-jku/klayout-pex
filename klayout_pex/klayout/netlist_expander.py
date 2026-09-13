@@ -46,7 +46,9 @@ class NetlistExpander:
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
         if not blackbox_devices:
-            for d in top_circuit.each_device():
+            # NOTE: Store devices before modifying container
+            devices_to_remove: List[kdb.Device] = list(top_circuit.each_device())
+            for d in devices_to_remove:
                 name = d.name or d.expanded_name()
                 info(f"Removing whiteboxed device {name}")
                 top_circuit.remove_device(d)
