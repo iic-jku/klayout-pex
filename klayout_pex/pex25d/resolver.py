@@ -501,15 +501,22 @@ class Resolver:
                 if box_contains(region, polygon_bounds(shape.polygon)):
                     polygons.append(shape.polygon)
                 elif boxes_overlap(region, polygon_bounds(shape.polygon)):
-                    # Clipping a polygon partially would put new vertices on the
-                    # region's edges, which for a non-Manhattan edge lands off
-                    # grid. Refuse rather than snap silently.
-                    self.diagnose(
-                        'PEX25D-E0241',
-                        f"TERMINAL '{terminal.name}' partially covers a polygon on "
-                        f"layer '{terminal.layer}'; only whole polygons and clipped "
-                        f"boxes are supported", source=terminal)
-                    return
+                    clipped = clip_manhattan_polygon(shape.polygon, region)
+                    if clipped is None:
+                        self.diagnose(
+                            'PEX25D-E0241',
+                            f"TERMINAL '{terminal.name}' partially covers a non-Manhattan "
+                            f"polygon on layer '{terminal.layer}'; clipping may leave "
+                            f"the coordinate grid", source=terminal)
+                        return
+                    if on_via and clipped:
+                        self.diagnose(
+                            'PEX25D-E0240',
+                            f"TERMINAL '{terminal.name}' clips a via cut on layer "
+                            f"'{terminal.layer}' rather than covering it whole",
+                            source=terminal)
+                        return
+                    boxes.extend(clipped)
 
         if not boxes and not polygons:
             self.diagnose('PEX25D-E0242',
@@ -689,6 +696,38 @@ def extend(bounds: Optional[List[int]],
 def fill_box3d(box: Any, x0: int, y0: int, x1: int, y1: int, z0: int, z1: int) -> None:
     box.lower_left.x, box.lower_left.y, box.lower_left.z = x0, y0, z0
     box.upper_right.x, box.upper_right.y, box.upper_right.z = x1, y1, z1
+
+
+def clip_manhattan_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
+    """Intersect an orthogonal polygon, including holes, with a box on the grid."""
+    rings = [polygon.outer, *polygon.holes]
+    edges = []
+    for ring in rings:
+        points = list(ring.points)
+        for first, second in zip(points, points[1:] + points[:1]):
+            if first.x != second.x and first.y != second.y:
+                return None
+            if first.y != second.y:
+                edges.append((first.x, min(first.y, second.y), max(first.y, second.y)))
+
+    bottom, top = region.lower_left.y, region.upper_right.y
+    if bottom >= top or region.lower_left.x >= region.upper_right.x:
+        return []
+    levels = sorted({bottom, top} | {y for _, lo, hi in edges
+                                     for y in (lo, hi) if bottom < y < top})
+    boxes = []
+    for low, high in zip(levels, levels[1:]):
+        # Twice the midpoint keeps the scanline exact even between adjacent grid rows.
+        crossings = sorted(x for x, lo, hi in edges if 2 * lo < low + high < 2 * hi)
+        for left, right in zip(crossings[::2], crossings[1::2]):
+            left = max(left, region.lower_left.x)
+            right = min(right, region.upper_right.x)
+            if left < right:
+                box = pex25d_geometry_pb2().Box2D()
+                box.lower_left.x, box.lower_left.y = left, low
+                box.upper_right.x, box.upper_right.y = right, high
+                boxes.append(box)
+    return boxes
 
 
 def resolve(pex25d_file: Any,

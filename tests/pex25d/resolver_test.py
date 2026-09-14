@@ -195,7 +195,54 @@ class Pex25DResolverTest(unittest.TestCase):
     def test_e0201_terminal_on_a_dielectric(self):
         assert 'PEX25D-E0201' in resolve_codes(replacing(
             'TERMINAL t1 CONDUCTOR A LAYER met1 KIND PIN LL 0.0 0.0 UR 0.2 0.5',
-            'TERMINAL t1 CONDUCTOR A LAYER lint KIND PIN LL 0.0 0.0 UR 0.2 0.5'))
+                      'TERMINAL t1 CONDUCTOR A LAYER lint KIND PIN LL 0.0 0.0 UR 0.2 0.5'))
+
+    def test_terminal_clipping_preserves_a_polygon_hole(self):
+        text = replacing(
+            'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
+            'POLYGON CONDUCTOR A LAYER met1 OUTER 0 0 1 0 1 1 0 1 '
+            'HOLE 0.2 0.2 0.8 0.2 0.8 0.8 0.2 0.8')
+        text = replacing('LL 0.0 0.0 UR 0.2 0.5', 'LL 0.1 0.1 UR 0.9 0.9', text)
+        terminal = resolved(text).conductors[0].terminals[0]
+        area = sum((b.upper_right.x - b.lower_left.x) *
+                   (b.upper_right.y - b.lower_left.y) for b in terminal.boxes)
+        assert area == 8000 ** 2 - 6000 ** 2
+        assert all(b.upper_right.x <= 2000 or b.lower_left.x >= 8000 or
+                   b.upper_right.y <= 2000 or b.lower_left.y >= 8000
+                   for b in terminal.boxes)
+
+    def test_a_terminal_in_a_polygon_hole_selects_nothing(self):
+        text = replacing(
+            'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
+            'POLYGON CONDUCTOR A LAYER met1 OUTER 0 0 1 0 1 1 0 1 '
+            'HOLE 0.2 0.2 0.8 0.2 0.8 0.8 0.2 0.8')
+        text = replacing('LL 0.0 0.0 UR 0.2 0.5', 'LL 0.3 0.3 UR 0.7 0.7', text)
+        assert 'PEX25D-E0242' in resolve_codes(text)
+
+    def test_clipping_can_split_a_terminal_into_disjoint_boxes(self):
+        text = replacing(
+            'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
+            'POLYGON CONDUCTOR A LAYER met1 OUTER '
+            '0 0 1 0 1 1 0.8 1 0.8 0.2 0.2 0.2 0.2 1 0 1')
+        text = replacing('LL 0.0 0.0 UR 0.2 0.5', 'LL 0 0.4 UR 1 0.6', text)
+        terminal = resolved(text).conductors[0].terminals[0]
+        assert len(terminal.boxes) == 2
+        assert [(b.lower_left.x, b.upper_right.x) for b in terminal.boxes] \
+            == [(0, 2000), (8000, 10000)]
+
+    def test_clipping_a_polygon_via_cut_is_rejected(self):
+        text = replacing(
+            'BOX CONDUCTOR A LAYER via1 LL 0.2 0.1 UR 0.4 0.3',
+            'POLYGON CONDUCTOR A LAYER via1 OUTER 0.2 0.1 0.4 0.1 0.4 0.3 0.2 0.3')
+        text = replacing('TERMINAL t1 CONDUCTOR A LAYER met1 KIND PIN LL 0.0 0.0 UR 0.2 0.5',
+                         'TERMINAL t1 CONDUCTOR A LAYER via1 KIND PIN LL 0.2 0.1 UR 0.3 0.3', text)
+        assert 'PEX25D-E0240' in resolve_codes(text)
+
+    def test_non_manhattan_clipping_is_not_silently_rounded(self):
+        text = replacing(
+            'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
+            'POLYGON CONDUCTOR A LAYER met1 OUTER 0 0 1 0 0 1')
+        assert 'PEX25D-E0241' in resolve_codes(text)
 
     # ---------------------------------------------------------------- domain
 

@@ -30,6 +30,7 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from functools import cached_property
 from typing import *
+from urllib.parse import quote
 
 import klayout.db as kdb
 
@@ -41,7 +42,7 @@ from ..pex25d.format_version import (
     FORMAT_VERSION_MINOR,
     FORMAT_VERSION_SUFFIX,
 )
-from ..pex25d.protobuf import pex25d_file_pb2, pex25d_dielectric_pb2
+from ..pex25d.protobuf import pex25d_file_pb2, pex25d_dielectric_pb2, pex25d_terminal_pb2
 from ..version import __version__
 from .lvsdb_extractor import GDSPair, KLayoutExtractionContext
 
@@ -113,6 +114,8 @@ class PEX25DBuilder:
         # MiM-cap variant) does not produce a duplicate declaration.
         self._profile_names: Set[str] = set()
         self._via_contacts: Dict[str, Any] = {}
+        self._conductor_regions: Dict[str, Dict[str, kdb.Region]] = {}
+        self._terminal_names: Set[str] = set()
 
         scale = self._dbu / self._grid
         if scale.denominator != 1:
@@ -240,6 +243,7 @@ class PEX25DBuilder:
         self.build_layers(pex25d_file)
         self.build_dielectrics(pex25d_file)
         self.build_conductors(pex25d_file)
+        self.build_terminals(pex25d_file)
         if self.options.include_resistance:
             self.build_resistance(pex25d_file)
         self.build_domain(pex25d_file)
@@ -525,6 +529,7 @@ class PEX25DBuilder:
             conductor = pex25d_file.conductors.add()
             conductor.name = net_name
             conductor.net = net_name
+            self._conductor_regions[net_name] = dict(shapes_by_layer)
 
             for layer_name, region in shapes_by_layer:
                 count = self.add_shapes(pex25d_file,
@@ -579,6 +584,95 @@ class PEX25DBuilder:
             vertex = ring.points.add()
             vertex.x = self.dbu_to_grid(point.x)
             vertex.y = self.dbu_to_grid(point.y)
+
+    # -------------------------------------------------------------- terminals
+
+    def add_terminal(self, pex25d_file: Any, name: str, conductor: str,
+                     layer: str, kind: int, box: kdb.Box) -> None:
+        base = name
+        suffix = 2
+        while name in self._terminal_names:
+            name = f'{base}.{suffix}'
+            suffix += 1
+        self._terminal_names.add(name)
+        terminal = pex25d_file.terminals.add()
+        terminal.name, terminal.conductor, terminal.layer = name, conductor, layer
+        terminal.kind = kind
+        terminal.region.lower_left.x = self.dbu_to_grid(box.left)
+        terminal.region.lower_left.y = self.dbu_to_grid(box.bottom)
+        terminal.region.upper_right.x = self.dbu_to_grid(box.right)
+        terminal.region.upper_right.y = self.dbu_to_grid(box.top)
+
+    def build_terminals(self, pex25d_file: Any) -> None:
+        kinds = pex25d_terminal_pb2()
+        for metal in pex25d_file.metals:
+            canonical = self.canonical_name(metal.name) or metal.name
+            gds_pair = self.tech_info.gds_pair_for_layer_name.get(canonical)
+            if gds_pair not in self.tech_info.layer_info_by_gds_pair:
+                continue
+            pins = self.pex_context.pins_of_layer(gds_pair)
+            if pins.is_empty():
+                continue
+            labels = self.pex_context.labels_of_layer(gds_pair) & pins
+            seen = set()
+            for label in labels:
+                point = label.position()
+                key = (label.string, point.x, point.y)
+                if key in seen:
+                    continue
+                seen.add(key)
+                candidates = []
+                for net_name, regions in self._conductor_regions.items():
+                    region = regions.get(metal.name)
+                    if region is not None and any(p.inside(point) for p in region.each_merged()):
+                        candidates.append(net_name)
+                if len(candidates) != 1:
+                    raise BuildError(f"Pin '{label.string}' on '{metal.name}' must select one "
+                                     f"conductor at its label; found {len(candidates)}")
+                # A pin marker may cover the entire wire; only the label is the port.
+                box = kdb.Box(point.x - 1, point.y - 1, point.x + 1, point.y + 1)
+                self.add_terminal(pex25d_file, f'pin:{quote(label.string, safe="._-$[]")}',
+                                  candidates[0], metal.name, kinds.TERMINAL_KIND_PIN, box)
+
+        for net in self.pex_context.top_circuit.each_net():
+            net_name = net.expanded_name()
+            regions = self._conductor_regions.get(net_name)
+            if not regions:
+                continue
+            for ref in net.each_terminal():
+                device = ref.device()
+                definition = device.device_class().terminal_definition(ref.terminal_id())
+                name = (f'device:{quote(device.expanded_name(), safe="._-$[]")}:'
+                        f'{quote(definition.name, safe="._-$[]")}')
+                selected = {}
+                for index, marker in self.pex_context.lvsdb.shapes_of_terminal(ref).items():
+                    source_name = self.pex_context.lvsdb.layer_name(index)
+                    pair = self.gds_pair(source_name)
+                    if pair is None:
+                        continue
+                    for layer, geometry in regions.items():
+                        if self.gds_pair(layer) != pair:
+                            continue
+                        intersection = geometry & marker
+                        if intersection.is_empty():
+                            # Abutting device geometry needs a narrow strip inside the interconnect.
+                            intersection = geometry & marker.sized(1)
+                        if not intersection.is_empty():
+                            selected.setdefault(layer, kdb.Region()).insert(intersection)
+                if not selected:
+                    debug(f"Device terminal '{name}' has no emitted interconnect boundary")
+                    continue
+                if len(selected) != 1:
+                    raise BuildError(f"Device terminal '{name}' spans multiple profiles "
+                                     f"({', '.join(selected)}); PEX25D requires one layer per node")
+                layer, intersection = next(iter(selected.items()))
+                box = intersection.bbox()
+                if not ((regions[layer] & kdb.Region(box)) - intersection).is_empty():
+                    raise BuildError(f"Device terminal '{name}' cannot use one box on '{layer}' "
+                                     f"without shorting additional interconnect")
+                self.add_terminal(pex25d_file, name, net_name, layer,
+                                  kinds.TERMINAL_KIND_DEVICE_TERMINAL, box)
+        info(f"{len(pex25d_file.terminals)} terminal record(s)")
 
     # ------------------------------------------------------------- resistance
 
