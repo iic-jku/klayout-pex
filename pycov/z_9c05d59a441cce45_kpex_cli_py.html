@@ -5,7 +5,7 @@
     <title>Coverage for klayout_pex/kpex_cli.py: 68%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
-    <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
+    <script src="coverage_html_cb_15cffcd0.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">702 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">475<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">227<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">476<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">226<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_186c02194fd6a17c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.0">coverage.py v7.16.0</a>,
-            created at 2026-08-28 21:58 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
+            created at 2026-09-14 14:43 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -1159,11 +1159,11 @@
     <p class="pln"><span class="n"><a id="t1077" href="#t1077">1077</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1078" href="#t1078">1078</a></span><span class="t">                <span class="key">if</span> <span class="nam">args</span><span class="op">.</span><span class="nam">cache_lvs</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1079" href="#t1079">1079</a></span><span class="t">                    <span class="key">if</span> <span class="key">not</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">exists</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t1080" href="#t1080">1080</a></span><span class="t">                        <span class="nam">info</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">Cache miss: extracted LVSDB does not exist</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t1081" href="#t1081">1081</a></span><span class="t">                        <span class="nam">subproc</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t1080" href="#t1080">1080</a></span><span class="t">                        <span class="nam">info</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">Cache miss: extracted LVSDB does not exist</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t1081" href="#t1081">1081</a></span><span class="t">                        <span class="nam">subproc</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1082" href="#t1082">1082</a></span><span class="t">                    <span class="key">elif</span> <span class="nam">self</span><span class="op">.</span><span class="nam">modification_date</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">modification_date</span><span class="op">(</span><span class="nam">args</span><span class="op">.</span><span class="nam">gds_path</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t1083" href="#t1083">1083</a></span><span class="t">                        <span class="nam">info</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">Cache miss: extracted LVSDB is older than the input GDS</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t1084" href="#t1084">1084</a></span><span class="t">                        <span class="nam">subproc</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t1083" href="#t1083">1083</a></span><span class="t">                        <span class="nam">info</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">Cache miss: extracted LVSDB is older than the input GDS</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t1084" href="#t1084">1084</a></span><span class="t">                        <span class="nam">subproc</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1085" href="#t1085">1085</a></span><span class="t">                    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1086" href="#t1086">1086</a></span><span class="t">                        <span class="nam">warning</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">Cache hit: Reusing cached LVSDB</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1087" href="#t1087">1087</a></span><span class="t">                        <span class="nam">subproc</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1181,7 +1181,7 @@
     <p class="run"><span class="n"><a id="t1099" href="#t1099">1099</a></span><span class="t">                    <span class="key">if</span> <span class="nam">args</span><span class="op">.</span><span class="nam">cache_lvs</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1100" href="#t1100">1100</a></span><span class="t">                        <span class="nam">cache_dir_path</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">dirname</span><span class="op">(</span><span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1101" href="#t1101">1101</a></span><span class="t">                        <span class="key">if</span> <span class="key">not</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">exists</span><span class="op">(</span><span class="nam">cache_dir_path</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t1102" href="#t1102">1102</a></span><span class="t">                            <span class="nam">os</span><span class="op">.</span><span class="nam">makedirs</span><span class="op">(</span><span class="nam">cache_dir_path</span><span class="op">,</span> <span class="nam">exist_ok</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t1102" href="#t1102">1102</a></span><span class="t">                            <span class="nam">os</span><span class="op">.</span><span class="nam">makedirs</span><span class="op">(</span><span class="nam">cache_dir_path</span><span class="op">,</span> <span class="nam">exist_ok</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1103" href="#t1103">1103</a></span><span class="t">                        <span class="nam">shutil</span><span class="op">.</span><span class="nam">copy</span><span class="op">(</span><span class="nam">lvsdb_path</span><span class="op">,</span> <span class="nam">lvsdb_cache_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1104" href="#t1104">1104</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1105" href="#t1105">1105</a></span><span class="t">                <span class="nam">lvsdb</span><span class="op">.</span><span class="nam">read</span><span class="op">(</span><span class="nam">lvsdb_path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1480,8 +1480,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_186c02194fd6a17c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.0">coverage.py v7.16.0</a>,
-            created at 2026-08-28 21:58 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
+            created at 2026-09-14 14:43 +0000
         </p>
     </div>
 </footer>
