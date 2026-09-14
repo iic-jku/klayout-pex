@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/pex25d/writer.py: 88%</title>
+    <title>Coverage for klayout_pex/pex25d/writer.py: 90%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_15cffcd0.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>pex25d<span class="sep">/</span>writer.py</b>:
-            <span class="pc_cov">88%</span>
+            <span class="pc_cov">90%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">242 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">213<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">29<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">217<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">25<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_4810bfbf6fbd806c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
-            created at 2026-09-14 14:43 +0000
+            created at 2026-09-14 19:23 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -180,10 +180,10 @@
     <p class="pln"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Quote a META value that would otherwise tokenize as more than one token.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="key">if</span> <span class="nam">value</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">any</span><span class="op">(</span><span class="nam">c</span><span class="op">.</span><span class="nam">isspace</span><span class="op">(</span><span class="op">)</span> <span class="key">for</span> <span class="nam">c</span> <span class="key">in</span> <span class="nam">value</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">        <span class="key">return</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="key">if</span> <span class="str">&#x27;&quot;&#x27;</span> <span class="key">in</span> <span class="nam">value</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="key">if</span> <span class="str">&#x27;&quot;&#x27;</span> <span class="key">in</span> <span class="nam">value</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">        <span class="nam">warning</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">META value contains a quote character, which PEX25D does not </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">                <span class="fst">f&quot;</span><span class="fst">define an escape for: </span><span class="op">{</span><span class="nam">value</span><span class="op">!</span><span class="nam">r</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">    <span class="key">return</span> <span class="fst">f&#x27;</span><span class="fst">&quot;</span><span class="op">{</span><span class="nam">value</span><span class="op">}</span><span class="fst">&quot;</span><span class="fst">&#x27;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">    <span class="key">return</span> <span class="fst">f&#x27;</span><span class="fst">&quot;</span><span class="op">{</span><span class="nam">value</span><span class="op">}</span><span class="fst">&quot;</span><span class="fst">&#x27;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t"><span class="key">class</span> <span class="nam">Pex25DTextWriter</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -393,7 +393,7 @@
     <p class="run run2"><span class="n"><a id="t311" href="#t311">311</a></span><span class="t">                          <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">metal_resistances</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t312" href="#t312">312</a></span><span class="t">                          <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">via_resistances</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t313" href="#t313">313</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">has_resistance</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t314" href="#t314">314</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t314" href="#t314">314</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t315" href="#t315">315</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">section</span><span class="op">(</span><span class="str">&#x27;RESISTANCE&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t316" href="#t316">316</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">hint</span><span class="op">(</span><span class="str">&quot;RESISTANCE TEMPERATURE &lt;celsius&gt;&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t317" href="#t317">317</a></span><span class="t">                  <span class="str">&quot;RESISTANCE METAL &lt;name&gt; SHEET &lt;ohm_per_square&gt; [TC1 &lt;v&gt;] [TC2 &lt;v&gt;]&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -526,7 +526,7 @@
     <p class="run"><span class="n"><a id="t444" href="#t444">444</a></span><span class="t">    <span class="key">def</span> <span class="nam">write_domain</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t445" href="#t445">445</a></span><span class="t">        <span class="nam">which</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">WhichOneof</span><span class="op">(</span><span class="str">&#x27;domain&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t446" href="#t446">446</a></span><span class="t">        <span class="key">if</span> <span class="nam">which</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t447" href="#t447">447</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t447" href="#t447">447</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t448" href="#t448">448</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">section</span><span class="op">(</span><span class="str">&#x27;COMPUTATIONAL DOMAIN&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t449" href="#t449">449</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">hint</span><span class="op">(</span><span class="str">&quot;DOMAIN_MARGIN X &lt;xmargin&gt; Y &lt;ymargin&gt; Z &lt;zmargin&gt;&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t450" href="#t450">450</a></span><span class="t">                  <span class="str">&quot;DOMAIN_BOX LL &lt;x&gt; &lt;y&gt; &lt;z&gt; UR &lt;x&gt; &lt;y&gt; &lt;z&gt;&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -565,7 +565,7 @@
             <a class="nav" href="z_4810bfbf6fbd806c___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
-            created at 2026-09-14 14:43 +0000
+            created at 2026-09-14 19:23 +0000
         </p>
     </div>
 </footer>

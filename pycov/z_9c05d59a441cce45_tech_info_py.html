@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/tech_info.py: 83%</title>
+    <title>Coverage for klayout_pex/tech_info.py: 86%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_15cffcd0.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>tech_info.py</b>:
-            <span class="pc_cov">83%</span>
+            <span class="pc_cov">86%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">228 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">189<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">39<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">197<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">31<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_7320fce113bc9090___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
-            created at 2026-09-14 14:43 +0000
+            created at 2026-09-14 19:23 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -240,7 +240,7 @@
     <p class="run"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">                <span class="key">case</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">LAYER_TYPE_SIMPLE_DIELECTRIC</span> <span class="op">|</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                     <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">LAYER_TYPE_CONFORMAL_DIELECTRIC</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">dielectric_filter</span><span class="op">.</span><span class="nam">is_included</span><span class="op">(</span><span class="nam">pl</span><span class="op">.</span><span class="nam">name</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">                        <span class="nam">layers</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">pl</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">                        <span class="nam">layers</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">pl</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">        <span class="key">return</span> <span class="nam">layers</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t163" href="#t163">163</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t164" href="#t164">164</a></span><span class="t">    <span class="op">@</span><span class="nam">cached_property</span>&nbsp;</span><span class="r"></span></p>
@@ -309,16 +309,16 @@
     <p class="pln"><span class="n"><a id="t227" href="#t227">227</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t228" href="#t228">228</a></span><span class="t">    <span class="op">@</span><span class="nam">cached_property</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t229" href="#t229">229</a></span><span class="t">    <span class="key">def</span> <span class="nam">contact_by_device_lvs_layer_name</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">Contact</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t230" href="#t230">230</a></span><span class="t">        <span class="nam">d</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t231" href="#t231">231</a></span><span class="t">        <span class="nam">LT</span> <span class="op">=</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">LayerType</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t232" href="#t232">232</a></span><span class="t">        <span class="key">for</span> <span class="nam">lyr</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">tech</span><span class="op">.</span><span class="nam">process_stack</span><span class="op">.</span><span class="nam">layers</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t233" href="#t233">233</a></span><span class="t">            <span class="key">match</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">layer_type</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t234" href="#t234">234</a></span><span class="t">                <span class="key">case</span> <span class="nam">LT</span><span class="op">.</span><span class="nam">LAYER_TYPE_NWELL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t230" href="#t230">230</a></span><span class="t">        <span class="nam">d</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t231" href="#t231">231</a></span><span class="t">        <span class="nam">LT</span> <span class="op">=</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">LayerType</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t232" href="#t232">232</a></span><span class="t">        <span class="key">for</span> <span class="nam">lyr</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">tech</span><span class="op">.</span><span class="nam">process_stack</span><span class="op">.</span><span class="nam">layers</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t233" href="#t233">233</a></span><span class="t">            <span class="key">match</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">layer_type</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t234" href="#t234">234</a></span><span class="t">                <span class="key">case</span> <span class="nam">LT</span><span class="op">.</span><span class="nam">LAYER_TYPE_NWELL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t235" href="#t235">235</a></span><span class="t">                    <span class="nam">d</span><span class="op">[</span><span class="nam">lyr</span><span class="op">.</span><span class="nam">name</span><span class="op">]</span> <span class="op">=</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">nwell_layer</span><span class="op">.</span><span class="nam">contact_above</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t236" href="#t236">236</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t237" href="#t237">237</a></span><span class="t">                <span class="key">case</span> <span class="nam">LT</span><span class="op">.</span><span class="nam">LAYER_TYPE_DIFFUSION</span><span class="op">:</span>  <span class="com"># nsdm or psdm</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t237" href="#t237">237</a></span><span class="t">                <span class="key">case</span> <span class="nam">LT</span><span class="op">.</span><span class="nam">LAYER_TYPE_DIFFUSION</span><span class="op">:</span>  <span class="com"># nsdm or psdm</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t238" href="#t238">238</a></span><span class="t">                    <span class="nam">d</span><span class="op">[</span><span class="nam">lyr</span><span class="op">.</span><span class="nam">name</span><span class="op">]</span> <span class="op">=</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">diffusion_layer</span><span class="op">.</span><span class="nam">contact_above</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t239" href="#t239">239</a></span><span class="t">        <span class="key">return</span> <span class="nam">d</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t239" href="#t239">239</a></span><span class="t">        <span class="key">return</span> <span class="nam">d</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t240" href="#t240">240</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t241" href="#t241">241</a></span><span class="t">    <span class="op">@</span><span class="nam">cached_property</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t242" href="#t242">242</a></span><span class="t">    <span class="key">def</span> <span class="nam">contact_by_contact_lvs_layer_name</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">Contact</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -493,7 +493,7 @@
             <a class="nav" href="z_7320fce113bc9090___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.1">coverage.py v7.16.1</a>,
-            created at 2026-09-14 14:43 +0000
+            created at 2026-09-14 19:23 +0000
         </p>
     </div>
 </footer>
