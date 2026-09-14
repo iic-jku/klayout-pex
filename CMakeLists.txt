@@ -50,28 +50,50 @@ function(require_exhaustive_enum_switches target)
         )
     endif()
 endfunction()
+#_____________________________________________________________________________________________
+# Optional flags
+option(PROTOBUF_USE_SYSTEM "Use system-wide Protobuf installation" OFF)
 
 #_____________________________________________________________________________________________
 
 # add dependencies
-include(cmake/CPM.cmake)
-CPMAddPackage(
-    NAME protobuf
-    GIT_TAG v33.5
-    GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
-    OPTIONS
-        "protobuf_INSTALL OFF"
-        "protobuf_BUILD_TESTS OFF"
-        "protobuf_BUILD_SHARED_LIBS OFF"
-        "protobuf_BUILD_EXAMPLES OFF"
-        "ABSL_PROPAGATE_CXX_STD ON"
-)
+
+# Protobuf minimum version for system check, and for CPM download
+set(KPEX_PROTOBUF_VERSION "33.5")
+
+if(PROTOBUF_USE_SYSTEM)
+    # Try to find Protobuf system-wide
+    find_package(Protobuf CONFIG REQUIRED)
+
+    if(Protobuf_VERSION VERSION_LESS KPEX_PROTOBUF_VERSION)
+        message(FATAL_ERROR
+            "System Protobuf version (${Protobuf_VERSION}) is older than "
+            "the required minimum (${KPEX_PROTOBUF_VERSION})."
+        )
+    endif()
+
+    message(STATUS "Found Protobuf: ${Protobuf_VERSION}")
+else()
+    # Download Protobuf using CPM
+    message(STATUS "Downloading Protobuf via CPM...")
+    include(cmake/CPM.cmake)
+    CPMAddPackage(
+        NAME protobuf
+        GIT_TAG "v${KPEX_PROTOBUF_VERSION}"
+        GIT_REPOSITORY "https://github.com/protocolbuffers/protobuf.git"
+        OPTIONS
+            "protobuf_INSTALL OFF"
+            "protobuf_BUILD_TESTS OFF"
+            "protobuf_BUILD_SHARED_LIBS OFF"
+            "protobuf_BUILD_EXAMPLES OFF"
+            "ABSL_PROPAGATE_CXX_STD ON"
+    )
+    # see https://github.com/protocolbuffers/protobuf/blob/main/docs/cmake_protobuf_generate.md
+    include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
+    set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
+endif()
 
 #_____________________________________________________________________________________________
-
-# see https://github.com/protocolbuffers/protobuf/blob/main/docs/cmake_protobuf_generate.md
-include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
-set(Protobuf_INCLUDE_DIRS ${protobuf_SOURCE_DIR}/src)
 
 set(PROTOBUF_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/protos/kpex/c/capacitance.proto
