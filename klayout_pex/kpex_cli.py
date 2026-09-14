@@ -1201,7 +1201,7 @@ class KpexCLI:
         them to a solver's native input — is the standalone ``pex25d`` tool's
         job, and needs neither a layout nor KLayout to do it.
         """
-        from .klayout.pex25d_builder import BuilderOptions, build_pex25d_file
+        from .klayout.pex25d_builder import BuildError, BuilderOptions, build_pex25d_file
         from .pex25d.codec import save_artifact
         from .pex25d.resolver import ResolveError, resolve
         from .pex25d.validator import validate
@@ -1253,6 +1253,9 @@ class KpexCLI:
                 validate(pex25d_file, report=report, strict=args.strict,
                          scene=scene)
 
+        except BuildError as e:
+            error(f"Could not generate PEX25D: {e}")
+            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
         except ResolveError as e:
             # The scene is not written: the diagnostics say why, and half a
             # scene is worse than none.
