@@ -1,0 +1,33 @@
+WARNING  __kpex__:kpex_cli.py:1141 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1177 main extract --pdk sky130A --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sideoverlap_plates_li1_m1.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:563 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:603 No explicit top cell specified, using top cell 'sideoverlap_plates_li1_m1'
+INFO     __kpex__:kpex_cli.py:644 LVS input schematic not specified (argument --schematic), using dummy schematic
+WARNING  __kpex__:kpex_cli.py:1086 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1087 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sideoverlap_plates_li1_m1.gds.gz/sideoverlap_plates_li1_m1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1298 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1298 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1298 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1298 (68, 16) -> (met1_pin_con)
+SUBPROCESS __kpex__:kpex_cli.py:977 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:977 C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;
+SUBPROCESS __kpex__:kpex_cli.py:977 C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;
+SUBPROCESS __kpex__:kpex_cli.py:977 C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:977 C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;
+SUBPROCESS __kpex__:kpex_cli.py:977 C5;LOWER_FullHaloOverlap;UPPER;262.817;
+SUBPROCESS __kpex__:kpex_cli.py:977 C6;LOWER_FullHaloOverlap;VSUBS;177.601;
+SUBPROCESS __kpex__:kpex_cli.py:977 C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;
+SUBPROCESS __kpex__:kpex_cli.py:977 C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;
+SUBPROCESS __kpex__:kpex_cli.py:977 C9;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;
+SUBPROCESS __kpex__:kpex_cli.py:977 C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;
+SUBPROCESS __kpex__:kpex_cli.py:977 C11;LOWER_OutsideHalo;UPPER;0.076;
+SUBPROCESS __kpex__:kpex_cli.py:977 C12;LOWER_OutsideHalo;VSUBS;73.274;
+SUBPROCESS __kpex__:kpex_cli.py:977 C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.261;
+SUBPROCESS __kpex__:kpex_cli.py:977 C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.931;
+SUBPROCESS __kpex__:kpex_cli.py:977 C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.149;
+SUBPROCESS __kpex__:kpex_cli.py:977 C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;90.618;
+SUBPROCESS __kpex__:kpex_cli.py:977 C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.159;
+SUBPROCESS __kpex__:kpex_cli.py:977 C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.637;
+SUBPROCESS __kpex__:kpex_cli.py:977 C19;UPPER;VSUBS;214.85;
+SUBPROCESS __kpex__:kpex_cli.py:980 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:994 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.spice
