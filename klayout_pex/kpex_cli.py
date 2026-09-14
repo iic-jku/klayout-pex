@@ -43,13 +43,16 @@ from typing import *
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from klayout import capacitance_matrix_interpreter
 from .common.path_validation import validate_files, FileValidationResult
 from .env import EnvVar, Env
 from .extraction_engine import ExtractionEngine
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
+from .fastcap.output_interpreter import FastCapOutputInterpreter
 from .klayout.lvs_runner import LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
@@ -774,11 +777,14 @@ class KpexCLI:
         cap_matrix = cap_matrix.averaged_off_diagonals()
         cap_matrix.write_csv(avg_csv_path)
 
+        cap_matrix_interpreter = FasterCapOutputInterpreter()
+
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
             top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
+            cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices
         )
 
@@ -914,11 +920,14 @@ class KpexCLI:
         cap_matrix = cap_matrix.averaged_off_diagonals()
         cap_matrix.write_csv(avg_csv_path)
 
+        cap_matrix_interpreter = FastCapOutputInterpreter()
+
         netlist_expander = NetlistExpander()
         expanded_netlist = netlist_expander.expand(
             extracted_netlist=pex_context.lvsdb.netlist(),
             top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
+            cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices
         )
 

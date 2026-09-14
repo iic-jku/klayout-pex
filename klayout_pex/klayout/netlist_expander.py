@@ -32,7 +32,8 @@ from ..log import (
     info,
     warning,
 )
-from ..common.capacitance_matrix import CapacitanceMatrix
+from .common.capacitance_matrix import CapacitanceMatrix
+from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
 from ..util.unit_formatter import format_spice_number
 
 
@@ -41,6 +42,7 @@ class NetlistExpander:
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
                cap_matrix: CapacitanceMatrix,
+               cap_matrix_interpreter: CapacitanceMatrixInterpreter,
                blackbox_devices: bool) -> kdb.Netlist:
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
@@ -65,13 +67,11 @@ class NetlistExpander:
         name2net: Dict[str, kdb.Net] = {n.expanded_name(): n for n in top_circuit.each_net()}
 
         # find nets for the matrix axes
-        pattern = re.compile(r'^g\d+_(.*)$')
-        for idx, nn in enumerate(cap_matrix.conductor_names):
-            m = pattern.match(nn)
-            nn = m.group(1)
-            if nn not in name2net:
+        for nc in cap_matrix.conductor_names:
+            nn = cap_matrix_interpreter.signal_name_from_conductor_name(nc)
+            n = name2net.get(nn)
+            if n is None:
                 raise Exception(f"No net found with name {nn}, net names are: {list(name2net.keys())}")
-            n = name2net[nn]
             nets.append(n)
 
         cap_threshold = 0.0
