@@ -43,7 +43,7 @@ from typing import *
 import klayout.db as kdb
 import klayout.rdb as rdb
 
-from klayout import capacitance_matrix_interpreter
+from .klayout import capacitance_matrix_interpreter
 from .common.path_validation import validate_files, FileValidationResult
 from .env import EnvVar, Env
 from .extraction_engine import ExtractionEngine

@@ -32,7 +32,7 @@ from ..log import (
     info,
     warning,
 )
-from .common.capacitance_matrix import CapacitanceMatrix
+from ..common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
 from ..util.unit_formatter import format_spice_number
 

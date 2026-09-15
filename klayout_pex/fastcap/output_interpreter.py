@@ -24,7 +24,7 @@
 
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
 
-class FastcapOutputInterpreter(CapacitanceMatrixInterpreter):
+class FastCapOutputInterpreter(CapacitanceMatrixInterpreter):
     def signal_name_from_conductor_name(self, conductor_name: str) -> str:
         # Pattern: <signal_name>%<group_id>
         return conductor_name.split("%", 1)[0]
