@@ -226,7 +226,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness,  ref
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addConformalDielectric(psi, "capild", capild_k, capild_thickness,          0.0,        0.0,   "met3_cap");
+    addConformalDielectric(psi, "capild3", capild_k, capild_thickness,         0.0,        0.0,   "met3_cap");
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
-    addSimpleDielectric(psi, "nild5",  4.1,         "nild4");
+    addSimpleDielectric(psi, "nild5b", 4.1,         "nild4");  // same material as nild5, above capm
 
     // METAL:                           name,        z,      thickness
     //-----------------------------------------------------------------------------------------------
@@ -247,7 +247,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     // DIELECTRIC (conformal)   name,    dielectric_k,   thickness,   thickness,      thickness,  ref
     //                                                   over metal,  where no metal, sidewall
     //-----------------------------------------------------------------------------------------------
-    addConformalDielectric(psi, "capild", capild_k, capild_thickness,          0.0,        0.0,   "met4_cap");
+    addConformalDielectric(psi, "capild4", capild_k, capild_thickness,         0.0,        0.0,   "met4_cap");
 
     // METAL:                           name,        z,      thickness
     //-----------------------------------------------------------------------------------------------
@@ -263,7 +263,7 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
 
     // DIELECTRIC (simple)   name,     dielectric_k, ref
     //-----------------------------------------------------------------------------------------------
-    addSimpleDielectric(psi, "nild6",  4.0,          "nild5");
+    addSimpleDielectric(psi, "nild6b", 4.0,         "nild5");  // same material as nild6, above capm2
 
     // METAL:                      name,   z,      thickness
     //-----------------------------------------------------------------------------------------------
