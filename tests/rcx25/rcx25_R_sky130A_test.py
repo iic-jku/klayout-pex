@@ -63,9 +63,9 @@ def test_contact_1x1_minsize_mcon():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_contact_1x1_minsize_mcon.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$0.16;$1.23;;9.3
-R2;$0.16;BOT;;0.0
-R3;$1.23;TOP;;0.0"""
+R1;BOT;BOT,TOP.$0.16;;0.0
+R2;BOT,TOP.$0.16;BOT,TOP.$1.23;;9.3
+R3;BOT,TOP.$1.23;TOP;;0.0"""
         )
 
 
@@ -80,9 +80,9 @@ def test_wire_voltage_divider_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$1.16;A;;426.667
-R2;$1.16;B;;413.867
-R3;$1.16;C;;72.533"""
+R1;A;A,B,C.$1.16;;426.667
+R2;A,B,C.$1.16;B;;413.867
+R3;A,B,C.$1.16;C;;72.533"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -106,24 +106,24 @@ def test_via_stack_1x1_minsize_poly_to_met5():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_via_stack_1x1_minsize_poly_to_met5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$0.17;$1.18;;152.0
-R2;$0.17;poly;;0.0
-R3;$1.18;$2.18;;0.0
-R4;$1.18;li1;;0.0
-R5;$10.40;$11.27;;0.38
-R6;$10.40;$9.40;;0.0
-R7;$11.27;met5;;0.0
-R8;$2.18;$3.25;;9.3
-R9;$3.25;$4.25;;0.0
-R10;$3.25;met1;;0.0
-R11;$4.25;$5.26;;4.5
-R12;$5.26;$6.26;;0.0
-R13;$5.26;met2;;0.0
-R14;$6.26;$7.43;;3.41
-R15;$7.43;$8.43;;0.0
-R16;$7.43;met3;;0.0
-R17;$8.43;$9.40;;3.41
-R18;$9.40;met4;;0.0"""
+R1;li1;li1,met1,met2,met3,met4,met5,poly.$1.18;;0.0
+R2;li1,met1,met2,met3,met4,met5,poly.$0.17;li1,met1,met2,met3,met4,met5,poly.$1.18;;152.0
+R3;li1,met1,met2,met3,met4,met5,poly.$0.17;poly;;0.0
+R4;li1,met1,met2,met3,met4,met5,poly.$1.18;li1,met1,met2,met3,met4,met5,poly.$2.18;;0.0
+R5;li1,met1,met2,met3,met4,met5,poly.$10.41;li1,met1,met2,met3,met4,met5,poly.$11.35;;3.41
+R6;li1,met1,met2,met3,met4,met5,poly.$10.41;li1,met1,met2,met3,met4,met5,poly.$7.41;;0.0
+R7;li1,met1,met2,met3,met4,met5,poly.$11.35;li1,met1,met2,met3,met4,met5,poly.$8.35;;0.0
+R8;li1,met1,met2,met3,met4,met5,poly.$2.18;li1,met1,met2,met3,met4,met5,poly.$3.25;;9.3
+R9;li1,met1,met2,met3,met4,met5,poly.$3.25;li1,met1,met2,met3,met4,met5,poly.$4.25;;0.0
+R10;li1,met1,met2,met3,met4,met5,poly.$3.25;met1;;0.0
+R11;li1,met1,met2,met3,met4,met5,poly.$4.25;li1,met1,met2,met3,met4,met5,poly.$5.26;;4.5
+R12;li1,met1,met2,met3,met4,met5,poly.$5.26;li1,met1,met2,met3,met4,met5,poly.$6.26;;0.0
+R13;li1,met1,met2,met3,met4,met5,poly.$5.26;met2;;0.0
+R14;li1,met1,met2,met3,met4,met5,poly.$6.26;li1,met1,met2,met3,met4,met5,poly.$7.41;;3.41
+R15;li1,met1,met2,met3,met4,met5,poly.$7.41;met3;;0.0
+R16;li1,met1,met2,met3,met4,met5,poly.$8.35;li1,met1,met2,met3,met4,met5,poly.$9.27;;0.38
+R17;li1,met1,met2,met3,met4,met5,poly.$8.35;met4;;0.0
+R18;li1,met1,met2,met3,met4,met5,poly.$9.27;met5;;0.0"""
         )
 
 
