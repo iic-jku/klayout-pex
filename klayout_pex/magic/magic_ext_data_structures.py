@@ -47,8 +47,8 @@ class Port:
 @dataclass
 class Node:
     net: str
-    int_r: int
-    fin_c: int
+    int_r: float
+    fin_c: float
     x_bot: int
     y_bot: int
     layer: str
