@@ -164,46 +164,62 @@ class PEX25DBuilder:
     def metal_layer_by_name(self) -> Dict[str, Any]:
         return {lyr.name: lyr for lyr in self.tech_info.process_metal_layers}
 
+    @cached_property
+    def metal_layers_by_canonical_name(self) -> Dict[str, List[str]]:
+        """The emitted METAL profiles, grouped by the canonical layer behind them."""
+        groups: Dict[str, List[str]] = {}
+        for name in self.metal_layer_by_name:
+            canonical = self.canonical_name(name)
+            if canonical:
+                groups.setdefault(canonical, []).append(name)
+        return groups
+
     def resolve_metal(self, name: str, context: str) -> Optional[str]:
         """
         Map a name used by a contact onto an emitted METAL profile.
 
-        Contacts in the kpex tech data name canonical layers (``met3``) while the
-        process stack splits some of them per MiM-cap variant (``met3_ncap``,
-        ``met3_cap``), so an exact match is not always available. Where exactly
-        one variant carries a contact the choice is unambiguous; anything else is
-        reported rather than guessed.
+        The two namespaces need not agree. sky130A splits a canonical layer per
+        MiM-cap variant, so a contact on ``met3`` has to find ``met3_ncap``; the
+        IHP stacks name their profiles after the drawing layer while their
+        contacts name the LVS computed layer, so ``metal1_con`` has to find
+        ``Metal1``. Both meet at the canonical layer, so the candidates are
+        taken from there rather than from the spelling of the name. Where
+        exactly one candidate carries a contact the choice is unambiguous;
+        anything else is reported rather than guessed.
         """
         if name in self.metal_layer_by_name:
             return name
 
-        variants = [n for n in self.metal_layer_by_name if n.startswith(f"{name}_")]
-        if variants:
-            chosen = variants[0] if len(variants) == 1 else None
-            if chosen is None:
-                with_contact = [n for n in variants
-                                if self.metal_layer_by_name[n].metal_layer
-                                .HasField('contact_above')]
-                if len(with_contact) != 1:
-                    warning(f"{context}: '{name}' is ambiguous in the process stack "
-                            f"({', '.join(variants)}); skipping")
-                    return None
-                chosen = with_contact[0]
+        canonical = self.canonical_name(name)
+        candidates = self.metal_layers_by_canonical_name.get(canonical, []) \
+            if canonical else []
+        if not candidates:
+            warning(f"{context}: no metal layer '{name}' in the process stack; skipping")
+            return None
 
-            # Where the variants share a z extent — sky130A splits met3 and met4
-            # only to hang different dielectrics off them — the choice cannot
-            # change the via extent that CONNECTS derives, so it is not worth a
-            # warning. A genuine difference is.
-            extents = {(self.metal_layer_by_name[n].metal_layer.z,
-                        self.metal_layer_by_name[n].metal_layer.thickness)
-                       for n in variants}
-            report = debug if len(extents) == 1 else warning
-            report(f"{context}: no metal layer '{name}' in the process stack, using "
-                   f"'{chosen}'; candidates were {', '.join(variants)}")
-            return chosen
+        chosen = candidates[0] if len(candidates) == 1 else None
+        if chosen is None:
+            with_contact = [n for n in candidates
+                            if self.metal_layer_by_name[n].metal_layer
+                            .HasField('contact_above')]
+            if len(with_contact) != 1:
+                warning(f"{context}: '{name}' is ambiguous in the process stack "
+                        f"({', '.join(candidates)}); skipping")
+                return None
+            chosen = with_contact[0]
 
-        warning(f"{context}: no metal layer '{name}' in the process stack; skipping")
-        return None
+        # Where the candidates share a z extent — sky130A splits met3 and met4
+        # only to hang different dielectrics off them — the choice cannot change
+        # the via extent that CONNECTS derives, so it is not worth a warning.
+        # A genuine difference is.
+        extents = {(self.metal_layer_by_name[n].metal_layer.z,
+                    self.metal_layer_by_name[n].metal_layer.thickness)
+                   for n in candidates}
+        report = debug if len(extents) == 1 else warning
+        report(f"{context}: no metal layer '{name}' in the process stack, using "
+               f"'{chosen}' for canonical layer '{canonical}'; candidates were "
+               f"{', '.join(candidates)}")
+        return chosen
 
     def canonical_name(self, name: str) -> Optional[str]:
         """
