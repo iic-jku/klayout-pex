@@ -330,21 +330,24 @@ void TechBuilder::buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
         //                                                 over metal,       where no metal, sidewall
         //------------------------------------------------------------------------------------------------------------
         addConformalDielectric(psi, "ismim", capild_k,     capild_thickness, 0.0,            0.0,       "metal5_cap");
+
+        // DIELECTRIC (simple)   name,       dielectric_k, ref
+        // A band of its own: same material as ildtm1, but it fills from
+        // metal5_cap up to cmim_top, and a name may be declared only once.
+        //------------------------------------------------------------------------------------------------------------
+        addSimpleDielectric(psi, "ildtm1b",  4.1,          "ild4");
     }
-        
-    // DIELECTRIC (simple)   name,     dielectric_k, ref
-    //----------------------------------------------------------------------------------------------------
-    addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
     kpex::tech::ProcessStackInfo::MetalLayer *cmim_cap = NULL;
     if (is_g2()) {
         // METAL:                           name,      z,      thickness
         //----------------------------------------------------------------------------------------------------
         cmim_cap = addMetalLayer(psi, "cmim_top", cmim_z, cmim_cap_thickness);
+
+        // DIELECTRIC (simple)   name,       dielectric_k, ref
+        //----------------------------------------------------------------------------------------------------
+        addSimpleDielectric(psi, "ildtm1c",  4.1,          "ild4");
     }
-    // DIELECTRIC (simple)   name,     dielectric_k, ref
-    //----------------------------------------------------------------------------------------------------
-    addSimpleDielectric(psi, "ildtm1",   4.1,        "ild4");
     
     kpex::tech::ProcessStackInfo::MetalLayer *topmet1 = NULL;
     kpex::tech::ProcessStackInfo::MetalLayer *topmet2 = NULL;
