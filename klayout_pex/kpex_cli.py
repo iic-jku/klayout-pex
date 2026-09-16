@@ -96,7 +96,7 @@ from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
-from .tech_info import TechInfo
+from .tech_info import TechDefError, TechInfo
 from .util.multiple_choice import MultipleChoicePattern
 from .util.argparse_helpers import render_enum_help, true_or_false
 from .version import __version__
@@ -1190,8 +1190,12 @@ class KpexCLI:
             os.makedirs(args.output_dir_base_path, exist_ok=True)
             self.setup_logging(args)
 
-            tech_info = TechInfo.from_json(args.tech_pbjson_path,
-                                           dielectric_filter=args.dielectric_filter)
+            try:
+                tech_info = TechInfo.from_json(args.tech_pbjson_path,
+                                               dielectric_filter=args.dielectric_filter)
+            except TechDefError as e:
+                error(str(e))
+                sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
             match args.command:
                 case 'pex25d':

@@ -25,6 +25,7 @@
 
 from __future__ import annotations  # allow class type hints within same class
 from typing import *
+from collections import Counter
 from functools import cached_property
 import google.protobuf.json_format
 
@@ -37,6 +38,10 @@ import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
 
+class TechDefError(Exception):
+    """A defect in the technology definition itself, not in a layout."""
+
+
 class TechInfo:
     """Helper class for Protocol Buffer tech_pb2.Technology"""
 
@@ -45,11 +50,63 @@ class TechInfo:
     GDSPair = Tuple[int, int]
 
     @staticmethod
+    def duplicate_names(tech: tech_pb2.Technology) -> List[str]:
+        """
+        Report every name one of the technology's namespaces declares twice.
+
+        Each of them is looked up by name, and the process stack's is also the
+        PEX25D profile namespace, so a repeat adds nothing: it replaces or
+        drops whatever it collides with. sky130A declaring 'capild' once per
+        MiM-cap variant cost the second film, and left the dielectric above it
+        wrapping the metal three levels down.
+        """
+        namespaces: Dict[str, List[Tuple[str, str]]] = {
+            'process stack': [],
+            'layer': [],
+            'LVS computed layer': [],
+        }
+
+        for lyr in tech.process_stack.layers:
+            namespaces['process stack'].append((lyr.name, 'layer'))
+            parameters = lyr.WhichOneof('parameters')
+            # Only some layer kinds can carry a contact, and an unset one has
+            # no name, so the name is the test rather than the layer type.
+            contact = getattr(getattr(lyr, parameters), 'contact_above', None) \
+                if parameters else None
+            if contact is not None and contact.name:
+                namespaces['process stack'].append((contact.name, 'contact'))
+
+        namespaces['layer'] += [(lyr.name, 'layer') for lyr in tech.layers]
+        namespaces['LVS computed layer'] += [(lyr.layer_info.name, 'layer')
+                                             for lyr in tech.lvs_computed_layers]
+
+        problems: List[str] = []
+        for namespace, declarations in namespaces.items():
+            counts = Counter(name for name, _ in declarations)
+            for name, count in sorted(counts.items()):
+                if count == 1:
+                    continue
+                kinds = sorted({kind for n, kind in declarations if n == name})
+                problems.append(
+                    f"the {namespace} namespace declares '{name}' {count} times "
+                    f"(as {', '.join(kinds)}), so all but the first declaration "
+                    f"are dropped")
+        return problems
+
+    @staticmethod
     def parse_tech_def(jsonpb_path: str) -> tech_pb2.Technology:
         with open(jsonpb_path, 'r') as f:
             contents = f.read()
             tech = google.protobuf.json_format.Parse(contents, tech_pb2.Technology())
-            return tech
+
+        # Checked here rather than where a name is used: by then the collision
+        # has already happened, and what it cost is no longer visible.
+        problems = TechInfo.duplicate_names(tech)
+        if problems:
+            raise TechDefError(
+                f"Names have to be unique, but in {jsonpb_path}"
+                + ''.join(f"\n  - {p}" for p in problems))
+        return tech
 
     @classmethod
     def from_json(cls,
