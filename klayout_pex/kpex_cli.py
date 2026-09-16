@@ -331,7 +331,9 @@ class KpexCLI:
                                  help="Control net uniqueness during extraction "
                                  " ('implicit' omits the command, uses MAGIC's default value). "
                                  + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
-
+        group_magic.add_argument("--magic_analyze", dest='magic_analyze',
+                                 type=true_or_false, default=False,
+                                 help="Analyze MAGIC extraction files (report as KLayout RDB)")
 
     @staticmethod
     def _add_analytical_25d_arguments(parser: argparse.ArgumentParser) -> None:
@@ -875,15 +877,17 @@ class KpexCLI:
 
         magic_pex_run = parse_magic_pex_run(Path(magic_run_dir))
 
-        report = rdb.ReportDatabase('')
-        magic_log_analyzer = MagicLogAnalyzer(magic_pex_run=magic_pex_run,
-                                              report=report,
-                                              dbu=layout.dbu)
-        magic_log_analyzer.analyze()
-        report.save(report_db_path)
+        if args.magic_analyze:
+            report = rdb.ReportDatabase('')
+            magic_log_analyzer = MagicLogAnalyzer(magic_pex_run=magic_pex_run,
+                                                  report=report,
+                                                  dbu=layout.dbu)
+            magic_log_analyzer.analyze()
+            report.save(report_db_path)
 
         rule("Paths")
-        subproc(f"Report DB saved at: {report_db_path}")
+        if args.magic_analyze:
+            subproc(f"Report DB saved at: {report_db_path}")
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
 
         if os.path.exists(output_netlist_path):
