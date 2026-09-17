@@ -30,6 +30,7 @@ import unittest
 
 import klayout.db as kdb
 
+from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.netlist_expander import NetlistExpander
 from klayout_pex.log import (
@@ -75,6 +76,7 @@ class Test(unittest.TestCase):
         expanded_netlist = exp.expand(extracted_netlist=pex_context.lvsdb.netlist(),
                                       top_cell_name=pex_context.annotated_top_cell.name,
                                       cap_matrix=cap_matrix,
+                                      cap_matrix_interpreter=FasterCapOutputInterpreter(),
                                       blackbox_devices=False)
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")
         spice_writer = kdb.NetlistSpiceWriter()

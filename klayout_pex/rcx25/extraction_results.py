@@ -202,6 +202,8 @@ class CellExtractionResults:
             #       and a parasitic resistance between the two,
             #       KLayout will call the net of both pins "A,B"
             #       but we really want the pin name as the node name
+            if node.node_kind == r_network_pb2.RNode.Kind.KIND_PIN:
+                return node.node_name
             if not node.net_name or ',' in node.net_name:
                 # NOTE: network prefix, as node name is only unique per network
                 return f"{network.net_name}.{node.node_name}"

@@ -100,13 +100,15 @@ def parse_magic_ext_file(path: Path) -> ExtData:
                                   y_top=int(m.group('y_top')),
                                   layer=m.group('layer')))
 
+            # NOTE: the node's resistance and capacitance are not integers,
+            #       MAGIC writes e.g. 'node "B" 939 968.643 1970 -15 li …'
             m = re.match(
-                r'^(node|substrate) "(?P<net>\w+)" (?P<int_r>\d+) (?P<fin_c>\d+) (?P<x_bot>-?\d+) (?P<y_bot>-?\d+) (?P<layer>\w+) .*$',
+                r'^(node|substrate) "(?P<net>\w+)" (?P<int_r>-?[\d.]+) (?P<fin_c>-?[\d.]+) (?P<x_bot>-?\d+) (?P<y_bot>-?\d+) (?P<layer>\w+) .*$',
                 line.strip())
             if m:
                 nodes.append(Node(net=m.group('net'),
-                                  int_r=int(m.group('int_r')),
-                                  fin_c=int(m.group('fin_c')),
+                                  int_r=float(m.group('int_r')),
+                                  fin_c=float(m.group('fin_c')),
                                   x_bot=int(m.group('x_bot')),
                                   y_bot=int(m.group('y_bot')),
                                   layer=m.group('layer')))

@@ -35,10 +35,20 @@ from rich_argparse import RichHelpFormatter
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from klayout_pex.log import debug
 from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
 from klayout_pex.magic.magic_ext_data_structures import MagicPEXRun, CellExtData
 
 PROGRAM_NAME = "magic_log_analyzer"
+
+# MAGIC has no position for the substrate node and writes its own infinity,
+# (1 << 30) - 7, in place of one. Scaled to database units that is far outside
+# the coordinate range of a kdb.Box.
+MAGIC_INFINITY = (1 << 30) - 7
+
+
+def is_magic_marker(*coordinates: float) -> bool:
+    return any(abs(c) >= MAGIC_INFINITY for c in coordinates)
 
 
 class MagicLogAnalyzer:
@@ -67,24 +77,57 @@ class MagicLogAnalyzer:
 
         dbu_to_um = 200.0
 
+        def scaled(value: float) -> float:
+            return value / dbu_to_um / self.dbu
+
         def box_for_point_dbu(x: float, y: float) -> kdb.Box:
             return kdb.Box(x, y, x + 20, y + 20)
+
+        # Everything the cell does place, so that a marker position can be
+        # reported clamped into it rather than dropped.
+        cell_box = kdb.Box()
+        for p in cell_data.ext_data.ports:
+            if not is_magic_marker(p.x_bot, p.y_bot, p.x_top, p.y_top):
+                cell_box += kdb.Box(scaled(p.x_bot), scaled(p.y_bot),
+                                    scaled(p.x_top), scaled(p.y_top))
+        for n in cell_data.ext_data.nodes:
+            if not is_magic_marker(n.x_bot, n.y_bot):
+                cell_box += box_for_point_dbu(scaled(n.x_bot), scaled(n.y_bot))
+        for d in cell_data.ext_data.devices:
+            if not is_magic_marker(d.x_bot, d.y_bot, d.x_top, d.y_top):
+                cell_box += kdb.Box(scaled(d.x_bot), scaled(d.y_bot),
+                                    scaled(d.x_top), scaled(d.y_top))
+
+        def clamped(x: float, y: float) -> Optional[Tuple[float, float]]:
+            """
+            The point in database units, or the closest one inside the cell if
+            MAGIC gave a marker instead of a position. None when there is
+            nothing to clamp into, which is the only case worth dropping.
+            """
+            if not is_magic_marker(x, y):
+                return scaled(x), scaled(y)
+            if cell_box.empty():
+                debug(f"Cell {cell}: node at MAGIC's marker position skipped, "
+                      f"the cell places no other geometry to clamp it into")
+                return None
+            return (min(max(scaled(x), cell_box.left), cell_box.right),
+                    min(max(scaled(y), cell_box.bottom), cell_box.top))
 
         for p in cell_data.ext_data.ports:
             port_cat = self.report.create_category(parent=ports_cat, name=f"{p.net} ({p.layer})")
             shapes = kdb.Shapes()
-            shapes.insert(kdb.Box(p.x_bot / dbu_to_um / self.dbu,
-                                  p.y_bot / dbu_to_um / self.dbu,
-                                  p.x_top / dbu_to_um / self.dbu,
-                                  p.y_top / dbu_to_um / self.dbu))
+            shapes.insert(kdb.Box(scaled(p.x_bot), scaled(p.y_bot),
+                                  scaled(p.x_top), scaled(p.y_top)))
             self.report.create_items(cell_id=rdb_cell.rdb_id(), category_id=port_cat.rdb_id(),
                                      trans=kdb.CplxTrans(mag=self.dbu), shapes=shapes)
 
         for n in cell_data.ext_data.nodes:
+            point = clamped(n.x_bot, n.y_bot)
+            if point is None:
+                continue
             node_cat = self.report.create_category(parent=nodes_cat, name=f"{n.net} ({n.layer})")
             shapes = kdb.Shapes()
-            shapes.insert(box_for_point_dbu(n.x_bot / dbu_to_um / self.dbu,
-                                            n.y_bot / dbu_to_um / self.dbu))
+            shapes.insert(box_for_point_dbu(*point))
             self.report.create_items(cell_id=rdb_cell.rdb_id(), category_id=node_cat.rdb_id(),
                                      trans=kdb.CplxTrans(mag=self.dbu), shapes=shapes)
 
@@ -92,32 +135,34 @@ class MagicLogAnalyzer:
             device_cat = self.report.create_category(parent=devices_cat,
                                                      name=f"Type={d.device_type} Model={d.model}")
             shapes = kdb.Shapes()
-            shapes.insert(kdb.Box(d.x_bot / dbu_to_um / self.dbu,
-                                  d.y_bot / dbu_to_um / self.dbu,
-                                  d.x_top / dbu_to_um / self.dbu,
-                                  d.y_top / dbu_to_um / self.dbu))
+            shapes.insert(kdb.Box(scaled(d.x_bot), scaled(d.y_bot),
+                                  scaled(d.x_top), scaled(d.y_top)))
             self.report.create_items(cell_id=rdb_cell.rdb_id(), category_id=device_cat.rdb_id(),
                                      trans=kdb.CplxTrans(mag=self.dbu), shapes=shapes)
 
         if cell_data.res_ext_data is not None:
             for n in cell_data.res_ext_data.rnodes:
+                point = clamped(n.x_bot, n.y_bot)
+                if point is None:
+                    continue
                 rnode_cat = self.report.create_category(parent=rnodes_cat,
                                                         name=n.name)
                 shapes = kdb.Shapes()
-                shapes.insert(box_for_point_dbu(n.x_bot / dbu_to_um / self.dbu,
-                                                n.y_bot / dbu_to_um / self.dbu))
+                shapes.insert(box_for_point_dbu(*point))
                 self.report.create_items(cell_id=rdb_cell.rdb_id(), category_id=rnode_cat.rdb_id(),
                                          trans=kdb.CplxTrans(mag=self.dbu), shapes=shapes)
 
             for idx, r in enumerate(cell_data.res_ext_data.resistors):
-                res_cat = self.report.create_category(parent=resistors_cat,
-                                                      name=f"#{idx} {r.node1}↔︎{r.node2} = {r.value_ohm} Ω")
                 shapes = kdb.Shapes()
                 for n in cell_data.res_ext_data.rnodes_by_name(r.node1) + \
                          cell_data.res_ext_data.rnodes_by_name(r.node2):
-                    box = box_for_point_dbu(n.x_bot / dbu_to_um / self.dbu,
-                                            n.y_bot / dbu_to_um / self.dbu)
-                    shapes.insert(box)
+                    point = clamped(n.x_bot, n.y_bot)
+                    if point is not None:
+                        shapes.insert(box_for_point_dbu(*point))
+                if shapes.is_empty():
+                    continue
+                res_cat = self.report.create_category(parent=resistors_cat,
+                                                      name=f"#{idx} {r.node1}↔︎{r.node2} = {r.value_ohm} Ω")
                 self.report.create_items(cell_id=rdb_cell.rdb_id(), category_id=res_cat.rdb_id(),
                                          trans=kdb.CplxTrans(mag=self.dbu), shapes=shapes)
 
