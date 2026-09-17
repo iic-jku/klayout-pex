@@ -131,7 +131,7 @@ def test_sidewall_100um_x_100um_distance_200nm_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;7.5;
+C1;A;B;3.75;
 C2;A;VSUBS;8.231;
 C3;B;VSUBS;8.231;"""
         )
@@ -152,7 +152,7 @@ def test_sidewall_net_uturn_l1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;1.874;
+C1;C0;C1;0.937;
 C2;C0;VSUBS;38.125;
 C3;C1;VSUBS;12.588;"""
         )
@@ -173,7 +173,7 @@ def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.286;
+C1;C0;C1;0.143;
 C2;C0;VSUBS;0.3;
 C3;C1;VSUBS;0.087;"""
         )
@@ -201,7 +201,7 @@ def test_near_body_shield_li1_m1():
 C1;BOTTOM;TOPA;215.972;
 C2;BOTTOM;TOPB;215.972;
 C3;BOTTOM;VSUBS;405.081;
-C4;TOPA;TOPB;0.503;
+C4;TOPA;TOPB;0.251;
 C5;TOPA;VSUBS;0.299;
 C6;TOPB;VSUBS;0.299;"""
     )
@@ -306,14 +306,14 @@ def test_sideoverlap_plates_li1_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;
-C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;
-C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
-C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;
+C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.063;
+C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.05;
+C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.0;
+C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.124;
 C5;LOWER_FullHaloOverlap;UPPER;262.817;
 C6;LOWER_FullHaloOverlap;VSUBS;177.601;
-C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;
-C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;
+C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.031;
+C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.032;
 C9;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;
 C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;
 C11;LOWER_OutsideHalo;UPPER;0.076;
@@ -368,11 +368,11 @@ def test_sideoverlap_fingered_li1_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.003;
-C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.016;
+C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.002;
+C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.008;
 C3;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.244;
 C4;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.884;
-C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.002;
+C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.001;
 C6;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.466;
 C7;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;8.16;
 C8;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.159;
@@ -427,7 +427,7 @@ def test_mom_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;13.917;
+C1;C0;C1;7.739;
 C2;C0;VSUBS;2.827;
 C3;C1;VSUBS;0.765;"""
         )
@@ -445,7 +445,7 @@ def test_mom_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.218;
+C1;C0;C1;0.141;
 C2;C0;VSUBS;3.562;
 C3;C1;VSUBS;0.117;"""
         )

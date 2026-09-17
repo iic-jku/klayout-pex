@@ -288,10 +288,19 @@ class SidewallAndFringeExtractor:
             distance_um = avg_distance * self.dbu
 
             # NOTE: dividing by 2 (like MAGIC this not bidirectional),
-            #       but we count 2 sidewall contributions (one for each side of the cap)
+            #       but we count 2 sidewall contributions (one for each side of the cap).
+            #       The second half accounts for the tech file coefficient itself:
+            #       it holds the full value of the field solver, while a
+            #       per-edge value has to be half of that. MAGIC counted the
+            #       full value on every edge until 8.3.679, which redefined the
+            #       tech file value rather than changing every PDK — the
+            #       coefficients stay as the PDK states them, and the factor
+            #       lives here, see
+            #       https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
             cap_femto = ((length_um * sidewall_cap_spec.capacitance)
                          / (distance_um + sidewall_cap_spec.offset)
                          / 2.0  # non-bidirectional (half)
+                         / 2.0  # the coefficient is the value for both edges
                          / 1000.0)  # aF -> fF
 
             # info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
