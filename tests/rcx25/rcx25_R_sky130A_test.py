@@ -136,12 +136,12 @@ def test_nfet_li1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$0.13;$1.18;;419.333
-R2;$0.13;D;;0.0
-R3;$0.13;S;;0.0
-R4;$0.17;$1.18;;172.267
-R5;$1.18;D;;47.059
-R6;$1.18;G;;2.133
-R7;$1.18;S;;68.894"""
+R1;$2.$0.12;$2.$1.17;;209.667
+R2;$2.$0.12;$2.P0.12;;0.0
+R3;$3.$0.12;$3.$1.17;;209.667
+R4;$3.$0.12;$3.P0.12;;0.0
+R5;G;G.$1.17;;2.418
+R6;G.$0.16;G.$1.17;;152.0
+R7;G.$0.16;G.P0.16;;316.321"""
         )
 
