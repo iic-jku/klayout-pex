@@ -42,7 +42,7 @@ from .artifact import (
     open_artifact_write,
 )
 from .diagnostics import DiagnosticsReport
-from .protobuf import message_class_for_kind
+from .protobuf import kind_for_message, message_class_for_kind
 
 
 def load_artifact(spec: ArtifactSpec,
@@ -91,7 +91,15 @@ def save_artifact(message: Any, spec: ArtifactSpec, comments: bool = False) -> N
 
     :param comments: emit the specification's syntax hints. Text format only —
         the protobuf encodings have no comments.
+    :raises ValueError: if the message is not the kind the spec describes. The
+        text format spells a ``PEX25DFile`` only, and a scene written under a
+        spec that says file would otherwise fail deep inside the writer.
     """
+    kind = kind_for_message(message)
+    if kind != spec.kind:
+        raise ValueError(f"The artifact spec for '{spec.path}' says "
+                         f"{spec.kind}, but the message is a {kind}")
+
     match spec.format:
         case ArtifactFormat.PB:
             data = message.SerializeToString()

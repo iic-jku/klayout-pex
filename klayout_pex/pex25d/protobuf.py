@@ -65,6 +65,37 @@ def _import(module_name: str) -> Any:
         ) from e
 
 
+_PACKAGE = 'klayout_pex_protobuf.kpex.pex25d'
+_MODULE_PREFIX = 'pex25d_'
+_MODULE_SUFFIX = '_pb2'
+
+
+@functools.cache
+def schema_names() -> Tuple[str, ...]:
+    """
+    The PEX25D schema names the build generated, e.g. ``('diagnostics', …)``.
+
+    Discovered in the generated package rather than listed here, so that adding
+    or removing a ``.proto`` needs no edit: the module naming convention
+    ``pex25d_<name>_pb2`` is the whole mapping.
+    """
+    import pkgutil
+    package = _import(_PACKAGE)
+    return tuple(sorted(
+        name[len(_MODULE_PREFIX):-len(_MODULE_SUFFIX)]
+        for _, name, _ in pkgutil.iter_modules(package.__path__)
+        if name.startswith(_MODULE_PREFIX) and name.endswith(_MODULE_SUFFIX)
+    ))
+
+
+def schema_module(name: str) -> Any:
+    """The generated module of one schema, see :func:`schema_names`."""
+    if name not in schema_names():
+        raise ValueError(f"PEX25D has no schema '{name}'; the build generated "
+                         f"{', '.join(schema_names())}")
+    return _import(f"{_PACKAGE}.{_MODULE_PREFIX}{name}{_MODULE_SUFFIX}")
+
+
 @functools.cache
 def pex25d_file_pb2() -> Any:
     return _import('klayout_pex_protobuf.kpex.pex25d.pex25d_file_pb2')
@@ -98,6 +129,26 @@ def pex25d_diagnostics_pb2() -> Any:
 @functools.cache
 def pex25d_source_ref_pb2() -> Any:
     return _import('klayout_pex_protobuf.kpex.pex25d.pex25d_source_ref_pb2')
+
+
+def kind_for_message(message: Any) -> 'ArtifactKind':  # noqa: F821 (avoid import cycle)
+    """
+    Return the :class:`ArtifactKind` a generated message holds.
+
+    Derived from :func:`message_class_for_kind`, so that a message renamed in
+    the schema is one edit rather than two that can drift apart.
+    """
+    from .artifact import ArtifactKind
+
+    for kind in ArtifactKind:
+        try:
+            message_class = message_class_for_kind(kind)
+        except ValueError:  # a kind that describes no message, i.e. AUTO
+            continue
+        if message.DESCRIPTOR is message_class.DESCRIPTOR:
+            return kind
+
+    raise ValueError(f"'{message.DESCRIPTOR.name}' is not a PEX25D artifact message")
 
 
 def message_class_for_kind(kind: 'ArtifactKind') -> Any:  # noqa: F821 (avoid import cycle)
