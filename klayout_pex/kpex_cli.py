@@ -97,6 +97,11 @@ from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .tech_info import TechDefError, TechInfo
+from .tool_version_constraints import (
+    Tool,
+    VersionCheckMode,
+    check_tool_versions
+)
 from .util.multiple_choice import MultipleChoicePattern
 from .util.argparse_helpers import render_enum_help, true_or_false
 from .version import __version__
@@ -133,6 +138,11 @@ class KpexCLI:
                                    help="show this help message and exit")
         group_special.add_argument("--log_level", dest='log_level', default='subprocess',
                                    help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        group_special.add_argument("--tool_version_checks", dest='version_check_mode',
+                                   default=VersionCheckMode.DEFAULT, type=VersionCheckMode,
+                                   choices=list(VersionCheckMode),
+                                   help=render_enum_help(topic='tool_version_checks',
+                                                         enum_cls=VersionCheckMode))
         if include_threads:
             group_special.add_argument("--threads", dest='num_threads', type=int,
                                        default=os.cpu_count() * 4,
@@ -508,12 +518,6 @@ class KpexCLI:
             # could be *.gds, or *.gds.gz, so remove all extensions
             return os.path.basename(path).split(sep='.')[0]
 
-        if not os.path.isfile(args.klayout_exe_path):
-            path = shutil.which(args.klayout_exe_path)
-            if not path:
-                error(f"Can't locate KLayout executable at {args.klayout_exe_path}")
-                found_errors = True
-
         if not os.path.isfile(args.tech_pbjson_path):
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
             found_errors = True
@@ -704,6 +708,36 @@ class KpexCLI:
             except ArtifactNamingError as e:
                 error(str(e))
                 found_errors = True
+
+        # KLayout runs the LVS script, which the MAGIC wrapper does not need
+        # ("no need to run LVS etc if only running magic engine") and which an
+        # LVSDB input has already been through.
+        needs_lvs = getattr(args, 'input_mode', None) == InputMode.GDS and \
+                    (args.command != 'extract' or
+                     args.run_fastcap or args.run_fastercap or args.run_2_5D)
+
+        exe_path_by_tool: Dict[Tool, str] = {}
+        if needs_lvs:
+            exe_path_by_tool[Tool.KLAYOUT] = args.klayout_exe_path
+        if args.run_magic:
+            exe_path_by_tool[Tool.MAGIC] = args.magic_exe_path
+        if args.run_fastercap:
+            exe_path_by_tool[Tool.FASTERCAP] = args.fastercap_exe_path
+        if args.run_fastcap:
+            exe_path_by_tool[Tool.FASTCAP] = args.fastcap_exe_path
+
+        # Only the tools this run will actually start have to be there.
+        for tool, exe_path in list(exe_path_by_tool.items()):
+            if not (os.path.isfile(exe_path) or shutil.which(exe_path)):
+                error(f"Can't locate {tool.value} executable at {exe_path} "
+                      f"(see {tool.env_var.value})")
+                found_errors = True
+                del exe_path_by_tool[tool]
+
+        if not check_tool_versions(exe_path_by_tool=exe_path_by_tool,
+                                   pdk=args.pdk,
+                                   mode=args.version_check_mode):
+            found_errors = True
 
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
