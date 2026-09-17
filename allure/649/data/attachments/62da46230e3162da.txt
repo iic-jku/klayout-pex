@@ -1,0 +1,44 @@
+[17:19:38] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1188
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --gds                                                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/sidewall_100um_x_100um_distance_200nm_li1.gds.gz --out_dir                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:19:38] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:572
+[17:19:38] INFO     No explicit top cell specified, using top    kpex_cli.py:612
+                    cell                                                        
+                    'sidewall_100um_x_100um_distance_200nm_li1'                 
+[17:19:38] INFO     LVS input schematic not specified (argument  kpex_cli.py:653
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:19:39] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1133
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+ewall_100um_x_100um_distance_200nm_li1.gds.gz/sidewall_100um_x_100um_distance_20
+0nm_li1.lvsdb.gz                                                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:19:39] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1352
+[17:19:39] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1352
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;3.75;                                                                    
+C2;A;VSUBS;8.231;                                                               
+C3;B;VSUBS;8.231;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um_
+distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_1
+00um_distance_200nm_li1_k25d_pex_netlist.csv                                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um_
+distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_1
+00um_distance_200nm_li1_k25d_pex_netlist.spice                                  
