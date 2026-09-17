@@ -188,12 +188,15 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
         severity=Severity.WARNING,
     ),
     ToolVersionConstraint(
-        id='MAGIC_REFERENCE_REVISION',
+        id='MAGIC_SIDEWALL_DEFINITION',
         tool=Tool.MAGIC,
-        specifier='>= 8.3.486',
-        reason="the revision the comparison results in the documentation were "
-               "recorded against; an older one reports different parasitics",
-        severity=Severity.WARNING,
+        specifier='>= 8.3.679',
+        reason="MAGIC used to count each sidewall edge against the full "
+               "'defaultsidewall' value of the tech file, which double-counts "
+               "it; 8.3.679 redefined the tech file value instead of changing "
+               "every PDK, so an older MAGIC reports twice the sidewall "
+               "capacitance, see "
+               "https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429",
     ),
 )
 
