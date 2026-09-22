@@ -447,7 +447,7 @@ class Pex25DTextReader:
             return
         self.meta_keys[key] = f"{record.file}:{record.line}"
 
-        meta = self.file.meta.add()
+        meta = self.file.metadata.add()
         meta.key, meta.value = key, value
         self.attach_source(meta, record)
 

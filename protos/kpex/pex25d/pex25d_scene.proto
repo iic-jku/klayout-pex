@@ -62,7 +62,7 @@ message PEX25DScene {
     string format_version_suffix = 5;  // the `rc1` of `PEX25D 1.0-rc1`, no '-'
 
     Units units = 3;
-    repeated Meta meta = 4;
+    repeated MetaEntry metadata = 4;
 
     // The infinite ground plane, if the file declared one.
     ResolvedGroundPlane ground_plane = 10;

@@ -275,7 +275,7 @@ class PEX25DBuilder:
 
     def build_meta(self, pex25d_file: Any) -> None:
         def add(key: str, value: str):
-            meta = pex25d_file.meta.add()
+            meta = pex25d_file.metadata.add()
             meta.key = key
             meta.value = value
 

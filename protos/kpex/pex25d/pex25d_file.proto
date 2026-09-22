@@ -85,7 +85,7 @@ message PEX25DFile {
     Units units = 3;
 
     // `META <key> <value>`
-    repeated Meta meta = 4;
+    repeated MetaEntry metadata = 4;
 
     // Profiles. GROUND_PLANE, METAL, VIA and DIELECTRIC_* names share ONE
     // namespace and must be unique across all of them; the split into typed

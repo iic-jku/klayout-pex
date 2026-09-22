@@ -207,13 +207,13 @@ class Pex25DTextWriter:
                   "multiple of GRID.")
         self.emit(f"UNITS LENGTH {unit_name} GRID {format_exact(self.grid)}")
 
-        keys = {meta.key for meta in self.file.meta}
-        if self.file.meta:
+        keys = {entry.key for entry in self.file.metadata}
+        if self.file.metadata:
             self.hint("",
                       "META <key> <value> is informational only, and never changes how",
                       "geometry or material is interpreted. A key may appear at most",
                       "once across the file and everything it INCLUDEs.")
-        for meta in self.file.meta:
+        for meta in self.file.metadata:
             self.emit(f"META {meta.key} {quote(meta.value)}")
 
         # The text format has no UNITS clause for the source DBU; META carries it.

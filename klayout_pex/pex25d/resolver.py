@@ -100,8 +100,8 @@ class Resolver:
         scene.format_version_minor = self.file.format_version_minor
         scene.format_version_suffix = self.file.format_version_suffix
         scene.units.CopyFrom(self.file.units)
-        for meta in self.file.meta:
-            scene.meta.add().CopyFrom(meta)
+        for entry in self.file.metadata:
+            scene.metadata.add().CopyFrom(entry)
         if self.file.HasField('resistance_temperature'):
             scene.resistance_temperature.CopyFrom(self.file.resistance_temperature)
 

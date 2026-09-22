@@ -76,12 +76,12 @@ def _show_header(message: Any, is_scene: bool) -> None:
 
 
 def _show_meta(message: Any, is_scene: bool) -> None:
-    metas = getattr(message, 'meta', None)
-    if not metas:
+    metadata = getattr(message, 'metadata', None)
+    if not metadata:
         return
     rule('Metadata')
-    for m in metas:
-        subproc(f"{m.key} = {m.value}")
+    for entry in metadata:
+        subproc(f"{entry.key} = {entry.value}")
 
 
 def _show_layers(message: Any, is_scene: bool) -> None:
