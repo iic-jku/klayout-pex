@@ -1,0 +1,19 @@
+WARNING  __kpex__:kpex_cli.py:1188 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1224 main extract --pdk sky130A --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sideoverlap_simple_plates_li1_m1.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:572 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:612 No explicit top cell specified, using top cell 'sideoverlap_simple_plates_li1_m1'
+INFO     __kpex__:kpex_cli.py:653 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1133 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1134 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sideoverlap_simple_plates_li1_m1.gds.gz/sideoverlap_simple_plates_li1_m1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1352 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1352 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1352 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1352 (68, 16) -> (met1_pin_con)
+SUBPROCESS __kpex__:kpex_cli.py:1024 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1024 C1;li1;met1;0.157;
+SUBPROCESS __kpex__:kpex_cli.py:1024 C2;VSUBS;li1;7.931;
+SUBPROCESS __kpex__:kpex_cli.py:1024 C3;VSUBS;met1;248.899;
+SUBPROCESS __kpex__:kpex_cli.py:1027 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_simple_plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1041 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_simple_plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1_k25d_pex_netlist.spice
