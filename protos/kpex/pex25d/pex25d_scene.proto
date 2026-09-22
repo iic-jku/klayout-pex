@@ -59,10 +59,10 @@ import "kpex/pex25d/pex25d_terminal.proto";
 message PEX25DScene {
     uint32 format_version_major = 1;
     uint32 format_version_minor = 2;
-    string format_version_suffix = 5;  // the `rc1` of `PEX25D 1.0-rc1`, no '-'
+    string format_version_suffix = 3;  // the `rc1` of `PEX25D 1.0-rc1`, no '-'
 
-    Units units = 3;
-    repeated MetaEntry metadata = 4;
+    Units units = 5;
+    repeated MetaEntry metadata = 6;
 
     // The infinite ground plane, if the file declared one.
     ResolvedGroundPlane ground_plane = 10;

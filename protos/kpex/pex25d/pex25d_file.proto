@@ -79,13 +79,13 @@ message PEX25DFile {
     // major/minor alone and MUST NOT reject one because it does not recognise
     // the suffix. Carried so that a writer can round-trip it and so that a
     // generator can tell "1.0" from "1.0-rc1" when reporting provenance.
-    string format_version_suffix = 5;
+    string format_version_suffix = 3;
 
     // `UNITS LENGTH um GRID 0.0001`
-    Units units = 3;
+    Units units = 5;
 
     // `META <key> <value>`
-    repeated MetaEntry metadata = 4;
+    repeated MetaEntry metadata = 6;
 
     // Profiles. GROUND_PLANE, METAL, VIA and DIELECTRIC_* names share ONE
     // namespace and must be unique across all of them; the split into typed
