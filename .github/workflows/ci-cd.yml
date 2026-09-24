@@ -241,6 +241,11 @@ jobs:
         unzip -l dist/*.whl | grep klayout_pex_protobuf | grep _pb2.py
       shell: bash
 
+    # NOTE: see scripts/build/kpex_build_backend.py and issue #210
+    - name: "[🐍] Verify wheel and sdist contain the symlinked PDK files as regular files"
+      run: python scripts/build/verify_dist.py dist
+      shell: bash
+
     - name: "[🐍] Store dist artifact"
       uses: actions/upload-artifact@v6
       with:
