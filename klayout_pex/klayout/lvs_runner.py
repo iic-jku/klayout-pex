@@ -108,9 +108,10 @@ class LVSRunner:
 
         rule()
 
-        # NOTE: a non-zero status alone is not fatal, some LVS scripts (e.g. sky130)
-        #       exit with 1 on a netlist mismatch, but still write a usable report.
-        #       Without the report however, there is nothing to extract from.
+        # NOTE: the report is the criterion, not the status code:
+        #       - a script error (e.g. an unresolvable %include) aborts before the report is written
+        #       - a netlist mismatch against the schematic is no error for PEX, the report is
+        #         still written, but some LVS scripts (e.g. sky130) exit with 1 in that case
         if not os.path.isfile(lvsdb_path):
             msg = f"KLayout LVS exited with status code {proc.returncode} after {'%.4g' % duration}s " \
                   f"without writing the LVS database {lvsdb_path}"
@@ -122,5 +123,6 @@ class LVSRunner:
         if proc.returncode == 0:
             info(f"klayout LVS succeeded after {'%.4g' % duration}s")
         else:
-            warning(f"klayout LVS failed with status code {proc.returncode} after {'%.4g' % duration}s, "
-                    f"see log file: {log_path}")
+            info(f"klayout LVS finished with status code {proc.returncode} after {'%.4g' % duration}s, "
+                 f"most likely due to a netlist mismatch against the schematic (irrelevant for PEX), "
+                 f"see log file: {log_path}")

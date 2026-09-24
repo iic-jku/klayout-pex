@@ -111,12 +111,16 @@ class LVSRunnerFailureTest(unittest.TestCase):
                                             writes_report=False))
         self.assertFalse(os.path.exists(self.lvsdb_path))
 
-    def test_nonzero_status_with_lvsdb_is_not_fatal(self):
+    def test_netlist_mismatch_is_no_error(self):
         # e.g. the sky130 LVS script exits with 1 on a netlist mismatch
-        self.run_lvs(FakeKLayoutProcess(output="ERROR : Netlists don't match\n",
-                                        returncode=1,
-                                        writes_report=True))
+        with mock.patch('klayout_pex.klayout.lvs_runner.warning') as warning_mock, \
+             mock.patch('klayout_pex.klayout.lvs_runner.error') as error_mock:
+            self.run_lvs(FakeKLayoutProcess(output="ERROR : Netlists don't match\n",
+                                            returncode=1,
+                                            writes_report=True))
         self.assertTrue(os.path.isfile(self.lvsdb_path))
+        warning_mock.assert_not_called()
+        error_mock.assert_not_called()
 
     def test_cli_exits_with_error_instead_of_failing_to_cache_missing_lvsdb(self):
         args = argparse.Namespace(
