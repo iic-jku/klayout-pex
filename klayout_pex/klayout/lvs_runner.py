@@ -37,6 +37,13 @@ from ..log import (
 )
 
 
+class LVSError(Exception):
+    """
+    KLayout LVS did not produce the LVS database that extraction depends on.
+    """
+    pass
+
+
 class LVSRunner:
     @staticmethod
     def run_klayout_lvs(exe_path: str,
@@ -71,6 +78,13 @@ class LVSRunner:
         rule('Calling KLayout LVS script')
         subproc(' '.join(args))
         subproc(log_path)
+
+        # A report left over from an earlier run in the same output directory
+        # must not be mistaken for the result of this one
+        if os.path.exists(lvsdb_path):
+            os.remove(lvsdb_path)
+
+        klayout_errors = []
         start = time.time()
 
         proc = subprocess.Popen(args,
@@ -86,14 +100,29 @@ class LVSRunner:
                     break
                 subproc(line[:-1])  # remove newline
                 f.writelines([line])
+                if line.startswith('ERROR:'):
+                    klayout_errors.append(line.rstrip())
         proc.wait()
 
         duration = time.time() - start
 
         rule()
 
+        # NOTE: the report is the criterion, not the status code:
+        #       - a script error (e.g. an unresolvable %include) aborts before the report is written
+        #       - a netlist mismatch against the schematic is no error for PEX, the report is
+        #         still written, but some LVS scripts (e.g. sky130) exit with 1 in that case
+        if not os.path.isfile(lvsdb_path):
+            msg = f"KLayout LVS exited with status code {proc.returncode} after {'%.4g' % duration}s " \
+                  f"without writing the LVS database {lvsdb_path}"
+            if klayout_errors:
+                msg += "\nKLayout reported:\n" + '\n'.join(f"  {e}" for e in klayout_errors)
+            msg += f"\nSee LVS log file for details: {log_path}"
+            raise LVSError(msg)
+
         if proc.returncode == 0:
             info(f"klayout LVS succeeded after {'%.4g' % duration}s")
         else:
-            warning(f"klayout LVS failed with status code {proc.returncode} after {'%.4g' % duration}s, "
-                    f"see log file: {log_path}")
+            info(f"klayout LVS finished with status code {proc.returncode} after {'%.4g' % duration}s, "
+                 f"most likely due to a netlist mismatch against the schematic (irrelevant for PEX), "
+                 f"see log file: {log_path}")

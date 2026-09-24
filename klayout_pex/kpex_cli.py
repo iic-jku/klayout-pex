@@ -53,7 +53,7 @@ from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitan
 from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .fastcap.output_interpreter import FastCapOutputInterpreter
-from .klayout.lvs_runner import LVSRunner
+from .klayout.lvs_runner import LVSError, LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
@@ -1136,13 +1136,17 @@ class KpexCLI:
 
                 if lvs_needed:
                     lvs_runner = LVSRunner()
-                    lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
-                                               lvs_script=args.lvs_script_path,
-                                               gds_path=args.effective_gds_path,
-                                               schematic_path=args.effective_schematic_path,
-                                               log_path=lvs_log_path,
-                                               lvsdb_path=lvsdb_path,
-                                               verbose=args.klayout_lvs_verbose)
+                    try:
+                        lvs_runner.run_klayout_lvs(exe_path=args.klayout_exe_path,
+                                                   lvs_script=args.lvs_script_path,
+                                                   gds_path=args.effective_gds_path,
+                                                   schematic_path=args.effective_schematic_path,
+                                                   log_path=lvs_log_path,
+                                                   lvsdb_path=lvsdb_path,
+                                                   verbose=args.klayout_lvs_verbose)
+                    except LVSError as e:
+                        error(str(e))
+                        sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
                     if args.cache_lvs:
                         cache_dir_path = os.path.dirname(lvsdb_cache_path)
                         if not os.path.exists(cache_dir_path):
