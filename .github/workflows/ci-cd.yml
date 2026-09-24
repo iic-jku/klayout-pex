@@ -251,7 +251,7 @@ jobs:
 
     - name: "[🐍] Run Unit tests"
       run: >
-        poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "not slow"
+        poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "not slow and not smoke"
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}
         --color no 
       shell: bash    # NOTE: required for windows poetry calls
@@ -278,9 +278,18 @@ jobs:
         retention-days: 1
         if-no-files-found: error
 
+  call-smoke-tests:
+    name: "Smoke Tests"
+    needs: build_and_test
+    concurrency:
+      group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-smoke-tests
+      cancel-in-progress: true
+    uses: ./.github/workflows/smoke-tests.yml
+
   call-publish-pypi:
     name: "Publish distribution 📦s to PyPI/TestPyPI"
-    needs: build_and_test
+    # NOTE: don't publish a wheel that fails for any bundled PDK (#210)
+    needs: [build_and_test, call-smoke-tests]
     concurrency:
       group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-pypi
       cancel-in-progress: true
