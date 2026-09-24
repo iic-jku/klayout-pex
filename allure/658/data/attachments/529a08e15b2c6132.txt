@@ -1,0 +1,26 @@
+[18:24:48] INFO     Cache miss: extracted LVSDB does not exist  kpex_cli.py:1127
+/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/.kpex_cache/ih
+p-sg13cmos5l/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/ce
+ll.gds/cell.lvsdb.gz                                                            
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r sg13cmos5l.lvs -rd                                                
+input=/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/cell.gds
+-rd                                                                             
+report=/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/cell.lv
+sdb.gz -rd                                                                      
+schematic=/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/cell
+.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd                
+spice_comments=false -rd scale=false -rd verbose=false -rd                      
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true                                                                
+/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/lvs_run_0zxq4qy5/cell_lvs.log  
+ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file:                             
+/pdk/rule_decks//sram_integration.lvs (errno=2) in                              
+MacroInterpreter::include_expansion                                             
+ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs 
+(errno=2) in MacroInterpreter::include_expansion in Executable::execute         
+  :/built-in-macros/lvs_interpreters.lym:27:in                                  
+'RBA::MacroInterpreter#include_expansion'                                       
+  :/built-in-macros/lvs_interpreters.lym:27:in 'LVS::LVSExecutable#execute'     
+────────────────────────────────────────────────────────────────────────────────
