@@ -23,10 +23,15 @@
 ## --------------------------------------------------------------------------------
 ##
 
-# Usage: run_tests <pattern>
+# Usage: run_tests <pattern> [--no-coverage]
 # Example:  run_tests "not slow"
 function run_tests() {
     PATTERN="$1"
+    WITH_COVERAGE=1
+    if [[ "$2" == "--no-coverage" ]]
+    then
+        WITH_COVERAGE=0
+    fi
 
     DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 
@@ -42,11 +47,18 @@ function run_tests() {
 
     set -x
 
-    poetry run coverage run -m pytest -m "$PATTERN" \
-        --alluredir "$ALLURE_RESULTS_PATH" \
-        --color no
+    if [[ $WITH_COVERAGE -eq 1 ]]
+    then
+        poetry run coverage run -m pytest -m "$PATTERN" \
+            --alluredir "$ALLURE_RESULTS_PATH" \
+            --color no
 
-    poetry run coverage html --directory "$COVERAGE_PATH"
+        poetry run coverage html --directory "$COVERAGE_PATH"
+    else
+        poetry run pytest -m "$PATTERN" \
+            --alluredir "$ALLURE_RESULTS_PATH" \
+            --color no
+    fi
 
     allure generate \
         --single-file "$ALLURE_RESULTS_PATH" \
@@ -56,6 +68,9 @@ function run_tests() {
     if [[ -z "$RUNNER_OS" ]] && [[ -d "/Applications/Safari.app" ]]
     then
         open -a Safari "$ALLURE_REPORT_PATH"/index.html
-        open -a Safari "$COVERAGE_PATH"/index.html
+        if [[ $WITH_COVERAGE -eq 1 ]]
+        then
+            open -a Safari "$COVERAGE_PATH"/index.html
+        fi
     fi
 }
