@@ -52,6 +52,38 @@ pip3 install poetry
 poetry update
 ```
 
+#### Windows: symlinks in the checkout
+
+Some PDK files are symlinks, e.g. most rule decks of `pdk/ihp-sg13cmos5l` link to `pdk/ihp-sg13g2`.
+By default, git on Windows checks out a symlink as a plain text file, containing only the link target path.
+As `poetry install` runs KPEX directly from your checkout (editable install),
+KLayout would then fail to include those rule decks.
+
+NOTE: Released wheels are not affected, the build backend `scripts/build/kpex_build_backend.py`
+packages symlinks as regular files.
+
+**Recommended:** use real symlinks, this requires Windows *Developer Mode* (or an administrator shell).
+
+For a new clone:
+```bash
+git clone -c core.symlinks=true https://github.com/iic-jku/klayout-pex.git
+```
+
+For an existing clone (NOTE: discards uncommitted changes in `pdk/`):
+```bash
+git config core.symlinks true
+git checkout -- pdk
+```
+
+**Fallback** (no symlinks possible): install a non-editable copy of KPEX into the poetry venv,
+built by the build backend (which resolves the symlinks):
+```bash
+poetry install --no-root
+poetry run pip install --no-deps .
+```
+- run KPEX with `poetry run kpex …` (`kpex.sh` would use the checkout)
+- after code changes, reinstall with `poetry run pip install --no-deps --force-reinstall .`
+
 ### Building
 
 Calling `./build.sh release` will: 
