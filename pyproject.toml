@@ -32,6 +32,9 @@ packages = [
 include = [
     "kpex",
     "pdk/**/*",
+    # NOTE: build-backend (backend-path) is needed to build a wheel from the sdist
+    { path = "scripts/build/kpex_build_backend.py", format = ["sdist"] },
+    { path = "scripts/build/kpex_symlinks.py", format = ["sdist"] },
     "klayout_pex_protobuf/__init__.py",
     # NOTE: explicitly mention generated protobuf files,
     #       otherwise the .gitignore entries would suppress them
@@ -102,8 +105,12 @@ pylint-json2html = ">= 0.5.0"
 licenseheaders = ">= 0.8.8"
 
 [build-system]
+# NOTE: `poetry build` bypasses build-backend (and uses its bundled poetry-core directly)
+#       if `requires` is only poetry-core, keep a second entry here.
 requires = ["poetry-core>=1.0.0", "setuptools>=42"]
-build-backend = "poetry.core.masonry.api"
+# NOTE: poetry-core, plus resolving the symlinks within `packages` when packaging (#210)
+build-backend = "kpex_build_backend"
+backend-path = ["scripts/build"]
 
 [tool.pytest.ini_options]
 markers = [
