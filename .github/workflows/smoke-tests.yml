@@ -1,0 +1,131 @@
+##
+## --------------------------------------------------------------------------------
+## SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+## Johannes Kepler University, Institute for Integrated Circuits.
+##
+## This file is part of KPEX
+## (see https://github.com/iic-jku/klayout-pex).
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
+## SPDX-License-Identifier: GPL-3.0-or-later
+## --------------------------------------------------------------------------------
+##
+
+# NOTE: runs the smoke test suite (tests/smoke) against the *installed* wheel
+#       (the wheel that gets published, see publish-pypi.yml),
+#       see https://github.com/iic-jku/klayout-pex/issues/210
+name: "Smoke tests"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  KLAYOUT_DEB: "klayout_0.30.4-1_amd64.deb"
+  KLAYOUT_URL: "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.30.4-1_amd64.deb"
+
+jobs:
+  run-tests:
+    name: Smoke Test ${{ matrix.os }}-py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04]
+        python-version: ['3.12']
+
+    env:
+      ALLURE_RESULTS_PATH: build/allure-results
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: "[🐍] Setup python ${{ matrix.python-version }}"
+      id: setup-python
+      uses: actions/setup-python@v7
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: "[🐍] Install Poetry"
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        virtualenvs-path: .venv
+        installer-parallel: true
+
+    - name: "[🐍] Load cached venv"
+      id: cached-poetry-dependencies
+      uses: actions/cache@v6
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: "[🐍] Install dependencies"
+      # NOTE: only for pytest itself, the wheel is installed into a fresh venv by the tests
+      run: poetry install --no-interaction --no-root
+      shell: bash
+
+    # NOTE: own cache key, as integration-tests.yml caches FasterCap along with KLayout
+    - name: "Restore cached KLayout deb 📦 download"
+      id: cache-klayout-deb
+      uses: actions/cache/restore@v6
+      with:
+        path: deb-downloads
+        key: ${{ runner.os }}-klayout-deb-${{ env.KLAYOUT_DEB }}
+
+    - name: "Download KLayout deb 📦"
+      if: steps.cache-klayout-deb.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p deb-downloads
+        wget -P deb-downloads "$KLAYOUT_URL"
+
+    - name: "Save cached KLayout deb 📦 download"
+      if: steps.cache-klayout-deb.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: deb-downloads
+        key: ${{ runner.os }}-klayout-deb-${{ env.KLAYOUT_DEB }}
+
+    - name: "Install KLayout deb 📦"
+      run: |
+        sudo apt-get update
+        sudo apt-get install ./deb-downloads/$KLAYOUT_DEB
+
+    - name: "Download Python dist artifacts"
+      uses: actions/download-artifact@v8
+      with:
+        pattern: python-dist-ubuntu-latest*   # NOTE: same as publish-pypi.yml
+        merge-multiple: true
+        path: dist   # destination
+
+    # NOTE: unlike integration-tests.yml, do NOT unpack the dist into the checkout
+    - name: "[🐍] Run smoke tests"
+      run: >
+        KPEX_SMOKE_TEST_WHEEL=$(ls dist/klayout_pex-*.whl)
+        poetry run pytest tests/smoke
+        --alluredir ${{ env.ALLURE_RESULTS_PATH }}
+        --color no
+        -rA
+      shell: bash
+
+    - name: "[🐍] Store allure test results"
+      if: success() || failure()
+      uses: actions/upload-artifact@v6
+      with:
+        name: python-smoke-tests-allure-report-${{ matrix.os }}_py${{ matrix.python-version }}
+        path: ${{ env.ALLURE_RESULTS_PATH }}
+        retention-days: 1
+        if-no-files-found: error
