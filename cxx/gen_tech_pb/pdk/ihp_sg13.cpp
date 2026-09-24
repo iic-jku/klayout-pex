@@ -422,7 +422,8 @@ void TechBuilder::buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
         setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
         setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
     } else {
-        
+        // CMOS5L has no Metal5, so TopVia1 lands on Metal4
+        setContact(topvia1_n_cap, "topvia1_n_cap", "metal4_con",    "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
     }
     // TODO: refine via rules!
     
