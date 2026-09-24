@@ -1,0 +1,76 @@
+──────────────────────────── Command line arguments ────────────────────────────
+/tmp/pytest-of-runner/pytest-0/installed_wheel0/bin/kpex extract --pdk          
+ihp-sg13cmos5l --gds                                                            
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13cmos5l/cap_cm
+omf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz --2.5D --out_dir               
+/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out              
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:40:08] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:572
+[18:40:08] INFO     No explicit top cell specified, using top    kpex_cli.py:612
+                    cell 'cap_cmomf_w5u_l5u_m1_m4'                              
+[18:40:08] INFO     LVS input schematic not specified (argument  kpex_cli.py:653
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:40:08] INFO     Cache miss: extracted LVSDB does not exist  kpex_cli.py:1127
+/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out/.kpex_cache/i
+hp-sg13cmos5l/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13
+cmos5l/cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz/cap_cmomf_w5u_l5u_
+m1_m4.lvsdb.gz                                                                  
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/kla
+yout_pex/pdk/ihp-sg13cmos5l/libs.tech/kpex/sg13cmos5l.lvs -rd                   
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13cmos5l/
+cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz -rd                      
+report=/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out/cap_cm
+omf_w5u_l5u_m1_m4__cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.lvsdb.gz -rd 
+schematic=/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out/cap
+_cmomf_w5u_l5u_m1_m4__cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4_dummy_sche
+matic.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd           
+spice_comments=false -rd scale=false -rd verbose=false -rd                      
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true                                                                
+/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out/cap_cmomf_w5u
+_l5u_m1_m4__cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4_lvs.log             
+ERROR: In                                                                       
+/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/kla
+yout_pex/pdk/ihp-sg13cmos5l/libs.tech/kpex/sg13cmos5l.lvs: Unable to open file: 
+/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/kla
+yout_pex/pdk/ihp-sg13cmos5l/libs.tech/kpex/rule_decks//sram_integration.lvs     
+(errno=2) in MacroInterpreter::include_expansion                                
+ERROR: RuntimeError: Unable to open file:                                       
+/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/kla
+yout_pex/pdk/ihp-sg13cmos5l/libs.tech/kpex/rule_decks//sram_integration.lvs     
+(errno=2) in MacroInterpreter::include_expansion in Executable::execute         
+  :/built-in-macros/lvs_interpreters.lym:27:in `include_expansion'              
+  :/built-in-macros/lvs_interpreters.lym:27:in `execute'                        
+────────────────────────────────────────────────────────────────────────────────
+[18:40:09] WARNING  klayout LVS failed with status code 1 after lvs_runner.py:98
+                    1.136s, see log file:                                       
+                    /tmp/pytest-of-runner/pytest-0/test_kpex_ex                 
+                    tract_ihp_sg13cmos0/out/cap_cmomf_w5u_l5u_m                 
+                    1_m4__cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u                 
+                    _l5u_m1_m4_lvs.log                                          
+Traceback (most recent call last):
+  File "/tmp/pytest-of-runner/pytest-0/installed_wheel0/bin/kpex", line 8, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/klayout_pex/__main__.py", line 29, in main
+    cli.main(sys.argv)
+  File "/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/klayout_pex/kpex_cli.py", line 1242, in main
+    self.run_extraction(args=args, tech_info=tech_info)
+  File "/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/klayout_pex/kpex_cli.py", line 1343, in run_extraction
+    lvsdb = self.create_lvsdb(args)
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pytest-of-runner/pytest-0/installed_wheel0/lib/python3.12/site-packages/klayout_pex/kpex_cli.py", line 1150, in create_lvsdb
+    shutil.copy(lvsdb_path, lvsdb_cache_path)
+  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/shutil.py", line 435, in copy
+    copyfile(src, dst, follow_symlinks=follow_symlinks)
+  File "/opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/shutil.py", line 260, in copyfile
+    with open(src, 'rb') as fsrc:
+         ^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/pytest-of-runner/pytest-0/test_kpex_extract_ihp_sg13cmos0/out/cap_cmomf_w5u_l5u_m1_m4__cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.lvsdb.gz'
