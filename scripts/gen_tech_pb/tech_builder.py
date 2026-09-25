@@ -106,6 +106,18 @@ def add_computed_layer(tech: Technology,
 #-------------------------------------------------------------------------
 
 
+def _um(length: float) -> float:
+    """
+    Round a length (in µm) to 1 pm.
+
+    The tables give lengths with at most 4 decimals, but derived ones carry the rounding error
+    of the float64 arithmetic, e.g. 5.090000000000001 for the z of IHP Metal5, which is the sum
+    of the thicknesses below it. Rounded, it's stored as 5.09 (i.e. the float64 nearest to it),
+    while the literals stay as they are.
+    """
+    return round(length, 6)
+
+
 def add_substrate_layer(psi: ProcessStackInfo,
                         layer_name: str,
                         height: float,
@@ -113,8 +125,8 @@ def add_substrate_layer(psi: ProcessStackInfo,
                         reference: str):
     psi.layers.add(name=layer_name,
                    layer_type=ProcessStackInfo.LAYER_TYPE_SUBSTRATE,
-                   substrate_layer=ProcessStackInfo.SubstrateLayer(height=height,
-                                                                   thickness=thickness,
+                   substrate_layer=ProcessStackInfo.SubstrateLayer(height=_um(height),
+                                                                   thickness=_um(thickness),
                                                                    reference=reference))
 
 
@@ -124,7 +136,7 @@ def add_nwell_layer(psi: ProcessStackInfo,
                     reference: str) -> ProcessStackInfo.NWellLayer:
     li = psi.layers.add(name=layer_name,
                         layer_type=ProcessStackInfo.LAYER_TYPE_NWELL,
-                        nwell_layer=ProcessStackInfo.NWellLayer(z=z, reference=reference))
+                        nwell_layer=ProcessStackInfo.NWellLayer(z=_um(z), reference=reference))
     return li.nwell_layer
 
 
@@ -139,10 +151,10 @@ def set_contact(co: ProcessStackInfo.Contact,
     co.name = name
     co.layer_below = layer_below
     co.metal_above = metal_above
-    co.thickness = thickness
-    co.width = width
-    co.spacing = spacing
-    co.border = border
+    co.thickness = _um(thickness)
+    co.width = _um(width)
+    co.spacing = _um(spacing)
+    co.border = _um(border)
 
 
 def add_diffusion_layer(psi: ProcessStackInfo,
@@ -151,7 +163,7 @@ def add_diffusion_layer(psi: ProcessStackInfo,
                         reference: str) -> ProcessStackInfo.DiffusionLayer:
     li = psi.layers.add(name=layer_name,
                         layer_type=ProcessStackInfo.LAYER_TYPE_DIFFUSION,
-                        diffusion_layer=ProcessStackInfo.DiffusionLayer(z=z, reference=reference))
+                        diffusion_layer=ProcessStackInfo.DiffusionLayer(z=_um(z), reference=reference))
     return li.diffusion_layer
 
 
@@ -169,7 +181,7 @@ def add_metal_layer(psi: ProcessStackInfo,
                     thickness: float) -> ProcessStackInfo.MetalLayer:
     li = psi.layers.add(name=layer_name,
                         layer_type=ProcessStackInfo.LAYER_TYPE_METAL,
-                        metal_layer=ProcessStackInfo.MetalLayer(z=z, thickness=thickness))
+                        metal_layer=ProcessStackInfo.MetalLayer(z=_um(z), thickness=_um(thickness)))
     return li.metal_layer
 
 
@@ -195,9 +207,9 @@ def add_conformal_dielectric(psi: ProcessStackInfo,
                    layer_type=ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC,
                    conformal_dielectric_layer=ProcessStackInfo.ConformalDielectricLayer(
                        dielectric_k=dielectric_k,
-                       thickness_over_metal=thickness_over_metal,
-                       thickness_where_no_metal=thickness_where_no_metal,
-                       thickness_sidewall=thickness_sidewall,
+                       thickness_over_metal=_um(thickness_over_metal),
+                       thickness_where_no_metal=_um(thickness_where_no_metal),
+                       thickness_sidewall=_um(thickness_sidewall),
                        reference=reference))
 
 #-------------------------------------------------------------------------
