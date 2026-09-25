@@ -31,7 +31,7 @@ from unittest import mock
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext, LVSDBError
 from klayout_pex.tech_info import TechInfo
 
 
@@ -69,3 +69,9 @@ class Test(unittest.TestCase):
         messages = [call.args[0] for call in warning.call_args_list]
         self.assertTrue(any('D$rfnmos' in m for m in messages), messages)
         self.assertFalse(pex_context.top_cell_bbox().empty())
+
+    def test_a_device_without_layout_geometry_is_an_error(self):
+        pex_context = self.prepare_extraction()
+        with self.assertRaises(LVSDBError) as cm:
+            pex_context.devices_by_name
+        self.assertIn('$1 (sg13_lv_nmos)', str(cm.exception))
