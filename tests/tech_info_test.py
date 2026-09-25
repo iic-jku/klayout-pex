@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 import glob
 import os
 import tempfile
@@ -75,6 +76,51 @@ class Test(unittest.TestCase):
             with self.subTest(tech=os.path.basename(path)):
                 self.assertEqual([], TechInfo.duplicate_names(
                     TechInfo.parse_tech_def(path)))
+
+    def test_shipped_tech_definitions_have_no_unnamed_metal_contacts(self):
+        # An unnamed contact_above still passes HasField(), and hides the via it
+        # should describe: ihp-sg13cmos5l declared one over Metal4, so TopVia1
+        # was missing from R extraction, PEX25D and FasterCap.
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech = TechInfo.parse_tech_def(path)
+            for lyr in tech.process_stack.layers:
+                if lyr.WhichOneof('parameters') != 'metal_layer' \
+                        or not lyr.metal_layer.HasField('contact_above'):
+                    continue
+                with self.subTest(tech=os.path.basename(path), layer=lyr.name):
+                    self.assertNotEqual('', lyr.metal_layer.contact_above.name,
+                                        "contact_above is set, but has no name")
+
+    def test_shipped_tech_definitions_have_no_conflicting_capacitances(self):
+        # The capacitances are looked up by layer (pair), so one declared twice
+        # keeps only the last value: ihp-sg13g2 and ihp-sg13cmos5l declared
+        # both the LV and the HV diffusion values for their single Activ layer.
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            cap = TechInfo.parse_tech_def(path).process_parasitics.capacitance
+            tables = {
+                'substrate': [((c.layer_name,), (c.area_capacitance, c.perimeter_capacitance))
+                              for c in cap.substrates],
+                'overlap': [((c.top_layer_name, c.bottom_layer_name), c.capacitance)
+                            for c in cap.overlaps],
+                'sidewall': [((c.layer_name,), (c.capacitance, c.offset))
+                             for c in cap.sidewalls],
+                'side overlap': [((c.in_layer_name, c.out_layer_name), c.capacitance)
+                                 for c in cap.sideoverlaps],
+            }
+            for table, entries in tables.items():
+                values_by_layers = defaultdict(set)
+                for layers, value in entries:
+                    values_by_layers[layers].add(value)
+                with self.subTest(tech=os.path.basename(path), table=table):
+                    self.assertEqual({}, {layers: sorted(values)
+                                          for layers, values in values_by_layers.items()
+                                          if len(values) > 1})
 
     def test_duplicate_names_are_reported_per_namespace(self):
         problems = TechInfo.duplicate_names(tech_with_duplicates())
