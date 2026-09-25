@@ -283,7 +283,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "air",  3.0,          "topnit");
 
-    auto nwellc = nwell->mutable_contact_above(); // licon over nwell / tap // TODO!
+    // NOTE: on its own, mutable_contact_above() declares an unnamed contact, so only together with setContact()
+    // auto nwellc = nwell->mutable_contact_above(); // licon over nwell / tap // TODO!
     auto licon1n = ndiff->mutable_contact_above(); // licon over nsdm
     auto licon1p = pdiff->mutable_contact_above(); // licon over nsdm
     auto licon1poly = poly->mutable_contact_above(); // licon over poly
@@ -346,7 +347,6 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 
     // resistance values are in mΩ / CNT
     //                   via_layer,  resistance
-    addViaResistance(ri, "poly",        152000); // licon over poly!
     addViaResistance(ri, "mcon",          9300);
     addViaResistance(ri, "via",           4500);
     addViaResistance(ri, "via2",          3410);
@@ -375,7 +375,6 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addOverlapCap(ci, "poly",     "nwell",      106.13);
     addOverlapCap(ci, "poly",     "pwell",      106.13);
     addOverlapCap(ci, "li1",      "pwell",      36.99);
-    addOverlapCap(ci, "li1",      "nwell",      36.99);
     addOverlapCap(ci, "li1",      "nwell",      36.99);
     addOverlapCap(ci, "li1",      diff_nonfet,  55.3);
     addOverlapCap(ci, "li1",      "poly",       94.16);
