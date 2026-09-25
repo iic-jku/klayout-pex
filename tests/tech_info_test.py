@@ -94,10 +94,11 @@ class Test(unittest.TestCase):
                     self.assertNotEqual('', lyr.metal_layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
-    def test_shipped_tech_definitions_have_no_conflicting_capacitances(self):
+    def test_shipped_tech_definitions_declare_each_capacitance_once(self):
         # The capacitances are looked up by layer (pair), so one declared twice
         # keeps only the last value: ihp-sg13g2 and ihp-sg13cmos5l declared
         # both the LV and the HV diffusion values for their single Activ layer.
+        # A repeated value is harmless, until one of the two copies gets edited.
         paths = tech_pbjson_paths()
         self.assertNotEqual([], paths, "No generated tech definition to check, "
                                        "run the build first")
@@ -114,11 +115,11 @@ class Test(unittest.TestCase):
                                  for c in cap.sideoverlaps],
             }
             for table, entries in tables.items():
-                values_by_layers = defaultdict(set)
+                values_by_layers = defaultdict(list)
                 for layers, value in entries:
-                    values_by_layers[layers].add(value)
+                    values_by_layers[layers].append(value)
                 with self.subTest(tech=os.path.basename(path), table=table):
-                    self.assertEqual({}, {layers: sorted(values)
+                    self.assertEqual({}, {layers: values
                                           for layers, values in values_by_layers.items()
                                           if len(values) > 1})
 

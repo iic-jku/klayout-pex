@@ -376,7 +376,6 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
     addOverlapCap(ci, "poly",     "pwell",      106.13);
     addOverlapCap(ci, "li1",      "pwell",      36.99);
     addOverlapCap(ci, "li1",      "nwell",      36.99);
-    addOverlapCap(ci, "li1",      "nwell",      36.99);
     addOverlapCap(ci, "li1",      diff_nonfet,  55.3);
     addOverlapCap(ci, "li1",      "poly",       94.16);
     addOverlapCap(ci, "met1",     "pwell",      25.78);
