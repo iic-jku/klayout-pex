@@ -27,8 +27,8 @@
 #
 # NOTE: always (re)builds everything the wheel packages, so the tests never run against outdated files
 #       (checking modification times isn't reliable, e.g. git operations touch sources):
-#       - protobuf modules klayout_pex_protobuf/**/*_pb2.py and gen_tech_pb (./build.sh, incremental)
-#       - PDK tech info klayout_pex_protobuf/*_tech.pb.json (./gen_tech_pb)
+#       - protobuf modules klayout_pex_protobuf/**/*_pb2.py and
+#         PDK tech info klayout_pex_protobuf/*_tech.pb.json (./gen_tech_pb.sh, a few seconds)
 #       - the wheel itself (a few seconds)
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
@@ -36,8 +36,7 @@ cd "$DIR" || exit 1
 
 WHEEL_DIR="$DIR/build/smoke-tests-dist"
 
-./build.sh release || exit 1
-./gen_tech_pb klayout_pex_protobuf || exit 1
+./gen_tech_pb.sh || exit 1
 
 rm -rf "$WHEEL_DIR"
 poetry build --format wheel --output "$WHEEL_DIR" || exit 1

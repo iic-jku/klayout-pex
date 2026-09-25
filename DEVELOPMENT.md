@@ -25,11 +25,9 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 ### Prerequisites
 
-- cmake
-   - NOTE: `cmake/CPM.cmake` will handle C++ dependencies
-- protobuf
 - python3 with pip packages:
-   - poetry (will manage additional dependencies)
+   - poetry (will manage additional dependencies,
+     including `grpcio-tools`, which bundles the protobuf compiler `protoc`)
 
 ### Optional prerequisites
 
@@ -46,7 +44,6 @@ source ~/myvenv/bin/activate
 ```
 
 ```bash
-sudo apt install cmake libprotobuf-dev protobuf-compiler 
 sudo apt install libcurl4-openssl-dev   # required for klayout pip module
 pip3 install poetry
 poetry update
@@ -86,15 +83,20 @@ poetry run pip install --no-deps .
 
 ### Building
 
-Calling `./build.sh release` will: 
-- create Python and C++ Protobuffer APIs for the given schema (present in `protos`)
-- compile the `gen_tech_pb` C++ tool
+Calling `./gen_tech_pb.sh` will:
+- create the Python Protobuffer APIs for the given schema (present in `protos`),
+  i.e. `klayout_pex_protobuf/**/*_pb2.py`, using the `protoc` bundled with `grpcio-tools`
+- generate the KPEX tech info JSON files (see below)
 
 ### Generating KPEX Tech Info JSON files
 
-Calling `./gen_tech_pb klayout_pex_protobuf` will create the JSON tech info files: 
-   - `build/sky130A_tech.pb.json`
-   - `build/ihp_sg13g2_tech.pb.json`
+The tech info of each bundled PDK (layers, process stack, parasitics) is defined in `scripts/gen_tech_pb`.
+Calling `poetry run python scripts/gen_tech_pb klayout_pex_protobuf` (the last step of `./gen_tech_pb.sh`)
+will create the JSON tech info files:
+   - `klayout_pex_protobuf/gf180mcuD_tech.pb.json`
+   - `klayout_pex_protobuf/ihp-sg13cmos5l_tech.pb.json`
+   - `klayout_pex_protobuf/ihp-sg13g2_tech.pb.json`
+   - `klayout_pex_protobuf/sky130A_tech.pb.json`
 
 ### Running KPEX
 
@@ -128,5 +130,4 @@ In your debugging configuration, set:
 
 - [Protocol Buffers](https://github.com/protocolbuffers/protobuf) for (de)serialization of data and shared data
   structures
-- [CMake](https://cmake.org/), for building on multiple platforms
-- [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) for making CMake dependency management easier
+- [grpcio-tools](https://pypi.org/project/grpcio-tools/), for bundling the protobuf compiler `protoc`

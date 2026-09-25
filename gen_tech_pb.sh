@@ -1,10 +1,10 @@
 #! /bin/bash
 ##
 ## --------------------------------------------------------------------------------
-## SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+## SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
-## This file is part of KPEX 
+## This file is part of KPEX
 ## (see https://github.com/iic-jku/klayout-pex).
 ##
 ## This program is free software: you can redistribute it and/or modify
@@ -23,52 +23,26 @@
 ## --------------------------------------------------------------------------------
 ##
 
+# Generates the files KPEX needs besides its sources (both are .gitignore'd, but packaged):
+#   - the protobuf python modules klayout_pex_protobuf/**/*_pb2.py, from protos/**/*.proto,
+#     using the protoc bundled with grpcio-tools (see the build dependency group in pyproject.toml)
+#   - the tech info of the bundled PDKs klayout_pex_protobuf/*_tech.pb.json (see scripts/gen_tech_pb)
+
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
+cd "$DIR" || exit 1
 
-function printUsageAndBail() {
-	echo "Usage: $0 (debug|release)"
+if [[ $# -gt 0 ]]
+then
+	echo "Usage: $0"
 	exit 1
-}
-
-if [[ $# -lt 1 ]]
-then
-	printUsageAndBail
-fi
-
-CMAKE_OPTIONS=""
-
-case $1 in
-	debug)
-		BUILD_TARGET=Debug
-		;;
-	release)
-		BUILD_TARGET=RelWithDbgInfo
-		;;
-	*)
-		echo "Unknown option $1"
-		printUsageAndBail
-		;;
-esac
-
-# hack for IIC compute servers (user-built protobuf)
-if [[ -x $HOME/usr_local/bin/protoc ]]
-then
-	CMAKE_OPTIONS="$CMAKE_OPTIONS -DCMAKE_PREFIX_PATH=$HOME/usr_local"
 fi
 
 set -x
 set -e
 
-BUILD_DIR=build/kpex_$BUILD_TARGET
-mkdir -p $BUILD_DIR
-pushd $BUILD_DIR
+poetry run python -m grpc_tools.protoc \
+	--proto_path=protos \
+	--python_out=klayout_pex_protobuf \
+	$(find protos -name '*.proto')
 
-cmake -G "Unix Makefiles" \
- 	  -DCMAKE_BUILD_TYPE=$BUILD_TARGET \
-	  $CMAKE_OPTIONS \
-	  $DIR
-
-make
-
-popd
-
+poetry run python scripts/gen_tech_pb klayout_pex_protobuf
