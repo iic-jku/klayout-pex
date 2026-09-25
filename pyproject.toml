@@ -104,6 +104,12 @@ pylint = ">= 3.3.1"
 pylint-json2html = ">= 0.5.0"
 licenseheaders = ">= 0.8.8"
 
+[tool.poetry.group.build.dependencies]
+# NOTE: bundles protoc, which generates the protobuf python modules (klayout_pex_protobuf/**/*_pb2.py).
+#       Their gencode version must not be newer than the protobuf runtime (see protobuf above),
+#       grpcio-tools >= 1.82.1 generates code for protobuf 7.
+grpcio-tools = ">= 1.81, < 1.82"
+
 [build-system]
 # NOTE: `poetry build` bypasses build-backend (and uses its bundled poetry-core directly)
 #       if `requires` is only poetry-core, keep a second entry here.
