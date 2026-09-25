@@ -504,34 +504,31 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
         addSubstrateCap(ci, "TopMetal1", 6.727,   34.527);
     }
     
-    const std::string diff_lv_nonfet = "Activ";   // TODO: diff must be non-fet!
-    const std::string diff_hv_nonfet = "Activ";   // TODO: diff must be non-fet!
+    // NOTE: magic distinguishes LV and HV (ThickGateOx) diffusion, which differ by up to 2 %,
+    //       there is only one diffusion layer here, which uses the LV values
+    const std::string diff_nonfet = "Activ";   // TODO: diff must be non-fet!
 
     //                top_layer,    bottom_layer,   cap
     addOverlapCap(ci, "GatPoly",    "NWell",        87.433);
     addOverlapCap(ci, "GatPoly",    "PWell",        87.433);
     addOverlapCap(ci, "Metal1",     "PWell",        35.015);
     addOverlapCap(ci, "Metal1",     "NWell",        35.015);
-    addOverlapCap(ci, "Metal1",     diff_lv_nonfet, 58.168);
-    addOverlapCap(ci, "Metal1",     diff_hv_nonfet, 57.702);
+    addOverlapCap(ci, "Metal1",     diff_nonfet,    58.168);
     addOverlapCap(ci, "Metal1",     "GatPoly",      78.653);
     addOverlapCap(ci, "Metal2",     "PWell",        18.180);
     addOverlapCap(ci, "Metal2",     "NWell",        18.180);
-    addOverlapCap(ci, "Metal2",     diff_lv_nonfet, 22.916);
-    addOverlapCap(ci, "Metal2",     diff_hv_nonfet, 22.844);
+    addOverlapCap(ci, "Metal2",     diff_nonfet,    22.916);
     addOverlapCap(ci, "Metal2",     "GatPoly",      25.537);
     addOverlapCap(ci, "Metal2",     "Metal1",       67.225);
     addOverlapCap(ci, "Metal3",     "NWell",        11.994);
     addOverlapCap(ci, "Metal3",     "PWell",        11.994);
-    addOverlapCap(ci, "Metal3",     diff_lv_nonfet, 13.887);
-    addOverlapCap(ci, "Metal3",     diff_hv_nonfet, 13.860);
+    addOverlapCap(ci, "Metal3",     diff_nonfet,    13.887);
     addOverlapCap(ci, "Metal3",     "GatPoly",      14.808);
     addOverlapCap(ci, "Metal3",     "Metal1",       23.122);
     addOverlapCap(ci, "Metal3",     "Metal2",       67.225);
     addOverlapCap(ci, "Metal4",     "NWell",         8.948);
     addOverlapCap(ci, "Metal4",     "PWell",         8.948);
-    addOverlapCap(ci, "Metal4",     diff_lv_nonfet,  9.962);
-    addOverlapCap(ci, "Metal4",     diff_hv_nonfet,  9.948);
+    addOverlapCap(ci, "Metal4",     diff_nonfet,     9.962);
     addOverlapCap(ci, "Metal4",     "GatPoly",      10.427);
     addOverlapCap(ci, "Metal4",     "Metal1",       13.962);
     addOverlapCap(ci, "Metal4",     "Metal2",       23.122);
@@ -539,8 +536,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     if (is_g2()) {
         addOverlapCap(ci, "Metal5",     "NWell",         7.136);
         addOverlapCap(ci, "Metal5",     "PWell",         7.136);
-        addOverlapCap(ci, "Metal5",     diff_lv_nonfet,  7.766);
-        addOverlapCap(ci, "Metal5",     diff_hv_nonfet,  7.758);
+        addOverlapCap(ci, "Metal5",     diff_nonfet,     7.766);
         addOverlapCap(ci, "Metal5",     "GatPoly",       8.046);
         addOverlapCap(ci, "Metal5",     "Metal1",       10.000);
         addOverlapCap(ci, "Metal5",     "Metal2",       13.962);
@@ -548,8 +544,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
         addOverlapCap(ci, "Metal5",     "Metal4",       67.225);
         addOverlapCap(ci, "TopMetal1",  "NWell",         5.649);
         addOverlapCap(ci, "TopMetal1",  "PWell",         5.649);
-        addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  6.036);
-        addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  6.031);
+        addOverlapCap(ci, "TopMetal1",  diff_nonfet,     6.036);
         addOverlapCap(ci, "TopMetal1",  "GatPoly",       6.204);
         addOverlapCap(ci, "TopMetal1",  "Metal1",        7.304);
         addOverlapCap(ci, "TopMetal1",  "Metal2",        9.214);
@@ -558,8 +553,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
         addOverlapCap(ci, "TopMetal1",  "Metal5",       42.708);
         addOverlapCap(ci, "TopMetal2",  "NWell",         3.233);
         addOverlapCap(ci, "TopMetal2",  "PWell",         3.233);
-        addOverlapCap(ci, "TopMetal2",  diff_lv_nonfet,  3.357);
-        addOverlapCap(ci, "TopMetal2",  diff_hv_nonfet,  3.355);
+        addOverlapCap(ci, "TopMetal2",  diff_nonfet,     3.357);
         addOverlapCap(ci, "TopMetal2",  "GatPoly",       3.408);
         addOverlapCap(ci, "TopMetal2",  "Metal1",        3.716);
         addOverlapCap(ci, "TopMetal2",  "Metal2",        4.154);
@@ -570,8 +564,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     } else { // CMOS5L: overlap situations differ as Metal5 and TopMetal2 are missing!
         addOverlapCap(ci, "TopMetal1",  "NWell",         6.727);
         addOverlapCap(ci, "TopMetal1",  "PWell",         6.727);
-        addOverlapCap(ci, "TopMetal1",  diff_lv_nonfet,  7.284);
-        addOverlapCap(ci, "TopMetal1",  diff_hv_nonfet,  7.276);
+        addOverlapCap(ci, "TopMetal1",  diff_nonfet,     7.284);
         addOverlapCap(ci, "TopMetal1",  "GatPoly",       7.529);
         addOverlapCap(ci, "TopMetal1",  "Metal1",        9.213);
         addOverlapCap(ci, "TopMetal1",  "Metal2",       12.475);
@@ -598,22 +591,19 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     addSidewallOverlapCap(ci, "GatPoly",      "PWell",        44.537);
     addSidewallOverlapCap(ci, "Metal1",       "NWell",        39.585);
     addSidewallOverlapCap(ci, "Metal1",       "PWell",        39.585);
-    addSidewallOverlapCap(ci, "Metal1",       diff_lv_nonfet, 44.749);
-    addSidewallOverlapCap(ci, "Metal1",       diff_hv_nonfet, 45.041);
+    addSidewallOverlapCap(ci, "Metal1",       diff_nonfet,    44.749);
     addSidewallOverlapCap(ci, "Metal1",       "GatPoly",      49.378);
     addSidewallOverlapCap(ci, "GatPoly",      "Metal1",       23.229);
     addSidewallOverlapCap(ci, "Metal2",       "NWell",        34.798);
     addSidewallOverlapCap(ci, "Metal2",       "PWell",        34.798);
-    addSidewallOverlapCap(ci, "Metal2",       diff_lv_nonfet, 36.950);
-    addSidewallOverlapCap(ci, "Metal2",       diff_hv_nonfet, 36.919);
+    addSidewallOverlapCap(ci, "Metal2",       diff_nonfet,    36.950);
     addSidewallOverlapCap(ci, "Metal2",       "GatPoly",      37.616);
     addSidewallOverlapCap(ci, "GatPoly",      "Metal2",       10.801);
     addSidewallOverlapCap(ci, "Metal2",       "Metal1",       49.543);
     addSidewallOverlapCap(ci, "Metal1",       "Metal2",       31.073);
     addSidewallOverlapCap(ci, "Metal3",       "NWell",        31.352);
     addSidewallOverlapCap(ci, "Metal3",       "PWell",        31.352);
-    addSidewallOverlapCap(ci, "Metal3",       diff_lv_nonfet, 32.271);
-    addSidewallOverlapCap(ci, "Metal3",       diff_hv_nonfet, 32.495);
+    addSidewallOverlapCap(ci, "Metal3",       diff_nonfet,    32.271);
     addSidewallOverlapCap(ci, "Metal3",       "GatPoly",      32.795);
     addSidewallOverlapCap(ci, "GatPoly",      "Metal3",       7.068);
     addSidewallOverlapCap(ci, "Metal3",       "Metal1",       37.009);
@@ -622,8 +612,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     addSidewallOverlapCap(ci, "Metal2",       "Metal3",       36.907);
     addSidewallOverlapCap(ci, "Metal4",       "NWell",        29.083);
     addSidewallOverlapCap(ci, "Metal4",       "PWell",        29.083);
-    addSidewallOverlapCap(ci, "Metal4",       diff_lv_nonfet, 29.755);
-    addSidewallOverlapCap(ci, "Metal4",       diff_hv_nonfet, 29.942);
+    addSidewallOverlapCap(ci, "Metal4",       diff_nonfet,    29.755);
     addSidewallOverlapCap(ci, "Metal4",       "GatPoly",      30.101);
     addSidewallOverlapCap(ci, "GatPoly",      "Metal4",        5.240);
     addSidewallOverlapCap(ci, "Metal4",       "Metal1",       32.162);
@@ -635,8 +624,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     if (is_g2()) {
         addSidewallOverlapCap(ci, "Metal5",       "NWell",        27.527);
         addSidewallOverlapCap(ci, "Metal5",       "PWell",        27.527);
-        addSidewallOverlapCap(ci, "Metal5",       diff_lv_nonfet, 28.227);
-        addSidewallOverlapCap(ci, "Metal5",       diff_hv_nonfet, 28.221);
+        addSidewallOverlapCap(ci, "Metal5",       diff_nonfet,    28.227);
         addSidewallOverlapCap(ci, "Metal5",       "GatPoly",      28.414);
         addSidewallOverlapCap(ci, "GatPoly",      "Metal5",        4.178);
         addSidewallOverlapCap(ci, "Metal5",       "Metal1",       29.935);
@@ -649,8 +637,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
         addSidewallOverlapCap(ci, "Metal4",       "Metal5",       41.956);
         addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        37.383);
         addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        37.383);
-        addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 38.084);
-        addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 38.085);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_nonfet,    38.084);
         addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      38.376);
         addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.316);
         addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       39.678);
@@ -666,8 +653,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
         
         addSidewallOverlapCap(ci, "TopMetal2",    "NWell",        31.175);
         addSidewallOverlapCap(ci, "TopMetal2",    "PWell",        31.175);
-        addSidewallOverlapCap(ci, "TopMetal2",    diff_lv_nonfet, 31.484);
-        addSidewallOverlapCap(ci, "TopMetal2",    diff_hv_nonfet, 30.835);
+        addSidewallOverlapCap(ci, "TopMetal2",    diff_nonfet,    31.484);
         addSidewallOverlapCap(ci, "TopMetal2",    "GatPoly",      30.971);
         addSidewallOverlapCap(ci, "GatPoly",      "TopMetal2",     1.909);
         addSidewallOverlapCap(ci, "TopMetal2",    "Metal1",       32.318);
@@ -685,8 +671,7 @@ void TechBuilder::buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *
     } else { // CMOS5L: fringe situations differ as Metal5 and TopMetal2 are missing!
         addSidewallOverlapCap(ci, "TopMetal1",    "NWell",        34.527);
         addSidewallOverlapCap(ci, "TopMetal1",    "PWell",        34.527);
-        addSidewallOverlapCap(ci, "TopMetal1",    diff_lv_nonfet, 35.162);
-        addSidewallOverlapCap(ci, "TopMetal1",    diff_hv_nonfet, 35.228);
+        addSidewallOverlapCap(ci, "TopMetal1",    diff_nonfet,    35.162);
         addSidewallOverlapCap(ci, "TopMetal1",    "GatPoly",      35.513);
         addSidewallOverlapCap(ci, "GatPoly",      "TopMetal1",     3.942);
         addSidewallOverlapCap(ci, "TopMetal1",    "Metal1",       37.397);
