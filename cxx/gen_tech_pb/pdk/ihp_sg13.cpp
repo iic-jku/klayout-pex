@@ -414,10 +414,10 @@ void TechBuilder::buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     setContact(contd,         "cont_psd_con",  "psd_fet",       "metal1_con",    0.4 + 0.64,              0.16,   0.18 /*TODO*/,  0.0);
     setContact(contp,         "cont_poly_con", "poly_con",      "metal1_con",    conp_thickness,          0.16,   0.18 /*TODO*/,  0.0);
     setContact(via1,          "via1_drw",      "metal1_con",    "metal2_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via2,          "via2_drw",      "metal2_con",    "metal3_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
-    setContact(via3,          "via3_drw",      "metal3_con",    "metal4_con",    via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via2,          "via2_drw",      "metal2_con",    "metal3_con",    via2_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+    setContact(via3,          "via3_drw",      "metal3_con",    "metal4_con",    via3_thickness,          0.19,   0.22 /*TODO*/,  0.0);
     if (is_g2()) {
-        setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via1_thickness,          0.19,   0.22 /*TODO*/,  0.0);
+        setContact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via4_thickness,          0.19,   0.22 /*TODO*/,  0.0);
         setContact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,   0.42,           0.005 /* or 0.36*/);
         setContact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,   0.42,           0.005 /* or 0.36*/);
         setContact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,    1.06,           0.5);
