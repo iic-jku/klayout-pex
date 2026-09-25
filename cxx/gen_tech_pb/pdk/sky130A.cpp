@@ -347,7 +347,6 @@ void buildProcessParasiticsInfo(kpex::tech::ProcessParasiticsInfo *ex) {
 
     // resistance values are in mΩ / CNT
     //                   via_layer,  resistance
-    addViaResistance(ri, "poly",        152000); // licon over poly!
     addViaResistance(ri, "mcon",          9300);
     addViaResistance(ri, "via",           4500);
     addViaResistance(ri, "via2",          3410);
