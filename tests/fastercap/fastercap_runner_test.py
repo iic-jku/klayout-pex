@@ -23,6 +23,7 @@
 #
 import allure
 import os
+import tempfile
 import unittest
 
 from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
@@ -47,6 +48,7 @@ class Test(unittest.TestCase):
             obtained_matrix.conductor_names
         )
 
-        output_path = os.path.join(self.fastercap_testdata_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
+        tmp_dir = tempfile.mkdtemp(prefix="fastercap_matrix_")
+        output_path = os.path.join(tmp_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
         obtained_matrix.write_csv(output_path=output_path, separator=';')
         allure.attach.file(output_path, attachment_type=allure.attachment_type.CSV)

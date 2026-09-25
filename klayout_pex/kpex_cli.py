@@ -1116,6 +1116,7 @@ class KpexCLI:
             case InputMode.GDS:
                 lvs_log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_lvs.log")
                 lvsdb_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}.lvsdb.gz")
+                lvs_netlist_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_extracted.cir")
                 lvsdb_cache_path = os.path.join(args.cache_dir_path, args.pdk,
                                                 os.path.splitroot(os.path.abspath(args.gds_path))[-1],
                                                 f"{args.effective_cell_name}.lvsdb.gz")
@@ -1143,6 +1144,7 @@ class KpexCLI:
                                                    schematic_path=args.effective_schematic_path,
                                                    log_path=lvs_log_path,
                                                    lvsdb_path=lvsdb_path,
+                                                   netlist_path=lvs_netlist_path,
                                                    verbose=args.klayout_lvs_verbose)
                     except LVSError as e:
                         error(str(e))

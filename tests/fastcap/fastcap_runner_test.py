@@ -23,6 +23,7 @@
 #
 import allure
 import os
+import tempfile
 import unittest
 
 from klayout_pex.fastcap.fastcap_runner import fastcap_parse_capacitance_matrix
@@ -48,6 +49,7 @@ class Test(unittest.TestCase):
             obtained_matrix.conductor_names
         )
 
-        output_path = os.path.join(self.fastcap_testdata_dir, 'cap_mim_m3_w18p9_l5p1__REDUX122_FastCap_Result_Matrix.csv')
+        tmp_dir = tempfile.mkdtemp(prefix="fastcap_matrix_")
+        output_path = os.path.join(tmp_dir, 'cap_mim_m3_w18p9_l5p1__REDUX122_FastCap_Result_Matrix.csv')
         obtained_matrix.write_csv(output_path=output_path, separator=';')
         allure.attach.file(output_path, attachment_type=allure.attachment_type.CSV)
