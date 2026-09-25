@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
                 self.assertEqual([], TechInfo.duplicate_names(
                     TechInfo.parse_tech_def(path)))
 
-    def test_shipped_tech_definitions_have_no_unnamed_metal_contacts(self):
+    def test_shipped_tech_definitions_have_no_unnamed_contacts(self):
         # An unnamed contact_above still passes HasField(), and hides the via it
         # should describe: ihp-sg13cmos5l declared one over Metal4, so TopVia1
         # was missing from R extraction, PEX25D and FasterCap.
@@ -87,11 +87,13 @@ class Test(unittest.TestCase):
         for path in paths:
             tech = TechInfo.parse_tech_def(path)
             for lyr in tech.process_stack.layers:
-                if lyr.WhichOneof('parameters') != 'metal_layer' \
-                        or not lyr.metal_layer.HasField('contact_above'):
+                parameters = lyr.WhichOneof('parameters')
+                layer = getattr(lyr, parameters) if parameters else None
+                # NOTE: nwell, diffusion and metal layers can carry a contact
+                if not hasattr(layer, 'contact_above') or not layer.HasField('contact_above'):
                     continue
                 with self.subTest(tech=os.path.basename(path), layer=lyr.name):
-                    self.assertNotEqual('', lyr.metal_layer.contact_above.name,
+                    self.assertNotEqual('', layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
     def test_shipped_tech_definitions_declare_each_capacitance_once(self):

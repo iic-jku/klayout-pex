@@ -283,7 +283,8 @@ void buildProcessStackInfo(kpex::tech::ProcessStackInfo *psi) {
     //-----------------------------------------------------------------------------------------------
     addSimpleDielectric(psi, "air",  3.0,          "topnit");
 
-    auto nwellc = nwell->mutable_contact_above(); // licon over nwell / tap // TODO!
+    // NOTE: on its own, mutable_contact_above() declares an unnamed contact, so only together with setContact()
+    // auto nwellc = nwell->mutable_contact_above(); // licon over nwell / tap // TODO!
     auto licon1n = ndiff->mutable_contact_above(); // licon over nsdm
     auto licon1p = pdiff->mutable_contact_above(); // licon over nsdm
     auto licon1poly = poly->mutable_contact_above(); // licon over poly
