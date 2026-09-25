@@ -90,6 +90,14 @@ class KLayoutExtractionContext:
                            top_cell: str,
                            tech: TechInfo,
                            blackbox_devices: bool) -> KLayoutExtractionContext:
+        # NOTE: e.g. the abstract of a device the LVS script removed from the netlist is left as a top cell
+        internal_top_cell = lvsdb.internal_top_cell()
+        extra_top_cells = [c.name for c in lvsdb.internal_layout().top_cells()
+                           if c.cell_index() != internal_top_cell.cell_index()]
+        if extra_top_cells:
+            warning(f"Ignoring the LVS database top cells besides {internal_top_cell.name}: "
+                    f"{', '.join(extra_top_cells)}")
+
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
         annotated_layout.dbu = dbu
