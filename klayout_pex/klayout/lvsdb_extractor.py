@@ -256,7 +256,7 @@ class KLayoutExtractionContext:
 
     def top_cell_bbox(self) -> kdb.Box:
         b1: kdb.Box = self.annotated_layout.top_cell().bbox()
-        b2: kdb.Box = self.lvsdb.internal_layout().top_cell().bbox()
+        b2: kdb.Box = self.lvsdb.internal_top_cell().bbox()
         if b1.area() > b2.area():
             return b1
         else:
