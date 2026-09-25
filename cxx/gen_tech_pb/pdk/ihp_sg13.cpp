@@ -101,6 +101,7 @@ void TechBuilder::buildLayers(kpex::tech::Technology *tech) {
     if (is_g2()) {
         addLayer(tech, VIA,      "Via4",       66,0, -1,-1,  -1,-1, "Defines 4-th metal to 5-th metal contact");
         addLayer(tech, METAL,    "Metal5",     67,0,  67,2,  67,25, "Defines 5-th metal interconnect");
+        addLayer(tech, MIM,      "MIM",        36,0, -1,-1,  -1,-1, "MiM capacitor top plate over Metal5");
     }
 
     addLayer(tech, VIA,      "TopVia1",   125,0, -1,-1,  -1,-1, "Defines 3-rd (or 5-th) metal to TopMetal1 contact");
@@ -172,7 +173,7 @@ void TechBuilder::buildLVSComputedLayers(kpex::tech::Technology *tech) {
     if (is_g2()) {
         addComputedLayer(tech, VIA,   KCAP, "mim_via",       125, 10, "TopVia1", "Original TopVia1 is 125/0, case MiM cap");
         addComputedLayer(tech, MIM,   KCAP, "metal5_cap",    67, 0,  "Metal5", "Computed layer for Metal5, case MiM cap");
-        addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "<TODO>", "Computed layer for MiM cap above Metal5");
+        addComputedLayer(tech, MIM,   KCAP, "cmim_top",      36, 0,  "MIM",    "Computed layer for MiM cap above Metal5");
     }
 
     // NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
