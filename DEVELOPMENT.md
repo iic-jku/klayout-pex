@@ -130,5 +130,4 @@ In your debugging configuration, set:
 
 - [Protocol Buffers](https://github.com/protocolbuffers/protobuf) for (de)serialization of data and shared data
   structures
-- [CMake](https://cmake.org/), for building on multiple platforms
-- [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) for making CMake dependency management easier
+- [grpcio-tools](https://pypi.org/project/grpcio-tools/), for bundling the protobuf compiler `protoc`
