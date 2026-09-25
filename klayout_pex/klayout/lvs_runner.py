@@ -52,13 +52,18 @@ class LVSRunner:
                         schematic_path: str,
                         log_path: str,
                         lvsdb_path: str,
+                        netlist_path: str,
                         verbose: bool):
+        # NOTE: target_netlist must always be passed, otherwise the LVS scripts fall back to
+        #       a path relative to the (in batch mode empty) active cell view,
+        #       i.e. next to the input layout or into the parent of the working directory
         args = [
             exe_path,
             '-b',
             '-r', lvs_script,
             '-rd', f"input={os.path.abspath(gds_path)}",
             '-rd', f"report={os.path.abspath(lvsdb_path)}",
+            '-rd', f"target_netlist={os.path.abspath(netlist_path)}",
             '-rd', f"schematic={os.path.abspath(schematic_path)}",
             '-rd', 'thr=22',
             '-rd', 'run_mode=deep',

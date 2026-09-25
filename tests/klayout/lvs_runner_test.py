@@ -164,6 +164,7 @@ class Test(unittest.TestCase):
         tmp_dir = tempfile.mkdtemp(prefix="lvs_run_")
         log_path = os.path.join(tmp_dir, "out.log")
         lvsdb_path = os.path.join(tmp_dir, "out.lvsdb.gz")
+        netlist_path = os.path.join(tmp_dir, "out_extracted.cir")
 
         # TODO!
         # lvs_script = os.path.join(os.environ['PDKPATH'], 'libs.tech', 'klayout', 'lvs', 'sky130.lvs')
@@ -177,6 +178,7 @@ class Test(unittest.TestCase):
                                schematic_path=schematic_path,
                                log_path=log_path,
                                lvsdb_path=lvsdb_path,
+                               netlist_path=netlist_path,
                                verbose=False)
         print(f"LVS log file: {log_path}")
         print(f"LVSDB file: {lvsdb_path}")
