@@ -56,13 +56,13 @@ failed for every user, while all tests passed
 Like the other `run_*_tests.sh` scripts, this generates the Allure report into `build/allure-report`
 (and opens it on macOS). Before, it rebuilds everything the wheel packages, so it's never outdated:
 
-1. `./build.sh release` (incremental), for the generated protobuf modules (`klayout_pex_protobuf/**/*_pb2.py`)
-2. `./gen_tech_pb klayout_pex_protobuf`, for the PDK tech info (`klayout_pex_protobuf/*_tech.pb.json`)
-3. `poetry build --format wheel`, into `build/smoke-tests-dist/`
-4. `pytest -m smoke`
+1. `./gen_tech_pb.sh`, for the generated protobuf modules (`klayout_pex_protobuf/**/*_pb2.py`)
+   and the PDK tech info (`klayout_pex_protobuf/*_tech.pb.json`)
+2. `poetry build --format wheel`, into `build/smoke-tests-dist/`
+3. `pytest -m smoke`
 
 Requirements:
-- the C++ toolchain (see [DEVELOPMENT.md](../../DEVELOPMENT.md))
+- the poetry environment, including `grpcio-tools` (see [DEVELOPMENT.md](../../DEVELOPMENT.md))
 - KLayout (on the `PATH`, or `KPEX_KLAYOUT_EXE`)
 - network access (to install the wheel's dependencies into the venv)
 

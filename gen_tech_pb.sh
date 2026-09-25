@@ -1,10 +1,10 @@
 #! /bin/bash
 ##
 ## --------------------------------------------------------------------------------
-## SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+## SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 ## Johannes Kepler University, Institute for Integrated Circuits.
 ##
-## This file is part of KPEX 
+## This file is part of KPEX
 ## (see https://github.com/iic-jku/klayout-pex).
 ##
 ## This program is free software: you can redistribute it and/or modify
@@ -23,27 +23,26 @@
 ## --------------------------------------------------------------------------------
 ##
 
-# Runs the smoke tests (tests/smoke) against the *installed* wheel, see tests/smoke/README.md
-#
-# NOTE: always (re)builds everything the wheel packages, so the tests never run against outdated files
-#       (checking modification times isn't reliable, e.g. git operations touch sources):
-#       - protobuf modules klayout_pex_protobuf/**/*_pb2.py and
-#         PDK tech info klayout_pex_protobuf/*_tech.pb.json (./gen_tech_pb.sh, a few seconds)
-#       - the wheel itself (a few seconds)
+# Generates the files KPEX needs besides its sources (both are .gitignore'd, but packaged):
+#   - the protobuf python modules klayout_pex_protobuf/**/*_pb2.py, from protos/**/*.proto,
+#     using the protoc bundled with grpcio-tools (see the build dependency group in pyproject.toml)
+#   - the tech info of the bundled PDKs klayout_pex_protobuf/*_tech.pb.json (see scripts/gen_tech_pb)
 
 DIR=$(dirname -- $(realpath ${BASH_SOURCE}))
 cd "$DIR" || exit 1
 
-WHEEL_DIR="$DIR/build/smoke-tests-dist"
+if [[ $# -gt 0 ]]
+then
+	echo "Usage: $0"
+	exit 1
+fi
 
-./gen_tech_pb.sh || exit 1
+set -x
+set -e
 
-rm -rf "$WHEEL_DIR"
-poetry build --format wheel --output "$WHEEL_DIR" || exit 1
+poetry run python -m grpc_tools.protoc \
+	--proto_path=protos \
+	--python_out=klayout_pex_protobuf \
+	$(find protos -name '*.proto')
 
-KPEX_SMOKE_TEST_WHEEL=$(ls "$WHEEL_DIR"/klayout_pex-*.whl)
-export KPEX_SMOKE_TEST_WHEEL
-
-source "$DIR"/_run_tests.sh
-
-run_tests "smoke" --no-coverage
+poetry run python scripts/gen_tech_pb klayout_pex_protobuf
