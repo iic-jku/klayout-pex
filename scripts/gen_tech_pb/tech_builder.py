@@ -26,7 +26,6 @@ Helpers to fill a kpex.tech.Technology message, one table row per call (see the 
 """
 from __future__ import annotations
 
-import struct
 from typing import Optional, Tuple
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
@@ -69,17 +68,6 @@ KLBL = ComputedLayerInfo.KIND_LABEL
 def _gds_pair(gds: GDSPair) -> tech_pb2.GDSPair:
     layer, datatype = gds
     return tech_pb2.GDSPair(layer=layer, datatype=datatype)
-
-
-def _float32(value: float) -> float:
-    """
-    Round to the nearest float32, e.g. 106.13 to 106.12999725341797.
-
-    NOTE: The C++ generator (gen_tech_pb) took the capacitance coefficients as float parameters,
-          before storing them in double fields. This reproduces its output exactly;
-          TODO: drop it (in a change of its own, as it changes each coefficient by up to 6e-8 relative).
-    """
-    return struct.unpack('f', struct.pack('f', value))[0]
 
 #-------------------------------------------------------------------------
 
@@ -247,8 +235,8 @@ def add_substrate_cap(ci: CapacitanceInfo,
                       area_cap: float,
                       perimeter_cap: float):
     ci.substrates.add(layer_name=layer_name,
-                      area_capacitance=_float32(area_cap),
-                      perimeter_capacitance=_float32(perimeter_cap))
+                      area_capacitance=area_cap,
+                      perimeter_capacitance=perimeter_cap)
 
 
 def add_overlap_cap(ci: CapacitanceInfo,
@@ -257,7 +245,7 @@ def add_overlap_cap(ci: CapacitanceInfo,
                     cap: float):
     ci.overlaps.add(top_layer_name=top_layer,
                     bottom_layer_name=bottom_layer,
-                    capacitance=_float32(cap))
+                    capacitance=cap)
 
 
 def add_sidewall_cap(ci: CapacitanceInfo,
@@ -265,8 +253,8 @@ def add_sidewall_cap(ci: CapacitanceInfo,
                      cap: float,
                      offset: float):
     ci.sidewalls.add(layer_name=layer_name,
-                     capacitance=_float32(cap),
-                     offset=_float32(offset))
+                     capacitance=cap,
+                     offset=offset)
 
 
 def add_sidewall_overlap_cap(ci: CapacitanceInfo,
@@ -275,4 +263,4 @@ def add_sidewall_overlap_cap(ci: CapacitanceInfo,
                              cap: float):
     ci.sideoverlaps.add(in_layer_name=in_layer,
                         out_layer_name=out_layer,
-                        capacitance=_float32(cap))
+                        capacitance=cap)
