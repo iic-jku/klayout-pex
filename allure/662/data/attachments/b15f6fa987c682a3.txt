@@ -1,0 +1,45 @@
+[19:47:21] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1192
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --gds                                                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/sideoverlap_fingered_li1_m1_patternA.gds.gz --out_dir                          
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:47:21] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:572
+[19:47:21] INFO     No explicit top cell specified, using top    kpex_cli.py:612
+                    cell 'sideoverlap_fingered_li1_m1_patternA'                 
+[19:47:21] INFO     LVS input schematic not specified (argument  kpex_cli.py:653
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[19:47:21] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1133
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/sid
+eoverlap_fingered_li1_m1_patternA.gds.gz/sideoverlap_fingered_li1_m1_patternA.lv
+sdb.gz                                                                          
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:47:21] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1356
+[19:47:21] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1356
+[19:47:21] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1356
+[19:47:21] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1356
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LOWER;UPPER;0.358;                                                           
+C2;LOWER;VSUBS;5.9;                                                             
+C3;UPPER;VSUBS;72.327;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_fingered_li
+1_m1_patternA__sideoverlap_fingered_li1_m1_patternA/sideoverlap_fingered_li1_m1_
+patternA_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_fingered_li
+1_m1_patternA__sideoverlap_fingered_li1_m1_patternA/sideoverlap_fingered_li1_m1_
+patternA_k25d_pex_netlist.spice                                                 

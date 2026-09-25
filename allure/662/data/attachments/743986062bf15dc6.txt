@@ -1,0 +1,19 @@
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r sg13cmos5l.lvs -rd                                                
+input=/home/runner/work/klayout-pex/klayout-pex/cell.gds -rd                    
+report=/tmp/lvs_run_xg8l1mdp/cell.lvsdb.gz -rd                                  
+schematic=/home/runner/work/klayout-pex/klayout-pex/cell.spice -rd thr=22 -rd   
+run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false 
+-rd verbose=false -rd schematic_simplify=false -rd net_only=false -rd           
+top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false   
+-rd purge_nets=false -rd no_simplify=true                                       
+/tmp/lvs_run_xg8l1mdp/cell_lvs.log                                              
+ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file:                             
+/pdk/rule_decks//sram_integration.lvs (errno=2) in                              
+MacroInterpreter::include_expansion                                             
+ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs 
+(errno=2) in MacroInterpreter::include_expansion in Executable::execute         
+  :/built-in-macros/lvs_interpreters.lym:27:in                                  
+'RBA::MacroInterpreter#include_expansion'                                       
+  :/built-in-macros/lvs_interpreters.lym:27:in 'LVS::LVSExecutable#execute'     
+────────────────────────────────────────────────────────────────────────────────
