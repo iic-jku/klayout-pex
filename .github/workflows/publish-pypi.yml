@@ -28,7 +28,7 @@ on:
   
 # NOTE: concurrency settings must be defined in calling workflow!
 #       otherwise unexpected cancellations will happen
-#   example error: "Canceling since a higher priority waiting request for 'martinjankoehler/klayout-pex-release-v0.1.4-Multi-platform Python/C++ build/test' exists"
+#   example error: "Canceling since a higher priority waiting request for 'martinjankoehler/klayout-pex-release-v0.1.4-Multi-platform Python build/test' exists"
 
 jobs:
   publish-test-pypi:
@@ -40,7 +40,7 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
-      # NOTE: For now, we don't have any native C++ code deployed as part of the python distribution,
+      # NOTE: KPEX is pure python, there is no native code deployed as part of the python distribution,
       #       so all platforms create the same wheels/source archives.
       #       Therefore it's sufficient to use the ubuntu download artifact:
       #           python-dist-ubuntu-latest_py3.13
@@ -73,7 +73,7 @@ jobs:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
 
     steps:
-      # NOTE: For now, we don't have any native C++ code deployed as part of the python distribution,
+      # NOTE: KPEX is pure python, there is no native code deployed as part of the python distribution,
       #       so all platforms create the same wheels/source archives.
       #       Therefore it's sufficient to use the ubuntu download artifact:
       #           python-dist-ubuntu-latest_py3.13
