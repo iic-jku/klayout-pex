@@ -57,6 +57,13 @@ LayerIndexMap = Dict[int, int]  # maps layer indexes of LVSDB to annotated_layou
 LVSDBRegions = Dict[int, kdb.Region]  # maps layer index of annotated_layout to LVSDB region
 
 
+class LVSDBError(Exception):
+    """
+    The LVS database lacks what the extraction depends on.
+    """
+    pass
+
+
 @dataclass
 class KLayoutExtractedLayerInfo:
     index: int
@@ -90,6 +97,14 @@ class KLayoutExtractionContext:
                            top_cell: str,
                            tech: TechInfo,
                            blackbox_devices: bool) -> KLayoutExtractionContext:
+        # NOTE: e.g. the abstract of a device the LVS script removed from the netlist is left as a top cell
+        internal_top_cell = lvsdb.internal_top_cell()
+        extra_top_cells = [c.name for c in lvsdb.internal_layout().top_cells()
+                           if c.cell_index() != internal_top_cell.cell_index()]
+        if extra_top_cells:
+            warning(f"Ignoring the LVS database top cells besides {internal_top_cell.name}: "
+                    f"{', '.join(extra_top_cells)}")
+
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
         annotated_layout.dbu = dbu
@@ -256,7 +271,7 @@ class KLayoutExtractionContext:
 
     def top_cell_bbox(self) -> kdb.Box:
         b1: kdb.Box = self.annotated_layout.top_cell().bbox()
-        b2: kdb.Box = self.lvsdb.internal_layout().top_cell().bbox()
+        b2: kdb.Box = self.lvsdb.internal_top_cell().bbox()
         if b1.area() > b2.area():
             return b1
         else:
@@ -352,6 +367,17 @@ class KLayoutExtractionContext:
 
     @cached_property
     def devices_by_name(self) -> Dict[str, device_pb2.Device]:
+        # NOTE: a device the LVS script created, rather than extracted, has no abstract,
+        #       so no terminal geometry to connect it to the resistor network
+        #       (e.g. a model mapping that replaces extracted devices with ones of another class)
+        created_devices = [f"{d.expanded_name()} ({d.device_class().name})"
+                           for d in self.top_circuit.each_device() if d.device_abstract is None]
+        if created_devices:
+            raise LVSDBError(f"The LVS database has devices without layout geometry, "
+                             f"which the resistance extraction depends on: {', '.join(created_devices)}. "
+                             f"They were created by the LVS script rather than extracted from the layout, "
+                             f"e.g. to replace extracted devices with another device class")
+
         dd = {}
 
         shapes_converter = ShapesConverter(dbu=self.dbu)

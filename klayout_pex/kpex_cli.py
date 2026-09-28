@@ -54,7 +54,7 @@ from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .fastcap.output_interpreter import FastCapOutputInterpreter
 from .klayout.lvs_runner import LVSError, LVSRunner
-from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo
+from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_printer import NetlistPrinter
@@ -1245,7 +1245,11 @@ class KpexCLI:
                 case 'pex25d':
                     self.run_pex25d_generation(args=args, tech_info=tech_info)
                 case _:
-                    self.run_extraction(args=args, tech_info=tech_info)
+                    try:
+                        self.run_extraction(args=args, tech_info=tech_info)
+                    except LVSDBError as e:
+                        error(str(e))
+                        sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
     def run_pex25d_generation(self,
                               args: argparse.Namespace,
