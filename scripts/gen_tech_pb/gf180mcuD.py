@@ -59,12 +59,12 @@ def build_layers(tech: Technology):
 def build_lvs_computed_layers(tech: Technology):
     #                        purpose  kind  lvs_name       lvs_gds_pair orig. layer  description
     add_computed_layer(tech, DNWELL,  KREG, "dnwell",      (12, 0),     "DNWELL",    "Deep NWell")
-    add_computed_layer(tech, NWELL,   KREG, "Nwell",       (21, 0),     "Nwell",     "NWell")
+    add_computed_layer(tech, NWELL,   KREG, "nwell_con",   (21, 0),     "Nwell",     "NWell")
     add_computed_layer(tech, NIMP,    KREG, "nsd",         (32, 44),    "Nplus",     "borrow from nsdm")
     add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 20),    "Pplus",     "borrow from psdm")
-    add_computed_layer(tech, NTAP,    KREG, "ntap_conn",   (65, 144),   "tap",       "Separate ntap, original tap is 65,44, we need seperate ntap/ptap")
-    add_computed_layer(tech, PTAP,    KREG, "ptap_conn",   (65, 244),   "tap",       "Separate ptap, original tap is 65,44, we need seperate ntap/ptap")
-    add_computed_layer(tech, METAL,   KREG, "poly_con",    (30, 0),     "Poly2",     "Computed layer for poly")
+    add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "N+ tap (COMP within nwell)")
+    add_computed_layer(tech, PTAP,    KREG, "ptap",        (22, 244),   "COMP",      "P+ tap (COMP outside nwell)")
+    add_computed_layer(tech, METAL,   KREG, "poly2_con",   (30, 0),     "Poly2",     "Computed layer for poly")
     add_computed_layer(tech, METAL,   KREG, "metal1_con",  (34, 0),     "Metal1",    "Computed layer for met1")
     add_computed_layer(tech, METAL,   KREG, "metal2_con",  (36, 0),     "Metal2",    "Computed layer for met2")
     add_computed_layer(tech, METAL,   KREG, "metal3_con",  (42, 0),     "Metal3",    "Computed layer for met3 (no cap)")
@@ -104,13 +104,13 @@ def build_lvs_computed_layers(tech: Technology):
     # add_computed_layer(tech, VIA,   KCAP, "via3_vpp",    (70, 44),    "via3",      "Capacitor device contact (MOM cap)")
     # add_computed_layer(tech, VIA,   KCAP, "via4_vpp",    (71, 44),    "via4",      "Capacitor device contact (MOM cap)")
 
-    add_computed_layer(tech, METAL,   KLBL, "comp_label",   (30, 10),   "COMP_label",   "LABEL drawn at diffusion layer")
-    add_computed_layer(tech, METAL,   KLBL, "Poly2_Label",  (30, 10),   "Poly2_label",  "LABEL drawn at poly2 layer")
-    add_computed_layer(tech, METAL,   KLBL, "metal1_Label", (34, 10),   "Metal1_label", "LABEL drawn at Metal1 layer")
-    add_computed_layer(tech, METAL,   KLBL, "metal2_Label", (36, 10),   "Metal2_label", "LABEL drawn at Metal2 layer")
-    add_computed_layer(tech, METAL,   KLBL, "metal3_Label", (42, 10),   "Metal3_label", "LABEL drawn at Metal3 layer")
-    add_computed_layer(tech, METAL,   KLBL, "metal4_Label", (46, 10),   "Metal4_label", "LABEL drawn at Metal4 layer")
-    add_computed_layer(tech, METAL,   KLBL, "metal5_Label", (81, 10),   "Metal5_label", "LABEL drawn at Metal5 layer")
+    add_computed_layer(tech, METAL,   KLBL, "comp_label",   (22, 10),   "COMP_label",   "LABEL drawn at diffusion layer")
+    add_computed_layer(tech, METAL,   KLBL, "poly2_label",  (30, 10),   "Poly2_label",  "LABEL drawn at poly2 layer")
+    add_computed_layer(tech, METAL,   KLBL, "metal1_label", (34, 10),   "Metal1_label", "LABEL drawn at Metal1 layer")
+    add_computed_layer(tech, METAL,   KLBL, "metal2_label", (36, 10),   "Metal2_label", "LABEL drawn at Metal2 layer")
+    add_computed_layer(tech, METAL,   KLBL, "metal3_label", (42, 10),   "Metal3_label", "LABEL drawn at Metal3 layer")
+    add_computed_layer(tech, METAL,   KLBL, "metal4_label", (46, 10),   "Metal4_label", "LABEL drawn at Metal4 layer")
+    add_computed_layer(tech, METAL,   KLBL, "metal5_label", (81, 10),   "Metal5_label", "LABEL drawn at Metal5 layer")
 
 
 def build_process_stack_info(psi: ProcessStackInfo):
