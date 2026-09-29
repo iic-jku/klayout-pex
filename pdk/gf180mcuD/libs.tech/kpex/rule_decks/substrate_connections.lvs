@@ -16,13 +16,14 @@
 # limitations under the License.
 ################################################################################################
 
-#================================
-# ----- MOSFET CONNECTIONS ------
-#================================
-logger.info('Starting LVS MOSFET CONNECTIONS')
+(sub_iso, sub_regular) = sub.andnot(isosub)
+connect(sub, sub_iso)
+connect(sub, sub_regular)
+connect(sub_iso, isosub)
+connect_global(sub_regular, 'SUB')
 
-connect(nd_ldmos, contact)
-connect(ns_ldmos, contact)
-
-connect(pd_ldmos, contact)
-connect(ps_ldmos, contact)
+(ptap_iso, ptap_regular) = ptap.andnot(isosub)
+connect(ptap, ptap_iso)
+connect(ptap, ptap_regular)
+connect(ptap_iso, isosub)
+connect_global(ptap_regular, 'SUB')

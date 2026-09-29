@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -17,7 +19,6 @@
 #==================================
 # ------ GENERAL DERIVATIONS ------
 #==================================
-
 ncomp           = comp.and(nplus)
 pcomp           = comp.and(pplus)
 tgate           = poly2.and(comp).not(res_mk)
@@ -118,7 +119,7 @@ when '6LM'
   top_metal_con = metaltop_con.not(fusetop)
   top_via_n_cap = via5.not(fusetop)
   top_via_cap = via5.and(fusetop)
-  top_metal_cap = metaltop.and(fusetop)
+  top_metal_cap = metaltop_con.and(fusetop)
 else
   logger.error("Unknown metal stack #{METAL_LEVEL}")
   raise

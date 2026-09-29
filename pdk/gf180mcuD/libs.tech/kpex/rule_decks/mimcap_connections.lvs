@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -24,13 +26,14 @@ case MIM_OPTION
 when 'A'
 
   # mim option A
-  connect(metal2, mim_virtual)
+  connect(metal2_con, mim_virtual)
   connect(fuse_cap, via2_cap)
+  connect(via2_cap, metal3_con)
 
 when 'B'
 
   # mim_option B
-  connect(topmin1_metal, mimtm_virtual)
+  connect(topmin1_metal, mim_virtual)
   connect(fuse_cap, top_via_cap)
   connect(top_via_cap, top_metal_cap)
 

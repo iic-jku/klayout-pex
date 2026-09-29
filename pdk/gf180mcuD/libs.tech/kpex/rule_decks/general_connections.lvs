@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -21,7 +23,6 @@
 logger.info('Starting GF180 LVS connectivity setup (Inter-layer)')
 
 # Inter-layer
-connect(sub, ptap)
 connect(lvpwell_con, ptap)
 connect(lvpwell_con, ptap_dw)
 connect(dnwell, ntap_dw)
@@ -80,21 +81,15 @@ else
   logger.error("Unknown metal stack #{METAL_LEVEL}")
   raise
 end
-connect(top_via, top_metal_con)
-connect(top_metal, top_metal_label)
+connect(top_via_n_cap, top_metal_con)
+connect(top_metal_con, top_metal_label)
 
 # Attaching labels
-connect(comp, comp_label)
 connect(poly2_con, poly2_label)
 connect(metal1_con, metal1_label)
 connect(metal2_con, metal2_label)
 
 logger.info('Starting GF180 LVS connectivity setup (Global)')
 
-# Global
-connect_global(sub, substrate_name)
-
-logger.info('Starting GF180 LVS connectivity setup (Multifinger Devices)')
-
-# Multifinger Devices
-connect_implicit('*')
+# Sub connections are made after device extraction, as it requires the sub output
+# terminal information
