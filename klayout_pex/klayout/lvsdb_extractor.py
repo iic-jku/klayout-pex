@@ -382,6 +382,9 @@ class KLayoutExtractionContext:
 
         shapes_converter = ShapesConverter(dbu=self.dbu)
 
+        # (device class, terminal, LVS layer) -> device names
+        devices_by_unknown_terminal_layer: Dict[Tuple[str, str, str], List[str]] = defaultdict(list)
+
         for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html
             d_kly: kdb.Device
@@ -429,8 +432,8 @@ class KLayoutExtractionContext:
                     for idx, shapes in shapes_by_lyr_idx.items():
                         lyr_idx = self.layer_index_map.get(idx, None)
                         if lyr_idx is None:
-                            warning(f"Could not find a layer for device {d.device_name}, class {d.device_class_name}, "
-                                    f"terminal {td.name}, net {n.name}")
+                            key = (d.device_class_name, td.name, self.lvsdb.layer_name(idx))
+                            devices_by_unknown_terminal_layer[key].append(d.device_name)
                             continue
 
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
@@ -442,6 +445,20 @@ class KLayoutExtractionContext:
                         shapes_converter.klayout_region_to_pb(shapes, region_by_layer.region)
 
             dd[d.device_name] = d
+
+        # NOTE: once devices are connected to the resistance network (#211, item 6),
+        #       a terminal without a node must be an error (or get a fallback node)
+        if devices_by_unknown_terminal_layer:
+            def device_list(device_names: List[str]) -> str:
+                listed = ', '.join(device_names[:3])
+                return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
+
+            warning("The resistance network has no nodes for these device terminals, "
+                    "as the tech info has no layer for their LVS layer:\n" +
+                    '\n'.join(f"  - {device_class} terminal {terminal} on LVS layer {lvs_layer}: "
+                              f"{device_list(device_names)}"
+                              for (device_class, terminal, lvs_layer), device_names
+                              in sorted(devices_by_unknown_terminal_layer.items())))
 
         return dd
 

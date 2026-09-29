@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import os
 import tempfile
+from unittest import mock
 
 import allure
 import klayout.db as kdb
@@ -76,3 +77,29 @@ def test_rf_mos_keeps_its_layout_geometry():
     assert [(d.device_class_name, d.device_abstract_name) for d in devices] == [('rfnmos', 'D$rfnmos')]
     assert {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer] for t in devices[0].terminals} \
            == {'S': ['nSD'], 'G': ['GatPoly'], 'D': ['nSD'], 'B': ['PWell']}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_device_terminals_without_tech_layer_are_reported_once():
+    # The terminals of the MOM capacitor are on an LVS layer the tech info has no layer for (#217)
+    cell_name = 'cmomi_w5u_l5u_m1_m5'
+    gds_path = os.path.join(TEST_DESIGNS_DIR, cell_name, f"{cell_name}.gds.gz")
+
+    with tempfile.TemporaryDirectory() as out_dir, \
+         mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        KpexCLI().main(['main',
+                        '--pdk', PDK.IHP_SG13G2,
+                        '--mode', 'R',
+                        '--gds', gds_path,
+                        '--out_dir', out_dir,
+                        '--2.5D'])
+
+    messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
+    assert messages == [
+        "The resistance network has no nodes for these device terminals, "
+        "as the tech info has no layer for their LVS layer:\n"
+        "  - cap_cmomi terminal mim_btm on LVS layer cap_cmomi_m5_ports: $1\n"
+        "  - cap_cmomi terminal mim_top on LVS layer cap_cmomi_m5_ports: $1"
+    ]
