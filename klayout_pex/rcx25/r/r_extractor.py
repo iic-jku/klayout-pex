@@ -99,8 +99,9 @@ class RExtractor:
 
         # NOTE: a layer that can't be modeled is not part of the resistance network,
         #       e.g. a via that joins nothing, which splits the networks of its nets.
-        #       This is never intended, so it's an error rather than a warning (#217)
-        unmodeled_layers: List[str] = []
+        #       This is never intended, so it's an error rather than a warning (#217).
+        #       It includes the LVS layers the tech info has no layer for (e.g. a via with another name)
+        unmodeled_layers: List[str] = list(self.pex_context.unmodeled_layers)
 
         for gds_pair, li in self.pex_context.extracted_layers.items():
             for source_layer in li.source_layers:
