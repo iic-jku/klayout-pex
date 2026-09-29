@@ -60,8 +60,8 @@ def build_lvs_computed_layers(tech: Technology):
     #                        purpose  kind  lvs_name       lvs_gds_pair orig. layer  description
     add_computed_layer(tech, DNWELL,  KREG, "dnwell",      (12, 0),     "DNWELL",    "Deep NWell")
     add_computed_layer(tech, NWELL,   KREG, "nwell_con",   (21, 0),     "Nwell",     "NWell")
-    add_computed_layer(tech, NIMP,    KREG, "nsd",         (32, 44),    "Nplus",     "borrow from nsdm")
-    add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 20),    "Pplus",     "borrow from psdm")
+    add_computed_layer(tech, NIMP,    KREG, "nsd",         (32, 0),     "Nplus",     "N+ source/drain")
+    add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 0),     "Pplus",     "P+ source/drain")
     add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "N+ tap (COMP within nwell)")
     add_computed_layer(tech, PTAP,    KREG, "ptap",        (22, 244),   "COMP",      "P+ tap (COMP outside nwell)")
     add_computed_layer(tech, METAL,   KREG, "poly2_con",   (30, 0),     "Poly2",     "Computed layer for poly")
@@ -70,11 +70,11 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, METAL,   KREG, "metal3_con",  (42, 0),     "Metal3",    "Computed layer for met3 (no cap)")
     add_computed_layer(tech, METAL,   KREG, "metal4_con",  (46, 0),     "Metal4",    "Computed layer for met4 (no cap)")
     add_computed_layer(tech, METAL,   KREG, "metal5_con",  (81, 0),     "Metal5",    "Computed layer for met5")
-    add_computed_layer(tech, CONT,    KREG, "m1_nsd_con",  (66, 4401),  "Contact",   "Computed layer for contact from nsdm to Metal1")
-    add_computed_layer(tech, CONT,    KREG, "m1_psd_con",  (66, 4402),  "Contact",   "Computed layer for contact from psdm to Metal1")
-    add_computed_layer(tech, CONT,    KREG, "m1_poly_con", (66, 4403),  "Contact",   "Computed layer for contact from poly to Metal1")
-    # add_computed_layer(tech, VIA,   KREG, "via1_con",    (35, 44),    "Via1",      "Computed layer for contact between met1 and met2")
-    # add_computed_layer(tech, VIA,   KREG, "via2_con",    (38, 44),    "Via2",      "Computed layer for contact between met2 and met3")
+    add_computed_layer(tech, CONT,    KREG, "contact_nsd_con",  (33, 4401),  "Contact", "Computed layer for contact from nsd to Metal1")
+    add_computed_layer(tech, CONT,    KREG, "contact_psd_con",  (33, 4402),  "Contact", "Computed layer for contact from psd to Metal1")
+    add_computed_layer(tech, CONT,    KREG, "contact_poly_con", (33, 4403),  "Contact", "Computed layer for contact from poly to Metal1")
+    add_computed_layer(tech, VIA,     KREG, "via1",        (35, 0),     "Via1",      "Computed layer for via1")
+    add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via4_n_cap",  (41, 144),   "Via4",      "Computed layer for via4 (no MIM cap)")
 
@@ -180,7 +180,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
 
     # METAL:                        name,     z,      thickness
     #-----------------------------------------------------------------------------------------------
-    add_metal_layer(psi,            "Metal5", 6.13,   1.1925)
+    met5 = add_metal_layer(psi,     "Metal5", 6.13,   1.1925)
 
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
@@ -202,18 +202,19 @@ def build_process_stack_info(psi: ProcessStackInfo):
     via3 = met3.contact_above
     via4 = met4.contact_above
 
-    # TODO! via sizes and thicknesses!!!
+    # NOTE: contacts to diffusion start at z = 0, all others at the top of the layer below
+    #       width, spacing and border (metal enclosure) are the DRC rules CO.1, CO.2a, CO.6 and Vx.1, Vx.2a, Vx.3b/4a
 
-    # CONTACT:  contact,  name,         layer_below, metal_above, thickness,               width, spacing, border
-    #                     (LVS)         (LVS)        (LVS)
-    #-------------------------------------------------------------------------------------------------------------
-    set_contact(m1np,     "M1-Nplus",   "Nplus",     "Metal1",    0.9361,                  0.22,  0.17,    0.0)
-    set_contact(m1pp,     "M1-Pplus",   "Pplus",     "Metal1",    0.9361,                  0.22,  0.17,    0.0)
-    set_contact(m1po,     "M1-Poly",    "Poly2",     "Metal1",    0.4299,                  0.22,  0.17,    0.0)
-    set_contact(via1,     "Via1_con",   "Metal1",    "Metal2",    1.3761 - (0.9361 + 0.1), 0.26,  0.19,    0.0)
-    set_contact(via2,     "Via2_con",   "Metal2",    "Metal3",    0.27,                    0.26,  0.17,    0.055)
-    set_contact(via3,     "Via3_con",   "Metal3",    "Metal4",    0.42,                    0.26,  0.20,    0.04)
-    set_contact(via4,     "Via4_ncap",  "Metal4",    "Metal5",    0.505,                   0.26,  0.80,    0.19)
+    # CONTACT:  contact,  name,               layer_below, metal_above, thickness,                            width, spacing, border
+    #                     (LVS)
+    #--------------------------------------------------------------------------------------------------------------------------------
+    set_contact(m1np,     "contact_nsd_con",  "Nplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
+    set_contact(m1pp,     "contact_psd_con",  "Pplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
+    set_contact(m1po,     "contact_poly_con", "Poly2",     "Metal1",    met1.z - (poly.z + poly.thickness),   0.22,  0.25,    0.005)
+    set_contact(via1,     "via1",             "Metal1",    "Metal2",    met2.z - (met1.z + met1.thickness),   0.26,  0.26,    0.01)
+    set_contact(via2,     "via2_n_cap",       "Metal2",    "Metal3",    met3.z - (met2.z + met2.thickness),   0.26,  0.26,    0.01)
+    set_contact(via3,     "via3_n_cap",       "Metal3",    "Metal4",    met4.z - (met3.z + met3.thickness),   0.26,  0.26,    0.01)
+    set_contact(via4,     "via4_n_cap",       "Metal4",    "Metal5",    met5.z - (met4.z + met4.thickness),   0.26,  0.26,    0.01)
 
 
 def build_process_parasitics_info(ex: ProcessParasiticsInfo):
@@ -237,14 +238,13 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT
     #                         contact_layer,  layer_below,  layer_above, resistance
-    add_contact_resistance(ri, "M1-Nplus",     "Nplus",      "Metal1",    6300)
-    add_contact_resistance(ri, "M1-Pplus",     "Pplus",      "Metal1",    5200)
-    add_contact_resistance(ri, "M1-Poly",      "Poly2",      "Metal1",    5900)
+    add_contact_resistance(ri, "contact_nsd_con",  "Nplus",  "Metal1",    6300)
+    add_contact_resistance(ri, "contact_psd_con",  "Pplus",  "Metal1",    5200)
+    add_contact_resistance(ri, "contact_poly_con", "Poly2",  "Metal1",    5900)
 
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT
     #                     via_layer,  resistance
-    add_via_resistance(ri, "M1-Poly",       5900)
     add_via_resistance(ri, "Via1",          4500)
     add_via_resistance(ri, "Via2",          4500)
     add_via_resistance(ri, "Via3",          4500)

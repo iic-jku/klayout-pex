@@ -366,8 +366,19 @@ logger.info('Starting base layers derivations')
 #       in connect, soft_connect, connect_global, soft_connect_global
 #       and extract_devices statements.
 
+# [PEX] Explicitly splitting the contacts for device terminals
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+contact_nsd_con  = contact.and(nsd)
+contact_psd_con  = contact.and(psd)
+contact_poly_con = contact.and(poly2_con)
+
 # %include rule_decks/auto_name_layers.rb
 auto_name_layers!(binding)
+
+# [PEX] Explicitly splitting the contacts for device terminals
+connect(contact_nsd_con,  contact)
+connect(contact_psd_con,  contact)
+connect(contact_poly_con, contact)
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
