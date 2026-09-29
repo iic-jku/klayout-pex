@@ -177,3 +177,50 @@ class CellExtractionResultsTest(unittest.TestCase):
         obtained_cap_value = summary.capacitances[NetCoupleKey('net1', 'net3').normed()]
         expected_cap_value = c2.cap_value
         self.assertEqual(expected_cap_value, obtained_cap_value)
+
+    def test_summarize_resistances_between_the_same_nodes_are_in_parallel(self):
+        # a wire with pin A at both ends, and pin B at a stub in the middle:
+        # both pins A are one node in the netlist, so each half of the wire is in parallel to the other
+        results = CellExtractionResults(cell_name='Cell')
+        network = results.r_extraction_result.networks.add()
+        network.net_name = 'A,B'
+        for node_id, kind, node_name in ((1, r_network_pb2.RNode.Kind.KIND_PIN, 'A'),
+                                         (2, r_network_pb2.RNode.Kind.KIND_PIN, 'A'),
+                                         (3, r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION, '$1.16'),
+                                         (4, r_network_pb2.RNode.Kind.KIND_PIN, 'B')):
+            node = network.nodes.add(node_id=node_id, node_kind=kind, node_name=node_name)
+            if kind == r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION:
+                node.net_name = f"{network.net_name}.{node_name}"
+        for node_a, node_b, resistance in ((1, 3, 426.667), (2, 3, 413.867), (3, 4, 72.533)):
+            element = network.elements.add(resistance=resistance)
+            element.node_a.node_id = node_a
+            element.node_b.node_id = node_b
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('A', 'A,B.$1.16'), NetCoupleKey('A,B.$1.16', 'B')},
+                         set(summary.resistances.keys()))
+        self.assertAlmostEqual(426.667 * 413.867 / (426.667 + 413.867),
+                               summary.resistances[NetCoupleKey('A', 'A,B.$1.16')])
+        self.assertAlmostEqual(72.533, summary.resistances[NetCoupleKey('A,B.$1.16', 'B')])
+
+
+@allure.parent_suite("Unit Tests")
+class ExtractionSummaryTest(unittest.TestCase):
+    def test_parallel_resistance(self):
+        self.assertAlmostEqual(50.0, parallel_resistance(100.0, 100.0))
+        self.assertAlmostEqual(75.0, parallel_resistance(100.0, 300.0))
+        self.assertEqual(0.0, parallel_resistance(0.0, 100.0))
+        self.assertEqual(0.0, parallel_resistance(100.0, 0.0))
+
+    def test_merged_resistances_between_the_same_nodes_are_in_parallel(self):
+        summary = ExtractionSummary.merged([
+            ExtractionSummary(capacitances={NetCoupleKey('A', 'B'): 1.0},
+                              resistances={NetCoupleKey('A', 'B'): 100.0}),
+            ExtractionSummary(capacitances={NetCoupleKey('B', 'A'): 2.0},
+                              resistances={NetCoupleKey('B', 'A'): 300.0,
+                                           NetCoupleKey('B', 'C'): 10.0}),
+        ])
+        self.assertEqual({NetCoupleKey('A', 'B'): 3.0}, dict(summary.capacitances))
+        self.assertEqual({NetCoupleKey('A', 'B'): 75.0,
+                          NetCoupleKey('B', 'C'): 10.0}, summary.resistances)
