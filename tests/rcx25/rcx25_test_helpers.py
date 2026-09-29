@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+import glob
 import io
 import json
 import os
@@ -45,6 +46,7 @@ from klayout_pex.rcx25.pex_mode import PEXMode
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
     IHP_SG13G2 = 'ihp-sg13g2'
+    GF180MCUD = 'gf180mcuD'
 
 
 @dataclass
@@ -63,11 +65,13 @@ class PDKTestConfig:
 
     @property
     def lyt_path(self) -> str:
-        return os.path.abspath(os.path.join(self.kpex_pdk_dir, 'sky130A.lyt'))
+        lyt_paths = glob.glob(os.path.join(self.kpex_pdk_dir, '*.lyt'))
+        assert len(lyt_paths) == 1, f"Expected one KLayout technology file in {self.kpex_pdk_dir}"
+        return os.path.abspath(lyt_paths[0])
 
     def load_kdb_technology(self) -> kdb.Technology:
         kdb.Technology.clear_technologies()
-        tech = kdb.Technology.create_technology('sky130A')
+        tech = kdb.Technology.create_technology(self.name)
         tech.load(self.lyt_path)
         return tech
 

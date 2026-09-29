@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -22,12 +24,14 @@ logger.info('Starting MIMCAP DERIVATIONS')
 
 mimcap_exclude = efuse_mk.join(plfuse)
 
-# mim option A
-mim_virtual = fusetop.sized(1.06.um).and(metal2.interacting(fusetop))
-                     .not(mimcap_exclude)
-metal2_ncap = metal2_con.not(mim_virtual)
-fuse_cap    = fusetop.interacting(cap_mk).interacting(mim_l_mk)
-                     .not(mimcap_exclude)
+fuse_cap = fusetop.interacting(cap_mk).interacting(mim_l_mk)
+                  .not(mimcap_exclude)
 
-# mim_option B
-mimtm_virtual = fusetop.sized(1.06.um).and(topmin1_metal.interacting(fusetop))
+case MIM_OPTION
+when 'A'
+
+  mim_virtual = fusetop.sized(1.06.um).and(metal2.interacting(fusetop))
+                       .not(mimcap_exclude)
+when 'B'
+  mim_virtual = fusetop.sized(1.06.um).and(topmin1_metal.interacting(fusetop))
+end

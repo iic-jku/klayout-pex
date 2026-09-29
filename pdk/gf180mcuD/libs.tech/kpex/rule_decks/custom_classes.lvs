@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -33,91 +35,80 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
     end
   end
 
-  # implements the delegate interface:
-  # take and translate the element
+  # rubocop:disable-next Metrics/ParameterLists
   def element(circuit, ele, name, model, value, nets, params)
     case ele
     when 'C'
-      error('Capacitor needs two nodes') if nets.size != 2
-
-      # provide a device class
-      cls = circuit.netlist.device_class_by_name(model)
-      unless cls
-        cls = RBA::DeviceClassCapacitor.new
-        cls.name = model
-        circuit.netlist.add(cls)
-      end
-
-      # create a device
-      device = circuit.create_device(cls, name)
-
-      # and configure the device
-      %w[A B].each_with_index do |t, index|
-        device.connect_terminal(t, nets[index])
-      end
-
-      # Convert Cap L & W & M parameters to --> A & P
-      # parameters in the model are given in micrometer units, so
-      # we need to translate the parameter values from SI to um values:
-      device.set_parameter('A', ((params['W'] || 0.0) * (params['L'] || 0.0)  * (params['M'] || 1.0)) * 1e12)
-      device.set_parameter('P', ((params['W'] || 0.0) + (params['L'] || 0.0)) * (params['M'] || 1.0)  * 2e6)
-      device.set_parameter('C', (params['C'] || 0.0))
-
+      handle_capacitor(circuit, name, model, nets, params)
     when 'R'
-      case nets.size
-      when 3
-        # provide a device class
-        cls = circuit.netlist.device_class_by_name(model)
-        unless cls
-          cls = RBA::DeviceClassResistorWithBulk.new
-          cls.name = model
-          circuit.netlist.add(cls)
-        end
-
-        # create a device
-        device = circuit.create_device(cls, name)
-
-        # and configure the device
-        %w[A B W].each_with_index do |t, index|
-          device.connect_terminal(t, nets[index])
-        end
-
-      when 2
-        # provide a device class
-        cls = circuit.netlist.device_class_by_name(model)
-        unless cls
-          cls = RBA::DeviceClassResistor.new
-          cls.name = model
-          circuit.netlist.add(cls)
-        end
-
-        # create a device
-        device = circuit.create_device(cls, name)
-
-        # and configure the device
-        %w[A B].each_with_index do |t, index|
-          device.connect_terminal(t, nets[index])
-        end
-
-      else
-        error('Resistor needs two or three nodes')
-
-      end
-
-      # parameters in the model are given in micrometer units, so
-      # we need to translate the parameter values from SI to um values:
-      device.set_parameter('W', ((params['W'] || 0.0) * (params['PAR'] || 1.0)) * 1e6)
-      device.set_parameter('L', ((params['L'] || 0.0) * (params['S'] || 1.0)) * 1e6)
-      device.set_parameter('R', ((params['R'] || 0.0) * (params['S'] || 1.0) / (params['PAR'] || 1.0)))
-
+      handle_resistor(circuit, name, model, nets, params)
     else
-      return super
-
+      super
     end
-    true
+  end
+
+  private
+
+  def handle_capacitor(circuit, name, model, nets, params)
+    error('Capacitor needs two nodes') unless nets.size == 2
+
+    cls = ensure_device_class(circuit, model, RBA::DeviceClassCapacitor)
+    device = circuit.create_device(cls, name)
+    connect_terminals(device, %w[A B], nets)
+
+    device.set_parameter('A', calc_area(params) * 1e12)
+    device.set_parameter('P', calc_perimeter(params) * 2e6)
+    device.set_parameter('C', params['C'] || 0.0)
+  end
+
+  def handle_resistor(circuit, name, model, nets, params)
+    return error('Resistor needs two or three nodes') unless [2, 3].include?(nets.size)
+
+    cls_type = nets.size == 3 ? RBA::DeviceClassResistorWithBulk : RBA::DeviceClassResistor
+    cls = ensure_device_class(circuit, model, cls_type)
+    terminals = nets.size == 3 ? %w[A B W] : %w[A B]
+
+    device = circuit.create_device(cls, name)
+    connect_terminals(device, terminals, nets)
+    apply_resistor_params(device, params)
+  end
+
+  def apply_resistor_params(device, params)
+    w = params['W'] || 0.0
+    par = params['PAR'] || 1.0
+    l = params['L'] || 0.0
+    s = params['S'] || 1.0
+    r = params['R'] || 0.0
+
+    device.set_parameter('W', w * par * 1e6)
+    device.set_parameter('L', l * s * 1e6)
+    device.set_parameter('R', r * s / par)
+  end
+
+  def ensure_device_class(circuit, model, device_class_type)
+    existing = circuit.netlist.device_class_by_name(model)
+    return existing if existing
+
+    cls = device_class_type.new
+    cls.name = model
+    circuit.netlist.add(cls)
+    cls
+  end
+
+  def connect_terminals(device, terminals, nets)
+    terminals.each_with_index { |t, index| device.connect_terminal(t, nets[index]) }
+  end
+
+  def calc_area(params)
+    (params['W'] || 0.0) * (params['L'] || 0.0) * (params['M'] || 1.0)
+  end
+
+  def calc_perimeter(params)
+    ((params['W'] || 0.0) + (params['L'] || 0.0)) * (params['M'] || 1.0)
   end
 end
 
+# rubocop:disable Style/OneClassPerFile
 # 4 terminals resistor device extractor
 class BResistor < RBA::DeviceClassResistorWithBulk
   def initialize
@@ -157,3 +148,4 @@ class MIMCap < RBA::DeviceClassCapacitor
     enable_parameter('P', true)
   end
 end
+# rubocop:enable Style/OneClassPerFile

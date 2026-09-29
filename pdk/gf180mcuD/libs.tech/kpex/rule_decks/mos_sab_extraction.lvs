@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -41,22 +43,43 @@ extract_devices(mos4('pfet_06v0_dss'),
                 { 'SD' => psd, 'G' => pgate_sab_6v, 'tS' => psd, 'tD' => psd, 'tG' => poly2_con, 'W' => nwell_con })
 
 # 3.3V ESD PMOS transistor inside DNWELL
-logger.info('Extracting 3.3V ESD PMOS transistor inside DNWELL device')
-extract_devices(mos4('pfet_03v3_dn_dss'),
-                { 'SD' => psd_dw, 'G' => pgate_dw_sab_3p3v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
-                  'W' => dnwell })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 3.3V ESD PMOS transistor inside DNWELL device')
+  extract_devices(mos4('pfet_03v3_dn_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_3p3v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+else
+  logger.info('Extracting 3.3V ESD PMOS transistor inside DNWELL device, as regular, non dw device')
+  extract_devices(mos4('pfet_03v3_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_3p3v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+end
 
 # 5V ESD PMOS transistor inside DNWELL
-logger.info('Extracting 5V ESD PMOS transistor inside DNWELL device')
-extract_devices(mos4('pfet_05v0_dn_dss'),
-                { 'SD' => psd_dw, 'G' => pgate_dw_sab_5v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
-                  'W' => dnwell })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 5V ESD PMOS transistor inside DNWELL device')
+  extract_devices(mos4('pfet_05v0_dn_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_5v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+else
+  logger.info('Extracting 5V ESD PMOS transistor inside DNWELL device as regular, non dw device')
+  extract_devices(mos4('pfet_05v0_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_5v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+end
 
 # 6V ESD PMOS transistor inside DNWELL
-logger.info('Extracting 6V ESD PMOS transistor inside DNWELL device')
-extract_devices(mos4('pfet_06v0_dn_dss'),
-                { 'SD' => psd_dw, 'G' => pgate_dw_sab_6v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
-                  'W' => dnwell })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 6V ESD PMOS transistor inside DNWELL device')
+  extract_devices(mos4('pfet_06v0_dn_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_6v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+else
+  logger.info('Extracting 6V ESD PMOS transistor inside DNWELL device as regular, non dw device')
+  extract_devices(mos4('pfet_06v0_dss'),
+                  { 'SD' => psd_dw, 'G' => pgate_dw_sab_6v, 'tS' => psd_dw, 'tD' => psd_dw, 'tG' => poly2_con,
+                    'W' => dnwell })
+end
 
 # ==============
 # ---- NMOS ----
@@ -79,19 +102,40 @@ extract_devices(mos4('nfet_06v0_dss'),
                 { 'SD' => nsd, 'G' => ngate_sab_6v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con, 'W' => sub })
 
 # 3.3V ESD NMOS transistor inside DNWELL
-logger.info('Extracting 3.3V ESD NMOS transistor inside DNWELL device')
-extract_devices(mos4('nfet_03v3_dn_dss'),
-                { 'SD' => nsd, 'G' => ngate_dw_sab_3p3v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
-                  'W' => lvpwell_con })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 3.3V ESD NMOS transistor inside DNWELL device')
+  extract_devices(mos4('nfet_03v3_dn_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_3p3v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+else
+  logger.info('Extracting 3.3V ESD NMOS transistor inside DNWELL device, as regular, non dw device')
+  extract_devices(mos4('nfet_03v3_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_3p3v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+end
 
 # 5V ESD NMOS transistor inside DNWELL
-logger.info('Extracting 5V ESD NMOS transistor inside DNWELL device')
-extract_devices(mos4('nfet_05v0_dn_dss'),
-                { 'SD' => nsd, 'G' => ngate_dw_sab_5v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
-                  'W' => lvpwell_con })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 5V ESD NMOS transistor inside DNWELL device')
+  extract_devices(mos4('nfet_05v0_dn_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_5v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+else
+  logger.info('Extracting 5V ESD NMOS transistor inside DNWELL device as regular, non dw device')
+  extract_devices(mos4('nfet_05v0_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_5v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+end
 
 # 6V ESD NMOS transistor inside DNWELL
-logger.info('Extracting 6V ESD NMOS transistor inside DNWELL device')
-extract_devices(mos4('nfet_06v0_dn_dss'),
-                { 'SD' => nsd, 'G' => ngate_dw_sab_6v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
-                  'W' => lvpwell_con })
+if CONSIDER_DN_DW_FEATURES
+  logger.info('Extracting 6V ESD NMOS transistor inside DNWELL device')
+  extract_devices(mos4('nfet_06v0_dn_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_6v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+else
+  logger.info('Extracting 6V ESD NMOS transistor inside DNWELL device as regular, non dw device')
+  extract_devices(mos4('nfet_06v0_dss'),
+                  { 'SD' => nsd, 'G' => ngate_dw_sab_6v, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con,
+                    'W' => lvpwell_con })
+end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ################################################################################################
 # Copyright 2023 GlobalFoundries PDK Authors
 #
@@ -88,30 +90,49 @@ poly_exclude = comp.join(res_exclude)
 # NPOLY
 npoly_exclude = poly_exclude.join(pplus).join(resistor)
 
-## NPOLYF_U
-npolyf_u_layer = nplus.and(poly2).and(sab).and(res_mk).not(dnwell).not(npoly_exclude)
+## NPOLYF_U SUB
+npolyf_u_sub_layer = nplus.and(poly2).and(sab).and(res_mk).not(dnwell).not(npoly_exclude).not(nwell)
+
+## NPOLYF_U NWELL
+npolyf_u_nwell_layer = nplus.and(poly2).and(sab).and(res_mk).not(dnwell).not(npoly_exclude).and(nwell)
 
 ## NPOLYF_U_DW
 npolyf_u_dw_layer = nplus.and(poly2).and(sab).and(res_mk).and(dnwell).not(npoly_exclude)
 
-## NPOLYF_S
-npolyf_s_layer = nplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab).not(npoly_exclude)
+## NPOLYF_S SUB
+npolyf_s_sub_layer = nplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
+                          .not(npoly_exclude).not(nwell)
+
+## NPOLYF_S NWELL
+npolyf_s_nwell_layer = nplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
+                            .not(npoly_exclude).and(nwell)
 
 ## NPOLYF_S_DW
-npolyf_s_dw_layer = nplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab).not(npoly_exclude)
+npolyf_s_dw_layer = nplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab)
+                         .not(npoly_exclude)
 
 # PPOLY
 ppoly_exclude = poly_exclude.join(nplus)
 
-## PPOLYF_U
-ppolyf_u_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor).not(dnwell).not(ppoly_exclude)
+## PPOLYF_U SUB
+ppolyf_u_sub_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor)
+                          .not(dnwell).not(ppoly_exclude).not(nwell)
+
+## PPOLYF_U NWELL
+ppolyf_u_nwell_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor)
+                            .not(dnwell).not(ppoly_exclude).and(nwell)
 
 ## PPOLYF_U_DW
-ppolyf_u_dw_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor).and(dnwell).not(ppoly_exclude)
+ppolyf_u_dw_layer = pplus.and(poly2).and(sab).and(res_mk).not_interacting(resistor)
+                         .and(dnwell).not(ppoly_exclude)
 
-## PPOLYF_S
-ppolyf_s_layer = pplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
-                      .not_interacting(resistor).not(ppoly_exclude)
+## PPOLYF_S SUB
+ppolyf_s_sub_layer = pplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
+                          .not_interacting(resistor).not(ppoly_exclude).not(nwell)
+
+## PPOLYF_S NWELL
+ppolyf_s_nwell_layer = pplus.and(poly2).and(res_mk).not(dnwell).not_interacting(sab)
+                            .not_interacting(resistor).not(ppoly_exclude).and(nwell)
 
 ## PPOLYF_S_DW
 ppolyf_s_dw_layer = pplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab)
@@ -121,17 +142,29 @@ ppolyf_s_dw_layer = pplus.and(poly2).and(res_mk).and(dnwell).not_interacting(sab
 # --H-POLY RES--
 # ==============
 
-# PPOLYF_U_1K
-ppolyf_u_h = poly2.and(sab).and(res_mk).and(resistor).not(dnwell).not(v5_xtor).not(dualgate).not(ppoly_exclude)
+# PPOLYF_U_1K SUB
+ppolyf_u_h_sub = poly2.and(sab).and(res_mk).and(resistor).not(dnwell)
+                      .not(v5_xtor).not(dualgate).not(ppoly_exclude).not(nwell)
+
+# PPOLYF_U_1K NWELL
+ppolyf_u_h_nwell = poly2.and(sab).and(res_mk).and(resistor).not(dnwell)
+                        .not(v5_xtor).not(dualgate).not(ppoly_exclude).and(nwell)
 
 # PPOLYF_U_DW_1K
-ppolyf_u_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor).not(dualgate).not(ppoly_exclude)
+ppolyf_u_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor)
+                     .not(dualgate).not(ppoly_exclude)
 
-# PPOLYF_U_1K_6p0
-ppolyf_u_6p0_h = poly2.and(sab).and(res_mk).and(resistor).not(dnwell).not(v5_xtor).and(dualgate).not(ppoly_exclude)
+# PPOLYF_U_1K_6p0 SUB
+ppolyf_u_6p0_h_sub = poly2.and(sab).and(res_mk).and(resistor).not(dnwell)
+                          .not(v5_xtor).and(dualgate).not(ppoly_exclude).not(nwell)
+
+# PPOLYF_U_1K_6p0 NWELL
+ppolyf_u_6p0_h_nwell = poly2.and(sab).and(res_mk).and(resistor).not(dnwell)
+                            .not(v5_xtor).and(dualgate).not(ppoly_exclude).and(nwell)
 
 # PPOLYF_U_DW_1K_6p0
-ppolyf_u_6p0_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor).and(dualgate).not(ppoly_exclude)
+ppolyf_u_6p0_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor)
+                         .and(dualgate).not(ppoly_exclude)
 
 # ===============
 # ---- METAL ----
@@ -140,11 +173,25 @@ ppolyf_u_6p0_dw_h = poly2.and(res_mk).and(dnwell).and(resistor).not(v5_xtor).and
 # Metal1 resistor
 rm1_res = metal1.and(metal1_res)
 
-# Metal2 resistor
-rm2_res = metal2.and(metal2_res)
+unless METAL_LEVEL == '2LM'
+  # Metal2 resistor
+  rm2_res = metal2.and(metal2_res)
+end
 
-# Metal3 resistor
-rm3_res = metal3.and(metal3_res)
+unless METAL_LEVEL == '3LM' || METAL_LEVEL == '2LM'
+  # Metal3 resistor
+  rm3_res = metal3.and(metal3_res)
+end
+
+unless METAL_LEVEL == '4LM' || METAL_LEVEL == '3LM' || METAL_LEVEL == '2LM'
+  # Metal4 resistor
+  rm4_res = metal4.and(metal4_res)
+end
+
+unless METAL_LEVEL == '5LM' || METAL_LEVEL == '4LM' || METAL_LEVEL == '3LM' || METAL_LEVEL == '2LM'
+  # Metal5 resistor
+  rm5_res = metal5.and(metal5_res)
+end
 
 # Metaltop resistor
 tm_res = top_metal.and(top_metal_res)
