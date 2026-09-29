@@ -1133,6 +1133,7 @@ class KpexCLI:
                     else:
                         warning(f"Cache hit: Reusing cached LVSDB")
                         subproc(lvsdb_cache_path)
+                        shutil.copy(lvsdb_cache_path, lvsdb_path)
                         lvs_needed = False
 
                 if lvs_needed:
