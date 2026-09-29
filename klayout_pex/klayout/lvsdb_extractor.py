@@ -79,6 +79,12 @@ class KLayoutMergedExtractedLayerInfo:
 
 
 @dataclass
+class KLayoutNonemptyExtractedLayers:
+    extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
+    unnamed_layers: List[KLayoutExtractedLayerInfo]   # not in the tech info
+
+
+@dataclass
 class KLayoutExtractionContext:
     lvsdb: kdb.LayoutToNetlist
     tech: TechInfo
@@ -147,11 +153,11 @@ class KLayoutExtractionContext:
             device_cell_name_prefix=None  # NOTE: this would create a cell for each device (e.g. transistor)
         )
 
-        extracted_layers, unnamed_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
-                                                                         tech=tech,
-                                                                         annotated_layout=annotated_layout,
-                                                                         layer_index_map=layer_index_map,
-                                                                         blackbox_devices=blackbox_devices)
+        nonempty_layers = cls.nonempty_extracted_layers(lvsdb=lvsdb,
+                                                        tech=tech,
+                                                        annotated_layout=annotated_layout,
+                                                        layer_index_map=layer_index_map,
+                                                        blackbox_devices=blackbox_devices)
 
         return KLayoutExtractionContext(
             lvsdb=lvsdb,
@@ -162,8 +168,8 @@ class KLayoutExtractionContext:
             lvsdb_regions=lvsdb_regions,
             cell_mapping=cm,
             annotated_layout=annotated_layout,
-            extracted_layers=extracted_layers,
-            unnamed_layers=unnamed_layers
+            extracted_layers=nonempty_layers.extracted_layers,
+            unnamed_layers=nonempty_layers.unnamed_layers
         )
 
     @staticmethod
@@ -214,7 +220,7 @@ class KLayoutExtractionContext:
                                   tech: TechInfo,
                                   annotated_layout: kdb.Layout,
                                   layer_index_map: LayerIndexMap,
-                                  blackbox_devices: bool) -> Tuple[Dict[GDSPair, KLayoutMergedExtractedLayerInfo], List[KLayoutExtractedLayerInfo]]:
+                                  blackbox_devices: bool) -> KLayoutNonemptyExtractedLayers:
         # https://www.klayout.de/doc-qt5/code/class_LayoutToNetlist.html#method18
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
 
@@ -267,7 +273,8 @@ class KLayoutExtractionContext:
                         gds_pair=gds_pair,
                     )
 
-        return nonempty_layers, unnamed_layers
+        return KLayoutNonemptyExtractedLayers(extracted_layers=nonempty_layers,
+                                              unnamed_layers=unnamed_layers)
 
     def top_cell_bbox(self) -> kdb.Box:
         b1: kdb.Box = self.annotated_layout.top_cell().bbox()
