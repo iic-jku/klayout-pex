@@ -186,3 +186,14 @@ def test_vias_within_mom_cap_l1m1m2():
                                                           'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
     assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
     assert results.summarize().resistances
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_vias_within_mom_cap_l1m1m2m3m4():
+    # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+                                                          'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
+    assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
+    assert results.summarize().resistances
