@@ -97,6 +97,7 @@ from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
+from .rcx25.r.r_extractor import RExtractionTechError
 from .tech_info import TechDefError, TechInfo
 from .tool_version_constraints import (
     Tool,
@@ -1254,7 +1255,7 @@ class KpexCLI:
                 case _:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
-                    except LVSDBError as e:
+                    except (LVSDBError, RExtractionTechError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
