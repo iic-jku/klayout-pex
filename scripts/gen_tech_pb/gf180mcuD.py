@@ -336,7 +336,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "Metal3",    "Metal2",    49.011)
     add_sidewall_overlap_cap(ci, "Metal2",    "Metal3",    36.626)
     add_sidewall_overlap_cap(ci, "Metal4",    "Nwell",     28.153)
-    add_sidewall_overlap_cap(ci, "Metal4",    "LVPWELL",   40.99)
+    add_sidewall_overlap_cap(ci, "Metal4",    "LVPWELL",   28.153)
     add_sidewall_overlap_cap(ci, "Metal4",    diff_nonfet, 29.065)
     add_sidewall_overlap_cap(ci, "Metal4",    poly_nonres, 29.407)
     add_sidewall_overlap_cap(ci, "Poly2",     "Metal4",    8.557)
