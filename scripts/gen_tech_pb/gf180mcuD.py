@@ -69,7 +69,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, METAL,   KREG, "metal2_con",  (36, 0),     "Metal2",    "Computed layer for met2")
     add_computed_layer(tech, METAL,   KREG, "metal3_con",  (42, 0),     "Metal3",    "Computed layer for met3 (no cap)")
     add_computed_layer(tech, METAL,   KREG, "metal4_con",  (46, 0),     "Metal4",    "Computed layer for met4 (no cap)")
-    add_computed_layer(tech, METAL,   KREG, "metal5_con",  (81, 0),     "MetalTop",  "Computed layer for met5")
+    add_computed_layer(tech, METAL,   KREG, "metal5_con",  (81, 0),     "Metal5",    "Computed layer for met5")
     add_computed_layer(tech, CONT,    KREG, "m1_nsd_con",  (66, 4401),  "Contact",   "Computed layer for contact from nsdm to Metal1")
     add_computed_layer(tech, CONT,    KREG, "m1_psd_con",  (66, 4402),  "Contact",   "Computed layer for contact from psdm to Metal1")
     add_computed_layer(tech, CONT,    KREG, "m1_poly_con", (66, 4403),  "Contact",   "Computed layer for contact from poly to Metal1")
@@ -232,8 +232,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "Metal2",   90)
     add_layer_resistance(ri, "Metal3",   90)
     add_layer_resistance(ri, "Metal4",   90)
-    add_layer_resistance(ri, "Metal5",   90)
-    add_layer_resistance(ri, "MetalTop", 40)  # TODO: there are options 9kA/6kA/11kA/30kA
+    add_layer_resistance(ri, "Metal5",   40)  # top metal, 11K (gf180mcuD, 5LM)
 
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT
@@ -250,7 +249,6 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_via_resistance(ri, "Via2",          4500)
     add_via_resistance(ri, "Via3",          4500)
     add_via_resistance(ri, "Via4",          4500)
-    add_via_resistance(ri, "Via5",          4500)
 
     ci = ex.capacitance
 
@@ -262,7 +260,6 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_substrate_cap(ci, "Metal3",   10.094,    30.021)
     add_substrate_cap(ci, "Metal4",   7.602,     28.153)
     add_substrate_cap(ci, "Metal5",   5.798,     30.386)
-    add_substrate_cap(ci, "MetalTop", 6.32,      38.85)
 
     diff_nonfet = "COMP"   # TODO: diff must be non-fet!
     poly_nonres = "Poly2"  # TODO: poly must be non-res!
