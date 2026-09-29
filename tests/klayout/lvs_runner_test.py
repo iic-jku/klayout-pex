@@ -73,6 +73,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.tmp_dir = tempfile.mkdtemp(prefix="lvs_run_")
         self.log_path = os.path.join(self.tmp_dir, "cell_lvs.log")
         self.lvsdb_path = os.path.join(self.tmp_dir, "cell.lvsdb.gz")
+        self.netlist_path = os.path.join(self.tmp_dir, "cell_extracted.cir")
 
     def run_lvs(self, fake_klayout: FakeKLayoutProcess):
         with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout):
@@ -82,6 +83,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
                                       schematic_path="cell.spice",
                                       log_path=self.log_path,
                                       lvsdb_path=self.lvsdb_path,
+                                      netlist_path=self.netlist_path,
                                       verbose=False)
 
     def test_missing_lvsdb_raises_with_klayout_errors_and_log_path(self):
