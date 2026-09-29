@@ -24,8 +24,11 @@
 
 import allure
 import pytest
+from unittest import mock
 
 from rcx25_test_helpers import *
+
+from klayout_pex.pex25d.diagnostics import ExitCode
 
 CSVPath = str
 PNGPath = str
@@ -160,3 +163,41 @@ R6;G.$0.16;G.$1.17;;152.0
 R7;G.$0.16;G.P0.16;;316.321"""
         )
 
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_no_resistor_between_pins_with_the_same_label():
+    # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
+    # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
+    with mock.patch('klayout_pex.rcx25.netlist_expander.warning') as warning_mock:
+        results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
+    warning_mock.assert_not_called()
+    assert [k for k in results.summarize().resistances.keys() if k.net1 == k.net2] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_layers_the_tech_info_cant_model_are_an_error():
+    # The vias within the MOM capacitor have no bottom/top layers in the tech info,
+    # so the resistance networks of C0 and C1 would fall apart into pieces (#217)
+    gds_path = pex_whiteboxed.pdk.gds_path('cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
+    with tempfile.TemporaryDirectory() as out_dir, \
+         mock.patch('klayout_pex.kpex_cli.error') as error_mock, \
+         pytest.raises(SystemExit) as exit_info:
+        KpexCLI().main(['main',
+                        '--pdk', pex_whiteboxed.pdk.name,
+                        '--mode', 'R',
+                        '--gds', gds_path,
+                        '--out_dir', out_dir,
+                        '--2.5D'])
+    assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
+    error_mock.assert_called_once()
+    assert error_mock.call_args.args[0] == (
+        "The tech info can't model these layers of the layout for the resistance extraction, "
+        "so their connections would be missing from the resistance network:\n"
+        "  - mcon (LVS mcon_vpp): no bottom/top layers\n"
+        "  - via (LVS via1_vpp): no bottom/top layers"
+    )

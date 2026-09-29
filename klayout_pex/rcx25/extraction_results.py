@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from typing import *
 
 from .types import NetName, LayerName, CellName
-from ..log import error
+from ..log import debug, error
 
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
@@ -235,7 +235,12 @@ class CellExtractionResults:
                 normalized_key = NetCoupleKey(node_name(network, node_a),
                                               node_name(network, node_b)).normed()
                 # NOTE: different nodes can have the same name, e.g. pins with the same label,
-                #       which are one node in the netlist, so their elements are in parallel
+                #       which are one node in the netlist, so their elements are in parallel,
+                #       and an element between two of them is shorted
+                if normalized_key.net1 == normalized_key.net2:
+                    debug(f"Skipping resistor between nodes of the same name {normalized_key.net1} "
+                          f"with value {'%.12g' % resistance}")
+                    continue
                 add_resistance(normalized_resistance_table, normalized_key, resistance)
 
         resistance_summary = ExtractionSummary(capacitances={},

@@ -26,7 +26,6 @@ from collections import defaultdict
 from typing import *
 
 from klayout_pex.log import (
-    warning,
     subproc,
 )
 
@@ -46,6 +45,13 @@ import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 
 import klayout.db as kdb
 import klayout.pex as klp
+
+
+class RExtractionTechError(Exception):
+    """
+    The tech info can't model layers of the layout for the resistance extraction
+    """
+    pass
 
 
 class RExtractor:
@@ -91,14 +97,22 @@ class RExtractor:
 
         tech = self.pex_context.tech
 
+        # NOTE: a layer that can't be modeled is not part of the resistance network,
+        #       e.g. a via that joins nothing, which splits the networks of its nets.
+        #       This is never intended, so it's an error rather than a warning (#217).
+        #       It includes the LVS layers the tech info has no layer for (e.g. a via with another name)
+        unmodeled_layers: List[str] = list(self.pex_context.unmodeled_layers)
+
         for gds_pair, li in self.pex_context.extracted_layers.items():
             for source_layer in li.source_layers:
                 computed_layer_info = tech.computed_layer_info_by_name.get(source_layer.lvs_layer_name, None)
                 if computed_layer_info is None:
-                    warning(f"ignoring layer {gds_pair}, no computed layer info found in tech info")
+                    unmodeled_layers.append(f"LVS {source_layer.lvs_layer_name} {gds_pair}: "
+                                            f"no computed layer info")
                     continue
 
                 canonical_layer_name = tech.canonical_layer_name_by_gds_pair[gds_pair]
+                layer_description = f"{canonical_layer_name} (LVS {source_layer.lvs_layer_name})"
 
                 LP = tech_pb2.LayerInfo.Purpose
 
@@ -159,17 +173,14 @@ class RExtractor:
                     case LP.PURPOSE_CONTACT:
                         contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
                         if contact is None:
-                            warning(
-                                f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
-                                f"no contact found in tech info")
+                            unmodeled_layers.append(f"{layer_description}: no contact")
                             continue
 
                         contact_resistance = tech.contact_resistance_by_device_layer_name.get(contact.layer_below,
                                                                                               None)
                         if contact_resistance is None:
-                            warning(
-                                f"ignoring LVS layer {source_layer.lvs_layer_name} (layer {canonical_layer_name}), "
-                                f"no contact resistance found in tech info")
+                            unmodeled_layers.append(f"{layer_description}: "
+                                                    f"no contact resistance for {contact.layer_below}")
                             continue
 
                         via = rex_tech.vias.add()
@@ -193,12 +204,12 @@ class RExtractor:
                     case LP.PURPOSE_VIA:
                         via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
                         if via_resistance is None:
-                            warning(f"ignoring layer {canonical_layer_name}, no via resistance found in tech info")
+                            unmodeled_layers.append(f"{layer_description}: no via resistance")
                             continue
                         bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
                             source_layer.lvs_layer_name, None)
                         if bot_top is None:
-                            warning(f"ignoring layer {canonical_layer_name} (LVS {source_layer.lvs_layer_name}), no bottom/top layers found in tech info")
+                            unmodeled_layers.append(f"{layer_description}: no bottom/top layers")
                             continue
                         via = rex_tech.vias.add()
 
@@ -224,11 +235,15 @@ class RExtractor:
                         via.merge_distance = self.via_merge_distance
 
                     case _:
-                        warning(f"prepare_r_extractor_tech_pb: Unhandled layer purpose "
-                                f"{LP.Name(computed_layer_info.layer_info.purpose)}"
-                                f"({computed_layer_info.layer_info.purpose}), "
-                                f"LVS computed layer is {source_layer.lvs_layer_name} ({source_layer.gds_pair}), "
-                                f"original layer is {canonical_layer_name}")
+                        unmodeled_layers.append(f"{layer_description}: unhandled layer purpose "
+                                                f"{LP.Name(computed_layer_info.layer_info.purpose)}")
+
+        if unmodeled_layers:
+            raise RExtractionTechError(
+                "The tech info can't model these layers of the layout for the resistance extraction, "
+                "so their connections would be missing from the resistance network:\n" +
+                '\n'.join(f"  - {layer}" for layer in unmodeled_layers)
+            )
 
         return rex_tech
 
