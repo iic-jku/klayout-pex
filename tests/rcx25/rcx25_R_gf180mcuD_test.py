@@ -23,6 +23,7 @@
 #
 
 import allure
+import csv
 import pytest
 
 from rcx25_test_helpers import *
@@ -92,3 +93,30 @@ R8;S.$0.9;S.$1.15;;6.3
 R9;S.$0.9;S.P0.9;;0.0"""
     )
 
+
+def obtained_resistances(*path_components) -> List[float]:
+    """
+    The resistances, sorted (for patterns with many internal nodes, whose names are not stable)
+    """
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell(*path_components)
+    with open(csv_path) as f:
+        return sorted(float(row['Resistance [Ω]']) for row in csv.DictReader(f, delimiter=';')
+                      if row['Resistance [Ω]'])
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_contact_2x2_minsize_via1():
+    # 4 cuts in parallel, each 4500 mΩ
+    assert obtained_resistances('test_patterns', 'r_contact_2x2_minsize_via1.gds.gz') == \
+           [0.0] * 4 + [0.026] * 4 + [4.5] * 4
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_via_stack_1x1_minsize_poly_to_metal5():
+    # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut
+    assert obtained_resistances('test_patterns', 'r_via_stack_1x1_minsize_poly_to_metal5.gds.gz') == \
+           [0.0] * 10 + [4.5] * 4 + [5.9]
