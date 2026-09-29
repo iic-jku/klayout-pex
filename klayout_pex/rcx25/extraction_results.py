@@ -135,6 +135,23 @@ class NetCoupleKey:
             return NetCoupleKey(self.net2, self.net1)
 
 
+def parallel_resistance(r1: float, r2: float) -> float:
+    if r1 == 0.0 or r2 == 0.0:
+        return 0.0
+    return r1 * r2 / (r1 + r2)
+
+
+def add_resistance(resistance_table: Dict[NetCoupleKey, float],
+                   key: NetCoupleKey,
+                   resistance: float):
+    # NOTE: resistances between the same pair of nodes are in parallel
+    #       (unlike capacitances, they must not be summed up)
+    if key in resistance_table:
+        resistance_table[key] = parallel_resistance(resistance_table[key], resistance)
+    else:
+        resistance_table[key] = resistance
+
+
 @dataclass
 class ExtractionSummary:
     capacitances: Dict[NetCoupleKey, float]
@@ -143,12 +160,12 @@ class ExtractionSummary:
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
         merged_capacitances = defaultdict(float)
-        merged_resistances = defaultdict(float)
+        merged_resistances: Dict[NetCoupleKey, float] = {}
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
             for couple_key, res in s.resistances.items():
-                merged_resistances[couple_key.normed()] += res
+                add_resistance(merged_resistances, couple_key.normed(), res)
         return ExtractionSummary(capacitances=merged_capacitances,
                                  resistances=merged_resistances)
 
@@ -194,7 +211,7 @@ class CellExtractionResults:
         sideoverlap_summary = ExtractionSummary(capacitances=normalized_sideoverlap_table,
                                                 resistances={})
 
-        normalized_resistance_table: Dict[NetCoupleKey, float] = defaultdict(float)
+        normalized_resistance_table: Dict[NetCoupleKey, float] = {}
 
         def node_name(network: r_network_pb2.RNetwork,
                       node: r_network_pb2.RNode) -> str:
@@ -217,8 +234,10 @@ class CellExtractionResults:
                 resistance = element.resistance
                 normalized_key = NetCoupleKey(node_name(network, node_a),
                                               node_name(network, node_b)).normed()
-                normalized_resistance_table[normalized_key] += resistance
-                
+                # NOTE: different nodes can have the same name, e.g. pins with the same label,
+                #       which are one node in the netlist, so their elements are in parallel
+                add_resistance(normalized_resistance_table, normalized_key, resistance)
+
         resistance_summary = ExtractionSummary(capacitances={},
                                                resistances=normalized_resistance_table)
 
