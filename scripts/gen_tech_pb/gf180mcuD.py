@@ -195,7 +195,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
 
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
-    add_simple_dielectric(psi,   "air",    8.5225,       "sin")
+    add_simple_dielectric(psi,   "air",    1.0,          "sin")
 
     m1np = ndiff.contact_above
     m1pp = pdiff.contact_above
