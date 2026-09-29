@@ -32,7 +32,7 @@ from klayout_pex.log import (
 from ..types import NetName
 
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.klayout.lvsdb_extractor import GDSPair, KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
 
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
@@ -103,12 +103,17 @@ class RExtractor:
         #       It includes the LVS layers the tech info has no layer for (e.g. a via with another name)
         unmodeled_layers: List[str] = list(self.pex_context.unmodeled_layers)
 
+        # NOTE: the resistance extraction works on the layer of a GDS pair, with the shapes of all its LVS layers,
+        #       so one model covers them all (e.g. sky130A mcon_con and mcon_vpp, the vias within MOM caps)
+        unmodeled_layers_by_gds_pair: Dict[GDSPair, List[str]] = defaultdict(list)
+        modeled_gds_pairs: Set[GDSPair] = set()
+
         for gds_pair, li in self.pex_context.extracted_layers.items():
             for source_layer in li.source_layers:
                 computed_layer_info = tech.computed_layer_info_by_name.get(source_layer.lvs_layer_name, None)
                 if computed_layer_info is None:
-                    unmodeled_layers.append(f"LVS {source_layer.lvs_layer_name} {gds_pair}: "
-                                            f"no computed layer info")
+                    unmodeled_layers_by_gds_pair[gds_pair].append(f"LVS {source_layer.lvs_layer_name} {gds_pair}: "
+                                                                  f"no computed layer info")
                     continue
 
                 canonical_layer_name = tech.canonical_layer_name_by_gds_pair[gds_pair]
@@ -151,6 +156,7 @@ class RExtractor:
 
                         cond.algorithm = self.substrate_algorithm
                         cond.resistance = 0  # see comment above
+                        modeled_gds_pairs.add(gds_pair)
 
                     case LP.PURPOSE_METAL:
                         layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
@@ -169,18 +175,19 @@ class RExtractor:
                         else:
                             cond.algorithm = self.wire_algorithm
                         cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
+                        modeled_gds_pairs.add(gds_pair)
 
                     case LP.PURPOSE_CONTACT:
                         contact = tech.contact_by_contact_lvs_layer_name.get(source_layer.lvs_layer_name, None)
                         if contact is None:
-                            unmodeled_layers.append(f"{layer_description}: no contact")
+                            unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no contact")
                             continue
 
                         contact_resistance = tech.contact_resistance_by_device_layer_name.get(contact.layer_below,
                                                                                               None)
                         if contact_resistance is None:
-                            unmodeled_layers.append(f"{layer_description}: "
-                                                    f"no contact resistance for {contact.layer_below}")
+                            unmodeled_layers_by_gds_pair[gds_pair].append(
+                                f"{layer_description}: no contact resistance for {contact.layer_below}")
                             continue
 
                         via = rex_tech.vias.add()
@@ -200,16 +207,17 @@ class RExtractor:
                             contact_resistance=contact_resistance
                         )
                         via.merge_distance = self.via_merge_distance
+                        modeled_gds_pairs.add(gds_pair)
 
                     case LP.PURPOSE_VIA:
                         via_resistance = tech.via_resistance_by_layer_name.get(canonical_layer_name, None)
                         if via_resistance is None:
-                            unmodeled_layers.append(f"{layer_description}: no via resistance")
+                            unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no via resistance")
                             continue
                         bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
                             source_layer.lvs_layer_name, None)
                         if bot_top is None:
-                            unmodeled_layers.append(f"{layer_description}: no bottom/top layers")
+                            unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no bottom/top layers")
                             continue
                         via = rex_tech.vias.add()
 
@@ -233,10 +241,15 @@ class RExtractor:
                         )
 
                         via.merge_distance = self.via_merge_distance
+                        modeled_gds_pairs.add(gds_pair)
 
                     case _:
-                        unmodeled_layers.append(f"{layer_description}: unhandled layer purpose "
-                                                f"{LP.Name(computed_layer_info.layer_info.purpose)}")
+                        unmodeled_layers_by_gds_pair[gds_pair].append(
+                            f"{layer_description}: unhandled layer purpose {LP.Name(computed_layer_info.layer_info.purpose)}")
+
+        for gds_pair, descriptions in unmodeled_layers_by_gds_pair.items():
+            if gds_pair not in modeled_gds_pairs:
+                unmodeled_layers.extend(descriptions)
 
         if unmodeled_layers:
             raise RExtractionTechError(
