@@ -38,11 +38,11 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_single_wire_m1():
-    # Metal1: 90 mΩ/sq
+    # Metal1: 90 mΩ/sq, (9.885 - 0.115) µm / 0.23 µm = 42.5 sq
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_single_wire_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;B;;5.91"""
+R1;A;B;;3.823"""
     )
 
 
@@ -53,9 +53,9 @@ def test_wire_voltage_divider_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B,C.$1.14;;3.0
-R2;A,B,C.$1.14;B;;2.91
-R3;A,B,C.$1.14;C;;0.51"""
+R1;A;A,B,C.$1.15;;1.912
+R2;A,B,C.$1.15;B;;1.912
+R3;A,B,C.$1.15;C;;0.346"""
     )
 
 
@@ -81,16 +81,14 @@ def test_nfet_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;D;D.$1.15;;0.282
+R1;D;D.$1.15;;0.208
 R2;D.$0.9;D.$1.15;;6.3
 R3;D.$0.9;D.P0.9;;0.0
-R4;G;G.$3.15;;0.128
+R4;G;G.$1.15;;0.156
 R5;G.$0.14;G.$1.15;;5.9
 R6;G.$0.14;G.P0.14;;12.514
-R7;G.$1.15;G.$3.15;;0.313
-R8;G.$2.14;G.$3.15;;5.9
-R9;G.$2.14;G.P0.14;;12.514
-R10;S;S.$1.15;;0.294
-R11;S.$0.9;S.$1.15;;6.3
-R12;S.$0.9;S.P0.9;;0.0"""
+R7;S;S.$1.15;;0.208
+R8;S.$0.9;S.$1.15;;6.3
+R9;S.$0.9;S.P0.9;;0.0"""
     )
+
