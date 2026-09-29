@@ -85,6 +85,21 @@ R2;A,B,C.$1.16;B;;413.867
 R3;A,B,C.$1.16;C;;72.533"""
         )
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_wire_same_label_at_both_ends_li1():
+    # Same layout as r_wire_voltage_divider_li1, but pin A is at both ends of the wire
+    # (and B at the stub in the middle). Both pins A are one node in the netlist,
+    # so the two halves of the wire (426.667 Ω, 413.867 Ω) are in parallel, not in series (#211)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_wire_same_label_at_both_ends_li1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;A;A,B.$1.16;;210.085
+R2;A,B.$1.16;B;;72.533"""
+        )
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
