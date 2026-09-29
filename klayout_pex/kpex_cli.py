@@ -53,6 +53,7 @@ from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitan
 from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .fastcap.output_interpreter import FastCapOutputInterpreter
+from .klayout.lvs_cache import LVSCacheEntry, LVSInputFingerprint, lvs_input_fingerprint
 from .klayout.lvs_runner import LVSError, LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError
 from .klayout.netlist_expander import NetlistExpander
@@ -199,7 +200,8 @@ class KpexCLI:
 
         group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                      type=true_or_false, default=True,
-                                     help="Used cached LVSDB (for given input GDS) (default is %(default)s)")
+                                     help="Reuse the cached LVSDB while the LVS inputs are unchanged "
+                                          "(layout, schematic, LVS deck, KLayout version) (default is %(default)s)")
         group_pex_input.add_argument("--cache-dir", dest="cache_dir_path", default=None,
                                      help="Path for cached LVSDB (default is .kpex_cache within --out_dir)")
         group_pex_input.add_argument("--lvs-verbose", dest="klayout_lvs_verbose",
@@ -1103,9 +1105,15 @@ class KpexCLI:
         set_log_level(args.log_level)
 
     @staticmethod
-    def modification_date(filename: str) -> datetime:
-        t = os.path.getmtime(filename)
-        return datetime.fromtimestamp(t)
+    def lvs_input_fingerprint(args: argparse.Namespace) -> LVSInputFingerprint:
+        klayout_version = Tool.KLAYOUT.detect_version(args.klayout_exe_path)
+        return lvs_input_fingerprint(pdk=str(args.pdk),
+                                     klayout_version='' if klayout_version is None else str(klayout_version),
+                                     lvs_script_path=args.lvs_script_path,
+                                     script_parameters=LVSRunner.result_script_parameters(),
+                                     gds_path=args.gds_path,
+                                     cell_name=args.effective_cell_name,
+                                     schematic_path=args.effective_schematic_path)
 
     def create_lvsdb(self, args: argparse.Namespace) -> kdb.LayoutVsSchematic:
         lvsdb = kdb.LayoutVsSchematic()
@@ -1117,22 +1125,24 @@ class KpexCLI:
                 lvs_log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_lvs.log")
                 lvsdb_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}.lvsdb.gz")
                 lvs_netlist_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_extracted.cir")
-                lvsdb_cache_path = os.path.join(args.cache_dir_path, args.pdk,
-                                                os.path.splitroot(os.path.abspath(args.gds_path))[-1],
-                                                f"{args.effective_cell_name}.lvsdb.gz")
+                lvs_cache_entry = LVSCacheEntry(
+                    dir_path=os.path.join(args.cache_dir_path, args.pdk,
+                                          os.path.splitroot(os.path.abspath(args.gds_path))[-1]),
+                    cell_name=args.effective_cell_name
+                )
 
                 lvs_needed = True
 
                 if args.cache_lvs:
-                    if not os.path.exists(lvsdb_cache_path):
-                        info(f"Cache miss: extracted LVSDB does not exist")
-                        subproc(lvsdb_cache_path)
-                    elif self.modification_date(lvsdb_cache_path) <= self.modification_date(args.gds_path):
-                        info(f"Cache miss: extracted LVSDB is older than the input GDS")
-                        subproc(lvsdb_cache_path)
+                    lvs_fingerprint = self.lvs_input_fingerprint(args)
+                    cache_miss_reasons = lvs_cache_entry.cache_miss_reasons(lvs_fingerprint)
+                    if cache_miss_reasons:
+                        info(f"Cache miss: {'; '.join(cache_miss_reasons)}")
+                        subproc(lvs_cache_entry.lvsdb_path)
                     else:
                         warning(f"Cache hit: Reusing cached LVSDB")
-                        subproc(lvsdb_cache_path)
+                        subproc(lvs_cache_entry.lvsdb_path)
+                        shutil.copy(lvs_cache_entry.lvsdb_path, lvsdb_path)
                         lvs_needed = False
 
                 if lvs_needed:
@@ -1150,10 +1160,7 @@ class KpexCLI:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
                     if args.cache_lvs:
-                        cache_dir_path = os.path.dirname(lvsdb_cache_path)
-                        if not os.path.exists(cache_dir_path):
-                            os.makedirs(cache_dir_path, exist_ok=True)
-                        shutil.copy(lvsdb_path, lvsdb_cache_path)
+                        lvs_cache_entry.store(lvsdb_path=lvsdb_path, fingerprint=lvs_fingerprint)
 
                 lvsdb.read(lvsdb_path)
         return lvsdb

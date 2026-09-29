@@ -1,0 +1,81 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.klayout;
+
+// Fingerprint of everything a KLayout LVS run depends on.
+//
+// KPEX caches the LVS database of a run (--cache-lvs) and stores this fingerprint next to it
+// in JSON format (<cell>.lvs_fingerprint.pb.json next to <cell>.lvsdb.gz).
+// A cached LVS database is reused only if the fingerprint of the current run equals the stored one,
+// otherwise the differences are reported and LVS runs again.
+// A cached LVS database without a fingerprint is never reused.
+//
+// Paths are informational only and not compared,
+// so that e.g. a reinstalled KPEX (same deck at a different location) still reuses the cache.
+message LVSInputFingerprint {
+    // Changes whenever KPEX computes the fingerprint differently,
+    // so that the fingerprints of an older KPEX never match
+    uint32 format_version = 1;
+
+    // PDK passed to KPEX (--pdk), e.g. "ihp-sg13g2"
+    string pdk = 10;
+
+    // Version of the KLayout running the LVS, e.g. "0.30.12"
+    string klayout_version = 20;
+
+    // The LVS script and every file it may include
+    LVSDeckFingerprint deck = 30;
+
+    // Parameters passed to the LVS script (-rd name=value), without the input/output paths
+    // and without those that can't change the LVS database: thread count, verbosity
+    // and the options of the SPICE writer for the extracted netlist (which is not cached)
+    map<string, string> script_parameters = 40;
+
+    // The input layout as given (not the export of a single cell that KPEX may create)
+    FileFingerprint layout = 50;
+    string cell_name = 51;
+
+    // The LVS input schematic (--schematic, otherwise the dummy schematic written by KPEX)
+    FileFingerprint schematic = 60;
+}
+
+message LVSDeckFingerprint {
+    // Absolute path of the LVS script, informational only
+    string script_path = 1;
+
+    // Hex SHA-256 digest of every file in the directory of the LVS script and below
+    // (following symbolic links, skipping hidden files like .DS_Store), by path relative to that directory.
+    //
+    //     NOTE: the whole directory is covered, as LVS scripts include further files
+    //           (%include, require, load) in ways that are not practical to trace
+    map<string, string> sha256_by_relative_path = 2;
+}
+
+message FileFingerprint {
+    // Absolute path, informational only
+    string path = 1;
+
+    // Hex SHA-256 digest of the file content
+    string sha256 = 2;
+}

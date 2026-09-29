@@ -26,6 +26,7 @@ from __future__ import annotations
 import os
 import subprocess
 import time
+from typing import *
 
 from ..log import (
     debug,
@@ -45,6 +46,43 @@ class LVSError(Exception):
 
 
 class LVSRunner:
+    # Parameters passed to the LVS scripts (-rd name=value), besides the paths and the verbosity
+    SCRIPT_PARAMETERS: Dict[str, str] = {
+        'thr': '22',
+        'run_mode': 'deep',
+        'spice_net_names': 'true',
+        'spice_comments': 'false',
+        'scale': 'false',
+        'schematic_simplify': 'false',
+        'net_only': 'false',
+        'top_lvl_pins': 'true',
+        'combine': 'false',
+        'combine_devices': 'false',  # IHP
+        'purge': 'false',
+        'purge_nets': 'false',
+        'no_simplify': 'true',  # IHP
+    }
+
+    # Script parameters that can't change the LVS database:
+    # the thread count, and the options of the SPICE writer for the extracted netlist
+    #
+    #     NOTE: any other parameter is assumed to change it, so a new one is part of
+    #           the LVS cache fingerprint unless it is listed here
+    NEUTRAL_SCRIPT_PARAMETERS: FrozenSet[str] = frozenset({
+        'thr',
+        'spice_net_names',
+        'spice_comments',
+    })
+
+    @classmethod
+    def result_script_parameters(cls) -> Dict[str, str]:
+        """
+        The script parameters that can change the LVS database (see LVSInputFingerprint)
+        """
+        return {name: value
+                for name, value in cls.SCRIPT_PARAMETERS.items()
+                if name not in cls.NEUTRAL_SCRIPT_PARAMETERS}
+
     @staticmethod
     def run_klayout_lvs(exe_path: str,
                         lvs_script: str,
@@ -65,21 +103,10 @@ class LVSRunner:
             '-rd', f"report={os.path.abspath(lvsdb_path)}",
             '-rd', f"target_netlist={os.path.abspath(netlist_path)}",
             '-rd', f"schematic={os.path.abspath(schematic_path)}",
-            '-rd', 'thr=22',
-            '-rd', 'run_mode=deep',
-            '-rd', 'spice_net_names=true',
-            '-rd', 'spice_comments=false',
-            '-rd', 'scale=false',
-            '-rd', f"verbose={'true' if verbose else 'false'}",
-            '-rd', 'schematic_simplify=false',
-            '-rd', 'net_only=false',
-            '-rd', 'top_lvl_pins=true',
-            '-rd', 'combine=false',
-            '-rd', 'combine_devices=false', # IHP
-            '-rd', 'purge=false',
-            '-rd', 'purge_nets=false',
-            '-rd', 'no_simplify=true', # IHP
         ]
+        for name, value in LVSRunner.SCRIPT_PARAMETERS.items():
+            args += ['-rd', f"{name}={value}"]
+        args += ['-rd', f"verbose={'true' if verbose else 'false'}"]
         rule('Calling KLayout LVS script')
         subproc(' '.join(args))
         subproc(log_path)

@@ -34,6 +34,7 @@ from unittest import mock
 
 from klayout_pex.kpex_cli import InputMode, KpexCLI
 from klayout_pex.klayout.lvs_runner import LVSError, LVSRunner
+from klayout_pex.tool_version_constraints import Tool
 
 
 # What KLayout 0.30 prints when an %include of an LVS script can't be resolved
@@ -73,6 +74,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.tmp_dir = tempfile.mkdtemp(prefix="lvs_run_")
         self.log_path = os.path.join(self.tmp_dir, "cell_lvs.log")
         self.lvsdb_path = os.path.join(self.tmp_dir, "cell.lvsdb.gz")
+        self.netlist_path = os.path.join(self.tmp_dir, "cell_extracted.cir")
 
     def run_lvs(self, fake_klayout: FakeKLayoutProcess):
         with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout):
@@ -82,6 +84,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
                                       schematic_path="cell.spice",
                                       log_path=self.log_path,
                                       lvsdb_path=self.lvsdb_path,
+                                      netlist_path=self.netlist_path,
                                       verbose=False)
 
     def test_missing_lvsdb_raises_with_klayout_errors_and_log_path(self):
@@ -122,7 +125,29 @@ class LVSRunnerFailureTest(unittest.TestCase):
         warning_mock.assert_not_called()
         error_mock.assert_not_called()
 
+    def test_script_parameters_are_passed(self):
+        fake_klayout = mock.Mock(wraps=FakeKLayoutProcess(output="", returncode=0, writes_report=True))
+        self.run_lvs(fake_klayout)
+        args = fake_klayout.call_args.args[0]
+        for name, value in LVSRunner.SCRIPT_PARAMETERS.items():
+            self.assertIn(f"{name}={value}", args)
+        self.assertIn('verbose=false', args)
+
+    def test_result_script_parameters_leave_out_the_neutral_ones(self):
+        parameters = LVSRunner.result_script_parameters()
+        self.assertEqual('deep', parameters['run_mode'])
+        for name in ('thr', 'spice_net_names', 'spice_comments', 'verbose'):
+            self.assertNotIn(name, parameters)
+
     def test_cli_exits_with_error_instead_of_failing_to_cache_missing_lvsdb(self):
+        deck_dir_path = os.path.join(self.tmp_dir, 'deck')
+        os.makedirs(deck_dir_path)
+        lvs_script_path = os.path.join(deck_dir_path, 'sg13cmos5l.lvs')
+        for path in (lvs_script_path,
+                     os.path.join(self.tmp_dir, 'cell.gds'),
+                     os.path.join(self.tmp_dir, 'cell.spice')):
+            with open(path, 'w') as f:
+                f.write(os.path.basename(path))
         args = argparse.Namespace(
             input_mode=InputMode.GDS,
             output_dir_path=self.tmp_dir,
@@ -134,13 +159,14 @@ class LVSRunnerFailureTest(unittest.TestCase):
             effective_schematic_path=os.path.join(self.tmp_dir, 'cell.spice'),
             effective_cell_name='cell',
             klayout_exe_path='klayout',
-            lvs_script_path='sg13cmos5l.lvs',
+            lvs_script_path=lvs_script_path,
             klayout_lvs_verbose=False,
         )
         fake_klayout = FakeKLayoutProcess(output=KLAYOUT_INCLUDE_ERROR_OUTPUT,
                                           returncode=1,
                                           writes_report=False)
         with mock.patch('klayout_pex.klayout.lvs_runner.subprocess.Popen', fake_klayout), \
+             mock.patch.object(Tool, 'detect_version', return_value=None), \
              mock.patch('klayout_pex.kpex_cli.error') as error_mock:
             with self.assertRaises(SystemExit) as ctx:
                 KpexCLI().create_lvsdb(args)
