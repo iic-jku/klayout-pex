@@ -168,6 +168,18 @@ R7;G.$0.16;G.P0.16;;316.321"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_no_resistor_between_pins_with_the_same_label():
+    # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
+    # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
+    with mock.patch('klayout_pex.rcx25.netlist_expander.warning') as warning_mock:
+        results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
+    warning_mock.assert_not_called()
+    assert [k for k in results.summarize().resistances.keys() if k.net1 == k.net2] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_layers_the_tech_info_cant_model_are_an_error():
     # The vias within the MOM capacitor have no bottom/top layers in the tech info,
     # so the resistance networks of C0 and C1 would fall apart into pieces (#217)

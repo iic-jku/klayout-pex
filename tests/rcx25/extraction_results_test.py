@@ -204,6 +204,27 @@ class CellExtractionResultsTest(unittest.TestCase):
                                summary.resistances[NetCoupleKey('A', 'A,B.$1.16')])
         self.assertAlmostEqual(72.533, summary.resistances[NetCoupleKey('A,B.$1.16', 'B')])
 
+    def test_summarize_skips_resistances_between_pins_with_the_same_label(self):
+        # e.g. output Y of sky130_fd_sc_hd__inv_1, which has two labels:
+        # both pins Y are one node in the netlist, so the element between them is shorted
+        results = CellExtractionResults(cell_name='Cell')
+        network = results.r_extraction_result.networks.add()
+        network.net_name = 'Y'
+        for node_id, kind, node_name in ((1, r_network_pb2.RNode.Kind.KIND_PIN, 'Y'),
+                                         (2, r_network_pb2.RNode.Kind.KIND_PIN, 'Y'),
+                                         (3, r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL, '$0.3')):
+            node = network.nodes.add(node_id=node_id, node_kind=kind, node_name=node_name)
+            if kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL:
+                node.net_name = f"{network.net_name}.{node_name}"
+        for node_a, node_b, resistance in ((1, 2, 18.981), (2, 3, 5.0)):
+            element = network.elements.add(resistance=resistance)
+            element.node_a.node_id = node_a
+            element.node_b.node_id = node_b
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('Y', 'Y.$0.3'): 5.0}, summary.resistances)
+
 
 @allure.parent_suite("Unit Tests")
 class ExtractionSummaryTest(unittest.TestCase):
