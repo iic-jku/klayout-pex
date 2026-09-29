@@ -102,8 +102,8 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, VIA,     KCAP, "mcon_vpp",  (67, 44),    "mcon",      "Capacitor device contact (MOM cap)")
     add_computed_layer(tech, VIA,     KCAP, "via1_vpp",  (68, 44),    "via",       "Capacitor device contact (MOM cap)")
     add_computed_layer(tech, VIA,     KCAP, "via2_vpp",  (69, 44),    "via2",      "Capacitor device contact (MOM cap)")
-    add_computed_layer(tech, VIA,     KCAP, "via3_vpp",  (70, 44),    "via3",      "Capacitor device contact (MOM cap)")
-    add_computed_layer(tech, VIA,     KCAP, "via4_vpp",  (71, 44),    "via4",      "Capacitor device contact (MOM cap)")
+    add_computed_layer(tech, VIA,     KCAP, "via3_vpp",  (70, 144),   "via3",      "Capacitor device contact (MOM cap)")
+    add_computed_layer(tech, VIA,     KCAP, "via4_vpp",  (71, 144),   "via4",      "Capacitor device contact (MOM cap)")
 
     add_computed_layer(tech, METAL,   KPIN, "poly_pin_con", (66, 16), "poly.pin",   "Poly pin")
     add_computed_layer(tech, METAL,   KPIN, "li_pin_con",   (67, 16), "li1.pin",    "li1 pin")

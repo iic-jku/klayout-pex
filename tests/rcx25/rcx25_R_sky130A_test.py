@@ -28,7 +28,6 @@ from unittest import mock
 
 from rcx25_test_helpers import *
 
-from klayout_pex.pex25d.diagnostics import ExitCode
 
 CSVPath = str
 PNGPath = str
@@ -180,24 +179,21 @@ def test_no_resistor_between_pins_with_the_same_label():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-def test_layers_the_tech_info_cant_model_are_an_error():
-    # The vias within the MOM capacitor have no bottom/top layers in the tech info,
-    # so the resistance networks of C0 and C1 would fall apart into pieces (#217)
-    gds_path = pex_whiteboxed.pdk.gds_path('cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
-    with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.kpex_cli.error') as error_mock, \
-         pytest.raises(SystemExit) as exit_info:
-        KpexCLI().main(['main',
-                        '--pdk', pex_whiteboxed.pdk.name,
-                        '--mode', 'R',
-                        '--gds', gds_path,
-                        '--out_dir', out_dir,
-                        '--2.5D'])
-    assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
-    error_mock.assert_called_once()
-    assert error_mock.call_args.args[0] == (
-        "The tech info can't model these layers of the layout for the resistance extraction, "
-        "so their connections would be missing from the resistance network:\n"
-        "  - mcon (LVS mcon_vpp): no bottom/top layers\n"
-        "  - via (LVS via1_vpp): no bottom/top layers"
-    )
+def test_vias_within_mom_cap_l1m1m2():
+    # The vias within the MOM capacitor (mcon_vpp, via1_vpp) are on the GDS pairs of the regular vias,
+    # so they are part of the resistance network (#228 reported them as unmodeled)
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_04p4x04p6_l1m1m2_noshield',
+                                                          'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
+    assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
+    assert results.summarize().resistances
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_vias_within_mom_cap_l1m1m2m3m4():
+    # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+                                                          'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
+    assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
+    assert results.summarize().resistances
