@@ -35,6 +35,9 @@ from tech_builder import *
 def build_layers(tech: Technology):
     # https://gf180mcu-pdk.readthedocs.io/en/latest/physical_verification/design_manual/drm_04_1.html
 
+    # NOTE: gf180mcu has no pin layers, pins are labels (xx/10) on the drawn layer,
+    #       so the drawn layer is the pin layer too
+    #
     #               purpose, name,      drw_gds,  pin_gds,  label_gds, description
     add_layer(tech, DNWELL,  "DNWELL",  (12, 0),  None,     None,      "Deep N-well")
     add_layer(tech, NWELL,   "Nwell",   (21, 0),  None,     None,      "N-well region")
@@ -42,18 +45,18 @@ def build_layers(tech: Technology):
     # add_layer(tech, N_P_TAP, "tap",   (65, 44), None,     None,      "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)")
     add_layer(tech, PIMP,    "Pplus",   (31, 0),  None,     None,      "P+ source/drain implant")
     add_layer(tech, NIMP,    "Nplus",   (32, 0),  None,     None,      "N+ source/drain implant")
-    add_layer(tech, METAL,   "Poly2",   (30, 0),  None,     (30, 10),  "Polysilicon gate & interconnect")
+    add_layer(tech, METAL,   "Poly2",   (30, 0),  (30, 0),  (30, 10),  "Polysilicon gate & interconnect")
     add_layer(tech, CONT,    "Contact", (33, 0),  None,     None,      "Contact to local interconnect")
-    add_layer(tech, METAL,   "Metal1",  (34, 0),  None,     (34, 10),  "Metal 1 interconnect")
+    add_layer(tech, METAL,   "Metal1",  (34, 0),  (34, 0),  (34, 10),  "Metal 1 interconnect")
     add_layer(tech, VIA,     "Via1",    (35, 0),  None,     None,      "Contact from Metal1 to Metal2")
-    add_layer(tech, METAL,   "Metal2",  (36, 0),  None,     (36, 10),  "Metal 2 interconnect")
+    add_layer(tech, METAL,   "Metal2",  (36, 0),  (36, 0),  (36, 10),  "Metal 2 interconnect")
     add_layer(tech, VIA,     "Via2",    (38, 0),  None,     None,      "Contact from Metal2 to Metal3")
-    add_layer(tech, METAL,   "Metal3",  (42, 0),  None,     (42, 10),  "Metal 3 interconnect")
+    add_layer(tech, METAL,   "Metal3",  (42, 0),  (42, 0),  (42, 10),  "Metal 3 interconnect")
     add_layer(tech, VIA,     "Via3",    (40, 0),  None,     None,      "Contact from Metal3 to Metal4")
-    add_layer(tech, METAL,   "Metal4",  (46, 0),  None,     (46, 10),  "Metal 4 interconnect")
+    add_layer(tech, METAL,   "Metal4",  (46, 0),  (46, 0),  (46, 10),  "Metal 4 interconnect")
     add_layer(tech, VIA,     "Via4",    (41, 0),  None,     None,      "Contact from Metal4 to Metal5")
     add_layer(tech, MIM,     "FuseTop", (75, 0),  None,     None,      "MiM capacitor plate over Metal5")
-    add_layer(tech, METAL,   "Metal5",  (81, 0),  None,     (81, 10),  "Metal 5 interconnect")
+    add_layer(tech, METAL,   "Metal5",  (81, 0),  (81, 0),  (81, 10),  "Metal 5 interconnect")
 
 
 def build_lvs_computed_layers(tech: Technology):
