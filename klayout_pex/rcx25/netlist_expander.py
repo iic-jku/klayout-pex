@@ -115,7 +115,7 @@ class RCX25NetlistExpander:
             c.set_parameter('C', cap_value_farad)
             if net1 == net2:
                 warning(f"Invalid attempt to create cap {c.name} between "
-                        f"same net {net1} with value {'%.12g' % cap_value}")
+                        f"same net {net1} with value {'%.12g' % cap_value_femto} fF")
 
         for idx, (key, res_value) in enumerate(res_items):
             net1 = name2net[key.net1]
