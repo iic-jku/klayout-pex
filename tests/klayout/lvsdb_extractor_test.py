@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import os
+from typing import *
 import unittest
 from unittest import mock
 
@@ -54,14 +55,35 @@ class Test(unittest.TestCase):
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                              'klayout_pex_protobuf', 'ihp-sg13g2_tech.pb.json'))
 
-    def prepare_extraction(self) -> KLayoutExtractionContext:
+    def tech_info(self, renamed_layers_derived_from: Optional[str] = None) -> TechInfo:
+        tech = TechInfo.parse_tech_def(jsonpb_path=self.tech_info_json_path)
+        # NOTE: e.g. like gf180mcuD, whose tech info names the contacts differently than its LVS deck
+        for layer in tech.lvs_computed_layers:
+            if layer.original_layer_name == renamed_layers_derived_from:
+                layer.layer_info.name += '_renamed'
+        return TechInfo(tech=tech, dielectric_filter=None)
+
+    def prepare_extraction(self, tech: Optional[TechInfo] = None) -> KLayoutExtractionContext:
         lvsdb = kdb.LayoutVsSchematic()
         lvsdb.read(self.lvsdb_path)
-        tech = TechInfo.from_json(self.tech_info_json_path, dielectric_filter=None)
         return KLayoutExtractionContext.prepare_extraction(top_cell=self.cell_name,
                                                            lvsdb=lvsdb,
-                                                           tech=tech,
+                                                           tech=tech or self.tech_info(),
                                                            blackbox_devices=False)
+
+    def test_unnamed_layer_partly_covered_by_derived_layers_is_a_warning(self):
+        # the contacts to the taps (e.g. the guard ring) have no layer in the tech info
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+            pex_context = self.prepare_extraction()
+        self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
+                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con",
+                      [call.args[0] for call in warning.call_args_list])
+        self.assertEqual([], pex_context.unmodeled_layers)
+
+    def test_unnamed_layer_without_derived_layers_is_unmodeled(self):
+        pex_context = self.prepare_extraction(tech=self.tech_info(renamed_layers_derived_from='Cont'))
+        self.assertEqual(['cont_drw (Cont): the tech info has no layer derived from it'],
+                         pex_context.unmodeled_layers)
 
     def test_leftover_top_cells_are_ignored_with_a_warning(self):
         with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:

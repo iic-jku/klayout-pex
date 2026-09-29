@@ -82,6 +82,7 @@ class KLayoutMergedExtractedLayerInfo:
 class KLayoutNonemptyExtractedLayers:
     extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
     unnamed_layers: List[KLayoutExtractedLayerInfo]   # not in the tech info
+    unmodeled_layers: List[str]                        # unnamed layers the tech info has no layer for
 
 
 @dataclass
@@ -96,6 +97,8 @@ class KLayoutExtractionContext:
     annotated_layout: kdb.Layout
     extracted_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo]
     unnamed_layers: List[KLayoutExtractedLayerInfo]
+    # unnamed layers the tech info has no layer for (derived from the same original layer)
+    unmodeled_layers: List[str]
 
     @classmethod
     def prepare_extraction(cls,
@@ -169,7 +172,8 @@ class KLayoutExtractionContext:
             cell_mapping=cm,
             annotated_layout=annotated_layout,
             extracted_layers=nonempty_layers.extracted_layers,
-            unnamed_layers=nonempty_layers.unnamed_layers
+            unnamed_layers=nonempty_layers.unnamed_layers,
+            unmodeled_layers=nonempty_layers.unmodeled_layers
         )
 
     @staticmethod
@@ -225,6 +229,7 @@ class KLayoutExtractionContext:
         nonempty_layers: Dict[GDSPair, KLayoutMergedExtractedLayerInfo] = {}
 
         unnamed_layers: List[KLayoutExtractedLayerInfo] = []
+        original_gds_pair_by_unnamed_layer_name: Dict[str, GDSPair] = {}
         lvsdb_layer_indexes = lvsdb.layer_indexes()
         for idx, ln in enumerate(lvsdb.layer_names()):
             li = lvsdb_layer_indexes[idx]
@@ -236,7 +241,6 @@ class KLayoutExtractionContext:
             if layer.count() >= 1:
                 computed_layer_info = tech.computed_layer_info_by_name.get(ln, None)
                 if not computed_layer_info:
-                    warning(f"Unable to find info about extracted LVS layer '{ln}'")
                     gds_pair = (1000 + idx, 20)
                     linfo = KLayoutExtractedLayerInfo(
                         index=idx,
@@ -245,6 +249,8 @@ class KLayoutExtractionContext:
                         region=layer
                     )
                     unnamed_layers.append(linfo)
+                    original_info = annotated_layout.get_info(li)
+                    original_gds_pair_by_unnamed_layer_name[ln] = (original_info.layer, original_info.datatype)
                     continue
 
                 if blackbox_devices:
@@ -273,8 +279,75 @@ class KLayoutExtractionContext:
                         gds_pair=gds_pair,
                     )
 
+        unmodeled_layers = KLayoutExtractionContext.check_unnamed_layers(
+            lvsdb=lvsdb,
+            tech=tech,
+            annotated_layout=annotated_layout,
+            layer_index_map=layer_index_map,
+            unnamed_layers=unnamed_layers,
+            original_gds_pair_by_unnamed_layer_name=original_gds_pair_by_unnamed_layer_name
+        )
+
         return KLayoutNonemptyExtractedLayers(extracted_layers=nonempty_layers,
-                                              unnamed_layers=unnamed_layers)
+                                              unnamed_layers=unnamed_layers,
+                                              unmodeled_layers=unmodeled_layers)
+
+    @staticmethod
+    def check_unnamed_layers(lvsdb: kdb.LayoutToNetlist,
+                             tech: TechInfo,
+                             annotated_layout: kdb.Layout,
+                             layer_index_map: LayerIndexMap,
+                             unnamed_layers: List[KLayoutExtractedLayerInfo],
+                             original_gds_pair_by_unnamed_layer_name: Dict[str, GDSPair]) -> List[str]:
+        """
+        An LVS layer the tech info doesn't know is left out of the extraction.
+        That's fine where the tech info has layers derived from the same original layer
+        that cover it (e.g. the raw contact layer, and the contacts to diffusion and poly).
+
+        :return: the layers the tech info has no derived layer for, which the LVS deck defines
+        """
+        lvsdb_layer_index_by_name = {lvsdb.layer_name(li): li for li in lvsdb.layer_indexes()}
+
+        def region(lvs_layer_name: str) -> kdb.Region:
+            li = layer_index_map.get(lvsdb_layer_index_by_name[lvs_layer_name], None)
+            if li is None:
+                return kdb.Region()
+            return kdb.Region(annotated_layout.top_cell().begin_shapes_rec(li))
+
+        unmodeled_layers: List[str] = []
+        partly_covered_layers: List[str] = []
+
+        for ul in unnamed_layers:
+            gds_pair = original_gds_pair_by_unnamed_layer_name[ul.lvs_layer_name]
+            original_layer = tech.layer_info_by_gds_pair.get(gds_pair, None)
+            description = f"{ul.lvs_layer_name} ({original_layer.name if original_layer else '%d/%d' % gds_pair})"
+
+            # NOTE: the LVS deck may not define the layers the tech info derives (e.g. differently named ones)
+            derived_layer_names = [] if original_layer is None else [
+                name for name, info in tech.computed_layer_info_by_name.items()
+                if info.original_layer_name == original_layer.name and name in lvsdb_layer_index_by_name
+            ]
+            if not derived_layer_names:
+                unmodeled_layers.append(f"{description}: the tech info has no layer derived from it")
+                continue
+
+            covered = kdb.Region()
+            for name in derived_layer_names:
+                covered += region(name)
+            uncovered = ul.region.dup()
+            uncovered.remove_properties()
+            uncovered -= covered
+            if uncovered.is_empty():
+                debug(f"The LVS layer {description} is covered by {', '.join(derived_layer_names)}")
+            else:
+                partly_covered_layers.append(f"{description}: {uncovered.count()} of {ul.region.count()} shapes "
+                                             f"are not within {', '.join(derived_layer_names)}")
+
+        if unmodeled_layers or partly_covered_layers:
+            warning("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n" +
+                    '\n'.join(f"  - {layer}" for layer in unmodeled_layers + partly_covered_layers))
+
+        return unmodeled_layers
 
     def top_cell_bbox(self) -> kdb.Box:
         b1: kdb.Box = self.annotated_layout.top_cell().bbox()
