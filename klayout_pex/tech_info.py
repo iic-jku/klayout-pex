@@ -29,6 +29,7 @@ from collections import Counter
 from functools import cached_property
 import google.protobuf.json_format
 
+from .device_models import DeviceModels
 from .util.multiple_choice import MultipleChoicePattern
 from .log import (
     warning
@@ -133,6 +134,10 @@ class TechInfo:
     @cached_property
     def computed_layer_info_by_name(self) -> Dict[LVSLayerName, tech_pb2.ComputedLayerInfo]:
         return {lyr.layer_info.name: lyr for lyr in self.tech.lvs_computed_layers}
+
+    @cached_property
+    def device_models(self) -> DeviceModels:
+        return DeviceModels(self.tech.device_models)
 
     @cached_property
     def computed_layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.ComputedLayerInfo]:
