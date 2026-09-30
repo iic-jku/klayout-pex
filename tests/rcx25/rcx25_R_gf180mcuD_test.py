@@ -54,9 +54,9 @@ def test_wire_voltage_divider_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B,C.$1.14;;1.912
-R2;A,B,C.$1.14;B;;1.912
-R3;A,B,C.$1.14;C;;0.346"""
+R1;A;A,B,C;;1.912
+R2;A,B,C;B;;1.912
+R3;A,B,C;C;;0.346"""
     )
 
 

@@ -529,8 +529,8 @@ class KLayoutExtractionContext:
 
             dd[d.device_name] = d
 
-        # NOTE: once devices are connected to the resistance network (#211, item 6),
-        #       a terminal without a node must be an error (or get a fallback node)
+        # NOTE: a terminal without a node stays on its net, which a node of the resistance network carries
+        #       (#211 §6), so it misses only the resistance to where it is
         if devices_by_unknown_terminal_layer:
             def device_list(device_names: List[str]) -> str:
                 listed = ', '.join(device_names[:3])

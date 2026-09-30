@@ -104,6 +104,15 @@ class RCX25NetlistExpander:
             add_net_if_needed(key.net1)
             add_net_if_needed(key.net2)
 
+        # connect each device terminal to its node of the resistor network (#211 §6),
+        # a terminal without one stays on its net, which a node of the resistor network carries
+        for key, node_name in sorted(summary.device_terminal_nodes.items()):
+            device = top_circuit.device_by_id(key.device_id)
+            if device is None:  # e.g. removed, as whiteboxed
+                continue
+            add_net_if_needed(node_name)
+            device.connect_terminal(key.terminal_id, name2net[node_name])
+
         for idx, (key, cap_value_femto) in enumerate(cap_items):
             net1 = name2net[key.net1]
             net2 = name2net[key.net2]

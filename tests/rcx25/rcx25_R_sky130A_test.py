@@ -23,6 +23,8 @@
 #
 
 import allure
+import glob
+import os
 import pytest
 from unittest import mock
 
@@ -80,9 +82,9 @@ def test_wire_voltage_divider_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B,C.$1.16;;426.667
-R2;A,B,C.$1.16;B;;413.867
-R3;A,B,C.$1.16;C;;72.533"""
+R1;A;A,B,C;;426.667
+R2;A,B,C;B;;413.867
+R3;A,B,C;C;;72.533"""
         )
 
 
@@ -96,8 +98,8 @@ def test_wire_same_label_at_both_ends_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_same_label_at_both_ends_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B.$1.16;;210.085
-R2;A,B.$1.16;B;;72.533"""
+R1;A;A,B;;210.085
+R2;A,B;B;;72.533"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -139,13 +141,28 @@ def test_nfet_li1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$2.$1.17;$2.P0.12;;209.667
-R2;$3.$1.17;$3.P0.12;;209.667
+R1;$2;$2.$1.17;;209.667
+R2;$3;$3.$1.17;;209.667
 R3;G;G.$1.17;;2.418
 R4;G.$0.16;G.$1.17;;152.0
 R5;G.$0.16;G.P0.16;;316.321"""
         )
 
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nfet_terminals_are_on_the_resistor_network():
+    # The transistor is connected to the nodes of its terminals (#211 §6): the gate to the end of the poly,
+    # drain and source to the nodes that carry the names of their nets (which have no pin)
+    pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'nfet_li1_redux.gds.gz')
+    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pex_whiteboxed.pdk.name}"))
+    netlist_path, = glob.glob(os.path.join(output_dir_path, 'nfet_li1_redux__*', '*_k25d_pex_netlist.spice'))
+    with open(netlist_path) as f:
+        lines = f.read().replace('\n+', ' ').splitlines()
+    nfet_line, = [l for l in lines if l.startswith('X$1 ')]
+    assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.16', '\\$2', 'sky130_gnd']  # D G S B
 
 
 @allure.parent_suite(parent_suite)

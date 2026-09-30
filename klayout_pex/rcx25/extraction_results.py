@@ -152,22 +152,34 @@ def add_resistance(resistance_table: Dict[NetCoupleKey, float],
         resistance_table[key] = resistance
 
 
+@dataclass(frozen=True, order=True)
+class DeviceTerminalKey:
+    device_id: int
+    terminal_id: int
+
+
 @dataclass
 class ExtractionSummary:
     capacitances: Dict[NetCoupleKey, float]
     resistances: Dict[NetCoupleKey, float]
 
+    # node of the resistor network each device terminal connects to
+    device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = field(default_factory=dict)
+
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
         merged_capacitances = defaultdict(float)
         merged_resistances: Dict[NetCoupleKey, float] = {}
+        merged_device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
             for couple_key, res in s.resistances.items():
                 add_resistance(merged_resistances, couple_key.normed(), res)
+            merged_device_terminal_nodes.update(s.device_terminal_nodes)
         return ExtractionSummary(capacitances=merged_capacitances,
-                                 resistances=merged_resistances)
+                                 resistances=merged_resistances,
+                                 device_terminal_nodes=merged_device_terminal_nodes)
 
 
 @dataclass
@@ -190,14 +202,15 @@ class CellExtractionResults:
         self.sideoverlap_table[cap.key].append(cap)
 
     @staticmethod
-    def node_names(network: r_network_pb2.RNetwork) -> Dict[int, NetName]:
+    def node_names(network: r_network_pb2.RNetwork) -> Tuple[Dict[int, NetName],
+                                                             Dict[DeviceTerminalKey, List[int]]]:
         """
         Names of the netlist nodes of a resistor network
 
-        Nodes joined by an element without resistance (which a simulator can't solve for)
-        are one electrical node, and get one name.
+        Nodes that are one electrical node get one name: the ports of a device terminal,
+        and nodes joined by an element without resistance (which a simulator can't solve for).
 
-        :return: node name by node ID
+        :return: node name by node ID, and the IDs of the nodes of each device terminal
         """
         K = r_network_pb2.RNode.Kind
 
@@ -216,6 +229,12 @@ class CellExtractionResults:
         # NOTE: ordered by name, as the node IDs differ from run to run
         nodes = sorted(network.nodes, key=lambda n: n.node_name)
 
+        terminal_node_ids: Dict[DeviceTerminalKey, List[int]] = defaultdict(list)
+        for n in nodes:
+            if n.node_kind == K.KIND_DEVICE_TERMINAL:
+                key = DeviceTerminalKey(n.device_terminal.device_id, n.device_terminal.terminal_id)
+                terminal_node_ids[key].append(n.node_id)
+
         # groups of nodes that are one electrical node (union-find, by node ID)
         parent: Dict[int, int] = {n.node_id: n.node_id for n in nodes}
 
@@ -228,6 +247,9 @@ class CellExtractionResults:
         def union(node_id_a: int, node_id_b: int):
             parent[find(node_id_a)] = find(node_id_b)
 
+        for node_ids in terminal_node_ids.values():
+            for node_id in node_ids[1:]:
+                union(node_id, node_ids[0])
         for element in network.elements:
             if element.resistance == 0.0:
                 union(element.node_a.node_id, element.node_b.node_id)
@@ -235,6 +257,9 @@ class CellExtractionResults:
         groups: Dict[int, List[r_network_pb2.RNode]] = defaultdict(list)  # by root node ID
         for n in nodes:
             groups[find(n.node_id)].append(n)
+
+        def has_pin(root: int) -> bool:
+            return any(n.node_kind == K.KIND_PIN for n in groups[root])
 
         def group_name(root: int) -> NetName:
             pin_names = sorted({n.node_name for n in groups[root] if n.node_kind == K.KIND_PIN})
@@ -247,7 +272,19 @@ class CellExtractionResults:
             return default_name((ports or groups[root])[0])
 
         name_by_root: Dict[int, NetName] = {root: group_name(root) for root in groups}
-        return {n.node_id: name_by_root[find(n.node_id)] for n in nodes}
+
+        # NOTE: one node carries the name of the net, so that what stays connected to the net
+        #       (its capacitances, device terminals without a port, e.g. a MOS bulk) is on the resistor network:
+        #       a pin of that name, otherwise the first device terminal, otherwise the first node (but a pin)
+        if network.net_name not in name_by_root.values():
+            candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
+                              [find(n.node_id) for n in nodes]
+            root = next((r for r in candidate_roots if not has_pin(r)), None)
+            if root is not None:
+                name_by_root[root] = network.net_name
+
+        names = {n.node_id: name_by_root[find(n.node_id)] for n in nodes}
+        return names, terminal_node_ids
 
     def summarize(self) -> ExtractionSummary:
         normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
@@ -272,9 +309,13 @@ class CellExtractionResults:
                                                 resistances={})
 
         normalized_resistance_table: Dict[NetCoupleKey, float] = {}
+        device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
 
         for network in self.r_extraction_result.networks:
-            node_names = self.node_names(network)
+            node_names, terminal_node_ids = self.node_names(network)
+            for terminal_key, node_ids in terminal_node_ids.items():
+                device_terminal_nodes[terminal_key] = node_names[node_ids[0]]
+
             for element in network.elements:
                 resistance = element.resistance
                 normalized_key = NetCoupleKey(node_names[element.node_a.node_id],
@@ -289,7 +330,8 @@ class CellExtractionResults:
                 add_resistance(normalized_resistance_table, normalized_key, resistance)
 
         resistance_summary = ExtractionSummary(capacitances={},
-                                               resistances=normalized_resistance_table)
+                                               resistances=normalized_resistance_table,
+                                               device_terminal_nodes=device_terminal_nodes)
 
         return ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary,
