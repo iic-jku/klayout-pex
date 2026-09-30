@@ -416,7 +416,9 @@ class RExtractor:
                     case klp.RNodeType.PolygonPort:
                         r_node.node_kind = r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL
                         port_idx = rn.port_index()
-                        nn = polygon_port_device_terminals[rn.layer()][port_idx].net_name
+                        # NOTE: the device terminal behind the port, to connect the device to this node
+                        r_node.device_terminal.CopyFrom(polygon_port_device_terminals[rn.layer()][port_idx])
+                        r_node.device_terminal.ClearField('region_by_layer')
                         r_node.net_name = f"{result_network.net_name}.{r_node.node_name}"
                         r_node.location.box.net = r_node.net_name
                     case klp.RNodeType.Internal:

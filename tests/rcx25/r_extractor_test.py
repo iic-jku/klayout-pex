@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import os
+from typing import *
 import unittest
 
 import allure
@@ -111,17 +112,26 @@ class RExtractorTechTest(unittest.TestCase):
 @allure.parent_suite("Unit Tests")
 @allure.tag("R", "Device Terminals")
 class RExtractorDeviceTerminalTest(unittest.TestCase):
+    @staticmethod
+    def ports_by_net() -> Dict[str, List[r_network_pb2.RNode]]:
+        rex = r_extractor(sky130a_tech(),
+                          top_cell='nfet_li1_redux',
+                          lvsdb_file_name='nfet_li1_redux_reordered_lvs_layers.lvsdb.gz')
+        result = rex.extract(rex.prepare_request())
+        return {network.net_name: [n for n in network.nodes
+                                   if n.node_kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL]
+                for network in result.networks}
+
     def test_device_terminal_is_a_port_of_its_wire(self):
         # NOTE: the annotated layout has a layer for each LVS layer, e.g. poly_con and poly_vpp for poly,
         #       and KLayout doesn't create the LVS layers in the same order from run to run:
         #       in this LVS database, the gate terminal's layer (poly_con) comes after the other one
-        rex = r_extractor(sky130a_tech(),
-                          top_cell='nfet_li1_redux',
-                          lvsdb_file_name='nfet_li1_redux_reordered_lvs_layers.lvsdb.gz')
+        self.assertEqual({'G': 1, '$2': 1, '$3': 1, 'sky130_gnd': 0},
+                         {net_name: len(ports) for net_name, ports in self.ports_by_net().items()})
 
-        result = rex.extract(rex.prepare_request())
-
-        ports_by_net = {network.net_name: sum(1 for n in network.nodes
-                                              if n.node_kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL)
-                        for network in result.networks}
-        self.assertEqual({'G': 1, '$2': 1, '$3': 1, 'sky130_gnd': 0}, ports_by_net)
+    def test_port_has_its_device_terminal(self):
+        # NOTE: to connect the device to the node of its port (#211 §6)
+        self.assertEqual({'G': [(1, 1, 'G')], '$2': [(1, 0, 'S')], '$3': [(1, 2, 'D')], 'sky130_gnd': []},
+                         {net_name: [(p.device_terminal.device_id, p.device_terminal.terminal_id, p.device_terminal.name)
+                                     for p in ports]
+                          for net_name, ports in self.ports_by_net().items()})
