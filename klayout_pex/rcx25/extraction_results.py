@@ -214,12 +214,18 @@ class CellExtractionResults:
         """
         K = r_network_pb2.RNode.Kind
 
+        pin_labels = {n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN}
+
         def default_name(node: r_network_pb2.RNode) -> NetName:
-            # NOTE: if we have an electrical short between 2 pins A and B
-            #       and a parasitic resistance between the two,
-            #       KLayout will call the net of both pins "A,B"
-            #       but we really want the pin name as the node name
             if node.node_kind == K.KIND_PIN:
+                # NOTE: the pins of a net with one label are the node of the net,
+                #       which is named after the label, unless other nets are too (e.g. vss$1, #211 §10)
+                if len(pin_labels) == 1:
+                    return network.net_name
+                # NOTE: if we have an electrical short between 2 pins A and B
+                #       and a parasitic resistance between the two,
+                #       KLayout will call the net of both pins "A,B"
+                #       but we really want the pin name as the node name
                 return node.node_name
             if not node.net_name or ',' in node.net_name:
                 # NOTE: network prefix, as node name is only unique per network
@@ -262,7 +268,7 @@ class CellExtractionResults:
             return any(n.node_kind == K.KIND_PIN for n in groups[root])
 
         def group_name(root: int) -> NetName:
-            pin_names = sorted({n.node_name for n in groups[root] if n.node_kind == K.KIND_PIN})
+            pin_names = sorted({default_name(n) for n in groups[root] if n.node_kind == K.KIND_PIN})
             if network.net_name in pin_names:
                 return network.net_name
             if pin_names:

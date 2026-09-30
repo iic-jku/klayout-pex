@@ -279,6 +279,22 @@ class CellExtractionResultsTest(unittest.TestCase):
         self.assertEqual({DeviceTerminalKey(1, 1): 'G.P0.16'}, summary.device_terminal_nodes)
         self.assertEqual({NetCoupleKey('G', 'G.P0.16'): 100.0}, summary.resistances)
 
+    def test_summarize_the_pins_of_a_net_of_one_label_are_its_node(self):
+        # NOTE: another net has the label D too, so this one is called D$1 (#211 §10)
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'D$1',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (3, K.KIND_DEVICE_TERMINAL, 'P0.nSD', (1, 2))],
+                         elements=[(1, 2, 0.488), (2, 3, 17.0)])
+
+        summary = results.summarize()
+
+        self.assertEqual({DeviceTerminalKey(1, 2): 'D$1.P0.nSD'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('D$1', 'D$1.$1.Metal1'): 0.488,
+                          NetCoupleKey('D$1.$1.Metal1', 'D$1.P0.nSD'): 17.0}, summary.resistances)
+
     def test_summarize_nodes_joined_without_resistance_are_one_node(self):
         # NOTE: a simulator can't solve for a resistor of 0 Ω, so no such resistor must be written
         K = r_network_pb2.RNode.Kind

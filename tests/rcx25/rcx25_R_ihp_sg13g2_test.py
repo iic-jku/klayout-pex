@@ -103,3 +103,39 @@ def test_device_terminals_without_tech_layer_are_reported_once():
         "  - cap_cmomi terminal mim_btm on LVS layer cap_cmomi_m5_ports: $1\n"
         "  - cap_cmomi terminal mim_top on LVS layer cap_cmomi_m5_ports: $1"
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_nets_of_the_same_name_stay_apart():
+    # Two transistors, each with its own metal islands labelled D and S, which are not connected
+    # (like the islands of a supply, joined only in the parent). The IHP LVS script connects no nets implicitly,
+    # so they are distinct nets of the same name, which KLayout's SPICE writer calls D, D$1, S, S$1 (#211 §10)
+    cell_name = 'nmos_metal1_redux_twice'
+    gds_path = os.path.join(TEST_DESIGNS_DIR, 'test_patterns', f"{cell_name}.gds.gz")
+
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main',
+                  '--pdk', PDK.IHP_SG13G2,
+                  '--mode', 'R',
+                  '--gds', gds_path,
+                  '--out_dir', out_dir,
+                  '--2.5D'])
+        with open(cli.rcx25_extracted_csv_path) as f:
+            csv_lines = f.read().splitlines()
+
+    assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$0.GatPoly;;33.654
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+R3;$4;$4.$0.GatPoly;;33.654
+R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0
+R5;D;D.$1.Metal1;;0.488
+R6;D$1;D$1.$1.Metal1;;0.488
+R7;D$1.$1.Metal1;D$1.P0.nSD;;17.0
+R8;D.$1.Metal1;D.P0.nSD;;17.0
+R9;S;S.$1.Metal1;;0.598
+R10;S$1;S$1.$1.Metal1;;0.598
+R11;S$1.$1.Metal1;S$1.P0.nSD;;17.0
+R12;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
