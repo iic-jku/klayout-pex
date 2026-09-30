@@ -1,0 +1,1319 @@
+[18:05:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1207
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --gds                                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp_sg13g2/cmomi_w5u_
+l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz --out_dir /tmp/tmpauf_s_tv --2.5D          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:05:49] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:576
+[18:05:49] INFO     No explicit top cell specified, using top    kpex_cli.py:616
+                    cell 'cmomi_w5u_l5u_m1_m5'                                  
+[18:05:49] INFO     LVS input schematic not specified (argument  kpex_cli.py:657
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:05:50] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1146
+/tmp/tmpauf_s_tv/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex
+/testdata/designs/ihp_sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz/cmom
+i_w5u_l5u_m1_m5.lvsdb.gz                                                        
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/ihp-sg13g2/libs.tech/kpex/sg13g2.l
+vs -rd                                                                          
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp_sg13g2/cmom
+i_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz -rd                                  
+report=/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m
+1_m5.lvsdb.gz -rd                                                               
+target_netlist=/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w
+5u_l5u_m1_m5_extracted.cir -rd                                                  
+schematic=/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5
+u_m1_m5_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd                  
+spice_net_names=true -rd spice_comments=false -rd scale=false -rd               
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true -rd verbose=false                                              
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_lv
+s.log                                                                           
+2026-09-30 18:05:50 +0000: Memory Usage (433924K) : Starting running SG13G2     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp_sg13g2/cmomi_w5u_
+l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz                                            
+2026-09-30 18:05:50 +0000: Memory Usage (433924K) : Ruby Version for klayout:   
+3.2.3                                                                           
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Loading database to memory  
+is complete.                                                                    
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : SG13G2 Klayout LVS runset   
+output at:                                                                      
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.lv
+sdb.gz                                                                          
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Evaluate switches.          
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Extracted netlist with net  
+names: true                                                                     
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Extracted netlist with      
+comments in details: false                                                      
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected NET_ONLY option:   
+false                                                                           
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected LAYOUT_NETLIST     
+option: (none)                                                                  
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected                    
+IGNORE_TOP_PORTS_MISMATCH option:                                               
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected IMPLICIT_NETS      
+option: (none)                                                                  
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected TOP_LVL_PINS       
+option: true                                                                    
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected COMBINE DEVICES    
+option: false                                                                   
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected PURGE option: false
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected PURGE_NETS option: 
+false                                                                           
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected SIMPLIFY option:   
+false                                                                           
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected SERIES_RES option: 
+true                                                                            
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected PARALLEL_RES       
+option: true                                                                    
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : Selected                    
+DISABLE_TAP_EXTRACTION option: false                                            
+2026-09-30 18:05:50 +0000: Memory Usage (435340K) : deep  mode is enabled.      
+2026-09-30 18:05:50 +0000: Memory Usage (435468K) : Netlist file:               
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_du
+mmy_schematic.spice                                                             
+2026-09-30 18:05:50 +0000: Memory Usage (435468K) : LVS extracted netlist at:   
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_ex
+tracted.cir                                                                     
+2026-09-30 18:05:50 +0000: Memory Usage (435468K) : Applying SRAM integration   
+support.                                                                        
+2026-09-30 18:05:50 +0000: Memory Usage (435468K) : Starting SG13G2 LVS runset  
+2026-09-30 18:05:50 +0000: Memory Usage (435468K) : Read in polygons from       
+layers.                                                                         
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_drw has 0 polygons    
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_filler has 0 polygons 
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ has 0 polygons        
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_pin has 0 polygons    
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_mask has 0 polygons   
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_nofill has 0 polygons 
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_OPC has 0 polygons    
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_iOPC has 0 polygons   
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : activ_noqrc has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : biwind_drw has 0 polygons   
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : biwind_OPC has 0 polygons   
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_drw has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_filler has 0        
+polygons                                                                        
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly has 0 polygons      
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_pin has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_nofill has 0        
+polygons                                                                        
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_OPC has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (435980K) : gatpoly_iOPC has 0 polygons 
+2026-09-30 18:05:50 +0000: Memory Usage (436364K) : gatpoly_noqrc has 0 polygons
+2026-09-30 18:05:50 +0000: Memory Usage (436364K) : cont_drw has 0 polygons     
+2026-09-30 18:05:50 +0000: Memory Usage (436364K) : cont_OPC has 0 polygons     
+2026-09-30 18:05:50 +0000: Memory Usage (436364K) : nsd_drw has 0 polygons      
+2026-09-30 18:05:50 +0000: Memory Usage (436492K) : nsd_block has 0 polygons    
+2026-09-30 18:05:50 +0000: Memory Usage (437004K) : metal1_drw has 62 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (437004K) : metal1_filler has 0 polygons
+2026-09-30 18:05:50 +0000: Memory Usage (437004K) : metal1_slit has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (437260K) : metal1 has 62 polygons      
+2026-09-30 18:05:50 +0000: Memory Usage (437388K) : metal1_pin has 0 polygons   
+2026-09-30 18:05:50 +0000: Memory Usage (437516K) : metal1_mask has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (437516K) : metal1_nofill has 0 polygons
+2026-09-30 18:05:50 +0000: Memory Usage (437644K) : metal1_text has 0 polygons  
+2026-09-30 18:05:50 +0000: Memory Usage (437644K) : metal1_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (437772K) : metal1_noqrc has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (437772K) : metal1_res has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (437900K) : metal1_iprobe has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (438028K) : metal1_diffprb has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (438028K) : passiv_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (438156K) : passiv_pin has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (438156K) : passiv_sbump has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (438284K) : passiv_pillar has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (438412K) : passiv_pdl has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (438412K) : metal2_drw has 62 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (438540K) : metal2_filler has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (438668K) : metal2_slit has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (438668K) : metal2 has 62 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (438796K) : metal2_pin has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (438796K) : metal2_mask has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (438924K) : metal2_nofill has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (439052K) : metal2_text has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (439052K) : metal2_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (439180K) : metal2_noqrc has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (439180K) : metal2_res has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (439308K) : metal2_iprobe has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (439436K) : metal2_diffprb has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (439436K) : baspoly_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (439564K) : baspoly_pin has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (439564K) : psd_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (439692K) : nldb_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (439820K) : digibnd_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (439820K) : via1_drw has 56 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (439948K) : backmetal1_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (439948K) : backmetal1_pin has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440076K) : backmetal1_mask has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440204K) : backmetal1_filler has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440204K) : backmetal1_nofill has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440332K) : backmetal1_slit has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440332K) : backmetal1_text has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440460K) : backmetal1_OPC has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440588K) : backmetal1_noqrc has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440588K) : backmetal1_res has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440716K) : backmetal1_iprobe has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440716K) : backmetal1_diffprb has 0    
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440844K) : backpassiv_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (440972K) : res_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (440972K) : sram_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (441100K) : trans_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (441100K) : ind_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (441228K) : ind_pin has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (441356K) : ind_text has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (441356K) : salblock_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (441484K) : via2_drw has 56 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (441484K) : metal3_drw has 62 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (441612K) : metal3_filler has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (441740K) : metal3_slit has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (441868K) : metal3 has 62 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (441868K) : metal3_pin has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (441996K) : metal3_mask has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (442124K) : metal3_nofill has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (442124K) : metal3_text has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (442252K) : metal3_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (442252K) : metal3_noqrc has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (442380K) : metal3_res has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (442380K) : metal3_iprobe has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (442508K) : metal3_diffprb has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (442636K) : nwell_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (442636K) : nwell_pin has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (442636K) : nwell_text has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (442764K) : nbulay_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (442764K) : nbulay_pin has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (442892K) : nbulay_block has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (443020K) : emwind_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (443020K) : emwind_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (443148K) : deepco_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (443148K) : mim_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (443276K) : edgeseal_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (443404K) : substrate_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (443404K) : substrate_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (443532K) : dfpad_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (443532K) : dfpad_pillar has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (443660K) : dfpad_sbump has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (443788K) : thickgateox_drw has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (443788K) : pldb_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (443916K) : pwell_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (443916K) : pwell_pin has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (444044K) : pwell_block has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (444172K) : ic_drw has 0 polygons       
+2026-09-30 18:05:51 +0000: Memory Usage (444172K) : via3_drw has 56 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (444300K) : metal4_drw has 62 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (444300K) : metal4_filler has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (444428K) : metal4_slit has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (444556K) : metal4 has 62 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (444684K) : metal4_pin has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (444684K) : metal4_mask has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (444812K) : metal4_nofill has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (444812K) : metal4_text has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (444940K) : metal4_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (445068K) : metal4_noqrc has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (445068K) : metal4_res has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (445196K) : metal4_iprobe has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (445324K) : metal4_diffprb has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (445324K) : heattrans_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (445452K) : heatres_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (445452K) : fbe_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (445580K) : empoly_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (445580K) : digisub_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (445836K) : text_drw has 1 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (445836K) : via4_drw has 56 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (445836K) : metal5_drw has 58 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (445964K) : metal5_filler has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (445964K) : metal5_slit has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (446092K) : metal5 has 58 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (446220K) : metal5_pin has 4 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (446220K) : metal5_mask has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (446348K) : metal5_nofill has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (446476K) : metal5_text has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (446476K) : metal5_OPC has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (446604K) : metal5_noqrc has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (446604K) : metal5_res has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (446732K) : metal5_iprobe has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (446860K) : metal5_diffprb has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (446860K) : radhard_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (446988K) : memcap_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (446988K) : varicap_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (447116K) : intbondvia_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (447244K) : intbondmet_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (447244K) : devbondvia_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (447372K) : devbondmet_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (447372K) : devtrench_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (447500K) : redist_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (447628K) : graphbot_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (447628K) : graphtop_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (447756K) : antvia1_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (447884K) : antmetal2_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (447884K) : graphcont_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (448012K) : siwg_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (448012K) : siwg_filler has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (448140K) : siwg_nofill has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (448268K) : sigrating_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (448268K) : singrating_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (448396K) : graphpas_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (448396K) : emwind3_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (448524K) : emwihv3_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (448652K) : redbulay_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (448652K) : smos_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (448780K) : graphpad_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (448780K) : polimide_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (448908K) : polimide_pin has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (448908K) : recog_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449036K) : recog_pin has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449036K) : recog_esd has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449164K) : recog_diode has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (449292K) : recog_tsv has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449292K) : recog_iprobe has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (449420K) : recog_diffprb has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (449420K) : recog_pillar has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (449548K) : recog_sbump has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (449676K) : recog_otp has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449676K) : recog_pdiode has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (449804K) : recog_mom has 1 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (449932K) : recog_momf has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (449932K) : recog_pcm has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (450060K) : colopen_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (450060K) : graphmetal1_drw has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450188K) : graphmetal1_filler has 0    
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450316K) : graphmetal1_nofill has 0    
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450316K) : graphmetal1_slit has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450444K) : graphmetal1_OPC has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450444K) : graphmet1l_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450572K) : graphmet1l_filler has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450700K) : graphmet1l_nofill has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450700K) : graphmet1l_slit has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450828K) : graphmet1l_OPC has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (450828K) : extblock_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (450956K) : nldd_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (451084K) : pldd_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (451084K) : next_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (451212K) : pext_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (451212K) : nexthv_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (451340K) : pexthv_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (451468K) : graphgate_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (451468K) : sinwg_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (451596K) : sinwg_filler has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (451596K) : sinwg_nofill has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (451724K) : mempad_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (451852K) : topvia1_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (451852K) : topmetal1_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (451980K) : topmetal1_filler has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452108K) : topmetal1_slit has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452236K) : topmetal1 has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (452364K) : topmetal1_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (452364K) : topmetal1_mask has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452492K) : topmetal1_nofill has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452492K) : topmetal1_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452620K) : topmetal1_noqrc has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452748K) : topmetal1_res has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (452748K) : topmetal1_iprobe has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452876K) : topmetal1_diffprb has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (452876K) : inldpwl_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (453004K) : polyres_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (453132K) : polyres_pin has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (453132K) : vmim_drw has 0 polygons     
+2026-09-30 18:05:51 +0000: Memory Usage (453260K) : nbulaycut_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (453260K) : antmetal1_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (453388K) : topvia2_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (453388K) : topmetal2_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (453516K) : topmetal2_filler has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (453516K) : topmetal2_slit has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (453644K) : topmetal2 has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (453644K) : topmetal2_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (453772K) : topmetal2_mask has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (453772K) : topmetal2_nofill has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (453900K) : topmetal2_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (453900K) : topmetal2_noqrc has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (454028K) : topmetal2_res has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (454028K) : topmetal2_iprobe has 0      
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (454156K) : topmetal2_diffprb has 0     
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (454156K) : snsring_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (454284K) : sensor_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (454284K) : snsarms_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (454412K) : snscmosvia_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (454412K) : colwind_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (454540K) : flm_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (454540K) : hafniumox_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (454668K) : memvia_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (454668K) : thinfilmres_drw has 0       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (454796K) : rfmem_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (454796K) : norcx_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (454924K) : norcx_m2m3 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (454924K) : norcx_m2m4 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455052K) : norcx_m2m5 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455052K) : norcx_m2tm1 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455180K) : norcx_m2tm2 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455180K) : norcx_m3m4 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455180K) : norcx_m3m5 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455308K) : norcx_m3tm1 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455308K) : norcx_m3tm2 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m4m5 has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m4tm1 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m4tm2 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m5tm1 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m5tm2 has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_tm1tm2 has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m1sub has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m2sub has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m3sub has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m4sub has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_m5sub has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_tm1sub has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : norcx_tm2sub has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : snsbotvia_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : snstopvia_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : deepvia_drw has 0 polygons  
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : fgetch_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : ctrgat_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : fgimp_drw has 0 polygons    
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : emwihv_drw has 0 polygons   
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : lbe_drw has 0 polygons      
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : alcustop_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : nometfiller_drw has 1       
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : prboundary_drw has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange0_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange0_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange0_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange1_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange1_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange1_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange2_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange2_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange2_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange3_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange3_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange3_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange4_drw has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange4_pin has 0 polygons
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : exchange4_text has 0        
+polygons                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : isonwell_drw has 0 polygons 
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : Total no. of polygons in the
+design is 537                                                                   
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : Starting base layers        
+derivations                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (455436K) : Starting general LVS        
+derivations                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting MOSFET DERIVATIONS 
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting NMOS DERIVATIONS   
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting PMOS DERIVATIONS   
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting RF-MOSFET          
+DERIVATIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting RF-NMOS DERIVATIONS
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting RF-PMOS DERIVATIONS
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting BJT DERIVATIONS    
+2026-09-30 18:05:51 +0000: Memory Usage (456076K) : Starting NPN-BJT DERIVATIONS
+2026-09-30 18:05:51 +0000: Memory Usage (456844K) : Starting PNP-BJT DERIVATIONS
+2026-09-30 18:05:51 +0000: Memory Usage (457996K) : Starting DIODE DERIVATIONS  
+2026-09-30 18:05:51 +0000: Memory Usage (462092K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (463884K) : Starting CAP DERIVATIONS    
+2026-09-30 18:05:51 +0000: Memory Usage (466060K) : Starting CAP_CMOM           
+DERIVATIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (468196K) : Starting CAP_CMOMF          
+DERIVATIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (468196K) : Starting ESD DERIVATIONS    
+2026-09-30 18:05:51 +0000: Memory Usage (462704K) : Starting Inductor           
+DERIVATIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462704K) : Starting Taps DERIVATIONS   
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting SG13G2 LVS         
+connectivity setup                                                              
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting SG13G2 LVS         
+connectivity setup (Inter-layer)                                                
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting SG13G2 LVS         
+connectivity setup (Global)                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS MOSFET         
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS RF-MOSFET      
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS BJT CONNECTIONS
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting RESISTOR           
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS CAP CONNECTIONS
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting CAP_CMOM           
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting CAP_CMOMF          
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting ESD CONNECTIONS    
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting Inductor           
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting LVS Taps           
+CONNECTIONS                                                                     
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting SG13G2 LVS DEVICES 
+EXTRACTION                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting MOSFET EXTRACTION  
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Starting NMOS EXTRACTION    
+2026-09-30 18:05:51 +0000: Memory Usage (462832K) : Extraction of NMOS-LV       
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of NMOS-HV       
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting PMOS EXTRACTION    
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of PMOS-LV       
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of PMOS-HV       
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting RF-MOSFET          
+EXTRACTION                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of RF-NMOS-LV    
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of RF-NMOS-HV    
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of RF-PMOS-LV    
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of RF-PMOS-HV    
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting BJT EXTRACTION     
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting NPN-BJT EXTRACTION 
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of npn13G2 BJT   
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of npn13G2L BJT  
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extraction of npn13G2V BJT  
+transistor                                                                      
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting PNP-BJT EXTRACTION 
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting pnpMPA BJT       
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting DIODE EXTRACTION   
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting dantenna diode   
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting dpantenna diode  
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting schottky_nbl1    
+diode                                                                           
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting isolbox diode    
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Starting RESISTOR EXTRACTION
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting rsil resistor    
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting rppd resistor    
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting rhigh resistor   
+2026-09-30 18:05:51 +0000: Memory Usage (462960K) : Extracting res_metal1       
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_metal2       
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_metal3       
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_metal4       
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_metal5       
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_topmetal1    
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting res_topmetal2    
+resistor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting CAP EXTRACTION     
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting cap_cmim device  
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting rfcmim device    
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting sg13_hv_svaricap 
+varactor                                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting cap_cmomi device 
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting cap_cmomf device 
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting sg13_moscap_n    
+capacitor                                                                       
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting sg13_moscap_p    
+capacitor                                                                       
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting ESD EXTRACTION     
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting diodevdd_2kv ESD 
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting diodevdd_4kv ESD 
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting diodevss_2kv ESD 
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting diodevss_4kv ESD 
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting idiodevdd_2kv ESD
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting idiodevdd_4kv ESD
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting idiodevss_2kv ESD
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting idiodevss_4kv ESD
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting nmoscl_2 ESD     
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting nmoscl_4 ESD     
+device                                                                          
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting Inductor EXTRACTION
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting Inductor2 device 
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting Inductor3 device 
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting Taps EXTRACTION    
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting ntap1 device     
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Extracting ptap1 device     
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting SG13G2 LVS Options 
+Preparations                                                                    
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : SG13G2 LVS flow: extraction 
+-> alignment -> option preparation -> comparison.                               
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting SG13G2 LVS         
+Alignment                                                                       
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting SG13G2 LVS         
+Simplification                                                                  
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [layout_netlist] simplify:  
+SKIPPED                                                                         
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [layout_netlist]            
+make_top_level_pins: ENABLED                                                    
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [layout_netlist]            
+combine_devices: SKIPPED                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [layout_netlist] purge:     
+SKIPPED                                                                         
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [layout_netlist] purge_nets:
+SKIPPED                                                                         
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [schematic_netlist]         
+simplify: SKIPPED                                                               
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [schematic_netlist]         
+make_top_level_pins: ENABLED                                                    
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [schematic_netlist]         
+combine_devices: SKIPPED                                                        
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [schematic_netlist] purge:  
+SKIPPED                                                                         
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : [schematic_netlist]         
+purge_nets: SKIPPED                                                             
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : Starting SG13G2 LVS         
+Comparison in strict port mode.                                                 
+2026-09-30 18:05:51 +0000: Memory Usage (463088K) : flag_missing_ports enabled: 
+missing/mislabeled top-level ports are treated as errors.                       
+2026-09-30 18:05:51 +0000: Memory Usage (463216K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-09-30 18:05:51 +0000: Memory Usage (463216K) : ERROR : Netlists don't match
+2026-09-30 18:05:51 +0000: Memory Usage (463216K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-09-30 18:05:51 +0000: Memory Usage (463216K) : LVS Total Run time 0.609485 
+seconds                                                                         
+────────────────────────────────────────────────────────────────────────────────
+[18:05:51] INFO     klayout LVS succeeded after 1.765s         lvs_runner.py:156
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:05:51] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1375
+[18:05:51] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1375
+[18:05:51] INFO     (49, 0) -> (via3_drw)                       kpex_cli.py:1375
+[18:05:51] INFO     (66, 0) -> (via4_drw)                       kpex_cli.py:1375
+[18:05:51] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1375
+[18:05:51] INFO     (8, 0) -> (metal1_con)                      kpex_cli.py:1375
+[18:05:51] INFO     (10, 0) -> (metal2_con)                     kpex_cli.py:1375
+[18:05:51] INFO     (30, 0) -> (metal3_con)                     kpex_cli.py:1375
+[18:05:51] INFO     (50, 0) -> (metal4_con)                     kpex_cli.py:1375
+[18:05:51] INFO     (67, 0) -> (metal5_n_cap)                   kpex_cli.py:1375
+[18:05:51] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1375
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:05:51] INFO     LVSDB: found 0pins                          extractor.py:196
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$I1.$0.18;$I1.$1.19;;9.0                                                     
+R2;$I1.$0.18;$I1.$2.18;;0.343                                                   
+R3;$I1.$1.19;$I1.$56.19;;0.0                                                    
+R4;$I1.$10.18;$I1.$11.19;;9.0                                                   
+R5;$I1.$10.18;$I1.$8.18;;0.44                                                   
+R6;$I1.$100.19;$I1.$101.20;;9.0                                                 
+R7;$I1.$100.19;$I1.$45.19;;0.0                                                  
+R8;$I1.$100.19;$I1.$47.19;;0.176                                                
+R9;$I1.$101.20;$I1.$154.20;;0.176                                               
+R10;$I1.$101.20;$I1.$156.20;;0.0                                                
+R11;$I1.$102.19;$I1.$103.20;;9.0                                                
+R12;$I1.$102.19;$I1.$47.19;;0.0                                                 
+R13;$I1.$102.19;$I1.$49.19;;0.176                                               
+R14;$I1.$103.20;$I1.$156.20;;0.176                                              
+R15;$I1.$103.20;$I1.$158.20;;0.0                                                
+R16;$I1.$104.19;$I1.$105.20;;9.0                                                
+R17;$I1.$104.19;$I1.$49.19;;0.0                                                 
+R18;$I1.$104.19;$I1.$51.19;;0.176                                               
+R19;$I1.$105.20;$I1.$158.20;;0.176                                              
+R20;$I1.$105.20;$I1.$160.20;;0.0                                                
+R21;$I1.$106.19;$I1.$107.20;;9.0                                                
+R22;$I1.$106.19;$I1.$51.19;;0.0                                                 
+R23;$I1.$106.19;$I1.$53.19;;0.176                                               
+R24;$I1.$107.20;$I1.$160.20;;0.176                                              
+R25;$I1.$107.20;$I1.$162.20;;0.0                                                
+R26;$I1.$108.19;$I1.$109.20;;9.0                                                
+R27;$I1.$108.19;$I1.$53.19;;0.0                                                 
+R28;$I1.$108.19;$I1.$55.19;;0.176                                               
+R29;$I1.$109.20;$I1.$162.20;;0.176                                              
+R30;$I1.$109.20;$I1.$164.20;;0.0                                                
+R31;$I1.$11.19;$I1.$64.19;;0.352                                                
+R32;$I1.$11.19;$I1.$66.19;;0.0                                                  
+R33;$I1.$110.19;$I1.$111.20;;9.0                                                
+R34;$I1.$110.19;$I1.$55.19;;0.0                                                 
+R35;$I1.$111.20;$I1.$164.20;;0.176                                              
+R36;$I1.$111.20;$I1.$166.20;;0.0                                                
+R37;$I1.$112.20;$I1.$113.21;;9.0                                                
+R38;$I1.$112.20;$I1.$57.20;;0.0                                                 
+R39;$I1.$112.20;$I1.$59.20;;0.274                                               
+R40;$I1.$113.21;$I1.$168.21;;0.0                                                
+R41;$I1.$114.20;$I1.$115.21;;9.0                                                
+R42;$I1.$114.20;$I1.$59.20;;0.0                                                 
+R43;$I1.$114.20;$I1.$61.20;;0.352                                               
+R44;$I1.$115.21;$I1.$168.21;;0.274                                              
+R45;$I1.$115.21;$I1.$170.21;;0.0                                                
+R46;$I1.$116.20;$I1.$117.21;;9.0                                                
+R47;$I1.$116.20;$I1.$61.20;;0.0                                                 
+R48;$I1.$116.20;$I1.$63.20;;0.352                                               
+R49;$I1.$117.21;$I1.$170.21;;0.352                                              
+R50;$I1.$117.21;$I1.$172.21;;0.0                                                
+R51;$I1.$118.20;$I1.$119.21;;9.0                                                
+R52;$I1.$118.20;$I1.$63.20;;0.0                                                 
+R53;$I1.$118.20;$I1.$65.20;;0.352                                               
+R54;$I1.$119.21;$I1.$172.21;;0.352                                              
+R55;$I1.$119.21;$I1.$174.21;;0.0                                                
+R56;$I1.$12.18;$I1.$13.19;;9.0                                                  
+R57;$I1.$12.18;$I1.$14.18;;0.343                                                
+R58;$I1.$120.20;$I1.$121.21;;9.0                                                
+R59;$I1.$120.20;$I1.$65.20;;0.0                                                 
+R60;$I1.$120.20;$I1.$67.20;;0.352                                               
+R61;$I1.$121.21;$I1.$174.21;;0.352                                              
+R62;$I1.$121.21;$I1.$176.21;;0.0                                                
+R63;$I1.$122.20;$I1.$123.21;;9.0                                                
+R64;$I1.$122.20;$I1.$67.20;;0.0                                                 
+R65;$I1.$123.21;$I1.$176.21;;0.352                                              
+R66;$I1.$123.21;$I1.$178.21;;0.0                                                
+R67;$I1.$124.20;$I1.$125.21;;9.0                                                
+R68;$I1.$124.20;$I1.$69.20;;0.0                                                 
+R69;$I1.$124.20;$I1.$71.20;;0.274                                               
+R70;$I1.$125.21;$I1.$180.21;;0.0                                                
+R71;$I1.$126.20;$I1.$127.21;;9.0                                                
+R72;$I1.$126.20;$I1.$71.20;;0.0                                                 
+R73;$I1.$126.20;$I1.$73.20;;0.176                                               
+R74;$I1.$127.21;$I1.$180.21;;0.274                                              
+R75;$I1.$127.21;$I1.$182.21;;0.0                                                
+R76;$I1.$128.20;$I1.$129.21;;9.0                                                
+R77;$I1.$128.20;$I1.$73.20;;0.0                                                 
+R78;$I1.$128.20;$I1.$75.20;;0.176                                               
+R79;$I1.$129.21;$I1.$182.21;;0.176                                              
+R80;$I1.$129.21;$I1.$184.21;;0.0                                                
+R81;$I1.$13.19;$I1.$68.19;;0.0                                                  
+R82;$I1.$130.20;$I1.$131.21;;9.0                                                
+R83;$I1.$130.20;$I1.$75.20;;0.0                                                 
+R84;$I1.$130.20;$I1.$77.20;;0.176                                               
+R85;$I1.$131.21;$I1.$184.21;;0.176                                              
+R86;$I1.$131.21;$I1.$186.21;;0.0                                                
+R87;$I1.$132.20;$I1.$133.21;;9.0                                                
+R88;$I1.$132.20;$I1.$77.20;;0.0                                                 
+R89;$I1.$132.20;$I1.$79.20;;0.176                                               
+R90;$I1.$133.21;$I1.$186.21;;0.176                                              
+R91;$I1.$133.21;$I1.$188.21;;0.0                                                
+R92;$I1.$134.20;$I1.$135.21;;9.0                                                
+R93;$I1.$134.20;$I1.$79.20;;0.0                                                 
+R94;$I1.$134.20;$I1.$81.20;;0.176                                               
+R95;$I1.$135.21;$I1.$188.21;;0.176                                              
+R96;$I1.$135.21;$I1.$190.21;;0.0                                                
+R97;$I1.$136.20;$I1.$137.21;;9.0                                                
+R98;$I1.$136.20;$I1.$81.20;;0.0                                                 
+R99;$I1.$136.20;$I1.$83.20;;0.176                                               
+R100;$I1.$137.21;$I1.$190.21;;0.176                                             
+R101;$I1.$137.21;$I1.$192.21;;0.0                                               
+R102;$I1.$138.20;$I1.$139.21;;9.0                                               
+R103;$I1.$138.20;$I1.$83.20;;0.0                                                
+R104;$I1.$138.20;$I1.$85.20;;0.176                                              
+R105;$I1.$139.21;$I1.$192.21;;0.176                                             
+R106;$I1.$139.21;$I1.$194.21;;0.0                                               
+R107;$I1.$14.18;$I1.$15.19;;9.0                                                 
+R108;$I1.$14.18;$I1.$16.18;;0.22                                                
+R109;$I1.$140.20;$I1.$141.21;;9.0                                               
+R110;$I1.$140.20;$I1.$85.20;;0.0                                                
+R111;$I1.$140.20;$I1.$87.20;;0.176                                              
+R112;$I1.$141.21;$I1.$194.21;;0.176                                             
+R113;$I1.$141.21;$I1.$196.21;;0.0                                               
+R114;$I1.$142.20;$I1.$143.21;;9.0                                               
+R115;$I1.$142.20;$I1.$87.20;;0.0                                                
+R116;$I1.$142.20;$I1.$89.20;;0.176                                              
+R117;$I1.$143.21;$I1.$196.21;;0.176                                             
+R118;$I1.$143.21;$I1.$198.21;;0.0                                               
+R119;$I1.$144.20;$I1.$145.21;;9.0                                               
+R120;$I1.$144.20;$I1.$89.20;;0.0                                                
+R121;$I1.$145.21;$I1.$198.21;;0.176                                             
+R122;$I1.$145.21;$I1.$200.21;;0.0                                               
+R123;$I1.$146.20;$I1.$147.21;;9.0                                               
+R124;$I1.$146.20;$I1.$91.20;;0.0                                                
+R125;$I1.$146.20;$I1.$93.20;;0.274                                              
+R126;$I1.$147.21;$I1.$202.21;;0.0                                               
+R127;$I1.$148.20;$I1.$149.21;;9.0                                               
+R128;$I1.$148.20;$I1.$93.20;;0.0                                                
+R129;$I1.$148.20;$I1.$95.20;;0.176                                              
+R130;$I1.$149.21;$I1.$202.21;;0.274                                             
+R131;$I1.$149.21;$I1.$204.21;;0.0                                               
+R132;$I1.$15.19;$I1.$68.19;;0.274                                               
+R133;$I1.$15.19;$I1.$70.19;;0.0                                                 
+R134;$I1.$150.20;$I1.$151.21;;9.0                                               
+R135;$I1.$150.20;$I1.$95.20;;0.0                                                
+R136;$I1.$150.20;$I1.$97.20;;0.176                                              
+R137;$I1.$151.21;$I1.$204.21;;0.176                                             
+R138;$I1.$151.21;$I1.$206.21;;0.0                                               
+R139;$I1.$152.20;$I1.$153.21;;9.0                                               
+R140;$I1.$152.20;$I1.$97.20;;0.0                                                
+R141;$I1.$152.20;$I1.$99.20;;0.176                                              
+R142;$I1.$153.21;$I1.$206.21;;0.176                                             
+R143;$I1.$153.21;$I1.$208.21;;0.0                                               
+R144;$I1.$154.20;$I1.$155.21;;9.0                                               
+R145;$I1.$154.20;$I1.$99.20;;0.0                                                
+R146;$I1.$155.21;$I1.$208.21;;0.176                                             
+R147;$I1.$155.21;$I1.$210.21;;0.0                                               
+R148;$I1.$156.20;$I1.$157.21;;9.0                                               
+R149;$I1.$157.21;$I1.$210.21;;0.176                                             
+R150;$I1.$157.21;$I1.$212.21;;0.0                                               
+R151;$I1.$158.20;$I1.$159.21;;9.0                                               
+R152;$I1.$159.21;$I1.$212.21;;0.176                                             
+R153;$I1.$159.21;$I1.$214.21;;0.0                                               
+R154;$I1.$16.18;$I1.$17.19;;9.0                                                 
+R155;$I1.$16.18;$I1.$18.18;;0.22                                                
+R156;$I1.$160.20;$I1.$161.21;;9.0                                               
+R157;$I1.$161.21;$I1.$214.21;;0.176                                             
+R158;$I1.$161.21;$I1.$216.21;;0.0                                               
+R159;$I1.$162.20;$I1.$163.21;;9.0                                               
+R160;$I1.$163.21;$I1.$216.21;;0.176                                             
+R161;$I1.$163.21;$I1.$218.21;;0.0                                               
+R162;$I1.$164.20;$I1.$165.21;;9.0                                               
+R163;$I1.$165.21;$I1.$218.21;;0.176                                             
+R164;$I1.$165.21;$I1.$220.21;;0.0                                               
+R165;$I1.$166.20;$I1.$167.21;;9.0                                               
+R166;$I1.$167.21;$I1.$220.21;;0.176                                             
+R167;$I1.$167.21;$I1.$222.21;;0.0                                               
+R168;$I1.$168.21;$I1.$169.35;;9.0                                               
+R169;$I1.$169.35;$I1.$171.35;;0.17                                              
+R170;$I1.$169.35;$I1.$181.35;;0.261                                             
+R171;$I1.$17.19;$I1.$70.19;;0.176                                               
+R172;$I1.$17.19;$I1.$72.19;;0.0                                                 
+R173;$I1.$170.21;$I1.$171.35;;9.0                                               
+R174;$I1.$171.35;$I1.$173.35;;0.352                                             
+R175;$I1.$172.21;$I1.$173.35;;9.0                                               
+R176;$I1.$173.35;$I1.$175.35;;0.352                                             
+R177;$I1.$174.21;$I1.$175.35;;9.0                                               
+R178;$I1.$175.35;$I1.$177.35;;0.352                                             
+R179;$I1.$176.21;$I1.$177.35;;9.0                                               
+R180;$I1.$177.35;$I1.$179.35;;0.352                                             
+R181;$I1.$178.21;$I1.$179.35;;9.0                                               
+R182;$I1.$18.18;$I1.$19.19;;9.0                                                 
+R183;$I1.$18.18;$I1.$20.18;;0.22                                                
+R184;$I1.$180.21;$I1.$181.35;;9.0                                               
+R185;$I1.$181.35;$I1.$183.35;;0.17                                              
+R186;$I1.$181.35;$I1.$203.35;;0.261                                             
+R187;$I1.$182.21;$I1.$183.35;;9.0                                               
+R188;$I1.$183.35;$I1.$185.35;;0.176                                             
+R189;$I1.$184.21;$I1.$185.35;;9.0                                               
+R190;$I1.$185.35;$I1.$187.35;;0.176                                             
+R191;$I1.$186.21;$I1.$187.35;;9.0                                               
+R192;$I1.$187.35;$I1.$189.35;;0.176                                             
+R193;$I1.$188.21;$I1.$189.35;;9.0                                               
+R194;$I1.$189.35;$I1.$191.35;;0.176                                             
+R195;$I1.$19.19;$I1.$72.19;;0.176                                               
+R196;$I1.$19.19;$I1.$74.19;;0.0                                                 
+R197;$I1.$190.21;$I1.$191.35;;9.0                                               
+R198;$I1.$191.35;$I1.$193.35;;0.176                                             
+R199;$I1.$192.21;$I1.$193.35;;9.0                                               
+R200;$I1.$193.35;$I1.$195.35;;0.176                                             
+R201;$I1.$194.21;$I1.$195.35;;9.0                                               
+R202;$I1.$195.35;$I1.$197.35;;0.176                                             
+R203;$I1.$196.21;$I1.$197.35;;9.0                                               
+R204;$I1.$197.35;$I1.$199.35;;0.176                                             
+R205;$I1.$198.21;$I1.$199.35;;9.0                                               
+R206;$I1.$199.35;$I1.$201.35;;0.176                                             
+R207;$I1.$2.18;$I1.$3.19;;9.0                                                   
+R208;$I1.$2.18;$I1.$4.18;;0.44                                                  
+R209;$I1.$20.18;$I1.$21.19;;9.0                                                 
+R210;$I1.$20.18;$I1.$22.18;;0.22                                                
+R211;$I1.$200.21;$I1.$201.35;;9.0                                               
+R212;$I1.$202.21;$I1.$203.35;;9.0                                               
+R213;$I1.$203.35;$I1.$205.35;;0.17                                              
+R214;$I1.$204.21;$I1.$205.35;;9.0                                               
+R215;$I1.$205.35;$I1.$207.35;;0.176                                             
+R216;$I1.$206.21;$I1.$207.35;;9.0                                               
+R217;$I1.$207.35;$I1.$209.35;;0.176                                             
+R218;$I1.$208.21;$I1.$209.35;;9.0                                               
+R219;$I1.$209.35;$I1.$211.35;;0.176                                             
+R220;$I1.$21.19;$I1.$74.19;;0.176                                               
+R221;$I1.$21.19;$I1.$76.19;;0.0                                                 
+R222;$I1.$210.21;$I1.$211.35;;9.0                                               
+R223;$I1.$211.35;$I1.$213.35;;0.176                                             
+R224;$I1.$212.21;$I1.$213.35;;9.0                                               
+R225;$I1.$213.35;$I1.$215.35;;0.176                                             
+R226;$I1.$214.21;$I1.$215.35;;9.0                                               
+R227;$I1.$215.35;$I1.$217.35;;0.176                                             
+R228;$I1.$216.21;$I1.$217.35;;9.0                                               
+R229;$I1.$217.35;$I1.$219.35;;0.176                                             
+R230;$I1.$218.21;$I1.$219.35;;9.0                                               
+R231;$I1.$219.35;$I1.$221.35;;0.176                                             
+R232;$I1.$22.18;$I1.$23.19;;9.0                                                 
+R233;$I1.$22.18;$I1.$24.18;;0.22                                                
+R234;$I1.$220.21;$I1.$221.35;;9.0                                               
+R235;$I1.$221.35;$I1.$223.35;;0.176                                             
+R236;$I1.$222.21;$I1.$223.35;;9.0                                               
+R237;$I1.$23.19;$I1.$76.19;;0.176                                               
+R238;$I1.$23.19;$I1.$78.19;;0.0                                                 
+R239;$I1.$24.18;$I1.$25.19;;9.0                                                 
+R240;$I1.$24.18;$I1.$26.18;;0.22                                                
+R241;$I1.$25.19;$I1.$78.19;;0.176                                               
+R242;$I1.$25.19;$I1.$80.19;;0.0                                                 
+R243;$I1.$26.18;$I1.$27.19;;9.0                                                 
+R244;$I1.$26.18;$I1.$28.18;;0.22                                                
+R245;$I1.$27.19;$I1.$80.19;;0.176                                               
+R246;$I1.$27.19;$I1.$82.19;;0.0                                                 
+R247;$I1.$28.18;$I1.$29.19;;9.0                                                 
+R248;$I1.$28.18;$I1.$30.18;;0.22                                                
+R249;$I1.$29.19;$I1.$82.19;;0.176                                               
+R250;$I1.$29.19;$I1.$84.19;;0.0                                                 
+R251;$I1.$3.19;$I1.$56.19;;0.274                                                
+R252;$I1.$3.19;$I1.$58.19;;0.0                                                  
+R253;$I1.$30.18;$I1.$31.19;;9.0                                                 
+R254;$I1.$30.18;$I1.$32.18;;0.22                                                
+R255;$I1.$31.19;$I1.$84.19;;0.176                                               
+R256;$I1.$31.19;$I1.$86.19;;0.0                                                 
+R257;$I1.$32.18;$I1.$33.19;;9.0                                                 
+R258;$I1.$33.19;$I1.$86.19;;0.176                                               
+R259;$I1.$33.19;$I1.$88.19;;0.0                                                 
+R260;$I1.$34.18;$I1.$35.19;;9.0                                                 
+R261;$I1.$34.18;$I1.$36.18;;0.343                                               
+R262;$I1.$35.19;$I1.$90.19;;0.0                                                 
+R263;$I1.$36.18;$I1.$37.19;;9.0                                                 
+R264;$I1.$36.18;$I1.$38.18;;0.22                                                
+R265;$I1.$37.19;$I1.$90.19;;0.274                                               
+R266;$I1.$37.19;$I1.$92.19;;0.0                                                 
+R267;$I1.$38.18;$I1.$39.19;;9.0                                                 
+R268;$I1.$38.18;$I1.$40.18;;0.22                                                
+R269;$I1.$39.19;$I1.$92.19;;0.176                                               
+R270;$I1.$39.19;$I1.$94.19;;0.0                                                 
+R271;$I1.$4.18;$I1.$5.19;;9.0                                                   
+R272;$I1.$4.18;$I1.$6.18;;0.44                                                  
+R273;$I1.$40.18;$I1.$41.19;;9.0                                                 
+R274;$I1.$40.18;$I1.$42.18;;0.22                                                
+R275;$I1.$41.19;$I1.$94.19;;0.176                                               
+R276;$I1.$41.19;$I1.$96.19;;0.0                                                 
+R277;$I1.$42.18;$I1.$43.19;;9.0                                                 
+R278;$I1.$42.18;$I1.$44.18;;0.22                                                
+R279;$I1.$43.19;$I1.$96.19;;0.176                                               
+R280;$I1.$43.19;$I1.$98.19;;0.0                                                 
+R281;$I1.$44.18;$I1.$45.19;;9.0                                                 
+R282;$I1.$44.18;$I1.$46.18;;0.22                                                
+R283;$I1.$45.19;$I1.$98.19;;0.176                                               
+R284;$I1.$46.18;$I1.$47.19;;9.0                                                 
+R285;$I1.$46.18;$I1.$48.18;;0.22                                                
+R286;$I1.$48.18;$I1.$49.19;;9.0                                                 
+R287;$I1.$48.18;$I1.$50.18;;0.22                                                
+R288;$I1.$5.19;$I1.$58.19;;0.352                                                
+R289;$I1.$5.19;$I1.$60.19;;0.0                                                  
+R290;$I1.$50.18;$I1.$51.19;;9.0                                                 
+R291;$I1.$50.18;$I1.$52.18;;0.22                                                
+R292;$I1.$52.18;$I1.$53.19;;9.0                                                 
+R293;$I1.$52.18;$I1.$54.18;;0.22                                                
+R294;$I1.$54.18;$I1.$55.19;;9.0                                                 
+R295;$I1.$56.19;$I1.$57.20;;9.0                                                 
+R296;$I1.$58.19;$I1.$59.20;;9.0                                                 
+R297;$I1.$6.18;$I1.$7.19;;9.0                                                   
+R298;$I1.$6.18;$I1.$8.18;;0.44                                                  
+R299;$I1.$60.19;$I1.$61.20;;9.0                                                 
+R300;$I1.$60.19;$I1.$7.19;;0.352                                                
+R301;$I1.$62.19;$I1.$63.20;;9.0                                                 
+R302;$I1.$62.19;$I1.$7.19;;0.0                                                  
+R303;$I1.$62.19;$I1.$9.19;;0.352                                                
+R304;$I1.$64.19;$I1.$65.20;;9.0                                                 
+R305;$I1.$64.19;$I1.$9.19;;0.0                                                  
+R306;$I1.$66.19;$I1.$67.20;;9.0                                                 
+R307;$I1.$68.19;$I1.$69.20;;9.0                                                 
+R308;$I1.$70.19;$I1.$71.20;;9.0                                                 
+R309;$I1.$72.19;$I1.$73.20;;9.0                                                 
+R310;$I1.$74.19;$I1.$75.20;;9.0                                                 
+R311;$I1.$76.19;$I1.$77.20;;9.0                                                 
+R312;$I1.$78.19;$I1.$79.20;;9.0                                                 
+R313;$I1.$8.18;$I1.$9.19;;9.0                                                   
+R314;$I1.$80.19;$I1.$81.20;;9.0                                                 
+R315;$I1.$82.19;$I1.$83.20;;9.0                                                 
+R316;$I1.$84.19;$I1.$85.20;;9.0                                                 
+R317;$I1.$86.19;$I1.$87.20;;9.0                                                 
+R318;$I1.$88.19;$I1.$89.20;;9.0                                                 
+R319;$I1.$90.19;$I1.$91.20;;9.0                                                 
+R320;$I1.$92.19;$I1.$93.20;;9.0                                                 
+R321;$I1.$94.19;$I1.$95.20;;9.0                                                 
+R322;$I1.$96.19;$I1.$97.20;;9.0                                                 
+R323;$I1.$98.19;$I1.$99.20;;9.0                                                 
+R324;$I2.$0.18;$I2.$1.19;;9.0                                                   
+R325;$I2.$0.18;$I2.$2.18;;0.22                                                  
+R326;$I2.$1.19;$I2.$56.19;;0.0                                                  
+R327;$I2.$10.18;$I2.$11.19;;9.0                                                 
+R328;$I2.$10.18;$I2.$12.18;;0.22                                                
+R329;$I2.$10.18;$I2.$8.18;;0.22                                                 
+R330;$I2.$100.19;$I2.$101.20;;9.0                                               
+R331;$I2.$100.19;$I2.$45.19;;0.0                                                
+R332;$I2.$100.19;$I2.$47.19;;0.352                                              
+R333;$I2.$101.20;$I2.$156.20;;0.0                                               
+R334;$I2.$102.19;$I2.$103.20;;9.0                                               
+R335;$I2.$102.19;$I2.$47.19;;0.0                                                
+R336;$I2.$102.19;$I2.$49.19;;0.352                                              
+R337;$I2.$103.20;$I2.$156.20;;0.352                                             
+R338;$I2.$103.20;$I2.$158.20;;0.0                                               
+R339;$I2.$104.19;$I2.$105.20;;9.0                                               
+R340;$I2.$104.19;$I2.$49.19;;0.0                                                
+R341;$I2.$104.19;$I2.$51.19;;0.352                                              
+R342;$I2.$105.20;$I2.$158.20;;0.352                                             
+R343;$I2.$105.20;$I2.$160.20;;0.0                                               
+R344;$I2.$106.19;$I2.$107.20;;9.0                                               
+R345;$I2.$106.19;$I2.$51.19;;0.0                                                
+R346;$I2.$106.19;$I2.$53.19;;0.352                                              
+R347;$I2.$107.20;$I2.$160.20;;0.352                                             
+R348;$I2.$107.20;$I2.$162.20;;0.0                                               
+R349;$I2.$108.19;$I2.$109.20;;9.0                                               
+R350;$I2.$108.19;$I2.$53.19;;0.0                                                
+R351;$I2.$108.19;$I2.$55.19;;0.362                                              
+R352;$I2.$109.20;$I2.$162.20;;0.352                                             
+R353;$I2.$109.20;$I2.$164.20;;0.0                                               
+R354;$I2.$11.19;$I2.$64.19;;0.176                                               
+R355;$I2.$11.19;$I2.$66.19;;0.0                                                 
+R356;$I2.$110.19;$I2.$111.20;;9.0                                               
+R357;$I2.$110.19;$I2.$55.19;;0.0                                                
+R358;$I2.$111.20;$I2.$164.20;;0.362                                             
+R359;$I2.$111.20;$I2.$166.20;;0.0                                               
+R360;$I2.$112.20;$I2.$113.21;;9.0                                               
+R361;$I2.$112.20;$I2.$57.20;;0.0                                                
+R362;$I2.$112.20;$I2.$59.20;;0.176                                              
+R363;$I2.$113.21;$I2.$168.21;;0.0                                               
+R364;$I2.$114.20;$I2.$115.21;;9.0                                               
+R365;$I2.$114.20;$I2.$59.20;;0.0                                                
+R366;$I2.$114.20;$I2.$61.20;;0.176                                              
+R367;$I2.$115.21;$I2.$168.21;;0.176                                             
+R368;$I2.$115.21;$I2.$170.21;;0.0                                               
+R369;$I2.$116.20;$I2.$117.21;;9.0                                               
+R370;$I2.$116.20;$I2.$61.20;;0.0                                                
+R371;$I2.$116.20;$I2.$63.20;;0.176                                              
+R372;$I2.$117.21;$I2.$170.21;;0.176                                             
+R373;$I2.$117.21;$I2.$172.21;;0.0                                               
+R374;$I2.$118.20;$I2.$119.21;;9.0                                               
+R375;$I2.$118.20;$I2.$63.20;;0.0                                                
+R376;$I2.$118.20;$I2.$65.20;;0.176                                              
+R377;$I2.$119.21;$I2.$172.21;;0.176                                             
+R378;$I2.$119.21;$I2.$174.21;;0.0                                               
+R379;$I2.$12.18;$I2.$13.19;;9.0                                                 
+R380;$I2.$12.18;$I2.$14.18;;0.22                                                
+R381;$I2.$120.20;$I2.$121.21;;9.0                                               
+R382;$I2.$120.20;$I2.$65.20;;0.0                                                
+R383;$I2.$120.20;$I2.$67.20;;0.176                                              
+R384;$I2.$121.21;$I2.$174.21;;0.176                                             
+R385;$I2.$121.21;$I2.$176.21;;0.0                                               
+R386;$I2.$122.20;$I2.$123.21;;9.0                                               
+R387;$I2.$122.20;$I2.$67.20;;0.0                                                
+R388;$I2.$122.20;$I2.$69.20;;0.176                                              
+R389;$I2.$123.21;$I2.$176.21;;0.176                                             
+R390;$I2.$123.21;$I2.$178.21;;0.0                                               
+R391;$I2.$124.20;$I2.$125.21;;9.0                                               
+R392;$I2.$124.20;$I2.$69.20;;0.0                                                
+R393;$I2.$124.20;$I2.$71.20;;0.176                                              
+R394;$I2.$125.21;$I2.$178.21;;0.176                                             
+R395;$I2.$125.21;$I2.$180.21;;0.0                                               
+R396;$I2.$126.20;$I2.$127.21;;9.0                                               
+R397;$I2.$126.20;$I2.$71.20;;0.0                                                
+R398;$I2.$126.20;$I2.$73.20;;0.176                                              
+R399;$I2.$127.21;$I2.$180.21;;0.176                                             
+R400;$I2.$127.21;$I2.$182.21;;0.0                                               
+R401;$I2.$128.20;$I2.$129.21;;9.0                                               
+R402;$I2.$128.20;$I2.$73.20;;0.0                                                
+R403;$I2.$128.20;$I2.$75.20;;0.176                                              
+R404;$I2.$129.21;$I2.$182.21;;0.176                                             
+R405;$I2.$129.21;$I2.$184.21;;0.0                                               
+R406;$I2.$13.19;$I2.$66.19;;0.176                                               
+R407;$I2.$13.19;$I2.$68.19;;0.0                                                 
+R408;$I2.$130.20;$I2.$131.21;;9.0                                               
+R409;$I2.$130.20;$I2.$75.20;;0.0                                                
+R410;$I2.$130.20;$I2.$77.20;;0.362                                              
+R411;$I2.$131.21;$I2.$184.21;;0.176                                             
+R412;$I2.$131.21;$I2.$186.21;;0.0                                               
+R413;$I2.$132.20;$I2.$133.21;;9.0                                               
+R414;$I2.$132.20;$I2.$77.20;;0.0                                                
+R415;$I2.$133.21;$I2.$186.21;;0.362                                             
+R416;$I2.$133.21;$I2.$188.21;;0.0                                               
+R417;$I2.$134.20;$I2.$135.21;;9.0                                               
+R418;$I2.$134.20;$I2.$79.20;;0.0                                                
+R419;$I2.$134.20;$I2.$81.20;;0.176                                              
+R420;$I2.$135.21;$I2.$190.21;;0.0                                               
+R421;$I2.$136.20;$I2.$137.21;;9.0                                               
+R422;$I2.$136.20;$I2.$81.20;;0.0                                                
+R423;$I2.$136.20;$I2.$83.20;;0.176                                              
+R424;$I2.$137.21;$I2.$190.21;;0.176                                             
+R425;$I2.$137.21;$I2.$192.21;;0.0                                               
+R426;$I2.$138.20;$I2.$139.21;;9.0                                               
+R427;$I2.$138.20;$I2.$83.20;;0.0                                                
+R428;$I2.$138.20;$I2.$85.20;;0.176                                              
+R429;$I2.$139.21;$I2.$192.21;;0.176                                             
+R430;$I2.$139.21;$I2.$194.21;;0.0                                               
+R431;$I2.$14.18;$I2.$15.19;;9.0                                                 
+R432;$I2.$14.18;$I2.$16.18;;0.22                                                
+R433;$I2.$140.20;$I2.$141.21;;9.0                                               
+R434;$I2.$140.20;$I2.$85.20;;0.0                                                
+R435;$I2.$140.20;$I2.$87.20;;0.176                                              
+R436;$I2.$141.21;$I2.$194.21;;0.176                                             
+R437;$I2.$141.21;$I2.$196.21;;0.0                                               
+R438;$I2.$142.20;$I2.$143.21;;9.0                                               
+R439;$I2.$142.20;$I2.$87.20;;0.0                                                
+R440;$I2.$142.20;$I2.$89.20;;0.176                                              
+R441;$I2.$143.21;$I2.$196.21;;0.176                                             
+R442;$I2.$143.21;$I2.$198.21;;0.0                                               
+R443;$I2.$144.20;$I2.$145.21;;9.0                                               
+R444;$I2.$144.20;$I2.$89.20;;0.0                                                
+R445;$I2.$144.20;$I2.$91.20;;0.176                                              
+R446;$I2.$145.21;$I2.$198.21;;0.176                                             
+R447;$I2.$145.21;$I2.$200.21;;0.0                                               
+R448;$I2.$146.20;$I2.$147.21;;9.0                                               
+R449;$I2.$146.20;$I2.$91.20;;0.0                                                
+R450;$I2.$146.20;$I2.$93.20;;0.176                                              
+R451;$I2.$147.21;$I2.$200.21;;0.176                                             
+R452;$I2.$147.21;$I2.$202.21;;0.0                                               
+R453;$I2.$148.20;$I2.$149.21;;9.0                                               
+R454;$I2.$148.20;$I2.$93.20;;0.0                                                
+R455;$I2.$148.20;$I2.$95.20;;0.176                                              
+R456;$I2.$149.21;$I2.$202.21;;0.176                                             
+R457;$I2.$149.21;$I2.$204.21;;0.0                                               
+R458;$I2.$15.19;$I2.$68.19;;0.176                                               
+R459;$I2.$15.19;$I2.$70.19;;0.0                                                 
+R460;$I2.$150.20;$I2.$151.21;;9.0                                               
+R461;$I2.$150.20;$I2.$95.20;;0.0                                                
+R462;$I2.$150.20;$I2.$97.20;;0.176                                              
+R463;$I2.$151.21;$I2.$204.21;;0.176                                             
+R464;$I2.$151.21;$I2.$206.21;;0.0                                               
+R465;$I2.$152.20;$I2.$153.21;;9.0                                               
+R466;$I2.$152.20;$I2.$97.20;;0.0                                                
+R467;$I2.$152.20;$I2.$99.20;;0.362                                              
+R468;$I2.$153.21;$I2.$206.21;;0.176                                             
+R469;$I2.$153.21;$I2.$208.21;;0.0                                               
+R470;$I2.$154.20;$I2.$155.21;;9.0                                               
+R471;$I2.$154.20;$I2.$99.20;;0.0                                                
+R472;$I2.$155.21;$I2.$208.21;;0.362                                             
+R473;$I2.$155.21;$I2.$210.21;;0.0                                               
+R474;$I2.$156.20;$I2.$157.21;;9.0                                               
+R475;$I2.$157.21;$I2.$212.21;;0.0                                               
+R476;$I2.$158.20;$I2.$159.21;;9.0                                               
+R477;$I2.$159.21;$I2.$212.21;;0.352                                             
+R478;$I2.$159.21;$I2.$214.21;;0.0                                               
+R479;$I2.$16.18;$I2.$17.19;;9.0                                                 
+R480;$I2.$16.18;$I2.$18.18;;0.22                                                
+R481;$I2.$160.20;$I2.$161.21;;9.0                                               
+R482;$I2.$161.21;$I2.$214.21;;0.352                                             
+R483;$I2.$161.21;$I2.$216.21;;0.0                                               
+R484;$I2.$162.20;$I2.$163.21;;9.0                                               
+R485;$I2.$163.21;$I2.$216.21;;0.352                                             
+R486;$I2.$163.21;$I2.$218.21;;0.0                                               
+R487;$I2.$164.20;$I2.$165.21;;9.0                                               
+R488;$I2.$165.21;$I2.$218.21;;0.352                                             
+R489;$I2.$165.21;$I2.$220.21;;0.0                                               
+R490;$I2.$166.20;$I2.$167.21;;9.0                                               
+R491;$I2.$167.21;$I2.$220.21;;0.362                                             
+R492;$I2.$167.21;$I2.$222.21;;0.0                                               
+R493;$I2.$168.21;$I2.$169.35;;9.0                                               
+R494;$I2.$169.35;$I2.$171.35;;0.176                                             
+R495;$I2.$17.19;$I2.$70.19;;0.176                                               
+R496;$I2.$17.19;$I2.$72.19;;0.0                                                 
+R497;$I2.$170.21;$I2.$171.35;;9.0                                               
+R498;$I2.$171.35;$I2.$173.35;;0.176                                             
+R499;$I2.$172.21;$I2.$173.35;;9.0                                               
+R500;$I2.$173.35;$I2.$175.35;;0.176                                             
+R501;$I2.$174.21;$I2.$175.35;;9.0                                               
+R502;$I2.$175.35;$I2.$177.35;;0.176                                             
+R503;$I2.$176.21;$I2.$177.35;;9.0                                               
+R504;$I2.$177.35;$I2.$179.35;;0.176                                             
+R505;$I2.$178.21;$I2.$179.35;;9.0                                               
+R506;$I2.$179.35;$I2.$181.35;;0.176                                             
+R507;$I2.$18.18;$I2.$19.19;;9.0                                                 
+R508;$I2.$18.18;$I2.$20.18;;0.453                                               
+R509;$I2.$180.21;$I2.$181.35;;9.0                                               
+R510;$I2.$181.35;$I2.$183.35;;0.176                                             
+R511;$I2.$182.21;$I2.$183.35;;9.0                                               
+R512;$I2.$183.35;$I2.$185.35;;0.176                                             
+R513;$I2.$184.21;$I2.$185.35;;9.0                                               
+R514;$I2.$185.35;$I2.$187.35;;0.176                                             
+R515;$I2.$186.21;$I2.$187.35;;9.0                                               
+R516;$I2.$187.35;$I2.$189.35;;0.258                                             
+R517;$I2.$188.21;$I2.$189.35;;9.0                                               
+R518;$I2.$189.35;$I2.$211.35;;0.261                                             
+R519;$I2.$19.19;$I2.$72.19;;0.176                                               
+R520;$I2.$19.19;$I2.$74.19;;0.0                                                 
+R521;$I2.$190.21;$I2.$191.35;;9.0                                               
+R522;$I2.$191.35;$I2.$193.35;;0.176                                             
+R523;$I2.$192.21;$I2.$193.35;;9.0                                               
+R524;$I2.$193.35;$I2.$195.35;;0.176                                             
+R525;$I2.$194.21;$I2.$195.35;;9.0                                               
+R526;$I2.$195.35;$I2.$197.35;;0.176                                             
+R527;$I2.$196.21;$I2.$197.35;;9.0                                               
+R528;$I2.$197.35;$I2.$199.35;;0.176                                             
+R529;$I2.$198.21;$I2.$199.35;;9.0                                               
+R530;$I2.$199.35;$I2.$201.35;;0.176                                             
+R531;$I2.$2.18;$I2.$3.19;;9.0                                                   
+R532;$I2.$2.18;$I2.$4.18;;0.22                                                  
+R533;$I2.$20.18;$I2.$21.19;;9.0                                                 
+R534;$I2.$200.21;$I2.$201.35;;9.0                                               
+R535;$I2.$201.35;$I2.$203.35;;0.176                                             
+R536;$I2.$202.21;$I2.$203.35;;9.0                                               
+R537;$I2.$203.35;$I2.$205.35;;0.176                                             
+R538;$I2.$204.21;$I2.$205.35;;9.0                                               
+R539;$I2.$205.35;$I2.$207.35;;0.176                                             
+R540;$I2.$206.21;$I2.$207.35;;9.0                                               
+R541;$I2.$207.35;$I2.$209.35;;0.176                                             
+R542;$I2.$208.21;$I2.$209.35;;9.0                                               
+R543;$I2.$209.35;$I2.$211.35;;0.258                                             
+R544;$I2.$21.19;$I2.$74.19;;0.362                                               
+R545;$I2.$21.19;$I2.$76.19;;0.0                                                 
+R546;$I2.$210.21;$I2.$211.35;;9.0                                               
+R547;$I2.$211.35;$I2.$223.35;;0.261                                             
+R548;$I2.$212.21;$I2.$213.35;;9.0                                               
+R549;$I2.$213.35;$I2.$215.35;;0.352                                             
+R550;$I2.$214.21;$I2.$215.35;;9.0                                               
+R551;$I2.$215.35;$I2.$217.35;;0.352                                             
+R552;$I2.$216.21;$I2.$217.35;;9.0                                               
+R553;$I2.$217.35;$I2.$219.35;;0.352                                             
+R554;$I2.$218.21;$I2.$219.35;;9.0                                               
+R555;$I2.$219.35;$I2.$221.35;;0.352                                             
+R556;$I2.$22.18;$I2.$23.19;;9.0                                                 
+R557;$I2.$22.18;$I2.$24.18;;0.22                                                
+R558;$I2.$220.21;$I2.$221.35;;9.0                                               
+R559;$I2.$221.35;$I2.$223.35;;0.258                                             
+R560;$I2.$222.21;$I2.$223.35;;9.0                                               
+R561;$I2.$23.19;$I2.$78.19;;0.0                                                 
+R562;$I2.$24.18;$I2.$25.19;;9.0                                                 
+R563;$I2.$24.18;$I2.$26.18;;0.22                                                
+R564;$I2.$25.19;$I2.$78.19;;0.176                                               
+R565;$I2.$25.19;$I2.$80.19;;0.0                                                 
+R566;$I2.$26.18;$I2.$27.19;;9.0                                                 
+R567;$I2.$26.18;$I2.$28.18;;0.22                                                
+R568;$I2.$27.19;$I2.$80.19;;0.176                                               
+R569;$I2.$27.19;$I2.$82.19;;0.0                                                 
+R570;$I2.$28.18;$I2.$29.19;;9.0                                                 
+R571;$I2.$28.18;$I2.$30.18;;0.22                                                
+R572;$I2.$29.19;$I2.$82.19;;0.176                                               
+R573;$I2.$29.19;$I2.$84.19;;0.0                                                 
+R574;$I2.$3.19;$I2.$56.19;;0.176                                                
+R575;$I2.$3.19;$I2.$58.19;;0.0                                                  
+R576;$I2.$30.18;$I2.$31.19;;9.0                                                 
+R577;$I2.$30.18;$I2.$32.18;;0.22                                                
+R578;$I2.$31.19;$I2.$84.19;;0.176                                               
+R579;$I2.$31.19;$I2.$86.19;;0.0                                                 
+R580;$I2.$32.18;$I2.$33.19;;9.0                                                 
+R581;$I2.$32.18;$I2.$34.18;;0.22                                                
+R582;$I2.$33.19;$I2.$86.19;;0.176                                               
+R583;$I2.$33.19;$I2.$88.19;;0.0                                                 
+R584;$I2.$34.18;$I2.$35.19;;9.0                                                 
+R585;$I2.$34.18;$I2.$36.18;;0.22                                                
+R586;$I2.$35.19;$I2.$88.19;;0.176                                               
+R587;$I2.$35.19;$I2.$90.19;;0.0                                                 
+R588;$I2.$36.18;$I2.$37.19;;9.0                                                 
+R589;$I2.$36.18;$I2.$38.18;;0.22                                                
+R590;$I2.$37.19;$I2.$90.19;;0.176                                               
+R591;$I2.$37.19;$I2.$92.19;;0.0                                                 
+R592;$I2.$38.18;$I2.$39.19;;9.0                                                 
+R593;$I2.$38.18;$I2.$40.18;;0.22                                                
+R594;$I2.$39.19;$I2.$92.19;;0.176                                               
+R595;$I2.$39.19;$I2.$94.19;;0.0                                                 
+R596;$I2.$4.18;$I2.$5.19;;9.0                                                   
+R597;$I2.$4.18;$I2.$6.18;;0.22                                                  
+R598;$I2.$40.18;$I2.$41.19;;9.0                                                 
+R599;$I2.$40.18;$I2.$42.18;;0.453                                               
+R600;$I2.$41.19;$I2.$94.19;;0.176                                               
+R601;$I2.$41.19;$I2.$96.19;;0.0                                                 
+R602;$I2.$42.18;$I2.$43.19;;9.0                                                 
+R603;$I2.$43.19;$I2.$96.19;;0.362                                               
+R604;$I2.$43.19;$I2.$98.19;;0.0                                                 
+R605;$I2.$44.18;$I2.$45.19;;9.0                                                 
+R606;$I2.$44.18;$I2.$46.18;;0.44                                                
+R607;$I2.$46.18;$I2.$47.19;;9.0                                                 
+R608;$I2.$46.18;$I2.$48.18;;0.44                                                
+R609;$I2.$48.18;$I2.$49.19;;9.0                                                 
+R610;$I2.$48.18;$I2.$50.18;;0.44                                                
+R611;$I2.$5.19;$I2.$58.19;;0.176                                                
+R612;$I2.$5.19;$I2.$60.19;;0.0                                                  
+R613;$I2.$50.18;$I2.$51.19;;9.0                                                 
+R614;$I2.$50.18;$I2.$52.18;;0.44                                                
+R615;$I2.$52.18;$I2.$53.19;;9.0                                                 
+R616;$I2.$52.18;$I2.$54.18;;0.453                                               
+R617;$I2.$54.18;$I2.$55.19;;9.0                                                 
+R618;$I2.$56.19;$I2.$57.20;;9.0                                                 
+R619;$I2.$58.19;$I2.$59.20;;9.0                                                 
+R620;$I2.$6.18;$I2.$7.19;;9.0                                                   
+R621;$I2.$6.18;$I2.$8.18;;0.22                                                  
+R622;$I2.$60.19;$I2.$61.20;;9.0                                                 
+R623;$I2.$60.19;$I2.$7.19;;0.176                                                
+R624;$I2.$62.19;$I2.$63.20;;9.0                                                 
+R625;$I2.$62.19;$I2.$7.19;;0.0                                                  
+R626;$I2.$62.19;$I2.$9.19;;0.176                                                
+R627;$I2.$64.19;$I2.$65.20;;9.0                                                 
+R628;$I2.$64.19;$I2.$9.19;;0.0                                                  
+R629;$I2.$66.19;$I2.$67.20;;9.0                                                 
+R630;$I2.$68.19;$I2.$69.20;;9.0                                                 
+R631;$I2.$70.19;$I2.$71.20;;9.0                                                 
+R632;$I2.$72.19;$I2.$73.20;;9.0                                                 
+R633;$I2.$74.19;$I2.$75.20;;9.0                                                 
+R634;$I2.$76.19;$I2.$77.20;;9.0                                                 
+R635;$I2.$78.19;$I2.$79.20;;9.0                                                 
+R636;$I2.$8.18;$I2.$9.19;;9.0                                                   
+R637;$I2.$80.19;$I2.$81.20;;9.0                                                 
+R638;$I2.$82.19;$I2.$83.20;;9.0                                                 
+R639;$I2.$84.19;$I2.$85.20;;9.0                                                 
+R640;$I2.$86.19;$I2.$87.20;;9.0                                                 
+R641;$I2.$88.19;$I2.$89.20;;9.0                                                 
+R642;$I2.$90.19;$I2.$91.20;;9.0                                                 
+R643;$I2.$92.19;$I2.$93.20;;9.0                                                 
+R644;$I2.$94.19;$I2.$95.20;;9.0                                                 
+R645;$I2.$96.19;$I2.$97.20;;9.0                                                 
+R646;$I2.$98.19;$I2.$99.20;;9.0                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k2
+5d_pex_netlist.csv                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[18:05:52] INFO     Removing whiteboxed device $1         netlist_expander.py:60
+Wrote expanded netlist to:                                                      
+/tmp/tmpauf_s_tv/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k2
+5d_pex_netlist.spice                                                            
