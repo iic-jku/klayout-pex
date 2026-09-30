@@ -225,6 +225,48 @@ class CellExtractionResultsTest(unittest.TestCase):
 
         self.assertEqual({NetCoupleKey('Y', 'Y.$0.3'): 5.0}, summary.resistances)
 
+    @staticmethod
+    def add_network(results: CellExtractionResults,
+                    net_name: str,
+                    nodes: List[Tuple[int, int, str]],
+                    elements: List[Tuple[int, int, float]]):
+        """
+        :param nodes: (node ID, kind, node name)
+        """
+        network = results.r_extraction_result.networks.add(net_name=net_name)
+        for node_id, kind, node_name in nodes:
+            node = network.nodes.add(node_id=node_id, node_kind=kind, node_name=node_name)
+            if kind != r_network_pb2.RNode.Kind.KIND_PIN:
+                node.net_name = f"{net_name}.{node_name}"
+        for node_a, node_b, resistance in elements:
+            element = network.elements.add(resistance=resistance)
+            element.node_a.node_id = node_a
+            element.node_b.node_id = node_b
+
+    def test_summarize_nodes_joined_without_resistance_are_one_node(self):
+        # NOTE: a simulator can't solve for a resistor of 0 Ω, so no such resistor must be written
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, '$2',
+                         nodes=[(1, K.KIND_DEVICE_TERMINAL, 'P0.12'),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.12'),
+                                (3, K.KIND_WIRE_JUNCTION, '$1.17'),
+                                (4, K.KIND_DEVICE_TERMINAL, 'P1.12'),
+                                (5, K.KIND_WIRE_JUNCTION, '$2.12')],
+                         elements=[(1, 2, 0.0), (2, 3, 209.667), (3, 5, 100.0), (5, 4, 0.0)])
+        self.add_network(results, 'VGND',
+                         nodes=[(1, K.KIND_PIN, 'VGND'),
+                                (2, K.KIND_WIRE_JUNCTION, '$5.26'),
+                                (3, K.KIND_WIRE_JUNCTION, '$4.18')],
+                         elements=[(1, 2, 0.0), (2, 3, 9.3)])
+
+        summary = results.summarize()
+
+        # NOTE: a group of nodes is named after its pin, otherwise its device terminal's port
+        self.assertEqual({NetCoupleKey('$2.$1.17', '$2.P0.12'): 209.667,
+                          NetCoupleKey('$2.$1.17', '$2.P1.12'): 100.0,
+                          NetCoupleKey('VGND', 'VGND.$4.18'): 9.3}, summary.resistances)
+
 
 @allure.parent_suite("Unit Tests")
 class ExtractionSummaryTest(unittest.TestCase):

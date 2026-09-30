@@ -189,6 +189,66 @@ class CellExtractionResults:
     def add_sideoverlap_cap(self, cap: SideOverlapCap):
         self.sideoverlap_table[cap.key].append(cap)
 
+    @staticmethod
+    def node_names(network: r_network_pb2.RNetwork) -> Dict[int, NetName]:
+        """
+        Names of the netlist nodes of a resistor network
+
+        Nodes joined by an element without resistance (which a simulator can't solve for)
+        are one electrical node, and get one name.
+
+        :return: node name by node ID
+        """
+        K = r_network_pb2.RNode.Kind
+
+        def default_name(node: r_network_pb2.RNode) -> NetName:
+            # NOTE: if we have an electrical short between 2 pins A and B
+            #       and a parasitic resistance between the two,
+            #       KLayout will call the net of both pins "A,B"
+            #       but we really want the pin name as the node name
+            if node.node_kind == K.KIND_PIN:
+                return node.node_name
+            if not node.net_name or ',' in node.net_name:
+                # NOTE: network prefix, as node name is only unique per network
+                return f"{network.net_name}.{node.node_name}"
+            return node.net_name
+
+        # NOTE: ordered by name, as the node IDs differ from run to run
+        nodes = sorted(network.nodes, key=lambda n: n.node_name)
+
+        # groups of nodes that are one electrical node (union-find, by node ID)
+        parent: Dict[int, int] = {n.node_id: n.node_id for n in nodes}
+
+        def find(node_id: int) -> int:
+            while parent[node_id] != node_id:
+                parent[node_id] = parent[parent[node_id]]
+                node_id = parent[node_id]
+            return node_id
+
+        def union(node_id_a: int, node_id_b: int):
+            parent[find(node_id_a)] = find(node_id_b)
+
+        for element in network.elements:
+            if element.resistance == 0.0:
+                union(element.node_a.node_id, element.node_b.node_id)
+
+        groups: Dict[int, List[r_network_pb2.RNode]] = defaultdict(list)  # by root node ID
+        for n in nodes:
+            groups[find(n.node_id)].append(n)
+
+        def group_name(root: int) -> NetName:
+            pin_names = sorted({n.node_name for n in groups[root] if n.node_kind == K.KIND_PIN})
+            if network.net_name in pin_names:
+                return network.net_name
+            if pin_names:
+                return pin_names[0]
+            # NOTE: preferably the name of a device terminal's port
+            ports = [n for n in groups[root] if n.node_kind == K.KIND_DEVICE_TERMINAL]
+            return default_name((ports or groups[root])[0])
+
+        name_by_root: Dict[int, NetName] = {root: group_name(root) for root in groups}
+        return {n.node_id: name_by_root[find(n.node_id)] for n in nodes}
+
     def summarize(self) -> ExtractionSummary:
         normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
         for key, entries in self.overlap_table.items():
@@ -213,27 +273,12 @@ class CellExtractionResults:
 
         normalized_resistance_table: Dict[NetCoupleKey, float] = {}
 
-        def node_name(network: r_network_pb2.RNetwork,
-                      node: r_network_pb2.RNode) -> str:
-            # NOTE: if we have an electrical short between 2 pins A and B
-            #       and a parasitic resistance between the two,
-            #       KLayout will call the net of both pins "A,B"
-            #       but we really want the pin name as the node name
-            if node.node_kind == r_network_pb2.RNode.Kind.KIND_PIN:
-                return node.node_name
-            if not node.net_name or ',' in node.net_name:
-                # NOTE: network prefix, as node name is only unique per network
-                return f"{network.net_name}.{node.node_name}"
-            return node.net_name
-
         for network in self.r_extraction_result.networks:
-            node_by_id: Dict[int, r_network_pb2.RNode] = {n.node_id: n for n in network.nodes}
+            node_names = self.node_names(network)
             for element in network.elements:
-                node_a = node_by_id[element.node_a.node_id]
-                node_b = node_by_id[element.node_b.node_id]
                 resistance = element.resistance
-                normalized_key = NetCoupleKey(node_name(network, node_a),
-                                              node_name(network, node_b)).normed()
+                normalized_key = NetCoupleKey(node_names[element.node_a.node_id],
+                                              node_names[element.node_b.node_id]).normed()
                 # NOTE: different nodes can have the same name, e.g. pins with the same label,
                 #       which are one node in the netlist, so their elements are in parallel,
                 #       and an element between two of them is shorted

@@ -68,9 +68,7 @@ def test_contact_1x1_minsize_via1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_contact_1x1_minsize_via1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;BOT;BOT,TOP.$0.15;;0.0
-R2;BOT,TOP.$0.15;BOT,TOP.$1.13;;4.5
-R3;BOT,TOP.$1.13;TOP;;0.0"""
+R1;BOT;TOP;;4.5"""
     )
 
 
@@ -83,14 +81,12 @@ def test_nfet_m1():
         'test_patterns', 'nfet_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;D;D.$1.9;;0.208
-R2;D.$0.12;D.$1.9;;6.3
-R3;D.$0.12;D.P0.12;;0.0
-R4;G;G.$1.9;;0.156
-R5;G.$0.17;G.$1.9;;5.9
-R6;G.$0.17;G.P0.17;;12.514
-R7;S;S.$1.9;;0.208
-R8;S.$0.12;S.$1.9;;6.3
-R9;S.$0.12;S.P0.12;;0.0"""
+R2;D.$1.9;D.P0.12;;6.3
+R3;G;G.$1.9;;0.156
+R4;G.$0.17;G.$1.9;;5.9
+R5;G.$0.17;G.P0.17;;12.514
+R6;S;S.$1.9;;0.208
+R7;S.$1.9;S.P0.12;;6.3"""
     )
 
 
@@ -108,9 +104,9 @@ def obtained_resistances(*path_components) -> List[float]:
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_contact_2x2_minsize_via1():
-    # 4 cuts in parallel, each 4500 mΩ
+    # 4 cuts in parallel, each 4500 mΩ (2 cuts each join the same nodes, so they are one resistor)
     assert obtained_resistances('test_patterns', 'r_contact_2x2_minsize_via1.gds.gz') == \
-           [0.0] * 4 + [0.026] * 4 + [4.5] * 4
+           [0.026] * 4 + [2.25] * 2
 
 
 @allure.parent_suite(parent_suite)
@@ -119,4 +115,4 @@ def test_contact_2x2_minsize_via1():
 def test_via_stack_1x1_minsize_poly_to_metal5():
     # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut
     assert obtained_resistances('test_patterns', 'r_via_stack_1x1_minsize_poly_to_metal5.gds.gz') == \
-           [0.0] * 10 + [4.5] * 4 + [5.9]
+           [4.5] * 4 + [5.9]
