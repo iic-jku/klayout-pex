@@ -29,6 +29,7 @@ from collections import Counter
 from functools import cached_property
 import google.protobuf.json_format
 
+from .device_models import DeviceModels
 from .util.multiple_choice import MultipleChoicePattern
 from .log import (
     warning
@@ -64,6 +65,7 @@ class TechInfo:
             'process stack': [],
             'layer': [],
             'LVS computed layer': [],
+            'device model mapping': [],
         }
 
         for lyr in tech.process_stack.layers:
@@ -79,6 +81,8 @@ class TechInfo:
         namespaces['layer'] += [(lyr.name, 'layer') for lyr in tech.layers]
         namespaces['LVS computed layer'] += [(lyr.layer_info.name, 'layer')
                                              for lyr in tech.lvs_computed_layers]
+        namespaces['device model mapping'] += [(dm.lvs_device_class_name, 'LVS device class')
+                                               for dm in tech.device_models.device_model_mappings]
 
         problems: List[str] = []
         for namespace, declarations in namespaces.items():
@@ -130,6 +134,10 @@ class TechInfo:
     @cached_property
     def computed_layer_info_by_name(self) -> Dict[LVSLayerName, tech_pb2.ComputedLayerInfo]:
         return {lyr.layer_info.name: lyr for lyr in self.tech.lvs_computed_layers}
+
+    @cached_property
+    def device_models(self) -> DeviceModels:
+        return DeviceModels(self.tech.device_models)
 
     @cached_property
     def computed_layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.ComputedLayerInfo]:

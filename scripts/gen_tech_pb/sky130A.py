@@ -470,6 +470,96 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "met4",      "met5",      46.98)
 
 
+def build_device_models_info(dmi: DeviceModelsInfo):
+    # NOTE: the ngspice models set .option scale=1.0u, so they take lengths in µm and areas in µm²,
+    #       as the LVS device classes store them.
+    #       The terminal order of each model is the one of the LVS netlist reader,
+    #       i.e. KLayout's standard one, and VPP caps with 4 terminals are read as MOS4 (see sky130.lvs)
+    mos = [lvs_param('l', 'L'), lvs_param('w', 'W'),
+           lvs_param('as', 'AS'), lvs_param('ad', 'AD'),
+           lvs_param('ps', 'PS'), lvs_param('pd', 'PD')]
+    for fet in ('nfet_01v8', 'nfet_01v8_lvt', 'nfet_03v3_nvt', 'nfet_05v0_nvt', 'nfet_g5v0d10v5',
+                'pfet_01v8', 'pfet_01v8_hvt', 'pfet_01v8_lvt', 'pfet_g5v0d10v5'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__{fet}", "X", ["D", "G", "S", "B"], mos)
+
+    for diode in ('diode_pd2nw_05v5', 'diode_pd2nw_05v5_hvt', 'diode_pd2nw_05v5_lvt', 'diode_pd2nw_11v0',
+                  'diode_pw2nd_05v5', 'diode_pw2nd_05v5_lvt', 'diode_pw2nd_05v5_nvt', 'diode_pw2nd_11v0'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__{diode}", "X", ["A", "C"],
+                                 [lvs_param('area', 'A'), lvs_param('perim', 'P')])
+
+    # BJTs of a fixed size, NE is the number of devices
+    bjt = [lvs_param('m', 'NE'), lvs_param('mult', 'NE')]
+    for npn in ('npn_05v5_W1p00L1p00', 'npn_05v5_W1p00L2p00', 'npn_11v0_W1p00L1p00'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__{npn}", "X", ["C", "B", "E", "S"], bjt)
+    for pnp in ('pnp_05v5_W0p68L0p68', 'pnp_05v5_W3p40L3p40'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__{pnp}", "X", ["C", "B", "E"], bjt)
+
+    # metal (and local interconnect) resistors are resistor models, the others subcircuits
+    w_l = [lvs_param('w', 'W'), lvs_param('l', 'L')]
+    for layer in ('l1', 'm1', 'm2', 'm3', 'm4', 'm5'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__res_generic_{layer}", "R", ["A", "B"], w_l)
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_po", "X", ["A", "B"], w_l)
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_nd", "X", ["A", "B", "W"], w_l)
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_pd", "X", ["A", "B", "W"], w_l)
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_iso_pw", "X", ["A", "B", "W"], w_l)
+    for width in ('0p35', '0p69', '1p41', '2p85', '5p73'):  # the width is the one of the model name
+        add_device_model_mapping(dmi, f"sky130_fd_pr__res_high_po_{width}", "X", ["A", "B", "W"], [lvs_param('l', 'L')])
+        add_device_model_mapping(dmi, f"sky130_fd_pr__res_xhigh_po_{width}", "X", ["A", "B", "W"], [lvs_param('l', 'L')])
+
+    # VPP (MOM) caps of a fixed size
+    #
+    #     NOTE: sky130.lib.spice doesn't include all of their models,
+    #           a simulation needs to include those (libs.ref/sky130_fd_pr/spice/<model>.model.spice) itself
+    for vpp in ('02p4x04p6_m1m2_noshield',                  # not in sky130.lib.spice
+                '02p7x06p1_m1m2m3m4_shieldl1_fingercap',
+                '02p7x11p1_m1m2m3m4_shieldl1_fingercap',
+                '02p7x21p1_m1m2m3m4_shieldl1_fingercap',
+                '02p7x41p1_m1m2m3m4_shieldl1_fingercap',
+                '02p9x06p1_m1m2m3m4_shieldl1_fingercap2',
+                '04p4x04p6_l1m1m2_noshield',                # not in sky130.lib.spice
+                '04p4x04p6_m1m2_noshield',                  # not in sky130.lib.spice
+                '04p4x04p6_m1m2_noshield_o2',               # not in sky130.lib.spice
+                '04p4x04p6_m1m2_shieldl1',                  # not in sky130.lib.spice
+                '04p4x04p6_m1m2m3_shieldl1',
+                '05p9x05p9_m1m2m3m4_shieldl1_wafflecap',
+                '08p6x07p8_l1m1m2_noshield',                # not in sky130.lib.spice
+                '08p6x07p8_m1m2_noshield',                  # not in sky130.lib.spice
+                '08p6x07p8_m1m2_shieldl1',                  # not in sky130.lib.spice
+                '08p6x07p8_m1m2m3_shieldl1',
+                '11p3x11p3_m1m2m3m4_shieldl1_wafflecap',
+                '11p5x11p7_l1m1m2_noshield',                # not in sky130.lib.spice
+                '11p5x11p7_m1m2_noshield',                  # not in sky130.lib.spice
+                '11p5x11p7_m1m2_shieldl1',                  # not in sky130.lib.spice
+                '11p5x11p7_m1m2m3_shieldl1',
+                '11p5x11p7_m1m4_noshield',
+                '44p7x23p1_pol1m1m2m3m4m5_noshield'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["A", "B", "W"], [])
+    for vpp in ('03p9x03p9_m1m2_shieldl1_floatm3',          # not in sky130.lib.spice
+                '04p4x04p6_l1m1m2_shieldpo_floatm3',        # not in sky130.lib.spice
+                '04p4x04p6_m1m2m3_shieldl1m5_floatm4',
+                '06p8x06p1_l1m1m2m3_shieldpom4',
+                '06p8x06p1_m1m2m3_shieldl1m4',
+                '08p6x07p8_l1m1m2_shieldpo_floatm3',        # not in sky130.lib.spice
+                '08p6x07p8_m1m2m3_shieldl1m5_floatm4',
+                '11p5x11p7_l1m1m2_shieldpom3',              # not in sky130.lib.spice
+                '11p5x11p7_l1m1m2m3_shieldm4',
+                '11p5x11p7_l1m1m2m3_shieldpom4',
+                '11p5x11p7_l1m1m2m3m4_shieldm5',
+                '11p5x11p7_l1m1m2m3m4_shieldpom5',
+                '11p5x11p7_l1m1m2m3m4_shieldpom5_x',
+                '11p5x11p7_m1m2m3_shieldl1m5_floatm4',
+                '11p5x11p7_m1m2m3m4_shieldl1m5',
+                '11p5x11p7_m1m2m3m4_shieldm5'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["S", "G", "D", "B"], [])
+
+    # NOTE: no device model mapping (yet), a netlist with these devices is an error:
+    #       - model__cap_mim, model__cap_mim_m4, cap_var_hvt, cap_var_lvt:
+    #         the models take w and l, LVS extracts area and perimeter
+    #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3
+    #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode, res_generic_nd_hv, res_generic_pd_hv,
+    #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models
+
+
 def build_tech() -> Technology:
     tech = Technology(name="sky130A")
 
@@ -480,5 +570,7 @@ def build_tech() -> Technology:
     build_process_stack_info(tech.process_stack)
 
     build_process_parasitics_info(tech.process_parasitics)
+
+    build_device_models_info(tech.device_models)
 
     return tech

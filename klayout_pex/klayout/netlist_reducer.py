@@ -28,6 +28,7 @@ import klayout.db as kdb
 from ..log import (
     info,
 )
+from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 
 
 class NetlistReducer:
@@ -45,7 +46,9 @@ class NetlistReducer:
         for d in top_circuit.each_device():
             d: kdb.Device
             dc = d.device_class()
-            if isinstance(dc, kdb.DeviceClassCapacitor):
+            # NOTE: only the parasitics KPEX added, the capacitors of the LVS netlist (e.g. MIM, MOM)
+            #       may have no C parameter (#203)
+            if dc.name == PARASITIC_CAPACITOR_CLASS_NAME:
                 # net_a = d.net_for_terminal('A')
                 # net_b = d.net_for_terminal('B')
                 c_value = d.parameter('C')

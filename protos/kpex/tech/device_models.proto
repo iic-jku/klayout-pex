@@ -1,0 +1,82 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.tech;
+
+// How KPEX writes the devices of the LVS netlist into the extracted netlist,
+// so that the simulation models of the PDK accept them.
+//
+// KLayout's SPICE writer only knows its own device classes and their standard parameters.
+// The devices of a PDK often differ:
+//   - a subcircuit instead of a primitive model (e.g. sky130A MOS, IHP MOS, resistors and capacitors)
+//   - other parameter names (e.g. gf180mcuD resistors r_width, r_length)
+//   - other units (e.g. sky130A µm, as its models set .option scale=1.0u)
+//   - a device class only LVS knows (e.g. IHP rfnmos is sg13_lv_nmos with rfmode=1)
+//
+// A device of the extracted netlist whose LVS device class has no DeviceModelMapping is an error.
+message DeviceModelsInfo {
+    repeated DeviceModelMapping device_model_mappings = 10;
+}
+
+message DeviceModelMapping {
+    // name of the LVS device class, e.g. "rfnmos"
+    string lvs_device_class_name = 1;
+
+    // SPICE instance prefix, e.g. "X" for a subcircuit, "M" for a MOS model
+    string spice_prefix = 10;
+
+    // name of the model or subcircuit, e.g. "sg13_lv_nmos",
+    // the LVS device class name if empty
+    string model_name = 20;
+
+    // LVS terminal names, in the order of the model's ports, e.g. ["D", "G", "S", "B"]
+    repeated string terminal_names = 30;
+
+    // parameters of the model, in the written order
+    // (LVS parameters that aren't listed are not written)
+    repeated DeviceModelParameter parameters = 40;
+}
+
+message DeviceModelParameter {
+    // name of the model parameter, e.g. "w"
+    string name = 1;
+
+    oneof value {
+        // value of this LVS parameter, times lvs_parameter_factor
+        string lvs_parameter_name = 10;
+
+        // fixed value, e.g. rfmode=1
+        double constant = 11;
+    }
+
+    // factor from the LVS parameter value (as the device class stores it) to the value the model expects,
+    // 1 if not set.
+    //
+    //     NOTE: the SI scaling of a device class parameter is not reliable for this,
+    //           e.g. the IHP device classes store w in µm but declare an SI scaling of 1.
+    //           Also, the written value is a plain number (no SPICE suffix like "u"),
+    //           so that other netlist formats can write it too.
+    //
+    // e.g. IHP w (µm) to SI (m): 1e-6, sky130A W (µm) to µm: 1
+    optional double lvs_parameter_factor = 20;
+}

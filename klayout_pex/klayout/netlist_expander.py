@@ -34,6 +34,7 @@ from ..log import (
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
+from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
 
 
@@ -57,7 +58,7 @@ class NetlistExpander:
 
         # create capacitor class
         cap = kdb.DeviceClassCapacitor()
-        cap.name = 'PEX_CAP'
+        cap.name = PARASITIC_CAPACITOR_CLASS_NAME
         cap.description = "Extracted by kpex/FasterCap PEX"
         expanded_netlist.add(cap)
 
@@ -130,7 +131,7 @@ class NetlistExpander:
         # create capacitor class
 
         res = kdb.DeviceClassResistor()
-        res.name = 'PEX_RES'
+        res.name = PARASITIC_RESISTOR_CLASS_NAME
         res.description = "Extracted by kpex/FasterCap PEX"
         expanded_netlist.add(res)
 
