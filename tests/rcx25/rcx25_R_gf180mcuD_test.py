@@ -80,13 +80,13 @@ def test_nfet_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;D;D.$1.9;;0.208
-R2;D.$1.9;D.P0.12;;6.3
-R3;G;G.$1.9;;0.156
-R4;G.$0.17;G.$1.9;;5.9
-R5;G.$0.17;G.P0.17;;12.514
-R6;S;S.$1.9;;0.208
-R7;S.$1.9;S.P0.12;;6.3"""
+R1;D;D.$1.Metal1;;0.208
+R2;D.$1.Metal1;D.P0.Nplus;;6.3
+R3;G;G.$1.Metal1;;0.156
+R4;G.$0.Poly2;G.$1.Metal1;;5.9
+R5;G.$0.Poly2;G.P0.Poly2;;12.514
+R6;S;S.$1.Metal1;;0.208
+R7;S.$1.Metal1;S.P0.Nplus;;6.3"""
     )
 
 

@@ -141,11 +141,11 @@ def test_nfet_li1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$2;$2.$1.17;;209.667
-R2;$3;$3.$1.17;;209.667
-R3;G;G.$1.17;;2.418
-R4;G.$0.16;G.$1.17;;152.0
-R5;G.$0.16;G.P0.16;;316.321"""
+R1;$2;$2.$1.li1;;209.667
+R2;$3;$3.$1.li1;;209.667
+R3;G;G.$1.li1;;2.418
+R4;G.$0.poly;G.$1.li1;;152.0
+R5;G.$0.poly;G.P0.poly;;316.321"""
         )
 
 
@@ -162,7 +162,7 @@ def test_nfet_terminals_are_on_the_resistor_network():
     with open(netlist_path) as f:
         lines = f.read().replace('\n+', ' ').splitlines()
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
-    assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.16', '\\$2', 'sky130_gnd']  # D G S B
+    assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.poly', '\\$2', 'sky130_gnd']  # D G S B
 
 
 @allure.parent_suite(parent_suite)

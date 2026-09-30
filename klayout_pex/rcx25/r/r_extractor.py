@@ -22,14 +22,14 @@
 # --------------------------------------------------------------------------------
 #
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from typing import *
 
 from klayout_pex.log import (
     subproc,
 )
 
-from ..types import NetName
+from ..types import LayerName, NetName
 
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 from klayout_pex.klayout.lvsdb_extractor import GDSPair, KLayoutExtractionContext
@@ -320,6 +320,26 @@ class RExtractor:
 
         return rex_request
 
+    @staticmethod
+    def node_name(rn: klp.RNode, layer_name: LayerName) -> str:
+        """
+        The name of a node of the resistor network, unique within the network (but pins),
+        e.g. $1.li1 (internal node), P0.poly (polygon port), V0.met1 (vertex port)
+
+        NOTE: KLayout names a node after its layer index (e.g. $1.17), but the layer indexes depend on
+              the order KLayout creates the LVS layers in, which differs from run to run
+        """
+        match rn.type():
+            case klp.RNodeType.Internal:
+                prefix = '$'
+            case klp.RNodeType.VertexPort:
+                prefix = 'V'
+            case klp.RNodeType.PolygonPort:
+                prefix = 'P'
+            case _:
+                raise NotImplementedError()
+        return f"{prefix}{rn.port_index()}.{layer_name}"
+
     def extract(self, rex_request: pex_request_pb2.RExtractionRequest) -> pex_result_pb2.RExtractionResult:
         rex_result = pex_result_pb2.RExtractionResult()
 
@@ -385,7 +405,7 @@ class RExtractor:
 
                 r_node = result_network.nodes.add()
                 r_node.node_id = rn.object_id()
-                r_node.node_name = rn.to_s()
+                r_node.node_name = self.node_name(rn, canonical_layer_name)
                 r_node.node_kind = r_network_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
                 r_node.layer_name = canonical_layer_name
 
@@ -436,6 +456,17 @@ class RExtractor:
                         raise NotImplementedError()
 
                 node_by_node_id[r_node.node_id] = r_node
+
+            # NOTE: nodes of the same name are one node in the netlist, like the pins of the same label,
+            #       so the names of the other nodes must be unique
+            #       (the internal nodes are numbered per network, the ports per layer, so no 2 layers
+            #        of the same name must have ports, e.g. a conductor split into several GDS pairs)
+            name_counts = Counter(n.node_name for n in result_network.nodes
+                                  if n.node_kind != r_network_pb2.RNode.Kind.KIND_PIN)
+            duplicate_names = sorted(name for name, count in name_counts.items() if count > 1)
+            if duplicate_names:
+                raise RExtractionTechError(f"Nodes of net {result_network.net_name} have the same name, "
+                                           f"as layers of the same name have ports: {', '.join(duplicate_names)}")
 
             for el in resistor_network.each_element():
                 r_element = result_network.elements.add()

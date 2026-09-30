@@ -51,7 +51,8 @@ def sky130a_tech() -> tech_pb2.Technology:
 
 def r_extractor(tech: tech_pb2.Technology,
                 top_cell: str = 'rfnmos_w1u_l0u72',
-                lvsdb_file_name: str = 'rfnmos_w1u_l0u72_broken_rfmos_model_mapping.lvsdb.gz') -> RExtractor:
+                lvsdb_file_name: str = 'rfnmos_w1u_l0u72_broken_rfmos_model_mapping.lvsdb.gz',
+                skip_simplify: bool = False) -> RExtractor:
     lvsdb = kdb.LayoutVsSchematic()
     lvsdb.read(os.path.join(REPO_DIR, 'testdata', 'klayout', 'lvs', lvsdb_file_name))
     pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=top_cell,
@@ -64,7 +65,7 @@ def r_extractor(tech: tech_pb2.Technology,
                       delaunay_b=0.5,
                       delaunay_amax=0.0,
                       via_merge_distance=0.0,
-                      skip_simplify=False)
+                      skip_simplify=skip_simplify)
 
 
 @allure.parent_suite("Unit Tests")
@@ -109,18 +110,23 @@ class RExtractorTechTest(unittest.TestCase):
         self.assertNotIn('cont_poly_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
 
 
+def nfet_li1_redux_networks() -> Dict[str, r_network_pb2.RNetwork]:
+    rex = r_extractor(sky130a_tech(),
+                      top_cell='nfet_li1_redux',
+                      lvsdb_file_name='nfet_li1_redux_reordered_lvs_layers.lvsdb.gz',
+                      skip_simplify=True)  # like kpex
+    result = rex.extract(rex.prepare_request())
+    return {network.net_name: network for network in result.networks}
+
+
 @allure.parent_suite("Unit Tests")
 @allure.tag("R", "Device Terminals")
 class RExtractorDeviceTerminalTest(unittest.TestCase):
     @staticmethod
     def ports_by_net() -> Dict[str, List[r_network_pb2.RNode]]:
-        rex = r_extractor(sky130a_tech(),
-                          top_cell='nfet_li1_redux',
-                          lvsdb_file_name='nfet_li1_redux_reordered_lvs_layers.lvsdb.gz')
-        result = rex.extract(rex.prepare_request())
-        return {network.net_name: [n for n in network.nodes
-                                   if n.node_kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL]
-                for network in result.networks}
+        return {net_name: [n for n in network.nodes
+                           if n.node_kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL]
+                for net_name, network in nfet_li1_redux_networks().items()}
 
     def test_device_terminal_is_a_port_of_its_wire(self):
         # NOTE: the annotated layout has a layer for each LVS layer, e.g. poly_con and poly_vpp for poly,
@@ -135,3 +141,17 @@ class RExtractorDeviceTerminalTest(unittest.TestCase):
                          {net_name: [(p.device_terminal.device_id, p.device_terminal.terminal_id, p.device_terminal.name)
                                      for p in ports]
                           for net_name, ports in self.ports_by_net().items()})
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "Node Names")
+class RExtractorNodeNameTest(unittest.TestCase):
+    def test_node_names_have_the_layer_name(self):
+        # NOTE: KLayout names a node after its layer index (e.g. $1.17),
+        #       which depends on the order of the LVS layers (see RExtractorDeviceTerminalTest)
+        self.assertEqual({'G': ['$0.poly', '$1.li1', 'G', 'P0.poly'],
+                          '$2': ['$0.nsdm', '$1.li1', 'P0.nsdm'],
+                          '$3': ['$0.nsdm', '$1.li1', 'P0.nsdm'],
+                          'sky130_gnd': []},
+                         {net_name: sorted(n.node_name for n in network.nodes)
+                          for net_name, network in nfet_li1_redux_networks().items()})
