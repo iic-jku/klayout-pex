@@ -33,6 +33,7 @@ from ..log import (
     warning,
 )
 from .extraction_results import ExtractionResults
+from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
 
 class RCX25NetlistExpander:
@@ -69,14 +70,14 @@ class RCX25NetlistExpander:
         # create capacitor device class
         cap = kdb.DeviceClassCapacitor()
         # cap.name = 'KPEX_CAP'
-        cap.name = 'C'
+        cap.name = PARASITIC_CAPACITOR_CLASS_NAME
         cap.description = "Extracted by KPEX/2.5D"
         expanded_netlist.add(cap)
 
         # create resistor device class
         res = kdb.DeviceClassResistor()
         # res.name = 'KPEX_RES'
-        res.name = 'R'
+        res.name = PARASITIC_RESISTOR_CLASS_NAME
         res.description = "Extracted by KPEX/2.5D"
         expanded_netlist.add(res)
 

@@ -29,6 +29,10 @@ from typing import *
 
 import klayout.db as kdb
 
+from .parasitic_device_classes import (
+    PARASITIC_CAPACITOR_CLASS_NAME,
+    PARASITIC_RESISTOR_CLASS_NAME,
+)
 from ..util.unit_formatter import format_spice_number
 
 
@@ -75,12 +79,16 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
 
     def write_device(self, device: kdb.Device):
         dc = device.device_class()
-        match dc:
-            case kdb.DeviceClassCapacitor():
-                c_farad = device.parameter('C')
-                net1 = self.net_to_string(device.net_for_terminal(0))
-                net2 = self.net_to_string(device.net_for_terminal(1))
-                self.emit_line(f"C{device.name} {net1} {net2} {format_spice_number(c_farad)}")
-
-            case _:
-                super().write_device(device)
+        if dc.name == PARASITIC_CAPACITOR_CLASS_NAME:
+            c_farad = device.parameter('C')
+            net1 = self.net_to_string(device.net_for_terminal(0))
+            net2 = self.net_to_string(device.net_for_terminal(1))
+            self.emit_line(f"C{device.name} {net1} {net2} {format_spice_number(c_farad)}")
+        elif dc.name == PARASITIC_RESISTOR_CLASS_NAME:
+            # NOTE: without a model name (KLayout's writer adds the device class name, which ngspice rejects)
+            r_ohm = device.parameter('R')
+            net1 = self.net_to_string(device.net_for_terminal(0))
+            net2 = self.net_to_string(device.net_for_terminal(1))
+            self.emit_line(f"R{device.name} {net1} {net2} {r_ohm:.12g}")
+        else:
+            super().write_device(device)
