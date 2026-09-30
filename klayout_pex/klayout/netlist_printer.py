@@ -29,11 +29,15 @@ from typing import *
 
 import klayout.db as kdb
 
+from ..device_models import DeviceModels
 from .parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
+    PARASITIC_DEVICE_CLASS_NAMES,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
 from ..util.unit_formatter import format_spice_number
+
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 @dataclass
@@ -46,13 +50,17 @@ class NetlistHeader:
 
 class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
     def __init__(self,
-                 header: NetlistHeader):
+                 header: NetlistHeader,
+                 device_models: DeviceModels):
         """
         :param header: written as comments at the top of the netlist
+        :param device_models: how to write the devices of the LVS netlist
+                              (the parasitics KPEX added are written as they are)
         """
         super().__init__()
 
         self.header = header
+        self.device_models = device_models
 
         self.spice_writer = kdb.NetlistSpiceWriter(self)
         self.spice_writer.use_net_names = True
@@ -61,6 +69,8 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
     def write(self,
               netlist: kdb.Netlist,
               output_path: str | Path):
+        # NOTE: the final netlist, the netlist expanders may have removed (whitebox) devices
+        self.device_models.check_mappings(netlist, ignored_device_class_names=PARASITIC_DEVICE_CLASS_NAMES)
         netlist.write(output_path, self.spice_writer)
 
     # --------------------------------------------------------------------------------
@@ -91,4 +101,22 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
             net2 = self.net_to_string(device.net_for_terminal(1))
             self.emit_line(f"R{device.name} {net1} {net2} {r_ohm:.12g}")
         else:
-            super().write_device(device)
+            self.write_modeled_device(device, self.device_models.mapping_by_lvs_device_class_name[dc.name])
+
+    def write_modeled_device(self,
+                             device: kdb.Device,
+                             device_model_mapping: device_models_pb2.DeviceModelMapping):
+        dc = device.device_class()
+        items = [f"{device_model_mapping.spice_prefix}{self.format_name(device.expanded_name())}"]
+        items += [self.net_to_string(device.net_for_terminal(dc.terminal_id(t)))
+                  for t in device_model_mapping.terminal_names]
+        items.append(self.format_name(device_model_mapping.model_name or dc.name))
+        for p in device_model_mapping.parameters:
+            match p.WhichOneof('value'):
+                case 'lvs_parameter_name':
+                    factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
+                    value = device.parameter(p.lvs_parameter_name) * factor
+                case 'constant':
+                    value = p.constant
+            items.append(f"{p.name}={value:.12g}")
+        self.emit_line(' '.join(items))
