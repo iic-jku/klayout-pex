@@ -58,7 +58,7 @@ from .klayout.lvs_runner import LVSError, LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
-from .klayout.netlist_printer import NetlistPrinter
+from .klayout.netlist_printer import NetlistHeader, NetlistPrinter
 from .klayout.netlist_reducer import NetlistReducer
 from .klayout.repair_rdb import repair_rdb
 from .log import (
@@ -747,10 +747,12 @@ class KpexCLI:
 
     def create_netlist_printer(self,
                                args: argparse.Namespace,
-                               extraction_engine: ExtractionEngine):
-        printer = NetlistPrinter(extraction_engine=extraction_engine,
-                                 pdk=args.pdk)
-        return printer
+                               extraction_engine: ExtractionEngine) -> NetlistPrinter:
+        header = NetlistHeader(kpex_version=__version__,
+                               extraction_engine=str(extraction_engine),
+                               tech=args.pdk.name.lower(),
+                               date=datetime.now())
+        return NetlistPrinter(header=header)
 
     def build_fastercap_input(self,
                               args: argparse.Namespace,

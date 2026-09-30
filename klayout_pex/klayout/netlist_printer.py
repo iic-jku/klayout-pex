@@ -22,26 +22,33 @@
 # --------------------------------------------------------------------------------
 #
 
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import *
 
 import klayout.db as kdb
 
-from ..extraction_engine import ExtractionEngine
-from ..pdk_config import PDKConfig
 from ..util.unit_formatter import format_spice_number
-from ..version import __version__
+
+
+@dataclass
+class NetlistHeader:
+    kpex_version: str
+    extraction_engine: str
+    tech: str
+    date: datetime
 
 
 class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
     def __init__(self,
-                 extraction_engine: ExtractionEngine,
-                 pdk: PDKConfig):
+                 header: NetlistHeader):
+        """
+        :param header: written as comments at the top of the netlist
+        """
         super().__init__()
 
-        self.extraction_engine = extraction_engine
-        self.pdk = pdk
+        self.header = header
 
         self.spice_writer = kdb.NetlistSpiceWriter(self)
         self.spice_writer.use_net_names = True
@@ -56,14 +63,13 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
     # NetlistSpiceWriterDelegate overwrites
 
     def write_header(self, *args, **kwargs):
-        now = datetime.now()
-        header_date = now.strftime("%Y-%m-%d %H:%M:%S")
+        header_date = self.header.date.strftime("%Y-%m-%d %H:%M:%S")
 
         self.emit_line(f"*********************************************************")
-        self.emit_line(f"*** NGSPICE file created by KLayout-PEX {__version__}")
+        self.emit_line(f"*** NGSPICE file created by KLayout-PEX {self.header.kpex_version}")
         self.emit_line(f"*** -----------------------------------------------------")
-        self.emit_line(f"***     Extraction Engine: {self.extraction_engine}")
-        self.emit_line(f"***     Technology: {self.pdk.name.lower()}")
+        self.emit_line(f"***     Extraction Engine: {self.header.extraction_engine}")
+        self.emit_line(f"***     Technology: {self.header.tech}")
         self.emit_line(f"***     Date: {header_date}")
         self.emit_line(f"*********************************************************")
 
