@@ -23,6 +23,7 @@ syntax = "proto3";
 
 package kpex.tech;
 
+import "kpex/tech/device_models.proto";
 import "kpex/tech/process_stack.proto";
 import "kpex/tech/process_parasitics.proto";
 
@@ -47,6 +48,9 @@ message Technology {
 
     // Parasistic data for the magic-like PEX engine
     ProcessParasiticsInfo process_parasitics = 200;
+
+    // How to write the devices of the LVS netlist into the extracted netlist
+    DeviceModelsInfo device_models = 300;
 }
 
 message GDSPair {
