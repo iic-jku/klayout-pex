@@ -33,6 +33,7 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError, RExtractor
 from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 
@@ -43,11 +44,16 @@ def ihp_sg13g2_tech() -> tech_pb2.Technology:
     return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'klayout_pex_protobuf', 'ihp-sg13g2_tech.pb.json'))
 
 
-def r_extractor(tech: tech_pb2.Technology) -> RExtractor:
+def sky130a_tech() -> tech_pb2.Technology:
+    return TechInfo.parse_tech_def(jsonpb_path=os.path.join(REPO_DIR, 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))
+
+
+def r_extractor(tech: tech_pb2.Technology,
+                top_cell: str = 'rfnmos_w1u_l0u72',
+                lvsdb_file_name: str = 'rfnmos_w1u_l0u72_broken_rfmos_model_mapping.lvsdb.gz') -> RExtractor:
     lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(os.path.join(REPO_DIR, 'testdata', 'klayout', 'lvs',
-                            'rfnmos_w1u_l0u72_broken_rfmos_model_mapping.lvsdb.gz'))
-    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='rfnmos_w1u_l0u72',
+    lvsdb.read(os.path.join(REPO_DIR, 'testdata', 'klayout', 'lvs', lvsdb_file_name))
+    pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=top_cell,
                                                               lvsdb=lvsdb,
                                                               tech=TechInfo(tech=tech, dielectric_filter=None),
                                                               blackbox_devices=False)
@@ -100,3 +106,22 @@ class RExtractorTechTest(unittest.TestCase):
 
         self.assertIn('cont_nsd_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
         self.assertNotIn('cont_poly_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "Device Terminals")
+class RExtractorDeviceTerminalTest(unittest.TestCase):
+    def test_device_terminal_is_a_port_of_its_wire(self):
+        # NOTE: the annotated layout has a layer for each LVS layer, e.g. poly_con and poly_vpp for poly,
+        #       and KLayout doesn't create the LVS layers in the same order from run to run:
+        #       in this LVS database, the gate terminal's layer (poly_con) comes after the other one
+        rex = r_extractor(sky130a_tech(),
+                          top_cell='nfet_li1_redux',
+                          lvsdb_file_name='nfet_li1_redux_reordered_lvs_layers.lvsdb.gz')
+
+        result = rex.extract(rex.prepare_request())
+
+        ports_by_net = {network.net_name: sum(1 for n in network.nodes
+                                              if n.node_kind == r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL)
+                        for network in result.networks}
+        self.assertEqual({'G': 1, '$2': 1, '$3': 1, 'sky130_gnd': 0}, ports_by_net)

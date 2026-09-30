@@ -519,7 +519,10 @@ class KLayoutExtractionContext:
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
                         region_by_layer = terminal.region_by_layer.add()
-                        region_by_layer.layer.id = lyr_idx
+                        # NOTE: the annotated layout has a layer for each LVS layer, so several for a GDS pair
+                        #       (e.g. poly_con and poly_vpp), but the resistance extraction has the wires
+                        #       of a GDS pair on one of them, so the terminal must be on that one to be a port
+                        region_by_layer.layer.id = self.annotated_layout.layer(lyr_info.layer, lyr_info.datatype)
                         region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
 
                         shapes_converter.klayout_region_to_pb(shapes, region_by_layer.region)
