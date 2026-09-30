@@ -605,6 +605,67 @@ class TechBuilder:
             add_sidewall_overlap_cap(ci, "TopMetal1",    "Metal4",       55.229)
             add_sidewall_overlap_cap(ci, "Metal4",       "TopMetal1",    35.146)
 
+    def build_device_models_info(self, dmi: DeviceModelsInfo):
+        # NOTE: the ngspice models are subcircuits, with parameters in SI units,
+        #       while the IHP device classes store lengths in µm (and areas in µm²).
+        #       The terminal order of each model is the one of the LVS netlist reader
+        #       (libs.tech/kpex/rule_decks/custom_reader.lvs, terminal_list_for_element).
+        um = 1e-6
+        um2 = 1e-12
+
+        mos = [lvs_param('w', 'W', um), lvs_param('l', 'L', um),
+               lvs_param('as', 'AS', um2), lvs_param('ad', 'AD', um2),
+               lvs_param('ps', 'PS', um), lvs_param('pd', 'PD', um)]
+        rf_mos = mos + [const_param('rfmode', 1)]  # RF MOS are the base MOS with rfmode=1
+        poly_res = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('ps', 'ps', um),
+                    lvs_param('b', 'b'), lvs_param('m', 'm')]
+        rsil = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('m', 'm')]  # no bends
+        cap = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('m', 'm')]
+        multiplier = [lvs_param('m', 'm')]
+        hbt = [lvs_param('le', 'le', um), lvs_param('we', 'we', um), lvs_param('Nx', 'Nx'), lvs_param('m', 'm')]
+
+        #                              LVS device class    prefix terminals                     parameters  model
+        add_device_model_mapping(dmi, "sg13_lv_nmos",     "X",   ["D", "G", "S", "B"],         mos)
+        add_device_model_mapping(dmi, "sg13_lv_pmos",     "X",   ["D", "G", "S", "B"],         mos)
+        add_device_model_mapping(dmi, "sg13_hv_nmos",     "X",   ["D", "G", "S", "B"],         mos)
+        add_device_model_mapping(dmi, "sg13_hv_pmos",     "X",   ["D", "G", "S", "B"],         mos)
+        add_device_model_mapping(dmi, "rfnmos",           "X",   ["D", "G", "S", "B"],         rf_mos,     "sg13_lv_nmos")
+        add_device_model_mapping(dmi, "rfpmos",           "X",   ["D", "G", "S", "B"],         rf_mos,     "sg13_lv_pmos")
+        add_device_model_mapping(dmi, "rfnmoshv",         "X",   ["D", "G", "S", "B"],         rf_mos,     "sg13_hv_nmos")
+        add_device_model_mapping(dmi, "rfpmoshv",         "X",   ["D", "G", "S", "B"],         rf_mos,     "sg13_hv_pmos")
+        add_device_model_mapping(dmi, "rsil",             "X",   ["rsil_1", "rsil_2", "rsil_sub"],    rsil)
+        add_device_model_mapping(dmi, "rppd",             "X",   ["rppd_1", "rppd_2", "rppd_sub"],    poly_res)
+        add_device_model_mapping(dmi, "rhigh",            "X",   ["rhigh_1", "rhigh_2", "rhigh_sub"], poly_res)
+        add_device_model_mapping(dmi, "ntap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
+        add_device_model_mapping(dmi, "ptap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
+        add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       cap)
+        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       cap)
+        add_device_model_mapping(dmi, "sg13_hv_svaricap", "X",   ["G1", "W", "G2", "SUB"],
+                                 [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('Nx', 'Nx')])
+        add_device_model_mapping(dmi, "sg13_moscap_n",    "X",   ["G", "SUB"],
+                                 [lvs_param('w', 'w', um), lvs_param('l', 'l', um)])
+        add_device_model_mapping(dmi, "sg13_moscap_p",    "X",   ["G", "NW"],
+                                 [lvs_param('w', 'w', um), lvs_param('l', 'l', um)])
+        add_device_model_mapping(dmi, "pnpMPA",           "X",   ["C", "B", "E"],
+                                 [lvs_param('a', 'A', um2), lvs_param('p', 'P', um), lvs_param('m', 'm')])
+        add_device_model_mapping(dmi, "diodevdd_2kv",     "X",   ["B", "E", "C"],              multiplier)
+        add_device_model_mapping(dmi, "diodevdd_4kv",     "X",   ["B", "E", "C"],              multiplier)
+        add_device_model_mapping(dmi, "diodevss_2kv",     "X",   ["C", "E", "B"],              multiplier)
+        add_device_model_mapping(dmi, "diodevss_4kv",     "X",   ["C", "E", "B"],              multiplier)
+        add_device_model_mapping(dmi, "nmoscl_2",         "X",   ["C", "A"],                   multiplier)
+        add_device_model_mapping(dmi, "nmoscl_4",         "X",   ["C", "A"],                   multiplier)
+        if self.is_g2:  # sg13cmos5l has no models for these
+            add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap)
+            add_device_model_mapping(dmi, "npn13G2",       "X",   ["C", "B", "E", "S"],         hbt)
+            add_device_model_mapping(dmi, "npn13G2l",      "X",   ["C", "B", "E", "S"],         hbt)
+            add_device_model_mapping(dmi, "npn13G2v",      "X",   ["C", "B", "E", "S"],         hbt)
+            add_device_model_mapping(dmi, "schottky_nbl1", "X",   ["E", "B", "C"],              multiplier)
+
+        # NOTE: no device model mapping (yet), a netlist with these devices is an error:
+        #       - dantenna, dpantenna, isolbox: the models take w and l, LVS extracts area and perimeter
+        #       - rfcmim, idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
+        #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
@@ -615,6 +676,8 @@ class TechBuilder:
         self.build_process_stack_info(tech.process_stack)
 
         self.build_process_parasitics_info(tech.process_parasitics)
+
+        self.build_device_models_info(tech.device_models)
 
         return tech
 
