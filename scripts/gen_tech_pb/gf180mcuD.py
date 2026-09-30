@@ -361,6 +361,49 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    34.954)
 
 
+def build_device_models_info(dmi: DeviceModelsInfo):
+    # NOTE: the ngspice models (sm141064.ngspice) take parameters in SI units,
+    #       while the LVS device classes store lengths in µm (and areas in µm²).
+    #       The terminal order of each model is the one of the LVS netlist reader,
+    #       i.e. KLayout's standard one (see rule_decks/custom_classes.lvs)
+    um = 1e-6
+    um2 = 1e-12
+
+    # the corners (e.g. typical) define all MOS as subcircuits (section fets_mm)
+    #
+    #     NOTE: the 10V asymmetric MOS are in smbb000149.ngspice, a simulation needs to include it itself
+    mos = [lvs_param('l', 'L', um), lvs_param('w', 'W', um),
+           lvs_param('as', 'AS', um2), lvs_param('ad', 'AD', um2),
+           lvs_param('ps', 'PS', um), lvs_param('pd', 'PD', um)]
+    for fet in ('nfet_03v3', 'nfet_03v3_dss', 'nfet_05v0', 'nfet_06v0', 'nfet_06v0_dss', 'nfet_06v0_nvt', 'nfet_10v0_asym',
+                'pfet_03v3', 'pfet_03v3_dss', 'pfet_05v0', 'pfet_06v0', 'pfet_06v0_dss', 'pfet_10v0_asym'):
+        add_device_model_mapping(dmi, fet, "X", ["D", "G", "S", "B"], mos)
+
+    for diode in ('diode_nd2ps_03v3', 'diode_nd2ps_06v0', 'diode_nw2ps_03v3', 'diode_nw2ps_06v0',
+                  'diode_pd2nw_03v3', 'diode_pd2nw_06v0', 'sc_diode'):
+        add_device_model_mapping(dmi, diode, "D", ["A", "C"],
+                                 [lvs_param('area', 'A', um2), lvs_param('pj', 'P', um)])
+
+    # BJTs of a fixed size, NE is the number of devices
+    for npn in ('npn_00p54x02p00', 'npn_00p54x04p00', 'npn_00p54x08p00', 'npn_00p54x16p00',
+                'npn_05p00x05p00', 'npn_10p00x10p00'):
+        add_device_model_mapping(dmi, npn, "X", ["C", "B", "E", "S"], [lvs_param('m', 'NE')])
+    for pnp in ('pnp_05p00x00p42', 'pnp_05p00x05p00', 'pnp_10p00x00p42', 'pnp_10p00x10p00'):
+        add_device_model_mapping(dmi, pnp, "X", ["C", "B", "E"], [lvs_param('m', 'NE')])
+
+    res = [lvs_param('r_width', 'W', um), lvs_param('r_length', 'L', um)]
+    for resistor in ('nplus_s', 'nplus_u', 'pplus_s', 'pplus_u', 'npolyf_s', 'npolyf_u', 'ppolyf_s', 'ppolyf_u',
+                     'ppolyf_u_1k', 'ppolyf_u_1k_6p0', 'nwell'):
+        add_device_model_mapping(dmi, resistor, "X", ["A", "B", "W"], res)
+    for resistor in ('rm1', 'rm2', 'rm3', 'rm4', 'tm11k'):
+        add_device_model_mapping(dmi, resistor, "X", ["A", "B"], res)
+    add_device_model_mapping(dmi, "efuse", "X", ["A", "B"], [])  # unblown
+
+    # NOTE: no device model mapping (yet), a netlist with these devices is an error:
+    #       - cap_mim_*, cap_nmos_*, cap_pmos_*: the models take c_width and c_length, LVS extracts area and perimeter
+    #       - nfet_05v0_dss, pfet_05v0_dss, diode_dw2ps_*, diode_pw2dw_*, pwell: no ngspice models
+
+
 def build_tech() -> Technology:
     tech = Technology(name="gf180mcuD")
 
@@ -371,5 +414,7 @@ def build_tech() -> Technology:
     build_process_stack_info(tech.process_stack)
 
     build_process_parasitics_info(tech.process_parasitics)
+
+    build_device_models_info(tech.device_models)
 
     return tech
