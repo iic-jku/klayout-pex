@@ -33,6 +33,7 @@ from klayout_pex.log import (
     set_log_level,
 )
 from klayout_pex.klayout.netlist_reducer import NetlistReducer
+from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 
 
 @allure.parent_suite("Unit Tests")
@@ -68,3 +69,33 @@ class Test(unittest.TestCase):
     def test_netlist_reduction_2(self):
         netlist_path = os.path.join(self.klayout_testdata_dir, 'cap_vpp_Expanded_Netlist.cir')
         self._test_netlist_reduction(netlist_path=netlist_path, cell_name='TOP')
+
+    def test_only_parasitic_capacitors_are_reduced(self):
+        netlist = kdb.Netlist()
+        circuit = kdb.Circuit()
+        circuit.name = 'TOP'
+        netlist.add(circuit)
+        a = circuit.create_net('a')
+        b = circuit.create_net('b')
+
+        # NOTE: a capacitor of the LVS netlist may have no C parameter, e.g. the IHP MIM (#203)
+        mim = kdb.DeviceClassCapacitor()
+        mim.name = 'cap_cmim'
+        mim.clear_parameters()
+        for name in ('w', 'l'):
+            mim.add_parameter(kdb.DeviceParameterDefinition(name, name, 0.0))
+        netlist.add(mim)
+        d = circuit.create_device(mim, 'MIM')
+        d.connect_terminal('A', a)
+        d.connect_terminal('B', b)
+
+        cap = kdb.DeviceClassCapacitor()
+        cap.name = PARASITIC_CAPACITOR_CLASS_NAME
+        netlist.add(cap)
+        c = circuit.create_device(cap, 'ext_1')
+        c.connect_terminal('A', a)
+        c.connect_terminal('B', b)
+        c.set_parameter('C', 0.01e-15)  # below the threshold
+
+        reduced_netlist = NetlistReducer().reduce(netlist=netlist, top_cell_name='TOP')
+        self.assertEqual(['MIM'], [d.name for d in reduced_netlist.circuit_by_name('TOP').each_device()])
