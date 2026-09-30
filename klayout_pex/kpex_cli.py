@@ -95,6 +95,7 @@ from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
 from .pex25d.pex25d_cli import Pex25DCLI
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
+from .rcx25.netlist_checks import check_rc_netlist
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
@@ -1048,6 +1049,17 @@ class KpexCLI:
             netlist_printer.write(expanded_netlist, expanded_netlist_path)
             subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
+            # NOTE: a defect of the RC netlist simulates to a plausible, but wrong number (#215)
+            self._rcx25_netlist_problems = check_rc_netlist(  # NOTE: store for test case
+                lvs_netlist=pex_context.lvsdb.netlist(),
+                rc_netlist=expanded_netlist,
+                top_cell_name=pex_context.annotated_top_cell.name,
+                summary=extraction_results.summarize()
+            )
+            if self._rcx25_netlist_problems:
+                warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
+                        '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+
             # FIXME: should this be already reduced?
             if args.output_spice_path:
                 netlist_printer.write(expanded_netlist, args.output_spice_path)
@@ -1456,6 +1468,12 @@ class KpexCLI:
         if not hasattr(self, '_rcx25_extracted_csv_path'):
             raise Exception('rcx25_extracted_csv_path is not initialized, was run_kpex_2_5d_engine called?')
         return self._rcx25_extracted_csv_path
+
+    @property
+    def rcx25_netlist_problems(self) -> List[str]:
+        if not hasattr(self, '_rcx25_netlist_problems'):
+            raise Exception('rcx25_netlist_problems is not initialized, was run_kpex_2_5d_engine called?')
+        return self._rcx25_netlist_problems
 
     @property
     def fastercap_extracted_csv_path(self) -> str:
