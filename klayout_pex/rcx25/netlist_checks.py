@@ -1,0 +1,198 @@
+#
+# --------------------------------------------------------------------------------
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+# Johannes Kepler University, Institute for Integrated Circuits.
+#
+# This file is part of KPEX
+# (see https://github.com/iic-jku/klayout-pex).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# --------------------------------------------------------------------------------
+#
+"""
+Consistency checks of the RC netlist against the LVS netlist it's made of (#215)
+
+NOTE: the defects of #211 gave RC netlists that simulate to plausible, but wrong numbers,
+      so these checks compare the RC netlist with the LVS netlist by identity
+      (the devices by ID, the nets by cluster ID), not by the names of the nodes
+"""
+
+from __future__ import annotations
+
+from collections import Counter, defaultdict
+from typing import *
+
+import klayout.db as kdb
+
+from .extraction_results import ExtractionSummary
+from .types import NetName
+from ..klayout.parasitic_device_classes import (
+    PARASITIC_CAPACITOR_CLASS_NAME,
+    PARASITIC_DEVICE_CLASS_NAMES,
+    PARASITIC_RESISTOR_CLASS_NAME,
+)
+
+
+NET_ID_PROPERTY = 'kpex_check_net_id'
+
+# NOTE: relative, the capacitances of the summary and the netlist differ by rounding only
+CAPACITANCE_TOLERANCE = 1e-9
+
+
+def check_rc_netlist(lvs_netlist: kdb.Netlist,
+                     rc_netlist: kdb.Netlist,
+                     top_cell_name: str,
+                     summary: ExtractionSummary) -> List[str]:
+    """
+    :return: the problems of the RC netlist, e.g. a device terminal that is not on
+             the resistor network of its net, so that the resistances don't reach it
+    """
+    lvs_circuit: kdb.Circuit = lvs_netlist.circuit_by_name(top_cell_name)
+
+    # NOTE: the nets of an extracted netlist have unique cluster IDs, which the copies keep
+    cluster_ids = [net.cluster_id for net in lvs_circuit.each_net()]
+    if 0 in cluster_ids or len(set(cluster_ids)) != len(cluster_ids):
+        return ["the nets of the LVS netlist have no unique cluster IDs, to find them in the RC netlist"]
+
+    # NOTE: KLayout's net objects are no Python identities, so the nets get an ID (on a copy)
+    rc_netlist = rc_netlist.dup()
+    rc_circuit: kdb.Circuit = rc_netlist.circuit_by_name(top_cell_name)
+
+    nets = list(rc_circuit.each_net())
+    for net_id, net in enumerate(nets):
+        net.set_property(NET_ID_PROPERTY, net_id)
+
+    def id_of(net: kdb.Net) -> int:
+        return net.property(NET_ID_PROPERTY)
+
+    problems: List[str] = []
+
+    # the pieces of the netlist, DC-connected by the parasitic resistors (union-find by net ID)
+    parent = list(range(len(nets)))
+
+    def piece_of(net_id: int) -> int:
+        while parent[net_id] != net_id:
+            parent[net_id] = parent[parent[net_id]]
+            net_id = parent[net_id]
+        return net_id
+
+    has_resistor: Set[int] = set()
+    for device in rc_circuit.each_device():
+        if device.device_class().name != PARASITIC_RESISTOR_CLASS_NAME:
+            continue
+        net_a, net_b = device.net_for_terminal('A'), device.net_for_terminal('B')
+        has_resistor.update((id_of(net_a), id_of(net_b)))
+        parent[piece_of(id_of(net_a))] = piece_of(id_of(net_b))
+
+    # NOTE: each LVS net keeps its net in the RC netlist, which its resistor network hangs off
+    lvs_net_by_piece: Dict[int, NetName] = {}
+    for lvs_net in lvs_circuit.each_net():
+        rc_net = rc_circuit.net_by_cluster_id(lvs_net.cluster_id)
+        if rc_net is None:
+            problems.append(f"net {lvs_net.expanded_name()} is missing")
+            continue
+        piece = piece_of(id_of(rc_net))
+        other = lvs_net_by_piece.setdefault(piece, lvs_net.expanded_name())
+        if other != lvs_net.expanded_name():
+            problems.append(f"resistors join the nets {other} and {lvs_net.expanded_name()}")
+
+    def lvs_net_name(rc_net: kdb.Net) -> NetName:
+        # NOTE: a net of no LVS net, e.g. the substrate of the capacitances
+        return lvs_net_by_piece.get(piece_of(id_of(rc_net)), rc_net.expanded_name())
+
+    floating_pieces = {piece_of(net_id) for net_id in has_resistor} - set(lvs_net_by_piece)
+    names_by_floating_piece: Dict[int, List[NetName]] = defaultdict(list)
+    for net_id, net in enumerate(nets):
+        if piece_of(net_id) in floating_pieces:
+            names_by_floating_piece[piece_of(net_id)].append(net.expanded_name())
+    for names in sorted(sorted(names) for names in names_by_floating_piece.values()):
+        problems.append(f"resistors of the nodes {', '.join(names[:3])}"
+                        f"{'' if len(names) <= 3 else f' and {len(names) - 3} more'} touch no net")
+
+    # every device terminal is on the resistor network of its net
+    for device in rc_circuit.each_device():
+        if device.device_class().name in PARASITIC_DEVICE_CLASS_NAMES:
+            continue
+        lvs_device = lvs_circuit.device_by_id(device.id())
+        if lvs_device is None:
+            problems.append(f"device {device.expanded_name()} is not in the LVS netlist")
+            continue
+        for terminal in device.device_class().terminal_definitions():
+            lvs_net = lvs_device.net_for_terminal(terminal.id())
+            rc_net = device.net_for_terminal(terminal.id())
+            if lvs_net is None:
+                continue
+            if rc_net is None or lvs_net_name(rc_net) != lvs_net.expanded_name():
+                problems.append(f"terminal {terminal.name} of device {device.expanded_name()} "
+                                f"is not on the resistor network of its net {lvs_net.expanded_name()}")
+
+    # every device terminal with a port is on the node of its port (#211 §6)
+    for key, node_name in sorted(summary.device_terminal_nodes.items()):
+        device = rc_circuit.device_by_id(key.device_id)
+        # NOTE: e.g. removed, as whiteboxed, and its ID given to a parasitic device
+        if device is None or device.device_class().name in PARASITIC_DEVICE_CLASS_NAMES:
+            continue
+        rc_net = device.net_for_terminal(key.terminal_id)
+        if rc_net is None or rc_net.expanded_name() != node_name:
+            terminal_name = device.device_class().terminal_definitions()[key.terminal_id].name
+            problems.append(f"terminal {terminal_name} of device {device.expanded_name()} "
+                            f"is not on the node {node_name} of its port")
+
+    # every port touches something, and every net with a pin in the LVS netlist keeps a port
+    ported_lvs_nets: Set[NetName] = set()
+    for pin in rc_circuit.each_pin():
+        rc_net = rc_circuit.net_for_pin(pin.id())
+        if rc_net is None or rc_net.terminal_count() == 0:
+            problems.append(f"port {pin.name()} touches nothing")
+        if rc_net is not None:
+            ported_lvs_nets.add(lvs_net_name(rc_net))
+    for pin in lvs_circuit.each_pin():
+        lvs_net = lvs_circuit.net_for_pin(pin.id())
+        if lvs_net is not None and lvs_net.expanded_name() not in ported_lvs_nets:
+            problems.append(f"net {lvs_net.expanded_name()} has no port")
+
+    # the capacitances between each pair of nets are the ones of the summary
+    # NOTE: the summary names the nodes, which must be unique for that
+    name_counts = Counter(net.expanded_name() for net in nets)
+    duplicate_names = sorted(name for name, count in name_counts.items() if count > 1)
+    if duplicate_names:
+        problems.append(f"nets have the same name: {', '.join(duplicate_names)}")
+    rc_net_by_name = {net.expanded_name(): net for net in nets}
+
+    def net_pair(net_a: NetName, net_b: NetName) -> Tuple[NetName, NetName]:
+        return (net_a, net_b) if net_a <= net_b else (net_b, net_a)
+
+    netlist_capacitances: Dict[Tuple[NetName, NetName], float] = defaultdict(float)
+    for device in rc_circuit.each_device():
+        if device.device_class().name != PARASITIC_CAPACITOR_CLASS_NAME:
+            continue
+        pair = net_pair(lvs_net_name(device.net_for_terminal('A')), lvs_net_name(device.net_for_terminal('B')))
+        netlist_capacitances[pair] += device.parameter('C') * 1e15  # fF
+
+    summary_capacitances: Dict[Tuple[NetName, NetName], float] = defaultdict(float)
+    for key, capacitance in summary.capacitances.items():
+        net1, net2 = rc_net_by_name.get(key.net1), rc_net_by_name.get(key.net2)
+        if net1 is None or net2 is None:
+            problems.append(f"the capacitance between {key.net1} and {key.net2} has no nodes")
+            continue
+        summary_capacitances[net_pair(lvs_net_name(net1), lvs_net_name(net2))] += capacitance
+
+    for pair in sorted(set(netlist_capacitances) | set(summary_capacitances)):
+        expected, obtained = summary_capacitances.get(pair, 0.0), netlist_capacitances.get(pair, 0.0)
+        if abs(obtained - expected) > CAPACITANCE_TOLERANCE * max(abs(expected), abs(obtained)):
+            problems.append(f"the capacitance between {pair[0]} and {pair[1]} is {'%.12g' % obtained} fF, "
+                            f"but {'%.12g' % expected} fF in the summary")
+
+    return problems
