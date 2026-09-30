@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import os
+import tempfile
 from typing import *
 import unittest
 from unittest import mock
@@ -97,3 +98,30 @@ class Test(unittest.TestCase):
         with self.assertRaises(LVSDBError) as cm:
             pex_context.devices_by_name
         self.assertIn('$1 (sg13_lv_nmos)', str(cm.exception))
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB", "Net Names")
+class NetNameTest(unittest.TestCase):
+    def test_nets_get_the_unique_names_of_the_spice_writer(self):
+        # NOTE: nets can share a name, e.g. the metal islands of a supply, joined only in the parent (#211 §10)
+        netlist = kdb.Netlist()
+        circuit = kdb.Circuit()
+        circuit.name = 'TOP'
+        netlist.add(circuit)
+        for name in ('D', 'S', 'D', 'D$1', 'D', ''):
+            circuit.connect_pin(circuit.create_pin(''), circuit.create_net(name))
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            spice_path = os.path.join(tmp_dir, 'netlist.cir')
+            writer = kdb.NetlistSpiceWriter()
+            writer.use_net_names = True
+            netlist.write(spice_path, writer)
+            with open(spice_path) as f:
+                subckt_line = next(line for line in f if line.startswith('.SUBCKT'))
+        spice_names = [name.replace('\\', '') for name in subckt_line.split()[2:]]
+
+        KLayoutExtractionContext.make_net_names_unique(netlist)
+
+        self.assertEqual(['D', 'S', 'D$1', 'D$1$1', 'D$2', '$0'], [n.expanded_name() for n in circuit.each_net()])
+        self.assertEqual(spice_names, [n.expanded_name() for n in circuit.each_net()])

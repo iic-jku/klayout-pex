@@ -64,6 +64,23 @@ class LVSDBError(Exception):
     pass
 
 
+def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str:
+    """
+    The name, or if it's present, the name with a number (e.g. vss$1),
+    like KLayout's tl::unique_name, which its SPICE writer names the nets with
+    """
+    if name not in present_names:
+        return name
+    j = 0
+    m = 1 << 30
+    while m > 0:
+        j += m
+        if f"{name}{separator}{j}" not in present_names:
+            j -= m
+        m >>= 1
+    return f"{name}{separator}{j + 1}"
+
+
 @dataclass
 class KLayoutExtractedLayerInfo:
     index: int
@@ -113,6 +130,8 @@ class KLayoutExtractionContext:
         if extra_top_cells:
             warning(f"Ignoring the LVS database top cells besides {internal_top_cell.name}: "
                     f"{', '.join(extra_top_cells)}")
+
+        cls.make_net_names_unique(lvsdb.netlist())
 
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
@@ -175,6 +194,23 @@ class KLayoutExtractionContext:
             unnamed_layers=nonempty_layers.unnamed_layers,
             unmodeled_layers=nonempty_layers.unmodeled_layers
         )
+
+    @staticmethod
+    def make_net_names_unique(netlist: kdb.Netlist):
+        """
+        Names each net of a circuit uniquely, as KLayout's SPICE writer does (e.g. vss, vss$1)
+
+        NOTE: nets can share a name, e.g. the metal islands of a supply, joined only in the parent
+              (unless the LVS script connects them implicitly), but the extraction identifies a net by its name,
+              and the annotated layout has the name on the shapes of the net (#211 §10)
+        """
+        for circuit in netlist.each_circuit():
+            names: Set[str] = set()
+            for net in list(circuit.each_net()):
+                name = unique_name(net.expanded_name(), names)
+                names.add(name)
+                if name != net.expanded_name():
+                    net.name = name
 
     @staticmethod
     def build_LVS_layer_map(annotated_layout: kdb.Layout,
