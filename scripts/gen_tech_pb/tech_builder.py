@@ -26,9 +26,10 @@ Helpers to fill a kpex.tech.Technology message, one table row per call (see the 
 """
 from __future__ import annotations
 
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as process_parasitics_pb2
 
@@ -39,6 +40,8 @@ ProcessStackInfo = process_stack_pb2.ProcessStackInfo
 ProcessParasiticsInfo = process_parasitics_pb2.ProcessParasiticsInfo
 ResistanceInfo = process_parasitics_pb2.ResistanceInfo
 CapacitanceInfo = process_parasitics_pb2.CapacitanceInfo
+DeviceModelsInfo = device_models_pb2.DeviceModelsInfo
+DeviceModelParameter = device_models_pb2.DeviceModelParameter
 
 GDSPair = Tuple[int, int]  # (layer, datatype)
 
@@ -276,3 +279,35 @@ def add_sidewall_overlap_cap(ci: CapacitanceInfo,
     ci.sideoverlaps.add(in_layer_name=in_layer,
                         out_layer_name=out_layer,
                         capacitance=cap)
+
+#-------------------------------------------------------------------------
+
+
+def lvs_param(name: str,
+              lvs_parameter_name: str,
+              factor: Optional[float] = None) -> DeviceModelParameter:
+    """
+    Model parameter from an LVS parameter (times factor, e.g. 1e-6 from µm to m)
+    """
+    parameter = DeviceModelParameter(name=name, lvs_parameter_name=lvs_parameter_name)
+    if factor is not None:
+        parameter.lvs_parameter_factor = factor
+    return parameter
+
+
+def const_param(name: str,
+                value: float) -> DeviceModelParameter:
+    return DeviceModelParameter(name=name, constant=value)
+
+
+def add_device_model_mapping(dmi: DeviceModelsInfo,
+                             lvs_device_class_name: str,
+                             spice_prefix: str,
+                             terminal_names: List[str],
+                             parameters: List[DeviceModelParameter],
+                             model_name: str = ''):  # empty if the same as the LVS device class name
+    dmi.device_model_mappings.add(lvs_device_class_name=lvs_device_class_name,
+                                  spice_prefix=spice_prefix,
+                                  model_name=model_name,
+                                  terminal_names=terminal_names,
+                                  parameters=parameters)
