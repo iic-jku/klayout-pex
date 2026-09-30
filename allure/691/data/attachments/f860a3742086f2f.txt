@@ -1,0 +1,1151 @@
+[21:26:01] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1219
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --gds                                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_
+l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz --out_dir /tmp/tmpax697b1x --2.5D          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:26:01] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:577
+[21:26:01] INFO     No explicit top cell specified, using top    kpex_cli.py:617
+                    cell 'cmomi_w5u_l5u_m1_m5'                                  
+[21:26:01] INFO     LVS input schematic not specified (argument  kpex_cli.py:658
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:26:01] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1158
+/tmp/tmpax697b1x/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex
+/testdata/designs/ihp-sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz/cmom
+i_w5u_l5u_m1_m5.lvsdb.gz                                                        
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/ihp-sg13g2/libs.tech/kpex/sg13g2.l
+vs -rd                                                                          
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmom
+i_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz -rd                                  
+report=/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m
+1_m5.lvsdb.gz -rd                                                               
+target_netlist=/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w
+5u_l5u_m1_m5_extracted.cir -rd                                                  
+schematic=/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5
+u_m1_m5_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd                  
+spice_net_names=true -rd spice_comments=false -rd scale=false -rd               
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true -rd verbose=false                                              
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_lv
+s.log                                                                           
+2026-09-30 21:26:03 +0000: Memory Usage (433572K) : Starting running SG13G2     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_
+l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz                                            
+2026-09-30 21:26:03 +0000: Memory Usage (433760K) : Ruby Version for klayout:   
+3.2.3                                                                           
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Loading database to memory  
+is complete.                                                                    
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : SG13G2 Klayout LVS runset   
+output at:                                                                      
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.lv
+sdb.gz                                                                          
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Evaluate switches.          
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Extracted netlist with net  
+names: true                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Extracted netlist with      
+comments in details: false                                                      
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected NET_ONLY option:   
+false                                                                           
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected LAYOUT_NETLIST     
+option: (none)                                                                  
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected                    
+IGNORE_TOP_PORTS_MISMATCH option:                                               
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected IMPLICIT_NETS      
+option: (none)                                                                  
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected TOP_LVL_PINS       
+option: true                                                                    
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected COMBINE DEVICES    
+option: false                                                                   
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected PURGE option: false
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected PURGE_NETS option: 
+false                                                                           
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected SIMPLIFY option:   
+false                                                                           
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected SERIES_RES option: 
+true                                                                            
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected PARALLEL_RES       
+option: true                                                                    
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : Selected                    
+DISABLE_TAP_EXTRACTION option: false                                            
+2026-09-30 21:26:03 +0000: Memory Usage (435052K) : deep  mode is enabled.      
+2026-09-30 21:26:03 +0000: Memory Usage (435180K) : Netlist file:               
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_du
+mmy_schematic.spice                                                             
+2026-09-30 21:26:03 +0000: Memory Usage (435180K) : LVS extracted netlist at:   
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_ex
+tracted.cir                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (435180K) : Applying SRAM integration   
+support.                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (435180K) : Starting SG13G2 LVS runset  
+2026-09-30 21:26:03 +0000: Memory Usage (435180K) : Read in polygons from       
+layers.                                                                         
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_filler has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ has 0 polygons        
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_pin has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_mask has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_nofill has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_OPC has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_iOPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : activ_noqrc has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : biwind_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : biwind_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_filler has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_pin has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_nofill has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_OPC has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_iOPC has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : gatpoly_noqrc has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (435692K) : cont_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (436204K) : cont_OPC has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (436204K) : nsd_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (436204K) : nsd_block has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (436716K) : metal1_drw has 62 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (436716K) : metal1_filler has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (436716K) : metal1_slit has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (436972K) : metal1 has 62 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (436972K) : metal1_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (437100K) : metal1_mask has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (437228K) : metal1_nofill has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (437228K) : metal1_text has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (437356K) : metal1_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (437356K) : metal1_noqrc has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (437484K) : metal1_res has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (437612K) : metal1_iprobe has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (437612K) : metal1_diffprb has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (437740K) : passiv_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (437740K) : passiv_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (437868K) : passiv_sbump has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (437996K) : passiv_pillar has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (437996K) : passiv_pdl has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (438124K) : metal2_drw has 62 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (438124K) : metal2_filler has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (438252K) : metal2_slit has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (438380K) : metal2 has 62 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (438380K) : metal2_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (438508K) : metal2_mask has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (438636K) : metal2_nofill has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (438636K) : metal2_text has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (438764K) : metal2_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (438764K) : metal2_noqrc has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (438892K) : metal2_res has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (438892K) : metal2_iprobe has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (439020K) : metal2_diffprb has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439148K) : baspoly_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (439148K) : baspoly_pin has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (439276K) : psd_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (439404K) : nldb_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (439404K) : digibnd_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (439532K) : via1_drw has 56 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (439532K) : backmetal1_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439660K) : backmetal1_pin has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439788K) : backmetal1_mask has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439788K) : backmetal1_filler has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439916K) : backmetal1_nofill has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (439916K) : backmetal1_slit has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440044K) : backmetal1_text has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440044K) : backmetal1_OPC has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440172K) : backmetal1_noqrc has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440300K) : backmetal1_res has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440300K) : backmetal1_iprobe has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440428K) : backmetal1_diffprb has 0    
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440556K) : backpassiv_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (440556K) : res_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (440684K) : sram_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (440684K) : trans_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (440812K) : ind_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (440940K) : ind_pin has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (440940K) : ind_text has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (441068K) : salblock_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (441068K) : via2_drw has 56 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (441196K) : metal3_drw has 62 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (441324K) : metal3_filler has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (441324K) : metal3_slit has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (441452K) : metal3 has 62 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (441580K) : metal3_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (441580K) : metal3_mask has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (441708K) : metal3_nofill has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (441836K) : metal3_text has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (441836K) : metal3_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (441964K) : metal3_noqrc has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (441964K) : metal3_res has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442092K) : metal3_iprobe has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (442220K) : metal3_diffprb has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (442220K) : nwell_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (442348K) : nwell_pin has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (442348K) : nwell_text has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442476K) : nbulay_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442604K) : nbulay_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442604K) : nbulay_block has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (442732K) : emwind_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442732K) : emwind_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442860K) : deepco_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (442860K) : mim_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (442988K) : edgeseal_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (442988K) : substrate_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (443116K) : substrate_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (443116K) : dfpad_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (443244K) : dfpad_pillar has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (443372K) : dfpad_sbump has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (443372K) : thickgateox_drw has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (443500K) : pldb_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (443628K) : pwell_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (443628K) : pwell_pin has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (443756K) : pwell_block has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (443756K) : ic_drw has 0 polygons       
+2026-09-30 21:26:03 +0000: Memory Usage (443884K) : via3_drw has 56 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (444012K) : metal4_drw has 62 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (444012K) : metal4_filler has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (444140K) : metal4_slit has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (444268K) : metal4 has 62 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (444268K) : metal4_pin has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (444396K) : metal4_mask has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (444524K) : metal4_nofill has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (444524K) : metal4_text has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (444652K) : metal4_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (444652K) : metal4_noqrc has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (444780K) : metal4_res has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (444908K) : metal4_iprobe has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (444908K) : metal4_diffprb has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (445036K) : heattrans_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (445164K) : heatres_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (445164K) : fbe_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (445292K) : empoly_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (445292K) : digisub_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (445676K) : text_drw has 1 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (445676K) : via4_drw has 56 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (445804K) : metal5_drw has 58 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (445932K) : metal5_filler has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (445932K) : metal5_slit has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (445932K) : metal5 has 58 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (445932K) : metal5_pin has 4 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (445932K) : metal5_mask has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (446060K) : metal5_nofill has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (446060K) : metal5_text has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (446188K) : metal5_OPC has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (446188K) : metal5_noqrc has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (446316K) : metal5_res has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (446444K) : metal5_iprobe has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (446444K) : metal5_diffprb has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (446572K) : radhard_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (446572K) : memcap_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (446700K) : varicap_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (446828K) : intbondvia_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (446828K) : intbondmet_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (446956K) : devbondvia_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (446956K) : devbondmet_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (447084K) : devtrench_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (447212K) : redist_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (447212K) : graphbot_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (447340K) : graphtop_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (447340K) : antvia1_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (447468K) : antmetal2_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (447596K) : graphcont_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (447596K) : siwg_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (447724K) : siwg_filler has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (447852K) : siwg_nofill has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (447852K) : sigrating_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (447980K) : singrating_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (447980K) : graphpas_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (448108K) : emwind3_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (448236K) : emwihv3_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (448236K) : redbulay_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (448364K) : smos_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (448364K) : graphpad_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (448492K) : polimide_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (448620K) : polimide_pin has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (448620K) : recog_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (448748K) : recog_pin has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (448748K) : recog_esd has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (448876K) : recog_diode has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (449004K) : recog_tsv has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (449004K) : recog_iprobe has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (449132K) : recog_diffprb has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (449132K) : recog_pillar has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (449260K) : recog_sbump has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (449388K) : recog_otp has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (449388K) : recog_pdiode has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (449516K) : recog_mom has 1 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (449516K) : recog_momf has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (449644K) : recog_pcm has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (449772K) : colopen_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (449772K) : graphmetal1_drw has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (449900K) : graphmetal1_filler has 0    
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (449900K) : graphmetal1_nofill has 0    
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450028K) : graphmetal1_slit has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450156K) : graphmetal1_OPC has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450156K) : graphmet1l_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450284K) : graphmet1l_filler has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450412K) : graphmet1l_nofill has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450412K) : graphmet1l_slit has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450540K) : graphmet1l_OPC has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (450540K) : extblock_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (450668K) : nldd_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (450796K) : pldd_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (450796K) : next_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (450924K) : pext_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (450924K) : nexthv_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (451052K) : pexthv_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (451180K) : graphgate_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (451180K) : sinwg_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (451308K) : sinwg_filler has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (451308K) : sinwg_nofill has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (451436K) : mempad_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (451564K) : topvia1_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (451564K) : topmetal1_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (451692K) : topmetal1_filler has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (451692K) : topmetal1_slit has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (451948K) : topmetal1 has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (451948K) : topmetal1_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (452076K) : topmetal1_mask has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452076K) : topmetal1_nofill has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452204K) : topmetal1_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452204K) : topmetal1_noqrc has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452332K) : topmetal1_res has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (452460K) : topmetal1_iprobe has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452460K) : topmetal1_diffprb has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (452588K) : inldpwl_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (452588K) : polyres_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (452716K) : polyres_pin has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (452844K) : vmim_drw has 0 polygons     
+2026-09-30 21:26:03 +0000: Memory Usage (452844K) : nbulaycut_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (452972K) : antmetal1_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (452972K) : topvia2_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (453100K) : topmetal2_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (453100K) : topmetal2_filler has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453100K) : topmetal2_slit has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453228K) : topmetal2 has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (453356K) : topmetal2_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (453356K) : topmetal2_mask has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453484K) : topmetal2_nofill has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453484K) : topmetal2_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453612K) : topmetal2_noqrc has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453612K) : topmetal2_res has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (453740K) : topmetal2_iprobe has 0      
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453740K) : topmetal2_diffprb has 0     
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (453868K) : snsring_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (453868K) : sensor_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (453996K) : snsarms_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (453996K) : snscmosvia_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (454124K) : colwind_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (454124K) : flm_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (454252K) : hafniumox_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (454252K) : memvia_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454380K) : thinfilmres_drw has 0       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (454380K) : rfmem_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (454508K) : norcx_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (454508K) : norcx_m2m3 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454508K) : norcx_m2m4 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454636K) : norcx_m2m5 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454636K) : norcx_m2tm1 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (454764K) : norcx_m2tm2 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (454764K) : norcx_m3m4 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454892K) : norcx_m3m5 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (454892K) : norcx_m3tm1 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455020K) : norcx_m3tm2 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455020K) : norcx_m4m5 has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (455148K) : norcx_m4tm1 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455148K) : norcx_m4tm2 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455276K) : norcx_m5tm1 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455276K) : norcx_m5tm2 has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_tm1tm2 has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_m1sub has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_m2sub has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_m3sub has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_m4sub has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_m5sub has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_tm1sub has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : norcx_tm2sub has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : snsbotvia_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : snstopvia_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : deepvia_drw has 0 polygons  
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : fgetch_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : ctrgat_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : fgimp_drw has 0 polygons    
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : emwihv_drw has 0 polygons   
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : lbe_drw has 0 polygons      
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : alcustop_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : nometfiller_drw has 1       
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : prboundary_drw has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange0_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange0_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange0_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange1_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange1_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange1_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455404K) : exchange2_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455532K) : exchange2_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455532K) : exchange2_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455660K) : exchange3_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455660K) : exchange3_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455788K) : exchange3_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (455788K) : exchange4_drw has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455916K) : exchange4_pin has 0 polygons
+2026-09-30 21:26:03 +0000: Memory Usage (455916K) : exchange4_text has 0        
+polygons                                                                        
+2026-09-30 21:26:03 +0000: Memory Usage (456044K) : isonwell_drw has 0 polygons 
+2026-09-30 21:26:03 +0000: Memory Usage (456044K) : Total no. of polygons in the
+design is 537                                                                   
+2026-09-30 21:26:03 +0000: Memory Usage (456044K) : Starting base layers        
+derivations                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (456044K) : Starting general LVS        
+derivations                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting MOSFET DERIVATIONS 
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting NMOS DERIVATIONS   
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting PMOS DERIVATIONS   
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting RF-MOSFET          
+DERIVATIONS                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting RF-NMOS DERIVATIONS
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting RF-PMOS DERIVATIONS
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting BJT DERIVATIONS    
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting NPN-BJT DERIVATIONS
+2026-09-30 21:26:03 +0000: Memory Usage (457076K) : Starting PNP-BJT DERIVATIONS
+2026-09-30 21:26:03 +0000: Memory Usage (457588K) : Starting DIODE DERIVATIONS  
+2026-09-30 21:26:03 +0000: Memory Usage (454412K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2026-09-30 21:26:03 +0000: Memory Usage (454412K) : Starting CAP DERIVATIONS    
+2026-09-30 21:26:04 +0000: Memory Usage (454412K) : Starting CAP_CMOM           
+DERIVATIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (456532K) : Starting CAP_CMOMF          
+DERIVATIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (456532K) : Starting ESD DERIVATIONS    
+2026-09-30 21:26:04 +0000: Memory Usage (463188K) : Starting Inductor           
+DERIVATIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464212K) : Starting Taps DERIVATIONS   
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting SG13G2 LVS         
+connectivity setup                                                              
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting SG13G2 LVS         
+connectivity setup (Inter-layer)                                                
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting SG13G2 LVS         
+connectivity setup (Global)                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS MOSFET         
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS RF-MOSFET      
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS BJT CONNECTIONS
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting RESISTOR           
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS CAP CONNECTIONS
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting CAP_CMOM           
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting CAP_CMOMF          
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting ESD CONNECTIONS    
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting Inductor           
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting LVS Taps           
+CONNECTIONS                                                                     
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting SG13G2 LVS DEVICES 
+EXTRACTION                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting MOSFET EXTRACTION  
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Starting NMOS EXTRACTION    
+2026-09-30 21:26:04 +0000: Memory Usage (464340K) : Extraction of NMOS-LV       
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of NMOS-HV       
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting PMOS EXTRACTION    
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of PMOS-LV       
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of PMOS-HV       
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting RF-MOSFET          
+EXTRACTION                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of RF-NMOS-LV    
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of RF-NMOS-HV    
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of RF-PMOS-LV    
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of RF-PMOS-HV    
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting BJT EXTRACTION     
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting NPN-BJT EXTRACTION 
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of npn13G2 BJT   
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of npn13G2L BJT  
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extraction of npn13G2V BJT  
+transistor                                                                      
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting PNP-BJT EXTRACTION 
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting pnpMPA BJT       
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting DIODE EXTRACTION   
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting dantenna diode   
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting dpantenna diode  
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting schottky_nbl1    
+diode                                                                           
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting isolbox diode    
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Starting RESISTOR EXTRACTION
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting rsil resistor    
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting rppd resistor    
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting rhigh resistor   
+2026-09-30 21:26:04 +0000: Memory Usage (464468K) : Extracting res_metal1       
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_metal2       
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_metal3       
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_metal4       
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_metal5       
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_topmetal1    
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting res_topmetal2    
+resistor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Starting CAP EXTRACTION     
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting cap_cmim device  
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting rfcmim device    
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting sg13_hv_svaricap 
+varactor                                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting cap_cmomi device 
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting cap_cmomf device 
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting sg13_moscap_n    
+capacitor                                                                       
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting sg13_moscap_p    
+capacitor                                                                       
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Starting ESD EXTRACTION     
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting diodevdd_2kv ESD 
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting diodevdd_4kv ESD 
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting diodevss_2kv ESD 
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting diodevss_4kv ESD 
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting idiodevdd_2kv ESD
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting idiodevdd_4kv ESD
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting idiodevss_2kv ESD
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (464596K) : Extracting idiodevss_4kv ESD
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting nmoscl_2 ESD     
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting nmoscl_4 ESD     
+device                                                                          
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting Inductor EXTRACTION
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting Inductor2 device 
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting Inductor3 device 
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting Taps EXTRACTION    
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting ntap1 device     
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Extracting ptap1 device     
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting SG13G2 LVS Options 
+Preparations                                                                    
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : SG13G2 LVS flow: extraction 
+-> alignment -> option preparation -> comparison.                               
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting SG13G2 LVS         
+Alignment                                                                       
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting SG13G2 LVS         
+Simplification                                                                  
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [layout_netlist] simplify:  
+SKIPPED                                                                         
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [layout_netlist]            
+make_top_level_pins: ENABLED                                                    
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [layout_netlist]            
+combine_devices: SKIPPED                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [layout_netlist] purge:     
+SKIPPED                                                                         
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [layout_netlist] purge_nets:
+SKIPPED                                                                         
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [schematic_netlist]         
+simplify: SKIPPED                                                               
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [schematic_netlist]         
+make_top_level_pins: ENABLED                                                    
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [schematic_netlist]         
+combine_devices: SKIPPED                                                        
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [schematic_netlist] purge:  
+SKIPPED                                                                         
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : [schematic_netlist]         
+purge_nets: SKIPPED                                                             
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : Starting SG13G2 LVS         
+Comparison in strict port mode.                                                 
+2026-09-30 21:26:04 +0000: Memory Usage (461632K) : flag_missing_ports enabled: 
+missing/mislabeled top-level ports are treated as errors.                       
+2026-09-30 21:26:04 +0000: Memory Usage (461760K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-09-30 21:26:04 +0000: Memory Usage (461760K) : ERROR : Netlists don't match
+2026-09-30 21:26:04 +0000: Memory Usage (461760K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-09-30 21:26:04 +0000: Memory Usage (461760K) : LVS Total Run time 0.923526 
+seconds                                                                         
+────────────────────────────────────────────────────────────────────────────────
+[21:26:04] INFO     klayout LVS succeeded after 2.549s         lvs_runner.py:156
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:26:04] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1387
+[21:26:04] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1387
+[21:26:04] INFO     (49, 0) -> (via3_drw)                       kpex_cli.py:1387
+[21:26:04] INFO     (66, 0) -> (via4_drw)                       kpex_cli.py:1387
+[21:26:04] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1387
+[21:26:04] INFO     (8, 0) -> (metal1_con)                      kpex_cli.py:1387
+[21:26:04] INFO     (10, 0) -> (metal2_con)                     kpex_cli.py:1387
+[21:26:04] INFO     (30, 0) -> (metal3_con)                     kpex_cli.py:1387
+[21:26:04] INFO     (50, 0) -> (metal4_con)                     kpex_cli.py:1387
+[21:26:04] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1387
+[21:26:04] INFO     (67, 0) -> (metal5_n_cap)                   kpex_cli.py:1387
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:26:04] INFO     LVSDB: found 0pins                          extractor.py:196
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$I1;$I1.$1.Metal2;;9.0                                                       
+R2;$I1;$I1.$2.Metal1;;0.343                                                     
+R3;$I1.$1.Metal2;$I1.$112.Metal3;;9.0                                           
+R4;$I1.$1.Metal2;$I1.$3.Metal2;;0.274                                           
+R5;$I1.$10.Metal1;$I1.$11.Metal2;;9.0                                           
+R6;$I1.$10.Metal1;$I1.$8.Metal1;;0.44                                           
+R7;$I1.$100.Metal2;$I1.$101.Metal3;;9.0                                         
+R8;$I1.$100.Metal2;$I1.$102.Metal2;;0.176                                       
+R9;$I1.$100.Metal2;$I1.$43.Metal2;;0.176                                        
+R10;$I1.$100.Metal2;$I1.$44.Metal1;;9.0                                         
+R11;$I1.$101.Metal3;$I1.$103.Metal3;;0.176                                      
+R12;$I1.$101.Metal3;$I1.$154.Metal3;;0.176                                      
+R13;$I1.$101.Metal3;$I1.$157.Metal4;;9.0                                        
+R14;$I1.$102.Metal2;$I1.$103.Metal3;;9.0                                        
+R15;$I1.$102.Metal2;$I1.$104.Metal2;;0.176                                      
+R16;$I1.$102.Metal2;$I1.$46.Metal1;;9.0                                         
+R17;$I1.$103.Metal3;$I1.$105.Metal3;;0.176                                      
+R18;$I1.$103.Metal3;$I1.$159.Metal4;;9.0                                        
+R19;$I1.$104.Metal2;$I1.$105.Metal3;;9.0                                        
+R20;$I1.$104.Metal2;$I1.$106.Metal2;;0.176                                      
+R21;$I1.$104.Metal2;$I1.$48.Metal1;;9.0                                         
+R22;$I1.$105.Metal3;$I1.$107.Metal3;;0.176                                      
+R23;$I1.$105.Metal3;$I1.$161.Metal4;;9.0                                        
+R24;$I1.$106.Metal2;$I1.$107.Metal3;;9.0                                        
+R25;$I1.$106.Metal2;$I1.$108.Metal2;;0.176                                      
+R26;$I1.$106.Metal2;$I1.$50.Metal1;;9.0                                         
+R27;$I1.$107.Metal3;$I1.$109.Metal3;;0.176                                      
+R28;$I1.$107.Metal3;$I1.$163.Metal4;;9.0                                        
+R29;$I1.$108.Metal2;$I1.$109.Metal3;;9.0                                        
+R30;$I1.$108.Metal2;$I1.$110.Metal2;;0.176                                      
+R31;$I1.$108.Metal2;$I1.$52.Metal1;;9.0                                         
+R32;$I1.$109.Metal3;$I1.$111.Metal3;;0.176                                      
+R33;$I1.$109.Metal3;$I1.$165.Metal4;;9.0                                        
+R34;$I1.$11.Metal2;$I1.$122.Metal3;;9.0                                         
+R35;$I1.$11.Metal2;$I1.$64.Metal2;;0.352                                        
+R36;$I1.$110.Metal2;$I1.$111.Metal3;;9.0                                        
+R37;$I1.$110.Metal2;$I1.$54.Metal1;;9.0                                         
+R38;$I1.$111.Metal3;$I1.$167.Metal4;;9.0                                        
+R39;$I1.$112.Metal3;$I1.$113.Metal4;;9.0                                        
+R40;$I1.$112.Metal3;$I1.$114.Metal3;;0.274                                      
+R41;$I1.$113.Metal4;$I1.$115.Metal4;;0.274                                      
+R42;$I1.$113.Metal4;$I1.$169.Metal5;;9.0                                        
+R43;$I1.$114.Metal3;$I1.$115.Metal4;;9.0                                        
+R44;$I1.$114.Metal3;$I1.$116.Metal3;;0.352                                      
+R45;$I1.$114.Metal3;$I1.$3.Metal2;;9.0                                          
+R46;$I1.$115.Metal4;$I1.$117.Metal4;;0.352                                      
+R47;$I1.$115.Metal4;$I1.$171.Metal5;;9.0                                        
+R48;$I1.$116.Metal3;$I1.$117.Metal4;;9.0                                        
+R49;$I1.$116.Metal3;$I1.$118.Metal3;;0.352                                      
+R50;$I1.$116.Metal3;$I1.$5.Metal2;;9.0                                          
+R51;$I1.$117.Metal4;$I1.$119.Metal4;;0.352                                      
+R52;$I1.$117.Metal4;$I1.$173.Metal5;;9.0                                        
+R53;$I1.$118.Metal3;$I1.$119.Metal4;;9.0                                        
+R54;$I1.$118.Metal3;$I1.$120.Metal3;;0.352                                      
+R55;$I1.$118.Metal3;$I1.$62.Metal2;;9.0                                         
+R56;$I1.$119.Metal4;$I1.$121.Metal4;;0.352                                      
+R57;$I1.$119.Metal4;$I1.$175.Metal5;;9.0                                        
+R58;$I1.$12.Metal1;$I1.$13.Metal2;;9.0                                          
+R59;$I1.$12.Metal1;$I1.$14.Metal1;;0.343                                        
+R60;$I1.$120.Metal3;$I1.$121.Metal4;;9.0                                        
+R61;$I1.$120.Metal3;$I1.$122.Metal3;;0.352                                      
+R62;$I1.$120.Metal3;$I1.$64.Metal2;;9.0                                         
+R63;$I1.$121.Metal4;$I1.$123.Metal4;;0.352                                      
+R64;$I1.$121.Metal4;$I1.$177.Metal5;;9.0                                        
+R65;$I1.$122.Metal3;$I1.$123.Metal4;;9.0                                        
+R66;$I1.$123.Metal4;$I1.$179.Metal5;;9.0                                        
+R67;$I1.$124.Metal3;$I1.$125.Metal4;;9.0                                        
+R68;$I1.$124.Metal3;$I1.$126.Metal3;;0.274                                      
+R69;$I1.$124.Metal3;$I1.$13.Metal2;;9.0                                         
+R70;$I1.$125.Metal4;$I1.$127.Metal4;;0.274                                      
+R71;$I1.$125.Metal4;$I1.$181.Metal5;;9.0                                        
+R72;$I1.$126.Metal3;$I1.$127.Metal4;;9.0                                        
+R73;$I1.$126.Metal3;$I1.$128.Metal3;;0.176                                      
+R74;$I1.$126.Metal3;$I1.$15.Metal2;;9.0                                         
+R75;$I1.$127.Metal4;$I1.$129.Metal4;;0.176                                      
+R76;$I1.$127.Metal4;$I1.$183.Metal5;;9.0                                        
+R77;$I1.$128.Metal3;$I1.$129.Metal4;;9.0                                        
+R78;$I1.$128.Metal3;$I1.$130.Metal3;;0.176                                      
+R79;$I1.$128.Metal3;$I1.$17.Metal2;;9.0                                         
+R80;$I1.$129.Metal4;$I1.$131.Metal4;;0.176                                      
+R81;$I1.$129.Metal4;$I1.$185.Metal5;;9.0                                        
+R82;$I1.$13.Metal2;$I1.$15.Metal2;;0.274                                        
+R83;$I1.$130.Metal3;$I1.$131.Metal4;;9.0                                        
+R84;$I1.$130.Metal3;$I1.$132.Metal3;;0.176                                      
+R85;$I1.$130.Metal3;$I1.$19.Metal2;;9.0                                         
+R86;$I1.$131.Metal4;$I1.$133.Metal4;;0.176                                      
+R87;$I1.$131.Metal4;$I1.$187.Metal5;;9.0                                        
+R88;$I1.$132.Metal3;$I1.$133.Metal4;;9.0                                        
+R89;$I1.$132.Metal3;$I1.$134.Metal3;;0.176                                      
+R90;$I1.$132.Metal3;$I1.$21.Metal2;;9.0                                         
+R91;$I1.$133.Metal4;$I1.$135.Metal4;;0.176                                      
+R92;$I1.$133.Metal4;$I1.$189.Metal5;;9.0                                        
+R93;$I1.$134.Metal3;$I1.$135.Metal4;;9.0                                        
+R94;$I1.$134.Metal3;$I1.$136.Metal3;;0.176                                      
+R95;$I1.$134.Metal3;$I1.$23.Metal2;;9.0                                         
+R96;$I1.$135.Metal4;$I1.$137.Metal4;;0.176                                      
+R97;$I1.$135.Metal4;$I1.$191.Metal5;;9.0                                        
+R98;$I1.$136.Metal3;$I1.$137.Metal4;;9.0                                        
+R99;$I1.$136.Metal3;$I1.$138.Metal3;;0.176                                      
+R100;$I1.$136.Metal3;$I1.$25.Metal2;;9.0                                        
+R101;$I1.$137.Metal4;$I1.$139.Metal4;;0.176                                     
+R102;$I1.$137.Metal4;$I1.$193.Metal5;;9.0                                       
+R103;$I1.$138.Metal3;$I1.$139.Metal4;;9.0                                       
+R104;$I1.$138.Metal3;$I1.$140.Metal3;;0.176                                     
+R105;$I1.$138.Metal3;$I1.$27.Metal2;;9.0                                        
+R106;$I1.$139.Metal4;$I1.$141.Metal4;;0.176                                     
+R107;$I1.$139.Metal4;$I1.$195.Metal5;;9.0                                       
+R108;$I1.$14.Metal1;$I1.$15.Metal2;;9.0                                         
+R109;$I1.$14.Metal1;$I1.$16.Metal1;;0.22                                        
+R110;$I1.$140.Metal3;$I1.$141.Metal4;;9.0                                       
+R111;$I1.$140.Metal3;$I1.$142.Metal3;;0.176                                     
+R112;$I1.$140.Metal3;$I1.$29.Metal2;;9.0                                        
+R113;$I1.$141.Metal4;$I1.$143.Metal4;;0.176                                     
+R114;$I1.$141.Metal4;$I1.$197.Metal5;;9.0                                       
+R115;$I1.$142.Metal3;$I1.$143.Metal4;;9.0                                       
+R116;$I1.$142.Metal3;$I1.$144.Metal3;;0.176                                     
+R117;$I1.$142.Metal3;$I1.$31.Metal2;;9.0                                        
+R118;$I1.$143.Metal4;$I1.$145.Metal4;;0.176                                     
+R119;$I1.$143.Metal4;$I1.$199.Metal5;;9.0                                       
+R120;$I1.$144.Metal3;$I1.$145.Metal4;;9.0                                       
+R121;$I1.$144.Metal3;$I1.$33.Metal2;;9.0                                        
+R122;$I1.$145.Metal4;$I1.$201.Metal5;;9.0                                       
+R123;$I1.$146.Metal3;$I1.$147.Metal4;;9.0                                       
+R124;$I1.$146.Metal3;$I1.$148.Metal3;;0.274                                     
+R125;$I1.$146.Metal3;$I1.$35.Metal2;;9.0                                        
+R126;$I1.$147.Metal4;$I1.$149.Metal4;;0.274                                     
+R127;$I1.$147.Metal4;$I1.$203.Metal5;;9.0                                       
+R128;$I1.$148.Metal3;$I1.$149.Metal4;;9.0                                       
+R129;$I1.$148.Metal3;$I1.$150.Metal3;;0.176                                     
+R130;$I1.$148.Metal3;$I1.$37.Metal2;;9.0                                        
+R131;$I1.$149.Metal4;$I1.$151.Metal4;;0.176                                     
+R132;$I1.$149.Metal4;$I1.$205.Metal5;;9.0                                       
+R133;$I1.$15.Metal2;$I1.$17.Metal2;;0.176                                       
+R134;$I1.$150.Metal3;$I1.$151.Metal4;;9.0                                       
+R135;$I1.$150.Metal3;$I1.$152.Metal3;;0.176                                     
+R136;$I1.$150.Metal3;$I1.$39.Metal2;;9.0                                        
+R137;$I1.$151.Metal4;$I1.$153.Metal4;;0.176                                     
+R138;$I1.$151.Metal4;$I1.$207.Metal5;;9.0                                       
+R139;$I1.$152.Metal3;$I1.$153.Metal4;;9.0                                       
+R140;$I1.$152.Metal3;$I1.$154.Metal3;;0.176                                     
+R141;$I1.$152.Metal3;$I1.$41.Metal2;;9.0                                        
+R142;$I1.$153.Metal4;$I1.$155.Metal4;;0.176                                     
+R143;$I1.$153.Metal4;$I1.$209.Metal5;;9.0                                       
+R144;$I1.$154.Metal3;$I1.$155.Metal4;;9.0                                       
+R145;$I1.$154.Metal3;$I1.$43.Metal2;;9.0                                        
+R146;$I1.$155.Metal4;$I1.$157.Metal4;;0.176                                     
+R147;$I1.$155.Metal4;$I1.$211.Metal5;;9.0                                       
+R148;$I1.$157.Metal4;$I1.$159.Metal4;;0.176                                     
+R149;$I1.$157.Metal4;$I1.$213.Metal5;;9.0                                       
+R150;$I1.$159.Metal4;$I1.$161.Metal4;;0.176                                     
+R151;$I1.$159.Metal4;$I1.$215.Metal5;;9.0                                       
+R152;$I1.$16.Metal1;$I1.$17.Metal2;;9.0                                         
+R153;$I1.$16.Metal1;$I1.$18.Metal1;;0.22                                        
+R154;$I1.$161.Metal4;$I1.$163.Metal4;;0.176                                     
+R155;$I1.$161.Metal4;$I1.$217.Metal5;;9.0                                       
+R156;$I1.$163.Metal4;$I1.$165.Metal4;;0.176                                     
+R157;$I1.$163.Metal4;$I1.$219.Metal5;;9.0                                       
+R158;$I1.$165.Metal4;$I1.$167.Metal4;;0.176                                     
+R159;$I1.$165.Metal4;$I1.$221.Metal5;;9.0                                       
+R160;$I1.$167.Metal4;$I1.$223.Metal5;;9.0                                       
+R161;$I1.$169.Metal5;$I1.$171.Metal5;;0.17                                      
+R162;$I1.$169.Metal5;$I1.$181.Metal5;;0.261                                     
+R163;$I1.$17.Metal2;$I1.$19.Metal2;;0.176                                       
+R164;$I1.$171.Metal5;$I1.$173.Metal5;;0.352                                     
+R165;$I1.$173.Metal5;$I1.$175.Metal5;;0.352                                     
+R166;$I1.$175.Metal5;$I1.$177.Metal5;;0.352                                     
+R167;$I1.$177.Metal5;$I1.$179.Metal5;;0.352                                     
+R168;$I1.$18.Metal1;$I1.$19.Metal2;;9.0                                         
+R169;$I1.$18.Metal1;$I1.$20.Metal1;;0.22                                        
+R170;$I1.$181.Metal5;$I1.$183.Metal5;;0.17                                      
+R171;$I1.$181.Metal5;$I1.$203.Metal5;;0.261                                     
+R172;$I1.$183.Metal5;$I1.$185.Metal5;;0.176                                     
+R173;$I1.$185.Metal5;$I1.$187.Metal5;;0.176                                     
+R174;$I1.$187.Metal5;$I1.$189.Metal5;;0.176                                     
+R175;$I1.$189.Metal5;$I1.$191.Metal5;;0.176                                     
+R176;$I1.$19.Metal2;$I1.$21.Metal2;;0.176                                       
+R177;$I1.$191.Metal5;$I1.$193.Metal5;;0.176                                     
+R178;$I1.$193.Metal5;$I1.$195.Metal5;;0.176                                     
+R179;$I1.$195.Metal5;$I1.$197.Metal5;;0.176                                     
+R180;$I1.$197.Metal5;$I1.$199.Metal5;;0.176                                     
+R181;$I1.$199.Metal5;$I1.$201.Metal5;;0.176                                     
+R182;$I1.$2.Metal1;$I1.$3.Metal2;;9.0                                           
+R183;$I1.$2.Metal1;$I1.$4.Metal1;;0.44                                          
+R184;$I1.$20.Metal1;$I1.$21.Metal2;;9.0                                         
+R185;$I1.$20.Metal1;$I1.$22.Metal1;;0.22                                        
+R186;$I1.$203.Metal5;$I1.$205.Metal5;;0.17                                      
+R187;$I1.$205.Metal5;$I1.$207.Metal5;;0.176                                     
+R188;$I1.$207.Metal5;$I1.$209.Metal5;;0.176                                     
+R189;$I1.$209.Metal5;$I1.$211.Metal5;;0.176                                     
+R190;$I1.$21.Metal2;$I1.$23.Metal2;;0.176                                       
+R191;$I1.$211.Metal5;$I1.$213.Metal5;;0.176                                     
+R192;$I1.$213.Metal5;$I1.$215.Metal5;;0.176                                     
+R193;$I1.$215.Metal5;$I1.$217.Metal5;;0.176                                     
+R194;$I1.$217.Metal5;$I1.$219.Metal5;;0.176                                     
+R195;$I1.$219.Metal5;$I1.$221.Metal5;;0.176                                     
+R196;$I1.$22.Metal1;$I1.$23.Metal2;;9.0                                         
+R197;$I1.$22.Metal1;$I1.$24.Metal1;;0.22                                        
+R198;$I1.$221.Metal5;$I1.$223.Metal5;;0.176                                     
+R199;$I1.$23.Metal2;$I1.$25.Metal2;;0.176                                       
+R200;$I1.$24.Metal1;$I1.$25.Metal2;;9.0                                         
+R201;$I1.$24.Metal1;$I1.$26.Metal1;;0.22                                        
+R202;$I1.$25.Metal2;$I1.$27.Metal2;;0.176                                       
+R203;$I1.$26.Metal1;$I1.$27.Metal2;;9.0                                         
+R204;$I1.$26.Metal1;$I1.$28.Metal1;;0.22                                        
+R205;$I1.$27.Metal2;$I1.$29.Metal2;;0.176                                       
+R206;$I1.$28.Metal1;$I1.$29.Metal2;;9.0                                         
+R207;$I1.$28.Metal1;$I1.$30.Metal1;;0.22                                        
+R208;$I1.$29.Metal2;$I1.$31.Metal2;;0.176                                       
+R209;$I1.$3.Metal2;$I1.$5.Metal2;;0.352                                         
+R210;$I1.$30.Metal1;$I1.$31.Metal2;;9.0                                         
+R211;$I1.$30.Metal1;$I1.$32.Metal1;;0.22                                        
+R212;$I1.$31.Metal2;$I1.$33.Metal2;;0.176                                       
+R213;$I1.$32.Metal1;$I1.$33.Metal2;;9.0                                         
+R214;$I1.$34.Metal1;$I1.$35.Metal2;;9.0                                         
+R215;$I1.$34.Metal1;$I1.$36.Metal1;;0.343                                       
+R216;$I1.$35.Metal2;$I1.$37.Metal2;;0.274                                       
+R217;$I1.$36.Metal1;$I1.$37.Metal2;;9.0                                         
+R218;$I1.$36.Metal1;$I1.$38.Metal1;;0.22                                        
+R219;$I1.$37.Metal2;$I1.$39.Metal2;;0.176                                       
+R220;$I1.$38.Metal1;$I1.$39.Metal2;;9.0                                         
+R221;$I1.$38.Metal1;$I1.$40.Metal1;;0.22                                        
+R222;$I1.$39.Metal2;$I1.$41.Metal2;;0.176                                       
+R223;$I1.$4.Metal1;$I1.$5.Metal2;;9.0                                           
+R224;$I1.$4.Metal1;$I1.$6.Metal1;;0.44                                          
+R225;$I1.$40.Metal1;$I1.$41.Metal2;;9.0                                         
+R226;$I1.$40.Metal1;$I1.$42.Metal1;;0.22                                        
+R227;$I1.$41.Metal2;$I1.$43.Metal2;;0.176                                       
+R228;$I1.$42.Metal1;$I1.$43.Metal2;;9.0                                         
+R229;$I1.$42.Metal1;$I1.$44.Metal1;;0.22                                        
+R230;$I1.$44.Metal1;$I1.$46.Metal1;;0.22                                        
+R231;$I1.$46.Metal1;$I1.$48.Metal1;;0.22                                        
+R232;$I1.$48.Metal1;$I1.$50.Metal1;;0.22                                        
+R233;$I1.$5.Metal2;$I1.$62.Metal2;;0.352                                        
+R234;$I1.$50.Metal1;$I1.$52.Metal1;;0.22                                        
+R235;$I1.$52.Metal1;$I1.$54.Metal1;;0.22                                        
+R236;$I1.$6.Metal1;$I1.$62.Metal2;;9.0                                          
+R237;$I1.$6.Metal1;$I1.$8.Metal1;;0.44                                          
+R238;$I1.$62.Metal2;$I1.$64.Metal2;;0.352                                       
+R239;$I1.$64.Metal2;$I1.$8.Metal1;;9.0                                          
+R240;$I2;$I2.$1.Metal2;;9.0                                                     
+R241;$I2;$I2.$2.Metal1;;0.22                                                    
+R242;$I2.$1.Metal2;$I2.$112.Metal3;;9.0                                         
+R243;$I2.$1.Metal2;$I2.$3.Metal2;;0.176                                         
+R244;$I2.$10.Metal1;$I2.$11.Metal2;;9.0                                         
+R245;$I2.$10.Metal1;$I2.$12.Metal1;;0.22                                        
+R246;$I2.$10.Metal1;$I2.$8.Metal1;;0.22                                         
+R247;$I2.$100.Metal2;$I2.$101.Metal3;;9.0                                       
+R248;$I2.$100.Metal2;$I2.$102.Metal2;;0.352                                     
+R249;$I2.$100.Metal2;$I2.$44.Metal1;;9.0                                        
+R250;$I2.$101.Metal3;$I2.$103.Metal3;;0.352                                     
+R251;$I2.$101.Metal3;$I2.$157.Metal4;;9.0                                       
+R252;$I2.$102.Metal2;$I2.$103.Metal3;;9.0                                       
+R253;$I2.$102.Metal2;$I2.$104.Metal2;;0.352                                     
+R254;$I2.$102.Metal2;$I2.$46.Metal1;;9.0                                        
+R255;$I2.$103.Metal3;$I2.$105.Metal3;;0.352                                     
+R256;$I2.$103.Metal3;$I2.$159.Metal4;;9.0                                       
+R257;$I2.$104.Metal2;$I2.$105.Metal3;;9.0                                       
+R258;$I2.$104.Metal2;$I2.$106.Metal2;;0.352                                     
+R259;$I2.$104.Metal2;$I2.$48.Metal1;;9.0                                        
+R260;$I2.$105.Metal3;$I2.$107.Metal3;;0.352                                     
+R261;$I2.$105.Metal3;$I2.$161.Metal4;;9.0                                       
+R262;$I2.$106.Metal2;$I2.$107.Metal3;;9.0                                       
+R263;$I2.$106.Metal2;$I2.$108.Metal2;;0.352                                     
+R264;$I2.$106.Metal2;$I2.$50.Metal1;;9.0                                        
+R265;$I2.$107.Metal3;$I2.$109.Metal3;;0.352                                     
+R266;$I2.$107.Metal3;$I2.$163.Metal4;;9.0                                       
+R267;$I2.$108.Metal2;$I2.$109.Metal3;;9.0                                       
+R268;$I2.$108.Metal2;$I2.$110.Metal2;;0.362                                     
+R269;$I2.$108.Metal2;$I2.$52.Metal1;;9.0                                        
+R270;$I2.$109.Metal3;$I2.$111.Metal3;;0.362                                     
+R271;$I2.$109.Metal3;$I2.$165.Metal4;;9.0                                       
+R272;$I2.$11.Metal2;$I2.$122.Metal3;;9.0                                        
+R273;$I2.$11.Metal2;$I2.$13.Metal2;;0.176                                       
+R274;$I2.$11.Metal2;$I2.$64.Metal2;;0.176                                       
+R275;$I2.$110.Metal2;$I2.$111.Metal3;;9.0                                       
+R276;$I2.$110.Metal2;$I2.$54.Metal1;;9.0                                        
+R277;$I2.$111.Metal3;$I2.$167.Metal4;;9.0                                       
+R278;$I2.$112.Metal3;$I2.$113.Metal4;;9.0                                       
+R279;$I2.$112.Metal3;$I2.$114.Metal3;;0.176                                     
+R280;$I2.$113.Metal4;$I2.$115.Metal4;;0.176                                     
+R281;$I2.$113.Metal4;$I2.$169.Metal5;;9.0                                       
+R282;$I2.$114.Metal3;$I2.$115.Metal4;;9.0                                       
+R283;$I2.$114.Metal3;$I2.$116.Metal3;;0.176                                     
+R284;$I2.$114.Metal3;$I2.$3.Metal2;;9.0                                         
+R285;$I2.$115.Metal4;$I2.$117.Metal4;;0.176                                     
+R286;$I2.$115.Metal4;$I2.$171.Metal5;;9.0                                       
+R287;$I2.$116.Metal3;$I2.$117.Metal4;;9.0                                       
+R288;$I2.$116.Metal3;$I2.$118.Metal3;;0.176                                     
+R289;$I2.$116.Metal3;$I2.$5.Metal2;;9.0                                         
+R290;$I2.$117.Metal4;$I2.$119.Metal4;;0.176                                     
+R291;$I2.$117.Metal4;$I2.$173.Metal5;;9.0                                       
+R292;$I2.$118.Metal3;$I2.$119.Metal4;;9.0                                       
+R293;$I2.$118.Metal3;$I2.$120.Metal3;;0.176                                     
+R294;$I2.$118.Metal3;$I2.$62.Metal2;;9.0                                        
+R295;$I2.$119.Metal4;$I2.$121.Metal4;;0.176                                     
+R296;$I2.$119.Metal4;$I2.$175.Metal5;;9.0                                       
+R297;$I2.$12.Metal1;$I2.$13.Metal2;;9.0                                         
+R298;$I2.$12.Metal1;$I2.$14.Metal1;;0.22                                        
+R299;$I2.$120.Metal3;$I2.$121.Metal4;;9.0                                       
+R300;$I2.$120.Metal3;$I2.$122.Metal3;;0.176                                     
+R301;$I2.$120.Metal3;$I2.$64.Metal2;;9.0                                        
+R302;$I2.$121.Metal4;$I2.$123.Metal4;;0.176                                     
+R303;$I2.$121.Metal4;$I2.$177.Metal5;;9.0                                       
+R304;$I2.$122.Metal3;$I2.$123.Metal4;;9.0                                       
+R305;$I2.$122.Metal3;$I2.$124.Metal3;;0.176                                     
+R306;$I2.$123.Metal4;$I2.$125.Metal4;;0.176                                     
+R307;$I2.$123.Metal4;$I2.$179.Metal5;;9.0                                       
+R308;$I2.$124.Metal3;$I2.$125.Metal4;;9.0                                       
+R309;$I2.$124.Metal3;$I2.$126.Metal3;;0.176                                     
+R310;$I2.$124.Metal3;$I2.$13.Metal2;;9.0                                        
+R311;$I2.$125.Metal4;$I2.$127.Metal4;;0.176                                     
+R312;$I2.$125.Metal4;$I2.$181.Metal5;;9.0                                       
+R313;$I2.$126.Metal3;$I2.$127.Metal4;;9.0                                       
+R314;$I2.$126.Metal3;$I2.$128.Metal3;;0.176                                     
+R315;$I2.$126.Metal3;$I2.$15.Metal2;;9.0                                        
+R316;$I2.$127.Metal4;$I2.$129.Metal4;;0.176                                     
+R317;$I2.$127.Metal4;$I2.$183.Metal5;;9.0                                       
+R318;$I2.$128.Metal3;$I2.$129.Metal4;;9.0                                       
+R319;$I2.$128.Metal3;$I2.$130.Metal3;;0.176                                     
+R320;$I2.$128.Metal3;$I2.$17.Metal2;;9.0                                        
+R321;$I2.$129.Metal4;$I2.$131.Metal4;;0.176                                     
+R322;$I2.$129.Metal4;$I2.$185.Metal5;;9.0                                       
+R323;$I2.$13.Metal2;$I2.$15.Metal2;;0.176                                       
+R324;$I2.$130.Metal3;$I2.$131.Metal4;;9.0                                       
+R325;$I2.$130.Metal3;$I2.$132.Metal3;;0.362                                     
+R326;$I2.$130.Metal3;$I2.$19.Metal2;;9.0                                        
+R327;$I2.$131.Metal4;$I2.$133.Metal4;;0.362                                     
+R328;$I2.$131.Metal4;$I2.$187.Metal5;;9.0                                       
+R329;$I2.$132.Metal3;$I2.$133.Metal4;;9.0                                       
+R330;$I2.$132.Metal3;$I2.$21.Metal2;;9.0                                        
+R331;$I2.$133.Metal4;$I2.$189.Metal5;;9.0                                       
+R332;$I2.$134.Metal3;$I2.$135.Metal4;;9.0                                       
+R333;$I2.$134.Metal3;$I2.$136.Metal3;;0.176                                     
+R334;$I2.$134.Metal3;$I2.$23.Metal2;;9.0                                        
+R335;$I2.$135.Metal4;$I2.$137.Metal4;;0.176                                     
+R336;$I2.$135.Metal4;$I2.$191.Metal5;;9.0                                       
+R337;$I2.$136.Metal3;$I2.$137.Metal4;;9.0                                       
+R338;$I2.$136.Metal3;$I2.$138.Metal3;;0.176                                     
+R339;$I2.$136.Metal3;$I2.$25.Metal2;;9.0                                        
+R340;$I2.$137.Metal4;$I2.$139.Metal4;;0.176                                     
+R341;$I2.$137.Metal4;$I2.$193.Metal5;;9.0                                       
+R342;$I2.$138.Metal3;$I2.$139.Metal4;;9.0                                       
+R343;$I2.$138.Metal3;$I2.$140.Metal3;;0.176                                     
+R344;$I2.$138.Metal3;$I2.$27.Metal2;;9.0                                        
+R345;$I2.$139.Metal4;$I2.$141.Metal4;;0.176                                     
+R346;$I2.$139.Metal4;$I2.$195.Metal5;;9.0                                       
+R347;$I2.$14.Metal1;$I2.$15.Metal2;;9.0                                         
+R348;$I2.$14.Metal1;$I2.$16.Metal1;;0.22                                        
+R349;$I2.$140.Metal3;$I2.$141.Metal4;;9.0                                       
+R350;$I2.$140.Metal3;$I2.$142.Metal3;;0.176                                     
+R351;$I2.$140.Metal3;$I2.$29.Metal2;;9.0                                        
+R352;$I2.$141.Metal4;$I2.$143.Metal4;;0.176                                     
+R353;$I2.$141.Metal4;$I2.$197.Metal5;;9.0                                       
+R354;$I2.$142.Metal3;$I2.$143.Metal4;;9.0                                       
+R355;$I2.$142.Metal3;$I2.$144.Metal3;;0.176                                     
+R356;$I2.$142.Metal3;$I2.$31.Metal2;;9.0                                        
+R357;$I2.$143.Metal4;$I2.$145.Metal4;;0.176                                     
+R358;$I2.$143.Metal4;$I2.$199.Metal5;;9.0                                       
+R359;$I2.$144.Metal3;$I2.$145.Metal4;;9.0                                       
+R360;$I2.$144.Metal3;$I2.$146.Metal3;;0.176                                     
+R361;$I2.$144.Metal3;$I2.$33.Metal2;;9.0                                        
+R362;$I2.$145.Metal4;$I2.$147.Metal4;;0.176                                     
+R363;$I2.$145.Metal4;$I2.$201.Metal5;;9.0                                       
+R364;$I2.$146.Metal3;$I2.$147.Metal4;;9.0                                       
+R365;$I2.$146.Metal3;$I2.$148.Metal3;;0.176                                     
+R366;$I2.$146.Metal3;$I2.$35.Metal2;;9.0                                        
+R367;$I2.$147.Metal4;$I2.$149.Metal4;;0.176                                     
+R368;$I2.$147.Metal4;$I2.$203.Metal5;;9.0                                       
+R369;$I2.$148.Metal3;$I2.$149.Metal4;;9.0                                       
+R370;$I2.$148.Metal3;$I2.$150.Metal3;;0.176                                     
+R371;$I2.$148.Metal3;$I2.$37.Metal2;;9.0                                        
+R372;$I2.$149.Metal4;$I2.$151.Metal4;;0.176                                     
+R373;$I2.$149.Metal4;$I2.$205.Metal5;;9.0                                       
+R374;$I2.$15.Metal2;$I2.$17.Metal2;;0.176                                       
+R375;$I2.$150.Metal3;$I2.$151.Metal4;;9.0                                       
+R376;$I2.$150.Metal3;$I2.$152.Metal3;;0.176                                     
+R377;$I2.$150.Metal3;$I2.$39.Metal2;;9.0                                        
+R378;$I2.$151.Metal4;$I2.$153.Metal4;;0.176                                     
+R379;$I2.$151.Metal4;$I2.$207.Metal5;;9.0                                       
+R380;$I2.$152.Metal3;$I2.$153.Metal4;;9.0                                       
+R381;$I2.$152.Metal3;$I2.$154.Metal3;;0.362                                     
+R382;$I2.$152.Metal3;$I2.$41.Metal2;;9.0                                        
+R383;$I2.$153.Metal4;$I2.$155.Metal4;;0.362                                     
+R384;$I2.$153.Metal4;$I2.$209.Metal5;;9.0                                       
+R385;$I2.$154.Metal3;$I2.$155.Metal4;;9.0                                       
+R386;$I2.$154.Metal3;$I2.$43.Metal2;;9.0                                        
+R387;$I2.$155.Metal4;$I2.$211.Metal5;;9.0                                       
+R388;$I2.$157.Metal4;$I2.$159.Metal4;;0.352                                     
+R389;$I2.$157.Metal4;$I2.$213.Metal5;;9.0                                       
+R390;$I2.$159.Metal4;$I2.$161.Metal4;;0.352                                     
+R391;$I2.$159.Metal4;$I2.$215.Metal5;;9.0                                       
+R392;$I2.$16.Metal1;$I2.$17.Metal2;;9.0                                         
+R393;$I2.$16.Metal1;$I2.$18.Metal1;;0.22                                        
+R394;$I2.$161.Metal4;$I2.$163.Metal4;;0.352                                     
+R395;$I2.$161.Metal4;$I2.$217.Metal5;;9.0                                       
+R396;$I2.$163.Metal4;$I2.$165.Metal4;;0.352                                     
+R397;$I2.$163.Metal4;$I2.$219.Metal5;;9.0                                       
+R398;$I2.$165.Metal4;$I2.$167.Metal4;;0.362                                     
+R399;$I2.$165.Metal4;$I2.$221.Metal5;;9.0                                       
+R400;$I2.$167.Metal4;$I2.$223.Metal5;;9.0                                       
+R401;$I2.$169.Metal5;$I2.$171.Metal5;;0.176                                     
+R402;$I2.$17.Metal2;$I2.$19.Metal2;;0.176                                       
+R403;$I2.$171.Metal5;$I2.$173.Metal5;;0.176                                     
+R404;$I2.$173.Metal5;$I2.$175.Metal5;;0.176                                     
+R405;$I2.$175.Metal5;$I2.$177.Metal5;;0.176                                     
+R406;$I2.$177.Metal5;$I2.$179.Metal5;;0.176                                     
+R407;$I2.$179.Metal5;$I2.$181.Metal5;;0.176                                     
+R408;$I2.$18.Metal1;$I2.$19.Metal2;;9.0                                         
+R409;$I2.$18.Metal1;$I2.$20.Metal1;;0.453                                       
+R410;$I2.$181.Metal5;$I2.$183.Metal5;;0.176                                     
+R411;$I2.$183.Metal5;$I2.$185.Metal5;;0.176                                     
+R412;$I2.$185.Metal5;$I2.$187.Metal5;;0.176                                     
+R413;$I2.$187.Metal5;$I2.$189.Metal5;;0.258                                     
+R414;$I2.$189.Metal5;$I2.$211.Metal5;;0.261                                     
+R415;$I2.$19.Metal2;$I2.$21.Metal2;;0.362                                       
+R416;$I2.$191.Metal5;$I2.$193.Metal5;;0.176                                     
+R417;$I2.$193.Metal5;$I2.$195.Metal5;;0.176                                     
+R418;$I2.$195.Metal5;$I2.$197.Metal5;;0.176                                     
+R419;$I2.$197.Metal5;$I2.$199.Metal5;;0.176                                     
+R420;$I2.$199.Metal5;$I2.$201.Metal5;;0.176                                     
+R421;$I2.$2.Metal1;$I2.$3.Metal2;;9.0                                           
+R422;$I2.$2.Metal1;$I2.$4.Metal1;;0.22                                          
+R423;$I2.$20.Metal1;$I2.$21.Metal2;;9.0                                         
+R424;$I2.$201.Metal5;$I2.$203.Metal5;;0.176                                     
+R425;$I2.$203.Metal5;$I2.$205.Metal5;;0.176                                     
+R426;$I2.$205.Metal5;$I2.$207.Metal5;;0.176                                     
+R427;$I2.$207.Metal5;$I2.$209.Metal5;;0.176                                     
+R428;$I2.$209.Metal5;$I2.$211.Metal5;;0.258                                     
+R429;$I2.$211.Metal5;$I2.$223.Metal5;;0.261                                     
+R430;$I2.$213.Metal5;$I2.$215.Metal5;;0.352                                     
+R431;$I2.$215.Metal5;$I2.$217.Metal5;;0.352                                     
+R432;$I2.$217.Metal5;$I2.$219.Metal5;;0.352                                     
+R433;$I2.$219.Metal5;$I2.$221.Metal5;;0.352                                     
+R434;$I2.$22.Metal1;$I2.$23.Metal2;;9.0                                         
+R435;$I2.$22.Metal1;$I2.$24.Metal1;;0.22                                        
+R436;$I2.$221.Metal5;$I2.$223.Metal5;;0.258                                     
+R437;$I2.$23.Metal2;$I2.$25.Metal2;;0.176                                       
+R438;$I2.$24.Metal1;$I2.$25.Metal2;;9.0                                         
+R439;$I2.$24.Metal1;$I2.$26.Metal1;;0.22                                        
+R440;$I2.$25.Metal2;$I2.$27.Metal2;;0.176                                       
+R441;$I2.$26.Metal1;$I2.$27.Metal2;;9.0                                         
+R442;$I2.$26.Metal1;$I2.$28.Metal1;;0.22                                        
+R443;$I2.$27.Metal2;$I2.$29.Metal2;;0.176                                       
+R444;$I2.$28.Metal1;$I2.$29.Metal2;;9.0                                         
+R445;$I2.$28.Metal1;$I2.$30.Metal1;;0.22                                        
+R446;$I2.$29.Metal2;$I2.$31.Metal2;;0.176                                       
+R447;$I2.$3.Metal2;$I2.$5.Metal2;;0.176                                         
+R448;$I2.$30.Metal1;$I2.$31.Metal2;;9.0                                         
+R449;$I2.$30.Metal1;$I2.$32.Metal1;;0.22                                        
+R450;$I2.$31.Metal2;$I2.$33.Metal2;;0.176                                       
+R451;$I2.$32.Metal1;$I2.$33.Metal2;;9.0                                         
+R452;$I2.$32.Metal1;$I2.$34.Metal1;;0.22                                        
+R453;$I2.$33.Metal2;$I2.$35.Metal2;;0.176                                       
+R454;$I2.$34.Metal1;$I2.$35.Metal2;;9.0                                         
+R455;$I2.$34.Metal1;$I2.$36.Metal1;;0.22                                        
+R456;$I2.$35.Metal2;$I2.$37.Metal2;;0.176                                       
+R457;$I2.$36.Metal1;$I2.$37.Metal2;;9.0                                         
+R458;$I2.$36.Metal1;$I2.$38.Metal1;;0.22                                        
+R459;$I2.$37.Metal2;$I2.$39.Metal2;;0.176                                       
+R460;$I2.$38.Metal1;$I2.$39.Metal2;;9.0                                         
+R461;$I2.$38.Metal1;$I2.$40.Metal1;;0.22                                        
+R462;$I2.$39.Metal2;$I2.$41.Metal2;;0.176                                       
+R463;$I2.$4.Metal1;$I2.$5.Metal2;;9.0                                           
+R464;$I2.$4.Metal1;$I2.$6.Metal1;;0.22                                          
+R465;$I2.$40.Metal1;$I2.$41.Metal2;;9.0                                         
+R466;$I2.$40.Metal1;$I2.$42.Metal1;;0.453                                       
+R467;$I2.$41.Metal2;$I2.$43.Metal2;;0.362                                       
+R468;$I2.$42.Metal1;$I2.$43.Metal2;;9.0                                         
+R469;$I2.$44.Metal1;$I2.$46.Metal1;;0.44                                        
+R470;$I2.$46.Metal1;$I2.$48.Metal1;;0.44                                        
+R471;$I2.$48.Metal1;$I2.$50.Metal1;;0.44                                        
+R472;$I2.$5.Metal2;$I2.$62.Metal2;;0.176                                        
+R473;$I2.$50.Metal1;$I2.$52.Metal1;;0.44                                        
+R474;$I2.$52.Metal1;$I2.$54.Metal1;;0.453                                       
+R475;$I2.$6.Metal1;$I2.$62.Metal2;;9.0                                          
+R476;$I2.$6.Metal1;$I2.$8.Metal1;;0.22                                          
+R477;$I2.$62.Metal2;$I2.$64.Metal2;;0.176                                       
+R478;$I2.$64.Metal2;$I2.$8.Metal1;;9.0                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k2
+5d_pex_netlist.csv                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[21:26:05] INFO     Removing whiteboxed device $1         netlist_expander.py:60
+Wrote expanded netlist to:                                                      
+/tmp/tmpax697b1x/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k2
+5d_pex_netlist.spice                                                            
