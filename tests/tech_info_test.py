@@ -62,6 +62,9 @@ def tech_with_duplicates() -> tech_pb2.Technology:
     for name in ('met1_con', 'met1_con'):
         tech.lvs_computed_layers.add().layer_info.name = name
 
+    for name in ('nmos', 'nmos'):
+        tech.device_models.device_model_mappings.add(lvs_device_class_name=name)
+
     return tech
 
 
@@ -127,13 +130,14 @@ class Test(unittest.TestCase):
 
     def test_duplicate_names_are_reported_per_namespace(self):
         problems = TechInfo.duplicate_names(tech_with_duplicates())
-        self.assertEqual(4, len(problems), problems)
+        self.assertEqual(5, len(problems), problems)
         self.assertIn("the process stack namespace declares 'met1' 2 times", problems[0])
         self.assertIn("the process stack namespace declares 'met2' 2 times", problems[1])
         self.assertIn('as contact, layer', problems[1])
         self.assertIn("the layer namespace declares 'met1' 2 times", problems[2])
         self.assertIn("the LVS computed layer namespace declares 'met1_con' 2 times",
                       problems[3])
+        self.assertIn("the device model mapping namespace declares 'nmos' 2 times", problems[4])
 
     def test_the_reader_refuses_a_duplicate(self):
         with tempfile.TemporaryDirectory() as tmp_dir:

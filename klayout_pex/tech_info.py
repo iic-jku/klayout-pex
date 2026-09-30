@@ -64,6 +64,7 @@ class TechInfo:
             'process stack': [],
             'layer': [],
             'LVS computed layer': [],
+            'device model mapping': [],
         }
 
         for lyr in tech.process_stack.layers:
@@ -79,6 +80,8 @@ class TechInfo:
         namespaces['layer'] += [(lyr.name, 'layer') for lyr in tech.layers]
         namespaces['LVS computed layer'] += [(lyr.layer_info.name, 'layer')
                                              for lyr in tech.lvs_computed_layers]
+        namespaces['device model mapping'] += [(dm.lvs_device_class_name, 'LVS device class')
+                                               for dm in tech.device_models.device_model_mappings]
 
         problems: List[str] = []
         for namespace, declarations in namespaces.items():
