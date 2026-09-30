@@ -195,59 +195,24 @@ class ExtractionSummary:
 
 
 @dataclass
-class CellExtractionResults:
-    cell_name: CellName
+class NetworkNodeNames:
+    """
+    The names of the netlist nodes of a resistor network
+    """
+    by_node_id: Dict[int, NetName]
 
-    overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
-    sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
-    sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
+    # the IDs of the nodes of each device terminal (its ports)
+    terminal_node_ids: Dict[DeviceTerminalKey, List[int]]
 
-    r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
-
-    def add_overlap_cap(self, cap: OverlapCap):
-        self.overlap_table[cap.key].append(cap)
-
-    def add_sidewall_cap(self, cap: SidewallCap):
-        self.sidewall_table[cap.key].append(cap)
-
-    def add_sideoverlap_cap(self, cap: SideOverlapCap):
-        self.sideoverlap_table[cap.key].append(cap)
-
-    def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:
+    @classmethod
+    def from_network(cls,
+                     network: r_network_pb2.RNetwork,
+                     port_names: Optional[Dict[str, NetName]] = None) -> NetworkNodeNames:
         """
-        The port names of the nets of several labels, by label
-
-        NOTE: KLayout names a net of several labels after all of them (e.g. "A,B"),
-              but each label is a port of its own (#211 §11), named after the label,
-              unless a net or another port is (e.g. A$1, like KLayout's SPICE writer)
-        """
-        K = r_network_pb2.RNode.Kind
-        networks = sorted(self.r_extraction_result.networks, key=lambda n: n.net_name)
-        taken_names: Set[NetName] = {network.net_name for network in networks}
-        port_names_by_net: Dict[NetName, Dict[str, NetName]] = {}
-        for network in networks:
-            labels = sorted({n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN})
-            if len(labels) < 2:
-                continue
-            port_names: Dict[str, NetName] = {}
-            for label in labels:
-                port_names[label] = unique_name(label, taken_names)
-                taken_names.add(port_names[label])
-            port_names_by_net[network.net_name] = port_names
-        return port_names_by_net
-
-    @staticmethod
-    def node_names(network: r_network_pb2.RNetwork,
-                   port_names: Optional[Dict[str, NetName]] = None) -> Tuple[Dict[int, NetName],
-                                                                             Dict[DeviceTerminalKey, List[int]]]:
-        """
-        Names of the netlist nodes of a resistor network
-
         Nodes that are one electrical node get one name: the ports of a device terminal,
         and nodes joined by an element without resistance (which a simulator can't solve for).
 
         :param port_names: the port name of each label, for a net of several labels
-        :return: node name by node ID, and the IDs of the nodes of each device terminal
         """
         K = r_network_pb2.RNode.Kind
 
@@ -326,8 +291,51 @@ class CellExtractionResults:
             if root is not None:
                 name_by_root[root] = network.net_name
 
-        names = {n.node_id: name_by_root[find(n.node_id)] for n in nodes}
-        return names, terminal_node_ids
+        return cls(by_node_id={n.node_id: name_by_root[find(n.node_id)] for n in nodes},
+                   terminal_node_ids=terminal_node_ids)
+
+
+@dataclass
+class CellExtractionResults:
+    cell_name: CellName
+
+    overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
+    sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
+    sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
+
+    r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
+
+    def add_overlap_cap(self, cap: OverlapCap):
+        self.overlap_table[cap.key].append(cap)
+
+    def add_sidewall_cap(self, cap: SidewallCap):
+        self.sidewall_table[cap.key].append(cap)
+
+    def add_sideoverlap_cap(self, cap: SideOverlapCap):
+        self.sideoverlap_table[cap.key].append(cap)
+
+    def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:
+        """
+        The port names of the nets of several labels, by label
+
+        NOTE: KLayout names a net of several labels after all of them (e.g. "A,B"),
+              but each label is a port of its own (#211 §11), named after the label,
+              unless a net or another port is (e.g. A$1, like KLayout's SPICE writer)
+        """
+        K = r_network_pb2.RNode.Kind
+        networks = sorted(self.r_extraction_result.networks, key=lambda n: n.net_name)
+        taken_names: Set[NetName] = {network.net_name for network in networks}
+        port_names_by_net: Dict[NetName, Dict[str, NetName]] = {}
+        for network in networks:
+            labels = sorted({n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN})
+            if len(labels) < 2:
+                continue
+            port_names: Dict[str, NetName] = {}
+            for label in labels:
+                port_names[label] = unique_name(label, taken_names)
+                taken_names.add(port_names[label])
+            port_names_by_net[network.net_name] = port_names
+        return port_names_by_net
 
     def summarize(self) -> ExtractionSummary:
         normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
@@ -358,23 +366,23 @@ class CellExtractionResults:
 
         for network in self.r_extraction_result.networks:
             port_names = port_names_by_net.get(network.net_name, {})
-            node_names, terminal_node_ids = self.node_names(network, port_names)
-            for terminal_key, node_ids in terminal_node_ids.items():
-                device_terminal_nodes[terminal_key] = node_names[node_ids[0]]
+            node_names = NetworkNodeNames.from_network(network, port_names)
+            for terminal_key, node_ids in node_names.terminal_node_ids.items():
+                device_terminal_nodes[terminal_key] = node_names.by_node_id[node_ids[0]]
 
             # NOTE: the port of a label on the node of another label (e.g. both on one via) is tied to it
-            ties = {NetCoupleKey(port_names[n.node_name], node_names[n.node_id]).normed()
+            ties = {NetCoupleKey(port_names[n.node_name], node_names.by_node_id[n.node_id]).normed()
                     for n in network.nodes
                     if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN
                     and n.node_name in port_names
-                    and port_names[n.node_name] != node_names[n.node_id]}
+                    and port_names[n.node_name] != node_names.by_node_id[n.node_id]}
             for key in sorted(ties):
                 add_resistance(normalized_resistance_table, key, LABEL_TIE_RESISTANCE)
 
             for element in network.elements:
                 resistance = element.resistance
-                normalized_key = NetCoupleKey(node_names[element.node_a.node_id],
-                                              node_names[element.node_b.node_id]).normed()
+                normalized_key = NetCoupleKey(node_names.by_node_id[element.node_a.node_id],
+                                              node_names.by_node_id[element.node_b.node_id]).normed()
                 # NOTE: different nodes can have the same name, e.g. pins with the same label,
                 #       which are one node in the netlist, so their elements are in parallel,
                 #       and an element between two of them is shorted
