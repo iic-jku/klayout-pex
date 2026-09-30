@@ -45,7 +45,7 @@ TESTDATA_DESIGNS_DIR = Path(__file__).resolve().parents[2] / 'testdata' / 'desig
 # NOTE: one small layout per bundled PDK, each PDK needs one
 SMOKE_TEST_DESIGNS: Dict[PDK, Path] = {
     PDK.GF180MCUD: TESTDATA_DESIGNS_DIR / 'gf180mcuD' / 'test_patterns' / 'nfet_m1.gds.gz',
-    PDK.IHP_SG13G2: TESTDATA_DESIGNS_DIR / 'ihp_sg13g2' / 'sg13g2_a21o_1' / 'sg13g2_a21o_1.gds.gz',
+    PDK.IHP_SG13G2: TESTDATA_DESIGNS_DIR / 'ihp-sg13g2' / 'sg13g2_a21o_1' / 'sg13g2_a21o_1.gds.gz',
     PDK.IHP_SG13CMOS5L: TESTDATA_DESIGNS_DIR / 'ihp-sg13cmos5l' / 'cap_cmomf_w5u_l5u_m1_m4'
                         / 'cap_cmomf_w5u_l5u_m1_m4.gds.gz',
     PDK.SKY130A: TESTDATA_DESIGNS_DIR / 'sky130A' / 'inv' / 'inv.gds.gz',

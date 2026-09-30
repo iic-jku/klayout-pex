@@ -40,7 +40,7 @@ from klayout_pex.tech_info import TechInfo
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
 
-TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs', 'ihp_sg13g2'))
+TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs', 'ihp-sg13g2'))
 
 
 @allure.parent_suite(parent_suite)
