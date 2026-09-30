@@ -64,6 +64,23 @@ class LVSDBError(Exception):
     pass
 
 
+def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str:
+    """
+    The name, or if it's present, the name with a number (e.g. vss$1),
+    like KLayout's tl::unique_name, which its SPICE writer names the nets with
+    """
+    if name not in present_names:
+        return name
+    j = 0
+    m = 1 << 30
+    while m > 0:
+        j += m
+        if f"{name}{separator}{j}" not in present_names:
+            j -= m
+        m >>= 1
+    return f"{name}{separator}{j + 1}"
+
+
 @dataclass
 class KLayoutExtractedLayerInfo:
     index: int
@@ -113,6 +130,8 @@ class KLayoutExtractionContext:
         if extra_top_cells:
             warning(f"Ignoring the LVS database top cells besides {internal_top_cell.name}: "
                     f"{', '.join(extra_top_cells)}")
+
+        cls.make_net_names_unique(lvsdb.netlist())
 
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
@@ -175,6 +194,23 @@ class KLayoutExtractionContext:
             unnamed_layers=nonempty_layers.unnamed_layers,
             unmodeled_layers=nonempty_layers.unmodeled_layers
         )
+
+    @staticmethod
+    def make_net_names_unique(netlist: kdb.Netlist):
+        """
+        Names each net of a circuit uniquely, as KLayout's SPICE writer does (e.g. vss, vss$1)
+
+        NOTE: nets can share a name, e.g. the metal islands of a supply, joined only in the parent
+              (unless the LVS script connects them implicitly), but the extraction identifies a net by its name,
+              and the annotated layout has the name on the shapes of the net (#211 §10)
+        """
+        for circuit in netlist.each_circuit():
+            names: Set[str] = set()
+            for net in list(circuit.each_net()):
+                name = unique_name(net.expanded_name(), names)
+                names.add(name)
+                if name != net.expanded_name():
+                    net.name = name
 
     @staticmethod
     def build_LVS_layer_map(annotated_layout: kdb.Layout,
@@ -519,15 +555,18 @@ class KLayoutExtractionContext:
                         lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
 
                         region_by_layer = terminal.region_by_layer.add()
-                        region_by_layer.layer.id = lyr_idx
+                        # NOTE: the annotated layout has a layer for each LVS layer, so several for a GDS pair
+                        #       (e.g. poly_con and poly_vpp), but the resistance extraction has the wires
+                        #       of a GDS pair on one of them, so the terminal must be on that one to be a port
+                        region_by_layer.layer.id = self.annotated_layout.layer(lyr_info.layer, lyr_info.datatype)
                         region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
 
                         shapes_converter.klayout_region_to_pb(shapes, region_by_layer.region)
 
             dd[d.device_name] = d
 
-        # NOTE: once devices are connected to the resistance network (#211, item 6),
-        #       a terminal without a node must be an error (or get a fallback node)
+        # NOTE: a terminal without a node stays on its net, which a node of the resistance network carries
+        #       (#211 §6), so it misses only the resistance to where it is
         if devices_by_unknown_terminal_layer:
             def device_list(device_names: List[str]) -> str:
                 listed = ', '.join(device_names[:3])

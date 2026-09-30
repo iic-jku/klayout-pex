@@ -23,6 +23,8 @@
 #
 
 import allure
+import glob
+import os
 import pytest
 from unittest import mock
 
@@ -65,9 +67,7 @@ def test_contact_1x1_minsize_mcon():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_contact_1x1_minsize_mcon.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;BOT;BOT,TOP.$0.16;;0.0
-R2;BOT,TOP.$0.16;BOT,TOP.$1.23;;9.3
-R3;BOT,TOP.$1.23;TOP;;0.0"""
+R1;BOT;TOP;;9.3"""
         )
 
 
@@ -82,9 +82,9 @@ def test_wire_voltage_divider_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B,C.$1.16;;426.667
-R2;A,B,C.$1.16;B;;413.867
-R3;A,B,C.$1.16;C;;72.533"""
+R1;A;A,B,C;;426.667
+R2;A,B,C;B;;413.867
+R3;A,B,C;C;;72.533"""
         )
 
 
@@ -98,8 +98,8 @@ def test_wire_same_label_at_both_ends_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_same_label_at_both_ends_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;A,B.$1.16;;210.085
-R2;A,B.$1.16;B;;72.533"""
+R1;A;A,B;;210.085
+R2;A,B;B;;72.533"""
         )
 
 @allure.parent_suite(parent_suite)
@@ -123,24 +123,12 @@ def test_via_stack_1x1_minsize_poly_to_met5():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_via_stack_1x1_minsize_poly_to_met5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;li1;li1,met1,met2,met3,met4,met5,poly.$1.18;;0.0
-R2;li1,met1,met2,met3,met4,met5,poly.$0.17;li1,met1,met2,met3,met4,met5,poly.$1.18;;152.0
-R3;li1,met1,met2,met3,met4,met5,poly.$0.17;poly;;0.0
-R4;li1,met1,met2,met3,met4,met5,poly.$1.18;li1,met1,met2,met3,met4,met5,poly.$2.18;;0.0
-R5;li1,met1,met2,met3,met4,met5,poly.$10.41;li1,met1,met2,met3,met4,met5,poly.$11.35;;3.41
-R6;li1,met1,met2,met3,met4,met5,poly.$10.41;li1,met1,met2,met3,met4,met5,poly.$7.41;;0.0
-R7;li1,met1,met2,met3,met4,met5,poly.$11.35;li1,met1,met2,met3,met4,met5,poly.$8.35;;0.0
-R8;li1,met1,met2,met3,met4,met5,poly.$2.18;li1,met1,met2,met3,met4,met5,poly.$3.25;;9.3
-R9;li1,met1,met2,met3,met4,met5,poly.$3.25;li1,met1,met2,met3,met4,met5,poly.$4.25;;0.0
-R10;li1,met1,met2,met3,met4,met5,poly.$3.25;met1;;0.0
-R11;li1,met1,met2,met3,met4,met5,poly.$4.25;li1,met1,met2,met3,met4,met5,poly.$5.26;;4.5
-R12;li1,met1,met2,met3,met4,met5,poly.$5.26;li1,met1,met2,met3,met4,met5,poly.$6.26;;0.0
-R13;li1,met1,met2,met3,met4,met5,poly.$5.26;met2;;0.0
-R14;li1,met1,met2,met3,met4,met5,poly.$6.26;li1,met1,met2,met3,met4,met5,poly.$7.41;;3.41
-R15;li1,met1,met2,met3,met4,met5,poly.$7.41;met3;;0.0
-R16;li1,met1,met2,met3,met4,met5,poly.$8.35;li1,met1,met2,met3,met4,met5,poly.$9.27;;0.38
-R17;li1,met1,met2,met3,met4,met5,poly.$8.35;met4;;0.0
-R18;li1,met1,met2,met3,met4,met5,poly.$9.27;met5;;0.0"""
+R1;li1;met1;;9.3
+R2;li1;poly;;152.0
+R3;met1;met2;;4.5
+R4;met2;met3;;3.41
+R5;met3;met4;;3.41
+R6;met4;met5;;0.38"""
         )
 
 
@@ -153,15 +141,28 @@ def test_nfet_li1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$2.$0.12;$2.$1.17;;209.667
-R2;$2.$0.12;$2.P0.12;;0.0
-R3;$3.$0.12;$3.$1.17;;209.667
-R4;$3.$0.12;$3.P0.12;;0.0
-R5;G;G.$1.17;;2.418
-R6;G.$0.16;G.$1.17;;152.0
-R7;G.$0.16;G.P0.16;;316.321"""
+R1;$2;$2.$1.li1;;209.667
+R2;$3;$3.$1.li1;;209.667
+R3;G;G.$1.li1;;2.418
+R4;G.$0.poly;G.$1.li1;;152.0
+R5;G.$0.poly;G.P0.poly;;316.321"""
         )
 
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nfet_terminals_are_on_the_resistor_network():
+    # The transistor is connected to the nodes of its terminals (#211 §6): the gate to the end of the poly,
+    # drain and source to the nodes that carry the names of their nets (which have no pin)
+    pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'nfet_li1_redux.gds.gz')
+    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pex_whiteboxed.pdk.name}"))
+    netlist_path, = glob.glob(os.path.join(output_dir_path, 'nfet_li1_redux__*', '*_k25d_pex_netlist.spice'))
+    with open(netlist_path) as f:
+        lines = f.read().replace('\n+', ' ').splitlines()
+    nfet_line, = [l for l in lines if l.startswith('X$1 ')]
+    assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.poly', '\\$2', 'sky130_gnd']  # D G S B
 
 
 @allure.parent_suite(parent_suite)

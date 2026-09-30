@@ -104,6 +104,34 @@ class RCX25NetlistExpander:
             add_net_if_needed(key.net1)
             add_net_if_needed(key.net2)
 
+        # connect each device terminal to its node of the resistor network (#211 §6),
+        # a terminal without one stays on its net, which a node of the resistor network carries
+        for key, node_name in sorted(summary.device_terminal_nodes.items()):
+            device = top_circuit.device_by_id(key.device_id)
+            if device is None:  # e.g. removed, as whiteboxed
+                continue
+            add_net_if_needed(node_name)
+            device.connect_terminal(key.terminal_id, name2net[node_name])
+
+        # the pin of a net of several labels (e.g. A,B) becomes a port per label, in its place (#211 §11)
+        if summary.label_ports:
+            ports: List[Tuple[str, Optional[kdb.Net]]] = []
+            for pin in top_circuit.each_pin():
+                net = top_circuit.net_for_pin(pin.id())
+                port_names = summary.label_ports.get(net.expanded_name(), None) if net else None
+                if port_names is None:
+                    ports.append((pin.name(), net))
+                    continue
+                for port_name in port_names:
+                    add_net_if_needed(port_name)
+                    ports.append((port_name, name2net[port_name]))
+            for pin in list(top_circuit.each_pin()):
+                top_circuit.remove_pin(pin.id())
+            for port_name, net in ports:
+                pin = top_circuit.create_pin(port_name)
+                if net is not None:
+                    top_circuit.connect_pin(pin, net)
+
         for idx, (key, cap_value_femto) in enumerate(cap_items):
             net1 = name2net[key.net1]
             net2 = name2net[key.net2]

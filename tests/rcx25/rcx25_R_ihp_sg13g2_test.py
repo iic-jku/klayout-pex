@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import os
 import tempfile
+from typing import *
 from unittest import mock
 
 import allure
@@ -103,3 +104,104 @@ def test_device_terminals_without_tech_layer_are_reported_once():
         "  - cap_cmomi terminal mim_btm on LVS layer cap_cmomi_m5_ports: $1\n"
         "  - cap_cmomi terminal mim_top on LVS layer cap_cmomi_m5_ports: $1"
     ]
+
+
+def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:
+    """
+    :return: the lines of the CSV and of the SPICE netlist (with continuation lines joined)
+    """
+    gds_path = os.path.join(TEST_DESIGNS_DIR, 'test_patterns', f"{cell_name}.gds.gz")
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main',
+                  '--pdk', PDK.IHP_SG13G2,
+                  '--mode', 'R',
+                  '--gds', gds_path,
+                  '--out_dir', out_dir,
+                  '--2.5D'])
+        csv_path = cli.rcx25_extracted_csv_path
+        with open(csv_path) as f:
+            csv_lines = f.read().splitlines()
+        with open(csv_path[:-len('.csv')] + '.spice') as f:
+            spice_lines = f.read().replace('\n+', ' ').splitlines()
+    return csv_lines, spice_lines
+
+
+def subckt_ports(spice_lines: List[str]) -> List[str]:
+    subckt_line, = [line for line in spice_lines if line.startswith('.SUBCKT ')]
+    return [port.replace('\\', '') for port in subckt_line.split()[2:]]
+
+
+def ports_touching_nothing(spice_lines: List[str]) -> List[str]:
+    element_nodes: Set[str] = set()
+    for line in spice_lines:
+        tokens = line.split()
+        if not tokens or tokens[0][0] not in 'CRX':
+            continue
+        if tokens[0][0] == 'X':  # the nodes, the subcircuit, then the parameters
+            nodes = tokens[1:next(i for i, t in enumerate(tokens) if '=' in t) - 1]
+        else:
+            nodes = tokens[1:3]
+        element_nodes.update(node.replace('\\', '') for node in nodes)
+    return [port for port in subckt_ports(spice_lines) if port not in element_nodes]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_nets_of_the_same_name_stay_apart():
+    # Two transistors, each with its own metal islands labelled D and S, which are not connected
+    # (like the islands of a supply, joined only in the parent). The IHP LVS script connects no nets implicitly,
+    # so they are distinct nets of the same name, which KLayout's SPICE writer calls D, D$1, S, S$1 (#211 §10)
+    csv_lines, _ = extract_test_pattern('nmos_metal1_redux_twice')
+    assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$0.GatPoly;;33.654
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+R3;$4;$4.$0.GatPoly;;33.654
+R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0
+R5;D;D.$1.Metal1;;0.488
+R6;D$1;D$1.$1.Metal1;;0.488
+R7;D$1.$1.Metal1;D$1.P0.nSD;;17.0
+R8;D.$1.Metal1;D.P0.nSD;;17.0
+R9;S;S.$1.Metal1;;0.598
+R10;S$1;S$1.$1.Metal1;;0.598
+R11;S$1.$1.Metal1;S$1.P0.nSD;;17.0
+R12;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_a_net_of_several_labels_has_a_port_per_label():
+    # The drain wire of the transistor has the labels D and X at its ends, so LVS has one net D,X with one pin,
+    # which the netlist replaces by the ports D and X at the labels, where the parent connects (#211 §11)
+    csv_lines, spice_lines = extract_test_pattern('nmos_metal1_redux_two_drain_labels')
+    assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$0.GatPoly;;33.654
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+R3;D;D,X.$1.Metal1;;0.488
+R4;D,X;D,X.$1.Metal1;;17.0
+R5;D,X.$1.Metal1;X;;0.089
+R6;S;S.$1.Metal1;;0.598
+R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+    assert subckt_ports(spice_lines) == ['D', 'X', 'S']
+    assert ports_touching_nothing(spice_lines) == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_labels_on_one_node_are_tied():
+    # The labels D and X are on the same pin of the drain wire, so both ports are on one node,
+    # tied by 1 mΩ, rather than one of them touching nothing (#211 §11)
+    csv_lines, spice_lines = extract_test_pattern('nmos_metal1_redux_two_labels_one_node')
+    assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$0.GatPoly;;33.654
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+R3;D;D,X.$1.Metal1;;0.488
+R4;D;X;;0.001
+R5;D,X;D,X.$1.Metal1;;17.0
+R6;S;S.$1.Metal1;;0.598
+R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+    assert subckt_ports(spice_lines) == ['D', 'X', 'S']
+    assert ports_touching_nothing(spice_lines) == []

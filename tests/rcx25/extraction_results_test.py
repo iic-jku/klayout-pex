@@ -198,11 +198,12 @@ class CellExtractionResultsTest(unittest.TestCase):
 
         summary = results.summarize()
 
-        self.assertEqual({NetCoupleKey('A', 'A,B.$1.16'), NetCoupleKey('A,B.$1.16', 'B')},
+        # NOTE: no pin carries the net's name A,B, so the wire junction does
+        self.assertEqual({NetCoupleKey('A', 'A,B'), NetCoupleKey('A,B', 'B')},
                          set(summary.resistances.keys()))
         self.assertAlmostEqual(426.667 * 413.867 / (426.667 + 413.867),
-                               summary.resistances[NetCoupleKey('A', 'A,B.$1.16')])
-        self.assertAlmostEqual(72.533, summary.resistances[NetCoupleKey('A,B.$1.16', 'B')])
+                               summary.resistances[NetCoupleKey('A', 'A,B')])
+        self.assertAlmostEqual(72.533, summary.resistances[NetCoupleKey('A,B', 'B')])
 
     def test_summarize_skips_resistances_between_pins_with_the_same_label(self):
         # e.g. output Y of sky130_fd_sc_hd__inv_1, which has two labels:
@@ -224,6 +225,157 @@ class CellExtractionResultsTest(unittest.TestCase):
         summary = results.summarize()
 
         self.assertEqual({NetCoupleKey('Y', 'Y.$0.3'): 5.0}, summary.resistances)
+
+    @staticmethod
+    def add_network(results: CellExtractionResults,
+                    net_name: str,
+                    nodes: List[Tuple],
+                    elements: List[Tuple[int, int, float]]):
+        """
+        :param nodes: (node ID, kind, node name[, (device ID, terminal ID)])
+        """
+        network = results.r_extraction_result.networks.add(net_name=net_name)
+        for node_id, kind, node_name, *terminal in nodes:
+            node = network.nodes.add(node_id=node_id, node_kind=kind, node_name=node_name)
+            if kind != r_network_pb2.RNode.Kind.KIND_PIN:
+                node.net_name = f"{net_name}.{node_name}"
+            if terminal:
+                node.device_terminal.device_id, node.device_terminal.terminal_id = terminal[0]
+        for node_a, node_b, resistance in elements:
+            element = network.elements.add(resistance=resistance)
+            element.node_a.node_id = node_a
+            element.node_b.node_id = node_b
+
+    def test_summarize_device_terminals_and_the_node_carrying_the_net_name(self):
+        # a net without a pin: device 3 and device 5 (with 2 ports for one terminal) on a wire
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, '$2',
+                         nodes=[(1, K.KIND_DEVICE_TERMINAL, 'P0.12', (5, 2)),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.12'),
+                                (3, K.KIND_DEVICE_TERMINAL, 'P0.13', (3, 0)),
+                                (4, K.KIND_DEVICE_TERMINAL, 'P1.12', (5, 2))],
+                         elements=[(1, 2, 10.0), (2, 3, 20.0), (4, 2, 30.0)])
+
+        summary = results.summarize()
+
+        # NOTE: the first device terminal carries the net's name,
+        #       and the ports of one terminal are one node (so their elements are in parallel)
+        self.assertEqual({DeviceTerminalKey(3, 0): '$2',
+                          DeviceTerminalKey(5, 2): '$2.P0.12'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('$2', '$2.$0.12'): 20.0,
+                          NetCoupleKey('$2.$0.12', '$2.P0.12'): 7.5}, summary.resistances)
+
+    def test_summarize_a_pin_carries_the_net_name(self):
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'G',
+                         nodes=[(1, K.KIND_PIN, 'G'),
+                                (2, K.KIND_DEVICE_TERMINAL, 'P0.16', (1, 1))],
+                         elements=[(1, 2, 100.0)])
+
+        summary = results.summarize()
+
+        self.assertEqual({DeviceTerminalKey(1, 1): 'G.P0.16'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('G', 'G.P0.16'): 100.0}, summary.resistances)
+
+    def test_summarize_the_pins_of_a_net_of_one_label_are_its_node(self):
+        # NOTE: another net has the label D too, so this one is called D$1 (#211 §10)
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'D$1',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (3, K.KIND_DEVICE_TERMINAL, 'P0.nSD', (1, 2))],
+                         elements=[(1, 2, 0.488), (2, 3, 17.0)])
+
+        summary = results.summarize()
+
+        self.assertEqual({DeviceTerminalKey(1, 2): 'D$1.P0.nSD'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('D$1', 'D$1.$1.Metal1'): 0.488,
+                          NetCoupleKey('D$1.$1.Metal1', 'D$1.P0.nSD'): 17.0}, summary.resistances)
+
+    def test_summarize_a_net_of_several_labels_has_a_port_per_label(self):
+        # a drain wire with the labels D and X at its ends (#211 §11)
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'D,X',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (3, K.KIND_PIN, 'X'),
+                                (4, K.KIND_DEVICE_TERMINAL, 'P0.nSD', (1, 2))],
+                         elements=[(1, 2, 0.488), (2, 3, 0.089), (2, 4, 17.0)])
+
+        summary = results.summarize()
+
+        self.assertEqual({'D,X': ['D', 'X']}, summary.label_ports)
+        # NOTE: no pin carries the net's name, so the device terminal does
+        self.assertEqual({DeviceTerminalKey(1, 2): 'D,X'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('D', 'D,X.$1.Metal1'): 0.488,
+                          NetCoupleKey('D,X.$1.Metal1', 'X'): 0.089,
+                          NetCoupleKey('D,X', 'D,X.$1.Metal1'): 17.0}, summary.resistances)
+
+    def test_summarize_the_port_of_a_label_has_a_unique_name(self):
+        # the label D is the name of another net too
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'D',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 0.5)])
+        self.add_network(results, 'D,X',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_PIN, 'X')],
+                         elements=[(1, 2, 0.6)])
+
+        summary = results.summarize()
+
+        self.assertEqual({'D,X': ['D$1', 'X']}, summary.label_ports)
+        self.assertEqual({NetCoupleKey('D', 'D.$1.Metal1'): 0.5,
+                          NetCoupleKey('D$1', 'X'): 0.6}, summary.resistances)
+
+    def test_summarize_labels_on_one_node_are_tied(self):
+        # NOTE: each label is a port, so the port of X is tied to the node of D (#211 §11)
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'D,X',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_PIN, 'X'),
+                                (3, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 0.0), (2, 3, 0.488)])
+
+        summary = results.summarize()
+
+        self.assertEqual({'D,X': ['D', 'X']}, summary.label_ports)
+        self.assertEqual({NetCoupleKey('D', 'D,X'): 0.488,
+                          NetCoupleKey('D', 'X'): LABEL_TIE_RESISTANCE}, summary.resistances)
+
+    def test_summarize_nodes_joined_without_resistance_are_one_node(self):
+        # NOTE: a simulator can't solve for a resistor of 0 Ω, so no such resistor must be written
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, '$2',
+                         nodes=[(1, K.KIND_DEVICE_TERMINAL, 'P0.12', (1, 2)),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.12'),
+                                (3, K.KIND_WIRE_JUNCTION, '$1.17'),
+                                (4, K.KIND_DEVICE_TERMINAL, 'P1.12', (2, 0)),
+                                (5, K.KIND_WIRE_JUNCTION, '$2.12')],
+                         elements=[(1, 2, 0.0), (2, 3, 209.667), (3, 5, 100.0), (5, 4, 0.0)])
+        self.add_network(results, 'VGND',
+                         nodes=[(1, K.KIND_PIN, 'VGND'),
+                                (2, K.KIND_WIRE_JUNCTION, '$5.26'),
+                                (3, K.KIND_WIRE_JUNCTION, '$4.18')],
+                         elements=[(1, 2, 0.0), (2, 3, 9.3)])
+
+        summary = results.summarize()
+
+        # NOTE: a group of nodes is named after its pin, otherwise its device terminal's port,
+        #       but the first device terminal carries the net's name
+        self.assertEqual({DeviceTerminalKey(1, 2): '$2',
+                          DeviceTerminalKey(2, 0): '$2.P1.12'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('$2', '$2.$1.17'): 209.667,
+                          NetCoupleKey('$2.$1.17', '$2.P1.12'): 100.0,
+                          NetCoupleKey('VGND', 'VGND.$4.18'): 9.3}, summary.resistances)
 
 
 @allure.parent_suite("Unit Tests")
