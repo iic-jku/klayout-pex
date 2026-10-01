@@ -28,6 +28,7 @@ import allure
 import os
 from typing import *
 import unittest
+from unittest import mock
 
 from klayout_pex.env import Env, EnvVar
 from klayout_pex.pdk_config import PDK
@@ -35,6 +36,8 @@ from klayout_pex.pdk_config import PDK
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("Env", "Environment", "Environmental Variables")
+# NOTE: each test restores the environment, so its variables don't leak into later tests
+@mock.patch.dict(os.environ)
 class Test(unittest.TestCase):
     def test_env_has_defaults(self):
         # ensure env is unset
