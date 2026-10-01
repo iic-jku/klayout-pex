@@ -191,6 +191,22 @@ class TechInfo:
         )[0]
 
     @cached_property
+    def process_conductor_gds_pairs(self) -> List[GDSPair]:
+        """
+        The GDS pairs of the conductors of the process stack (its diffusion and metal layers), from the bottom up
+        """
+        gds_pairs: List[TechInfo.GDSPair] = []
+        for lyr in self.tech.process_stack.layers:
+            if lyr.layer_type not in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
+                                      process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL):
+                continue
+            gds_pair = self.gds_pair_for_computed_layer_name.get(lyr.name, None) or \
+                       self.gds_pair_for_layer_name.get(lyr.name, None)
+            if gds_pair is not None and gds_pair not in gds_pairs:
+                gds_pairs.append(gds_pair)
+        return gds_pairs
+
+    @cached_property
     def process_diffusion_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return list(
             filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
