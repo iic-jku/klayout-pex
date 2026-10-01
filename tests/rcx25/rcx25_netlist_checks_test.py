@@ -41,10 +41,7 @@ DESIGNS = [
     (PDK.SKY130A, 'sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz'),
     (PDK.SKY130A, 'inv/inv.gds.gz'),
     (PDK.SKY130A, 'test_patterns/nfet_li1_redux.gds.gz'),
-    pytest.param(PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
-                 marks=pytest.mark.xfail(strict=True,
-                                         reason="the whiteboxed MOM cap leaves its port SUB touching nothing, "
-                                                "as the LVS script doesn't connect vpp_sub to the substrate")),
+    (PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/nfet_m1.gds.gz'),
     (PDK.IHP_SG13G2, 'sg13g2_a21o_1/sg13g2_a21o_1.gds.gz'),
     (PDK.IHP_SG13G2, 'rfnmos/rfnmos_w1u_l0u72.gds.gz'),
@@ -55,13 +52,22 @@ DESIGNS = [
 ]
 
 
+EXPECTED_FAILURES = {
+    ('cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz', 'R'):
+        "in R mode, the whiteboxed MOM cap leaves its port SUB touching nothing, as there are no capacitances",
+}
+
+
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D")
 @pytest.mark.slow
 @pytest.mark.parametrize('mode', ['R', 'RC'])
 @pytest.mark.parametrize('pdk,gds', DESIGNS)
-def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str):
+def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest.FixtureRequest):
     # NOTE: each defect of #211 §6, §10, §11 fails these checks (#215)
+    reason = EXPECTED_FAILURES.get((gds, mode), None)
+    if reason is not None:
+        request.applymarker(pytest.mark.xfail(strict=True, reason=reason))
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
         cli.main(['main',

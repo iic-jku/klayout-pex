@@ -572,9 +572,11 @@ def build_device_models_info(dmi: DeviceModelsInfo):
 def build_substrate_info(si: SubstrateInfo):
     # NOTE: sky130.lvs connects the substrate (sub) to the global net sky130_gnd ($lvs_sub would name it otherwise).
     #       sub has the shapes of the bulk terminals of the transistors only, so the p-taps (ptap_conn)
-    #       are no part of it, but nets of their own (e.g. VGND)
+    #       are no part of it, but nets of their own (e.g. VGND).
+    #       The PEX-LVS script also connects the substrate under the VPP caps (vpp_sub), which a label may name
+    #       (e.g. SUB)
     si.net_names.append("sky130_gnd")
-    si.lvs_layer_names.append("sub")
+    si.lvs_layer_names.extend(["sub", "vpp_sub"])
 
 
 def build_tech() -> Technology:
