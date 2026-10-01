@@ -210,6 +210,21 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_via_without_conductor_below_is_an_error():
+    # The via1 has no met1 below it, so it joins nothing there. The extraction report crashed on it with a KeyError,
+    # as with gf180mcuD before #229, whose tech info put the layer below its vias on another GDS pair
+    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_via1_without_met1.gds.gz')
+    assert [c.args[0] for c in error_mock.call_args_list if 'vias' in c.args[0]] == [
+        "These vias have no conductor to join on one side, "
+        "so their connections would be missing from the resistance network:\n"
+        "  - via (LVS via1_con): the layer below it, met1 (68, 20), has no shapes"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_vias_within_mom_cap_l1m1m2m3m4():
     # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
     results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',

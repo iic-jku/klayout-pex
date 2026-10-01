@@ -258,6 +258,29 @@ class RExtractor:
                 '\n'.join(f"  - {layer}" for layer in unmodeled_layers)
             )
 
+        # NOTE: a via joins the conductors below and above it, but the layout may have none on one side,
+        #       e.g. a via without metal below, or a tech info that puts the layer below on another GDS pair
+        #       (gf180mcuD before #229), so the resistance network would miss the connection there
+        conductor_layer_ids = {c.layer.id for c in rex_tech.conductors}
+        vias_without_conductor: Set[str] = set()
+        for via in rex_tech.vias:
+            for side, conductor in (('below', via.bottom_conductor), ('above', via.top_conductor)):
+                if conductor.id in conductor_layer_ids:
+                    continue
+                layer_info = self.pex_context.annotated_layout.get_info(conductor.id)
+                gds_pair = (layer_info.layer, layer_info.datatype)
+                layer_name = self.pex_context.tech.canonical_layer_name_by_gds_pair.get(gds_pair, '?')
+                problem = 'has no shapes' if gds_pair not in self.pex_context.extracted_layers else 'is no conductor'
+                vias_without_conductor.add(f"{via.layer.canonical_layer_name} (LVS {via.layer.lvs_layer_name}): "
+                                           f"the layer {side} it, {layer_name} {gds_pair}, {problem}")
+
+        if vias_without_conductor:
+            raise RExtractionTechError(
+                "These vias have no conductor to join on one side, "
+                "so their connections would be missing from the resistance network:\n" +
+                '\n'.join(f"  - {via}" for via in sorted(vias_without_conductor))
+            )
+
         return rex_tech
 
     def prepare_request(self) -> pex_request_pb2.RExtractionRequest:
