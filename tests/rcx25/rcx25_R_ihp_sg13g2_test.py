@@ -191,7 +191,7 @@ R4;D,X;D,X.$1.Metal1;;17.0
 R5;D,X.$1.Metal1;X;;0.089
 R6;S;S.$1.Metal1;;0.598
 R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
-    assert subckt_ports(spice_lines) == ['D', 'X', 'S']
+    assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
 
 
@@ -210,5 +210,5 @@ R4;D;X;;0.001
 R5;D,X;D,X.$1.Metal1;;17.0
 R6;S;S.$1.Metal1;;0.598
 R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
-    assert subckt_ports(spice_lines) == ['D', 'X', 'S']
+    assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
