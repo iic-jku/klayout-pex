@@ -399,9 +399,21 @@ def build_device_models_info(dmi: DeviceModelsInfo):
         add_device_model_mapping(dmi, resistor, "X", ["A", "B"], res)
     add_device_model_mapping(dmi, "efuse", "X", ["A", "B"], [])  # unblown
 
+    # MIM caps, the top plate (B, FuseTop) first, and MOS caps, the gate (A) first
+    #
+    #     NOTE: LVS extracts the area and perimeter, the models take c_width and c_length,
+    #           but depend on c_width*c_length and c_width+c_length only.
+    #           gf180mcuD has its MIM caps between Metal4 and Metal5 (MIM option B, 5 metal layers)
+    cap = lvs_area_perimeter_params('c_width', 'c_length', 'A', 'P', um)
+    for mim in ('1f0', '1f5', '2f0'):
+        add_device_model_mapping(dmi, f"cap_mim_{mim}fF", "X", ["B", "A"], cap, f"cap_mim_{mim}_m4m5_noshield")
+    for mos_cap in ('cap_nmos_03v3', 'cap_nmos_03v3_b', 'cap_nmos_06v0', 'cap_nmos_06v0_b',
+                    'cap_pmos_03v3', 'cap_pmos_03v3_b', 'cap_pmos_06v0', 'cap_pmos_06v0_b'):
+        add_device_model_mapping(dmi, mos_cap, "X", ["A", "B"], cap)
+
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-    #       - cap_mim_*, cap_nmos_*, cap_pmos_*: the models take c_width and c_length, LVS extracts area and perimeter
-    #       - nfet_05v0_dss, pfet_05v0_dss, diode_dw2ps_*, diode_pw2dw_*, pwell: no ngspice models
+    #       - nfet_05v0_dss, pfet_05v0_dss, diode_dw2ps_*, diode_pw2dw_*, pwell,
+    #         cap_nmos_*_dn, cap_pmos_*_dn (only with CONSIDER_DN_DW_FEATURES): no ngspice models
 
 
 def build_tech() -> Technology:
