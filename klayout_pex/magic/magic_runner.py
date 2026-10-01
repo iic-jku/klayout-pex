@@ -132,6 +132,11 @@ def prepare_magic_script(gds_path: str,
         f"extract {ext_res} resistance",
         f"{unique_mode.to_cmd()}",
         "extract all",
+        # Without this, MAGIC never builds the resistor networks: the
+        # `extresist threshold/minres/mindelay` calls above only configure the
+        # extractor, and `ext2spice extresist on` then finds no (or a stale)
+        # .res.ext, silently emitting an incomplete network.
+        "extresist all" if has_res else None,
         f"ext2spice short {short_mode}",
         f"ext2spice merge {merge_mode}",
         f"ext2spice cthresh {c_threshold}" if has_cap else None,
