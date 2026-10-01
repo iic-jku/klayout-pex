@@ -545,23 +545,32 @@ class KLayoutExtractionContext:
                     terminal.name = td.name
                     terminal.net_name = net_name
 
-                    for idx, shapes in shapes_by_lyr_idx.items():
-                        lyr_idx = self.layer_index_map.get(idx, None)
-                        if lyr_idx is None:
-                            key = (d.device_class_name, td.name, self.lvsdb.layer_name(idx))
-                            devices_by_unknown_terminal_layer[key].append(d.device_name)
-                            continue
-
-                        lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
-
+                    def add_region(gds_pair: GDSPair, region: kdb.Region):
                         region_by_layer = terminal.region_by_layer.add()
                         # NOTE: the annotated layout has a layer for each LVS layer, so several for a GDS pair
                         #       (e.g. poly_con and poly_vpp), but the resistance extraction has the wires
                         #       of a GDS pair on one of them, so the terminal must be on that one to be a port
-                        region_by_layer.layer.id = self.annotated_layout.layer(lyr_info.layer, lyr_info.datatype)
-                        region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr_info.layer, lyr_info.datatype]
+                        region_by_layer.layer.id = self.annotated_layout.layer(*gds_pair)
+                        region_by_layer.layer.canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[gds_pair]
+                        shapes_converter.klayout_region_to_pb(region, region_by_layer.region)
 
-                        shapes_converter.klayout_region_to_pb(shapes, region_by_layer.region)
+                    for idx, shapes in shapes_by_lyr_idx.items():
+                        lyr_idx = self.layer_index_map.get(idx, None)
+                        if lyr_idx is None:
+                            # NOTE: the tech info has no layer for the LVS layer of the terminal
+                            #       (e.g. the ports of a MOM cap, the metal pins within its marker),
+                            #       so the terminal is where it overlaps a conductor of its net,
+                            #       which LVS connected it to (e.g. the metal of the pins)
+                            gds_pair_and_region = self.terminal_region_on_net(shapes, net_name)
+                            if gds_pair_and_region is None:
+                                key = (d.device_class_name, td.name, self.lvsdb.layer_name(idx))
+                                devices_by_unknown_terminal_layer[key].append(d.device_name)
+                            else:
+                                add_region(*gds_pair_and_region)
+                            continue
+
+                        lyr_info: kdb.LayerInfo = self.annotated_layout.layer_infos()[lyr_idx]
+                        add_region((lyr_info.layer, lyr_info.datatype), shapes)
 
             dd[d.device_name] = d
 
@@ -573,13 +582,50 @@ class KLayoutExtractionContext:
                 return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
 
             warning("The resistance network has no nodes for these device terminals, "
-                    "as the tech info has no layer for their LVS layer:\n" +
+                    "as the tech info has no layer for their LVS layer, and they overlap no conductor of their net "
+                    "(e.g. a terminal on the substrate or a well):\n" +
                     '\n'.join(f"  - {device_class} terminal {terminal} on LVS layer {lvs_layer}: "
                               f"{device_list(device_names)}"
                               for (device_class, terminal, lvs_layer), device_names
                               in sorted(devices_by_unknown_terminal_layer.items())))
 
         return dd
+
+    def terminal_region_on_net(self,
+                               terminal_shapes: kdb.Region,
+                               net_name: str) -> Optional[Tuple[GDSPair, kdb.Region]]:
+        """
+        :return: the part of the terminal shapes on the conductor of its net they overlap most,
+                 the lowest of equals, or None if they overlap no conductor of their net
+
+        NOTE: one conductor, as the ports of a terminal are one node, which would short the resistance
+              between the conductors (e.g. a pin on the top metal of a MOM cap, over the fingers below)
+        """
+        lvsdb_layer_indexes = self.lvsdb.layer_indexes()
+        bbox = terminal_shapes.bbox()
+        best: Optional[Tuple[float, GDSPair, kdb.Region]] = None
+        for gds_pair in self.tech.process_conductor_gds_pairs:
+            lyr = self.extracted_layers.get(gds_pair, None)
+            if lyr is None:
+                continue
+            net_shapes = kdb.Region()
+            for sl in lyr.source_layers:
+                computed_layer_info = self.tech.computed_layer_info_by_name[sl.lvs_layer_name]
+                if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_PIN:
+                    continue
+                annotated_layer_index = self.layer_index_map[lvsdb_layer_indexes[sl.index]]
+                # NOTE: the shapes near the terminal only, the net may be huge (e.g. a supply)
+                iter = self.annotated_top_cell.begin_shapes_rec_touching(annotated_layer_index, bbox)
+                while not iter.at_end():
+                    shape = iter.shape()
+                    if shape.property('net') == net_name and not shape.is_text():
+                        net_shapes.insert(iter.trans() * shape.polygon)
+                    iter.next()
+            overlap = terminal_shapes & net_shapes
+            area = overlap.area()
+            if area > 0 and (best is None or area > best[0]):
+                best = (area, gds_pair, overlap)
+        return None if best is None else (best[1], best[2])
 
     @cached_property
     def pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:

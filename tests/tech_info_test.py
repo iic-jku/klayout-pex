@@ -146,3 +146,20 @@ class Test(unittest.TestCase):
                 f.write(google.protobuf.json_format.MessageToJson(tech_with_duplicates()))
             with self.assertRaises(TechDefError):
                 TechInfo.parse_tech_def(path)
+
+    def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
+        tech = tech_pb2.Technology(name='test')
+        stack = tech.process_stack
+        for name, layer_type in (('subs', stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE),
+                                 ('nsd', stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION),
+                                 ('fox', stack_pb2.ProcessStackInfo.LAYER_TYPE_FIELD_OXIDE),
+                                 ('poly', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL),
+                                 ('met1', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL),
+                                 ('met1_cap', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)):
+            stack.layers.add(name=name, layer_type=layer_type)
+        for name, gds_pair in (('nsd', (7, 0)), ('poly', (5, 0)), ('met1', (8, 0))):
+            tech.layers.add(name=name, drw_gds_pair=tech_pb2.GDSPair(layer=gds_pair[0], datatype=gds_pair[1]))
+        # NOTE: a layer of the stack can be a computed layer, and share the GDS pair of another one
+        tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name='met1_cap',
+                                                                   drw_gds_pair=tech_pb2.GDSPair(layer=8, datatype=0)))
+        self.assertEqual([(7, 0), (5, 0), (8, 0)], TechInfo(tech, dielectric_filter=None).process_conductor_gds_pairs)

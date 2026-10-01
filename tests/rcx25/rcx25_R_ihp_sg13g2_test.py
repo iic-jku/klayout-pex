@@ -83,8 +83,9 @@ def test_rf_mos_keeps_its_layout_geometry():
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
 @pytest.mark.slow
-def test_device_terminals_without_tech_layer_are_reported_once():
-    # The terminals of the MOM capacitor are on an LVS layer the tech info has no layer for (#217)
+def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
+    # The terminals of the MOM capacitor are on its ports (cap_cmomi_m5_ports, the Metal5 pins within its marker),
+    # an LVS layer the tech info has no layer for (#217), so they are where they overlap the Metal5 of their nets
     cell_name = 'cmomi_w5u_l5u_m1_m5'
     gds_path = os.path.join(TEST_DESIGNS_DIR, cell_name, f"{cell_name}.gds.gz")
 
@@ -97,13 +98,19 @@ def test_device_terminals_without_tech_layer_are_reported_once():
                         '--out_dir', out_dir,
                         '--2.5D'])
 
-    messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
-    assert messages == [
-        "The resistance network has no nodes for these device terminals, "
-        "as the tech info has no layer for their LVS layer:\n"
-        "  - cap_cmomi terminal mim_btm on LVS layer cap_cmomi_m5_ports: $1\n"
-        "  - cap_cmomi terminal mim_top on LVS layer cap_cmomi_m5_ports: $1"
-    ]
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(os.path.join(out_dir, f"{cell_name}__{cell_name}", f"{cell_name}.lvsdb.gz"))
+
+    assert [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]] == []
+
+    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
+    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
+                                                              top_cell=cell_name,
+                                                              tech=tech,
+                                                              blackbox_devices=True)
+    mom_cap, = [d for d in pex_context.devices_by_name.values() if d.device_class_name == 'cap_cmomi']
+    assert {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer] for t in mom_cap.terminals} \
+           == {'mim_top': ['Metal5'], 'mim_btm': ['Metal5']}
 
 
 def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:

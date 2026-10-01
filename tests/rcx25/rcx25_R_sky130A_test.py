@@ -192,6 +192,24 @@ def test_vias_within_mom_cap_l1m1m2():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_once():
+    # The substrate terminal B of the MOM capacitor (vpp_sub, the marker of the capacitor) is on an LVS layer
+    # the tech info has no layer for, and it overlaps no conductor of its net, as the substrate is none (#217)
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+                                              'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
+    messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
+    assert messages == [
+        "The resistance network has no nodes for these device terminals, "
+        "as the tech info has no layer for their LVS layer, and they overlap no conductor of their net "
+        "(e.g. a terminal on the substrate or a well):\n"
+        "  - sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5 terminal B on LVS layer vpp_sub: $1"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_vias_within_mom_cap_l1m1m2m3m4():
     # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
     results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
