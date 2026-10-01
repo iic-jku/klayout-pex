@@ -99,6 +99,16 @@ class Test(unittest.TestCase):
                     self.assertNotEqual('', layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
+    def test_shipped_tech_definitions_name_the_substrate(self):
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            substrate = TechInfo.parse_tech_def(path).substrate
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual([], list(substrate.net_names))
+                self.assertNotEqual([], list(substrate.lvs_layer_names))
+
     def test_shipped_tech_definitions_declare_each_capacitance_once(self):
         # The capacitances are looked up by layer (pair), so one declared twice
         # keeps only the last value: ihp-sg13g2 and ihp-sg13cmos5l declared

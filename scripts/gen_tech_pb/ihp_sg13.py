@@ -671,6 +671,11 @@ class TechBuilder:
         #       - rfcmim, idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
         #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
 
+    def build_substrate_info(self, si: SubstrateInfo):
+        # NOTE: the PEX-LVS script connects pwell_sub (the pwell but the isolated ones) to the global net sub!
+        si.net_names.append("sub!")
+        si.lvs_layer_names.append("pwell_sub")
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
@@ -683,6 +688,8 @@ class TechBuilder:
         self.build_process_parasitics_info(tech.process_parasitics)
 
         self.build_device_models_info(tech.device_models)
+
+        self.build_substrate_info(tech.substrate)
 
         return tech
 

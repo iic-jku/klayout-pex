@@ -97,7 +97,8 @@ class Test(unittest.TestCase):
     @staticmethod
     def check(rc: RCNetlist,
               capacitances: Dict[Tuple[str, str], float],
-              device_terminal_nodes: Optional[Dict[str, str]] = None) -> List[str]:
+              device_terminal_nodes: Optional[Dict[str, str]] = None,
+              substrate_net_name: Optional[str] = None) -> List[str]:
         """
         :param device_terminal_nodes: the node of the port of each terminal of M1
         """
@@ -108,7 +109,8 @@ class Test(unittest.TestCase):
             device_terminal_nodes={DeviceTerminalKey(m1.id(), m1.device_class().terminal_id(terminal)): node
                                    for terminal, node in (device_terminal_nodes or {}).items()}
         )
-        return check_rc_netlist(lvs_netlist=rc.lvs, rc_netlist=rc.netlist, top_cell_name='chip', summary=summary)
+        return check_rc_netlist(lvs_netlist=rc.lvs, rc_netlist=rc.netlist, top_cell_name='chip', summary=summary,
+                                substrate_net_name=substrate_net_name)
 
     def rc_netlist(self) -> RCNetlist:
         lvs = lvs_netlist()
@@ -175,3 +177,9 @@ class Test(unittest.TestCase):
         rc = self.rc_netlist()
         rc.circuit.create_net('D')
         self.assertEqual(['nets have the same name: D'], self.check(rc, {}))
+
+    def test_capacitances_to_the_substrate_are_on_its_net(self):
+        # the summary has them on VSUBS, the netlist on the substrate net B, but the one of B itself, shorted
+        rc = self.rc_netlist()
+        rc.add_capacitor('D', 'B', 1.0)
+        self.assertEqual([], self.check(rc, {('D', 'VSUBS'): 1.0, ('B', 'VSUBS'): 2.0}, substrate_net_name='B'))

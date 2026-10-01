@@ -437,6 +437,10 @@ else
   # NOTE: GatPoly.text is missing in rule_decks/layers_definitions.lvs
   connect(poly_text,  poly_con)
 
+  # [PEX] The substrate is one global net, sub! as in the IHP schematics (NOTE: a regular LVS would not do this,
+  #       we need it for PEX, as the capacitances to the substrate go to it). pwell_sub excludes the isolated pwells.
+  connect_global(pwell_sub, "sub!")
+
 #===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===
 
   #================================================

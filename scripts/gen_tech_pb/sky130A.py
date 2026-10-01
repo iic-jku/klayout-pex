@@ -569,6 +569,14 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models
 
 
+def build_substrate_info(si: SubstrateInfo):
+    # NOTE: sky130.lvs connects the substrate (sub) to the global net sky130_gnd ($lvs_sub would name it otherwise).
+    #       sub has the shapes of the bulk terminals of the transistors only, so the p-taps (ptap_conn)
+    #       are no part of it, but nets of their own (e.g. VGND)
+    si.net_names.append("sky130_gnd")
+    si.lvs_layer_names.append("sub")
+
+
 def build_tech() -> Technology:
     tech = Technology(name="sky130A")
 
@@ -581,5 +589,7 @@ def build_tech() -> Technology:
     build_process_parasitics_info(tech.process_parasitics)
 
     build_device_models_info(tech.device_models)
+
+    build_substrate_info(tech.substrate)
 
     return tech

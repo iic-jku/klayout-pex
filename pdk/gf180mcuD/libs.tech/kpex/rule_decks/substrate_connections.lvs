@@ -23,6 +23,9 @@ connect(sub_iso, isosub)
 connect_global(sub_regular, 'SUB')
 
 (ptap_iso, ptap_regular) = ptap.andnot(isosub)
+# [PEX] KPEX finds the substrate net SUB by this layer, when a label names the net otherwise
+#       (NOTE: derived after auto_name_layers!, so it must be named here, before it is connected)
+name(ptap_regular, 'ptap_regular')
 connect(ptap, ptap_iso)
 connect(ptap, ptap_regular)
 connect(ptap_iso, isosub)
