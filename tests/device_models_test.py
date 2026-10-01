@@ -22,12 +22,13 @@
 # --------------------------------------------------------------------------------
 #
 import allure
+import math
 import unittest
 
 import google.protobuf.json_format
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModelError, DeviceModels
+from klayout_pex.device_models import DeviceModelError, DeviceModels, rectangle_sides
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
@@ -103,3 +104,33 @@ class Test(unittest.TestCase):
                          "  - nmos: parameter 'w': no LVS parameter 'w' (parameters are L, W, AS, AD, PS, PD)\n"
                          "  - nmos: parameter 'rfmode': no value",
                          str(ctx.exception))
+
+    def test_invalid_rectangle_sides_are_reported(self):
+        rppd = {'lvs_device_class_name': 'rppd', 'spice_prefix': 'X', 'terminal_names': ['A', 'B'],
+                'parameters': [{'name': 'w', 'lvs_area_perimeter_side': {'area_parameter_name': 'A',
+                                                                         'perimeter_parameter_name': 'X',
+                                                                         'side': 'SIDE_LONG'}},
+                               {'name': 'l', 'lvs_area_perimeter_side': {'area_parameter_name': 'A',
+                                                                         'perimeter_parameter_name': 'P'}}]}
+        with self.assertRaises(DeviceModelError) as ctx:
+            device_models(NMOS, rppd).check_mappings(netlist())
+        self.assertEqual("The device model mappings of the tech info are missing or invalid "
+                         "for these LVS device classes:\n"
+                         "  - rppd: parameter 'w': no LVS parameter 'X' (parameters are R, L, W, A, P)\n"
+                         "  - rppd: parameter 'l': no side of the rectangle",
+                         str(ctx.exception))
+
+    def test_rectangle_sides(self):
+        self.assertEqual((2.0, 1.0), rectangle_sides(area=2.0, perimeter=6.0))
+        self.assertEqual((3.0, 3.0), rectangle_sides(area=9.0, perimeter=12.0))
+        self.assertEqual((5.0, 0.0), rectangle_sides(area=0.0, perimeter=10.0))
+
+    def test_rectangle_sides_of_a_long_narrow_rectangle_are_exact(self):
+        long_side, short_side = rectangle_sides(area=1e4 * 1e-4, perimeter=2 * (1e4 + 1e-4))
+        self.assertAlmostEqual(1e4, long_side, delta=1e-12 * 1e4)
+        self.assertAlmostEqual(1e-4, short_side, delta=1e-12 * 1e-4)
+
+    def test_shape_without_rectangle_is_the_square_of_its_area(self):
+        # NOTE: a regular octagon of side 1 has a perimeter of 8, less than 4·√area
+        area = 2 * (1 + math.sqrt(2))
+        self.assertEqual((math.sqrt(area), math.sqrt(area)), rectangle_sides(area=area, perimeter=8.0))
