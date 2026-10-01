@@ -29,7 +29,7 @@ from typing import *
 
 import klayout.db as kdb
 
-from ..device_models import DeviceModels
+from ..device_models import DeviceModels, rectangle_sides
 from .parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_DEVICE_CLASS_NAMES,
@@ -112,10 +112,16 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
                   for t in device_model_mapping.terminal_names]
         items.append(self.format_name(device_model_mapping.model_name or dc.name))
         for p in device_model_mapping.parameters:
+            factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
             match p.WhichOneof('value'):
                 case 'lvs_parameter_name':
-                    factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
                     value = device.parameter(p.lvs_parameter_name) * factor
+                case 'lvs_area_perimeter_side':
+                    side = p.lvs_area_perimeter_side
+                    long_side, short_side = rectangle_sides(area=device.parameter(side.area_parameter_name),
+                                                            perimeter=device.parameter(side.perimeter_parameter_name))
+                    is_long = side.side == device_models_pb2.LVSAreaPerimeterSide.SIDE_LONG
+                    value = (long_side if is_long else short_side) * factor
                 case 'constant':
                     value = p.constant
             items.append(f"{p.name}={value:.12g}")

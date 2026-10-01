@@ -58,6 +58,19 @@ RFNMOS = device_model_mapping(lvs_device_class_name='rfnmos',
                                           {'name': 'l', 'lvs_parameter_name': 'L', 'lvs_parameter_factor': 1e-6},
                                           {'name': 'rfmode', 'constant': 1}])
 
+# as the IHP antenna diode: a model of w and l, which LVS extracts by area and perimeter
+DANTENNA = device_model_mapping(lvs_device_class_name='dantenna',
+                                spice_prefix='X',
+                                terminal_names=['A', 'C'],
+                                parameters=[{'name': 'w', 'lvs_parameter_factor': 1e-6,
+                                             'lvs_area_perimeter_side': {'area_parameter_name': 'A',
+                                                                         'perimeter_parameter_name': 'P',
+                                                                         'side': 'SIDE_LONG'}},
+                                            {'name': 'l', 'lvs_parameter_factor': 1e-6,
+                                             'lvs_area_perimeter_side': {'area_parameter_name': 'A',
+                                                                         'perimeter_parameter_name': 'P',
+                                                                         'side': 'SIDE_SHORT'}}])
+
 
 def empty_netlist() -> kdb.Netlist:
     netlist = kdb.Netlist()
@@ -173,3 +186,18 @@ class Test(unittest.TestCase):
                          "for these LVS device classes:\n"
                          "  - rfnmos (1 devices): no mapping",
                          str(ctx.exception))
+
+    def test_rectangle_sides_are_written_for_area_and_perimeter(self):
+        netlist = empty_netlist()
+        circuit = netlist.circuit_by_name('TOP')
+        diode = kdb.DeviceClassDiode()
+        diode.name = 'dantenna'
+        netlist.add(diode)
+        d = circuit.create_device(diode, 'D1')
+        d.connect_terminal('A', circuit.create_net('sub'))
+        d.connect_terminal('C', circuit.create_net('pin'))
+        d.set_parameter('A', 0.48 * 0.78)  # µm²
+        d.set_parameter('P', 2 * (0.48 + 0.78))  # µm
+        self.assertEqual([
+            'XD1 sub pin dantenna w=7.8e-07 l=4.8e-07',
+        ], self.device_lines(self.printer(DANTENNA), netlist))
