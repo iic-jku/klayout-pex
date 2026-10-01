@@ -1877,6 +1877,10 @@ logger.info("Starting LVS VPP CAP CONNECTIONS")
 # General VPP capacitor connections
 connect(vpp_sub      , pwell_label)
 
+# [PEX] The substrate under the VPP cap is the substrate (NOTE: a regular LVS would not do this,
+#       we need it for PEX, as the capacitances to the substrate go to it)
+connect_global(vpp_sub, substrate_name)
+
 connect(met1_vpp     ,   met1_con)
 connect(met1_vpp     , met1_label)
 
