@@ -36,12 +36,21 @@ from .extraction_results import ExtractionResults
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
 
+# the net of the capacitances to the substrate in the extraction results (TechInfo.internal_substrate_layer_name)
+SUBSTRATE = 'VSUBS'
+
+
 class RCX25NetlistExpander:
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
                extraction_results: ExtractionResults,
-               blackbox_devices: bool) -> kdb.Netlist:
+               blackbox_devices: bool,
+               substrate_net_name: Optional[str] = None) -> kdb.Netlist:
+        """
+        :param substrate_net_name: the net the capacitances to the substrate go to,
+                                   a port of its own if the netlist has none (VSUBS if not given)
+        """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
@@ -82,7 +91,6 @@ class RCX25NetlistExpander:
         expanded_netlist.add(res)
 
         fc_gnd_net = top_circuit.create_net('FC_GND')  # create GROUND net
-        vsubs_net = top_circuit.create_net("VSUBS")
 
         summary = extraction_results.summarize()
         cap_items = sorted(summary.capacitances.items())
@@ -95,6 +103,16 @@ class RCX25NetlistExpander:
             if net_name in name2net:
                 return
             name2net[net_name] = top_circuit.create_net(net_name)
+
+        # NOTE: the capacitances to the substrate are on VSUBS (TechInfo.internal_substrate_layer_name),
+        #       they go to the substrate net, rather than to a net that connects to nothing
+        if any(SUBSTRATE in (key.net1, key.net2) for key, _ in cap_items):
+            substrate_net_name = substrate_net_name or SUBSTRATE
+            if substrate_net_name not in name2net:
+                substrate_net = top_circuit.create_net(substrate_net_name)
+                top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
+                name2net[substrate_net_name] = substrate_net
+            name2net[SUBSTRATE] = name2net[substrate_net_name]
 
         # add additional nets for new nodes (e.g. created during R extraction of vias)
         for key, _ in cap_items:
@@ -135,6 +153,8 @@ class RCX25NetlistExpander:
         for idx, (key, cap_value_femto) in enumerate(cap_items):
             net1 = name2net[key.net1]
             net2 = name2net[key.net2]
+            if net1 == net2 and SUBSTRATE in (key.net1, key.net2):
+                continue  # e.g. the metal of the substrate net itself (VSS), shorted
 
             cap_value_farad = cap_value_femto / 1e15
 

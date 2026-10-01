@@ -1042,7 +1042,8 @@ class KpexCLI:
                 extracted_netlist=pex_context.lvsdb.netlist(),
                 top_cell_name=pex_context.annotated_top_cell.name,
                 extraction_results=extraction_results,
-                blackbox_devices=args.blackbox_devices
+                blackbox_devices=args.blackbox_devices,
+                substrate_net_name=pex_context.substrate_net_name
             )
 
             netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D, tech_info)
@@ -1054,7 +1055,8 @@ class KpexCLI:
                 lvs_netlist=pex_context.lvsdb.netlist(),
                 rc_netlist=expanded_netlist,
                 top_cell_name=pex_context.annotated_top_cell.name,
-                summary=extraction_results.summarize()
+                summary=extraction_results.summarize(),
+                substrate_net_name=pex_context.substrate_net_name
             )
             if self._rcx25_netlist_problems:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +

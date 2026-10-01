@@ -37,6 +37,7 @@ from typing import *
 import klayout.db as kdb
 
 from .extraction_results import ExtractionSummary
+from .netlist_expander import SUBSTRATE
 from .types import NetName
 from ..klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
@@ -54,8 +55,10 @@ CAPACITANCE_TOLERANCE = 1e-9
 def check_rc_netlist(lvs_netlist: kdb.Netlist,
                      rc_netlist: kdb.Netlist,
                      top_cell_name: str,
-                     summary: ExtractionSummary) -> List[str]:
+                     summary: ExtractionSummary,
+                     substrate_net_name: Optional[str] = None) -> List[str]:
     """
+    :param substrate_net_name: the net of the capacitances to the substrate (see RCX25NetlistExpander)
     :return: the problems of the RC netlist, e.g. a device terminal that is not on
              the resistor network of its net, so that the resistances don't reach it
     """
@@ -181,12 +184,19 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
         pair = net_pair(lvs_net_name(device.net_for_terminal('A')), lvs_net_name(device.net_for_terminal('B')))
         netlist_capacitances[pair] += device.parameter('C') * 1e15  # fF
 
+    def rc_net(node_name: NetName) -> Optional[kdb.Net]:
+        if node_name == SUBSTRATE:
+            node_name = substrate_net_name or SUBSTRATE
+        return rc_net_by_name.get(node_name)
+
     summary_capacitances: Dict[Tuple[NetName, NetName], float] = defaultdict(float)
     for key, capacitance in summary.capacitances.items():
-        net1, net2 = rc_net_by_name.get(key.net1), rc_net_by_name.get(key.net2)
+        net1, net2 = rc_net(key.net1), rc_net(key.net2)
         if net1 is None or net2 is None:
             problems.append(f"the capacitance between {key.net1} and {key.net2} has no nodes")
             continue
+        if id_of(net1) == id_of(net2) and SUBSTRATE in (key.net1, key.net2):
+            continue  # e.g. the metal of the substrate net itself (VSS), shorted
         summary_capacitances[net_pair(lvs_net_name(net1), lvs_net_name(net2))] += capacitance
 
     for pair in sorted(set(netlist_capacitances) | set(summary_capacitances)):
