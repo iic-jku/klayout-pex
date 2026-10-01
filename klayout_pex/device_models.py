@@ -25,6 +25,7 @@
 from __future__ import annotations  # allow class type hints within same class
 from collections import Counter
 from functools import cached_property
+import math
 from typing import *
 
 import klayout.db as kdb
@@ -37,6 +38,23 @@ class DeviceModelError(Exception):
     The device model mappings are missing or invalid for devices of a netlist
     """
     pass
+
+
+def rectangle_sides(area: float, perimeter: float) -> Tuple[float, float]:
+    """
+    :return: the long and the short side of the rectangle with this area and perimeter,
+             or the sides of the square of this area, if there is no such rectangle
+             (perimeter² < 16 · area, e.g. an octagon)
+    """
+    # NOTE: the sides are the roots of x² - perimeter/2 · x + area
+    half_sum = perimeter / 4
+    discriminant = half_sum * half_sum - area
+    if discriminant <= 0:
+        side = math.sqrt(area)
+        return side, side
+    long_side = half_sum + math.sqrt(discriminant)
+    # NOTE: not half_sum - sqrt(discriminant), which cancels out for a long, narrow rectangle
+    return long_side, area / long_side
 
 
 class DeviceModels:
@@ -105,6 +123,14 @@ class DeviceModels:
                     if p.lvs_parameter_name not in lvs_parameter_names:
                         problems.append(f"parameter '{p.name}': no LVS parameter '{p.lvs_parameter_name}' "
                                         f"(parameters are {', '.join(lvs_parameter_names)})")
+                case 'lvs_area_perimeter_side':
+                    side = p.lvs_area_perimeter_side
+                    for lvs_parameter_name in (side.area_parameter_name, side.perimeter_parameter_name):
+                        if lvs_parameter_name not in lvs_parameter_names:
+                            problems.append(f"parameter '{p.name}': no LVS parameter '{lvs_parameter_name}' "
+                                            f"(parameters are {', '.join(lvs_parameter_names)})")
+                    if side.side == device_models_pb2.LVSAreaPerimeterSide.SIDE_UNSPECIFIED:
+                        problems.append(f"parameter '{p.name}': no side of the rectangle")
                 case 'constant':
                     pass
                 case _:

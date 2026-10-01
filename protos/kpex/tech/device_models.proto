@@ -67,6 +67,10 @@ message DeviceModelParameter {
 
         // fixed value, e.g. rfmode=1
         double constant = 11;
+
+        // side of the rectangle with the area and perimeter of these LVS parameters, times lvs_parameter_factor
+        // (e.g. w and l of the IHP antenna diodes, which LVS extracts by area and perimeter)
+        LVSAreaPerimeterSide lvs_area_perimeter_side = 12;
     }
 
     // factor from the LVS parameter value (as the device class stores it) to the value the model expects,
@@ -79,4 +83,42 @@ message DeviceModelParameter {
     //
     // e.g. IHP w (µm) to SI (m): 1e-6, sky130A W (µm) to µm: 1
     optional double lvs_parameter_factor = 20;
+}
+
+// A side of the rectangle with the area and perimeter of a device,
+// for a model that takes w and l, where LVS extracts area and perimeter.
+//
+//     NOTE: only for a model that is symmetric in w and l, i.e. depends on w*l and w+l only
+//           (e.g. a diode or MIM cap). Area and perimeter don't tell which side is which
+//           (e.g. the drawn w), but such a model gives the same with w and l swapped.
+//           The two parameters still need different sides (e.g. w the long one, l the short one),
+//           so that w*l and w+l are the area and half the perimeter of the device.
+//
+//           The model then gets the area and perimeter of the device, whatever its shape.
+//           For parallel devices that LVS combines by adding their areas and perimeters,
+//           that's the same as for the single devices, if the model is linear in w*l and w+l.
+//           A shape without such a rectangle (perimeter² < 16 · area, e.g. an octagon)
+//           gets the square of the same area.
+//
+//           Not for a varactor: like a MOS gate, its l is the gate length across the poly
+//           and its w the gate width along it, and its model depends on them separately
+//           (e.g. sky130A cap_var_lvt: the series resistance by w/l along the poly and by l/w
+//           through the well, and the edge capacitances by w and by l).
+//           With w and l swapped, it's a different device, so its w and l must come from LVS,
+//           which sees the poly and the diffusion of the gate.
+message LVSAreaPerimeterSide {
+    enum Side {
+        SIDE_UNSPECIFIED = 0;
+        SIDE_LONG = 1;
+        SIDE_SHORT = 2;
+    }
+
+    // LVS parameter of the area, e.g. "A" (µm²)
+    string area_parameter_name = 1;
+
+    // LVS parameter of the perimeter, e.g. "P" (µm)
+    string perimeter_parameter_name = 2;
+
+    // which side of the rectangle this parameter is, e.g. the long one for w, the short one for l
+    Side side = 3;
 }

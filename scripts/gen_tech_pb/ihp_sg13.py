@@ -623,6 +623,9 @@ class TechBuilder:
         cap = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('m', 'm')]
         multiplier = [lvs_param('m', 'm')]
         hbt = [lvs_param('le', 'le', um), lvs_param('we', 'we', um), lvs_param('Nx', 'Nx'), lvs_param('m', 'm')]
+        # NOTE: LVS extracts the area and perimeter, the models take w and l, but depend on w*l and w+l only
+        antenna = lvs_area_perimeter_params('w', 'l', 'A', 'P', um) + multiplier
+        isolbox = lvs_area_perimeter_params('w', 'l', 'a', 'p', um)
 
         #                              LVS device class    prefix terminals                     parameters  model
         add_device_model_mapping(dmi, "sg13_lv_nmos",     "X",   ["D", "G", "S", "B"],         mos)
@@ -654,15 +657,17 @@ class TechBuilder:
         add_device_model_mapping(dmi, "diodevss_4kv",     "X",   ["C", "E", "B"],              multiplier)
         add_device_model_mapping(dmi, "nmoscl_2",         "X",   ["C", "A"],                   multiplier)
         add_device_model_mapping(dmi, "nmoscl_4",         "X",   ["C", "A"],                   multiplier)
+        add_device_model_mapping(dmi, "dantenna",         "X",   ["A", "C"],                   antenna)
+        add_device_model_mapping(dmi, "dpantenna",        "X",   ["A", "C"],                   antenna)
         if self.is_g2:  # sg13cmos5l has no models for these
             add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap)
             add_device_model_mapping(dmi, "npn13G2",       "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2l",      "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2v",      "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "schottky_nbl1", "X",   ["E", "B", "C"],              multiplier)
+            add_device_model_mapping(dmi, "isolbox",       "X",   ["S", "I", "Bn"],             isolbox)
 
         # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-        #       - dantenna, dpantenna, isolbox: the models take w and l, LVS extracts area and perimeter
         #       - rfcmim, idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
         #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
 
