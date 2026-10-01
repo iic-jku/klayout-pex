@@ -552,9 +552,18 @@ def build_device_models_info(dmi: DeviceModelsInfo):
                 '11p5x11p7_m1m2m3m4_shieldm5'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["S", "G", "D", "B"], [])
 
+    # MIM caps, the top plate (B, capm and capm2) first
+    #
+    #     NOTE: LVS extracts the area and perimeter, the models take w and l.
+    #           Their capacitance depends on w*l and w+l only, the series resistance of the plate also on l/w
+    #           (w is the long side)
+    mim = lvs_area_perimeter_params('w', 'l', 'A', 'P')
+    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_1")
+    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim_m4", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_2")
+
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-    #       - model__cap_mim, model__cap_mim_m4, cap_var_hvt, cap_var_lvt:
-    #         the models take w and l, LVS extracts area and perimeter
+    #       - cap_var_hvt, cap_var_lvt: the models take w and l, LVS extracts area and perimeter,
+    #         and the models depend on w and l, not only on w*l and w+l
     #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3
     #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode, res_generic_nd_hv, res_generic_pd_hv,
     #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models
