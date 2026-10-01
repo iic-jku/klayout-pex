@@ -416,6 +416,13 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #         cap_nmos_*_dn, cap_pmos_*_dn (only with CONSIDER_DN_DW_FEATURES): no ngspice models
 
 
+def build_substrate_info(si: SubstrateInfo):
+    # NOTE: substrate_connections.lvs connects the substrate and the p-taps outside the isolated substrate
+    #       (ptap_regular) to the global net SUB
+    si.net_names.append("SUB")
+    si.lvs_layer_names.append("ptap_regular")
+
+
 def build_tech() -> Technology:
     tech = Technology(name="gf180mcuD")
 
@@ -428,5 +435,7 @@ def build_tech() -> Technology:
     build_process_parasitics_info(tech.process_parasitics)
 
     build_device_models_info(tech.device_models)
+
+    build_substrate_info(tech.substrate)
 
     return tech
