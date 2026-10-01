@@ -48,6 +48,13 @@ from ..klayout.parasitic_device_classes import (
 
 NET_ID_PROPERTY = 'kpex_check_net_id'
 
+
+class RCNetlistCheckError(Exception):
+    """
+    The RC netlist is inconsistent with the LVS netlist (see check_rc_netlist)
+    """
+    pass
+
 # NOTE: relative, the capacitances of the summary and the netlist differ by rounding only
 CAPACITANCE_TOLERANCE = 1e-9
 

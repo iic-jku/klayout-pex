@@ -95,7 +95,7 @@ from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
 from .pex25d.pex25d_cli import Pex25DCLI
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import RCX25Extractor, ExtractionResults
-from .rcx25.netlist_checks import check_rc_netlist
+from .rcx25.netlist_checks import check_rc_netlist, RCNetlistCheckError
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
@@ -363,6 +363,12 @@ class KpexCLI:
         group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
                                 type=true_or_false, default=True,
                                 help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
+        group_25d.add_argument("--check", dest="check_rc_netlist",
+                               type=true_or_false, default=None,
+                               help="Fail the run (after writing the netlist), if the extracted netlist is "
+                                    "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
+                                    "network of its net, a port that touches nothing, or a lost capacitance "
+                                    "(default is True for --mode RC, otherwise these are warnings)")
 
 
     @staticmethod
@@ -1058,7 +1064,10 @@ class KpexCLI:
                 summary=extraction_results.summarize(),
                 substrate_net_name=pex_context.substrate_net_name
             )
-            if self._rcx25_netlist_problems:
+            # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers
+            check_fails_run = args.check_rc_netlist if args.check_rc_netlist is not None \
+                              else args.pex_mode == PEXMode.RC
+            if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
 
@@ -1076,6 +1085,11 @@ class KpexCLI:
             rule("Repair broken marker DB")
             warning(f"Detected KLayout bug: RDB can't be loaded due to exception {e}")
             repair_rdb(report_path)
+
+        if expanded_netlist_path is not None and self._rcx25_netlist_problems and check_fails_run:
+            raise RCNetlistCheckError("The extracted netlist is inconsistent with the LVS netlist "
+                                      "(--check n to accept it):\n" +
+                                      '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
 
         return extraction_results
 
@@ -1274,7 +1288,7 @@ class KpexCLI:
                 case _:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
-                    except (LVSDBError, RExtractionTechError, DeviceModelError) as e:
+                    except (LVSDBError, RExtractionTechError, DeviceModelError, RCNetlistCheckError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
