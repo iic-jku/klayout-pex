@@ -42,6 +42,7 @@ ResistanceInfo = process_parasitics_pb2.ResistanceInfo
 CapacitanceInfo = process_parasitics_pb2.CapacitanceInfo
 DeviceModelsInfo = device_models_pb2.DeviceModelsInfo
 DeviceModelParameter = device_models_pb2.DeviceModelParameter
+LVSAreaPerimeterSide = device_models_pb2.LVSAreaPerimeterSide
 
 GDSPair = Tuple[int, int]  # (layer, datatype)
 
@@ -298,6 +299,27 @@ def lvs_param(name: str,
 def const_param(name: str,
                 value: float) -> DeviceModelParameter:
     return DeviceModelParameter(name=name, constant=value)
+
+
+def lvs_area_perimeter_params(w_name: str,
+                              l_name: str,
+                              lvs_area_parameter_name: str,
+                              lvs_perimeter_parameter_name: str,
+                              factor: Optional[float] = None) -> List[DeviceModelParameter]:
+    """
+    Model parameters w and l from the rectangle with the area and perimeter of LVS parameters
+    (times factor, e.g. 1e-6 from µm to m), w is the long side and l the short one
+    """
+    parameters = []
+    for name, side in ((w_name, LVSAreaPerimeterSide.SIDE_LONG), (l_name, LVSAreaPerimeterSide.SIDE_SHORT)):
+        area_perimeter_side = LVSAreaPerimeterSide(area_parameter_name=lvs_area_parameter_name,
+                                                   perimeter_parameter_name=lvs_perimeter_parameter_name,
+                                                   side=side)
+        parameter = DeviceModelParameter(name=name, lvs_area_perimeter_side=area_perimeter_side)
+        if factor is not None:
+            parameter.lvs_parameter_factor = factor
+        parameters.append(parameter)
+    return parameters
 
 
 def add_device_model_mapping(dmi: DeviceModelsInfo,
