@@ -113,6 +113,35 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
            == {'mim_top': ['Metal5'], 'mim_btm': ['Metal5']}
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+@pytest.mark.parametrize('design_dir, cell_name, substrate_net_name', [
+    # no label names the substrate, so it's the global net sub! of the PEX-LVS script
+    ('rfnmos', 'rfnmos_w1u_l0u72', 'sub!'),
+    # the taps connect the substrate to VSS, which names it, so it's found by pwell_sub
+    ('sg13g2_a21o_1', 'sg13g2_a21o_1', 'VSS'),
+])
+def test_substrate_net_is_found_by_its_name_or_its_layer(design_dir: str, cell_name: str, substrate_net_name: str):
+    gds_path = os.path.join(TEST_DESIGNS_DIR, design_dir, f"{cell_name}.gds.gz")
+    with tempfile.TemporaryDirectory() as out_dir:
+        KpexCLI().main(['main',
+                        '--pdk', PDK.IHP_SG13G2,
+                        '--mode', 'R',
+                        '--gds', gds_path,
+                        '--out_dir', out_dir,
+                        '--2.5D'])
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(os.path.join(out_dir, f"{cell_name}__{cell_name}", f"{cell_name}.lvsdb.gz"))
+
+    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
+    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
+                                                              top_cell=cell_name,
+                                                              tech=tech,
+                                                              blackbox_devices=False)
+    assert pex_context.substrate_net_name == substrate_net_name
+
+
 def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:
     """
     :return: the lines of the CSV and of the SPICE netlist (with continuation lines joined)

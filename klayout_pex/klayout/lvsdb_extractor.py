@@ -482,6 +482,41 @@ class KLayoutExtractionContext:
         return self.lvsdb.netlist().top_circuit()
 
     @cached_property
+    def substrate_net_name(self) -> str:
+        """
+        The net the capacitances to the substrate go to: the substrate net of the LVS netlist,
+        by a name of the tech info (e.g. sky130_gnd), or by a shape on its LVS layers,
+        when a label names it otherwise (e.g. VSS, through the taps), else the first name,
+        for a port of its own (e.g. a metal test pattern without taps or transistors)
+        """
+        substrate = self.tech.tech.substrate
+        for name in substrate.net_names:
+            if self.top_circuit.net_by_name(name) is not None:
+                return name
+
+        lvs_layer_names = set(self.lvsdb.layer_names())
+        for lvs_layer_name in substrate.lvs_layer_names:
+            if lvs_layer_name not in lvs_layer_names:
+                continue
+            region = self.lvsdb.layer_by_name(lvs_layer_name)
+            if region.is_empty():
+                continue
+            # NOTE: a point within the first shape, the vertices of a trapezoid surround their average
+            trapezoid = next(iter(region.each())).decompose_trapezoids()[0]
+            points = list(trapezoid.each_point())
+            point = kdb.Point(sum(p.x for p in points) // len(points), sum(p.y for p in points) // len(points))
+            subcircuit_path: List[kdb.SubCircuit] = []
+            net = self.lvsdb.probe_net(region, point, subcircuit_path)
+            # NOTE: the net of the shape may be within a subcircuit, the substrate is a pin of it
+            for subcircuit in reversed(subcircuit_path):
+                pins = list(net.each_pin()) if net is not None else []
+                net = subcircuit.net_for_pin(pins[0].pin_id()) if pins else None
+            if net is not None:
+                return net.expanded_name()
+
+        return substrate.net_names[0] if substrate.net_names else self.tech.internal_substrate_layer_name
+
+    @cached_property
     def devices_by_name(self) -> Dict[str, device_pb2.Device]:
         # NOTE: a device the LVS script created, rather than extracted, has no abstract,
         #       so no terminal geometry to connect it to the resistor network
