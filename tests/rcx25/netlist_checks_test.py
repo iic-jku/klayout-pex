@@ -37,9 +37,11 @@ from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSu
 from klayout_pex.rcx25.netlist_checks import check_rc_netlist
 
 
-def lvs_netlist() -> kdb.Netlist:
+def lvs_netlist(mim_cap: bool = False) -> kdb.Netlist:
     """
     An nmos M1, with a pin on D, G and S
+
+    :param mim_cap: with a MIM cap C1 between G and S, before M1
     """
     netlist = kdb.Netlist()
     circuit = kdb.Circuit()
@@ -48,6 +50,11 @@ def lvs_netlist() -> kdb.Netlist:
     nmos = kdb.DeviceClassMOS4Transistor()
     nmos.name = 'nmos'
     netlist.add(nmos)
+    if mim_cap:
+        mim = kdb.DeviceClassCapacitor()
+        mim.name = 'mim'
+        netlist.add(mim)
+        c1 = circuit.create_device(mim, 'C1')
     m1 = circuit.create_device(nmos, 'M1')
     for cluster_id, terminal in enumerate(('D', 'G', 'S', 'B'), start=1):
         net = circuit.create_net(terminal)
@@ -55,6 +62,9 @@ def lvs_netlist() -> kdb.Netlist:
         m1.connect_terminal(terminal, net)
         if terminal != 'B':
             circuit.connect_pin(circuit.create_pin(terminal), net)
+    if mim_cap:
+        c1.connect_terminal('A', circuit.net_by_name('G'))
+        c1.connect_terminal('B', circuit.net_by_name('S'))
     return netlist
 
 
@@ -98,22 +108,28 @@ class Test(unittest.TestCase):
     def check(rc: RCNetlist,
               capacitances: Dict[Tuple[str, str], float],
               device_terminal_nodes: Optional[Dict[str, str]] = None,
-              substrate_net_name: Optional[str] = None) -> List[str]:
+              substrate_net_name: Optional[str] = None,
+              blackbox_devices: bool = False) -> List[str]:
         """
-        :param device_terminal_nodes: the node of the port of each terminal of M1
+        :param device_terminal_nodes: the node of the port of each terminal of M1 (e.g. D),
+                                      or of another device (e.g. C1.A)
         """
-        m1 = rc.circuit.device_by_name('M1')
+        def key(terminal: str) -> DeviceTerminalKey:
+            device_name, terminal = terminal.split('.') if '.' in terminal else ('M1', terminal)
+            # NOTE: the device IDs of the summary are the ones of the LVS netlist
+            device = rc.lvs.circuit_by_name('chip').device_by_name(device_name)
+            return DeviceTerminalKey(device.id(), device.device_class().terminal_id(terminal))
+
         summary = ExtractionSummary(
             capacitances={NetCoupleKey(*k): c for k, c in capacitances.items()},
             resistances={},
-            device_terminal_nodes={DeviceTerminalKey(m1.id(), m1.device_class().terminal_id(terminal)): node
-                                   for terminal, node in (device_terminal_nodes or {}).items()}
+            device_terminal_nodes={key(terminal): node for terminal, node in (device_terminal_nodes or {}).items()}
         )
         return check_rc_netlist(lvs_netlist=rc.lvs, rc_netlist=rc.netlist, top_cell_name='chip', summary=summary,
-                                substrate_net_name=substrate_net_name)
+                                blackbox_devices=blackbox_devices, substrate_net_name=substrate_net_name)
 
-    def rc_netlist(self) -> RCNetlist:
-        lvs = lvs_netlist()
+    def rc_netlist(self, mim_cap: bool = False) -> RCNetlist:
+        lvs = lvs_netlist(mim_cap)
         rc = RCNetlist(lvs)
         rc.lvs = lvs
         return rc
@@ -126,6 +142,35 @@ class Test(unittest.TestCase):
         rc.connect('M1', 'D', 'D.P0.nsdm')
         rc.add_capacitor('D.$1.li1', 'G', 1.0)
         self.assertEqual([], self.check(rc, {('D.$1.li1', 'G'): 1.0}, {'D': 'D.P0.nsdm'}))
+
+    def test_devices_after_a_whiteboxed_one(self):
+        # the whiteboxed C1 is removed, the devices after it keep their IDs, the ones of the LVS netlist
+        # NOTE: a copy of the RC netlist numbers them anew, which would make M1 the C1 of the LVS netlist
+        rc = self.rc_netlist(mim_cap=True)
+        rc.circuit.remove_device(rc.circuit.device_by_name('C1'))
+        rc.add_resistor('D', 'D.P0.nsdm')
+        rc.add_resistor('G', 'G.P0.metal1')
+        rc.connect('M1', 'D', 'D.P0.nsdm')
+        self.assertEqual([], self.check(rc, {}, {'D': 'D.P0.nsdm', 'C1.A': 'G.P0.metal1'}))
+
+    def test_blackboxed_device_is_kept(self):
+        rc = self.rc_netlist(mim_cap=True)
+        self.assertEqual([], self.check(rc, {}, blackbox_devices=True))
+
+    def test_lost_device(self):
+        # black-box mode keeps the MIM cap, as its plates are not extracted
+        rc = self.rc_netlist(mim_cap=True)
+        rc.circuit.remove_device(rc.circuit.device_by_name('C1'))
+        self.assertEqual(['the RC netlist lacks 1 of the 1 devices of class mim: C1'],
+                         self.check(rc, {}, blackbox_devices=True))
+
+    def test_whiteboxed_device_is_counted_twice(self):
+        # like the whiteboxed devices after the first one, which the netlist expansion didn't remove,
+        # but whose capacitances it extracted from their plates and fingers
+        rc = self.rc_netlist(mim_cap=True)
+        self.assertEqual(['the RC netlist keeps 1 of the 1 whiteboxed devices of class mim, '
+                          'which counts their capacitances twice: C1'],
+                         self.check(rc, {}))
 
     def test_floating_resistor_network(self):
         # like #211 §6, on a net without a pin: the drain on the net, its wire floating

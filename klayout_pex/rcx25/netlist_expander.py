@@ -42,6 +42,21 @@ SUBSTRATE = 'VSUBS'
 
 class RCX25NetlistExpander:
     @staticmethod
+    def is_whiteboxed(device_class: kdb.DeviceClass) -> bool:
+        """
+        :return: whether white-box mode (--blackbox n) removes the devices of the class,
+                 as their capacitances are extracted from their plates and fingers (e.g. MIM and MOM caps)
+        """
+        # TODO: we'll need additional information about the available devices
+        #       because we only want to replace resistor / capacitor devices
+        #       and for example not transitors
+        match device_class.__class__:
+            case kdb.DeviceClassCapacitor | kdb.DeviceClassCapacitorWithBulk:
+                return True
+            case _:  # e.g. resistors, inductors, transistors, diodes
+                return False
+
+    @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
                extraction_results: ExtractionResults,
@@ -55,28 +70,12 @@ class RCX25NetlistExpander:
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
         if not blackbox_devices:
-            # TODO: we'll need additional information about the available devices
-            #       because we only want to replace resistor / capacitor devices
-            #       and for example not transitors
-
             # NOTE: removing a device ends the iteration over the circuit's devices,
             #       so iterate over a list of them
             for d in list(top_circuit.each_device()):
-                name = d.name or d.expanded_name()
-                match d.device_class().__class__:
-                    case kdb.DeviceClassResistor | kdb.DeviceClassResistorWithBulk:
-                        pass
-
-                    case kdb.DeviceClassCapacitor | kdb.DeviceClassCapacitorWithBulk:
-                        info(f"Removing whiteboxed device {name}")
-                        top_circuit.remove_device(d)
-
-                    case kdb.DeviceClassInductor:
-                        pass
-
-                    case kdb.DeviceClassBJT3Transistor | kdb.DeviceClassBJT4Transistor | kdb.DeviceClassDiode | \
-                         kdb.DeviceClassMOS3Transistor | kdb.DeviceClassMOS4Transistor:
-                        pass
+                if RCX25NetlistExpander.is_whiteboxed(d.device_class()):
+                    info(f"Removing whiteboxed device {d.name or d.expanded_name()}")
+                    top_circuit.remove_device(d)
 
         # create capacitor device class
         cap = kdb.DeviceClassCapacitor()
