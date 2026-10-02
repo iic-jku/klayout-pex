@@ -27,7 +27,6 @@ import klayout.db as kdb
 
 from klayout_pex.log import (
     info,
-    warning,
 )
 from klayout_pex.tech_info import TechInfo
 
@@ -115,14 +114,8 @@ class OverlapExtractor:
 
                     top_layer_name = self.layer_names[other_layer_index]
 
-                    top_overlap_specs = self.tech_info.overlap_cap_by_layer_names.get(top_layer_name, None)
-                    if not top_overlap_specs:
-                        warning(f"No overlap cap specified for layer top={top_layer_name}")
-                        return
-                    overlap_cap_spec = top_overlap_specs.get(bot_layer_name, None)
-                    if not overlap_cap_spec:
-                        warning(f"No overlap cap specified for layer bottom={bot_layer_name}")
-                        return
+                    # NOTE: RCX25Extractor checked that the tech info has the overlap capacitance of each layer pair
+                    overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[top_layer_name][bot_layer_name]
 
                     top_region = kdb.Region(polygon_above)
 

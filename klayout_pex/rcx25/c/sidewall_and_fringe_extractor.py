@@ -29,6 +29,7 @@ import math
 import klayout.db as kdb
 
 from klayout_pex.log import (
+    debug,
     info,
     warning,
     get_log_level,
@@ -168,9 +169,10 @@ class SidewallAndFringeExtractor:
 
                 edge_interval_length = edge_interval[1] - edge_interval[0]
                 if edge_interval_length <= 1:
-                    warning(f"Short edge interval {edge_interval} "
-                            f"(length {edge_interval_length * self.dbu * 1000} nm), "
-                            f"expected to be dropped due to bext/eext parameters, skipping…")
+                    # NOTE: expected, so no warning, which would train to ignore warnings
+                    debug(f"Short edge interval {edge_interval} "
+                          f"(length {edge_interval_length * self.dbu * 1000} nm), "
+                          f"expected to be dropped due to bext/eext parameters, skipping…")
                     continue
 
                 layer_fringe_shields = [kdb.Region() for _ in self.all_layer_names]

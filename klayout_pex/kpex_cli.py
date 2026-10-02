@@ -94,7 +94,7 @@ from .klayout.pex25d_builder import DEFAULT_GRID_UM
 from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
 from .pex25d.pex25d_cli import Pex25DCLI
 from .pdk_config import PDK, PDKConfig
-from .rcx25.extractor import RCX25Extractor, ExtractionResults
+from .rcx25.extractor import CExtractionTechError, RCX25Extractor, ExtractionResults
 from .rcx25.netlist_checks import check_rc_netlist, RCNetlistCheckError
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
@@ -1288,7 +1288,8 @@ class KpexCLI:
                 case _:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
-                    except (LVSDBError, RExtractionTechError, DeviceModelError, RCNetlistCheckError) as e:
+                    except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
+                            RCNetlistCheckError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 

@@ -50,6 +50,13 @@ import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as rex_tech_pb2
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech as pb_RExtractorTech
 
 
+class CExtractionTechError(Exception):
+    """
+    The tech info can't model the capacitances of the layout
+    """
+    pass
+
+
 class RCX25Extractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
@@ -169,6 +176,21 @@ class RCX25Extractor:
 
         # ------------------------------------------------------------------------
         if self.pex_mode.need_capacitance():
+            # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
+            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode
+            missing_overlap_caps = [f"{top_layer_name} over {bottom_layer_name}"
+                                    for idx, bottom_layer_name in enumerate(all_layer_names)
+                                    for top_layer_name in all_layer_names[idx + 1:]
+                                    if not self.tech_info.overlap_cap_by_layer_names
+                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)]
+            if missing_overlap_caps:
+                raise CExtractionTechError(
+                    "The tech info has no overlap capacitance for these layer pairs of the layout, "
+                    "so their capacitances would be missing (e.g. the plates of a MIM cap, "
+                    "which --blackbox leaves to the device model):\n" +
+                    '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
+                )
+
             overlap_extractor = OverlapExtractor(
                 all_layer_names=all_layer_names,
                 layer_regions_by_name=layer_regions_by_name,

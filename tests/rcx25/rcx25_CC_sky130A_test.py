@@ -24,6 +24,7 @@
 
 import allure
 import pytest
+from unittest import mock
 
 from rcx25_test_helpers import *
 
@@ -449,3 +450,29 @@ C1;C0;C1;0.141;
 C2;C0;VSUBS;3.562;
 C3;C1;VSUBS;0.117;"""
         )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap__whiteboxed_is_an_error():
+    # The tech info has no overlap capacitances for the MIM plate capm, so they would be missing,
+    # which crashed the sidewall extraction with a KeyError
+    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+        pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+    assert [c.args[0] for c in error_mock.call_args_list if 'overlap' in c.args[0]] == [
+        "The tech info has no overlap capacitance for these layer pairs of the layout, "
+        "so their capacitances would be missing (e.g. the plates of a MIM cap, "
+        "which --blackbox leaves to the device model):\n"
+        "  - capm over VSUBS\n"
+        "  - capm over met3\n"
+        "  - met4 over capm"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap__blackboxed():
+    results, _, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+    assert results.summarize().capacitances
