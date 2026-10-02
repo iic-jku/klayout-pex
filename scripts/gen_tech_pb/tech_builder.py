@@ -283,6 +283,57 @@ def add_sidewall_overlap_cap(ci: CapacitanceInfo,
                         out_layer_name=out_layer,
                         capacitance=cap)
 
+
+def add_mim_cap(ci: CapacitanceInfo,
+                top_plate: str,
+                bottom_plate: str,
+                area_cap: float,
+                perimeter_cap: float):
+    """
+    The capacitances of a MIM cap's top plate, a thin metal just above the bottom plate metal,
+    needed by the white-box extraction, which removes the MIM devices from the netlist.
+
+    The magic techs have no parasitic coefficients for the top plate, as the device model has
+    the capacitance between the plates. So the top plate couples to all other layers like the
+    bottom plate (IHP's magic tech also lists *mimcap with allm5), and only the capacitance
+    between the plates comes from the device model.
+    Except for the fringe from the top plate's edge down to the layers below the bottom plate
+    and the substrate: the bottom plate extends beyond that edge just below it, and shields it.
+
+    NOTE: call this after all other capacitances are added, it copies those of the bottom plate
+
+    :param area_cap: area capacitance of the device model (aF/µm²)
+    :param perimeter_cap: perimeter capacitance of the device model (aF/µm),
+                          the fringe between the top plate's edge and the bottom plate
+    """
+    def plate(layer_name: str) -> str:
+        return top_plate if layer_name == bottom_plate else layer_name
+
+    substrates = [(sc.layer_name, sc.area_capacitance, sc.perimeter_capacitance) for sc in ci.substrates]
+    overlaps = [(oc.top_layer_name, oc.bottom_layer_name, oc.capacitance) for oc in ci.overlaps]
+    sidewalls = [(sc.layer_name, sc.capacitance, sc.offset) for sc in ci.sidewalls]
+    sideoverlaps = [(soc.in_layer_name, soc.out_layer_name, soc.capacitance) for soc in ci.sideoverlaps]
+    layers_below = {bottom_layer for top_layer, bottom_layer, _ in overlaps if top_layer == bottom_plate}
+
+    for layer_name, area, perimeter in substrates:
+        if layer_name == bottom_plate:
+            add_substrate_cap(ci, top_plate, area, 0.0)  # fringe shielded by the bottom plate
+    for top_layer, bottom_layer, cap in overlaps:
+        if bottom_plate in (top_layer, bottom_layer):
+            add_overlap_cap(ci, plate(top_layer), plate(bottom_layer), cap)
+    for layer_name, cap, offset in sidewalls:
+        if layer_name == bottom_plate:
+            add_sidewall_cap(ci, top_plate, cap, offset)
+    for in_layer, out_layer, cap in sideoverlaps:
+        if in_layer == bottom_plate and out_layer in layers_below:
+            add_sidewall_overlap_cap(ci, top_plate, out_layer, 0.0)  # fringe shielded by the bottom plate
+        elif bottom_plate in (in_layer, out_layer):
+            add_sidewall_overlap_cap(ci, plate(in_layer), plate(out_layer), cap)
+
+    add_overlap_cap(ci, top_plate, bottom_plate, area_cap)
+    add_sidewall_overlap_cap(ci, top_plate, bottom_plate, perimeter_cap)
+    add_sidewall_overlap_cap(ci, bottom_plate, top_plate, perimeter_cap)
+
 #-------------------------------------------------------------------------
 
 
