@@ -108,7 +108,8 @@ class Test(unittest.TestCase):
     def check(rc: RCNetlist,
               capacitances: Dict[Tuple[str, str], float],
               device_terminal_nodes: Optional[Dict[str, str]] = None,
-              substrate_net_name: Optional[str] = None) -> List[str]:
+              substrate_net_name: Optional[str] = None,
+              blackbox_devices: bool = False) -> List[str]:
         """
         :param device_terminal_nodes: the node of the port of each terminal of M1 (e.g. D),
                                       or of another device (e.g. C1.A)
@@ -125,7 +126,7 @@ class Test(unittest.TestCase):
             device_terminal_nodes={key(terminal): node for terminal, node in (device_terminal_nodes or {}).items()}
         )
         return check_rc_netlist(lvs_netlist=rc.lvs, rc_netlist=rc.netlist, top_cell_name='chip', summary=summary,
-                                substrate_net_name=substrate_net_name)
+                                blackbox_devices=blackbox_devices, substrate_net_name=substrate_net_name)
 
     def rc_netlist(self, mim_cap: bool = False) -> RCNetlist:
         lvs = lvs_netlist(mim_cap)
@@ -151,6 +152,25 @@ class Test(unittest.TestCase):
         rc.add_resistor('G', 'G.P0.metal1')
         rc.connect('M1', 'D', 'D.P0.nsdm')
         self.assertEqual([], self.check(rc, {}, {'D': 'D.P0.nsdm', 'C1.A': 'G.P0.metal1'}))
+
+    def test_blackboxed_device_is_kept(self):
+        rc = self.rc_netlist(mim_cap=True)
+        self.assertEqual([], self.check(rc, {}, blackbox_devices=True))
+
+    def test_lost_device(self):
+        # black-box mode keeps the MIM cap, as its plates are not extracted
+        rc = self.rc_netlist(mim_cap=True)
+        rc.circuit.remove_device(rc.circuit.device_by_name('C1'))
+        self.assertEqual(['the RC netlist lacks 1 of the 1 devices of class mim: C1'],
+                         self.check(rc, {}, blackbox_devices=True))
+
+    def test_whiteboxed_device_is_counted_twice(self):
+        # like the whiteboxed devices after the first one, which the netlist expansion didn't remove,
+        # but whose capacitances it extracted from their plates and fingers
+        rc = self.rc_netlist(mim_cap=True)
+        self.assertEqual(['the RC netlist keeps 1 of the 1 whiteboxed devices of class mim, '
+                          'which counts their capacitances twice: C1'],
+                         self.check(rc, {}))
 
     def test_floating_resistor_network(self):
         # like #211 §6, on a net without a pin: the drain on the net, its wire floating

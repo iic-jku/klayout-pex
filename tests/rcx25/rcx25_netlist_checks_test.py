@@ -81,7 +81,33 @@ def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest
     assert cli.rcx25_netlist_problems == []
 
 
-INV_1_GDS = os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
+BLACKBOXED_DESIGNS = [
+    (PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz'),
+    (PDK.IHP_SG13G2, 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin/cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz'),
+    (PDK.IHP_SG13CMOS5L, 'cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz'),
+]
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+@pytest.mark.parametrize('pdk,gds', BLACKBOXED_DESIGNS)
+def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
+    # NOTE: the RC netlist keeps the MOM caps, which white-box mode removes
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main',
+                  '--pdk', pdk,
+                  '--mode', 'RC',
+                  '--blackbox', 'y',
+                  '--gds', os.path.join(TEST_DESIGNS_DIR, pdk, gds),
+                  '--out_dir', out_dir,
+                  '--2.5D',
+                  '--check', 'n'])  # NOTE: the problems, rather than a failed run
+    assert cli.rcx25_netlist_problems == []
+
+
+INV_1_GDS =os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
 PROBLEMS = ['port Y touches nothing']
 
 
