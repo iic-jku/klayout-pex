@@ -414,6 +414,12 @@ def build_device_models_info(dmi: DeviceModelsInfo):
         add_device_model_mapping(dmi, diode, "D", ["A", "C"],
                                  [lvs_param('area', 'A', um2), lvs_param('pj', 'P', um)])
 
+    # the well diodes have one model for both voltages
+    for diode in ('diode_pw2dw', 'diode_dw2ps'):
+        for volt in ('03v3', '06v0'):
+            add_device_model_mapping(dmi, f"{diode}_{volt}", "D", ["A", "C"],
+                                     [lvs_param('area', 'A', um2), lvs_param('pj', 'P', um)], diode)
+
     # BJTs of a fixed size, NE is the number of devices
     for npn in ('npn_00p54x02p00', 'npn_00p54x04p00', 'npn_00p54x08p00', 'npn_00p54x16p00',
                 'npn_05p00x05p00', 'npn_10p00x10p00'):
@@ -443,7 +449,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
         add_device_model_mapping(dmi, mos_cap, "X", ["A", "B"], cap)
 
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-    #       - nfet_05v0_dss, pfet_05v0_dss, diode_dw2ps_*, diode_pw2dw_*, pwell,
+    #       - nfet_05v0_dss, pfet_05v0_dss, pwell,
     #         cap_nmos_*_dn, cap_pmos_*_dn (only with CONSIDER_DN_DW_FEATURES): no ngspice models
 
 

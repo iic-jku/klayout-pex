@@ -32,6 +32,7 @@ tags = ("PEX", "2.5D")
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=PEXMode.CC, blackbox=False)
+pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=PEXMode.CC, blackbox=True)
 
 
 @allure.parent_suite(parent_suite)
@@ -55,3 +56,14 @@ C8;TOP1;TOP2;0.183;
 C9;TOP1;VSUBS;0.449;
 C10;TOP2;VSUBS;1.603;"""
     )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_well_diodes__blackboxed():
+    # The well diodes of the PDK's KLayout pcells (2 µm x 4 µm, 3.3V), their models are diode_pw2dw, diode_dw2ps
+    assert pex_blackboxed.written_device_lines('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz') == [
+        'D$1 PW2DW_P PW2DW_N diode_pw2dw area=8e-12 pj=1.2e-05',
+        'D$2 SUB DW2PS_N diode_dw2ps area=8e-12 pj=1.2e-05',
+    ]

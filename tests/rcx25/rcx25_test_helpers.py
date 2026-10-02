@@ -124,6 +124,16 @@ class RCX25Extraction:
         assert results.cell_name == path_components[-1][:-len('.gds.gz')]
         return results, cli.rcx25_extracted_csv_path, preview_png_path
 
+    def written_device_lines(self, *path_components, prefixes: str = 'XDMQ') -> List[str]:
+        """
+        Extracts the single cell and returns the lines of the written SPICE netlist with these prefixes
+        (by default not the capacitors and resistors KPEX adds), with their continuation lines joined
+        """
+        _, csv_path, _ = self.run_rcx25d_single_cell(*path_components)
+        with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
+            lines = f.read().replace('\n+', '').splitlines()
+        return [l for l in lines if l and l[0] in prefixes]
+
     def assert_expected_matches_obtained(self,
                                          *path_components,
                                          expected_csv_content: str) -> CellExtractionResults:

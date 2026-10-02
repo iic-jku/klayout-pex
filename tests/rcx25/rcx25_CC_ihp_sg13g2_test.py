@@ -85,3 +85,13 @@ C3;PLUS;VSUBS;6.829;
 C4;PLUS;X;1.911;
 C5;VSUBS;X;1.292;"""
     )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_rf_mim_cap__blackboxed():
+    # The rfcmim of the PDK's cell library (sg13g2_pr), its model is cap_rfcmim, with the substrate as 3rd terminal
+    assert pex_blackboxed.written_device_lines('sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == [
+        'X$1 \\$5 \\$4 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06',
+    ]

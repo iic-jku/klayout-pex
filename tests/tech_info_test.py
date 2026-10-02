@@ -177,7 +177,7 @@ class Test(unittest.TestCase):
         for path in paths:
             tech_info = TechInfo.from_json(path, dielectric_filter=None)
             mim_and_mom_caps = {name for name in tech_info.device_models.mapping_by_lvs_device_class_name
-                                if re.search(r'cap_(mim|cmim|cmom|vpp)', name)}
+                                if re.search(r'cap_(mim|cmim|cmom|vpp)|rfcmim', name)}
             with self.subTest(tech=os.path.basename(path)):
                 self.assertNotEqual(set(), mim_and_mom_caps)
                 self.assertEqual(mim_and_mom_caps, tech_info.device_models.metal_capacitor_class_names)
