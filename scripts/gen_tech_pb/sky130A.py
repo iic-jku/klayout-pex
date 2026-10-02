@@ -320,6 +320,11 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "met4",    47)
     add_layer_resistance(ri, "met5",    29)
 
+    # MIM cap top plates, RSCAPM 5.8 Ω/□ of the SkyWater PDK docs (rules/device-details/cap_mim/cap_mim-table0.rst),
+    # the magic tech has no resist for mimcap and mimcap2
+    add_layer_resistance(ri, "capm",  5800)
+    add_layer_resistance(ri, "capm2", 5800)
+
     # resistance values are in mΩ / CNT
     #                         contact_layer,    layer_below,  layer_above, resistance
     add_contact_resistance(ri, "licon_nsd_con",  "nsdm",       "li1",        185000)  # licon over nsdm!
