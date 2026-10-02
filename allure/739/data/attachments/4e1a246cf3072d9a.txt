@@ -1,0 +1,1188 @@
+[23:29:34] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1243
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/inv/inv.gds.g
+z --out_dir /tmp/tmpo50ukdx5 --2.5D --check n                                   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[23:29:34] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:583
+[23:29:34] INFO     No explicit top cell specified, using top    kpex_cli.py:623
+                    cell 'inv'                                                  
+[23:29:34] INFO     LVS input schematic not specified (argument  kpex_cli.py:664
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[23:29:34] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1182
+/tmp/tmpo50ukdx5/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/te
+stdata/designs/sky130A/inv/inv.gds.gz/inv.lvsdb.gz                              
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs 
+-rd                                                                             
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/inv/inv
+.gds.gz -rd report=/tmp/tmpo50ukdx5/inv__inv/inv.lvsdb.gz -rd                   
+target_netlist=/tmp/tmpo50ukdx5/inv__inv/inv_extracted.cir -rd                  
+schematic=/tmp/tmpo50ukdx5/inv__inv/inv_dummy_schematic.spice -rd thr=22 -rd    
+run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false 
+-rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd       
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true -rd verbose=false                                              
+/tmp/tmpo50ukdx5/inv__inv/inv_lvs.log                                           
+2026-10-02 23:29:36 +0000: Memory Usage (432216K) : Starting running SKY130     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/inv/inv.gds.g
+z                                                                               
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Layout file:                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/inv/inv.gds.g
+z                                                                               
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Number of threads: 22       
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Final report:               
+/tmp/tmpo50ukdx5/inv__inv/inv.lvsdb.gz                                          
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : No substrate name given,    
+default name is sky130_gnd                                                      
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Extracted netlist with net  
+names: true                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Extracted netlist with      
+comments in details: false                                                      
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Extracted netlist file:     
+/tmp/tmpo50ukdx5/inv__inv/inv_extracted.cir                                     
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : device_scaling: false       
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : Verbose mode: false         
+2026-10-02 23:29:36 +0000: Memory Usage (433540K) : deep mode is enabled.       
+2026-10-02 23:29:36 +0000: Memory Usage (433796K) : Netlist file:               
+/tmp/tmpo50ukdx5/inv__inv/inv_dummy_schematic.spice                             
+2026-10-02 23:29:36 +0000: Memory Usage (433796K) : Read in polygons from       
+layers.                                                                         
+2026-10-02 23:29:36 +0000: Memory Usage (440360K) : Read in labels from layers. 
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : Evaluate switches start     
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : SCH_SIMPLE enabled  false   
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : NET_ONLY enabled  false     
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : TOP_LVL_PINS enabled  true  
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : COMBINE enabled  false      
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : PURGE enabled  false        
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : PURGE_NETS enabled  false   
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : SIMPLIFY enabled  false     
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : Evaluate switches end.      
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : SKY130 LVS rules started    
+2026-10-02 23:29:36 +0000: Memory Usage (441256K) : Starting deriving base      
+layers.                                                                         
+2026-10-02 23:29:36 +0000: Memory Usage (451492K) : Starting MOSFET DERIVATIONS 
+2026-10-02 23:29:36 +0000: Memory Usage (451492K) : Starting PMOS layers        
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (452768K) : Starting NMOS layers        
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (454300K) : Starting BJT DERIVATIONS    
+2026-10-02 23:29:36 +0000: Memory Usage (455068K) : Starting NPN layers         
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (457108K) : Starting PNP layers         
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (458388K) : Starting DIODE DERIVATIONS  
+2026-10-02 23:29:36 +0000: Memory Usage (460308K) : Starting PHOTODIODE         
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (461200K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (462352K) : Starting FUSE DERIVATIONS   
+2026-10-02 23:29:36 +0000: Memory Usage (462352K) : Starting MIM DERIVATIONS    
+2026-10-02 23:29:36 +0000: Memory Usage (462352K) : Starting VARACTOR           
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (462480K) : Starting INDUCTOR           
+DERIVATIONS                                                                     
+2026-10-02 23:29:36 +0000: Memory Usage (462736K) : Starting VPP CAP DERIVATIONS
+2026-10-02 23:29:37 +0000: Memory Usage (462736K) : Starting SONOS DERIVATIONS  
+2026-10-02 23:29:37 +0000: Memory Usage (463112K) : Starting SKY130 LVS         
+connectivity setup                                                              
+2026-10-02 23:29:37 +0000: Memory Usage (463112K) : Starting SKY130 LVS         
+connectivity setup (Inter-layer)                                                
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting SKY130 LVS         
+connectivity setup (Attaching labels)                                           
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting SKY130 LVS         
+connectivity setup (Global connections)                                         
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting SKY130 LVS         
+connectivity setup (Multifinger Devices)                                        
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS BJT CONNECTIONS
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS PHOTODIODE     
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS MIMCAP         
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS VARACTOR       
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS RESISTOR       
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS INDUCTOR       
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS VPP CAP        
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting LVS SONOS          
+CONNECTIONS                                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting MOSFET EXTRACTION  
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Starting PMOS EXTRACTION    
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Extracting 1.8V PMOS        
+transistor standard                                                             
+2026-10-02 23:29:37 +0000: Memory Usage (463240K) : Extracting 1.8V PMOS        
+transistor low threshold voltage                                                
+2026-10-02 23:29:37 +0000: Memory Usage (463752K) : Extracting 1.8V PMOS        
+transistor high threshold voltage                                               
+2026-10-02 23:29:37 +0000: Memory Usage (463752K) : Extracting 5V gate 10.5V    
+drain PMOS transistor                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (463752K) : Starting NMOS EXTRACTION    
+2026-10-02 23:29:37 +0000: Memory Usage (463752K) : Extracting 1.8V NMOS        
+transistor standard                                                             
+2026-10-02 23:29:37 +0000: Memory Usage (463880K) : Extracting 1.8V NMOS        
+transistor low threshold voltage                                                
+2026-10-02 23:29:37 +0000: Memory Usage (463880K) : Extracting 3.3V NMOS        
+transistor native voltage                                                       
+2026-10-02 23:29:37 +0000: Memory Usage (463880K) : Extracting 5V NMOS          
+transistor native voltage                                                       
+2026-10-02 23:29:37 +0000: Memory Usage (464008K) : Extracting 5V gate 10.5V    
+drain NMOS transistor                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464008K) : Starting BJT EXTRACTION     
+2026-10-02 23:29:37 +0000: Memory Usage (464008K) : Starting NPN BJT EXTRACTION 
+2026-10-02 23:29:37 +0000: Memory Usage (464008K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L1p00 BJT                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464136K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L2p00 BJT                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464392K) : Extracting                  
+sky130_fd_pr__npn_11v0_W1p00L1p00 BJT                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464392K) : Starting PNP BJT EXTRACTION 
+2026-10-02 23:29:37 +0000: Memory Usage (464392K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464520K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464648K) : Starting DIODE EXTRACTION   
+2026-10-02 23:29:37 +0000: Memory Usage (464648K) : Extracting 5V N+ diffusion  
+diode                                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464776K) : Extracting 5V N+ diffusion  
+diode low threshold voltage                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (464776K) : Extracting 5V N+ diffusion  
+diode native threshold voltage                                                  
+2026-10-02 23:29:37 +0000: Memory Usage (464776K) : Extracting 11V N+ diffusion 
+diode                                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464776K) : Extracting 5V P+ diffusion  
+diode                                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (464904K) : Extracting5V P+ diffusion   
+diode low threshold voltage                                                     
+2026-10-02 23:29:37 +0000: Memory Usage (464904K) : Extracting 5V P+ diffusion  
+diode high threshold voltage                                                    
+2026-10-02 23:29:37 +0000: Memory Usage (464904K) : Extracting 11V P+ diffusion 
+diode                                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465032K) : Starting PHOTODIODE         
+EXTRACTION                                                                      
+2026-10-02 23:29:37 +0000: Memory Usage (465032K) : Extracting Photodiode       
+2026-10-02 23:29:37 +0000: Memory Usage (465032K) : Starting RESISTOR EXTRACTION
+2026-10-02 23:29:37 +0000: Memory Usage (465032K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465032K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465160K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465160K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465160K) : Extracting                  
+sky130_fd_pr__res_iso_pw device                                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465288K) : Extracting                  
+sky130_fd_pr__res_generic_po device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465416K) : Extracting                  
+sky130_fd_pr__res_high_po_0p35 device                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465416K) : Extracting                  
+sky130_fd_pr__res_high_po_0p69 device                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465544K) : Extracting                  
+sky130_fd_pr__res_high_po_1p41 device                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465544K) : Extracting                  
+sky130_fd_pr__res_high_po_2p85 device                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465544K) : Extracting                  
+sky130_fd_pr__res_high_po_5p73 device                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465672K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p35 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465672K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p69 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465672K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_1p41 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_2p85 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_5p73 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_l1 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_m1 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_m2 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_m3 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_m4 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__res_generic_m5 device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting FUSE EXTRACTION    
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__fuse_m4 device                                                    
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting MIMCAP EXTRACTION  
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__model__cap_mim device                                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__model__cap_mim_m4 device                                          
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting VARACTOR EXTRACTION
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting low threshold    
+voltage varactor                                                                
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting high threshold   
+voltage varactor                                                                
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting VARACTOR EXTRACTION
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2                    
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3                           
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell                       
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2                                
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4                               
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell                       
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting vpp cap          
+sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5                           
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4                               
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3                               
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5                             
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5                               
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1                                 
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield                                   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test                    
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting SONOS EXTRACTION   
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Extracting Build space flash
+special SONOSFET star                                                           
+2026-10-02 23:29:37 +0000: Memory Usage (465800K) : Starting SKY130 LVS         
+comparison section                                                              
+2026-10-02 23:29:37 +0000: Memory Usage (466056K) : LVS Total Run time 1.124092 
+seconds                                                                         
+2026-10-02 23:29:37 +0000: Memory Usage (466056K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-10-02 23:29:37 +0000: Memory Usage (466056K) : ERROR : Netlists don't match
+2026-10-02 23:29:37 +0000: Memory Usage (466056K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+────────────────────────────────────────────────────────────────────────────────
+[23:29:37] INFO     klayout LVS finished with status code 1    lvs_runner.py:158
+                    after 2.952s, most likely due to a netlist                  
+                    mismatch against the schematic (irrelevant                  
+                    for PEX), see log file:                                     
+                    /tmp/tmpo50ukdx5/inv__inv/inv_lvs.log                       
+[23:29:37] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:392
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - licon (licon1): 21 of 110 shapes                        
+                    are not within licon_nsd_con,                               
+                    licon_psd_con, licon_poly_con,                              
+                    licon_ntap_con, licon_vpp                                   
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[23:29:37] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1412
+[23:29:37] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1412
+[23:29:37] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1412
+[23:29:37] INFO     (94, 20) -> (psd)                           kpex_cli.py:1412
+[23:29:37] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1412
+[23:29:37] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1412
+[23:29:37] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1412
+[23:29:37] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1412
+[23:29:37] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1412
+[23:29:37] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1412
+[23:29:37] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (68, 44) -> (via1_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (69, 44) -> (via2_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1412
+[23:29:37] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1412
+[23:29:37] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1412
+[23:29:37] INFO     (70, 144) -> (via3_ncap)                    kpex_cli.py:1412
+[23:29:37] INFO     (70, 20) -> (met3_ncap)                     kpex_cli.py:1412
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[23:29:39] INFO     LVSDB: found 1pins                          extractor.py:267
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;$11;0.494;                                                                
+C2;$1;$12;0.415;                                                                
+C3;$1;$4;0.169;                                                                 
+C4;$1;$I14;0.074;                                                               
+C5;$1;$I15;0.064;                                                               
+C6;$1;$I16;0.064;                                                               
+C7;$1;$I17;0.076;                                                               
+C8;$1;$I18;0.004;                                                               
+C9;$1;$I19;0.142;                                                               
+C10;$1;$I20;0.004;                                                              
+C11;$1;$I21;0.142;                                                              
+C12;$1;$I39;0.004;                                                              
+C13;$1;$I42;0.004;                                                              
+C14;$1;VSUBS;2.909;                                                             
+C15;$11;$12;0.334;                                                              
+C16;$11;$4;0.24;                                                                
+C17;$11;$I14;0.061;                                                             
+C18;$11;$I15;0.091;                                                             
+C19;$11;$I154;0.001;                                                            
+C20;$11;$I155;0.001;                                                            
+C21;$11;$I156;0.001;                                                            
+C22;$11;$I157;0.001;                                                            
+C23;$11;$I16;0.077;                                                             
+C24;$11;$I17;0.054;                                                             
+C25;$11;$I18;0.002;                                                             
+C26;$11;$I19;0.01;                                                              
+C27;$11;$I20;0.001;                                                             
+C28;$11;$I21;0.008;                                                             
+C29;$11;$I39;0.037;                                                             
+C30;$11;$I40;0.048;                                                             
+C31;$11;$I41;0.046;                                                             
+C32;$11;$I42;0.032;                                                             
+C33;$11;VSUBS;0.454;                                                            
+C34;$12;$4;0.761;                                                               
+C35;$12;$I14;0.051;                                                             
+C36;$12;$I15;0.052;                                                             
+C37;$12;$I154;0.002;                                                            
+C38;$12;$I155;0.003;                                                            
+C39;$12;$I156;0.002;                                                            
+C40;$12;$I157;0.003;                                                            
+C41;$12;$I16;0.058;                                                             
+C42;$12;$I17;0.051;                                                             
+C43;$12;$I18;0.005;                                                             
+C44;$12;$I19;0.001;                                                             
+C45;$12;$I20;0.005;                                                             
+C46;$12;$I21;0.001;                                                             
+C47;$12;$I39;0.059;                                                             
+C48;$12;$I40;0.073;                                                             
+C49;$12;$I41;0.074;                                                             
+C50;$12;$I42;0.059;                                                             
+C51;$12;VSUBS;0.076;                                                            
+C52;$4;$I14;0.008;                                                              
+C53;$4;$I15;0.004;                                                              
+C54;$4;$I154;0.346;                                                             
+C55;$4;$I155;0.394;                                                             
+C56;$4;$I156;0.346;                                                             
+C57;$4;$I157;0.394;                                                             
+C58;$4;$I16;0.004;                                                              
+C59;$4;$I17;0.008;                                                              
+C60;$4;$I18;0.417;                                                              
+C61;$4;$I19;0.019;                                                              
+C62;$4;$I20;0.417;                                                              
+C63;$4;$I21;0.019;                                                              
+C64;$4;$I39;0.321;                                                              
+C65;$4;$I40;0.313;                                                              
+C66;$4;$I41;0.313;                                                              
+C67;$4;$I42;0.322;                                                              
+C68;$4;VSUBS;1.134;                                                             
+C69;$I14;$I15;0.027;                                                            
+C70;$I14;$I19;0.027;                                                            
+C71;$I14;$I39;0.013;                                                            
+C72;$I14;VSUBS;0.247;                                                           
+C73;$I15;$I16;0.027;                                                            
+C74;$I15;$I40;0.013;                                                            
+C75;$I15;VSUBS;0.247;                                                           
+C76;$I154;$I155;0.027;                                                          
+C77;$I154;VSUBS;0.102;                                                          
+C78;$I155;$I18;0.027;                                                           
+C79;$I155;VSUBS;0.022;                                                          
+C80;$I156;$I157;0.027;                                                          
+C81;$I156;VSUBS;0.102;                                                          
+C82;$I157;$I20;0.027;                                                           
+C83;$I157;VSUBS;0.022;                                                          
+C84;$I16;$I17;0.027;                                                            
+C85;$I16;$I41;0.013;                                                            
+C86;$I16;VSUBS;0.247;                                                           
+C87;$I17;$I21;0.027;                                                            
+C88;$I17;$I42;0.013;                                                            
+C89;$I17;VSUBS;0.247;                                                           
+C90;$I18;$I19;0.013;                                                            
+C91;$I18;$I39;0.027;                                                            
+C92;$I18;VSUBS;0.006;                                                           
+C93;$I19;VSUBS;0.296;                                                           
+C94;$I20;$I21;0.013;                                                            
+C95;$I20;$I42;0.027;                                                            
+C96;$I20;VSUBS;0.006;                                                           
+C97;$I21;VSUBS;0.296;                                                           
+C98;$I39;$I40;0.027;                                                            
+C99;$I39;VSUBS;0.006;                                                           
+C100;$I40;$I41;0.027;                                                           
+C101;$I40;VSUBS;0.006;                                                          
+C102;$I41;$I42;0.027;                                                           
+C103;$I41;VSUBS;0.006;                                                          
+C104;$I42;VSUBS;0.006;                                                          
+R1;$1;$1.$15.li1;;185.0                                                         
+R2;$1;$1.$25.li1;;185.0                                                         
+R3;$1;$1.$35.li1;;185.0                                                         
+R4;$1;$1.$5.li1;;185.0                                                          
+R5;$1.$0.poly;$1.$1.li1;;152.0                                                  
+R6;$1.$1.li1;$1.$86.li1;;47.059                                                 
+R7;$1.$100.li1;$1.$101.met1;;9.3                                                
+R8;$1.$100.li1;$1.$21.li1;;12.8                                                 
+R9;$1.$100.li1;$1.$31.li1;;12.8                                                 
+R10;$1.$101.met1;$1.$160.met1;;0.071                                            
+R11;$1.$101.met1;$1.$166.met1;;0.071                                            
+R12;$1.$102.li1;$1.$103.met1;;9.3                                               
+R13;$1.$102.li1;$1.$27.li1;;14.306                                              
+R14;$1.$102.li1;$1.$37.li1;;11.294                                              
+R15;$1.$103.met1;$1.$162.met1;;0.089                                            
+R16;$1.$103.met1;$1.$168.met1;;0.054                                            
+R17;$1.$104.li1;$1.$105.met1;;9.3                                               
+R18;$1.$104.li1;$1.$29.li1;;14.306                                              
+R19;$1.$104.li1;$1.$39.li1;;11.294                                              
+R20;$1.$105.met1;$1.$164.met1;;0.089                                            
+R21;$1.$105.met1;$1.$170.met1;;0.054                                            
+R22;$1.$106.li1;$1.$107.met1;;9.3                                               
+R23;$1.$106.li1;$1.$31.li1;;14.306                                              
+R24;$1.$106.li1;$1.$41.li1;;11.294                                              
+R25;$1.$107.met1;$1.$166.met1;;0.089                                            
+R26;$1.$107.met1;$1.$172.met1;;0.054                                            
+R27;$1.$108.met1;$1.$109.met2;;4.5                                              
+R28;$1.$108.met1;$1.$122.met1;;0.143                                            
+R29;$1.$108.met1;$1.$45.met1;;0.018                                             
+R30;$1.$109.met2;$1.$174.met2;;0.104                                            
+R31;$1.$109.met2;$1.$188.met2;;0.053                                            
+R32;$1.$11.li1;$1.$94.li1;;11.294                                               
+R33;$1.$11.li1;$1.P5.nsdm;;185.0                                                
+R34;$1.$110.met1;$1.$111.met2;;4.5                                              
+R35;$1.$110.met1;$1.$124.met1;;0.143                                            
+R36;$1.$110.met1;$1.$47.met1;;0.018                                             
+R37;$1.$111.met2;$1.$176.met2;;0.104                                            
+R38;$1.$111.met2;$1.$190.met2;;0.053                                            
+R39;$1.$112.met1;$1.$113.met2;;4.5                                              
+R40;$1.$112.met1;$1.$126.met1;;0.143                                            
+R41;$1.$112.met1;$1.$49.met1;;0.018                                             
+R42;$1.$113.met2;$1.$178.met2;;0.104                                            
+R43;$1.$113.met2;$1.$192.met2;;0.053                                            
+R44;$1.$114.met1;$1.$115.met2;;4.5                                              
+R45;$1.$114.met1;$1.$128.met1;;0.143                                            
+R46;$1.$114.met1;$1.$51.met1;;0.018                                             
+R47;$1.$115.met2;$1.$180.met2;;0.104                                            
+R48;$1.$115.met2;$1.$194.met2;;0.053                                            
+R49;$1.$116.met1;$1.$117.met2;;4.5                                              
+R50;$1.$116.met1;$1.$130.met1;;0.143                                            
+R51;$1.$116.met1;$1.$53.met1;;0.018                                             
+R52;$1.$117.met2;$1.$182.met2;;0.104                                            
+R53;$1.$117.met2;$1.$196.met2;;0.053                                            
+R54;$1.$118.met1;$1.$119.met2;;4.5                                              
+R55;$1.$118.met1;$1.$132.met1;;0.143                                            
+R56;$1.$118.met1;$1.$55.met1;;0.018                                             
+R57;$1.$119.met2;$1.$184.met2;;0.104                                            
+R58;$1.$119.met2;$1.$198.met2;;0.053                                            
+R59;$1.$120.met1;$1.$121.met2;;4.5                                              
+R60;$1.$120.met1;$1.$134.met1;;0.143                                            
+R61;$1.$120.met1;$1.$57.met1;;0.018                                             
+R62;$1.$121.met2;$1.$186.met2;;0.104                                            
+R63;$1.$121.met2;$1.$200.met2;;0.053                                            
+R64;$1.$122.met1;$1.$123.met2;;4.5                                              
+R65;$1.$122.met1;$1.$136.met1;;0.143                                            
+R66;$1.$122.met1;$1.$44.li1;;9.3                                                
+R67;$1.$123.met2;$1.$188.met2;;0.072                                            
+R68;$1.$123.met2;$1.$202.met2;;0.084                                            
+R69;$1.$124.met1;$1.$125.met2;;4.5                                              
+R70;$1.$124.met1;$1.$138.met1;;0.143                                            
+R71;$1.$124.met1;$1.$46.li1;;9.3                                                
+R72;$1.$125.met2;$1.$190.met2;;0.072                                            
+R73;$1.$125.met2;$1.$204.met2;;0.084                                            
+R74;$1.$126.met1;$1.$127.met2;;4.5                                              
+R75;$1.$126.met1;$1.$140.met1;;0.143                                            
+R76;$1.$126.met1;$1.$48.li1;;9.3                                                
+R77;$1.$127.met2;$1.$192.met2;;0.072                                            
+R78;$1.$127.met2;$1.$206.met2;;0.084                                            
+R79;$1.$128.met1;$1.$129.met2;;4.5                                              
+R80;$1.$128.met1;$1.$142.met1;;0.143                                            
+R81;$1.$128.met1;$1.$50.li1;;9.3                                                
+R82;$1.$129.met2;$1.$194.met2;;0.072                                            
+R83;$1.$129.met2;$1.$208.met2;;0.084                                            
+R84;$1.$13.li1;$1.$23.li1;;25.6                                                 
+R85;$1.$13.li1;$1.$88.li1;;78.306                                               
+R86;$1.$13.li1;$1.P7.nsdm;;185.0                                                
+R87;$1.$130.met1;$1.$131.met2;;4.5                                              
+R88;$1.$130.met1;$1.$144.met1;;0.143                                            
+R89;$1.$130.met1;$1.$52.li1;;9.3                                                
+R90;$1.$131.met2;$1.$196.met2;;0.072                                            
+R91;$1.$131.met2;$1.$210.met2;;0.084                                            
+R92;$1.$132.met1;$1.$133.met2;;4.5                                              
+R93;$1.$132.met1;$1.$146.met1;;0.143                                            
+R94;$1.$132.met1;$1.$54.li1;;9.3                                                
+R95;$1.$133.met2;$1.$198.met2;;0.072                                            
+R96;$1.$133.met2;$1.$212.met2;;0.084                                            
+R97;$1.$134.met1;$1.$135.met2;;4.5                                              
+R98;$1.$134.met1;$1.$148.met1;;0.143                                            
+R99;$1.$134.met1;$1.$56.li1;;9.3                                                
+R100;$1.$135.met2;$1.$200.met2;;0.072                                           
+R101;$1.$135.met2;$1.$214.met2;;0.084                                           
+R102;$1.$136.met1;$1.$137.met2;;4.5                                             
+R103;$1.$136.met1;$1.$73.met1;;0.018                                            
+R104;$1.$137.met2;$1.$202.met2;;0.041                                           
+R105;$1.$137.met2;$1.$216.met2;;0.115                                           
+R106;$1.$138.met1;$1.$139.met2;;4.5                                             
+R107;$1.$138.met1;$1.$75.met1;;0.018                                            
+R108;$1.$139.met2;$1.$204.met2;;0.041                                           
+R109;$1.$139.met2;$1.$218.met2;;0.115                                           
+R110;$1.$140.met1;$1.$141.met2;;4.5                                             
+R111;$1.$140.met1;$1.$77.met1;;0.018                                            
+R112;$1.$141.met2;$1.$206.met2;;0.041                                           
+R113;$1.$141.met2;$1.$220.met2;;0.115                                           
+R114;$1.$142.met1;$1.$143.met2;;4.5                                             
+R115;$1.$142.met1;$1.$79.met1;;0.018                                            
+R116;$1.$143.met2;$1.$208.met2;;0.041                                           
+R117;$1.$143.met2;$1.$222.met2;;0.115                                           
+R118;$1.$144.met1;$1.$145.met2;;4.5                                             
+R119;$1.$144.met1;$1.$81.met1;;0.018                                            
+R120;$1.$145.met2;$1.$210.met2;;0.041                                           
+R121;$1.$145.met2;$1.$224.met2;;0.115                                           
+R122;$1.$146.met1;$1.$147.met2;;4.5                                             
+R123;$1.$146.met1;$1.$83.met1;;0.018                                            
+R124;$1.$147.met2;$1.$212.met2;;0.041                                           
+R125;$1.$147.met2;$1.$226.met2;;0.115                                           
+R126;$1.$148.met1;$1.$149.met2;;4.5                                             
+R127;$1.$148.met1;$1.$85.met1;;0.018                                            
+R128;$1.$149.met2;$1.$214.met2;;0.041                                           
+R129;$1.$149.met2;$1.$228.met2;;0.115                                           
+R130;$1.$15.li1;$1.$25.li1;;25.6                                                
+R131;$1.$15.li1;$1.$5.li1;;25.6                                                 
+R132;$1.$150.met1;$1.$151.met2;;4.5                                             
+R133;$1.$150.met1;$1.$91.met1;;0.054                                            
+R134;$1.$151.met2;$1.$157.met2;;0.125                                           
+R135;$1.$151.met2;$1.$218.met2;;0.93                                            
+R136;$1.$152.met1;$1.$153.met2;;4.5                                             
+R137;$1.$152.met1;$1.$93.met1;;0.054                                            
+R138;$1.$153.met2;$1.$159.met2;;0.125                                           
+R139;$1.$153.met2;$1.$222.met2;;0.93                                            
+R140;$1.$154.met1;$1.$155.met2;;4.5                                             
+R141;$1.$154.met1;$1.$95.met1;;0.054                                            
+R142;$1.$155.met2;$1.$161.met2;;0.125                                           
+R143;$1.$155.met2;$1.$226.met2;;0.93                                            
+R144;$1.$156.met1;$1.$157.met2;;4.5                                             
+R145;$1.$156.met1;$1.$91.met1;;0.089                                            
+R146;$1.$156.met1;$1.$97.met1;;0.071                                            
+R147;$1.$157.met2;$1.$163.met2;;0.125                                           
+R148;$1.$158.met1;$1.$159.met2;;4.5                                             
+R149;$1.$158.met1;$1.$93.met1;;0.089                                            
+R150;$1.$158.met1;$1.$99.met1;;0.071                                            
+R151;$1.$159.met2;$1.$165.met2;;0.125                                           
+R152;$1.$160.met1;$1.$161.met2;;4.5                                             
+R153;$1.$160.met1;$1.$95.met1;;0.089                                            
+R154;$1.$161.met2;$1.$167.met2;;0.125                                           
+R155;$1.$162.met1;$1.$163.met2;;4.5                                             
+R156;$1.$162.met1;$1.$97.met1;;0.071                                            
+R157;$1.$163.met2;$1.$169.met2;;0.125                                           
+R158;$1.$164.met1;$1.$165.met2;;4.5                                             
+R159;$1.$164.met1;$1.$99.met1;;0.071                                            
+R160;$1.$165.met2;$1.$171.met2;;0.125                                           
+R161;$1.$166.met1;$1.$167.met2;;4.5                                             
+R162;$1.$167.met2;$1.$173.met2;;0.125                                           
+R163;$1.$168.met1;$1.$169.met2;;4.5                                             
+R164;$1.$17.li1;$1.$90.li1;;14.306                                              
+R165;$1.$17.li1;$1.$96.li1;;12.8                                                
+R166;$1.$17.li1;$1.P1.nsdm;;185.0                                               
+R167;$1.$170.met1;$1.$171.met2;;4.5                                             
+R168;$1.$172.met1;$1.$173.met2;;4.5                                             
+R169;$1.$174.met2;$1.$175.met3;;3.41                                            
+R170;$1.$175.met3;$1.$177.met3;;0.037                                           
+R171;$1.$175.met3;$1.$188.met2;;3.41                                            
+R172;$1.$175.met3;$1.$202.met2;;3.41                                            
+R173;$1.$175.met3;$1.$216.met2;;3.41                                            
+R174;$1.$176.met2;$1.$177.met3;;3.41                                            
+R175;$1.$177.met3;$1.$179.met3;;0.037                                           
+R176;$1.$177.met3;$1.$190.met2;;3.41                                            
+R177;$1.$177.met3;$1.$204.met2;;3.41                                            
+R178;$1.$177.met3;$1.$218.met2;;3.41                                            
+R179;$1.$178.met2;$1.$179.met3;;3.41                                            
+R180;$1.$179.met3;$1.$181.met3;;0.037                                           
+R181;$1.$179.met3;$1.$192.met2;;3.41                                            
+R182;$1.$179.met3;$1.$206.met2;;3.41                                            
+R183;$1.$179.met3;$1.$220.met2;;3.41                                            
+R184;$1.$180.met2;$1.$181.met3;;3.41                                            
+R185;$1.$181.met3;$1.$183.met3;;0.037                                           
+R186;$1.$181.met3;$1.$194.met2;;3.41                                            
+R187;$1.$181.met3;$1.$208.met2;;3.41                                            
+R188;$1.$181.met3;$1.$222.met2;;3.41                                            
+R189;$1.$182.met2;$1.$183.met3;;3.41                                            
+R190;$1.$183.met3;$1.$185.met3;;0.037                                           
+R191;$1.$183.met3;$1.$196.met2;;3.41                                            
+R192;$1.$183.met3;$1.$210.met2;;3.41                                            
+R193;$1.$183.met3;$1.$224.met2;;3.41                                            
+R194;$1.$184.met2;$1.$185.met3;;3.41                                            
+R195;$1.$185.met3;$1.$187.met3;;0.037                                           
+R196;$1.$185.met3;$1.$198.met2;;3.41                                            
+R197;$1.$185.met3;$1.$212.met2;;3.41                                            
+R198;$1.$185.met3;$1.$226.met2;;3.41                                            
+R199;$1.$186.met2;$1.$187.met3;;3.41                                            
+R200;$1.$187.met3;$1.$200.met2;;3.41                                            
+R201;$1.$187.met3;$1.$214.met2;;3.41                                            
+R202;$1.$187.met3;$1.$228.met2;;3.41                                            
+R203;$1.$19.li1;$1.$92.li1;;14.306                                              
+R204;$1.$19.li1;$1.$98.li1;;12.8                                                
+R205;$1.$19.li1;$1.P3.nsdm;;185.0                                               
+R206;$1.$2.poly;$1.$3.li1;;152.0                                                
+R207;$1.$21.li1;$1.$94.li1;;14.306                                              
+R208;$1.$21.li1;$1.P5.nsdm;;185.0                                               
+R209;$1.$23.li1;$1.$33.li1;;25.6                                                
+R210;$1.$23.li1;$1.P7.nsdm;;185.0                                               
+R211;$1.$25.li1;$1.$35.li1;;25.6                                                
+R212;$1.$27.li1;$1.$96.li1;;12.8                                                
+R213;$1.$27.li1;$1.P1.nsdm;;185.0                                               
+R214;$1.$29.li1;$1.$98.li1;;12.8                                                
+R215;$1.$29.li1;$1.P3.nsdm;;185.0                                               
+R216;$1.$3.li1;$1.$88.li1;;47.059                                               
+R217;$1.$31.li1;$1.P5.nsdm;;185.0                                               
+R218;$1.$33.li1;$1.$43.li1;;25.6                                                
+R219;$1.$33.li1;$1.P7.nsdm;;185.0                                               
+R220;$1.$37.li1;$1.P1.nsdm;;185.0                                               
+R221;$1.$39.li1;$1.P3.nsdm;;185.0                                               
+R222;$1.$41.li1;$1.P5.nsdm;;185.0                                               
+R223;$1.$43.li1;$1.P7.nsdm;;185.0                                               
+R224;$1.$44.li1;$1.$45.met1;;9.3                                                
+R225;$1.$44.li1;$1.$46.li1;;13.445                                              
+R226;$1.$44.li1;$1.$73.met1;;9.3                                                
+R227;$1.$46.li1;$1.$47.met1;;9.3                                                
+R228;$1.$46.li1;$1.$48.li1;;13.445                                              
+R229;$1.$46.li1;$1.$75.met1;;9.3                                                
+R230;$1.$48.li1;$1.$49.met1;;9.3                                                
+R231;$1.$48.li1;$1.$50.li1;;13.445                                              
+R232;$1.$48.li1;$1.$77.met1;;9.3                                                
+R233;$1.$5.li1;$1.$86.li1;;78.306                                               
+R234;$1.$50.li1;$1.$51.met1;;9.3                                                
+R235;$1.$50.li1;$1.$52.li1;;13.445                                              
+R236;$1.$50.li1;$1.$79.met1;;9.3                                                
+R237;$1.$52.li1;$1.$53.met1;;9.3                                                
+R238;$1.$52.li1;$1.$54.li1;;13.445                                              
+R239;$1.$52.li1;$1.$81.met1;;9.3                                                
+R240;$1.$54.li1;$1.$55.met1;;9.3                                                
+R241;$1.$54.li1;$1.$56.li1;;13.445                                              
+R242;$1.$54.li1;$1.$83.met1;;9.3                                                
+R243;$1.$56.li1;$1.$57.met1;;9.3                                                
+R244;$1.$56.li1;$1.$85.met1;;9.3                                                
+R245;$1.$7.li1;$1.$90.li1;;11.294                                               
+R246;$1.$7.li1;$1.P1.nsdm;;185.0                                                
+R247;$1.$73.met1;$1.$87.met1;;0.661                                             
+R248;$1.$85.met1;$1.$89.met1;;0.661                                             
+R249;$1.$86.li1;$1.$87.met1;;9.3                                                
+R250;$1.$88.li1;$1.$89.met1;;9.3                                                
+R251;$1.$9.li1;$1.$92.li1;;11.294                                               
+R252;$1.$9.li1;$1.P3.nsdm;;185.0                                                
+R253;$1.$90.li1;$1.$91.met1;;9.3                                                
+R254;$1.$92.li1;$1.$93.met1;;9.3                                                
+R255;$1.$94.li1;$1.$95.met1;;9.3                                                
+R256;$1.$96.li1;$1.$97.met1;;9.3                                                
+R257;$1.$98.li1;$1.$99.met1;;9.3                                                
+R258;$11;$11.$1.li1;;152.0                                                      
+R259;$11.$1.li1;$11.$16.li1;;47.059                                             
+R260;$11.$10.poly;$11.$11.li1;;152.0                                            
+R261;$11.$11.li1;$11.$20.li1;;47.059                                            
+R262;$11.$11.li1;$11.$9.li1;;94.118                                             
+R263;$11.$12.poly;$11.$13.li1;;152.0                                            
+R264;$11.$13.li1;$11.$15.li1;;94.118                                            
+R265;$11.$13.li1;$11.$20.li1;;47.059                                            
+R266;$11.$14.poly;$11.$15.li1;;152.0                                            
+R267;$11.$16.li1;$11.$17.met1;;9.3                                              
+R268;$11.$16.li1;$11.$3.li1;;47.059                                             
+R269;$11.$17.met1;$11.$22.met1;;0.038                                           
+R270;$11.$18.li1;$11.$19.met1;;9.3                                              
+R271;$11.$18.li1;$11.$5.li1;;47.059                                             
+R272;$11.$18.li1;$11.$7.li1;;47.059                                             
+R273;$11.$19.met1;$11.$24.met1;;0.038                                           
+R274;$11.$2.poly;$11.$3.li1;;152.0                                              
+R275;$11.$20.li1;$11.$21.met1;;9.3                                              
+R276;$11.$21.met1;$11.$26.met1;;0.038                                           
+R277;$11.$22.met1;$11.$23.met2;;4.5                                             
+R278;$11.$23.met2;$11.$28.met2;;0.008                                           
+R279;$11.$24.met1;$11.$25.met2;;4.5                                             
+R280;$11.$25.met2;$11.$30.met2;;0.008                                           
+R281;$11.$26.met1;$11.$27.met2;;4.5                                             
+R282;$11.$27.met2;$11.$32.met2;;0.053                                           
+R283;$11.$28.met2;$11.$29.met3;;3.41                                            
+R284;$11.$29.met3;$11.$34.met3;;0.043                                           
+R285;$11.$3.li1;$11.$5.li1;;94.118                                              
+R286;$11.$30.met2;$11.$31.met3;;3.41                                            
+R287;$11.$31.met3;$11.$36.met3;;0.133                                           
+R288;$11.$32.met2;$11.$33.met3;;3.41                                            
+R289;$11.$33.met3;$11.$38.met3;;0.135                                           
+R290;$11.$33.met3;$11.$40.met3;;0.045                                           
+R291;$11.$34.met3;$11.$35.met4;;3.41                                            
+R292;$11.$34.met3;$11.$36.met3;;0.179                                           
+R293;$11.$35.met4;$11.$39.met4;;0.404                                           
+R294;$11.$36.met3;$11.$37.met4;;3.41                                            
+R295;$11.$37.met4;$11.$41.met4;;0.404                                           
+R296;$11.$38.met3;$11.$39.met4;;3.41                                            
+R297;$11.$4.poly;$11.$5.li1;;152.0                                              
+R298;$11.$40.met3;$11.$41.met4;;3.41                                            
+R299;$11.$6.poly;$11.$7.li1;;152.0                                              
+R300;$11.$8.poly;$11.$9.li1;;152.0                                              
+R301;$12;$12.$17.li1;;585.0                                                     
+R302;$12;$12.$21.li1;;585.0                                                     
+R303;$12;$12.$25.li1;;585.0                                                     
+R304;$12;$12.$29.li1;;585.0                                                     
+R305;$12.$1.li1;$12.$32.li1;;11.294                                             
+R306;$12.$1.li1;$12.P0.nsdm;;185.0                                              
+R307;$12.$11.li1;$12.$38.li1;;12.8                                              
+R308;$12.$11.li1;$12.$42.li1;;14.306                                            
+R309;$12.$11.li1;$12.P2.nsdm;;185.0                                             
+R310;$12.$13.li1;$12.$40.li1;;11.294                                            
+R311;$12.$13.li1;$12.P0.nsdm;;185.0                                             
+R312;$12.$15.li1;$12.$42.li1;;11.294                                            
+R313;$12.$15.li1;$12.P2.nsdm;;185.0                                             
+R314;$12.$17.li1;$12.$44.li1;;11.294                                            
+R315;$12.$19.li1;$12.$46.li1;;11.294                                            
+R316;$12.$19.li1;$12.P2.psdm;;585.0                                             
+R317;$12.$21.li1;$12.$44.li1;;14.306                                            
+R318;$12.$21.li1;$12.$48.li1;;12.8                                              
+R319;$12.$23.li1;$12.$46.li1;;14.306                                            
+R320;$12.$23.li1;$12.$50.li1;;12.8                                              
+R321;$12.$23.li1;$12.P2.psdm;;585.0                                             
+R322;$12.$25.li1;$12.$48.li1;;12.8                                              
+R323;$12.$25.li1;$12.$52.li1;;14.306                                            
+R324;$12.$27.li1;$12.$50.li1;;12.8                                              
+R325;$12.$27.li1;$12.$54.li1;;14.306                                            
+R326;$12.$27.li1;$12.P2.psdm;;585.0                                             
+R327;$12.$29.li1;$12.$52.li1;;11.294                                            
+R328;$12.$3.li1;$12.$34.li1;;11.294                                             
+R329;$12.$3.li1;$12.P2.nsdm;;185.0                                              
+R330;$12.$31.li1;$12.$54.li1;;11.294                                            
+R331;$12.$31.li1;$12.P2.psdm;;585.0                                             
+R332;$12.$32.li1;$12.$33.met1;;9.3                                              
+R333;$12.$32.li1;$12.$5.li1;;14.306                                             
+R334;$12.$33.met1;$12.$56.met1;;0.054                                           
+R335;$12.$33.met1;$12.$60.met1;;0.089                                           
+R336;$12.$34.li1;$12.$35.met1;;9.3                                              
+R337;$12.$34.li1;$12.$7.li1;;14.306                                             
+R338;$12.$35.met1;$12.$58.met1;;0.054                                           
+R339;$12.$35.met1;$12.$62.met1;;0.089                                           
+R340;$12.$36.li1;$12.$37.met1;;9.3                                              
+R341;$12.$36.li1;$12.$5.li1;;12.8                                               
+R342;$12.$36.li1;$12.$9.li1;;12.8                                               
+R343;$12.$37.met1;$12.$60.met1;;0.071                                           
+R344;$12.$37.met1;$12.$64.met1;;0.071                                           
+R345;$12.$38.li1;$12.$39.met1;;9.3                                              
+R346;$12.$38.li1;$12.$7.li1;;12.8                                               
+R347;$12.$39.met1;$12.$62.met1;;0.071                                           
+R348;$12.$39.met1;$12.$66.met1;;0.071                                           
+R349;$12.$40.li1;$12.$41.met1;;9.3                                              
+R350;$12.$40.li1;$12.$9.li1;;14.306                                             
+R351;$12.$41.met1;$12.$64.met1;;0.089                                           
+R352;$12.$41.met1;$12.$68.met1;;0.054                                           
+R353;$12.$42.li1;$12.$43.met1;;9.3                                              
+R354;$12.$43.met1;$12.$66.met1;;0.089                                           
+R355;$12.$43.met1;$12.$70.met1;;0.054                                           
+R356;$12.$44.li1;$12.$45.met1;;9.3                                              
+R357;$12.$45.met1;$12.$72.met1;;0.054                                           
+R358;$12.$45.met1;$12.$76.met1;;0.089                                           
+R359;$12.$46.li1;$12.$47.met1;;9.3                                              
+R360;$12.$47.met1;$12.$74.met1;;0.054                                           
+R361;$12.$47.met1;$12.$78.met1;;0.089                                           
+R362;$12.$48.li1;$12.$49.met1;;9.3                                              
+R363;$12.$49.met1;$12.$76.met1;;0.071                                           
+R364;$12.$49.met1;$12.$80.met1;;0.071                                           
+R365;$12.$5.li1;$12.P0.nsdm;;185.0                                              
+R366;$12.$50.li1;$12.$51.met1;;9.3                                              
+R367;$12.$51.met1;$12.$78.met1;;0.071                                           
+R368;$12.$51.met1;$12.$82.met1;;0.071                                           
+R369;$12.$52.li1;$12.$53.met1;;9.3                                              
+R370;$12.$53.met1;$12.$80.met1;;0.089                                           
+R371;$12.$53.met1;$12.$84.met1;;0.054                                           
+R372;$12.$54.li1;$12.$55.met1;;9.3                                              
+R373;$12.$55.met1;$12.$82.met1;;0.089                                           
+R374;$12.$55.met1;$12.$86.met1;;0.054                                           
+R375;$12.$56.met1;$12.$57.met2;;4.5                                             
+R376;$12.$57.met2;$12.$61.met2;;0.125                                           
+R377;$12.$58.met1;$12.$59.met2;;4.5                                             
+R378;$12.$59.met2;$12.$63.met2;;0.125                                           
+R379;$12.$60.met1;$12.$61.met2;;4.5                                             
+R380;$12.$61.met2;$12.$65.met2;;0.125                                           
+R381;$12.$62.met1;$12.$63.met2;;4.5                                             
+R382;$12.$63.met2;$12.$67.met2;;0.125                                           
+R383;$12.$64.met1;$12.$65.met2;;4.5                                             
+R384;$12.$65.met2;$12.$69.met2;;0.125                                           
+R385;$12.$66.met1;$12.$67.met2;;4.5                                             
+R386;$12.$67.met2;$12.$71.met2;;0.125                                           
+R387;$12.$68.met1;$12.$69.met2;;4.5                                             
+R388;$12.$69.met2;$12.$73.met2;;0.777                                           
+R389;$12.$7.li1;$12.P2.nsdm;;185.0                                              
+R390;$12.$70.met1;$12.$71.met2;;4.5                                             
+R391;$12.$71.met2;$12.$75.met2;;0.777                                           
+R392;$12.$72.met1;$12.$73.met2;;4.5                                             
+R393;$12.$73.met2;$12.$88.met2;;0.021                                           
+R394;$12.$74.met1;$12.$75.met2;;4.5                                             
+R395;$12.$75.met2;$12.$90.met2;;0.021                                           
+R396;$12.$76.met1;$12.$77.met2;;4.5                                             
+R397;$12.$77.met2;$12.$81.met2;;0.125                                           
+R398;$12.$77.met2;$12.$88.met2;;0.104                                           
+R399;$12.$78.met1;$12.$79.met2;;4.5                                             
+R400;$12.$79.met2;$12.$83.met2;;0.125                                           
+R401;$12.$79.met2;$12.$90.met2;;0.104                                           
+R402;$12.$80.met1;$12.$81.met2;;4.5                                             
+R403;$12.$81.met2;$12.$85.met2;;0.125                                           
+R404;$12.$82.met1;$12.$83.met2;;4.5                                             
+R405;$12.$83.met2;$12.$87.met2;;0.125                                           
+R406;$12.$84.met1;$12.$85.met2;;4.5                                             
+R407;$12.$86.met1;$12.$87.met2;;4.5                                             
+R408;$12.$88.met2;$12.$89.met3;;3.41                                            
+R409;$12.$89.met3;$12.$91.met3;;0.356                                           
+R410;$12.$9.li1;$12.P0.nsdm;;185.0                                              
+R411;$12.$90.met2;$12.$91.met3;;3.41                                            
+R412;$4;$4.$15.li1;;585.0                                                       
+R413;$4;$4.$25.li1;;585.0                                                       
+R414;$4;$4.$35.li1;;585.0                                                       
+R415;$4;$4.$5.li1;;585.0                                                        
+R416;$4.$0.poly;$4.$1.li1;;152.0                                                
+R417;$4.$1.li1;$4.$86.li1;;47.059                                               
+R418;$4.$100.li1;$4.$101.met1;;9.3                                              
+R419;$4.$100.li1;$4.$21.li1;;12.8                                               
+R420;$4.$100.li1;$4.$31.li1;;12.8                                               
+R421;$4.$101.met1;$4.$160.met1;;0.071                                           
+R422;$4.$101.met1;$4.$166.met1;;0.071                                           
+R423;$4.$102.li1;$4.$103.met1;;9.3                                              
+R424;$4.$102.li1;$4.$27.li1;;14.306                                             
+R425;$4.$102.li1;$4.$37.li1;;11.294                                             
+R426;$4.$103.met1;$4.$162.met1;;0.089                                           
+R427;$4.$103.met1;$4.$168.met1;;0.054                                           
+R428;$4.$104.li1;$4.$105.met1;;9.3                                              
+R429;$4.$104.li1;$4.$29.li1;;14.306                                             
+R430;$4.$104.li1;$4.$39.li1;;11.294                                             
+R431;$4.$105.met1;$4.$164.met1;;0.089                                           
+R432;$4.$105.met1;$4.$170.met1;;0.054                                           
+R433;$4.$106.li1;$4.$107.met1;;9.3                                              
+R434;$4.$106.li1;$4.$31.li1;;14.306                                             
+R435;$4.$106.li1;$4.$41.li1;;11.294                                             
+R436;$4.$107.met1;$4.$166.met1;;0.089                                           
+R437;$4.$107.met1;$4.$172.met1;;0.054                                           
+R438;$4.$108.li1;$4.$109.met1;;9.3                                              
+R439;$4.$108.li1;$4.$110.li1;;13.445                                            
+R440;$4.$108.li1;$4.$123.met1;;9.3                                              
+R441;$4.$108.li1;$4.$137.met1;;9.3                                              
+R442;$4.$108.li1;$4.$44.nwell;;61.667                                           
+R443;$4.$109.met1;$4.$174.met1;;0.018                                           
+R444;$4.$109.met1;$4.$87.met1;;1.652                                            
+R445;$4.$11.li1;$4.$94.li1;;11.294                                              
+R446;$4.$11.li1;$4.P5.psdm;;585.0                                               
+R447;$4.$110.li1;$4.$111.met1;;9.3                                              
+R448;$4.$110.li1;$4.$112.li1;;13.445                                            
+R449;$4.$110.li1;$4.$125.met1;;9.3                                              
+R450;$4.$110.li1;$4.$139.met1;;9.3                                              
+R451;$4.$110.li1;$4.$46.nwell;;61.667                                           
+R452;$4.$111.met1;$4.$176.met1;;0.018                                           
+R453;$4.$112.li1;$4.$113.met1;;9.3                                              
+R454;$4.$112.li1;$4.$114.li1;;13.445                                            
+R455;$4.$112.li1;$4.$127.met1;;9.3                                              
+R456;$4.$112.li1;$4.$141.met1;;9.3                                              
+R457;$4.$112.li1;$4.$48.nwell;;61.667                                           
+R458;$4.$113.met1;$4.$178.met1;;0.018                                           
+R459;$4.$114.li1;$4.$115.met1;;9.3                                              
+R460;$4.$114.li1;$4.$116.li1;;13.445                                            
+R461;$4.$114.li1;$4.$129.met1;;9.3                                              
+R462;$4.$114.li1;$4.$143.met1;;9.3                                              
+R463;$4.$114.li1;$4.$50.nwell;;61.667                                           
+R464;$4.$115.met1;$4.$180.met1;;0.018                                           
+R465;$4.$116.li1;$4.$117.met1;;9.3                                              
+R466;$4.$116.li1;$4.$118.li1;;13.445                                            
+R467;$4.$116.li1;$4.$131.met1;;9.3                                              
+R468;$4.$116.li1;$4.$145.met1;;9.3                                              
+R469;$4.$116.li1;$4.$52.nwell;;61.667                                           
+R470;$4.$117.met1;$4.$182.met1;;0.018                                           
+R471;$4.$118.li1;$4.$119.met1;;9.3                                              
+R472;$4.$118.li1;$4.$120.li1;;13.445                                            
+R473;$4.$118.li1;$4.$133.met1;;9.3                                              
+R474;$4.$118.li1;$4.$147.met1;;9.3                                              
+R475;$4.$118.li1;$4.$54.nwell;;61.667                                           
+R476;$4.$119.met1;$4.$184.met1;;0.018                                           
+R477;$4.$120.li1;$4.$121.met1;;9.3                                              
+R478;$4.$120.li1;$4.$135.met1;;9.3                                              
+R479;$4.$120.li1;$4.$149.met1;;9.3                                              
+R480;$4.$120.li1;$4.$56.nwell;;61.667                                           
+R481;$4.$121.met1;$4.$186.met1;;0.018                                           
+R482;$4.$121.met1;$4.$89.met1;;1.652                                            
+R483;$4.$123.met1;$4.$174.met1;;0.143                                           
+R484;$4.$123.met1;$4.$189.met2;;4.5                                             
+R485;$4.$123.met1;$4.$202.met1;;0.143                                           
+R486;$4.$125.met1;$4.$176.met1;;0.143                                           
+R487;$4.$125.met1;$4.$191.met2;;4.5                                             
+R488;$4.$125.met1;$4.$204.met1;;0.143                                           
+R489;$4.$127.met1;$4.$178.met1;;0.143                                           
+R490;$4.$127.met1;$4.$193.met2;;4.5                                             
+R491;$4.$127.met1;$4.$206.met1;;0.143                                           
+R492;$4.$129.met1;$4.$180.met1;;0.143                                           
+R493;$4.$129.met1;$4.$195.met2;;4.5                                             
+R494;$4.$129.met1;$4.$208.met1;;0.143                                           
+R495;$4.$13.li1;$4.$23.li1;;25.6                                                
+R496;$4.$13.li1;$4.$88.li1;;78.306                                              
+R497;$4.$13.li1;$4.P7.psdm;;585.0                                               
+R498;$4.$131.met1;$4.$182.met1;;0.143                                           
+R499;$4.$131.met1;$4.$197.met2;;4.5                                             
+R500;$4.$131.met1;$4.$210.met1;;0.143                                           
+R501;$4.$133.met1;$4.$184.met1;;0.143                                           
+R502;$4.$133.met1;$4.$199.met2;;4.5                                             
+R503;$4.$133.met1;$4.$212.met1;;0.143                                           
+R504;$4.$135.met1;$4.$186.met1;;0.143                                           
+R505;$4.$135.met1;$4.$201.met2;;4.5                                             
+R506;$4.$135.met1;$4.$214.met1;;0.143                                           
+R507;$4.$137.met1;$4.$202.met1;;0.018                                           
+R508;$4.$139.met1;$4.$204.met1;;0.018                                           
+R509;$4.$141.met1;$4.$206.met1;;0.018                                           
+R510;$4.$143.met1;$4.$208.met1;;0.018                                           
+R511;$4.$145.met1;$4.$210.met1;;0.018                                           
+R512;$4.$147.met1;$4.$212.met1;;0.018                                           
+R513;$4.$149.met1;$4.$214.met1;;0.018                                           
+R514;$4.$15.li1;$4.$25.li1;;25.6                                                
+R515;$4.$15.li1;$4.$5.li1;;25.6                                                 
+R516;$4.$150.met1;$4.$151.met2;;4.5                                             
+R517;$4.$150.met1;$4.$91.met1;;0.054                                            
+R518;$4.$151.met2;$4.$157.met2;;0.125                                           
+R519;$4.$152.met1;$4.$153.met2;;4.5                                             
+R520;$4.$152.met1;$4.$93.met1;;0.054                                            
+R521;$4.$153.met2;$4.$159.met2;;0.125                                           
+R522;$4.$154.met1;$4.$155.met2;;4.5                                             
+R523;$4.$154.met1;$4.$95.met1;;0.054                                            
+R524;$4.$155.met2;$4.$161.met2;;0.125                                           
+R525;$4.$156.met1;$4.$157.met2;;4.5                                             
+R526;$4.$156.met1;$4.$91.met1;;0.089                                            
+R527;$4.$156.met1;$4.$97.met1;;0.071                                            
+R528;$4.$157.met2;$4.$163.met2;;0.125                                           
+R529;$4.$158.met1;$4.$159.met2;;4.5                                             
+R530;$4.$158.met1;$4.$93.met1;;0.089                                            
+R531;$4.$158.met1;$4.$99.met1;;0.071                                            
+R532;$4.$159.met2;$4.$165.met2;;0.125                                           
+R533;$4.$160.met1;$4.$161.met2;;4.5                                             
+R534;$4.$160.met1;$4.$95.met1;;0.089                                            
+R535;$4.$161.met2;$4.$167.met2;;0.125                                           
+R536;$4.$162.met1;$4.$163.met2;;4.5                                             
+R537;$4.$162.met1;$4.$97.met1;;0.071                                            
+R538;$4.$163.met2;$4.$169.met2;;0.125                                           
+R539;$4.$164.met1;$4.$165.met2;;4.5                                             
+R540;$4.$164.met1;$4.$99.met1;;0.071                                            
+R541;$4.$165.met2;$4.$171.met2;;0.125                                           
+R542;$4.$166.met1;$4.$167.met2;;4.5                                             
+R543;$4.$167.met2;$4.$173.met2;;0.125                                           
+R544;$4.$168.met1;$4.$169.met2;;4.5                                             
+R545;$4.$169.met2;$4.$218.met2;;0.52                                            
+R546;$4.$17.li1;$4.$90.li1;;14.306                                              
+R547;$4.$17.li1;$4.$96.li1;;12.8                                                
+R548;$4.$17.li1;$4.P1.psdm;;585.0                                               
+R549;$4.$170.met1;$4.$171.met2;;4.5                                             
+R550;$4.$171.met2;$4.$222.met2;;0.52                                            
+R551;$4.$172.met1;$4.$173.met2;;4.5                                             
+R552;$4.$173.met2;$4.$226.met2;;0.52                                            
+R553;$4.$174.met1;$4.$175.met2;;4.5                                             
+R554;$4.$175.met2;$4.$216.met2;;0.115                                           
+R555;$4.$175.met2;$4.$230.met2;;0.041                                           
+R556;$4.$176.met1;$4.$177.met2;;4.5                                             
+R557;$4.$177.met2;$4.$218.met2;;0.115                                           
+R558;$4.$177.met2;$4.$232.met2;;0.041                                           
+R559;$4.$178.met1;$4.$179.met2;;4.5                                             
+R560;$4.$179.met2;$4.$220.met2;;0.115                                           
+R561;$4.$179.met2;$4.$234.met2;;0.041                                           
+R562;$4.$180.met1;$4.$181.met2;;4.5                                             
+R563;$4.$181.met2;$4.$222.met2;;0.115                                           
+R564;$4.$181.met2;$4.$236.met2;;0.041                                           
+R565;$4.$182.met1;$4.$183.met2;;4.5                                             
+R566;$4.$183.met2;$4.$224.met2;;0.115                                           
+R567;$4.$183.met2;$4.$238.met2;;0.041                                           
+R568;$4.$184.met1;$4.$185.met2;;4.5                                             
+R569;$4.$185.met2;$4.$226.met2;;0.115                                           
+R570;$4.$185.met2;$4.$240.met2;;0.041                                           
+R571;$4.$186.met1;$4.$187.met2;;4.5                                             
+R572;$4.$187.met2;$4.$228.met2;;0.115                                           
+R573;$4.$187.met2;$4.$242.met2;;0.041                                           
+R574;$4.$189.met2;$4.$230.met2;;0.084                                           
+R575;$4.$189.met2;$4.$244.met2;;0.072                                           
+R576;$4.$19.li1;$4.$92.li1;;14.306                                              
+R577;$4.$19.li1;$4.$98.li1;;12.8                                                
+R578;$4.$19.li1;$4.P3.psdm;;585.0                                               
+R579;$4.$191.met2;$4.$232.met2;;0.084                                           
+R580;$4.$191.met2;$4.$246.met2;;0.072                                           
+R581;$4.$193.met2;$4.$234.met2;;0.084                                           
+R582;$4.$193.met2;$4.$248.met2;;0.072                                           
+R583;$4.$195.met2;$4.$236.met2;;0.084                                           
+R584;$4.$195.met2;$4.$250.met2;;0.072                                           
+R585;$4.$197.met2;$4.$238.met2;;0.084                                           
+R586;$4.$197.met2;$4.$252.met2;;0.072                                           
+R587;$4.$199.met2;$4.$240.met2;;0.084                                           
+R588;$4.$199.met2;$4.$254.met2;;0.072                                           
+R589;$4.$2.poly;$4.$3.li1;;152.0                                                
+R590;$4.$201.met2;$4.$242.met2;;0.084                                           
+R591;$4.$201.met2;$4.$256.met2;;0.072                                           
+R592;$4.$202.met1;$4.$203.met2;;4.5                                             
+R593;$4.$203.met2;$4.$244.met2;;0.053                                           
+R594;$4.$203.met2;$4.$258.met2;;0.104                                           
+R595;$4.$204.met1;$4.$205.met2;;4.5                                             
+R596;$4.$205.met2;$4.$246.met2;;0.053                                           
+R597;$4.$205.met2;$4.$260.met2;;0.104                                           
+R598;$4.$206.met1;$4.$207.met2;;4.5                                             
+R599;$4.$207.met2;$4.$248.met2;;0.053                                           
+R600;$4.$207.met2;$4.$262.met2;;0.104                                           
+R601;$4.$208.met1;$4.$209.met2;;4.5                                             
+R602;$4.$209.met2;$4.$250.met2;;0.053                                           
+R603;$4.$209.met2;$4.$264.met2;;0.104                                           
+R604;$4.$21.li1;$4.$94.li1;;14.306                                              
+R605;$4.$21.li1;$4.P5.psdm;;585.0                                               
+R606;$4.$210.met1;$4.$211.met2;;4.5                                             
+R607;$4.$211.met2;$4.$252.met2;;0.053                                           
+R608;$4.$211.met2;$4.$266.met2;;0.104                                           
+R609;$4.$212.met1;$4.$213.met2;;4.5                                             
+R610;$4.$213.met2;$4.$254.met2;;0.053                                           
+R611;$4.$213.met2;$4.$268.met2;;0.104                                           
+R612;$4.$214.met1;$4.$215.met2;;4.5                                             
+R613;$4.$215.met2;$4.$256.met2;;0.053                                           
+R614;$4.$215.met2;$4.$270.met2;;0.104                                           
+R615;$4.$216.met2;$4.$217.met3;;3.41                                            
+R616;$4.$217.met3;$4.$219.met3;;0.037                                           
+R617;$4.$217.met3;$4.$230.met2;;3.41                                            
+R618;$4.$217.met3;$4.$244.met2;;3.41                                            
+R619;$4.$217.met3;$4.$258.met2;;3.41                                            
+R620;$4.$218.met2;$4.$219.met3;;3.41                                            
+R621;$4.$219.met3;$4.$221.met3;;0.037                                           
+R622;$4.$219.met3;$4.$232.met2;;3.41                                            
+R623;$4.$219.met3;$4.$246.met2;;3.41                                            
+R624;$4.$219.met3;$4.$260.met2;;3.41                                            
+R625;$4.$220.met2;$4.$221.met3;;3.41                                            
+R626;$4.$221.met3;$4.$223.met3;;0.037                                           
+R627;$4.$221.met3;$4.$234.met2;;3.41                                            
+R628;$4.$221.met3;$4.$248.met2;;3.41                                            
+R629;$4.$221.met3;$4.$262.met2;;3.41                                            
+R630;$4.$222.met2;$4.$223.met3;;3.41                                            
+R631;$4.$223.met3;$4.$225.met3;;0.037                                           
+R632;$4.$223.met3;$4.$236.met2;;3.41                                            
+R633;$4.$223.met3;$4.$250.met2;;3.41                                            
+R634;$4.$223.met3;$4.$264.met2;;3.41                                            
+R635;$4.$224.met2;$4.$225.met3;;3.41                                            
+R636;$4.$225.met3;$4.$227.met3;;0.037                                           
+R637;$4.$225.met3;$4.$238.met2;;3.41                                            
+R638;$4.$225.met3;$4.$252.met2;;3.41                                            
+R639;$4.$225.met3;$4.$266.met2;;3.41                                            
+R640;$4.$226.met2;$4.$227.met3;;3.41                                            
+R641;$4.$227.met3;$4.$229.met3;;0.037                                           
+R642;$4.$227.met3;$4.$240.met2;;3.41                                            
+R643;$4.$227.met3;$4.$254.met2;;3.41                                            
+R644;$4.$227.met3;$4.$268.met2;;3.41                                            
+R645;$4.$228.met2;$4.$229.met3;;3.41                                            
+R646;$4.$229.met3;$4.$242.met2;;3.41                                            
+R647;$4.$229.met3;$4.$256.met2;;3.41                                            
+R648;$4.$229.met3;$4.$270.met2;;3.41                                            
+R649;$4.$23.li1;$4.$33.li1;;25.6                                                
+R650;$4.$23.li1;$4.P7.psdm;;585.0                                               
+R651;$4.$25.li1;$4.$35.li1;;25.6                                                
+R652;$4.$27.li1;$4.$96.li1;;12.8                                                
+R653;$4.$27.li1;$4.P1.psdm;;585.0                                               
+R654;$4.$29.li1;$4.$98.li1;;12.8                                                
+R655;$4.$29.li1;$4.P3.psdm;;585.0                                               
+R656;$4.$3.li1;$4.$88.li1;;47.059                                               
+R657;$4.$31.li1;$4.P5.psdm;;585.0                                               
+R658;$4.$33.li1;$4.$43.li1;;25.6                                                
+R659;$4.$33.li1;$4.P7.psdm;;585.0                                               
+R660;$4.$37.li1;$4.P1.psdm;;585.0                                               
+R661;$4.$39.li1;$4.P3.psdm;;585.0                                               
+R662;$4.$41.li1;$4.P5.psdm;;585.0                                               
+R663;$4.$43.li1;$4.P7.psdm;;585.0                                               
+R664;$4.$44.nwell;$4.P0.nwell;;200.851                                          
+R665;$4.$46.nwell;$4.P0.nwell;;200.851                                          
+R666;$4.$46.nwell;$4.P1.nwell;;200.851                                          
+R667;$4.$48.nwell;$4.P1.nwell;;200.851                                          
+R668;$4.$48.nwell;$4.P2.nwell;;200.851                                          
+R669;$4.$5.li1;$4.$86.li1;;78.306                                               
+R670;$4.$50.nwell;$4.P2.nwell;;200.851                                          
+R671;$4.$50.nwell;$4.P3.nwell;;200.851                                          
+R672;$4.$52.nwell;$4.P3.nwell;;200.851                                          
+R673;$4.$52.nwell;$4.P4.nwell;;200.851                                          
+R674;$4.$54.nwell;$4.P4.nwell;;200.851                                          
+R675;$4.$54.nwell;$4.P5.nwell;;200.851                                          
+R676;$4.$56.nwell;$4.P5.nwell;;200.851                                          
+R677;$4.$7.li1;$4.$90.li1;;11.294                                               
+R678;$4.$7.li1;$4.P1.psdm;;585.0                                                
+R679;$4.$86.li1;$4.$87.met1;;9.3                                                
+R680;$4.$88.li1;$4.$89.met1;;9.3                                                
+R681;$4.$9.li1;$4.$92.li1;;11.294                                               
+R682;$4.$9.li1;$4.P3.psdm;;585.0                                                
+R683;$4.$90.li1;$4.$91.met1;;9.3                                                
+R684;$4.$92.li1;$4.$93.met1;;9.3                                                
+R685;$4.$94.li1;$4.$95.met1;;9.3                                                
+R686;$4.$96.li1;$4.$97.met1;;9.3                                                
+R687;$4.$98.li1;$4.$99.met1;;9.3                                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpo50ukdx5/inv__inv/inv_k25d_pex_netlist.csv                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to: /tmp/tmpo50ukdx5/inv__inv/inv_k25d_pex_netlist.spice 
