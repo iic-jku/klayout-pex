@@ -59,7 +59,9 @@ class RCX25NetlistExpander:
             #       because we only want to replace resistor / capacitor devices
             #       and for example not transitors
 
-            for d in top_circuit.each_device():
+            # NOTE: removing a device ends the iteration over the circuit's devices,
+            #       so iterate over a list of them
+            for d in list(top_circuit.each_device()):
                 name = d.name or d.expanded_name()
                 match d.device_class().__class__:
                     case kdb.DeviceClassResistor | kdb.DeviceClassResistorWithBulk:
