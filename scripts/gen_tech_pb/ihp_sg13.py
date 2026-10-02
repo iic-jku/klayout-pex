@@ -685,6 +685,8 @@ class TechBuilder:
         add_device_model_mapping(dmi, "dpantenna",        "X",   ["A", "C"],                   antenna)
         if self.is_g2:  # sg13cmos5l has no models for these
             add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
+            add_device_model_mapping(dmi, "rfcmim",        "X",   ["mim_top", "mim_btm", "mim_sub"],
+                                     cap + [lvs_param('wfeed', 'wfeed', um)], "cap_rfcmim", kind=METAL_CAP)
             add_device_model_mapping(dmi, "npn13G2",       "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2l",      "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2v",      "X",   ["C", "B", "E", "S"],         hbt)
@@ -692,7 +694,7 @@ class TechBuilder:
             add_device_model_mapping(dmi, "isolbox",       "X",   ["S", "I", "Bn"],             isolbox)
 
         # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-        #       - rfcmim, idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
+        #       - idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
         #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
 
     def build_substrate_info(self, si: SubstrateInfo):
