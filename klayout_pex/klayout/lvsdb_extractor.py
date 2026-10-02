@@ -480,13 +480,12 @@ class KLayoutExtractionContext:
     def pins_of_layer(self, gds_pair: GDSPair) -> kdb.Region:
         pin_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].pin_gds_pair
         pin_gds_pair = pin_gds_pair.layer, pin_gds_pair.datatype
-        lyr = self.extracted_layers.get(pin_gds_pair, None)
-        if lyr is None:
+        # NOTE: the pin layer can have several LVS layers, where it's the drawn layer
+        #       (e.g. gf180mcuD, without pin layers, with Metal4 split under the MIM caps)
+        pins = self.shapes_of_layer(pin_gds_pair)
+        if pins is None:
             return kdb.Region()
-        if len(lyr.source_layers) != 1:
-            raise NotImplementedError(f"currently only supporting 1 pin layer mapping, "
-                                      f"but got {len(lyr.source_layers)}")
-        return lyr.source_layers[0].region
+        return pins
 
     def labels_of_layer(self, gds_pair: GDSPair) -> kdb.Texts:
         labels_gds_pair = self.tech.layer_info_by_gds_pair[gds_pair].label_gds_pair
