@@ -100,6 +100,14 @@ message ComputedLayerInfo {
         KIND_DEVICE_RESISTOR = 3;  // same for resistors
         KIND_PIN = 4;
         KIND_LABEL = 5;
+
+        // the plates (or fingers) of a capacitor device, whose model has the capacitance between them,
+        // but not their capacitances to other conductors (e.g. IHP cap_cmomf has no substrate terminal):
+        // with --blackbox, the extraction leaves out the capacitances between the plates of the terminal nets
+        // of a device (of DeviceModelMapping.KIND_METAL_CAPACITOR), but unlike KIND_DEVICE_CAPACITOR, not the plates,
+        // so their capacitances to other nets (e.g. the substrate, a wire across) are extracted.
+        // Otherwise like a regular layer (e.g. on the GDS pair of the metal, for the resistance extraction)
+        KIND_DEVICE_CAPACITOR_PLATE = 6;
     }
 
     Kind kind = 10;

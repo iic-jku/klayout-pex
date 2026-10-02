@@ -67,6 +67,7 @@ MIM = LayerInfo.PURPOSE_MIM_CAP
 # computed layer kinds
 KREG = ComputedLayerInfo.KIND_REGULAR
 KCAP = ComputedLayerInfo.KIND_DEVICE_CAPACITOR
+KPLT = ComputedLayerInfo.KIND_DEVICE_CAPACITOR_PLATE
 KRES = ComputedLayerInfo.KIND_DEVICE_RESISTOR
 KPIN = ComputedLayerInfo.KIND_PIN
 KLBL = ComputedLayerInfo.KIND_LABEL

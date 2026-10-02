@@ -334,7 +334,8 @@ class RExtractor:
                     match li.kind:
                         case LK.KIND_PIN:
                             continue  # skip
-                        case LK.KIND_REGULAR | LK.KIND_DEVICE_CAPACITOR | LK.KIND_DEVICE_RESISTOR:
+                        case LK.KIND_REGULAR | LK.KIND_DEVICE_CAPACITOR | LK.KIND_DEVICE_CAPACITOR_PLATE | \
+                             LK.KIND_DEVICE_RESISTOR:
                             r = self.pex_context.shapes_of_net(lyr.gds_pair, net)
                             if not r:
                                 continue
