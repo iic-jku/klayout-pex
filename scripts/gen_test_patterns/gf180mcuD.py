@@ -30,6 +30,8 @@ drawn to the gf180mcu DRC rules (variant D: 5 metals, 11K top metal):
   Metal5 (top, 11K): width 0.44, area 0.5625
   Contact:           size 0.22, Poly2 enclosure 0.07, Metal1 enclosure >= 0.005
   Via1-Via4:         size 0.26, spacing 0.26, metal enclosure 0.06
+  MIM (option B):    FuseTop area >= 25, enclosed by the bottom plate (Metal4) and CAP_MK by 0.6,
+                     Via4 on FuseTop spacing 0.5, FuseTop enclosure 0.4, bottom plates 1.2 apart
 
 The nfet patterns use the nfet pcell of the PDK, so the gf180mcuD PDK must be installed
 (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/gf180mcuD).
@@ -63,6 +65,9 @@ VIA3:   GDSPair = (40, 0)
 METAL4: GDSPair = (46, 0)
 VIA4:   GDSPair = (41, 0)
 METAL5: GDSPair = (81, 0)
+FUSETOP: GDSPair = (75, 0)
+CAP_MK: GDSPair = (117, 5)
+MIM_L_MK: GDSPair = (117, 10)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     POLY2: (30, 10),
@@ -258,6 +263,32 @@ def sideoverlap_complex_m1_m2() -> Pattern:
     return p
 
 
+def mim_cap(p: Pattern, x: int, y: int, w: int, l: int, top: str, bottom: str):
+    """
+    A MIM cap (option B) like the PDK's cap_mim_2f0_m4m5_noshield, with its top plate (FuseTop) at x, y
+    """
+    p.box(FUSETOP, x, y, x + w, y + l)
+    p.box(MIM_L_MK, x, y, x + w, y + 100)
+    p.box(CAP_MK, x - 600, y - 600, x + w + 600, y + l + 600)
+    p.box(METAL4, x - 600, y - 600, x + w + 600, y + l + 600)
+    p.box(METAL5, x, y, x + w, y + l)
+    nx, ny = ((size - 800 + 500) // 760 for size in (w, l))  # 0.26 vias, 0.5 apart, enclosed by 0.4
+    x0, y0 = x + (w - (nx * 760 - 500)) // 2, y + (l - (ny * 760 - 500)) // 2
+    for i in range(nx):
+        for j in range(ny):
+            p.box(VIA4, x0 + i * 760, y0 + j * 760, x0 + i * 760 + 260, y0 + j * 760 + 260)
+    p.label(METAL4, bottom, x - 575, y - 575)
+    p.label(METAL5, top, x + 25, y + 25)
+
+
+def cap_mim_m4m5() -> Pattern:
+    # 2 MIM caps, 5 µm x 5 µm and 20 µm x 10 µm
+    p = Pattern('cap_mim_m4m5')
+    mim_cap(p, 0, 0, 5000, 5000, 'TOP1', 'BOT1')
+    mim_cap(p, 7400, 0, 20000, 10000, 'TOP2', 'BOT2')
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'r_single_wire_m1': r_single_wire_m1,
     'r_wire_voltage_divider_m1': r_wire_voltage_divider_m1,
@@ -272,6 +303,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'sidewall_cap_vpp_04p4x04p6_m1_redux': sidewall_cap_vpp_04p4x04p6_m1_redux,
     'sidewall_non_parallel_m1': sidewall_non_parallel_m1,
     'sideoverlap_complex_m1_m2': sideoverlap_complex_m1_m2,
+    'cap_mim_m4m5': cap_mim_m4m5,
 }
 
 
