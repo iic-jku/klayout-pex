@@ -30,6 +30,7 @@ import unittest
 
 import klayout.db as kdb
 
+from klayout_pex.device_models import DeviceModels
 from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.netlist_expander import NetlistExpander
@@ -38,6 +39,7 @@ from klayout_pex.log import (
 )
 from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.tech_info import TechInfo
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 @allure.parent_suite("Unit Tests")
@@ -78,6 +80,7 @@ class Test(unittest.TestCase):
                                       cap_matrix=cap_matrix,
                                       cap_matrix_interpreter=FasterCapOutputInterpreter(),
                                       blackbox_devices=False,
+                                      device_models=tech.device_models,
                                       substrate_net_name='VSUBS')  # NOTE: the substrate conductor of the matrix
         out_path = tempfile.mktemp(prefix=f"{cell_name}_expanded_netlist_", suffix=".cir")
         spice_writer = kdb.NetlistSpiceWriter()
@@ -86,6 +89,14 @@ class Test(unittest.TestCase):
 
         allure.attach.file(csv_path, attachment_type=allure.attachment_type.CSV)
         allure.attach.file(out_path, attachment_type=allure.attachment_type.TEXT)
+
+
+def device_models(*metal_capacitor_class_names: str) -> DeviceModels:
+    info = device_models_pb2.DeviceModelsInfo()
+    for name in metal_capacitor_class_names:
+        info.device_model_mappings.add(lvs_device_class_name=name,
+                                       kind=device_models_pb2.DeviceModelMapping.KIND_METAL_CAPACITOR)
+    return DeviceModels(info)
 
 
 def substrate_test_netlist() -> kdb.Netlist:
@@ -128,7 +139,8 @@ def capacitances_by_net_pair(expanded: kdb.Netlist) -> dict:
 class SubstrateTest(unittest.TestCase):
     def test_capacitances_to_the_substrate_are_on_its_net(self):
         expanded = NetlistExpander.expand(substrate_test_netlist(), 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
-                                          FasterCapOutputInterpreter(), blackbox_devices=True, substrate_net_name='B')
+                                          FasterCapOutputInterpreter(), blackbox_devices=True,
+                                          device_models=device_models(), substrate_net_name='B')
         circuit = expanded.circuit_by_name('chip')
         # NOTE: the rest of the diagonal of D goes to the substrate B too
         self.assertEqual({frozenset(('D', 'B')): 1.75}, capacitances_by_net_pair(expanded))
@@ -139,10 +151,30 @@ class SubstrateTest(unittest.TestCase):
     def test_substrate_without_net_is_a_port(self):
         expanded = NetlistExpander.expand(substrate_test_netlist(), 'chip', CAP_MATRIX_SUBSTRATE_PORT,
                                           FasterCapOutputInterpreter(), blackbox_devices=True,
-                                          substrate_net_name='sky130_gnd')
+                                          device_models=device_models(), substrate_net_name='sky130_gnd')
         circuit = expanded.circuit_by_name('chip')
         self.assertEqual({frozenset(('sky130_gnd', 'D')): 1.25,
                           frozenset(('sky130_gnd', 'B')): 2.1,
                           frozenset(('D', 'B')): 0.5},
                          capacitances_by_net_pair(expanded))
         self.assertEqual(['D', 'B', 'sky130_gnd'], [p.name() for p in circuit.each_pin()])
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Netlist", "Netlist Expansion")
+class WhiteboxTest(unittest.TestCase):
+    def test_whitebox_removes_the_metal_capacitors_only(self):
+        # White-box mode removed all devices, e.g. the transistors too
+        netlist = substrate_test_netlist()
+        circuit = netlist.circuit_by_name('chip')
+        for device_class, class_name, device_name in ((kdb.DeviceClassCapacitor(), 'mim', 'C1'),
+                                                      (kdb.DeviceClassMOS4Transistor(), 'nmos', 'M1')):
+            device_class.name = class_name
+            netlist.add(device_class)
+            circuit.create_device(device_class, device_name)
+
+        expanded = NetlistExpander.expand(netlist, 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
+                                          FasterCapOutputInterpreter(), blackbox_devices=False,
+                                          device_models=device_models('mim'), substrate_net_name='B')
+        self.assertEqual(['M1'], [d.name for d in expanded.circuit_by_name('chip').each_device()
+                                  if d.device_class().name in ('mim', 'nmos')])

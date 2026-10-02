@@ -838,6 +838,7 @@ class KpexCLI:
             cap_matrix=cap_matrix,
             cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices,
+            device_models=pex_context.tech.device_models,
             substrate_net_name=pex_context.substrate_net_name
         )
 
@@ -984,6 +985,7 @@ class KpexCLI:
             cap_matrix=cap_matrix,
             cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices,
+            device_models=pex_context.tech.device_models,
             substrate_net_name=pex_context.substrate_net_name
         )
 
