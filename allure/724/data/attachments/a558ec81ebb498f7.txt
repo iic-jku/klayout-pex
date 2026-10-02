@@ -1,0 +1,738 @@
+[21:32:55] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1239
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --gds                                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x
+04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz --out_dir         
+/tmp/tmp23uc37h9 --2.5D --check n                                               
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:32:55] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:583
+[21:32:55] INFO     No explicit top cell specified, using top    kpex_cli.py:623
+                    cell 'cap_vpp_04p4x04p6_l1m1m2_noshield'                    
+[21:32:55] INFO     LVS input schematic not specified (argument  kpex_cli.py:664
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:32:55] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1178
+/tmp/tmp23uc37h9/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/te
+stdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m
+2_noshield.gds.gz/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz                    
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs 
+-rd                                                                             
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp
+_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz -rd         
+report=/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m
+1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz -rd                     
+target_netlist=/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x
+04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_extracted.cir -rd        
+schematic=/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_
+l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_dummy_schematic.spice -rd     
+thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd  
+scale=false -rd schematic_simplify=false -rd net_only=false -rd                 
+top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false   
+-rd purge_nets=false -rd no_simplify=true -rd verbose=false                     
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_lvs.log                                 
+2026-10-02 21:32:56 +0000: Memory Usage (431900K) : Starting running SKY130     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x
+04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz                   
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Layout file:                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x
+04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz                   
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Number of threads: 22       
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Final report:               
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz                                
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : No substrate name given,    
+default name is sky130_gnd                                                      
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Extracted netlist with net  
+names: true                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Extracted netlist with      
+comments in details: false                                                      
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Extracted netlist file:     
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_extracted.cir                           
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : device_scaling: false       
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : Verbose mode: false         
+2026-10-02 21:32:56 +0000: Memory Usage (433352K) : deep mode is enabled.       
+2026-10-02 21:32:56 +0000: Memory Usage (433480K) : Netlist file:               
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_dummy_schematic.spice                   
+2026-10-02 21:32:56 +0000: Memory Usage (433480K) : Read in polygons from       
+layers.                                                                         
+2026-10-02 21:32:56 +0000: Memory Usage (440292K) : Read in labels from layers. 
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : Evaluate switches start     
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : SCH_SIMPLE enabled  false   
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : NET_ONLY enabled  false     
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : TOP_LVL_PINS enabled  true  
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : COMBINE enabled  false      
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : PURGE enabled  false        
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : PURGE_NETS enabled  false   
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : SIMPLIFY enabled  false     
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : Evaluate switches end.      
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : SKY130 LVS rules started    
+2026-10-02 21:32:56 +0000: Memory Usage (441316K) : Starting deriving base      
+layers.                                                                         
+2026-10-02 21:32:56 +0000: Memory Usage (449096K) : Starting MOSFET DERIVATIONS 
+2026-10-02 21:32:56 +0000: Memory Usage (449096K) : Starting PMOS layers        
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (450120K) : Starting NMOS layers        
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (451528K) : Starting BJT DERIVATIONS    
+2026-10-02 21:32:56 +0000: Memory Usage (452168K) : Starting NPN layers         
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (454600K) : Starting PNP layers         
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (455880K) : Starting DIODE DERIVATIONS  
+2026-10-02 21:32:56 +0000: Memory Usage (457032K) : Starting PHOTODIODE         
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (457672K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (459976K) : Starting FUSE DERIVATIONS   
+2026-10-02 21:32:56 +0000: Memory Usage (459976K) : Starting MIM DERIVATIONS    
+2026-10-02 21:32:56 +0000: Memory Usage (460360K) : Starting VARACTOR           
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (461640K) : Starting INDUCTOR           
+DERIVATIONS                                                                     
+2026-10-02 21:32:56 +0000: Memory Usage (462920K) : Starting VPP CAP DERIVATIONS
+2026-10-02 21:32:57 +0000: Memory Usage (467180K) : Starting SONOS DERIVATIONS  
+2026-10-02 21:32:57 +0000: Memory Usage (467180K) : Starting SKY130 LVS         
+connectivity setup                                                              
+2026-10-02 21:32:57 +0000: Memory Usage (467180K) : Starting SKY130 LVS         
+connectivity setup (Inter-layer)                                                
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting SKY130 LVS         
+connectivity setup (Attaching labels)                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting SKY130 LVS         
+connectivity setup (Global connections)                                         
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting SKY130 LVS         
+connectivity setup (Multifinger Devices)                                        
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS BJT CONNECTIONS
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS PHOTODIODE     
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS MIMCAP         
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS VARACTOR       
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS RESISTOR       
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS INDUCTOR       
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS VPP CAP        
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting LVS SONOS          
+CONNECTIONS                                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting MOSFET EXTRACTION  
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Starting PMOS EXTRACTION    
+2026-10-02 21:32:57 +0000: Memory Usage (467308K) : Extracting 1.8V PMOS        
+transistor standard                                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 1.8V PMOS        
+transistor low threshold voltage                                                
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 1.8V PMOS        
+transistor high threshold voltage                                               
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V gate 10.5V    
+drain PMOS transistor                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting NMOS EXTRACTION    
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 1.8V NMOS        
+transistor standard                                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 1.8V NMOS        
+transistor low threshold voltage                                                
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 3.3V NMOS        
+transistor native voltage                                                       
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V NMOS          
+transistor native voltage                                                       
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V gate 10.5V    
+drain NMOS transistor                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting BJT EXTRACTION     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting NPN BJT EXTRACTION 
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L1p00 BJT                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L2p00 BJT                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__npn_11v0_W1p00L1p00 BJT                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting PNP BJT EXTRACTION 
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting DIODE EXTRACTION   
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V N+ diffusion  
+diode                                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V N+ diffusion  
+diode low threshold voltage                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V N+ diffusion  
+diode native threshold voltage                                                  
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 11V N+ diffusion 
+diode                                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V P+ diffusion  
+diode                                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting5V P+ diffusion   
+diode low threshold voltage                                                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 5V P+ diffusion  
+diode high threshold voltage                                                    
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting 11V P+ diffusion 
+diode                                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting PHOTODIODE         
+EXTRACTION                                                                      
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting Photodiode       
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting RESISTOR EXTRACTION
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_iso_pw device                                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_po device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_high_po_0p35 device                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_high_po_0p69 device                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_high_po_1p41 device                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_high_po_2p85 device                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_high_po_5p73 device                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p35 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p69 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_1p41 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_2p85 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_5p73 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_l1 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_m1 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_m2 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_m3 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_m4 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__res_generic_m5 device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting FUSE EXTRACTION    
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__fuse_m4 device                                                    
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting MIMCAP EXTRACTION  
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__model__cap_mim device                                             
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__model__cap_mim_m4 device                                          
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting VARACTOR EXTRACTION
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting low threshold    
+voltage varactor                                                                
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting high threshold   
+voltage varactor                                                                
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Starting VARACTOR EXTRACTION
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2                    
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3                           
+2026-10-02 21:32:57 +0000: Memory Usage (467436K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell                       
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2                                
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4                             
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4                               
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell                       
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting vpp cap          
+sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5                             
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5                           
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4                               
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4                             
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3                               
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5                             
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5                               
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1                                 
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4                       
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield                                   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test                    
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Starting SONOS EXTRACTION   
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Extracting Build space flash
+special SONOSFET star                                                           
+2026-10-02 21:32:57 +0000: Memory Usage (467820K) : Starting SKY130 LVS         
+comparison section                                                              
+2026-10-02 21:32:57 +0000: Memory Usage (468120K) : LVS Total Run time 0.477741 
+seconds                                                                         
+2026-10-02 21:32:57 +0000: Memory Usage (468120K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-10-02 21:32:57 +0000: Memory Usage (468120K) : ERROR : Netlists don't match
+2026-10-02 21:32:57 +0000: Memory Usage (468120K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+────────────────────────────────────────────────────────────────────────────────
+[21:32:57] INFO     klayout LVS finished with status code 1    lvs_runner.py:158
+                    after 1.638s, most likely due to a netlist                  
+                    mismatch against the schematic (irrelevant                  
+                    for PEX), see log file:                                     
+                    /tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_                  
+                    noshield__cap_vpp_04p4x04p6_l1m1m2_noshiel                  
+                    d/cap_vpp_04p4x04p6_l1m1m2_noshield_lvs.lo                  
+                    g                                                           
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:32:57] INFO     (67, 20) -> (li_con li_vpp)                 kpex_cli.py:1408
+[21:32:57] INFO     (67, 44) -> (mcon_con mcon_vpp)             kpex_cli.py:1408
+[21:32:57] INFO     (68, 44) -> (via1_con via1_vpp)             kpex_cli.py:1408
+[21:32:57] INFO     (68, 20) -> (met1_con met1_vpp)             kpex_cli.py:1408
+[21:32:57] INFO     (69, 20) -> (met2_con met2_vpp)             kpex_cli.py:1408
+[21:32:57] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1408
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:32:57] INFO     LVSDB: found 3pins                          extractor.py:218
+[21:32:57] WARNING  The resistance network has no nodes   lvsdb_extractor.py:619
+                    for these device terminals, as the                          
+                    tech info has no layer for their LVS                        
+                    layer, and they overlap no conductor                        
+                    of their net (e.g. a terminal on the                        
+                    substrate or a well):                                       
+                      -                                                         
+                    sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m                       
+                    2_noshield terminal W on LVS layer                          
+                    vpp_sub: $1                                                 
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;C0;C0.$151.met2;;0.066                                                       
+R2;C0;C0.$153.met2;;0.055                                                       
+R3;C0.$0.li1;C0.$1.met1;;9.3                                                    
+R4;C0.$0.li1;C0.$2.li1;;13.964                                                  
+R5;C0.$0.li1;C0.$20.li1;;33.454                                                 
+R6;C0.$1.met1;C0.$84.met1;;0.068                                                
+R7;C0.$1.met1;C0.$86.met1;;0.053                                                
+R8;C0.$10.li1;C0.$11.met1;;9.3                                                  
+R9;C0.$10.li1;C0.$12.li1;;13.964                                                
+R10;C0.$10.li1;C0.$8.li1;;13.964                                                
+R11;C0.$100.met1;C0.$101.met2;;4.5                                              
+R12;C0.$100.met1;C0.$17.met1;;0.083                                             
+R13;C0.$100.met1;C0.$19.met1;;0.053                                             
+R14;C0.$101.met2;C0.$103.met2;;0.121                                            
+R15;C0.$101.met2;C0.$99.met2;;0.121                                             
+R16;C0.$102.met1;C0.$103.met2;;4.5                                              
+R17;C0.$102.met1;C0.$19.met1;;0.068                                             
+R18;C0.$102.met1;C0.$23.met1;;0.259                                             
+R19;C0.$103.met2;C0.$107.met2;;0.264                                            
+R20;C0.$104.met1;C0.$105.met2;;4.5                                              
+R21;C0.$104.met1;C0.$108.met1;;0.121                                            
+R22;C0.$104.met1;C0.$21.met1;;0.006                                             
+R23;C0.$105.met2;C0.$165.met2;;0.117                                            
+R24;C0.$105.met2;C0.$85.met2;;0.264                                             
+R25;C0.$106.met1;C0.$107.met2;;4.5                                              
+R26;C0.$106.met1;C0.$110.met1;;0.121                                            
+R27;C0.$106.met1;C0.$23.met1;;0.006                                             
+R28;C0.$107.met2;C0.$111.met2;;0.121                                            
+R29;C0.$108.met1;C0.$109.met2;;4.5                                              
+R30;C0.$108.met1;C0.$25.met1;;0.009                                             
+R31;C0.$109.met2;C0.$165.met2;;0.004                                            
+R32;C0.$109.met2;C0.P0.met2;;0.1                                                
+R33;C0.$11.met1;C0.$9.met1;;0.136                                               
+R34;C0.$11.met1;C0.$94.met1;;0.129                                              
+R35;C0.$110.met1;C0.$111.met2;;4.5                                              
+R36;C0.$110.met1;C0.$27.met1;;0.009                                             
+R37;C0.$111.met2;C0.$115.met2;;0.121                                            
+R38;C0.$112.met1;C0.$113.met2;;4.5                                              
+R39;C0.$112.met1;C0.$25.met1;;0.112                                             
+R40;C0.$112.met1;C0.$29.met1;;0.025                                             
+R41;C0.$113.met2;C0.$164.met2;;0.087                                            
+R42;C0.$113.met2;C0.P0.met2;;0.021                                              
+R43;C0.$114.met1;C0.$115.met2;;4.5                                              
+R44;C0.$114.met1;C0.$27.met1;;0.112                                             
+R45;C0.$114.met1;C0.$31.met1;;0.025                                             
+R46;C0.$115.met2;C0.$119.met2;;0.121                                            
+R47;C0.$116.met1;C0.$117.met2;;4.5                                              
+R48;C0.$116.met1;C0.$29.met1;;0.097                                             
+R49;C0.$116.met1;C0.$33.met1;;0.04                                              
+R50;C0.$117.met2;C0.$121.met2;;0.121                                            
+R51;C0.$117.met2;C0.$164.met2;;0.034                                            
+R52;C0.$118.met1;C0.$119.met2;;4.5                                              
+R53;C0.$118.met1;C0.$31.met1;;0.097                                             
+R54;C0.$118.met1;C0.$35.met1;;0.04                                              
+R55;C0.$119.met2;C0.$123.met2;;0.121                                            
+R56;C0.$12.li1;C0.$13.met1;;9.3                                                 
+R57;C0.$12.li1;C0.$14.li1;;13.964                                               
+R58;C0.$120.met1;C0.$121.met2;;4.5                                              
+R59;C0.$120.met1;C0.$33.met1;;0.081                                             
+R60;C0.$120.met1;C0.$37.met1;;0.055                                             
+R61;C0.$121.met2;C0.P0.met2;;0.693                                              
+R62;C0.$122.met1;C0.$123.met2;;4.5                                              
+R63;C0.$122.met1;C0.$35.met1;;0.081                                             
+R64;C0.$122.met1;C0.$39.met1;;0.055                                             
+R65;C0.$124.met1;C0.$125.met2;;4.5                                              
+R66;C0.$124.met1;C0.$45.met1;;0.055                                             
+R67;C0.$124.met1;C0.$49.met1;;0.081                                             
+R68;C0.$125.met2;C0.$129.met2;;0.123                                            
+R69;C0.$126.met1;C0.$127.met2;;4.5                                              
+R70;C0.$126.met1;C0.$47.met1;;0.055                                             
+R71;C0.$126.met1;C0.$51.met1;;0.081                                             
+R72;C0.$127.met2;C0.$131.met2;;0.121                                            
+R73;C0.$128.met1;C0.$129.met2;;4.5                                              
+R74;C0.$128.met1;C0.$49.met1;;0.04                                              
+R75;C0.$128.met1;C0.$53.met1;;0.097                                             
+R76;C0.$129.met2;C0.$133.met2;;0.121                                            
+R77;C0.$13.met1;C0.$94.met1;;0.008                                              
+R78;C0.$13.met1;C0.$96.met1;;0.114                                              
+R79;C0.$130.met1;C0.$131.met2;;4.5                                              
+R80;C0.$130.met1;C0.$51.met1;;0.04                                              
+R81;C0.$130.met1;C0.$55.met1;;0.097                                             
+R82;C0.$131.met2;C0.$135.met2;;0.121                                            
+R83;C0.$132.met1;C0.$133.met2;;4.5                                              
+R84;C0.$132.met1;C0.$53.met1;;0.025                                             
+R85;C0.$132.met1;C0.$57.met1;;0.112                                             
+R86;C0.$133.met2;C0.$137.met2;;0.121                                            
+R87;C0.$134.met1;C0.$135.met2;;4.5                                              
+R88;C0.$134.met1;C0.$55.met1;;0.025                                             
+R89;C0.$134.met1;C0.$59.met1;;0.112                                             
+R90;C0.$135.met2;C0.$139.met2;;0.121                                            
+R91;C0.$136.met1;C0.$137.met2;;4.5                                              
+R92;C0.$136.met1;C0.$140.met1;;0.121                                            
+R93;C0.$136.met1;C0.$57.met1;;0.009                                             
+R94;C0.$137.met2;C0.$141.met2;;0.121                                            
+R95;C0.$138.met1;C0.$139.met2;;4.5                                              
+R96;C0.$138.met1;C0.$142.met1;;0.121                                            
+R97;C0.$138.met1;C0.$59.met1;;0.009                                             
+R98;C0.$139.met2;C0.$143.met2;;0.121                                            
+R99;C0.$14.li1;C0.$15.met1;;9.3                                                 
+R100;C0.$14.li1;C0.$16.li1;;13.964                                              
+R101;C0.$140.met1;C0.$141.met2;;4.5                                             
+R102;C0.$140.met1;C0.$61.met1;;0.006                                            
+R103;C0.$141.met2;C0.$145.met2;;0.264                                           
+R104;C0.$142.met1;C0.$143.met2;;4.5                                             
+R105;C0.$142.met1;C0.$63.met1;;0.006                                            
+R106;C0.$143.met2;C0.$163.met2;;0.264                                           
+R107;C0.$144.met1;C0.$145.met2;;4.5                                             
+R108;C0.$144.met1;C0.$61.met1;;0.259                                            
+R109;C0.$144.met1;C0.$65.met1;;0.068                                            
+R110;C0.$145.met2;C0.$147.met2;;0.121                                           
+R111;C0.$146.met1;C0.$147.met2;;4.5                                             
+R112;C0.$146.met1;C0.$65.met1;;0.053                                            
+R113;C0.$146.met1;C0.$67.met1;;0.083                                            
+R114;C0.$147.met2;C0.$149.met2;;0.121                                           
+R115;C0.$148.met1;C0.$149.met2;;4.5                                             
+R116;C0.$148.met1;C0.$67.met1;;0.038                                            
+R117;C0.$148.met1;C0.$69.met1;;0.098                                            
+R118;C0.$149.met2;C0.$151.met2;;0.121                                           
+R119;C0.$15.met1;C0.$96.met1;;0.023                                             
+R120;C0.$15.met1;C0.$98.met1;;0.098                                             
+R121;C0.$150.met1;C0.$151.met2;;4.5                                             
+R122;C0.$150.met1;C0.$69.met1;;0.023                                            
+R123;C0.$150.met1;C0.$71.met1;;0.114                                            
+R124;C0.$152.met1;C0.$153.met2;;4.5                                             
+R125;C0.$152.met1;C0.$71.met1;;0.008                                            
+R126;C0.$152.met1;C0.$73.met1;;0.129                                            
+R127;C0.$154.met1;C0.$155.met2;;4.5                                             
+R128;C0.$154.met1;C0.$75.met1;;0.129                                            
+R129;C0.$154.met1;C0.$77.met1;;0.008                                            
+R130;C0.$155.met2;C0.$157.met2;;0.121                                           
+R131;C0.$156.met1;C0.$157.met2;;4.5                                             
+R132;C0.$156.met1;C0.$77.met1;;0.114                                            
+R133;C0.$156.met1;C0.$79.met1;;0.023                                            
+R134;C0.$157.met2;C0.$159.met2;;0.121                                           
+R135;C0.$158.met1;C0.$159.met2;;4.5                                             
+R136;C0.$158.met1;C0.$79.met1;;0.098                                            
+R137;C0.$158.met1;C0.$81.met1;;0.038                                            
+R138;C0.$159.met2;C0.$161.met2;;0.121                                           
+R139;C0.$16.li1;C0.$17.met1;;9.3                                                
+R140;C0.$16.li1;C0.$18.li1;;13.964                                              
+R141;C0.$160.met1;C0.$161.met2;;4.5                                             
+R142;C0.$160.met1;C0.$81.met1;;0.083                                            
+R143;C0.$160.met1;C0.$83.met1;;0.053                                            
+R144;C0.$161.met2;C0.$163.met2;;0.121                                           
+R145;C0.$162.met1;C0.$163.met2;;4.5                                             
+R146;C0.$162.met1;C0.$63.met1;;0.259                                            
+R147;C0.$162.met1;C0.$83.met1;;0.068                                            
+R148;C0.$164.met2;C0.P0.met2;;0.636                                             
+R149;C0.$165.met2;C0.P0.met2;;0.636                                             
+R150;C0.$17.met1;C0.$98.met1;;0.038                                             
+R151;C0.$18.li1;C0.$19.met1;;9.3                                                
+R152;C0.$18.li1;C0.$22.li1;;33.454                                              
+R153;C0.$2.li1;C0.$3.met1;;9.3                                                  
+R154;C0.$2.li1;C0.$4.li1;;13.964                                                
+R155;C0.$20.li1;C0.$21.met1;;9.3                                                
+R156;C0.$20.li1;C0.$24.li1;;13.964                                              
+R157;C0.$21.met1;C0.$84.met1;;0.259                                             
+R158;C0.$22.li1;C0.$23.met1;;9.3                                                
+R159;C0.$22.li1;C0.$26.li1;;13.964                                              
+R160;C0.$24.li1;C0.$25.met1;;9.3                                                
+R161;C0.$24.li1;C0.$28.li1;;13.964                                              
+R162;C0.$26.li1;C0.$27.met1;;9.3                                                
+R163;C0.$26.li1;C0.$30.li1;;13.964                                              
+R164;C0.$28.li1;C0.$29.met1;;9.3                                                
+R165;C0.$28.li1;C0.$32.li1;;13.964                                              
+R166;C0.$3.met1;C0.$86.met1;;0.083                                              
+R167;C0.$3.met1;C0.$88.met1;;0.038                                              
+R168;C0.$30.li1;C0.$31.met1;;9.3                                                
+R169;C0.$30.li1;C0.$34.li1;;13.964                                              
+R170;C0.$32.li1;C0.$33.met1;;9.3                                                
+R171;C0.$32.li1;C0.$36.li1;;13.964                                              
+R172;C0.$34.li1;C0.$35.met1;;9.3                                                
+R173;C0.$34.li1;C0.$38.li1;;13.964                                              
+R174;C0.$36.li1;C0.$37.met1;;9.3                                                
+R175;C0.$36.li1;C0.$40.li1;;13.964                                              
+R176;C0.$37.met1;C0.$41.met1;;0.136                                             
+R177;C0.$38.li1;C0.$39.met1;;9.3                                                
+R178;C0.$38.li1;C0.$42.li1;;13.964                                              
+R179;C0.$39.met1;C0.$43.met1;;0.136                                             
+R180;C0.$4.li1;C0.$5.met1;;9.3                                                  
+R181;C0.$4.li1;C0.$6.li1;;13.964                                                
+R182;C0.$40.li1;C0.$41.met1;;9.3                                                
+R183;C0.$40.li1;C0.$44.li1;;13.964                                              
+R184;C0.$41.met1;C0.$45.met1;;0.136                                             
+R185;C0.$42.li1;C0.$43.met1;;9.3                                                
+R186;C0.$42.li1;C0.$46.li1;;13.964                                              
+R187;C0.$43.met1;C0.$47.met1;;0.136                                             
+R188;C0.$44.li1;C0.$45.met1;;9.3                                                
+R189;C0.$44.li1;C0.$48.li1;;13.964                                              
+R190;C0.$46.li1;C0.$47.met1;;9.3                                                
+R191;C0.$46.li1;C0.$50.li1;;13.964                                              
+R192;C0.$48.li1;C0.$49.met1;;9.3                                                
+R193;C0.$48.li1;C0.$52.li1;;13.964                                              
+R194;C0.$5.met1;C0.$88.met1;;0.098                                              
+R195;C0.$5.met1;C0.$90.met1;;0.023                                              
+R196;C0.$50.li1;C0.$51.met1;;9.3                                                
+R197;C0.$50.li1;C0.$54.li1;;13.964                                              
+R198;C0.$52.li1;C0.$53.met1;;9.3                                                
+R199;C0.$52.li1;C0.$56.li1;;13.964                                              
+R200;C0.$54.li1;C0.$55.met1;;9.3                                                
+R201;C0.$54.li1;C0.$58.li1;;13.964                                              
+R202;C0.$56.li1;C0.$57.met1;;9.3                                                
+R203;C0.$56.li1;C0.$60.li1;;13.964                                              
+R204;C0.$58.li1;C0.$59.met1;;9.3                                                
+R205;C0.$58.li1;C0.$62.li1;;13.964                                              
+R206;C0.$6.li1;C0.$7.met1;;9.3                                                  
+R207;C0.$6.li1;C0.$8.li1;;13.964                                                
+R208;C0.$60.li1;C0.$61.met1;;9.3                                                
+R209;C0.$60.li1;C0.$64.li1;;33.454                                              
+R210;C0.$62.li1;C0.$63.met1;;9.3                                                
+R211;C0.$62.li1;C0.$82.li1;;33.454                                              
+R212;C0.$64.li1;C0.$65.met1;;9.3                                                
+R213;C0.$64.li1;C0.$66.li1;;13.964                                              
+R214;C0.$66.li1;C0.$67.met1;;9.3                                                
+R215;C0.$66.li1;C0.$68.li1;;13.964                                              
+R216;C0.$68.li1;C0.$69.met1;;9.3                                                
+R217;C0.$68.li1;C0.$70.li1;;13.964                                              
+R218;C0.$7.met1;C0.$90.met1;;0.114                                              
+R219;C0.$7.met1;C0.$92.met1;;0.008                                              
+R220;C0.$70.li1;C0.$71.met1;;9.3                                                
+R221;C0.$70.li1;C0.$72.li1;;13.964                                              
+R222;C0.$72.li1;C0.$73.met1;;9.3                                                
+R223;C0.$72.li1;C0.$74.li1;;13.964                                              
+R224;C0.$73.met1;C0.$75.met1;;0.136                                             
+R225;C0.$74.li1;C0.$75.met1;;9.3                                                
+R226;C0.$74.li1;C0.$76.li1;;13.964                                              
+R227;C0.$76.li1;C0.$77.met1;;9.3                                                
+R228;C0.$76.li1;C0.$78.li1;;13.964                                              
+R229;C0.$78.li1;C0.$79.met1;;9.3                                                
+R230;C0.$78.li1;C0.$80.li1;;13.964                                              
+R231;C0.$8.li1;C0.$9.met1;;9.3                                                  
+R232;C0.$80.li1;C0.$81.met1;;9.3                                                
+R233;C0.$80.li1;C0.$82.li1;;13.964                                              
+R234;C0.$82.li1;C0.$83.met1;;9.3                                                
+R235;C0.$84.met1;C0.$85.met2;;4.5                                               
+R236;C0.$85.met2;C0.$87.met2;;0.121                                             
+R237;C0.$86.met1;C0.$87.met2;;4.5                                               
+R238;C0.$87.met2;C0.$89.met2;;0.121                                             
+R239;C0.$88.met1;C0.$89.met2;;4.5                                               
+R240;C0.$89.met2;C0.P0.met2;;0.005                                              
+R241;C0.$9.met1;C0.$92.met1;;0.129                                              
+R242;C0.$90.met1;C0.$91.met2;;4.5                                               
+R243;C0.$91.met2;C0.$93.met2;;0.121                                             
+R244;C0.$91.met2;C0.P0.met2;;0.117                                              
+R245;C0.$92.met1;C0.$93.met2;;4.5                                               
+R246;C0.$94.met1;C0.$95.met2;;4.5                                               
+R247;C0.$95.met2;C0.$97.met2;;0.121                                             
+R248;C0.$96.met1;C0.$97.met2;;4.5                                               
+R249;C0.$97.met2;C0.$99.met2;;0.121                                             
+R250;C0.$98.met1;C0.$99.met2;;4.5                                               
+R251;C1;C1.P0.met2;;0.176                                                       
+R252;C1.$0.li1;C1.$1.met1;;9.3                                                  
+R253;C1.$0.li1;C1.$2.li1;;17.067                                                
+R254;C1.$1.met1;C1.$16.met1;;0.058                                              
+R255;C1.$1.met1;C1.$18.met1;;0.09                                               
+R256;C1.$10.li1;C1.$11.met1;;9.3                                                
+R257;C1.$10.li1;C1.$12.li1;;17.067                                              
+R258;C1.$10.li1;C1.$8.li1;;17.067                                               
+R259;C1.$11.met1;C1.$44.met1;;0.053                                             
+R260;C1.$11.met1;C1.$46.met1;;0.095                                             
+R261;C1.$12.li1;C1.$13.met1;;9.3                                                
+R262;C1.$12.li1;C1.$14.li1;;17.067                                              
+R263;C1.$13.met1;C1.$46.met1;;0.072                                             
+R264;C1.$13.met1;C1.$48.met1;;0.076                                             
+R265;C1.$14.li1;C1.$15.met1;;9.3                                                
+R266;C1.$15.met1;C1.$48.met1;;0.09                                              
+R267;C1.$15.met1;C1.$50.met1;;0.058                                             
+R268;C1.$16.met1;C1.$17.met2;;4.5                                               
+R269;C1.$17.met2;C1.$19.met2;;0.148                                             
+R270;C1.$17.met2;C1.P0.met2;;0.042                                              
+R271;C1.$18.met1;C1.$19.met2;;4.5                                               
+R272;C1.$18.met1;C1.$3.met1;;0.076                                              
+R273;C1.$19.met2;C1.P0.met2;;0.069                                              
+R274;C1.$2.li1;C1.$3.met1;;9.3                                                  
+R275;C1.$2.li1;C1.$4.li1;;17.067                                                
+R276;C1.$20.met1;C1.$21.met2;;4.5                                               
+R277;C1.$20.met1;C1.$3.met1;;0.072                                              
+R278;C1.$20.met1;C1.$5.met1;;0.095                                              
+R279;C1.$21.met2;C1.$23.met2;;0.148                                             
+R280;C1.$21.met2;C1.P0.met2;;0.079                                              
+R281;C1.$22.met1;C1.$23.met2;;4.5                                               
+R282;C1.$22.met1;C1.$5.met1;;0.053                                              
+R283;C1.$22.met1;C1.$7.met1;;0.113                                              
+R284;C1.$23.met2;C1.P0.met2;;0.032                                              
+R285;C1.$24.met1;C1.$25.met2;;4.5                                               
+R286;C1.$24.met1;C1.$52.met1;;0.104                                             
+R287;C1.$24.met1;C1.$7.met1;;0.035                                              
+R288;C1.$25.met2;C1.P0.met2;;0.058                                              
+R289;C1.$26.met1;C1.$27.met2;;4.5                                               
+R290;C1.$26.met1;C1.$28.met1;;0.125                                             
+R291;C1.$27.met2;C1.$29.met2;;0.148                                             
+R292;C1.$28.met1;C1.$29.met2;;4.5                                               
+R293;C1.$28.met1;C1.$30.met1;;0.125                                             
+R294;C1.$29.met2;C1.$31.met2;;0.148                                             
+R295;C1.$30.met1;C1.$31.met2;;4.5                                               
+R296;C1.$30.met1;C1.$32.met1;;0.125                                             
+R297;C1.$31.met2;C1.$33.met2;;0.148                                             
+R298;C1.$32.met1;C1.$33.met2;;4.5                                               
+R299;C1.$32.met1;C1.$52.met1;;0.197                                             
+R300;C1.$33.met2;C1.P0.met2;;0.171                                              
+R301;C1.$34.met1;C1.$35.met2;;4.5                                               
+R302;C1.$34.met1;C1.$36.met1;;0.125                                             
+R303;C1.$34.met1;C1.$52.met1;;0.197                                             
+R304;C1.$35.met2;C1.$37.met2;;0.148                                             
+R305;C1.$35.met2;C1.P0.met2;;0.234                                              
+R306;C1.$36.met1;C1.$37.met2;;4.5                                               
+R307;C1.$36.met1;C1.$38.met1;;0.125                                             
+R308;C1.$37.met2;C1.$39.met2;;0.148                                             
+R309;C1.$38.met1;C1.$39.met2;;4.5                                               
+R310;C1.$38.met1;C1.$40.met1;;0.125                                             
+R311;C1.$39.met2;C1.$41.met2;;0.148                                             
+R312;C1.$4.li1;C1.$5.met1;;9.3                                                  
+R313;C1.$4.li1;C1.$6.li1;;17.067                                                
+R314;C1.$40.met1;C1.$41.met2;;4.5                                               
+R315;C1.$42.met1;C1.$43.met2;;4.5                                               
+R316;C1.$42.met1;C1.$52.met1;;0.104                                             
+R317;C1.$42.met1;C1.$9.met1;;0.035                                              
+R318;C1.$43.met2;C1.P0.met2;;0.058                                              
+R319;C1.$44.met1;C1.$45.met2;;4.5                                               
+R320;C1.$44.met1;C1.$9.met1;;0.113                                              
+R321;C1.$45.met2;C1.$47.met2;;0.148                                             
+R322;C1.$45.met2;C1.P0.met2;;0.032                                              
+R323;C1.$46.met1;C1.$47.met2;;4.5                                               
+R324;C1.$47.met2;C1.P0.met2;;0.079                                              
+R325;C1.$48.met1;C1.$49.met2;;4.5                                               
+R326;C1.$49.met2;C1.$51.met2;;0.148                                             
+R327;C1.$49.met2;C1.P0.met2;;0.069                                              
+R328;C1.$50.met1;C1.$51.met2;;4.5                                               
+R329;C1.$51.met2;C1.P0.met2;;0.042                                              
+R330;C1.$6.li1;C1.$7.met1;;9.3                                                  
+R331;C1.$6.li1;C1.$8.li1;;43.615                                                
+R332;C1.$8.li1;C1.$9.met1;;9.3                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.csv                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[21:32:57] INFO     Removing whiteboxed device $1         netlist_expander.py:77
+Wrote expanded netlist to:                                                      
+/tmp/tmp23uc37h9/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.spice                  
+[21:32:57] WARNING  The extracted netlist is inconsistent with  kpex_cli.py:1075
+                    the LVS netlist:                                            
+                      - port SUB touches nothing                                
