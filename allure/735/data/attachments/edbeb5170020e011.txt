@@ -1,0 +1,8 @@
+INFO     __kpex__:kpex_cli.py:1182 Cache miss: there is no cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1183 /tmp/lvs_run_cq_3ffth/.kpex_cache/ihp-sg13cmos5l/tmp/lvs_run_cq_3ffth/cell.gds/cell.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:111 klayout -b -r /tmp/lvs_run_cq_3ffth/deck/sg13cmos5l.lvs -rd input=/tmp/lvs_run_cq_3ffth/cell.gds -rd report=/tmp/lvs_run_cq_3ffth/cell.lvsdb.gz -rd target_netlist=/tmp/lvs_run_cq_3ffth/cell_extracted.cir -rd schematic=/tmp/lvs_run_cq_3ffth/cell.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false -rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd no_simplify=true -rd verbose=false
+SUBPROCESS __kpex__:lvs_runner.py:112 /tmp/lvs_run_cq_3ffth/cell_lvs.log
+SUBPROCESS __kpex__:lvs_runner.py:133 ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file: /pdk/rule_decks//sram_integration.lvs (errno=2) in MacroInterpreter::include_expansion
+SUBPROCESS __kpex__:lvs_runner.py:133 ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs (errno=2) in MacroInterpreter::include_expansion in Executable::execute
+SUBPROCESS __kpex__:lvs_runner.py:133   :/built-in-macros/lvs_interpreters.lym:27:in 'RBA::MacroInterpreter#include_expansion'
+SUBPROCESS __kpex__:lvs_runner.py:133   :/built-in-macros/lvs_interpreters.lym:27:in 'LVS::LVSExecutable#execute'
