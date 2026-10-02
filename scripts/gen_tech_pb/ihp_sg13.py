@@ -89,13 +89,13 @@ class TechBuilder:
         add_computed_layer(tech, PTAP,  KREG, "ptap",           (65, 244),    "Activ",     "Computed layer for ptap")
 
         add_computed_layer(tech, METAL, KREG, "poly_con",       (5, 0),       "GatPoly",   "Computed layer for GatPoly")
-        add_computed_layer(tech, METAL, KREG, "metal1_con",     (8, 0),       "Metal1",    "Computed layer for Metal1")
-        add_computed_layer(tech, METAL, KREG, "metal2_con",     (10, 0),      "Metal2",    "Computed layer for Metal2")
-        add_computed_layer(tech, METAL, KREG, "metal3_con",     (30, 0),      "Metal3",    "Computed layer for Metal3")
-        add_computed_layer(tech, METAL, KREG, "metal4_con",     (50, 0),      "Metal4",    "Computed layer for Metal4")
+        add_computed_layer(tech, METAL, KREG, "metal1_n_mom",   (8, 0),       "Metal1",    "Computed layer for Metal1 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal2_n_mom",   (10, 0),      "Metal2",    "Computed layer for Metal2 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal3_n_mom",   (30, 0),      "Metal3",    "Computed layer for Metal3 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal4_n_mom",   (50, 0),      "Metal4",    "Computed layer for Metal4 (case where no MOM cap)")
 
         if self.is_g2:
-            add_computed_layer(tech, METAL, KREG, "metal5_n_cap",   (67, 0),      "Metal5",    "Computed layer for Metal5 (case where no MiM cap)")
+            add_computed_layer(tech, METAL, KREG, "metal5_n_cap",   (67, 0),      "Metal5",    "Computed layer for Metal5 (case where no MiM or MOM cap)")
 
         add_computed_layer(tech, METAL, KREG, "topmetal1_con",  (126, 0),     "TopMetal1", "Computed layer for TopMetal1")
 
@@ -130,9 +130,18 @@ class TechBuilder:
             add_computed_layer(tech, MIM,   KCAP, "metal5_cap",     (67, 0),      "Metal5",    "Computed layer for Metal5, case MiM cap")
             add_computed_layer(tech, MIM,   KCAP, "cmim_top",       (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5")
 
-        # NOTE: there are no existing SPICE models for MOM caps (as was with sky130A)
-        #       otherwise they should also be declared as ComputedLayerInfo.KIND_DEVICE_CAPACITOR
-        #       and extracted accordingly in the LVS script, to allow blackboxing
+        # NOTE: the fingers of the MOM caps (cap_cmomi, cap_cmomf, the metal within their markers)
+        #       are on the GDS pairs of the regular metal, but with --blackbox, the capacitances between them
+        #       are left to the device models. Unlike the models of sky130A's VPP caps (KIND_DEVICE_CAPACITOR),
+        #       these have no substrate terminal, so the capacitances of the fingers to the substrate
+        #       and to other nets (e.g. a wire across) are extracted.
+        #       But the model of cap_cmomi has a substrate shunt (to the global ground 0) of its own
+        add_computed_layer(tech, METAL, KPLT, "metal1_mom",     (8, 0),       "Metal1",    "Metal1 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal2_mom",     (10, 0),      "Metal2",    "Metal2 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal3_mom",     (30, 0),      "Metal3",    "Metal3 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal4_mom",     (50, 0),      "Metal4",    "Metal4 of MOM caps (within their markers)")
+        if self.is_g2:
+            add_computed_layer(tech, METAL, KPLT, "metal5_mom",     (67, 0),      "Metal5",    "Metal5 of MOM caps (within their markers)")
 
         add_computed_layer(tech, METAL, KPIN, "poly_pin_con",       (5, 2),    "GatPoly.pin",    "Poly pin")
         add_computed_layer(tech, METAL, KPIN, "metal1_pin_con",     (8, 2),    "Metal1.pin",     "Metal1 pin")
@@ -344,20 +353,20 @@ class TechBuilder:
         # CONTACT:  contact,         name,            layer_below,     metal_above,     thickness,               width, spacing, border
         #                            (LVS)            (LVS)            (LVS)
         #--------------------------------------------------------------------------------------------------------------------------------
-        set_contact(contn,           "cont_nsd_con",  "nsd_fet",       "metal1_con",    0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
-        set_contact(contd,           "cont_psd_con",  "psd_fet",       "metal1_con",    0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
-        set_contact(contp,           "cont_poly_con", "poly_con",      "metal1_con",    conp_thickness,          0.16,  0.18,    0.0)    # TODO: spacing
-        set_contact(via1,            "via1_drw",      "metal1_con",    "metal2_con",    via1_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
-        set_contact(via2,            "via2_drw",      "metal2_con",    "metal3_con",    via2_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
-        set_contact(via3,            "via3_drw",      "metal3_con",    "metal4_con",    via3_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
+        set_contact(contn,           "cont_nsd_con",  "nsd_fet",       "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
+        set_contact(contd,           "cont_psd_con",  "psd_fet",       "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
+        set_contact(contp,           "cont_poly_con", "poly_con",      "metal1_n_mom",  conp_thickness,          0.16,  0.18,    0.0)    # TODO: spacing
+        set_contact(via1,            "via1_drw",      "metal1_n_mom",  "metal2_n_mom",  via1_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
+        set_contact(via2,            "via2_drw",      "metal2_n_mom",  "metal3_n_mom",  via2_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
+        set_contact(via3,            "via3_drw",      "metal3_n_mom",  "metal4_n_mom",  via3_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
         if self.is_g2:
-            set_contact(via4,          "via4_drw",      "metal4_con",    "metal5_n_cap",  via4_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
+            set_contact(via4,          "via4_drw",      "metal4_n_mom",  "metal5_n_cap",  via4_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
             set_contact(topvia1_n_cap, "topvia1_n_cap", "metal5_n_cap",  "topmetal1_con", topvia1_ncap_thickness,  0.42,  0.42,    0.005)  # border: or 0.36
             set_contact(mim_via,       "mim_via",       "cmim_top",      "topmetal1_con", mim_via_thickness,       0.42,  0.42,    0.005)  # border: or 0.36
             set_contact(topvia2,       "topvia2_drw",   "topmetal1_con", "topmetal2_con", topvia2_thickness,       0.9,   1.06,    0.5)
         else:
             # CMOS5L has no Metal5, so TopVia1 lands on Metal4
-            set_contact(topvia1_n_cap, "topvia1_n_cap", "metal4_con",    "topmetal1_con", topvia1_ncap_thickness,  0.42,  0.42,    0.005)  # border: or 0.36
+            set_contact(topvia1_n_cap, "topvia1_n_cap", "metal4_n_mom",  "topmetal1_con", topvia1_ncap_thickness,  0.42,  0.42,    0.005)  # border: or 0.36
         # TODO: refine via rules!
 
         # NOTE:  Contact arrays defined at 200 spacing for large array rule (5x5), otherwise spacing is 180.
@@ -404,9 +413,9 @@ class TechBuilder:
         # resistance values are in mΩ / CNT
         #                         contact_layer,   layer_below,  layer_above,     resistance
         #                         (LVS)            (LVS)         (LVS)
-        add_contact_resistance(ri, "cont_nsd_con",  "nsd_fet",    "metal1_con",    17000)  # Cont over nSD-Activ
-        add_contact_resistance(ri, "cont_psd_con",  "psd_fet",    "metal1_con",    17000)  # Cont over pSD-Activ
-        add_contact_resistance(ri, "cont_poly_con", "poly_con",   "metal1_con",    15000)  # Cont over GatPoly
+        add_contact_resistance(ri, "cont_nsd_con",  "nsd_fet",    "metal1_n_mom",  17000)  # Cont over nSD-Activ
+        add_contact_resistance(ri, "cont_psd_con",  "psd_fet",    "metal1_n_mom",  17000)  # Cont over pSD-Activ
+        add_contact_resistance(ri, "cont_poly_con", "poly_con",   "metal1_n_mom",  15000)  # Cont over GatPoly
 
         # resistance values are in mΩ / CNT
         #                     via_layer,  resistance

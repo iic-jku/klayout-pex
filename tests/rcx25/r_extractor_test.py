@@ -51,7 +51,7 @@ def sky130a_tech() -> tech_pb2.Technology:
 
 def r_extractor(tech: tech_pb2.Technology,
                 top_cell: str = 'rfnmos_w1u_l0u72',
-                lvsdb_file_name: str = 'rfnmos_w1u_l0u72_broken_rfmos_model_mapping.lvsdb.gz',
+                lvsdb_file_name: str = 'rfnmos_w1u_l0u72.lvsdb.gz',
                 skip_simplify: bool = False) -> RExtractor:
     lvsdb = kdb.LayoutVsSchematic()
     lvsdb.read(os.path.join(REPO_DIR, 'testdata', 'klayout', 'lvs', lvsdb_file_name))
@@ -91,27 +91,27 @@ class RExtractorTechTest(unittest.TestCase):
         tech = ihp_sg13g2_tech()
         del tech.process_parasitics.resistance.contacts[:]
         self.assert_unmodeled_layers_error(tech,
-                                           "Cont (LVS cont_nsd_con): no contact resistance for nsd_fet",
-                                           "Cont (LVS cont_poly_con): no contact resistance for poly_con")
+                                           "Cont (LVS cont_poly_con): no contact resistance for poly_con",
+                                           "Cont (LVS cont_nsd_con): no contact resistance for nsd_fet")
 
     def test_metal_without_sheet_resistance_is_an_error(self):
         # NOTE: it crashed with an AttributeError on the missing resistance
         tech = ihp_sg13g2_tech()
         layers = tech.process_parasitics.resistance.layers
         layers.remove(next(r for r in layers if r.layer_name == 'Metal1'))
-        self.assert_unmodeled_layers_error(tech, "Metal1 (LVS metal1_con): no sheet resistance")
+        self.assert_unmodeled_layers_error(tech, "Metal1 (LVS metal1_n_mom): no sheet resistance")
 
     def test_mim_cap_top_plate_is_a_conductor(self):
         # NOTE: the white-box extraction keeps the top plates of the MIM caps (e.g. sky130A capm, IHP cmim_top),
         #       which stopped it with "unhandled layer purpose PURPOSE_MIM_CAP", here Metal1 stands in for one
         tech = ihp_sg13g2_tech()
         for layer in tech.lvs_computed_layers:
-            if layer.layer_info.name == 'metal1_con':
+            if layer.layer_info.name == 'metal1_n_mom':
                 layer.layer_info.purpose = tech_pb2.LayerInfo.PURPOSE_MIM_CAP
 
         rex_tech = r_extractor(tech).prepare_r_extractor_tech_pb(RExtractorTech())
 
-        self.assertEqual([0.11], [c.resistance for c in rex_tech.conductors if c.layer.lvs_layer_name == 'metal1_con'])
+        self.assertEqual([0.11], [c.resistance for c in rex_tech.conductors if c.layer.lvs_layer_name == 'metal1_n_mom'])
 
     def test_layer_modeled_by_another_layer_of_its_gds_pair_is_no_error(self):
         # e.g. sky130A mcon_vpp (the vias within MOM caps), on the GDS pair of mcon_con:
