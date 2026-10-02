@@ -1,0 +1,52 @@
+[23:19:09] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1243
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox y --gds                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz --out_dir                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[23:19:10] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:583
+[23:19:10] INFO     No explicit top cell specified, using top    kpex_cli.py:623
+                    cell 'cap_cmomf_w10u_l25u_m2_m4_m5_wire'                    
+[23:19:10] INFO     LVS input schematic not specified (argument  kpex_cli.py:664
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[23:19:10] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1185
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_pat
+terns/cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz/cap_cmomf_w10u_l25u_m2_m4_m5_wire
+.lvsdb.gz                                                                       
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[23:19:10] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1412
+[23:19:10] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1412
+[23:19:10] INFO     (49, 0) -> (via3_drw)                       kpex_cli.py:1412
+[23:19:10] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1412
+[23:19:10] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1412
+[23:19:10] INFO     (67, 0) -> (metal5_mom metal5_n_cap)        kpex_cli.py:1412
+[23:19:10] INFO     (50, 0) -> (metal4_mom)                     kpex_cli.py:1412
+[23:19:10] INFO     (10, 0) -> (metal2_mom)                     kpex_cli.py:1412
+[23:19:10] INFO     (30, 0) -> (metal3_mom)                     kpex_cli.py:1412
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;MINUS;VSUBS;6.757;                                                           
+C2;MINUS;X;1.805;                                                               
+C3;PLUS;VSUBS;6.829;                                                            
+C4;PLUS;X;1.911;                                                                
+C5;VSUBS;X;1.292;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmomf_w10u_l25u_
+m2_m4_m5_wire__cap_cmomf_w10u_l25u_m2_m4_m5_wire/cap_cmomf_w10u_l25u_m2_m4_m5_wi
+re_k25d_pex_netlist.csv                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmomf_w10u_l25u_
+m2_m4_m5_wire__cap_cmomf_w10u_l25u_m2_m4_m5_wire/cap_cmomf_w10u_l25u_m2_m4_m5_wi
+re_k25d_pex_netlist.spice                                                       

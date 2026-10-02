@@ -1,0 +1,538 @@
+WARNING  __kpex__:kpex_cli.py:1243 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1279 main extract --pdk sky130A --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz --out_dir /tmp/tmp8ux15cfv --2.5D --check n
+INFO     __kpex__:kpex_cli.py:583 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:623 No explicit top cell specified, using top cell 'cap_vpp_04p4x04p6_l1m1m2_noshield'
+INFO     __kpex__:kpex_cli.py:664 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+INFO     __kpex__:kpex_cli.py:1182 Cache miss: there is no cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1183 /tmp/tmp8ux15cfv/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:111 klayout -b -r /home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs -rd input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz -rd report=/tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz -rd target_netlist=/tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_extracted.cir -rd schematic=/tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false -rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd no_simplify=true -rd verbose=false
+SUBPROCESS __kpex__:lvs_runner.py:112 /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_lvs.log
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (431892K) : Starting running SKY130 Klayout LVS runset on /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Layout file: /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Number of threads: 22
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Final report: /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : No substrate name given, default name is sky130_gnd
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Extracted netlist with net names: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Extracted netlist with comments in details: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Extracted netlist file: /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_extracted.cir
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : device_scaling: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : Verbose mode: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433216K) : deep mode is enabled.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433472K) : Netlist file: /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_dummy_schematic.spice
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (433472K) : Read in polygons from layers.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (440128K) : Read in labels from layers.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : Evaluate switches start
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : SCH_SIMPLE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : NET_ONLY enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : TOP_LVL_PINS enabled  true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : COMBINE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : PURGE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : PURGE_NETS enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : SIMPLIFY enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : Evaluate switches end.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : SKY130 LVS rules started
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (441280K) : Starting deriving base layers.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (449308K) : Starting MOSFET DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (449308K) : Starting PMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (450460K) : Starting NMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:18 +0000: Memory Usage (451868K) : Starting BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (452380K) : Starting NPN layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (454684K) : Starting PNP layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (455964K) : Starting DIODE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (457244K) : Starting PHOTODIODE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (457884K) : Starting RESISTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (460956K) : Starting FUSE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (461084K) : Starting MIM DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (461340K) : Starting VARACTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (462492K) : Starting INDUCTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (464028K) : Starting VPP CAP DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (467880K) : Starting SONOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (467880K) : Starting SKY130 LVS connectivity setup
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (467880K) : Starting SKY130 LVS connectivity setup (Inter-layer)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting SKY130 LVS connectivity setup (Attaching labels)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting SKY130 LVS connectivity setup (Global connections)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting SKY130 LVS connectivity setup (Multifinger Devices)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS BJT CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS DIODE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS PHOTODIODE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS MIMCAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS VARACTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS RESISTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS INDUCTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS VPP CAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting LVS SONOS CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting MOSFET EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Starting PMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468008K) : Extracting 1.8V PMOS transistor standard
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 1.8V PMOS transistor low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 1.8V PMOS transistor high threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V gate 10.5V drain PMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting NMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 1.8V NMOS transistor standard
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 1.8V NMOS transistor low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 3.3V NMOS transistor native voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V NMOS transistor native voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V gate 10.5V drain NMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting NPN BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__npn_05v5_W1p00L1p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__npn_05v5_W1p00L2p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__npn_11v0_W1p00L1p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting PNP BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting DIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V N+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V N+ diffusion diode low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V N+ diffusion diode native threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 11V N+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V P+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting5V P+ diffusion diode low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 5V P+ diffusion diode high threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting 11V P+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting PHOTODIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting Photodiode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Starting RESISTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_nd device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_nd device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_pd device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_pd device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_iso_pw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_po device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_high_po_0p35 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_high_po_0p69 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_high_po_1p41 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_high_po_2p85 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_high_po_5p73 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_xhigh_po_0p35 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_xhigh_po_0p69 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_xhigh_po_1p41 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_xhigh_po_2p85 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_xhigh_po_5p73 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468136K) : Extracting sky130_fd_pr__res_generic_l1 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__res_generic_m1 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__res_generic_m2 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__res_generic_m3 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__res_generic_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__res_generic_m5 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Starting FUSE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__fuse_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Starting MIMCAP EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__model__cap_mim device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__model__cap_mim_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Starting VARACTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting low threshold voltage varactor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting high threshold voltage varactor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Starting VARACTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468264K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting vpp cap sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Starting SONOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Extracting Build space flash special SONOSFET star
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468520K) : Starting SKY130 LVS comparison section
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468820K) : LVS Total Run time 0.791423 seconds
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468820K) : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468820K) : ERROR : Netlists don't match
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-02 23:24:19 +0000: Memory Usage (468820K) : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+INFO     __kpex__:lvs_runner.py:158 klayout LVS finished with status code 1 after 2.671s, most likely due to a netlist mismatch against the schematic (irrelevant for PEX), see log file: /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_lvs.log
+INFO     __kpex__:kpex_cli.py:1412 (68, 44) -> (via1_vpp via1_con)
+INFO     __kpex__:kpex_cli.py:1412 (67, 20) -> (li_con li_vpp)
+INFO     __kpex__:kpex_cli.py:1412 (67, 44) -> (mcon_con mcon_vpp)
+INFO     __kpex__:kpex_cli.py:1412 (68, 20) -> (met1_con met1_vpp)
+INFO     __kpex__:kpex_cli.py:1412 (69, 20) -> (met2_con met2_vpp)
+INFO     __kpex__:kpex_cli.py:1412 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:extractor.py:267 LVSDB: found 3pins
+WARNING  __kpex__:lvsdb_extractor.py:642 The resistance network has no nodes for these device terminals, as the tech info has no layer for their LVS layer, and they overlap no conductor of their net (e.g. a terminal on the substrate or a well):
+  - sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield terminal W on LVS layer vpp_sub: $1
+SUBPROCESS __kpex__:kpex_cli.py:1044 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1044 C1;C0;C1;7.787;
+SUBPROCESS __kpex__:kpex_cli.py:1044 C2;C0;VSUBS;2.893;
+SUBPROCESS __kpex__:kpex_cli.py:1044 C3;C1;VSUBS;0.829;
+SUBPROCESS __kpex__:kpex_cli.py:1044 R1;C0;C0.$67.met2;;0.066
+SUBPROCESS __kpex__:kpex_cli.py:1044 R2;C0;C0.$69.met2;;0.055
+SUBPROCESS __kpex__:kpex_cli.py:1044 R3;C0.$0.met1;C0.$1.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R4;C0.$0.met1;C0.$101.met1;;0.259
+SUBPROCESS __kpex__:kpex_cli.py:1044 R5;C0.$0.met1;C0.$81.met1;;0.068
+SUBPROCESS __kpex__:kpex_cli.py:1044 R6;C0.$1.met2;C0.$21.met2;;0.264
+SUBPROCESS __kpex__:kpex_cli.py:1044 R7;C0.$1.met2;C0.$3.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R8;C0.$10.met1;C0.$11.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R9;C0.$10.met1;C0.$91.met1;;0.129
+SUBPROCESS __kpex__:kpex_cli.py:1044 R10;C0.$10.met1;C0.$93.met1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1044 R11;C0.$100.li1;C0.$101.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R12;C0.$100.li1;C0.$104.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R13;C0.$100.li1;C0.$80.li1;;33.454
+SUBPROCESS __kpex__:kpex_cli.py:1044 R14;C0.$101.met1;C0.$20.met1;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R15;C0.$102.li1;C0.$103.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R16;C0.$102.li1;C0.$106.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R17;C0.$102.li1;C0.$98.li1;;33.454
+SUBPROCESS __kpex__:kpex_cli.py:1044 R18;C0.$103.met1;C0.$18.met1;;0.259
+SUBPROCESS __kpex__:kpex_cli.py:1044 R19;C0.$103.met1;C0.$22.met1;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R20;C0.$104.li1;C0.$105.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R21;C0.$104.li1;C0.$108.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R22;C0.$105.met1;C0.$24.met1;;0.009
+SUBPROCESS __kpex__:kpex_cli.py:1044 R23;C0.$105.met1;C0.$28.met1;;0.112
+SUBPROCESS __kpex__:kpex_cli.py:1044 R24;C0.$106.li1;C0.$107.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R25;C0.$106.li1;C0.$110.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R26;C0.$107.met1;C0.$26.met1;;0.009
+SUBPROCESS __kpex__:kpex_cli.py:1044 R27;C0.$107.met1;C0.$30.met1;;0.112
+SUBPROCESS __kpex__:kpex_cli.py:1044 R28;C0.$108.li1;C0.$109.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R29;C0.$108.li1;C0.$112.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R30;C0.$109.met1;C0.$28.met1;;0.025
+SUBPROCESS __kpex__:kpex_cli.py:1044 R31;C0.$109.met1;C0.$32.met1;;0.097
+SUBPROCESS __kpex__:kpex_cli.py:1044 R32;C0.$11.met2;C0.$13.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R33;C0.$110.li1;C0.$111.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R34;C0.$110.li1;C0.$114.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R35;C0.$111.met1;C0.$30.met1;;0.025
+SUBPROCESS __kpex__:kpex_cli.py:1044 R36;C0.$111.met1;C0.$34.met1;;0.097
+SUBPROCESS __kpex__:kpex_cli.py:1044 R37;C0.$112.li1;C0.$113.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R38;C0.$112.li1;C0.$116.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R39;C0.$113.met1;C0.$32.met1;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1044 R40;C0.$113.met1;C0.$36.met1;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1044 R41;C0.$114.li1;C0.$115.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R42;C0.$114.li1;C0.$118.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R43;C0.$115.met1;C0.$34.met1;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1044 R44;C0.$115.met1;C0.$38.met1;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1044 R45;C0.$116.li1;C0.$117.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R46;C0.$116.li1;C0.$120.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R47;C0.$117.met1;C0.$121.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R48;C0.$117.met1;C0.$36.met1;;0.055
+SUBPROCESS __kpex__:kpex_cli.py:1044 R49;C0.$118.li1;C0.$119.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R50;C0.$118.li1;C0.$122.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R51;C0.$119.met1;C0.$123.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R52;C0.$119.met1;C0.$38.met1;;0.055
+SUBPROCESS __kpex__:kpex_cli.py:1044 R53;C0.$12.met1;C0.$13.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R54;C0.$12.met1;C0.$93.met1;;0.114
+SUBPROCESS __kpex__:kpex_cli.py:1044 R55;C0.$12.met1;C0.$95.met1;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1044 R56;C0.$120.li1;C0.$121.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R57;C0.$120.li1;C0.$124.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R58;C0.$121.met1;C0.$125.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R59;C0.$122.li1;C0.$123.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R60;C0.$122.li1;C0.$126.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R61;C0.$123.met1;C0.$127.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R62;C0.$124.li1;C0.$125.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R63;C0.$124.li1;C0.$128.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R64;C0.$125.met1;C0.$40.met1;;0.055
+SUBPROCESS __kpex__:kpex_cli.py:1044 R65;C0.$126.li1;C0.$127.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R66;C0.$126.li1;C0.$130.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R67;C0.$127.met1;C0.$42.met1;;0.055
+SUBPROCESS __kpex__:kpex_cli.py:1044 R68;C0.$128.li1;C0.$129.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R69;C0.$128.li1;C0.$132.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R70;C0.$129.met1;C0.$40.met1;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1044 R71;C0.$129.met1;C0.$44.met1;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1044 R72;C0.$13.met2;C0.$15.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R73;C0.$130.li1;C0.$131.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R74;C0.$130.li1;C0.$134.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R75;C0.$131.met1;C0.$42.met1;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1044 R76;C0.$131.met1;C0.$46.met1;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1044 R77;C0.$132.li1;C0.$133.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R78;C0.$132.li1;C0.$136.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R79;C0.$133.met1;C0.$44.met1;;0.097
+SUBPROCESS __kpex__:kpex_cli.py:1044 R80;C0.$133.met1;C0.$48.met1;;0.025
+SUBPROCESS __kpex__:kpex_cli.py:1044 R81;C0.$134.li1;C0.$135.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R82;C0.$134.li1;C0.$138.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R83;C0.$135.met1;C0.$46.met1;;0.097
+SUBPROCESS __kpex__:kpex_cli.py:1044 R84;C0.$135.met1;C0.$50.met1;;0.025
+SUBPROCESS __kpex__:kpex_cli.py:1044 R85;C0.$136.li1;C0.$137.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R86;C0.$136.li1;C0.$140.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R87;C0.$137.met1;C0.$48.met1;;0.112
+SUBPROCESS __kpex__:kpex_cli.py:1044 R88;C0.$137.met1;C0.$52.met1;;0.009
+SUBPROCESS __kpex__:kpex_cli.py:1044 R89;C0.$138.li1;C0.$139.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R90;C0.$138.li1;C0.$142.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R91;C0.$139.met1;C0.$50.met1;;0.112
+SUBPROCESS __kpex__:kpex_cli.py:1044 R92;C0.$139.met1;C0.$54.met1;;0.009
+SUBPROCESS __kpex__:kpex_cli.py:1044 R93;C0.$14.met1;C0.$15.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R94;C0.$14.met1;C0.$95.met1;;0.098
+SUBPROCESS __kpex__:kpex_cli.py:1044 R95;C0.$14.met1;C0.$97.met1;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R96;C0.$140.li1;C0.$141.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R97;C0.$140.li1;C0.$144.li1;;33.454
+SUBPROCESS __kpex__:kpex_cli.py:1044 R98;C0.$141.met1;C0.$56.met1;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R99;C0.$141.met1;C0.$60.met1;;0.259
+SUBPROCESS __kpex__:kpex_cli.py:1044 R100;C0.$142.li1;C0.$143.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R101;C0.$142.li1;C0.$162.li1;;33.454
+SUBPROCESS __kpex__:kpex_cli.py:1044 R102;C0.$143.met1;C0.$58.met1;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R103;C0.$143.met1;C0.$78.met1;;0.259
+SUBPROCESS __kpex__:kpex_cli.py:1044 R104;C0.$144.li1;C0.$145.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R105;C0.$144.li1;C0.$146.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R106;C0.$145.met1;C0.$60.met1;;0.068
+SUBPROCESS __kpex__:kpex_cli.py:1044 R107;C0.$145.met1;C0.$62.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R108;C0.$146.li1;C0.$147.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R109;C0.$146.li1;C0.$148.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R110;C0.$147.met1;C0.$62.met1;;0.083
+SUBPROCESS __kpex__:kpex_cli.py:1044 R111;C0.$147.met1;C0.$64.met1;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R112;C0.$148.li1;C0.$149.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R113;C0.$148.li1;C0.$150.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R114;C0.$149.met1;C0.$64.met1;;0.098
+SUBPROCESS __kpex__:kpex_cli.py:1044 R115;C0.$149.met1;C0.$66.met1;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1044 R116;C0.$15.met2;C0.$17.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R117;C0.$150.li1;C0.$151.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R118;C0.$150.li1;C0.$152.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R119;C0.$151.met1;C0.$66.met1;;0.114
+SUBPROCESS __kpex__:kpex_cli.py:1044 R120;C0.$151.met1;C0.$68.met1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1044 R121;C0.$152.li1;C0.$153.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R122;C0.$152.li1;C0.$154.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R123;C0.$153.met1;C0.$155.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R124;C0.$153.met1;C0.$68.met1;;0.129
+SUBPROCESS __kpex__:kpex_cli.py:1044 R125;C0.$154.li1;C0.$155.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R126;C0.$154.li1;C0.$156.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R127;C0.$155.met1;C0.$70.met1;;0.129
+SUBPROCESS __kpex__:kpex_cli.py:1044 R128;C0.$156.li1;C0.$157.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R129;C0.$156.li1;C0.$158.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R130;C0.$157.met1;C0.$70.met1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1044 R131;C0.$157.met1;C0.$72.met1;;0.114
+SUBPROCESS __kpex__:kpex_cli.py:1044 R132;C0.$158.li1;C0.$159.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R133;C0.$158.li1;C0.$160.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R134;C0.$159.met1;C0.$72.met1;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1044 R135;C0.$159.met1;C0.$74.met1;;0.098
+SUBPROCESS __kpex__:kpex_cli.py:1044 R136;C0.$16.met1;C0.$17.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R137;C0.$16.met1;C0.$97.met1;;0.083
+SUBPROCESS __kpex__:kpex_cli.py:1044 R138;C0.$16.met1;C0.$99.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R139;C0.$160.li1;C0.$161.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R140;C0.$160.li1;C0.$162.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R141;C0.$161.met1;C0.$74.met1;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R142;C0.$161.met1;C0.$76.met1;;0.083
+SUBPROCESS __kpex__:kpex_cli.py:1044 R143;C0.$162.li1;C0.$163.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R144;C0.$163.met1;C0.$76.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R145;C0.$163.met1;C0.$78.met1;;0.068
+SUBPROCESS __kpex__:kpex_cli.py:1044 R146;C0.$164.met2;C0.$29.met2;;0.087
+SUBPROCESS __kpex__:kpex_cli.py:1044 R147;C0.$164.met2;C0.$33.met2;;0.034
+SUBPROCESS __kpex__:kpex_cli.py:1044 R148;C0.$164.met2;C0.P0.met2;;0.636
+SUBPROCESS __kpex__:kpex_cli.py:1044 R149;C0.$165.met2;C0.$21.met2;;0.117
+SUBPROCESS __kpex__:kpex_cli.py:1044 R150;C0.$165.met2;C0.$25.met2;;0.004
+SUBPROCESS __kpex__:kpex_cli.py:1044 R151;C0.$165.met2;C0.P0.met2;;0.636
+SUBPROCESS __kpex__:kpex_cli.py:1044 R152;C0.$17.met2;C0.$19.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R153;C0.$18.met1;C0.$19.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R154;C0.$18.met1;C0.$99.met1;;0.068
+SUBPROCESS __kpex__:kpex_cli.py:1044 R155;C0.$19.met2;C0.$23.met2;;0.264
+SUBPROCESS __kpex__:kpex_cli.py:1044 R156;C0.$2.met1;C0.$3.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R157;C0.$2.met1;C0.$81.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R158;C0.$2.met1;C0.$83.met1;;0.083
+SUBPROCESS __kpex__:kpex_cli.py:1044 R159;C0.$20.met1;C0.$21.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R160;C0.$20.met1;C0.$24.met1;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R161;C0.$22.met1;C0.$23.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R162;C0.$22.met1;C0.$26.met1;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R163;C0.$23.met2;C0.$27.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R164;C0.$24.met1;C0.$25.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R165;C0.$25.met2;C0.P0.met2;;0.1
+SUBPROCESS __kpex__:kpex_cli.py:1044 R166;C0.$26.met1;C0.$27.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R167;C0.$27.met2;C0.$31.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R168;C0.$28.met1;C0.$29.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R169;C0.$29.met2;C0.P0.met2;;0.021
+SUBPROCESS __kpex__:kpex_cli.py:1044 R170;C0.$3.met2;C0.$5.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R171;C0.$30.met1;C0.$31.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R172;C0.$31.met2;C0.$35.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R173;C0.$32.met1;C0.$33.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R174;C0.$33.met2;C0.$37.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R175;C0.$34.met1;C0.$35.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R176;C0.$35.met2;C0.$39.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R177;C0.$36.met1;C0.$37.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R178;C0.$37.met2;C0.P0.met2;;0.693
+SUBPROCESS __kpex__:kpex_cli.py:1044 R179;C0.$38.met1;C0.$39.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R180;C0.$4.met1;C0.$5.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R181;C0.$4.met1;C0.$83.met1;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R182;C0.$4.met1;C0.$85.met1;;0.098
+SUBPROCESS __kpex__:kpex_cli.py:1044 R183;C0.$40.met1;C0.$41.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R184;C0.$41.met2;C0.$45.met2;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1044 R185;C0.$42.met1;C0.$43.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R186;C0.$43.met2;C0.$47.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R187;C0.$44.met1;C0.$45.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R188;C0.$45.met2;C0.$49.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R189;C0.$46.met1;C0.$47.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R190;C0.$47.met2;C0.$51.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R191;C0.$48.met1;C0.$49.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R192;C0.$49.met2;C0.$53.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R193;C0.$5.met2;C0.P0.met2;;0.005
+SUBPROCESS __kpex__:kpex_cli.py:1044 R194;C0.$50.met1;C0.$51.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R195;C0.$51.met2;C0.$55.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R196;C0.$52.met1;C0.$53.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R197;C0.$52.met1;C0.$56.met1;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R198;C0.$53.met2;C0.$57.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R199;C0.$54.met1;C0.$55.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R200;C0.$54.met1;C0.$58.met1;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R201;C0.$55.met2;C0.$59.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R202;C0.$56.met1;C0.$57.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R203;C0.$57.met2;C0.$61.met2;;0.264
+SUBPROCESS __kpex__:kpex_cli.py:1044 R204;C0.$58.met1;C0.$59.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R205;C0.$59.met2;C0.$79.met2;;0.264
+SUBPROCESS __kpex__:kpex_cli.py:1044 R206;C0.$6.met1;C0.$7.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R207;C0.$6.met1;C0.$85.met1;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1044 R208;C0.$6.met1;C0.$87.met1;;0.114
+SUBPROCESS __kpex__:kpex_cli.py:1044 R209;C0.$60.met1;C0.$61.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R210;C0.$61.met2;C0.$63.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R211;C0.$62.met1;C0.$63.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R212;C0.$63.met2;C0.$65.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R213;C0.$64.met1;C0.$65.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R214;C0.$65.met2;C0.$67.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R215;C0.$66.met1;C0.$67.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R216;C0.$68.met1;C0.$69.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R217;C0.$7.met2;C0.$9.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R218;C0.$7.met2;C0.P0.met2;;0.117
+SUBPROCESS __kpex__:kpex_cli.py:1044 R219;C0.$70.met1;C0.$71.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R220;C0.$71.met2;C0.$73.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R221;C0.$72.met1;C0.$73.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R222;C0.$73.met2;C0.$75.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R223;C0.$74.met1;C0.$75.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R224;C0.$75.met2;C0.$77.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R225;C0.$76.met1;C0.$77.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R226;C0.$77.met2;C0.$79.met2;;0.121
+SUBPROCESS __kpex__:kpex_cli.py:1044 R227;C0.$78.met1;C0.$79.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R228;C0.$8.met1;C0.$87.met1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1044 R229;C0.$8.met1;C0.$89.met1;;0.129
+SUBPROCESS __kpex__:kpex_cli.py:1044 R230;C0.$8.met1;C0.$9.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R231;C0.$80.li1;C0.$81.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R232;C0.$80.li1;C0.$82.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R233;C0.$82.li1;C0.$83.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R234;C0.$82.li1;C0.$84.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R235;C0.$84.li1;C0.$85.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R236;C0.$84.li1;C0.$86.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R237;C0.$86.li1;C0.$87.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R238;C0.$86.li1;C0.$88.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R239;C0.$88.li1;C0.$89.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R240;C0.$88.li1;C0.$90.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R241;C0.$89.met1;C0.$91.met1;;0.136
+SUBPROCESS __kpex__:kpex_cli.py:1044 R242;C0.$90.li1;C0.$91.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R243;C0.$90.li1;C0.$92.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R244;C0.$92.li1;C0.$93.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R245;C0.$92.li1;C0.$94.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R246;C0.$94.li1;C0.$95.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R247;C0.$94.li1;C0.$96.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R248;C0.$96.li1;C0.$97.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R249;C0.$96.li1;C0.$98.li1;;13.964
+SUBPROCESS __kpex__:kpex_cli.py:1044 R250;C0.$98.li1;C0.$99.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R251;C1;C1.P0.met2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1044 R252;C1.$0.met1;C1.$1.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R253;C1.$0.met1;C1.$37.met1;;0.058
+SUBPROCESS __kpex__:kpex_cli.py:1044 R254;C1.$1.met2;C1.$3.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R255;C1.$1.met2;C1.P0.met2;;0.042
+SUBPROCESS __kpex__:kpex_cli.py:1044 R256;C1.$10.met1;C1.$11.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R257;C1.$10.met1;C1.$12.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R258;C1.$11.met2;C1.$13.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R259;C1.$12.met1;C1.$13.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R260;C1.$12.met1;C1.$14.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R261;C1.$13.met2;C1.$15.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R262;C1.$14.met1;C1.$15.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R263;C1.$14.met1;C1.$16.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R264;C1.$15.met2;C1.$17.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R265;C1.$16.met1;C1.$17.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R266;C1.$16.met1;C1.$52.met1;;0.197
+SUBPROCESS __kpex__:kpex_cli.py:1044 R267;C1.$17.met2;C1.P0.met2;;0.171
+SUBPROCESS __kpex__:kpex_cli.py:1044 R268;C1.$18.met1;C1.$19.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R269;C1.$18.met1;C1.$20.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R270;C1.$18.met1;C1.$52.met1;;0.197
+SUBPROCESS __kpex__:kpex_cli.py:1044 R271;C1.$19.met2;C1.$21.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R272;C1.$19.met2;C1.P0.met2;;0.234
+SUBPROCESS __kpex__:kpex_cli.py:1044 R273;C1.$2.met1;C1.$3.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R274;C1.$2.met1;C1.$37.met1;;0.09
+SUBPROCESS __kpex__:kpex_cli.py:1044 R275;C1.$2.met1;C1.$39.met1;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R276;C1.$20.met1;C1.$21.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R277;C1.$20.met1;C1.$22.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R278;C1.$21.met2;C1.$23.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R279;C1.$22.met1;C1.$23.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R280;C1.$22.met1;C1.$24.met1;;0.125
+SUBPROCESS __kpex__:kpex_cli.py:1044 R281;C1.$23.met2;C1.$25.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R282;C1.$24.met1;C1.$25.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R283;C1.$26.met1;C1.$27.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R284;C1.$26.met1;C1.$45.met1;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1044 R285;C1.$26.met1;C1.$52.met1;;0.104
+SUBPROCESS __kpex__:kpex_cli.py:1044 R286;C1.$27.met2;C1.P0.met2;;0.058
+SUBPROCESS __kpex__:kpex_cli.py:1044 R287;C1.$28.met1;C1.$29.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R288;C1.$28.met1;C1.$45.met1;;0.113
+SUBPROCESS __kpex__:kpex_cli.py:1044 R289;C1.$28.met1;C1.$47.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R290;C1.$29.met2;C1.$31.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R291;C1.$29.met2;C1.P0.met2;;0.032
+SUBPROCESS __kpex__:kpex_cli.py:1044 R292;C1.$3.met2;C1.P0.met2;;0.069
+SUBPROCESS __kpex__:kpex_cli.py:1044 R293;C1.$30.met1;C1.$31.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R294;C1.$30.met1;C1.$47.met1;;0.095
+SUBPROCESS __kpex__:kpex_cli.py:1044 R295;C1.$30.met1;C1.$49.met1;;0.072
+SUBPROCESS __kpex__:kpex_cli.py:1044 R296;C1.$31.met2;C1.P0.met2;;0.079
+SUBPROCESS __kpex__:kpex_cli.py:1044 R297;C1.$32.met1;C1.$33.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R298;C1.$32.met1;C1.$49.met1;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R299;C1.$32.met1;C1.$51.met1;;0.09
+SUBPROCESS __kpex__:kpex_cli.py:1044 R300;C1.$33.met2;C1.$35.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R301;C1.$33.met2;C1.P0.met2;;0.069
+SUBPROCESS __kpex__:kpex_cli.py:1044 R302;C1.$34.met1;C1.$35.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R303;C1.$34.met1;C1.$51.met1;;0.058
+SUBPROCESS __kpex__:kpex_cli.py:1044 R304;C1.$35.met2;C1.P0.met2;;0.042
+SUBPROCESS __kpex__:kpex_cli.py:1044 R305;C1.$36.li1;C1.$37.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R306;C1.$36.li1;C1.$38.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R307;C1.$38.li1;C1.$39.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R308;C1.$38.li1;C1.$40.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R309;C1.$39.met1;C1.$4.met1;;0.072
+SUBPROCESS __kpex__:kpex_cli.py:1044 R310;C1.$4.met1;C1.$41.met1;;0.095
+SUBPROCESS __kpex__:kpex_cli.py:1044 R311;C1.$4.met1;C1.$5.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R312;C1.$40.li1;C1.$41.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R313;C1.$40.li1;C1.$42.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R314;C1.$41.met1;C1.$6.met1;;0.053
+SUBPROCESS __kpex__:kpex_cli.py:1044 R315;C1.$42.li1;C1.$43.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R316;C1.$42.li1;C1.$44.li1;;43.615
+SUBPROCESS __kpex__:kpex_cli.py:1044 R317;C1.$43.met1;C1.$6.met1;;0.113
+SUBPROCESS __kpex__:kpex_cli.py:1044 R318;C1.$43.met1;C1.$8.met1;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1044 R319;C1.$44.li1;C1.$45.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R320;C1.$44.li1;C1.$46.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R321;C1.$46.li1;C1.$47.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R322;C1.$46.li1;C1.$48.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R323;C1.$48.li1;C1.$49.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R324;C1.$48.li1;C1.$50.li1;;17.067
+SUBPROCESS __kpex__:kpex_cli.py:1044 R325;C1.$5.met2;C1.$7.met2;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1044 R326;C1.$5.met2;C1.P0.met2;;0.079
+SUBPROCESS __kpex__:kpex_cli.py:1044 R327;C1.$50.li1;C1.$51.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1044 R328;C1.$52.met1;C1.$8.met1;;0.104
+SUBPROCESS __kpex__:kpex_cli.py:1044 R329;C1.$6.met1;C1.$7.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R330;C1.$7.met2;C1.P0.met2;;0.032
+SUBPROCESS __kpex__:kpex_cli.py:1044 R331;C1.$8.met1;C1.$9.met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1044 R332;C1.$9.met2;C1.P0.met2;;0.058
+SUBPROCESS __kpex__:kpex_cli.py:1047 /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1063 Wrote expanded netlist to: /tmp/tmp8ux15cfv/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.spice
