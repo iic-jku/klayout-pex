@@ -1,0 +1,113 @@
+WARNING  __kpex__:kpex_cli.py:1243 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1279 main extract --pdk gf180mcuD --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/cap_mim_m4m5.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:583 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:623 No explicit top cell specified, using top cell 'cap_mim_m4m5'
+INFO     __kpex__:kpex_cli.py:664 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1185 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1186 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/cap_mim_m4m5.gds.gz/cap_mim_m4m5.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1412 (81, 0) -> (metal5_con)
+INFO     __kpex__:kpex_cli.py:1412 (41, 244) -> (top_via_cap)
+INFO     __kpex__:kpex_cli.py:1412 (46, 0) -> (metal4_cap metal4_n_cap)
+INFO     __kpex__:kpex_cli.py:1412 (75, 0) -> (fuse_cap)
+INFO     __kpex__:extractor.py:231 LVSDB: found 4pins
+SUBPROCESS __kpex__:kpex_cli.py:1044 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1044 R1;BOT1;BOT1.P0.Metal4;;0.045
+SUBPROCESS __kpex__:kpex_cli.py:1044 R2;BOT2;BOT2.P0.Metal4;;0.085
+SUBPROCESS __kpex__:kpex_cli.py:1044 R3;TOP1;TOP1.$1.Metal5;;0.005
+SUBPROCESS __kpex__:kpex_cli.py:1044 R4;TOP1.$0.FuseTop;TOP1.$1.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R5;TOP1.$0.FuseTop;TOP1.$14.FuseTop;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R6;TOP1.$1.Metal5;TOP1.$15.Metal5;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R7;TOP1.$10.FuseTop;TOP1.$11.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R8;TOP1.$10.FuseTop;TOP1.$20.FuseTop;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R9;TOP1.$11.Metal5;TOP1.$21.Metal5;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R10;TOP1.$14.FuseTop;TOP1.$15.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R11;TOP1.$14.FuseTop;TOP1.$16.FuseTop;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R12;TOP1.$15.Metal5;TOP1.$17.Metal5;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R13;TOP1.$16.FuseTop;TOP1.$17.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R14;TOP1.$16.FuseTop;TOP1.P0.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R15;TOP1.$17.Metal5;TOP1.$19.Metal5;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R16;TOP1.$18.FuseTop;TOP1.$19.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R17;TOP1.$18.FuseTop;TOP1.$20.FuseTop;;0.076
+SUBPROCESS __kpex__:kpex_cli.py:1044 R18;TOP1.$18.FuseTop;TOP1.P0.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R19;TOP1.$19.Metal5;TOP1.$21.Metal5;;0.006
+SUBPROCESS __kpex__:kpex_cli.py:1044 R20;TOP1.$20.FuseTop;TOP1.$21.Metal5;;0.75
+SUBPROCESS __kpex__:kpex_cli.py:1044 R21;TOP2;TOP2.$205.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R22;TOP2.$1.Metal5;TOP2.$119.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R23;TOP2.$1.Metal5;TOP2.$185.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R24;TOP2.$1.Metal5;TOP2.P0.FuseTop;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R25;TOP2.$100.FuseTop;TOP2.$101.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R26;TOP2.$100.FuseTop;TOP2.$102.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R27;TOP2.$100.FuseTop;TOP2.$116.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R28;TOP2.$101.Metal5;TOP2.$103.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R29;TOP2.$101.Metal5;TOP2.$117.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R30;TOP2.$102.FuseTop;TOP2.$103.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R31;TOP2.$102.FuseTop;TOP2.$104.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R32;TOP2.$103.Metal5;TOP2.$105.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R33;TOP2.$104.FuseTop;TOP2.$105.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R34;TOP2.$104.FuseTop;TOP2.$106.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R35;TOP2.$105.Metal5;TOP2.$107.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R36;TOP2.$106.FuseTop;TOP2.$107.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R37;TOP2.$106.FuseTop;TOP2.$108.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R38;TOP2.$107.Metal5;TOP2.$109.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R39;TOP2.$108.FuseTop;TOP2.$109.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R40;TOP2.$108.FuseTop;TOP2.$110.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R41;TOP2.$109.Metal5;TOP2.$111.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R42;TOP2.$110.FuseTop;TOP2.$111.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R43;TOP2.$110.FuseTop;TOP2.$112.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R44;TOP2.$111.Metal5;TOP2.$113.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R45;TOP2.$112.FuseTop;TOP2.$113.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R46;TOP2.$112.FuseTop;TOP2.$114.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R47;TOP2.$113.Metal5;TOP2.$115.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R48;TOP2.$114.FuseTop;TOP2.$115.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R49;TOP2.$116.FuseTop;TOP2.$117.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R50;TOP2.$116.FuseTop;TOP2.$122.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R51;TOP2.$117.Metal5;TOP2.$123.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R52;TOP2.$118.FuseTop;TOP2.$119.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R53;TOP2.$118.FuseTop;TOP2.$120.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R54;TOP2.$118.FuseTop;TOP2.P0.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R55;TOP2.$119.Metal5;TOP2.$121.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R56;TOP2.$120.FuseTop;TOP2.$121.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R57;TOP2.$120.FuseTop;TOP2.$122.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R58;TOP2.$121.Metal5;TOP2.$123.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R59;TOP2.$122.FuseTop;TOP2.$123.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R60;TOP2.$168.FuseTop;TOP2.$169.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R61;TOP2.$168.FuseTop;TOP2.$170.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R62;TOP2.$168.FuseTop;TOP2.$216.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R63;TOP2.$169.Metal5;TOP2.$171.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R64;TOP2.$169.Metal5;TOP2.$217.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R65;TOP2.$170.FuseTop;TOP2.$171.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R66;TOP2.$170.FuseTop;TOP2.$172.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R67;TOP2.$171.Metal5;TOP2.$173.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R68;TOP2.$172.FuseTop;TOP2.$173.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R69;TOP2.$172.FuseTop;TOP2.$174.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R70;TOP2.$173.Metal5;TOP2.$175.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R71;TOP2.$174.FuseTop;TOP2.$175.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R72;TOP2.$174.FuseTop;TOP2.$176.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R73;TOP2.$175.Metal5;TOP2.$177.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R74;TOP2.$176.FuseTop;TOP2.$177.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R75;TOP2.$176.FuseTop;TOP2.$178.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R76;TOP2.$177.Metal5;TOP2.$179.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R77;TOP2.$178.FuseTop;TOP2.$179.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R78;TOP2.$178.FuseTop;TOP2.$180.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R79;TOP2.$179.Metal5;TOP2.$181.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R80;TOP2.$180.FuseTop;TOP2.$181.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R81;TOP2.$180.FuseTop;TOP2.$182.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R82;TOP2.$181.Metal5;TOP2.$183.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R83;TOP2.$182.FuseTop;TOP2.$183.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R84;TOP2.$182.FuseTop;TOP2.$184.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R85;TOP2.$183.Metal5;TOP2.$185.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R86;TOP2.$184.FuseTop;TOP2.$185.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R87;TOP2.$184.FuseTop;TOP2.P0.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R88;TOP2.$204.FuseTop;TOP2.$205.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R89;TOP2.$204.FuseTop;TOP2.$210.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R90;TOP2.$205.Metal5;TOP2.$211.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R91;TOP2.$210.FuseTop;TOP2.$211.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1044 R92;TOP2.$210.FuseTop;TOP2.$216.FuseTop;;0.038
+SUBPROCESS __kpex__:kpex_cli.py:1044 R93;TOP2.$211.Metal5;TOP2.$217.Metal5;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1044 R94;TOP2.$216.FuseTop;TOP2.$217.Metal5;;0.375
+SUBPROCESS __kpex__:kpex_cli.py:1047 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim_m4m5/cap_mim_m4m5_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $2
+SUBPROCESS __kpex__:kpex_cli.py:1063 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim_m4m5/cap_mim_m4m5_k25d_pex_netlist.spice
