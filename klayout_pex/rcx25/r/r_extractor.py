@@ -27,6 +27,7 @@ from typing import *
 
 from klayout_pex.log import (
     subproc,
+    warning,
 )
 
 from ..types import LayerName, NetName
@@ -108,6 +109,11 @@ class RExtractor:
         unmodeled_layers_by_gds_pair: Dict[GDSPair, List[str]] = defaultdict(list)
         modeled_gds_pairs: Set[GDSPair] = set()
 
+        substrate_gds_pairs = {tech.gds_pair_for_computed_layer_name[name]
+                               for name in tech.tech.substrate.lvs_layer_names
+                               if name in tech.gds_pair_for_computed_layer_name}
+        wells_without_resistance: Set[str] = set()
+
         for gds_pair, li in self.pex_context.extracted_layers.items():
             for source_layer in li.source_layers:
                 computed_layer_info = tech.computed_layer_info_by_name.get(source_layer.lvs_layer_name, None)
@@ -133,10 +139,37 @@ class RExtractor:
 
                 match computed_layer_info.layer_info.purpose:
                     case LP.PURPOSE_NWELL | LP.PURPOSE_PWELL:
-                        pass  # TODO!?
+                        # NOTE: a well is a conductor between the contacts over its taps, which land on the well
+                        #       (e.g. sky130A licon_ntap_con), and the device terminals on it (e.g. the PMOS bulks),
+                        #       but the substrate (e.g. IHP pwell_sub, on the GDS pair of pwell), which is ideal,
+                        #       as it is 3D bulk rather than a sheet, so the device terminals on it stay on
+                        #       the node of their net
+                        if gds_pair in substrate_gds_pairs:
+                            continue
+
+                        layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
+                        if layer_resistance is None:
+                            wells_without_resistance.add(layer_description)
+                            continue
+
+                        cond = rex_tech.conductors.add()
+
+                        cond.layer.id = self.pex_context.annotated_layout.layer(*source_layer.gds_pair)
+                        cond.layer.canonical_layer_name = canonical_layer_name
+                        cond.layer.lvs_layer_name = source_layer.lvs_layer_name
+
+                        cond.triangulation_min_b = self.delaunay_b
+                        cond.triangulation_max_area = self.delaunay_amax
+
+                        cond.algorithm = self.substrate_algorithm
+                        cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
+                        modeled_gds_pairs.add(gds_pair)
 
                     case LP.PURPOSE_NTAP | LP.PURPOSE_PTAP:
-                        pass  # TODO!?
+                        # NOTE: no conductor, the contacts over a tap land on the well below it
+                        #       (e.g. sky130A licon_ntap_con on the nwell), neglecting the resistance
+                        #       of the tap itself, like the one of the diffusion (e.g. SkyWater rule SR.diff.1)
+                        continue
 
                     case LP.PURPOSE_N_IMPLANT | LP.PURPOSE_P_IMPLANT:
                         # device terminals
@@ -255,6 +288,11 @@ class RExtractor:
         for gds_pair, descriptions in unmodeled_layers_by_gds_pair.items():
             if gds_pair not in modeled_gds_pairs:
                 unmodeled_layers.extend(descriptions)
+
+        if wells_without_resistance:
+            warning("The resistance network leaves out these wells, as the tech info has no sheet resistance "
+                    "for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:\n" +
+                    '\n'.join(f"  - {well}" for well in sorted(wells_without_resistance)))
 
         if unmodeled_layers:
             raise RExtractionTechError(
@@ -394,6 +432,15 @@ class RExtractor:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
             via_layer_ids.add(c.layer.id)
 
+        LP = tech_pb2.LayerInfo.Purpose
+        well_layer_ids: Set[int] = set()
+        for c in rex_request.tech.conductors:
+            computed_layer_info = self.pex_context.tech.computed_layer_info_by_name.get(c.layer.lvs_layer_name, None)
+            if computed_layer_info and computed_layer_info.layer_info.purpose in (LP.PURPOSE_NWELL, LP.PURPOSE_PWELL):
+                well_layer_ids.add(c.layer.id)
+
+        nets_with_isolated_wells: List[NetName] = []
+
         for net_extraction_request in rex_request.net_extraction_requests:
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
@@ -425,7 +472,17 @@ class RExtractor:
             result_network = rex_result.networks.add()
             result_network.net_name = net_extraction_request.net_name
 
+            # NOTE: LVS may join a well to its net other than by the contacts over its taps,
+            #       e.g. by a label of the net on the well, so it's a piece of the network that joins nothing else.
+            #       It's left out, so that the device terminals on it stay on the node of their net, ideally
+            isolated_well_node_ids = self.isolated_well_node_ids(resistor_network, well_layer_ids)
+            if isolated_well_node_ids:
+                nets_with_isolated_wells.append(result_network.net_name)
+
             for rn in resistor_network.each_node():
+                if rn.object_id() in isolated_well_node_ids:
+                    continue
+
                 node_by_node_id: Dict[int, r_network_pb2.RNode] = {}
 
                 loc = rn.location()
@@ -498,11 +555,52 @@ class RExtractor:
                                            f"as layers of the same name have ports: {', '.join(duplicate_names)}")
 
             for el in resistor_network.each_element():
+                if el.a().object_id() in isolated_well_node_ids:
+                    continue  # NOTE: and so is b, of the same piece
                 r_element = result_network.elements.add()
                 r_element.element_id = el.object_id()
                 r_element.node_a.node_id = el.a().object_id()
                 r_element.node_b.node_id = el.b().object_id()
                 r_element.resistance = el.resistance()
 
+        if nets_with_isolated_wells:
+            warning("The resistance network leaves out the wells of these nets, as no contact joins them "
+                    "to the rest of their net (e.g. a label of the net on the well does), "
+                    "so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets: " +
+                    ', '.join(sorted(nets_with_isolated_wells)))
+
         return rex_result
 
+    @staticmethod
+    def isolated_well_node_ids(resistor_network: klp.RNetwork, well_layer_ids: Set[int]) -> Set[int]:
+        """
+        :return: the nodes of the pieces of the network that are wells only, without a pin,
+                 i.e. the wells no contact joins to the rest of their net
+                 (none if the network is one piece, e.g. a well with the bulks of transistors only)
+        """
+        nodes = list(resistor_network.each_node())
+        if not any(n.layer() in well_layer_ids for n in nodes):
+            return set()
+
+        # the pieces of the network (union-find by node ID)
+        parent: Dict[int, int] = {n.object_id(): n.object_id() for n in nodes}
+
+        def find(node_id: int) -> int:
+            while parent[node_id] != node_id:
+                parent[node_id] = parent[parent[node_id]]
+                node_id = parent[node_id]
+            return node_id
+
+        for el in resistor_network.each_element():
+            parent[find(el.a().object_id())] = find(el.b().object_id())
+
+        pieces: Dict[int, List[klp.RNode]] = defaultdict(list)
+        for n in nodes:
+            pieces[find(n.object_id())].append(n)
+        if len(pieces) < 2:
+            return set()
+
+        return {n.object_id()
+                for piece in pieces.values()
+                if all(n.layer() in well_layer_ids and n.type() != klp.RNodeType.VertexPort for n in piece)
+                for n in piece}

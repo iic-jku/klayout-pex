@@ -26,9 +26,11 @@ from __future__ import annotations
 import os
 from typing import *
 import unittest
+from unittest import mock
 
 import allure
 import klayout.db as kdb
+import klayout.pex as klp
 
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError, RExtractor
@@ -127,6 +129,92 @@ class RExtractorTechTest(unittest.TestCase):
 
         self.assertIn('cont_nsd_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
         self.assertNotIn('cont_poly_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "Tech")
+class RExtractorWellTest(unittest.TestCase):
+    # NOTE: the IHP pwell stands in for a well, unless the tech info names the substrate (pwell_sub, on its GDS pair)
+    @staticmethod
+    def pwell_conductors(resistance: Optional[float], substrate: bool) -> List[Tuple[str, float]]:
+        tech = ihp_sg13g2_tech()
+        if not substrate:
+            del tech.substrate.lvs_layer_names[:]
+        if resistance is not None:
+            tech.process_parasitics.resistance.layers.add(layer_name='PWell', resistance=resistance)
+        rex_tech = r_extractor(tech).prepare_r_extractor_tech_pb(RExtractorTech())
+        return sorted((c.layer.lvs_layer_name, c.resistance) for c in rex_tech.conductors
+                      if c.layer.canonical_layer_name == 'PWell')
+
+    def test_well_is_a_conductor(self):
+        # NOTE: it was left out without a word, so the device terminals on it were ideally on their nets
+        self.assertEqual([('pwell', 3000.0), ('pwell_sub', 3000.0)],
+                         self.pwell_conductors(resistance=3000000, substrate=False))
+
+    def test_substrate_is_no_conductor(self):
+        # NOTE: the substrate is ideal, as it is 3D bulk rather than a sheet
+        with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+            self.assertEqual([], self.pwell_conductors(resistance=3000000, substrate=True))
+        warning_mock.assert_not_called()
+
+    def test_well_without_sheet_resistance_is_no_conductor(self):
+        with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+            self.assertEqual([], self.pwell_conductors(resistance=None, substrate=False))
+        self.assertEqual([
+            "The resistance network leaves out these wells, as the tech info has no sheet resistance for them, "
+            "so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:\n"
+            "  - PWell (LVS pwell)\n"
+            "  - PWell (LVS pwell_sub)"
+        ], [c.args[0] for c in warning_mock.call_args_list])
+
+
+def network_of_metal_and_well(joined_by_via: bool, with_metal: bool = True) -> klp.RNetwork:
+    """
+    A wire (layer 0) with a pin, and a well (layer 1) with a device terminal (e.g. a PMOS bulk),
+    joined by a contact (layer 2), or not
+    """
+    tech = klp.RExtractorTech()
+    tech.skip_simplify = True
+    for layer in (0, 1):
+        conductor = klp.RExtractorTechConductor()
+        conductor.layer = layer
+        conductor.algorithm = klp.Algorithm.SquareCounting
+        conductor.resistance = 1.0
+        tech.add_conductor(conductor)
+    regions = {1: kdb.Region(kdb.Box(0, 0, 10000, 1000))}
+    vertex_ports = {}
+    if with_metal:
+        regions[0] = kdb.Region(kdb.Box(9000, 0, 20000, 1000))
+        vertex_ports[0] = [kdb.Point(19500, 500)]
+    if joined_by_via:
+        via = klp.RExtractorTechVia()
+        via.cut_layer = 2
+        via.bottom_conductor = 1
+        via.top_conductor = 0
+        via.resistance = 1.0
+        tech.add_via(via)
+        regions[2] = kdb.Region(kdb.Box(9400, 400, 9600, 600))
+    polygon_ports = {1: [kdb.Polygon(kdb.Box(1000, 0, 1200, 1000))]}
+    return klp.RNetExtractor(0.001).extract(tech, regions, vertex_ports, polygon_ports)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "Wells")
+class RExtractorIsolatedWellTest(unittest.TestCase):
+    def test_well_joined_by_no_contact_is_isolated(self):
+        # NOTE: e.g. a well joined to its net by a label, its piece of the network would join nothing
+        network = network_of_metal_and_well(joined_by_via=False)
+        self.assertEqual({n.object_id() for n in network.each_node() if n.layer() == 1},
+                         RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
+
+    def test_well_joined_by_contact_is_not_isolated(self):
+        network = network_of_metal_and_well(joined_by_via=True)
+        self.assertEqual(set(), RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
+
+    def test_network_of_a_well_only_is_not_isolated(self):
+        # NOTE: e.g. the well of a standard cell, without taps (sky130_fd_sc_hd__inv_1, VPB)
+        network = network_of_metal_and_well(joined_by_via=False, with_metal=False)
+        self.assertEqual(set(), RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
 
 
 def nfet_li1_redux_networks() -> Dict[str, r_network_pb2.RNetwork]:
