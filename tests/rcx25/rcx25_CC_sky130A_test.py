@@ -472,6 +472,78 @@ C10;VSUBS;W;0.388;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_inverter_over_nwell():
+    # The capacitances of the shapes over the nwell go to its net VPB, the others to the substrate.
+    # They all used to go to the substrate (e.g. VPWR-VSUBS 0.273 fF, which is 0.211 fF and VPB-VPWR 0.062 fF now).
+    # A is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor,
+    # and VPB-VNB (VSUBS) is the capacitance of the nwell itself, which MAGIC has, but the tech info doesn't
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm and halo=50µm _____________________
+    # C2 A VGND 0.03709f
+    # C8 VPB A 0.04506f
+    # C6 A VPWR 0.03629f
+    # C13 A VNB 0.13301f
+    # C4 A Y 0.03773f
+    # C3 VPB VGND 0.01319f
+    # C0 VPWR VGND 0.01841f
+    # C10 VGND VNB 0.24421f
+    # C9 Y VGND 0.05975f
+    # C7 VPB VPWR 0.06649f
+    # C5 VPB Y 0.01774f
+    # C12 VPWR VNB 0.20582f
+    # C1 VPWR Y 0.07413f
+    # C11 Y VNB 0.0961f
+    # C14 VPB VNB 0.33898f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;VGND;0.04;
+C2;A;VPB;0.091;
+C3;A;VPWR;0.041;
+C4;A;VSUBS;0.222;
+C5;A;Y;0.051;
+C6;VGND;VPB;0.012;
+C7;VGND;VPWR;0.018;
+C8;VGND;VSUBS;0.248;
+C9;VGND;Y;0.06;
+C10;VPB;VPWR;0.062;
+C11;VPB;Y;0.018;
+C12;VPWR;VSUBS;0.211;
+C13;VPWR;Y;0.074;
+C14;VSUBS;Y;0.096;"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_met2_over_met1_over_nwell_of_its_net():
+    # The nwell is VDD (by an ntap), and so is the met1 plate (8 µm x 8 µm) over it, which has no capacitance
+    # to it, and shields it from the met2 plate X (4 µm x 4 µm) above.
+    # The fringe of X beyond the met1 plate ends at the nwell (VDD), and beyond that, at the substrate.
+    # The nwell used to be the substrate (VDD-VSUBS 3.003 fF, VDD-X 3.088 fF, VSUBS-X 0.369 fF).
+    # MAGIC has the capacitance of the nwell itself too (100 µm² * 120 aF/µm² = 12 fF), which the tech info hasn't
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # C2 VDD VSUBS 12.9206f
+    # C0 VDD X 3.16499f
+    # C1 X VSUBS 0.29271f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'nwell_met1_met2_plates.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;VDD;VSUBS;0.923;
+C2;VDD;X;3.165;
+C3;VSUBS;X;0.293;"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mom_cap__whiteboxed():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________

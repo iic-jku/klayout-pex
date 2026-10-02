@@ -103,9 +103,7 @@ class OverlapExtractor:
             shielded_region = kdb.Region()
             bottom_region = kdb.Region(polygon)
             bot_layer_name = self.layer_names[self.inside_layer_index]
-            net_bot = self.tech_info.internal_substrate_layer_name \
-                if bot_layer_name == self.tech_info.internal_substrate_layer_name \
-                else polygon.property('net')
+            net_bot = polygon.property('net')  # NOTE: the substrate's is the one of its well or VSUBS
 
             for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
                 polygons_above = neighborhood.get(other_layer_index, None)
@@ -116,6 +114,9 @@ class OverlapExtractor:
                     net_top = polygon_above.property('net')
 
                     if net_top == net_bot:
+                        # NOTE: e.g. VDD over its nwell, which still shields the nwell from the shapes above
+                        if bot_layer_name == self.tech_info.internal_substrate_layer_name:
+                            shielded_region.insert(polygon_above)
                         continue
 
                     top_layer_name = self.layer_names[other_layer_index]

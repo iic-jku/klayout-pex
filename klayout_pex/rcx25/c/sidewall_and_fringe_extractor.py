@@ -69,10 +69,11 @@ class SidewallAndFringeExtractor:
 
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
-            # NOTE: the diffusion is the bottom plate of the capacitances of the layers above,
-            #       whose fringe ends at it, while its own edges have none
-            #       (like in the magic techs): those to the substrate are the devices' (e.g. the junctions)
-            if layer_name in self.tech_info.process_diffusion_layer_names:
+            # NOTE: the substrate (with its wells) and the diffusion are the bottom plates of the capacitances
+            #       of the layers above, whose fringe ends at them, while their own edges have none
+            #       (like in the magic techs): those between them are the devices' (e.g. the junctions)
+            if layer_name == self.tech_info.internal_substrate_layer_name or \
+               layer_name in self.tech_info.process_diffusion_layer_names:
                 continue
 
             other_layer_regions = [
@@ -386,21 +387,14 @@ class SidewallAndFringeExtractor:
             if self.tech_info.is_device_capacitance(inside_layer_name, outside_layer_name):
                 return
 
-            inside_net_name = self.tech_info.internal_substrate_layer_name \
-                if inside_layer_name == self.tech_info.internal_substrate_layer_name \
-                else edge.property('net')
+            inside_net_name = edge.property('net')
 
             # NOTE: each polygon in outside_polygons
-            #          - could have a different net
+            #          - could have a different net (e.g. the wells of the substrate and the rest, VSUBS)
             #          - could be segmented by a shield into multiple polygons
             #            each with different near/far regions
 
-            outside_net_names = [
-                self.tech_info.internal_substrate_layer_name \
-                if outside_layer_name == self.tech_info.internal_substrate_layer_name \
-                else p.property('net')
-                for p in outside_polygons
-            ]
+            outside_net_names = [p.property('net') for p in outside_polygons]
 
             # NOTE: the model of a device has the capacitance between its plates, so they are like one net
             same_net_markers = [

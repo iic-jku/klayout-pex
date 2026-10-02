@@ -94,6 +94,35 @@ class RCX25Extractor:
 
         return shapes
 
+    def substrate_region(self) -> kdb.Region:
+        """
+        The substrate below the layout (and its halo), the bottom plate of the capacitances to the substrate,
+        split into its wells, of the nets of the wells (e.g. VDD), and the rest, of the substrate (VSUBS)
+        """
+        dbu = self.pex_context.dbu
+        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
+        rest = kdb.Region(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
+
+        substrate_region = kdb.Region()
+        substrate_region.enable_properties()
+
+        def insert(region: kdb.Region, net_name: NetName):
+            for polygon in region.each():
+                substrate_region.insert(kdb.PolygonWithProperties(polygon.downcast(), {'net': net_name}))
+
+        # NOTE: where wells overlap (e.g. an nwell within a deep nwell), the first one is at the surface
+        for well_layer_name in self.tech_info.tech.substrate.well_lvs_layer_names:
+            wells = self.shapes_of_layer(well_layer_name)
+            if wells is None:
+                continue
+            for well in wells.merged().each():  # NOTE: merged per net
+                well_region = kdb.Region(well.downcast()) & rest
+                rest -= well_region
+                insert(well_region, well.property('net'))
+
+        insert(rest, self.tech_info.internal_substrate_layer_name)
+        return substrate_region
+
     def extract(self) -> ExtractionResults:
         extraction_results = ExtractionResults()
 
@@ -133,13 +162,7 @@ class RCX25Extractor:
         all_region = kdb.Region()
         all_region.enable_properties()
 
-        substrate_region = kdb.Region()
-        substrate_region.enable_properties()
-
-        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
-        substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
-
-        layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = substrate_region
+        layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = self.substrate_region()
 
         # NOTE: the diffusion (the source/drain of the transistors) is above the substrate, which it shields,
         #       and below the metal layers, of whose capacitances it's the bottom plate
