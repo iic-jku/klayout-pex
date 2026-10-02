@@ -192,6 +192,57 @@ end # run_mode
 # --------------- CUSTOM CLASSES ----------------
 #================================================
 
+#====================== [PEX] VARACTOR DEVICE CLASS =========================
+# [PEX] A varactor has the gate width W and length L of the MOS gate it is, L across the poly, W along it
+#       (NOTE: the original sky130A LVS script has the area and perimeter of the gate only,
+#              but the models take w and l and depend on them separately, e.g. the series resistance
+#              by w/l along the poly and by l/w through the well, and the edge capacitances by w and by l.
+#              With W and L swapped, it's a different device.)
+#       Like MOS, parallel varactors of the same L combine into one of their summed W,
+#       and the gate (A) and the well (B) are not swappable
+class VarCapCombiner < RBA::GenericDeviceCombiner
+
+  def combine_devices(a, b)
+    if (a.parameter("L") - b.parameter("L")).abs > 1e-6
+      return false
+    end
+
+    # NOTE: the candidates share their nets, but maybe at other terminals
+    terminal_ids = a.device_class.terminal_definitions.collect { |td| td.id }
+    parallel = terminal_ids.all? do |t|
+      net = a.net_for_terminal(t)
+      net ? net.each_terminal.any? { |tr| tr.device.id == b.id && tr.terminal_id == t } : !b.net_for_terminal(t)
+    end
+    if !parallel
+      return false
+    end
+
+    [ "W", "C", "A", "P" ].each do |p|
+      a.set_parameter(p, a.parameter(p) + b.parameter(p))
+    end
+    terminal_ids.each do |t|
+      b.disconnect_terminal(t)
+    end
+    return true
+  end
+
+end
+
+class VarCap < RBA::DeviceClassCapacitorWithBulk
+  def initialize
+    super
+    enable_parameter("C", false)
+    enable_parameter("A", false)
+    enable_parameter("P", false)
+    add_parameter(RBA::DeviceParameterDefinition::new("W", "Width (along the poly) (micrometer)", 0.0, true, 1e-6, 1.0))
+    add_parameter(RBA::DeviceParameterDefinition::new("L", "Length (across the poly) (micrometer)", 0.0, true, 1e-6, 1.0))
+    clear_equivalent_terminal_ids
+    self.supports_serial_combination = false
+    @combiner = VarCapCombiner::new
+    self.combiner = @combiner
+  end
+end
+
 #====================== CUSTOM READER =========================
 class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
 
@@ -205,6 +256,16 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
     else
       super
     end
+  end
+
+  # [PEX] varactors (see VarCap), also as subcircuit calls, as xschem and Magic write them
+  #       (e.g. XC1 c0 c1 b sky130_fd_pr__cap_var_lvt W=1 L=2 m=1)
+  def varactor?(model)
+    model.include?('SKY130') && model.include?('CAP_VAR')
+  end
+
+  def wants_subcircuit(name)
+    varactor?(name)
   end
 
   # take and translate the element
@@ -256,6 +317,34 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
         device.connect_terminal(t, nets[index])
       end
 
+    elsif (el == "C" || el == "X") && varactor?(model)
+
+      # [PEX] a varactor has W and L, not the area and perimeter of a capacitor (see VarCap)
+      if nets.size != 3
+        error("Expected the 3 nets c0 c1 b for the varactor #{name}, got #{nets.size}")
+      end
+
+      cls = circuit.netlist.device_class_by_name(model)
+      if !cls
+        cls = VarCap::new
+        cls.name = model
+        circuit.netlist.add(cls)
+      end
+
+      # create a device
+      device = circuit.create_device(cls, name)
+
+      # and configure the device
+      [ "A", "B", "W" ].each_with_index do |t,index|
+        device.connect_terminal(t, nets[index])
+      end
+
+      # NOTE: m varactors are one of m times their W, as parallel varactors combine (see VarCapCombiner).
+      #       C is not compared, but keeps the varactor from being ignored as a small capacitor (min_caps)
+      device.set_parameter("W", (params["W"] || 0.0) * (params["M"] || 1.0))
+      device.set_parameter("L", params["L"] || 0.0)
+      device.set_parameter("C", params["C"] || 2e-16)
+
     else
       # all other elements are left to the standard implementation
       return super
@@ -303,15 +392,6 @@ class NResistor < RBA::DeviceClassResistor
 end
 
 class MIMCap < RBA::DeviceClassCapacitor
-  def initialize
-    super
-    enable_parameter("C", false)
-    enable_parameter("A", true)
-    enable_parameter("P", true)
-  end
-end
-
-class VarCap < RBA::DeviceClassCapacitorWithBulk
   def initialize
     super
     enable_parameter("C", false)
@@ -710,6 +790,78 @@ class VPP3NHVExtractor < RBA::GenericDeviceExtractor
       define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_W, 3, dev_w[0])
     end 
   end
+end
+
+#====================== [PEX] VARACTOR EXTRACTOR =========================
+# [PEX] Extracts a varactor (see VarCap) like KLayout's MOS extractor: the gate is the poly over the diffusion,
+#       W the length of its edges to the diffusion on both sides of the poly (halved), and L its area / W.
+#       The capacitance, area and perimeter are those of capacitor_with_bulk, which the original script uses.
+class VaractorExtractor < RBA::GenericDeviceExtractor
+
+  def initialize(name, area_cap)
+    self.name = name
+    @area_cap = area_cap
+  end
+
+  def setup
+
+    define_layer("P1", "Poly")
+    define_layer("P2", "N+ diffusion")
+    define_layer("W", "Bulk")
+    define_opt_layer("tA", 0, "Gate terminal (A)")
+    define_opt_layer("tB", 1, "Well terminal (B)")
+    define_opt_layer("tW", 2, "Bulk terminal (W)")
+
+    register_device_class(VarCap::new)
+
+  end
+
+  def get_connectivity(layout, layers)
+
+    conn = RBA::Connectivity::new
+    conn.connect(layers[0], layers[0])
+    conn.connect(layers[1], layers[1])
+    conn.connect(layers[0], layers[1])
+
+    return conn
+
+  end
+
+  def extract_devices(layer_geometry)
+
+    poly = layer_geometry[0]
+    diff = layer_geometry[1]
+
+    # like source and drain of a MOS
+    sd = diff - poly
+
+    (poly & diff).each_merged do |gate|
+
+      gate_region = RBA::Region::new(gate)
+      gate_sd = sd.interacting(gate_region)
+      if gate_sd.count != 2
+        error("Expected the diffusion on both sides of the varactor gate, found #{gate_sd.count} diffusion regions", gate)
+        next
+      end
+
+      w = sdbu * (gate_region.edges & gate_sd.edges).length * 0.5
+      area = sdbu * sdbu * gate.area
+
+      device = create_device
+      device.set_parameter("W", w)
+      device.set_parameter("L", area / w)
+      device.set_parameter("C", @area_cap * area)
+      device.set_parameter("A", area)
+      device.set_parameter("P", sdbu * gate.perimeter)
+
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_A, 3, gate)
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_B, 4, gate)
+      define_terminal(device, RBA::DeviceClassCapacitorWithBulk::TERMINAL_W, 5, gate)
+
+    end
+
+  end
+
 end
 
 
@@ -2229,13 +2381,15 @@ extract_devices(capacitor("sky130_fd_pr__model__cap_mim_m4", 2e-15, MIMCap), { "
 
 logger.info("Starting VARACTOR EXTRACTION")
 
+# [PEX] W and L of the varactors, instead of the area and perimeter (capacitor_with_bulk)
+
 # Low threshold voltage varactor
 logger.info("Extracting low threshold voltage varactor")
-extract_devices(capacitor_with_bulk("sky130_fd_pr__cap_var_lvt", 4.4e-15, VarCap), { "P1" => varactor_gate_lvt, "P2" => varactor_nsd_lvt, "W" => varactor_bulk_lvt, "tA" => poly_con, "tB" => ntap_conn})
+extract_devices(VaractorExtractor::new("sky130_fd_pr__cap_var_lvt", 4.4e-15), { "P1" => varactor_gate_lvt, "P2" => varactor_nsd_lvt, "W" => varactor_bulk_lvt, "tA" => poly_con, "tB" => ntap_conn})
 
 # High threshold voltage varactor
 logger.info("Extracting high threshold voltage varactor")
-extract_devices(capacitor_with_bulk("sky130_fd_pr__cap_var_hvt", 4.4e-15, VarCap), { "P1" => varactor_gate_hvt, "P2" => varactor_nsd_hvt, "W" => varactor_bulk_hvt, "tA" => poly_con, "tB" => ntap_conn})
+extract_devices(VaractorExtractor::new("sky130_fd_pr__cap_var_hvt", 4.4e-15), { "P1" => varactor_gate_hvt, "P2" => varactor_nsd_hvt, "W" => varactor_bulk_hvt, "tA" => poly_con, "tB" => ntap_conn})
 
 
 #==================================
