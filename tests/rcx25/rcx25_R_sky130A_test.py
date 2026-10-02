@@ -231,3 +231,19 @@ def test_vias_within_mom_cap_l1m1m2m3m4():
                                                           'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
     assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
     assert results.summarize().resistances
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap__whiteboxed():
+    # The white-box extraction keeps the MIM cap layers, so the top plate (capm) is a conductor of its net,
+    # joined to met4 by the vias on it (via3_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+    networks = {n.net_name: n for n in results.r_extraction_result.networks}
+    assert {node.layer_name for node in networks['mimcap_top'].nodes} == {'capm', 'met3', 'met4'}
+    assert {node.layer_name for node in networks['mimcap_bot'].nodes} == {'met3', 'met4'}
+
+    top_layer_by_node_id = {node.node_id: node.layer_name for node in networks['mimcap_top'].nodes}
+    assert [e for e in networks['mimcap_top'].elements
+            if {top_layer_by_node_id[e.node_a.node_id], top_layer_by_node_id[e.node_b.node_id]} == {'capm', 'met4'}]

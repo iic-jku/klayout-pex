@@ -241,3 +241,29 @@ R6;S;S.$1.Metal1;;0.598
 R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
     assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_mim_cap__whiteboxed():
+    # The white-box extraction keeps the MIM cap layers, so the top plate (MIM, LVS layer cmim_top) is a conductor
+    # of its net, joined to TopMetal1 by the TopVia1 on it (mim_via), 5 cuts per row (2.2 Ω / 5).
+    # It stopped with "unhandled layer purpose PURPOSE_MIM_CAP".
+    # The bottom plate (Metal5) has no network, as nothing connects to it
+    gds_path = os.path.join(TEST_DESIGNS_DIR, 'sg13g2_pr__cmim', 'cmim.gds.gz')
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main',
+                  '--pdk', PDK.IHP_SG13G2,
+                  '--mode', 'R',
+                  '--gds', gds_path,
+                  '--out_dir', out_dir,
+                  '--2.5D'])
+    results, = cli.rcx25_extraction_results.cell_extraction_results.values()
+
+    # NOTE: the nets have no labels, so their names ($1, $2, ...) depend on the LVS run
+    network, = [n for n in results.r_extraction_result.networks if n.elements]
+    assert {node.layer_name for node in network.nodes} == {'MIM', 'TopMetal1'}
+    assert sorted(round(r, 3) for r in results.summarize().resistances.values()) == \
+           [0.004] * 4 + [0.44] * 5 + [2.408] * 4

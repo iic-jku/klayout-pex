@@ -158,7 +158,9 @@ class RExtractor:
                         cond.resistance = 0  # see comment above
                         modeled_gds_pairs.add(gds_pair)
 
-                    case LP.PURPOSE_METAL:
+                    case LP.PURPOSE_METAL | LP.PURPOSE_MIM_CAP:
+                        # NOTE: the top plate of a MIM cap is a thin metal, which the white-box extraction keeps
+                        #       (the MIM cap layers are no part of the extraction in the black-box mode)
                         layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
                         if layer_resistance is None:
                             unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no sheet resistance")

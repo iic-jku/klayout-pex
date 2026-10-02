@@ -134,3 +134,20 @@ def test_via_stack_1x1_minsize_poly_to_metal5():
     # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut
     assert obtained_resistances('test_patterns', 'r_via_stack_1x1_minsize_poly_to_metal5.gds.gz') == \
            [4.5] * 4 + [5.9]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap__whiteboxed():
+    # The white-box extraction keeps the MIM cap layers, so the top plate (FuseTop) is a conductor of its net,
+    # joined to Metal5 by the vias on it (top_via_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'cap_mim_m4m5.gds.gz')
+    networks = {n.net_name: n for n in results.r_extraction_result.networks}
+    for top, bottom in (('TOP1', 'BOT1'), ('TOP2', 'BOT2')):
+        assert {node.layer_name for node in networks[top].nodes} == {'FuseTop', 'Metal5'}
+        assert {node.layer_name for node in networks[bottom].nodes} == {'Metal4'}
+
+        layer_by_node_id = {node.node_id: node.layer_name for node in networks[top].nodes}
+        assert [e for e in networks[top].elements
+                if {layer_by_node_id[e.node_a.node_id], layer_by_node_id[e.node_b.node_id]} == {'FuseTop', 'Metal5'}]
