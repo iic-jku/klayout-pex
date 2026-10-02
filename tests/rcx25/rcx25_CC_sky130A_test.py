@@ -418,6 +418,57 @@ C8;Complex_Shape_T;VSUBS;3.2;
 C9;UPPER;VSUBS;13.019;"""
         )
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_met1_over_drain_li1():
+    # The met1 plate W (4 µm x 2 µm) is over the drain diffusion of the nfet (W = 2 µm, L = 0.15 µm),
+    # 33.6 aF/µm² * 8 µm² = 268.8 aF to D, plus the fringe to the drain beyond the plate.
+    # The diffusion used to be no part of the extraction, so W had 25.78 aF/µm² to the substrate instead
+    # (D-W 0.002 fF, VSUBS-W 0.69 fF).
+    # G is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C2 G D 0.00247f
+    # C1 S D 0.00581f
+    # C7 D VSUBS 0.03027f
+    # C4 D W 0.37655f
+    # C3 G S 0.00323f
+    # C9 G VSUBS 0.18508f
+    # C0 G W 0.0014f
+    # C8 S VSUBS 0.03027f
+    # C5 S W 0.01027f
+    # C6 W VSUBS 0.38766f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # C4 G D 0.00247f
+    # C3 S D 0.00645f
+    # C7 D VSUBS 0.02884f
+    # C0 D W 0.37655f
+    # C5 G S 0.00323f
+    # C9 G VSUBS 0.18508f
+    # C2 G W 0.0014f
+    # C8 S VSUBS 0.02884f
+    # C1 S W 0.01027f
+    # C6 W VSUBS 0.38766f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'nfet_li1_met1_over_drain.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;D;G;0.002;
+C2;D;S;0.006;
+C3;D;VSUBS;0.029;
+C4;D;W;0.377;
+C5;G;S;0.004;
+C6;G;VSUBS;0.235;
+C7;G;W;0.007;
+C8;S;VSUBS;0.029;
+C9;S;W;0.01;
+C10;VSUBS;W;0.388;"""
+        )
+
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow

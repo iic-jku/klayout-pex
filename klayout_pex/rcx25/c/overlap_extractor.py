@@ -120,6 +120,12 @@ class OverlapExtractor:
 
                     top_layer_name = self.layer_names[other_layer_index]
 
+                    # NOTE: the capacitance of a device, which its model has (e.g. the junction of the diffusion
+                    #       and the substrate), but the shape above shields (e.g. the substrate from the metal above)
+                    if self.tech_info.is_device_capacitance(top_layer_name, bot_layer_name):
+                        shielded_region.insert(polygon_above)
+                        continue
+
                     # NOTE: RCX25Extractor checked that the tech info has the overlap capacitance of each layer pair
                     overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[top_layer_name][bot_layer_name]
 

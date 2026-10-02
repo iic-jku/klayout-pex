@@ -69,6 +69,12 @@ class SidewallAndFringeExtractor:
 
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
+            # NOTE: the diffusion is the bottom plate of the capacitances of the layers above,
+            #       whose fringe ends at it, while its own edges have none
+            #       (like in the magic techs): those to the substrate are the devices' (e.g. the junctions)
+            if layer_name in self.tech_info.process_diffusion_layer_names:
+                continue
+
             other_layer_regions = [
                 r for ln, r in self.layer_regions_by_name.items()
                 if ln != layer_name
@@ -376,6 +382,10 @@ class SidewallAndFringeExtractor:
                         shield: kdb.Region,
                         lateral_shield: kdb.Polygon,
                         geometry_restorer: GeometryRestorer):
+            # NOTE: e.g. the fringe of the gate poly to the source/drain, which the transistor model has
+            if self.tech_info.is_device_capacitance(inside_layer_name, outside_layer_name):
+                return
+
             inside_net_name = self.tech_info.internal_substrate_layer_name \
                 if inside_layer_name == self.tech_info.internal_substrate_layer_name \
                 else edge.property('net')

@@ -141,6 +141,17 @@ class RCX25Extractor:
 
         layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = substrate_region
 
+        # NOTE: the diffusion (the source/drain of the transistors) is above the substrate, which it shields,
+        #       and below the metal layers, of whose capacitances it's the bottom plate
+        for diffusion_layer in self.tech_info.process_diffusion_layers:
+            diffusion_shapes = self.shapes_of_layer(diffusion_layer.name)
+            if diffusion_shapes is not None:
+                diffusion_shapes.enable_properties()
+                gds_pair = self.gds_pair(diffusion_layer.name)
+                canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+                layer_regions_by_name[canonical_layer_name] += diffusion_shapes
+                layer_regions_by_name[canonical_layer_name].enable_properties()
+
         via_name_below_layer_name: Dict[LayerName, Optional[LayerName]] = {}
         via_name_above_layer_name: Dict[LayerName, Optional[LayerName]] = {}
         via_regions_by_via_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
@@ -181,12 +192,14 @@ class RCX25Extractor:
         # ------------------------------------------------------------------------
         if self.pex_mode.need_capacitance():
             # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
-            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode
+            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode,
+            #       but for the capacitances of the devices (e.g. of the diffusion to the substrate)
             missing_overlap_caps = [f"{top_layer_name} over {bottom_layer_name}"
                                     for idx, bottom_layer_name in enumerate(all_layer_names)
                                     for top_layer_name in all_layer_names[idx + 1:]
                                     if not self.tech_info.overlap_cap_by_layer_names
-                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)]
+                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)
+                                    and not self.tech_info.is_device_capacitance(top_layer_name, bottom_layer_name)]
             if missing_overlap_caps:
                 raise CExtractionTechError(
                     "The tech info has no overlap capacitance for these layer pairs of the layout, "
