@@ -292,9 +292,9 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_substrate_cap(ci, "Metal4",   7.602,     28.153)
     add_substrate_cap(ci, "Metal5",   5.798,     30.386)
 
-    diff_nonfet = "COMP"   # TODO: diff must be non-fet!
+    diff_nonfet = "COMP"   # allactivenonfet, the source/drain (see below)
     poly_nonres = "Poly2"  # TODO: poly must be non-res!
-    all_active = "COMP"    # TODO: must be allactive
+    all_active = "COMP"    # allactive, the source/drain too, as the gates are below the poly
 
     #                  top_layer,  bottom_layer,  cap
     # add_overlap_cap(ci, "LVPWELL", "dnwell",   120.0)  # TODO
@@ -387,6 +387,10 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "Metal3",    "Metal5",    22.988)
     add_sidewall_overlap_cap(ci, "Metal5",    "Metal4",    52.692)
     add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    34.954)
+
+    # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
+    #       nsd and psd (the LVS layers of Nplus and Pplus), like the resistance extraction
+    split_layer_capacitances(ci, "COMP", ["Nplus", "Pplus"])
 
     # MIM cap, c_cox 1.99e-3 F/m² and c_capsw 2.383e-10 F/m of the device model
     # cap_mim_2f0_m4m5_noshield (sm141064_mim.ngspice), the deck's default mim_cap

@@ -369,9 +369,9 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_substrate_cap(ci, "met4", 8.42,      36.68)
     add_substrate_cap(ci, "met5", 6.32,      38.85)
 
-    diff_nonfet = "diff"  # TODO: diff must be non-fet!
+    diff_nonfet = "diff"  # allactivenonfet, the source/drain (see below)
     poly_nonres = "poly"  # TODO: poly must be non-res!
-    all_active = "diff"   # TODO: must be allactive
+    all_active = "diff"   # allactive, the source/drain too, as the gates are below the poly
 
     #                  top_layer,  bottom_layer,  cap
     # add_overlap_cap(ci, "pwell", "dnwell",     120.0)  # TODO
@@ -491,6 +491,10 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "met3",      "met5",      27.84)
     add_sidewall_overlap_cap(ci, "met5",      "met4",      82.82)
     add_sidewall_overlap_cap(ci, "met4",      "met5",      46.98)
+
+    # NOTE: the extraction has the diffusion as the source/drain implants of the LVS deck,
+    #       nsd and psd (the LVS layers of nsdm and psdm), like the resistance extraction
+    split_layer_capacitances(ci, "diff", ["nsdm", "psdm"])
 
     # MIM caps, camimc 2.00 fF/µm² and cpmimc 0.19 fF/µm of the device models
     # sky130_fd_pr__cap_mim_m3_1/2 (libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice)

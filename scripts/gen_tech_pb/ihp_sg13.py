@@ -448,7 +448,7 @@ class TechBuilder:
 
         # NOTE: magic distinguishes LV and HV (ThickGateOx) diffusion, which differ by up to 2 %,
         #       there is only one diffusion layer here, which uses the LV values
-        diff_nonfet = "Activ"   # TODO: diff must be non-fet!
+        diff_nonfet = "Activ"   # allactivenonfet, the source/drain (see below)
 
         #                  top_layer,    bottom_layer,   cap
         add_overlap_cap(ci, "GatPoly",    "NWell",        87.433)
@@ -621,6 +621,10 @@ class TechBuilder:
             add_sidewall_overlap_cap(ci, "Metal3",       "TopMetal1",    22.609)
             add_sidewall_overlap_cap(ci, "TopMetal1",    "Metal4",       55.229)
             add_sidewall_overlap_cap(ci, "Metal4",       "TopMetal1",    35.146)
+
+        # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
+        #       nsd_fet and psd_fet (the LVS layers of nSD and pSD), like the resistance extraction
+        split_layer_capacitances(ci, "Activ", ["nSD", "pSD"])
 
         if self.is_g2:
             # MIM cap, cap_carea 1.5 fF/µm² (cornerCAP.lib, cap_typ) and CJSW 40 aF/µm
