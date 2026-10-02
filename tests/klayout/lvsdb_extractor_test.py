@@ -125,3 +125,31 @@ class NetNameTest(unittest.TestCase):
 
         self.assertEqual(['D', 'S', 'D$1', 'D$1$1', 'D$2', '$0'], [n.expanded_name() for n in circuit.each_net()])
         self.assertEqual(spice_names, [n.expanded_name() for n in circuit.each_net()])
+
+    def test_nets_without_label_keep_their_shapes(self):
+        # NOTE: KLayout 0.30.4 (CI) reads the nets without a label from the LVSDB without a name
+        #       (newer versions with the expanded one, e.g. $2), but the extraction finds the shapes of a net
+        #       by the name on them, so the nets $2 and $3 of the nfet had no shapes and no resistor network
+        testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_reordered_lvs_layers.lvsdb.gz'))
+        for net in lvsdb.netlist().circuit_by_name('nfet_li1_redux').each_net():
+            if net.name.startswith('$'):
+                net.name = ''
+        tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
+                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                        dielectric_filter=None)
+
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+            pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux',
+                                                                      lvsdb=lvsdb,
+                                                                      tech=tech,
+                                                                      blackbox_devices=False)
+
+        circuit = pex_context.lvsdb.netlist().circuit_by_name('nfet_li1_redux')
+        self.assertEqual(['G', '$2', '$3', 'sky130_gnd'], [n.name for n in circuit.each_net()])
+        for net in circuit.each_net():
+            if net.name in ('$2', '$3'):
+                shape_count = sum(pex_context.shapes_of_net(gds_pair, net).count()
+                                  for gds_pair in pex_context.extracted_layers)
+                self.assertGreater(shape_count, 0, net.name)
