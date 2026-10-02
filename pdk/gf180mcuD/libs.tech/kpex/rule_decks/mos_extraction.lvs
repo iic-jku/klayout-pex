@@ -82,11 +82,11 @@ else
                     'W' => dnwell })
 end
 
-# LDPMOS transistor
+# LDPMOS transistor (asymmetric, S and D are not interchangeable)
 logger.info('Extracting LDPMOS transistor')
-extract_devices(mos4('pfet_10v0_asym'),
-                { 'SD' => psd_ldmos, 'G' => pgate_ldmos, 'tS' => ps_ldmos, 'tD' => pd_ldmos, 'tG' => poly2_con,
-                  'W' => dnwell })
+extract_devices(dmos4('pfet_10v0_asym'),
+                { 'S' => ps_dev_ldmos, 'D' => pd_dev_ldmos, 'G' => pgate_ldmos,
+                  'tS' => ps_ldmos, 'tD' => pd_ldmos, 'tG' => poly2_con, 'W' => dnwell })
 
 # ==============
 # ---- NMOS ----
@@ -153,8 +153,8 @@ logger.info('Native Vt NMOS transistor')
 extract_devices(mos4('nfet_06v0_nvt'),
                 { 'SD' => nsd, 'G' => ngate_nat, 'tS' => nsd, 'tD' => nsd, 'tG' => poly2_con, 'W' => sub })
 
-# LDNMOS transistor
+# LDNMOS transistor (asymmetric, S and D are not interchangeable)
 logger.info('Extracting LDNMOS transistor')
-extract_devices(mos4('nfet_10v0_asym'),
-                { 'SD' => nsd_ldmos, 'G' => ngate_ldmos, 'tS' => ns_ldmos, 'tD' => nd_ldmos, 'tG' => poly2_con,
-                  'W' => sub })
+extract_devices(dmos4('nfet_10v0_asym'),
+                { 'S' => ns_dev_ldmos, 'D' => nd_dev_ldmos, 'G' => ngate_ldmos,
+                  'tS' => ns_ldmos, 'tD' => nd_ldmos, 'tG' => poly2_con, 'W' => sub })
