@@ -605,6 +605,13 @@ class TechBuilder:
             add_sidewall_overlap_cap(ci, "TopMetal1",    "Metal4",       55.229)
             add_sidewall_overlap_cap(ci, "Metal4",       "TopMetal1",    35.146)
 
+        if self.is_g2:
+            # MIM cap, cap_carea 1.5 fF/µm² (cornerCAP.lib, cap_typ) and CJSW 40 aF/µm
+            # of the device model cap_cmim (capacitors_mod.lib)
+            #
+            #              top_plate, bottom_plate, area_cap, perimeter_cap
+            add_mim_cap(ci, "MIM",     "Metal5",     1500.0,   40.0)
+
     def build_device_models_info(self, dmi: DeviceModelsInfo):
         # NOTE: the ngspice models are subcircuits, with parameters in SI units,
         #       while the IHP device classes store lengths in µm (and areas in µm²).
