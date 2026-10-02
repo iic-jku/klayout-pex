@@ -1,0 +1,24 @@
+WARNING  __kpex__:kpex_cli.py:1238 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1274 main extract --pdk sky130A --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_redux.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:583 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:623 No explicit top cell specified, using top cell 'nfet_li1_redux'
+INFO     __kpex__:kpex_cli.py:664 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1180 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1181 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_redux.gds.gz/nfet_li1_redux.lvsdb.gz
+WARNING  __kpex__:lvsdb_extractor.py:383 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - licon (licon1): 4 of 5 shapes are not within licon_nsd_con, licon_psd_con, licon_poly_con, licon_vpp
+INFO     __kpex__:kpex_cli.py:1407 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1407 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1407 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1407 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1407 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1407 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:218 LVSDB: found 2pins
+SUBPROCESS __kpex__:kpex_cli.py:1042 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1042 R1;G;G.$1.li1;;2.418
+SUBPROCESS __kpex__:kpex_cli.py:1042 R2;G.$0.poly;G.$1.li1;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1042 R3;G.$0.poly;G.P0.poly;;316.321
+SUBPROCESS __kpex__:kpex_cli.py:1045 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1060 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.spice
