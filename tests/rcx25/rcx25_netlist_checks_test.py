@@ -45,6 +45,7 @@ DESIGNS = [
     (PDK.GF180MCUD, 'test_patterns/nfet_m1.gds.gz'),
     (PDK.IHP_SG13G2, 'sg13g2_a21o_1/sg13g2_a21o_1.gds.gz'),
     (PDK.IHP_SG13G2, 'rfnmos/rfnmos_w1u_l0u72.gds.gz'),
+    (PDK.IHP_SG13G2, 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin/cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_twice.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_labels_one_node.gds.gz'),

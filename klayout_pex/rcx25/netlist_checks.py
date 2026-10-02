@@ -77,6 +77,8 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
         return ["the nets of the LVS netlist have no unique cluster IDs, to find them in the RC netlist"]
 
     # NOTE: KLayout's net objects are no Python identities, so the nets get an ID (on a copy)
+    rc_device_ids = [(device.id(), device.expanded_name())
+                     for device in rc_netlist.circuit_by_name(top_cell_name).each_device()]
     rc_netlist = rc_netlist.dup()
     rc_circuit: kdb.Circuit = rc_netlist.circuit_by_name(top_cell_name)
 
@@ -86,6 +88,14 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
 
     def id_of(net: kdb.Net) -> int:
         return net.property(NET_ID_PROPERTY)
+
+    # NOTE: the copy numbers its devices anew (in their order), which closes the gaps of the removed ones
+    #       (e.g. whiteboxed), so that a device would have the ID of another one of the LVS netlist,
+    #       hence the devices go by the IDs and names of the RC netlist, which are the ones of the LVS netlist
+    devices: Dict[int, Tuple[str, kdb.Device]] = {
+        device_id: (device_name, device)
+        for (device_id, device_name), device in zip(rc_device_ids, rc_circuit.each_device())
+    }
 
     problems: List[str] = []
 
@@ -132,12 +142,12 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
                         f"{'' if len(names) <= 3 else f' and {len(names) - 3} more'} touch no net")
 
     # every device terminal is on the resistor network of its net
-    for device in rc_circuit.each_device():
+    for device_id, (device_name, device) in devices.items():
         if device.device_class().name in PARASITIC_DEVICE_CLASS_NAMES:
             continue
-        lvs_device = lvs_circuit.device_by_id(device.id())
+        lvs_device = lvs_circuit.device_by_id(device_id)
         if lvs_device is None:
-            problems.append(f"device {device.expanded_name()} is not in the LVS netlist")
+            problems.append(f"device {device_name} is not in the LVS netlist")
             continue
         for terminal in device.device_class().terminal_definitions():
             lvs_net = lvs_device.net_for_terminal(terminal.id())
@@ -145,19 +155,19 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
             if lvs_net is None:
                 continue
             if rc_net is None or lvs_net_name(rc_net) != lvs_net.expanded_name():
-                problems.append(f"terminal {terminal.name} of device {device.expanded_name()} "
+                problems.append(f"terminal {terminal.name} of device {device_name} "
                                 f"is not on the resistor network of its net {lvs_net.expanded_name()}")
 
     # every device terminal with a port is on the node of its port (#211 §6)
     for key, node_name in sorted(summary.device_terminal_nodes.items()):
-        device = rc_circuit.device_by_id(key.device_id)
+        device_name, device = devices.get(key.device_id, (None, None))
         # NOTE: e.g. removed, as whiteboxed, and its ID given to a parasitic device
         if device is None or device.device_class().name in PARASITIC_DEVICE_CLASS_NAMES:
             continue
         rc_net = device.net_for_terminal(key.terminal_id)
         if rc_net is None or rc_net.expanded_name() != node_name:
             terminal_name = device.device_class().terminal_definitions()[key.terminal_id].name
-            problems.append(f"terminal {terminal_name} of device {device.expanded_name()} "
+            problems.append(f"terminal {terminal_name} of device {device_name} "
                             f"is not on the node {node_name} of its port")
 
     # every port touches something, and every net with a pin in the LVS netlist keeps a port
