@@ -90,6 +90,24 @@ R7;S.$1.Metal1;S.P0.Nplus;;6.3"""
     )
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nfet_10v0_asym_pair():
+    # 2 mirrored LDMOS sharing their drain (the MVSD side), each with its own source:
+    # the asymmetric device must be extracted with S and D in place, not swapped
+    cell_name = 'nfet_10v0_asym_pair'
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
+    devices = list(lvsdb.netlist().circuit_by_name(cell_name).each_device())
+    assert [d.device_class().name for d in devices] == ['nfet_10v0_asym'] * 2
+    drains = {d.net_for_terminal('D').expanded_name() for d in devices}
+    sources = {d.net_for_terminal('S').expanded_name() for d in devices}
+    assert len(drains) == 1
+    assert len(sources) == 2
+
+
 def obtained_resistances(*path_components) -> List[float]:
     """
     The resistances, sorted (for patterns with many internal nodes, whose names are not stable)
