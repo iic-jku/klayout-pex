@@ -182,6 +182,32 @@ class Test(unittest.TestCase):
                 self.assertNotEqual(set(), mim_and_mom_caps)
                 self.assertEqual(mim_and_mom_caps, tech_info.device_models.metal_capacitor_class_names)
 
+    def test_shipped_tech_definitions_have_the_resistances_of_the_wells_their_contacts_land_on(self):
+        # The contacts over the taps land on the well below (e.g. sky130A licon_ntap_con on the nwell),
+        # which the resistance extraction leaves out without a sheet resistance,
+        # so that they'd join nothing there
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        LP = tech_pb2.LayerInfo
+        for path in paths:
+            tech_info = TechInfo(TechInfo.parse_tech_def(path), dielectric_filter=None)
+            missing = []
+            for contact in tech_info.contact_by_contact_lvs_layer_name.values():
+                gds_pair = tech_info.gds_pair_for_computed_layer_name.get(contact.layer_below, None) or \
+                           tech_info.gds_pair_for_layer_name.get(contact.layer_below, None)
+                computed_layer_info = tech_info.computed_layer_info_by_gds_pair.get(gds_pair, None)
+                if computed_layer_info is None or \
+                        computed_layer_info.layer_info.purpose not in (LP.PURPOSE_NWELL, LP.PURPOSE_PWELL):
+                    continue
+                canonical_layer_name = tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+                if canonical_layer_name not in tech_info.layer_resistance_by_layer_name:
+                    missing.append(f"{canonical_layer_name}: sheet resistance, below {contact.name}")
+                if contact.layer_below not in tech_info.contact_resistance_by_device_layer_name:
+                    missing.append(f"{contact.name}: contact resistance")
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertEqual([], missing)
+
     def test_duplicate_names_are_reported_per_namespace(self):
         problems = TechInfo.duplicate_names(tech_with_duplicates())
         self.assertEqual(5, len(problems), problems)

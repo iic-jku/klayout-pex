@@ -1147,6 +1147,10 @@ licon_poly_con = licon.and(poly)
 licon_nsd_con = licon.and(nsd)
 licon_psd_con = licon.and(psd)
 
+# [PEX] the licon over the n-taps, which joins li1 to the nwell below them
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+licon_ntap_con = licon.and(ntap_conn)
+
 mcon_con  = mcon.not(vpp)
 via1_con  = via1.not(vpp)
 via2_con  = via2.not(vpp)
@@ -1867,6 +1871,7 @@ connect(pad         ,      pad_label)
 connect(licon_poly_con,   licon)
 connect(licon_nsd_con,    licon)
 connect(licon_psd_con,    licon)
+connect(licon_ntap_con,   licon)
 
 # [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
 connect(poly_con    ,      poly_pin_con)
