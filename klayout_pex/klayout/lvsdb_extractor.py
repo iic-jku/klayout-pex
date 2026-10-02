@@ -203,13 +203,16 @@ class KLayoutExtractionContext:
         NOTE: nets can share a name, e.g. the metal islands of a supply, joined only in the parent
               (unless the LVS script connects them implicitly), but the extraction identifies a net by its name,
               and the annotated layout has the name on the shapes of the net (#211 §10)
+
+        NOTE: a net without a label gets its expanded name (e.g. $2) as its name, as KLayout 0.30.4 reads it
+              from the LVSDB without one (newer versions with the expanded name)
         """
         for circuit in netlist.each_circuit():
             names: Set[str] = set()
             for net in list(circuit.each_net()):
                 name = unique_name(net.expanded_name(), names)
                 names.add(name)
-                if name != net.expanded_name():
+                if name != net.name:
                     net.name = name
 
     @staticmethod
