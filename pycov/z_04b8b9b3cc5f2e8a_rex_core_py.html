@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/klayout/rex_core.py: 92%</title>
+    <title>Coverage for klayout_pex/klayout/rex_core.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_15cffcd0.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>klayout<span class="sep">/</span>rex_core.py</b>:
-            <span class="pc_cov">92%</span>
+            <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">26 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">24<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">26<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_shapes_pb2_converter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-09-29 19:08 +0000
+            created at 2026-10-02 20:51 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -119,8 +119,8 @@
     <p class="run"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">        <span class="key">match</span> <span class="nam">pb_c</span><span class="op">.</span><span class="nam">algorithm</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">            <span class="key">case</span> <span class="nam">pb_RExtractorTech</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">ALGORITHM_SQUARE_COUNTING</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">                <span class="nam">kly_c</span><span class="op">.</span><span class="nam">algorithm</span> <span class="op">=</span> <span class="nam">klp</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">SquareCounting</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">            <span class="key">case</span> <span class="nam">pb_RExtractorTech</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">ALGORITHM_TESSELATION</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                <span class="nam">kly_c</span><span class="op">.</span><span class="nam">algorithm</span> <span class="op">=</span> <span class="nam">klp</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">Tesselation</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">            <span class="key">case</span> <span class="nam">pb_RExtractorTech</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">ALGORITHM_TESSELATION</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                <span class="nam">kly_c</span><span class="op">.</span><span class="nam">algorithm</span> <span class="op">=</span> <span class="nam">klp</span><span class="op">.</span><span class="nam">Algorithm</span><span class="op">.</span><span class="nam">Tesselation</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">        <span class="nam">kly_c</span><span class="op">.</span><span class="nam">triangulation_min_b</span> <span class="op">=</span> <span class="nam">pb_c</span><span class="op">.</span><span class="nam">triangulation_min_b</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">        <span class="nam">kly_c</span><span class="op">.</span><span class="nam">triangulation_max_area</span> <span class="op">=</span> <span class="nam">pb_c</span><span class="op">.</span><span class="nam">triangulation_max_area</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="nam">kly_c</span><span class="op">.</span><span class="nam">resistance</span> <span class="op">=</span> <span class="nam">pb_c</span><span class="op">.</span><span class="nam">resistance</span>&nbsp;</span><span class="r"></span></p>
@@ -145,7 +145,7 @@
             <a class="nav" href="z_04b8b9b3cc5f2e8a_shapes_pb2_converter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-09-29 19:08 +0000
+            created at 2026-10-02 20:51 +0000
         </p>
     </div>
 </footer>

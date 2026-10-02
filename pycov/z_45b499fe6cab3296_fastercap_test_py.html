@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_5f30060c77e65d78_lvs_cache_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-09-29 19:08 +0000
+            created at 2026-10-02 20:51 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -212,12 +212,14 @@
     <p class="run"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t"><span class="key">def</span> <span class="nam">test_single_plate_100um_x_100um_li1_over_substrate</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">    <span class="com">#_______________________________ NOTE: with halo=8&#181;m __________________________________</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">    <span class="com"># C0 PLATE VSUBS 0.38618p</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">    <span class="nam">assert_expected_matches_obtained</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="str">&#x27;test_patterns&#x27;</span><span class="op">,</span> <span class="str">&#x27;single_plate_100um_x_100um_li1_over_substrate.gds.gz&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">        <span class="nam">expected_csv_content</span><span class="op">=</span><span class="str">&quot;&quot;&quot;Device;Net1;Net2;Capacitance [fF]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t"><span class="str">Cext_0_1;VSUBS;PLATE;396.78</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t"><span class="str">Cext_1_1;PLATE;VSUBS;3.33&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">    <span class="com">#</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">    <span class="com"># NOTE: the substrate is the port sky130_gnd, as the pattern has no substrate net (no transistor)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">    <span class="nam">assert_expected_matches_obtained</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="str">&#x27;test_patterns&#x27;</span><span class="op">,</span> <span class="str">&#x27;single_plate_100um_x_100um_li1_over_substrate.gds.gz&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">        <span class="nam">expected_csv_content</span><span class="op">=</span><span class="str">&quot;&quot;&quot;Device;Net1;Net2;Capacitance [fF]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t"><span class="str">Cext_0_1;sky130_gnd;PLATE;396.78</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t"><span class="str">Cext_1_1;PLATE;sky130_gnd;3.33&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -227,7 +229,7 @@
             <a class="nav" href="z_5f30060c77e65d78_lvs_cache_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-09-29 19:08 +0000
+            created at 2026-10-02 20:51 +0000
         </p>
     </div>
 </footer>
