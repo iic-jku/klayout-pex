@@ -1,0 +1,19 @@
+───────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r sg13cmos5l.lvs -rd input=D:\a\klayout-pex\klayout-pex\cell.gds   
+-rd report=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_ohzd18ti\cell.lvsdb.gz 
+-rd                                                                            
+target_netlist=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_ohzd18ti\cell_extra
+cted.cir -rd schematic=D:\a\klayout-pex\klayout-pex\cell.spice -rd thr=22 -rd  
+run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false
+-rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd      
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false   
+-rd no_simplify=true -rd verbose=false                                         
+C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_ohzd18ti\cell_lvs.log             
+ERROR : Netlists don't match                                                   
+───────────────────────────────────────────────────────────────────────────────
+[19:46:30] INFO     klayout LVS finished with status code 1   lvs_runner.py:158
+                    after 0.00201s, most likely due to a                       
+                    netlist mismatch against the schematic                     
+                    (irrelevant for PEX), see log file:                        
+                    C:\Users\RUNNER~1\AppData\Local\Temp\lvs_                  
+                    run_ohzd18ti\cell_lvs.log                                  
