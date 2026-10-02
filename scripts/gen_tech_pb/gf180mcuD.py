@@ -87,8 +87,8 @@ def build_lvs_computed_layers(tech: Technology):
     #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
     #       to ensure they are be merged
     #
-    #       for R mode, MIM cap vias should point to a different GDS number than the regular via
-    #       as they have different resistances
+    #       for R mode, MIM cap vias should point to a different GDS number than the regular via,
+    #       as they join the top plate below them, not the metal (but their resistance per cut is the same)
     # add_computed_layer(tech, METAL, KCAP, "poly_vpp",    (66, 20),    "Poly2",     "Computed layer for poly (MOM cap)")
     # add_computed_layer(tech, METAL, KCAP, "li_vpp",      (67, 20),    "Metal1",    "Capacitor device metal (MOM cap)")
     # add_computed_layer(tech, METAL, KCAP, "met1_vpp",    (68, 20),    "Metal2",    "Capacitor device metal (MOM cap)")
@@ -257,6 +257,10 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "Metal4",   90)
     add_layer_resistance(ri, "Metal5",   40)  # top metal, 11K (gf180mcuD, 5LM)
 
+    # MIM cap top plate, the typical "Sheet res. top plate" of elec_specs 6.4, which gives it for the
+    # 1 and 1.5 fF/µm² options only (none for 2 fF/µm²), the magic tech has no resist for mimcap
+    add_layer_resistance(ri, "FuseTop", 500)
+
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT
     #                         contact_layer,  layer_below,  layer_above, resistance
@@ -270,6 +274,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_via_resistance(ri, "Via1",          4500)
     add_via_resistance(ri, "Via2",          4500)
     add_via_resistance(ri, "Via3",          4500)
+    # NOTE: also the one of the Via4 on the MIM cap top plate (top_via_cap), like magic's mimcc
     add_via_resistance(ri, "Via4",          4500)
 
     ci = ex.capacitance

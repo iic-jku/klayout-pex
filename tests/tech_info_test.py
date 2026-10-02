@@ -138,6 +138,34 @@ class Test(unittest.TestCase):
                                           for layers, values in values_by_layers.items()
                                           if len(values) > 1})
 
+    def test_shipped_tech_definitions_have_the_resistances_of_their_conductors_and_vias(self):
+        # The resistance extraction looks them up by their canonical layer name,
+        # and stops at a layer without one (e.g. at the top plates of the MIM caps)
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        LP = tech_pb2.LayerInfo
+        LK = tech_pb2.ComputedLayerInfo
+        for path in paths:
+            tech_info = TechInfo(TechInfo.parse_tech_def(path), dielectric_filter=None)
+            missing = []
+            for lyr in tech_info.tech.lvs_computed_layers:
+                if lyr.kind in (LK.KIND_PIN, LK.KIND_LABEL):
+                    continue
+                gds_pair = (lyr.layer_info.drw_gds_pair.layer, lyr.layer_info.drw_gds_pair.datatype)
+                canonical_layer_name = tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+                match lyr.layer_info.purpose:
+                    case LP.PURPOSE_METAL | LP.PURPOSE_MIM_CAP:
+                        resistances = tech_info.layer_resistance_by_layer_name
+                    case LP.PURPOSE_VIA:
+                        resistances = tech_info.via_resistance_by_layer_name
+                    case _:
+                        continue
+                if canonical_layer_name not in resistances:
+                    missing.append(f"{canonical_layer_name} (LVS {lyr.layer_info.name})")
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertEqual([], missing)
+
     def test_duplicate_names_are_reported_per_namespace(self):
         problems = TechInfo.duplicate_names(tech_with_duplicates())
         self.assertEqual(5, len(problems), problems)

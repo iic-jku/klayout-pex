@@ -23,6 +23,7 @@
 #
 
 import allure
+import csv
 import pytest
 
 from rcx25_test_helpers import *
@@ -40,10 +41,10 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode
 def test_mim_cap__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 6.99 µm * 6.99 µm = 73.29 fF
     # plus CJSW 40 aF/µm * 27.96 µm = 1.12 fF, the fringe to the bottom plate (Metal5) around the top plate (MIM)
-    pex_whiteboxed.assert_expected_matches_obtained(
-        'sg13g2_pr__cmim', 'cmim.gds.gz',
-        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;$2;$3;74.784;
-C2;$2;VSUBS;1.38;
-C3;$3;VSUBS;0.878;"""
-    )
+    # NOTE: the plates' nets have no labels, so their names ($1, $2, ...) depend on the LVS run
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__cmim', 'cmim.gds.gz')
+    with open(csv_path) as f:
+        rows = list(csv.DictReader(f, delimiter=';'))
+    caps = [(('VSUBS' in (row['Net1'], row['Net2'])), float(row['Capacitance [fF]'])) for row in rows]
+    assert sorted(cap for to_substrate, cap in caps if not to_substrate) == [74.784]  # between the plates
+    assert sorted(cap for to_substrate, cap in caps if to_substrate) == [0.878, 1.38]  # top and bottom plate

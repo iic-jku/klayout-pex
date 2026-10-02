@@ -83,8 +83,8 @@ def build_lvs_computed_layers(tech: Technology):
     #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
     #       to ensure they are be merged
     #
-    #       for R mode, MIM cap vias should point to a different GDS number than the regular via
-    #       as they have different resistances
+    #       for R mode, MIM cap vias should point to a different GDS number than the regular via,
+    #       as they join the top plate below them, not the metal (but their resistance per cut is the same)
     add_computed_layer(tech, VIA,     KCAP, "via3_cap",  (70, 244),   "via3",      "Computed layer for via3 (with MIM cap)")
     add_computed_layer(tech, VIA,     KCAP, "via4_cap",  (71, 244),   "via4",      "Computed layer for via4 (with MIM cap)")
     add_computed_layer(tech, METAL,   KCAP, "met3_cap",  (70, 20),    "met3",      "metal3 part of MiM cap")
@@ -320,6 +320,11 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "met4",    47)
     add_layer_resistance(ri, "met5",    29)
 
+    # MIM cap top plates, RSCAPM 5.8 Ω/□ of the SkyWater PDK docs (rules/device-details/cap_mim/cap_mim-table0.rst),
+    # the magic tech has no resist for mimcap and mimcap2
+    add_layer_resistance(ri, "capm",  5800)
+    add_layer_resistance(ri, "capm2", 5800)
+
     # resistance values are in mΩ / CNT
     #                         contact_layer,    layer_below,  layer_above, resistance
     add_contact_resistance(ri, "licon_nsd_con",  "nsdm",       "li1",        185000)  # licon over nsdm!
@@ -331,6 +336,11 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_via_resistance(ri, "mcon",          9300)
     add_via_resistance(ri, "via",           4500)
     add_via_resistance(ri, "via2",          3410)
+    # NOTE: also the ones of the vias on the MIM cap top plates (via3_cap on capm, via4_cap on capm2),
+    #       which the device models sky130_fd_pr__cap_mim_m3_1/2 give rcvia3 and rcvia4 too.
+    #       The magic tech has mimcc 4500 and mim2cc 3410 instead, the values of m2c and m3c in all its corners,
+    #       which don't fit the cuts: mimcc is a via3 cut (0.2 µm, not one of 0.15 µm like m2c),
+    #       mim2cc a via4 cut (0.8 µm, not one of 0.2 µm like m3c)
     add_via_resistance(ri, "via3",          3410)
     add_via_resistance(ri, "via4",           380)
 

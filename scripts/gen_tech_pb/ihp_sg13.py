@@ -122,8 +122,8 @@ class TechBuilder:
         #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
         #       to ensure they are be merged
         #
-        #       for R mode, MIM cap vias should point to a different GDS number than the regular via
-        #       as they have different resistances
+        #       for R mode, MIM cap vias should point to a different GDS number than the regular via,
+        #       as they join the top plate below them, not the metal (but their resistance per cut is the same)
 
         if self.is_g2:
             add_computed_layer(tech, VIA,   KCAP, "mim_via",        (125, 10),    "TopVia1",   "Original TopVia1 is 125/0, case MiM cap")
@@ -395,6 +395,12 @@ class TechBuilder:
         if self.is_g2:
             add_layer_resistance(ri, "TopMetal2",  11)
 
+            # MIM cap top plate: neither the process spec nor the magic tech have its sheet resistance,
+            # the gds2palace stackups of the PDK (libs.tech/palace, e.g. more_examples/XML_stackup_format_examples/
+            # 01_legacy_absolute_positioning_schemaVersion2.0.xml) give the MIM layer 0.5 MS/m and 0.1497 µm,
+            # i.e. 13.36 Ω/□ (and Metal5 23.19 MS/m and 0.49 µm, i.e. the 88 mΩ/□ of the process spec)
+            add_layer_resistance(ri, "MIM",     13360)
+
         # resistance values are in mΩ / CNT
         #                         contact_layer,   layer_below,  layer_above,     resistance
         #                         (LVS)            (LVS)         (LVS)
@@ -410,6 +416,8 @@ class TechBuilder:
         add_via_resistance(ri,     "Via3",       9000)
         if self.is_g2:
             add_via_resistance(ri,     "Via4",       9000)
+        # NOTE: also the one of the TopVia1 on the MIM cap top plate (mim_via), the gds2palace stackups
+        #       give it (Vmim) the conductivity of TopVia1, the process spec and the magic tech have none for it
         add_via_resistance(ri,     "TopVia1",    2200)
         if self.is_g2:
             add_via_resistance(ri,     "TopVia2",    1100)
