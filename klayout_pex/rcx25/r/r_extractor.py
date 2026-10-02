@@ -160,6 +160,9 @@ class RExtractor:
 
                     case LP.PURPOSE_METAL:
                         layer_resistance = tech.layer_resistance_by_layer_name.get(canonical_layer_name, None)
+                        if layer_resistance is None:
+                            unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no sheet resistance")
+                            continue
 
                         cond = rex_tech.conductors.add()
 

@@ -94,6 +94,13 @@ class RExtractorTechTest(unittest.TestCase):
                                            "Cont (LVS cont_nsd_con): no contact resistance for nsd_fet",
                                            "Cont (LVS cont_poly_con): no contact resistance for poly_con")
 
+    def test_metal_without_sheet_resistance_is_an_error(self):
+        # NOTE: it crashed with an AttributeError on the missing resistance
+        tech = ihp_sg13g2_tech()
+        layers = tech.process_parasitics.resistance.layers
+        layers.remove(next(r for r in layers if r.layer_name == 'Metal1'))
+        self.assert_unmodeled_layers_error(tech, "Metal1 (LVS metal1_con): no sheet resistance")
+
     def test_layer_modeled_by_another_layer_of_its_gds_pair_is_no_error(self):
         # e.g. sky130A mcon_vpp (the vias within MOM caps), on the GDS pair of mcon_con:
         # the resistance extraction models the layer of the GDS pair, with the shapes of both
