@@ -264,9 +264,12 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     add_conformal_dielectric(psi,   "topnit", 7.5,          0.54,        0.4223,         0.3777,    "topox")
 
+    # NOTE: above topnit, the SkyWater metal stack (module docstring) has the polyimide PI1, K = 2.94,
+    #       up to 11.8834 µm, which capiche (sky130A/metal_stack_sky130A.py) names air, with k = 3.0
+    #
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
-    add_simple_dielectric(psi,   "air",    3.0,          "topnit")
+    add_simple_dielectric(psi,   "air",    2.94,         "topnit")
 
     # NOTE: on its own, accessing contact_above declares no contact (unlike C++ mutable_contact_above()),
     #       it's declared by setting its fields in set_contact()
