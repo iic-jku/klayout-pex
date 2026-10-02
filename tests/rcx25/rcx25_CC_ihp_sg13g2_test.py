@@ -33,6 +33,7 @@ tags = ("PEX", "2.5D")
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.CC, blackbox=False)
+pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.CC, blackbox=True)
 
 
 @allure.parent_suite(parent_suite)
@@ -48,3 +49,39 @@ def test_mim_cap__whiteboxed():
     caps = [(('VSUBS' in (row['Net1'], row['Net2'])), float(row['Capacitance [fF]'])) for row in rows]
     assert sorted(cap for to_substrate, cap in caps if not to_substrate) == [74.784]  # between the plates
     assert sorted(cap for to_substrate, cap in caps if to_substrate) == [0.878, 1.38]  # top and bottom plate
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mom_cap__whiteboxed():
+    # The device model gives 0.915 fF/µm² (fingers on Metal2 … Metal4) * 10 µm * 25 µm = 228.75 fF
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;MINUS;PLUS;205.148;
+C2;MINUS;VSUBS;6.757;
+C3;MINUS;X;1.805;
+C4;PLUS;VSUBS;6.829;
+C5;PLUS;X;1.911;
+C6;VSUBS;X;1.292;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mom_cap__blackboxed():
+    # The fingers of the MOM cap are metal of its terminal nets, so --blackbox extracted their capacitance
+    # on top of the device, whose model has it: 205.148 fF more between PLUS and MINUS (#211 §9).
+    # The model has no substrate terminal, so the capacitances of the fingers to the substrate
+    # and to the wire X across are extracted, the same as in white-box mode
+    pex_blackboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;MINUS;VSUBS;6.757;
+C2;MINUS;X;1.805;
+C3;PLUS;VSUBS;6.829;
+C4;PLUS;X;1.911;
+C5;VSUBS;X;1.292;"""
+    )

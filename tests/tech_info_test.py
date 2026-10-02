@@ -27,6 +27,7 @@ from __future__ import annotations
 from collections import defaultdict
 import glob
 import os
+import re
 import tempfile
 import unittest
 
@@ -165,6 +166,21 @@ class Test(unittest.TestCase):
                     missing.append(f"{canonical_layer_name} (LVS {lyr.layer_info.name})")
             with self.subTest(tech=os.path.basename(path)):
                 self.assertEqual([], missing)
+
+    def test_shipped_tech_definitions_whitebox_the_metal_capacitors_only(self):
+        # White-box mode removes the devices whose capacitance the extraction has from their geometry:
+        # the MIM and MOM caps (whatever their LVS device class, e.g. sky130A VPP caps with 4 terminals are MOS4),
+        # but not the MOS caps and varactors, whose capacitance (of the gate oxide) the extraction doesn't have
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech_info = TechInfo.from_json(path, dielectric_filter=None)
+            mim_and_mom_caps = {name for name in tech_info.device_models.mapping_by_lvs_device_class_name
+                                if re.search(r'cap_(mim|cmim|cmom|vpp)', name)}
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual(set(), mim_and_mom_caps)
+                self.assertEqual(mim_and_mom_caps, tech_info.device_models.metal_capacitor_class_names)
 
     def test_duplicate_names_are_reported_per_namespace(self):
         problems = TechInfo.duplicate_names(tech_with_duplicates())

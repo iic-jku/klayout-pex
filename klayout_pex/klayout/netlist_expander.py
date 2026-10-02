@@ -33,6 +33,7 @@ from ..log import (
     warning,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
+from ..device_models import DeviceModels
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
 from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
@@ -45,8 +46,10 @@ class NetlistExpander:
                cap_matrix: CapacitanceMatrix,
                cap_matrix_interpreter: CapacitanceMatrixInterpreter,
                blackbox_devices: bool,
+               device_models: DeviceModels,
                substrate_net_name: str) -> kdb.Netlist:
         """
+        :param device_models: the device models of the tech info, whose metal capacitors white-box mode removes
         :param substrate_net_name: the conductor of the substrate (see FasterCapInputBuilder),
                                    a port of its own if the netlist has no such net
         """
@@ -54,8 +57,12 @@ class NetlistExpander:
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
         if not blackbox_devices:
+            # NOTE: only the metal capacitors (e.g. MIM and MOM caps), whose capacitance is extracted
+            #       from their plates and fingers (see RCX25NetlistExpander.is_whiteboxed), not e.g. the transistors
+            metal_capacitor_class_names = device_models.metal_capacitor_class_names
             # NOTE: Store devices before modifying container
-            devices_to_remove: List[kdb.Device] = list(top_circuit.each_device())
+            devices_to_remove: List[kdb.Device] = [d for d in top_circuit.each_device()
+                                                   if d.device_class().name in metal_capacitor_class_names]
             for d in devices_to_remove:
                 name = d.name or d.expanded_name()
                 info(f"Removing whiteboxed device {name}")

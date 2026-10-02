@@ -374,12 +374,28 @@ else
   # [KPEX] special layers needed for parasitic extraction
   #=====================================================================
 
-  # metal5_n_cap: metal5 region where no MiM cap is above metal5
+  # metal1_mom … metal5_mom: the metal within the markers of the MOM caps (cap_cmomi, cap_cmomf), their fingers
+  #                           (with --blackbox, their models have the capacitances between them)
+  # metal1_n_mom … metal4_n_mom: the metal outside the markers of the MOM caps
+
+  mom_mk = cap_cmomi_marker.join(cap_cmomf_marker)
+
+  metal1_n_mom = metal1_con.not(mom_mk)
+  metal1_mom   = metal1_con.and(mom_mk)
+  metal2_n_mom = metal2_con.not(mom_mk)
+  metal2_mom   = metal2_con.and(mom_mk)
+  metal3_n_mom = metal3_con.not(mom_mk)
+  metal3_mom   = metal3_con.and(mom_mk)
+  metal4_n_mom = metal4_con.not(mom_mk)
+  metal4_mom   = metal4_con.and(mom_mk)
+
+  # metal5_n_cap: metal5 region where no MiM cap is above metal5 (and outside the markers of the MOM caps)
   # metal5_cap: metal5 region where MiM cap is above
   # cmim_top: the MiM cap itself (connected to mim_via)
 
-  metal5_n_cap = metal5_drw.not(mim_drw)
+  metal5_n_cap = metal5_drw.not(mim_drw).not(mom_mk)
   metal5_cap   = metal5_drw.and(mim_drw)
+  metal5_mom   = metal5_drw.not(mim_drw).and(mom_mk)
 
   # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
   cont_poly_con = cont_drw.and(poly_con)
@@ -416,8 +432,18 @@ else
   auto_name_layers!(binding)
 
 
+  connect(metal1_n_mom, metal1_con)
+  connect(metal1_mom,   metal1_con)
+  connect(metal2_n_mom, metal2_con)
+  connect(metal2_mom,   metal2_con)
+  connect(metal3_n_mom, metal3_con)
+  connect(metal3_mom,   metal3_con)
+  connect(metal4_n_mom, metal4_con)
+  connect(metal4_mom,   metal4_con)
+
   connect(metal5_n_cap, metal5_con)
   connect(metal5_cap, metal5_con)
+  connect(metal5_mom, metal5_con)
 
   # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
   connect(cont_poly_con,   cont_drw)

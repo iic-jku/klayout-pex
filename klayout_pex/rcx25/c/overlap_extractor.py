@@ -30,6 +30,7 @@ from klayout_pex.log import (
 )
 from klayout_pex.tech_info import TechInfo
 
+from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.types import PolygonNeighborhood
 from klayout_pex.rcx25.extraction_results import *
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
@@ -41,12 +42,14 @@ class OverlapExtractor:
                  layer_regions_by_name: Dict[LayerName, kdb.Region],
                  dbu: float,
                  tech_info: TechInfo,
+                 device_capacitor_plates: DeviceCapacitorPlates,
                  results: CellExtractionResults,
                  report: ExtractionReporter):
         self.all_layer_names = all_layer_names
         self.layer_regions_by_name = layer_regions_by_name
         self.dbu = dbu
         self.tech_info = tech_info
+        self.device_capacitor_plates = device_capacitor_plates
         self.results = results
         self.report = report
 
@@ -57,6 +60,7 @@ class OverlapExtractor:
                 inside_layer_index=idx,
                 dbu=self.dbu,
                 tech_info=self.tech_info,
+                device_capacitor_plates=self.device_capacitor_plates,
                 results=self.results,
                 report=self.report
             )
@@ -77,6 +81,7 @@ class OverlapExtractor:
                      inside_layer_index: int,
                      dbu: float,
                      tech_info: TechInfo,
+                     device_capacitor_plates: DeviceCapacitorPlates,
                      results: CellExtractionResults,
                      report: ExtractionReporter):
             super().__init__()
@@ -84,6 +89,7 @@ class OverlapExtractor:
             self.inside_layer_index = inside_layer_index
             self.dbu = dbu
             self.tech_info = tech_info
+            self.device_capacitor_plates = device_capacitor_plates
             self.results = results
             self.report = report
 
@@ -126,6 +132,11 @@ class OverlapExtractor:
                     # info(f"(Overlap): {top_layer_name}({net_top})-{bot_layer_name}({net_bot}): "
                     #     f"cap: {round(cap_femto, 2)} fF, "
                     #     f"area: {overlap_area_um2} µm^2")
+
+                    # NOTE: the model of a device has the capacitance between its plates,
+                    #       but the plate above still shields the one below from the layers further above
+                    if self.device_capacitor_plates.are_plates_of_a_device(polygon, net_bot, polygon_above, net_top):
+                        cap_femto = 0.0
 
                     if cap_femto > 0.0:
                         ovk = OverlapKey(layer_top=top_layer_name,

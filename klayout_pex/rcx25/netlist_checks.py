@@ -36,6 +36,7 @@ from typing import *
 
 import klayout.db as kdb
 
+from ..device_models import DeviceModels
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
 from .types import NetName
@@ -71,10 +72,12 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
                      top_cell_name: str,
                      summary: ExtractionSummary,
                      blackbox_devices: bool,
+                     device_models: DeviceModels,
                      substrate_net_name: Optional[str] = None) -> List[str]:
     """
     :param blackbox_devices: whether the RC netlist keeps the devices, rather than the whiteboxed ones
                              removed (see RCX25NetlistExpander)
+    :param device_models: the device models of the tech info, which tell the whiteboxed devices
     :param substrate_net_name: the net of the capacitances to the substrate (see RCX25NetlistExpander)
     :return: the problems of the RC netlist, e.g. a device terminal that is not on
              the resistor network of its net, so that the resistances don't reach it
@@ -161,7 +164,7 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
         _, device = devices.get(lvs_device.id(), (None, None))
         # NOTE: the ID of a removed device may be given to a parasitic one
         in_rc_netlist = device is not None and device.device_class().name == class_name
-        if blackbox_devices or not RCX25NetlistExpander.is_whiteboxed(lvs_device.device_class()):
+        if blackbox_devices or not RCX25NetlistExpander.is_whiteboxed(lvs_device.device_class(), device_models):
             if not in_rc_netlist:
                 missing_devices[class_name].append(lvs_device.expanded_name())
         elif in_rc_netlist:

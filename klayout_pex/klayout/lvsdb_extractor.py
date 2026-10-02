@@ -56,6 +56,9 @@ GDSPair = Tuple[int, int]
 LayerIndexMap = Dict[int, int]  # maps layer indexes of LVSDB to annotated_layout
 LVSDBRegions = Dict[int, kdb.Region]  # maps layer index of annotated_layout to LVSDB region
 
+# the property of the shapes of the plates of a device capacitor (see KLayoutExtractionContext.shapes_of_layer)
+DEVICE_CAPACITOR_PLATE_PROPERTY = 'device_capacitor_plate'
+
 
 class LVSDBError(Exception):
     """
@@ -116,6 +119,8 @@ class KLayoutExtractionContext:
     unnamed_layers: List[KLayoutExtractedLayerInfo]
     # unnamed layers the tech info has no layer for (derived from the same original layer)
     unmodeled_layers: List[str]
+    # the devices are black-boxed (--blackbox), their models have their capacitances (see ComputedLayerInfo.Kind)
+    blackbox_devices: bool
 
     @classmethod
     def prepare_extraction(cls,
@@ -192,7 +197,8 @@ class KLayoutExtractionContext:
             annotated_layout=annotated_layout,
             extracted_layers=nonempty_layers.extracted_layers,
             unnamed_layers=nonempty_layers.unnamed_layers,
-            unmodeled_layers=nonempty_layers.unmodeled_layers
+            unmodeled_layers=nonempty_layers.unmodeled_layers,
+            blackbox_devices=blackbox_devices
         )
 
     @staticmethod
@@ -426,17 +432,30 @@ class KLayoutExtractionContext:
 
         return shapes
 
-    def shapes_of_layer(self, gds_pair: GDSPair) -> Optional[kdb.Region]:
+    def shapes_of_layer(self,
+                        gds_pair: GDSPair,
+                        mark_device_capacitor_plates: bool = False) -> Optional[kdb.Region]:
+        """
+        :param mark_device_capacitor_plates: give the shapes of the layers of KIND_DEVICE_CAPACITOR_PLATE
+                                             (e.g. the fingers of a MOM cap) the property
+                                             DEVICE_CAPACITOR_PLATE_PROPERTY, so that they are kept apart
+                                             from the other shapes of their nets
+        """
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
             return None
+
+        def is_plate(sl: KLayoutExtractedLayerInfo) -> bool:
+            return mark_device_capacitor_plates and \
+                   self.tech.computed_layer_info_by_name[sl.lvs_layer_name].kind == \
+                   tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_CAPACITOR_PLATE
 
         shapes: kdb.Region
 
         match len(lyr.source_layers):
             case 0:
                 raise AssertionError('Internal error: Empty list of source_layers')
-            case 1:
+            case 1 if not is_plate(lyr.source_layers[0]):
                 shapes = lyr.source_layers[0].region
             case _:
                 # NOTE: currently a bug, for now use polygon-per-polygon workaround
@@ -446,9 +465,11 @@ class KLayoutExtractionContext:
                 shapes = kdb.Region()
                 shapes.enable_properties()
                 for sl in lyr.source_layers:
+                    plate_properties = {DEVICE_CAPACITOR_PLATE_PROPERTY: True} if is_plate(sl) else {}
                     iter, transform = sl.region.begin_shapes_rec()
                     while not iter.at_end():
-                        p = kdb.PolygonWithProperties(iter.shape().polygon, {'net': iter.shape().property('net')})
+                        p = kdb.PolygonWithProperties(iter.shape().polygon,
+                                                      {'net': iter.shape().property('net'), **plate_properties})
                         shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
                                       iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
                                       p)

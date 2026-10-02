@@ -42,6 +42,7 @@ ProcessParasiticsInfo = process_parasitics_pb2.ProcessParasiticsInfo
 ResistanceInfo = process_parasitics_pb2.ResistanceInfo
 CapacitanceInfo = process_parasitics_pb2.CapacitanceInfo
 DeviceModelsInfo = device_models_pb2.DeviceModelsInfo
+DeviceModelMapping = device_models_pb2.DeviceModelMapping
 DeviceModelParameter = device_models_pb2.DeviceModelParameter
 LVSAreaPerimeterSide = device_models_pb2.LVSAreaPerimeterSide
 SubstrateInfo = substrate_pb2.SubstrateInfo
@@ -66,9 +67,13 @@ MIM = LayerInfo.PURPOSE_MIM_CAP
 # computed layer kinds
 KREG = ComputedLayerInfo.KIND_REGULAR
 KCAP = ComputedLayerInfo.KIND_DEVICE_CAPACITOR
+KPLT = ComputedLayerInfo.KIND_DEVICE_CAPACITOR_PLATE
 KRES = ComputedLayerInfo.KIND_DEVICE_RESISTOR
 KPIN = ComputedLayerInfo.KIND_PIN
 KLBL = ComputedLayerInfo.KIND_LABEL
+
+# device kinds
+METAL_CAP = DeviceModelMapping.KIND_METAL_CAPACITOR
 
 
 def _gds_pair(gds: GDSPair) -> tech_pb2.GDSPair:
@@ -380,8 +385,10 @@ def add_device_model_mapping(dmi: DeviceModelsInfo,
                              spice_prefix: str,
                              terminal_names: List[str],
                              parameters: List[DeviceModelParameter],
-                             model_name: str = ''):  # empty if the same as the LVS device class name
+                             model_name: str = '',  # empty if the same as the LVS device class name
+                             kind: DeviceModelMapping.Kind = DeviceModelMapping.KIND_UNSPECIFIED):
     dmi.device_model_mappings.add(lvs_device_class_name=lvs_device_class_name,
+                                  kind=kind,
                                   spice_prefix=spice_prefix,
                                   model_name=model_name,
                                   terminal_names=terminal_names,

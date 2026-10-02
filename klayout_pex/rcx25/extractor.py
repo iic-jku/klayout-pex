@@ -38,6 +38,7 @@ from ..tech_info import TechInfo
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode
+from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
 from klayout_pex.rcx25.r.r_extractor import RExtractor
@@ -81,12 +82,13 @@ class RCX25Extractor:
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
         return self.tech_info.gds_pair(layer_name)
 
-    def shapes_of_layer(self, layer_name: str) -> Optional[kdb.Region]:
+    def shapes_of_layer(self, layer_name: str, mark_device_capacitor_plates: bool = False) -> Optional[kdb.Region]:
         gds_pair = self.gds_pair(layer_name=layer_name)
         if not gds_pair:
             return None
 
-        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair)
+        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair,
+                                                  mark_device_capacitor_plates=mark_device_capacitor_plates)
         if not shapes:
             debug(f"Nothing extracted for layer {layer_name}")
 
@@ -150,7 +152,9 @@ class RCX25Extractor:
             gds_pair = self.gds_pair(layer_name)
             canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
 
-            all_layer_shapes = self.shapes_of_layer(layer_name)
+            # NOTE: with --blackbox, the plates of the capacitor devices are marked (see DeviceCapacitorPlates)
+            all_layer_shapes = self.shapes_of_layer(layer_name,
+                                                    mark_device_capacitor_plates=self.pex_context.blackbox_devices)
             if all_layer_shapes is not None:
                 all_layer_shapes.enable_properties()
 
@@ -191,11 +195,19 @@ class RCX25Extractor:
                     '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
                 )
 
+            # NOTE: with --blackbox, the capacitances between the plates of a capacitor device
+            #       (e.g. the fingers of a MOM cap) are left to its model
+            device_capacitor_plates = DeviceCapacitorPlates.from_circuit(
+                circuit=self.pex_context.top_circuit,
+                device_class_names=self.tech_info.device_models.metal_capacitor_class_names
+            ) if self.pex_context.blackbox_devices else DeviceCapacitorPlates()
+
             overlap_extractor = OverlapExtractor(
                 all_layer_names=all_layer_names,
                 layer_regions_by_name=layer_regions_by_name,
                 dbu=dbu,
                 tech_info=self.tech_info,
+                device_capacitor_plates=device_capacitor_plates,
                 results=results,
                 report=report
             )
@@ -207,6 +219,7 @@ class RCX25Extractor:
                 dbu=dbu,
                 scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
                 tech_info=self.tech_info,
+                device_capacitor_plates=device_capacitor_plates,
                 results=results,
                 report=report
             )

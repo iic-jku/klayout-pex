@@ -37,6 +37,7 @@ from klayout_pex.log import (
 )
 from klayout_pex.tech_info import TechInfo
 
+from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from klayout_pex.rcx25.extraction_results import *
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
@@ -52,6 +53,7 @@ class SidewallAndFringeExtractor:
                  dbu: float,
                  scale_ratio_to_fit_halo: bool,
                  tech_info: TechInfo,
+                 device_capacitor_plates: DeviceCapacitorPlates,
                  results: CellExtractionResults,
                  report: ExtractionReporter):
         self.all_layer_names = all_layer_names
@@ -59,6 +61,7 @@ class SidewallAndFringeExtractor:
         self.dbu = dbu
         self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
         self.tech_info = tech_info
+        self.device_capacitor_plates = device_capacitor_plates
         self.results = results
         self.report = report
 
@@ -77,6 +80,7 @@ class SidewallAndFringeExtractor:
                 dbu=self.dbu,
                 scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
                 tech_info=self.tech_info,
+                device_capacitor_plates=self.device_capacitor_plates,
                 results=self.results,
                 report=self.report
             )
@@ -109,6 +113,7 @@ class SidewallAndFringeExtractor:
                      dbu: float,
                      tech_info: TechInfo,
                      scale_ratio_to_fit_halo: bool,
+                     device_capacitor_plates: DeviceCapacitorPlates,
                      results: CellExtractionResults,
                      report: ExtractionReporter):
             super().__init__()
@@ -118,6 +123,7 @@ class SidewallAndFringeExtractor:
             self.dbu = dbu
             self.tech_info = tech_info
             self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
+            self.device_capacitor_plates = device_capacitor_plates
             self.results = results
             self.report = report
 
@@ -267,6 +273,10 @@ class SidewallAndFringeExtractor:
             if net1 == net2:
                 return
 
+            # NOTE: the model of a device has the capacitance between its plates
+            if self.device_capacitor_plates.are_plates_of_a_device(edge, net1, polygon, net2):
+                return
+
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name[layer_name]
 
             # TODO!
@@ -382,9 +392,11 @@ class SidewallAndFringeExtractor:
                 for p in outside_polygons
             ]
 
+            # NOTE: the model of a device has the capacitance between its plates, so they are like one net
             same_net_markers = [
-                inside_net_name == outside_net_name
-                for outside_net_name in outside_net_names
+                inside_net_name == outside_net_name or
+                self.device_capacitor_plates.are_plates_of_a_device(edge, inside_net_name, p, outside_net_name)
+                for p, outside_net_name in zip(outside_polygons, outside_net_names)
             ]
 
             # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)

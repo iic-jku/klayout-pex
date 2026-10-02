@@ -436,7 +436,8 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #           gf180mcuD has its MIM caps between Metal4 and Metal5 (MIM option B, 5 metal layers)
     cap = lvs_area_perimeter_params('c_width', 'c_length', 'A', 'P', um)
     for mim in ('1f0', '1f5', '2f0'):
-        add_device_model_mapping(dmi, f"cap_mim_{mim}fF", "X", ["B", "A"], cap, f"cap_mim_{mim}_m4m5_noshield")
+        add_device_model_mapping(dmi, f"cap_mim_{mim}fF", "X", ["B", "A"], cap, f"cap_mim_{mim}_m4m5_noshield",
+                                 kind=METAL_CAP)
     for mos_cap in ('cap_nmos_03v3', 'cap_nmos_03v3_b', 'cap_nmos_06v0', 'cap_nmos_06v0_b',
                     'cap_pmos_03v3', 'cap_pmos_03v3_b', 'cap_pmos_06v0', 'cap_pmos_06v0_b'):
         add_device_model_mapping(dmi, mos_cap, "X", ["A", "B"], cap)

@@ -69,6 +69,15 @@ class DeviceModels:
     def mapping_by_lvs_device_class_name(self) -> Dict[LVSDeviceClassName, device_models_pb2.DeviceModelMapping]:
         return {m.lvs_device_class_name: m for m in self.device_models.device_model_mappings}
 
+    @cached_property
+    def metal_capacitor_class_names(self) -> Set[LVSDeviceClassName]:
+        """
+        The LVS device classes of the metal capacitors (e.g. MIM and MOM caps),
+        whose capacitance the extraction has from their geometry, unless black-boxed
+        """
+        return {m.lvs_device_class_name for m in self.device_models.device_model_mappings
+                if m.kind == device_models_pb2.DeviceModelMapping.KIND_METAL_CAPACITOR}
+
     def check_mappings(self,
                        netlist: kdb.Netlist,
                        ignored_device_class_names: Set[LVSDeviceClassName] = frozenset()):
