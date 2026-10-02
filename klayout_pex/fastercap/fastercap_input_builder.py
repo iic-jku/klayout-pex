@@ -52,11 +52,17 @@ class FasterCapInputBuilder:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
                  tech_info: TechInfo,
+                 substrate_net_name: str,
                  k_void: float = 3.5,
                  delaunay_amax: float = 0.0,
                  delaunay_b: float = 1.0):
+        """
+        :param substrate_net_name: the conductor of the substrate block, the substrate net (e.g. VSS),
+                                   whose metal is then the same conductor, or a name for a port of its own
+        """
         self.pex_context = pex_context
         self.tech_info = tech_info
+        self.substrate_net_name = substrate_net_name
         self.k_void = k_void
         self.delaunay_amax = delaunay_amax
         self.delaunay_b = delaunay_b
@@ -198,7 +204,7 @@ class FasterCapInputBuilder:
         enlarged_top_cell_bbox = self.top_cell_bbox().enlarged(math.floor(8 / self.dbu))  # 8µm fringe halo
 
         #
-        # global substrate block below everything. independent of nets!
+        # global substrate block below everything, a conductor of the substrate net
         #
 
         substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
@@ -210,9 +216,9 @@ class FasterCapInputBuilder:
         diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
         for d in diffusion_regions:
             substrate_region -= d.sized(diffusion_margin)
-        info(f"Substrate VSUBS, "
+        info(f"Substrate {self.substrate_net_name}, "
              f"z={0 - substrate_layer.height - substrate_layer.thickness}, height={substrate_layer.thickness}")
-        model_builder.add_conductor(net_name="VSUBS",
+        model_builder.add_conductor(net_name=self.substrate_net_name,
                                     layer=substrate_region,
                                     z=0 - substrate_layer.height - substrate_layer.thickness,
                                     height=substrate_layer.thickness)

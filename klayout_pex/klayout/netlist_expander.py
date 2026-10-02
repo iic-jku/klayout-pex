@@ -34,7 +34,7 @@ from ..log import (
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
-from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
+from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
 
 
@@ -44,7 +44,12 @@ class NetlistExpander:
                top_cell_name: str,
                cap_matrix: CapacitanceMatrix,
                cap_matrix_interpreter: CapacitanceMatrixInterpreter,
-               blackbox_devices: bool) -> kdb.Netlist:
+               blackbox_devices: bool,
+               substrate_net_name: str) -> kdb.Netlist:
+        """
+        :param substrate_net_name: the conductor of the substrate (see FasterCapInputBuilder),
+                                   a port of its own if the netlist has no such net
+        """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
@@ -62,16 +67,22 @@ class NetlistExpander:
         cap.description = "Extracted by kpex/FasterCap PEX"
         expanded_netlist.add(cap)
 
-        fc_gnd_net = top_circuit.create_net('FC_GND')  # create GROUND net
-        vsubs_net = top_circuit.create_net("VSUBS")
         nets: List[kdb.Net] = []
 
         # build table: name -> net
         name2net: Dict[str, kdb.Net] = {n.expanded_name(): n for n in top_circuit.each_net()}
 
+        signal_names = [cap_matrix_interpreter.signal_name_from_conductor_name(nc)
+                        for nc in cap_matrix.conductor_names]
+
+        # NOTE: the substrate conductor is the substrate net, or a port of its own (e.g. a metal test pattern)
+        if substrate_net_name in signal_names and substrate_net_name not in name2net:
+            substrate_net = top_circuit.create_net(substrate_net_name)
+            top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
+            name2net[substrate_net_name] = substrate_net
+
         # find nets for the matrix axes
-        for nc in cap_matrix.conductor_names:
-            nn = cap_matrix_interpreter.signal_name_from_conductor_name(nc)
+        for nn in signal_names:
             n = name2net.get(nn)
             if n is None:
                 raise Exception(f"No net found with name {nn}, net names are: {list(name2net.keys())}")
@@ -108,6 +119,8 @@ class NetlistExpander:
         #
         # https://www.fastfieldsolvers.com/Papers/The_Maxwell_Capacitance_Matrix_WP110301_R03.pdf
         #
+        ground_index = signal_names.index(substrate_net_name) if substrate_net_name in signal_names else 0
+
         for i in range(0, cap_matrix.dimension):
             row = cap_matrix[i]
             cap_ii = row[i]
@@ -120,33 +133,10 @@ class NetlistExpander:
                     add_parasitic_cap(i=i, j=j,
                                       net1=nets[i], net2=nets[j],
                                       cap_value=cap_value)
-            if i > 0:
+            # NOTE: the rest of the diagonal element (the capacitance to infinity) goes to the substrate
+            if i != ground_index:
                 add_parasitic_cap(i=i, j=i,
-                                  net1=nets[i], net2=nets[0],
+                                  net1=nets[i], net2=nets[ground_index],
                                   cap_value=cap_ii)
-
-        # Short VSUBS and FC_GND together
-        #   VSUBS ... substrate block
-        #   FC_GND ... FasterCap's GND, i.e. the diagonal Cii elements
-        # create capacitor class
-
-        res = kdb.DeviceClassResistor()
-        res.name = PARASITIC_RESISTOR_CLASS_NAME
-        res.description = "Extracted by kpex/FasterCap PEX"
-        expanded_netlist.add(res)
-
-        gnd_net = name2net.get('GND', None)
-        if not gnd_net:
-            gnd_net = top_circuit.create_net('GND')  # create GROUND net
-
-        c: kdb.Device = top_circuit.create_device(res, f"Rext_FC_GND_GND")
-        c.connect_terminal('A', fc_gnd_net)
-        c.connect_terminal('B', gnd_net)
-        c.set_parameter('R', 0)
-
-        c: kdb.Device = top_circuit.create_device(res, f"Rext_VSUBS_GND")
-        c.connect_terminal('A', vsubs_net)
-        c.connect_terminal('B', gnd_net)
-        c.set_parameter('R', 0)
 
         return expanded_netlist

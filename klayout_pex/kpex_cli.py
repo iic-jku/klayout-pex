@@ -771,6 +771,7 @@ class KpexCLI:
         rule('Process stackup')
         fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
                                                         tech_info=tech_info,
+                                                        substrate_net_name=pex_context.substrate_net_name,
                                                         k_void=args.k_void,
                                                         delaunay_amax=args.delaunay_amax,
                                                         delaunay_b=args.delaunay_b)
@@ -836,7 +837,8 @@ class KpexCLI:
             top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             cap_matrix_interpreter=cap_matrix_interpreter,
-            blackbox_devices=args.blackbox_devices
+            blackbox_devices=args.blackbox_devices,
+            substrate_net_name=pex_context.substrate_net_name
         )
 
         # create a nice CSV for reports, useful for spreadsheets
@@ -981,7 +983,8 @@ class KpexCLI:
             top_cell_name=pex_context.annotated_top_cell.name,
             cap_matrix=cap_matrix,
             cap_matrix_interpreter=cap_matrix_interpreter,
-            blackbox_devices=args.blackbox_devices
+            blackbox_devices=args.blackbox_devices,
+            substrate_net_name=pex_context.substrate_net_name
         )
 
         netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTCAP2, pex_context.tech)

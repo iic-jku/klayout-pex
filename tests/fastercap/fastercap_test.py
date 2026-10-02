@@ -130,9 +130,11 @@ def assert_expected_matches_obtained(*path_components,
 def test_single_plate_100um_x_100um_li1_over_substrate():
     #_______________________________ NOTE: with halo=8µm __________________________________
     # C0 PLATE VSUBS 0.38618p
+    #
+    # NOTE: the substrate is the port sky130_gnd, as the pattern has no substrate net (no transistor)
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-Cext_0_1;VSUBS;PLATE;396.78
-Cext_1_1;PLATE;VSUBS;3.33"""
+Cext_0_1;sky130_gnd;PLATE;396.78
+Cext_1_1;PLATE;sky130_gnd;3.33"""
         )
