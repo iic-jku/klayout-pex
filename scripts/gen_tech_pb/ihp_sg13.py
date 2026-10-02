@@ -395,6 +395,12 @@ class TechBuilder:
         if self.is_g2:
             add_layer_resistance(ri, "TopMetal2",  11)
 
+            # MIM cap top plate: neither the process spec nor the magic tech have its sheet resistance,
+            # the gds2palace stackups of the PDK (libs.tech/palace, e.g. more_examples/XML_stackup_format_examples/
+            # 01_legacy_absolute_positioning_schemaVersion2.0.xml) give the MIM layer 0.5 MS/m and 0.1497 µm,
+            # i.e. 13.36 Ω/□ (and Metal5 23.19 MS/m and 0.49 µm, i.e. the 88 mΩ/□ of the process spec)
+            add_layer_resistance(ri, "MIM",     13360)
+
         # resistance values are in mΩ / CNT
         #                         contact_layer,   layer_below,  layer_above,     resistance
         #                         (LVS)            (LVS)         (LVS)
