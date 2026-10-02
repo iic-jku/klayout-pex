@@ -32,6 +32,8 @@ package kpex.tech;
 //
 // A layout without a substrate net (e.g. a metal test pattern without taps or transistors)
 // gets a port for the substrate, of the first name.
+//
+// The wells within the substrate are nets of their own, which the capacitances above them go to.
 message SubstrateInfo {
     // names of the substrate net, if no label names it (the global net of the LVS deck),
     // e.g. "sky130_gnd" (sky130A), "SUB" (gf180mcuD), "sub!" (IHP)
@@ -40,4 +42,9 @@ message SubstrateInfo {
     // LVS layers on the substrate net, to find it when a label names it,
     // e.g. "ptap_conn" (sky130A), "ptap_regular" (gf180mcuD), "pwell_sub" (IHP)
     repeated string lvs_layer_names = 20;
+
+    // LVS layers of the wells within the substrate, e.g. "nwell" (sky130A):
+    // the capacitances of the shapes above a well go to the net of the well (e.g. VDD), rather than
+    // to the substrate net, with the coefficients of the substrate (where wells overlap, to the first one's)
+    repeated string well_lvs_layer_names = 30;
 }

@@ -110,6 +110,20 @@ class Test(unittest.TestCase):
                 self.assertNotEqual([], list(substrate.net_names))
                 self.assertNotEqual([], list(substrate.lvs_layer_names))
 
+    def test_shipped_tech_definitions_have_wells_of_lvs_computed_layers(self):
+        # The capacitances above a well go to its net, which the extraction has on the shapes
+        # of the LVS computed layers, so the substrate would cover a well of another layer
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech_info = TechInfo(TechInfo.parse_tech_def(path), dielectric_filter=None)
+            well_layer_names = list(tech_info.tech.substrate.well_lvs_layer_names)
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual([], well_layer_names)
+                self.assertEqual([], [name for name in well_layer_names
+                                      if name not in tech_info.computed_layer_info_by_name])
+
     def test_shipped_tech_definitions_declare_each_capacitance_once(self):
         # The capacitances are looked up by layer (pair), so one declared twice
         # keeps only the last value: ihp-sg13g2 and ihp-sg13cmos5l declared
@@ -206,6 +220,31 @@ class Test(unittest.TestCase):
                 if contact.layer_below not in tech_info.contact_resistance_by_device_layer_name:
                     missing.append(f"{contact.name}: contact resistance")
             with self.subTest(tech=os.path.basename(path)):
+                self.assertEqual([], missing)
+
+    def test_shipped_tech_definitions_have_the_capacitances_to_their_diffusion(self):
+        # The capacitances are looked up by the canonical names of the extracted layers,
+        # and the diffusion is extracted as its source/drain implants (e.g. nsdm and psdm),
+        # while the tables of the magic techs have it as the drawn diffusion (e.g. diff)
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech_info = TechInfo(TechInfo.parse_tech_def(path), dielectric_filter=None)
+
+            def canonical_layer_name(layer_name: str) -> str:
+                return tech_info.canonical_layer_name_by_gds_pair[tech_info.gds_pair(layer_name)]
+
+            diffusion_layer_names = [canonical_layer_name(lyr.name) for lyr in tech_info.process_diffusion_layers]
+            # NOTE: but the gate poly, whose capacitances to the source/drain are the transistor's
+            metal_layer_names = [canonical_layer_name(lyr.name) for lyr in tech_info.process_metal_layers[1:]]
+            missing = [f"{metal} over {diffusion}"
+                       for metal in metal_layer_names
+                       for diffusion in diffusion_layer_names
+                       if diffusion not in tech_info.overlap_cap_by_layer_names.get(metal, {})
+                       or diffusion not in tech_info.side_overlap_cap_by_layer_names.get(metal, {})]
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual([], diffusion_layer_names)
                 self.assertEqual([], missing)
 
     def test_duplicate_names_are_reported_per_namespace(self):

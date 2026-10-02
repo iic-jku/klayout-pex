@@ -94,6 +94,35 @@ class RCX25Extractor:
 
         return shapes
 
+    def substrate_region(self) -> kdb.Region:
+        """
+        The substrate below the layout (and its halo), the bottom plate of the capacitances to the substrate,
+        split into its wells, of the nets of the wells (e.g. VDD), and the rest, of the substrate (VSUBS)
+        """
+        dbu = self.pex_context.dbu
+        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
+        rest = kdb.Region(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
+
+        substrate_region = kdb.Region()
+        substrate_region.enable_properties()
+
+        def insert(region: kdb.Region, net_name: NetName):
+            for polygon in region.each():
+                substrate_region.insert(kdb.PolygonWithProperties(polygon.downcast(), {'net': net_name}))
+
+        # NOTE: where wells overlap (e.g. an nwell within a deep nwell), the first one is at the surface
+        for well_layer_name in self.tech_info.tech.substrate.well_lvs_layer_names:
+            wells = self.shapes_of_layer(well_layer_name)
+            if wells is None:
+                continue
+            for well in wells.merged().each():  # NOTE: merged per net
+                well_region = kdb.Region(well.downcast()) & rest
+                rest -= well_region
+                insert(well_region, well.property('net'))
+
+        insert(rest, self.tech_info.internal_substrate_layer_name)
+        return substrate_region
+
     def extract(self) -> ExtractionResults:
         extraction_results = ExtractionResults()
 
@@ -133,13 +162,18 @@ class RCX25Extractor:
         all_region = kdb.Region()
         all_region.enable_properties()
 
-        substrate_region = kdb.Region()
-        substrate_region.enable_properties()
+        layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = self.substrate_region()
 
-        side_halo_um = self.tech_info.tech.process_parasitics.side_halo
-        substrate_region.insert(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
-
-        layer_regions_by_name[self.tech_info.internal_substrate_layer_name] = substrate_region
+        # NOTE: the diffusion (the source/drain of the transistors) is above the substrate, which it shields,
+        #       and below the metal layers, of whose capacitances it's the bottom plate
+        for diffusion_layer in self.tech_info.process_diffusion_layers:
+            diffusion_shapes = self.shapes_of_layer(diffusion_layer.name)
+            if diffusion_shapes is not None:
+                diffusion_shapes.enable_properties()
+                gds_pair = self.gds_pair(diffusion_layer.name)
+                canonical_layer_name = self.tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+                layer_regions_by_name[canonical_layer_name] += diffusion_shapes
+                layer_regions_by_name[canonical_layer_name].enable_properties()
 
         via_name_below_layer_name: Dict[LayerName, Optional[LayerName]] = {}
         via_name_above_layer_name: Dict[LayerName, Optional[LayerName]] = {}
@@ -181,12 +215,14 @@ class RCX25Extractor:
         # ------------------------------------------------------------------------
         if self.pex_mode.need_capacitance():
             # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
-            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode
+            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode,
+            #       but for the capacitances of the devices (e.g. of the diffusion to the substrate)
             missing_overlap_caps = [f"{top_layer_name} over {bottom_layer_name}"
                                     for idx, bottom_layer_name in enumerate(all_layer_names)
                                     for top_layer_name in all_layer_names[idx + 1:]
                                     if not self.tech_info.overlap_cap_by_layer_names
-                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)]
+                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)
+                                    and not self.tech_info.is_device_capacitance(top_layer_name, bottom_layer_name)]
             if missing_overlap_caps:
                 raise CExtractionTechError(
                     "The tech info has no overlap capacitance for these layer pairs of the layout, "

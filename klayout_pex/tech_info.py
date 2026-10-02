@@ -214,6 +214,33 @@ class TechInfo:
         )
 
     @cached_property
+    def process_diffusion_layer_names(self) -> List[CanonicalLayerName]:
+        """
+        The canonical names of the diffusion layers, which the capacitances are looked up by
+        (e.g. nsdm and psdm, of the LVS layers nsd and psd)
+        """
+        gds_pairs = [self.gds_pair(lyr.name) for lyr in self.process_diffusion_layers]
+        return [self.canonical_layer_name_by_gds_pair[gds_pair] for gds_pair in gds_pairs if gds_pair is not None]
+
+    @cached_property
+    def device_capacitance_layer_names(self) -> Set[CanonicalLayerName]:
+        """
+        The layers between which the diffusion has the capacitances of the devices (see is_device_capacitance)
+        """
+        gate_poly_layer_name = self.canonical_layer_name_by_gds_pair.get(self.gds_pair(self.gate_poly_layer.name), None)
+        return {self.internal_substrate_layer_name, gate_poly_layer_name, *self.process_diffusion_layer_names}
+
+    def is_device_capacitance(self, layer_name1: CanonicalLayerName, layer_name2: CanonicalLayerName) -> bool:
+        """
+        Whether the capacitance between the layers is the one of a device, which its model has,
+        rather than a parasitic one: between the diffusion and the substrate or another diffusion (the junctions,
+        e.g. by the AS, AD, PS and PD of a transistor), or the gate poly (the overlap of the gate)
+        """
+        return (layer_name1 in self.process_diffusion_layer_names or layer_name2 in self.process_diffusion_layer_names) \
+            and layer_name1 in self.device_capacitance_layer_names \
+            and layer_name2 in self.device_capacitance_layer_names
+
+    @cached_property
     def gate_poly_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
         return self.process_metal_layers[0]
 

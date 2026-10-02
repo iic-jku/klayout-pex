@@ -339,6 +339,42 @@ def add_mim_cap(ci: CapacitanceInfo,
     add_sidewall_overlap_cap(ci, top_plate, bottom_plate, perimeter_cap)
     add_sidewall_overlap_cap(ci, bottom_plate, top_plate, perimeter_cap)
 
+
+def split_layer_capacitances(ci: CapacitanceInfo,
+                             layer_name: str,
+                             extracted_layer_names: List[str]):
+    """
+    The capacitances of a layer the extraction has as other layers, e.g. the diffusion,
+    which the LVS decks split into the source/drain implants (and the transistor gates).
+    The extraction looks the capacitances up by the names of its layers,
+    so each of them gets the rows of the layer, with the same coefficients, in their place.
+    """
+    def names(name: str) -> List[str]:
+        return extracted_layer_names if name == layer_name else [name]
+
+    substrates = [(sc.layer_name, sc.area_capacitance, sc.perimeter_capacitance) for sc in ci.substrates]
+    overlaps = [(oc.top_layer_name, oc.bottom_layer_name, oc.capacitance) for oc in ci.overlaps]
+    sidewalls = [(sc.layer_name, sc.capacitance, sc.offset) for sc in ci.sidewalls]
+    sideoverlaps = [(soc.in_layer_name, soc.out_layer_name, soc.capacitance) for soc in ci.sideoverlaps]
+
+    for table in (ci.substrates, ci.overlaps, ci.sidewalls, ci.sideoverlaps):
+        del table[:]
+
+    for layer, area, perimeter in substrates:
+        for name in names(layer):
+            add_substrate_cap(ci, name, area, perimeter)
+    for top_layer, bottom_layer, cap in overlaps:
+        for top_name in names(top_layer):
+            for bottom_name in names(bottom_layer):
+                add_overlap_cap(ci, top_name, bottom_name, cap)
+    for layer, cap, offset in sidewalls:
+        for name in names(layer):
+            add_sidewall_cap(ci, name, cap, offset)
+    for in_layer, out_layer, cap in sideoverlaps:
+        for in_name in names(in_layer):
+            for out_name in names(out_layer):
+                add_sidewall_overlap_cap(ci, in_name, out_name, cap)
+
 #-------------------------------------------------------------------------
 
 

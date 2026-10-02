@@ -448,7 +448,7 @@ class TechBuilder:
 
         # NOTE: magic distinguishes LV and HV (ThickGateOx) diffusion, which differ by up to 2 %,
         #       there is only one diffusion layer here, which uses the LV values
-        diff_nonfet = "Activ"   # TODO: diff must be non-fet!
+        diff_nonfet = "Activ"   # allactivenonfet, the source/drain (see below)
 
         #                  top_layer,    bottom_layer,   cap
         add_overlap_cap(ci, "GatPoly",    "NWell",        87.433)
@@ -622,6 +622,10 @@ class TechBuilder:
             add_sidewall_overlap_cap(ci, "TopMetal1",    "Metal4",       55.229)
             add_sidewall_overlap_cap(ci, "Metal4",       "TopMetal1",    35.146)
 
+        # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
+        #       nsd_fet and psd_fet (the LVS layers of nSD and pSD), like the resistance extraction
+        split_layer_capacitances(ci, "Activ", ["nSD", "pSD"])
+
         if self.is_g2:
             # MIM cap, cap_carea 1.5 fF/µm² (cornerCAP.lib, cap_typ) and CJSW 40 aF/µm
             # of the device model cap_cmim (capacitors_mod.lib)
@@ -701,6 +705,10 @@ class TechBuilder:
         # NOTE: the PEX-LVS script connects pwell_sub (the pwell but the isolated ones) to the global net sub!
         si.net_names.append("sub!")
         si.lvs_layer_names.append("pwell_sub")
+
+        # TODO: the isolated p-wells (iso_pwell, the holes of the nwell over nBuLay) are nets of their own,
+        #       but the LVS layer that has them (pwell) has the substrate too, so they are the substrate here
+        si.well_lvs_layer_names.append("nwell_drw")
 
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)

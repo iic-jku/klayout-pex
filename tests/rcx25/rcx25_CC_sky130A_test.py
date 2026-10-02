@@ -23,6 +23,8 @@
 #
 
 import allure
+import glob
+import os
 import pytest
 from unittest import mock
 
@@ -416,6 +418,129 @@ C8;Complex_Shape_T;VSUBS;3.2;
 C9;UPPER;VSUBS;13.019;"""
         )
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_met1_over_drain_li1():
+    # The met1 plate W (4 µm x 2 µm) is over the drain diffusion of the nfet (W = 2 µm, L = 0.15 µm),
+    # 33.6 aF/µm² * 8 µm² = 268.8 aF to D, plus the fringe to the drain beyond the plate.
+    # The diffusion used to be no part of the extraction, so W had 25.78 aF/µm² to the substrate instead
+    # (D-W 0.002 fF, VSUBS-W 0.69 fF).
+    # G is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm __________________________________
+    # C2 G D 0.00247f
+    # C1 S D 0.00581f
+    # C7 D VSUBS 0.03027f
+    # C4 D W 0.37655f
+    # C3 G S 0.00323f
+    # C9 G VSUBS 0.18508f
+    # C0 G W 0.0014f
+    # C8 S VSUBS 0.03027f
+    # C5 S W 0.01027f
+    # C6 W VSUBS 0.38766f
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # C4 G D 0.00247f
+    # C3 S D 0.00645f
+    # C7 D VSUBS 0.02884f
+    # C0 D W 0.37655f
+    # C5 G S 0.00323f
+    # C9 G VSUBS 0.18508f
+    # C2 G W 0.0014f
+    # C8 S VSUBS 0.02884f
+    # C1 S W 0.01027f
+    # C6 W VSUBS 0.38766f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'nfet_li1_met1_over_drain.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;D;G;0.002;
+C2;D;S;0.006;
+C3;D;VSUBS;0.029;
+C4;D;W;0.377;
+C5;G;S;0.004;
+C6;G;VSUBS;0.235;
+C7;G;W;0.007;
+C8;S;VSUBS;0.029;
+C9;S;W;0.01;
+C10;VSUBS;W;0.388;"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_inverter_over_nwell():
+    # The capacitances of the shapes over the nwell go to its net VPB, the others to the substrate.
+    # They all used to go to the substrate (e.g. VPWR-VSUBS 0.273 fF, which is 0.211 fF and VPB-VPWR 0.062 fF now).
+    # A is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor,
+    # and VPB-VNB (VSUBS) is the capacitance of the nwell itself, which MAGIC has, but the tech info doesn't
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=8µm and halo=50µm _____________________
+    # C2 A VGND 0.03709f
+    # C8 VPB A 0.04506f
+    # C6 A VPWR 0.03629f
+    # C13 A VNB 0.13301f
+    # C4 A Y 0.03773f
+    # C3 VPB VGND 0.01319f
+    # C0 VPWR VGND 0.01841f
+    # C10 VGND VNB 0.24421f
+    # C9 Y VGND 0.05975f
+    # C7 VPB VPWR 0.06649f
+    # C5 VPB Y 0.01774f
+    # C12 VPWR VNB 0.20582f
+    # C1 VPWR Y 0.07413f
+    # C11 Y VNB 0.0961f
+    # C14 VPB VNB 0.33898f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;VGND;0.04;
+C2;A;VPB;0.091;
+C3;A;VPWR;0.041;
+C4;A;VSUBS;0.222;
+C5;A;Y;0.051;
+C6;VGND;VPB;0.012;
+C7;VGND;VPWR;0.018;
+C8;VGND;VSUBS;0.248;
+C9;VGND;Y;0.06;
+C10;VPB;VPWR;0.062;
+C11;VPB;Y;0.018;
+C12;VPWR;VSUBS;0.211;
+C13;VPWR;Y;0.074;
+C14;VSUBS;Y;0.096;"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_met2_over_met1_over_nwell_of_its_net():
+    # The nwell is VDD (by an ntap), and so is the met1 plate (8 µm x 8 µm) over it, which has no capacitance
+    # to it, and shields it from the met2 plate X (4 µm x 4 µm) above.
+    # The fringe of X beyond the met1 plate ends at the nwell (VDD), and beyond that, at the substrate.
+    # The nwell used to be the substrate (VDD-VSUBS 3.003 fF, VDD-X 3.088 fF, VSUBS-X 0.369 fF).
+    # MAGIC has the capacitance of the nwell itself too (100 µm² * 120 aF/µm² = 12 fF), which the tech info hasn't
+    #
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # _______________________________ NOTE: with halo=50µm __________________________________
+    # C2 VDD VSUBS 12.9206f
+    # C0 VDD X 3.16499f
+    # C1 X VSUBS 0.29271f
+
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'nwell_met1_met2_plates.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;VDD;VSUBS;0.923;
+C2;VDD;X;3.165;
+C3;VSUBS;X;0.293;"""
+        )
+
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
@@ -546,3 +671,23 @@ def test_sonos_fet__blackboxed():
     assert pex_blackboxed.written_device_lines('test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz') == [
         'X$1 S G D sky130_gnd sky130_fd_bs_flash__special_sonosfet_star l=0.22 w=0.45 as=0.1305 ad=0.1305 ps=1.48 pd=1.48',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_label_of_substrate_under_inductor_names_the_substrate():
+    # A label (SUB) names the substrate under the inductor marker, like the ones of the PDK's VPP caps,
+    # so the capacitances to the substrate (of the met1 plate over the marker) go to SUB,
+    # like the bulk of the nfet next to it. It used to name a net of its own, that connected to nothing
+    pex_whiteboxed.run_rcx25d_single_cell('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
+    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pex_whiteboxed.pdk.name}"))
+    netlist_path, = glob.glob(os.path.join(output_dir_path, 'inductor_substrate_pin__*', '*_k25d_pex_netlist.spice'))
+    with open(netlist_path) as f:
+        lines = f.read().replace('\n+', ' ').splitlines()
+    subckt_line, = [l for l in lines if l.startswith('.SUBCKT ')]
+    nfet_line, = [l for l in lines if l.startswith('X$1 ')]
+    plate_cap_line, = [l for l in lines if l.startswith('C') and 'PLATE' in l.split()[1:3]]
+    assert subckt_line.split()[2:] == ['D', 'G', 'S', 'SUB']
+    assert nfet_line.split()[4] == 'SUB'  # B
+    assert sorted(plate_cap_line.split()[1:3]) == ['PLATE', 'SUB']
