@@ -76,6 +76,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "contact_nsd_con",  (33, 4401),  "Contact", "Computed layer for contact from nsd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_psd_con",  (33, 4402),  "Contact", "Computed layer for contact from psd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_poly_con", (33, 4403),  "Contact", "Computed layer for contact from poly to Metal1")
+    add_computed_layer(tech, CONT,    KREG, "contact_ntap_con", (33, 4404),  "Contact", "Computed layer for contact from ntap (the nwell below) to Metal1")
     add_computed_layer(tech, VIA,     KREG, "via1",        (35, 0),     "Via1",      "Computed layer for via1")
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
@@ -124,7 +125,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     # NWELL/DIFF:                   name     z        ref
     #                                        (TODO)
     #-----------------------------------------------------------------------------------------------
-    add_nwell_layer(psi,            "Nwell", 0.0,     "fox")
+    nwell = add_nwell_layer(psi,    "Nwell", 0.0,     "fox")
 
     ndiff = add_diffusion_layer(psi, "Nplus", 0.312,  "fox")
     pdiff = add_diffusion_layer(psi, "Pplus", 0.312,  "fox")
@@ -213,6 +214,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     add_simple_dielectric(psi,   "air",    1.0,          "sin")
 
+    m1nw = nwell.contact_above  # contact over ntap, which lands on the nwell below it
     m1np = ndiff.contact_above
     m1pp = pdiff.contact_above
     m1po = poly.contact_above
@@ -228,6 +230,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     # CONTACT:  contact,  name,               layer_below, metal_above, thickness,                            width, spacing, border
     #                     (LVS)
     #--------------------------------------------------------------------------------------------------------------------------------
+    set_contact(m1nw,     "contact_ntap_con", "Nwell",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1np,     "contact_nsd_con",  "Nplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1pp,     "contact_psd_con",  "Pplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1po,     "contact_poly_con", "Poly2",     "Metal1",    met1.z - (poly.z + poly.thickness),   0.22,  0.25,    0.005)
@@ -255,6 +258,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "Metal3",   90)
     add_layer_resistance(ri, "Metal4",   90)
     add_layer_resistance(ri, "Metal5",   40)  # top metal, 11K (gf180mcuD, 5LM)
+    add_layer_resistance(ri, "Nwell", 1000000)  # Wide Nwell (unsalicided), as the magic tech
 
     # MIM cap top plate, the typical "Sheet res. top plate" of elec_specs 6.4, which gives it for the
     # 1 and 1.5 fF/µm² options only (none for 2 fF/µm²), the magic tech has no resist for mimcap
@@ -266,6 +270,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_contact_resistance(ri, "contact_nsd_con",  "Nplus",  "Metal1",    6300)
     add_contact_resistance(ri, "contact_psd_con",  "Pplus",  "Metal1",    5200)
     add_contact_resistance(ri, "contact_poly_con", "Poly2",  "Metal1",    5900)
+    add_contact_resistance(ri, "contact_ntap_con", "Nwell",  "Metal1",    6300)  # M1-N+, over ntap
 
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT

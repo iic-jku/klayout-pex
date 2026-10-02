@@ -93,6 +93,25 @@ R7;S.$1.Metal1;S.P0.Nplus;;6.3"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_nwell_pfet_ntap_m1():
+    # The bulk of the PMOS is on the nwell, which the contact over the ntap at its far end joins to VDD.
+    # The extraction left out both, so the bulk was on VDD, without resistance:
+    #   - contact over ntap: 6300 mΩ per cut (M1-N+), 1 cut
+    #   - Nwell: 1000 Ω/sq, from the contact to the middle of the gate (9.25 µm) along the 3 µm wide nwell, 3.083 sq
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_nwell_pfet_ntap_m1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;D;D.P0.Pplus;;5.2
+R2;G;G.P0.Poly2;;31.633
+R3;S;S.P0.Pplus;;5.2
+R4;VDD;VDD.$0.Nwell;;6.3
+R5;VDD.$0.Nwell;VDD.P0.Nwell;;3083.333"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_nfet_10v0_asym_pair():
     # 2 mirrored LDMOS sharing their drain (the MVSD side), each with its own source:
     # the asymmetric device must be extracted with S and D in place, not swapped
