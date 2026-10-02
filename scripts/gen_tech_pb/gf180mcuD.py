@@ -257,6 +257,10 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "Metal4",   90)
     add_layer_resistance(ri, "Metal5",   40)  # top metal, 11K (gf180mcuD, 5LM)
 
+    # MIM cap top plate, the typical "Sheet res. top plate" of elec_specs 6.4, which gives it for the
+    # 1 and 1.5 fF/µm² options only (none for 2 fF/µm²), the magic tech has no resist for mimcap
+    add_layer_resistance(ri, "FuseTop", 500)
+
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_2.html
     # resistance values are in mΩ / CNT
     #                         contact_layer,  layer_below,  layer_above, resistance
