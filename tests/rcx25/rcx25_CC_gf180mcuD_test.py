@@ -61,6 +61,30 @@ C10;TOP2;VSUBS;1.603;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mim_cap__blackboxed():
+    # The black-box extraction leaves the MIM caps to the device model, with both of their plates,
+    # FuseTop and the Metal4 under it (LVS layer metal4_cap), so there's no Metal5 over Metal4 under the top plates,
+    # which added 8.758 fF to TOP2 - BOT2 (2 % of the device) and 1.28 fF to TOP1 - BOT1.
+    # Between the plates, the fringe between Metal5 and the Metal4 around the bottom plates is left.
+    pex_blackboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_mim_m4m5.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;BOT1;BOT2;0.15;
+C2;BOT1;TOP1;0.884;
+C3;BOT1;TOP2;0.031;
+C4;BOT1;VSUBS;0.879;
+C5;BOT2;TOP1;0.021;
+C6;BOT2;TOP2;2.844;
+C7;BOT2;VSUBS;3.112;
+C8;TOP1;TOP2;0.118;
+C9;TOP1;VSUBS;0.594;
+C10;TOP2;VSUBS;2.763;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_well_diodes__blackboxed():
     # The well diodes of the PDK's KLayout pcells (2 µm x 4 µm, 3.3V), their models are diode_pw2dw, diode_dw2ps
     assert pex_blackboxed.written_device_lines('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz') == [

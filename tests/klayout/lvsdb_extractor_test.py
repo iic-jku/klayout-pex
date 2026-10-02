@@ -33,8 +33,14 @@ from unittest import mock
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext, LVSDBError
+from klayout_pex.klayout.lvsdb_extractor import (
+    KLayoutExtractedLayerInfo,
+    KLayoutExtractionContext,
+    KLayoutMergedExtractedLayerInfo,
+    LVSDBError
+)
 from klayout_pex.tech_info import TechInfo
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 
 @allure.parent_suite("Unit Tests")
@@ -153,3 +159,36 @@ class NetNameTest(unittest.TestCase):
                 shape_count = sum(pex_context.shapes_of_net(gds_pair, net).count()
                                   for gds_pair in pex_context.extracted_layers)
                 self.assertGreater(shape_count, 0, net.name)
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB", "Pins")
+class PinsTest(unittest.TestCase):
+    def test_the_pins_of_a_pin_layer_with_several_lvs_layers(self):
+        # NOTE: e.g. gf180mcuD, which has no pin layers (the pins are labels on the drawn layers),
+        #       and splits Metal4 into the bottom plates of the MIM caps and the rest
+        tech = tech_pb2.Technology(name='test')
+        tech.layers.add(name='Metal4',
+                        drw_gds_pair=tech_pb2.GDSPair(layer=46, datatype=0),
+                        pin_gds_pair=tech_pb2.GDSPair(layer=46, datatype=0))
+
+        def extracted_layer(lvs_layer_name: str, box: kdb.Box, net_name: str) -> KLayoutExtractedLayerInfo:
+            region = kdb.Region()
+            region.insert(kdb.PolygonWithProperties(kdb.Polygon(box), {'net': net_name}))
+            return KLayoutExtractedLayerInfo(index=0, lvs_layer_name=lvs_layer_name, gds_pair=(46, 0), region=region)
+
+        source_layers = [extracted_layer('metal4_n_cap', kdb.Box(0, 0, 100, 100), 'BOT'),
+                         extracted_layer('metal4_cap', kdb.Box(100, 0, 300, 100), 'BOT'),
+                         extracted_layer('metal4_n_cap', kdb.Box(400, 0, 500, 100), 'OTHER')]
+        pex_context = KLayoutExtractionContext(
+            lvsdb=None, tech=TechInfo(tech=tech, dielectric_filter=None), dbu=0.001,
+            layer_index_map={}, lvsdb_regions={}, cell_mapping=None,
+            annotated_top_cell=None, annotated_layout=None,
+            extracted_layers={(46, 0): KLayoutMergedExtractedLayerInfo(source_layers=source_layers, gds_pair=(46, 0))},
+            unnamed_layers=[], unmodeled_layers=[], blackbox_devices=False
+        )
+
+        pins = pex_context.pins_of_layer((46, 0))
+
+        self.assertEqual([('BOT', kdb.Box(0, 0, 100, 100)), ('BOT', kdb.Box(100, 0, 300, 100)),
+                          ('OTHER', kdb.Box(400, 0, 500, 100))],
+                         sorted((p.property('net'), p.bbox()) for p in pins.each()))
