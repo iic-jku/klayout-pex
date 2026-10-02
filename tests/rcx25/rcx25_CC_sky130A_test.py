@@ -26,6 +26,7 @@ import allure
 import pytest
 from unittest import mock
 
+from klayout_pex.tech_info import TechInfo
 from rcx25_test_helpers import *
 
 CSVPath = str
@@ -455,10 +456,33 @@ C3;C1;VSUBS;0.117;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-def test_mim_cap__whiteboxed_is_an_error():
-    # The tech info has no overlap capacitances for the MIM plate capm, so they would be missing,
+def test_mim_cap__whiteboxed():
+    # The device model gives camimc 2.0 fF/µm² * 18.9 µm * 5.1 µm = 192.78 fF (capm over met3)
+    # plus cpmimc 0.19 fF/µm * 48 µm = 9.12 fF, the fringe to the bottom plate around the top plate
+    # (8.36 fF from capm to met3 here), the rest is the interconnect
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;mimcap_bot;mimcap_top;204.88;
+C2;VSUBS;mimcap_bot;4.353;
+C3;VSUBS;mimcap_top;2.942;"""
+        )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
+    # Without the overlap capacitances of the MIM plate capm, they would be missing,
     # which crashed the sidewall extraction with a KeyError
-    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+    overlap_cap_by_layer_names = TechInfo.overlap_cap_by_layer_names.func
+
+    def without_capm(tech_info: TechInfo):
+        return {top: {bottom: oc for bottom, oc in ocs.items() if bottom != 'capm'}
+                for top, ocs in overlap_cap_by_layer_names(tech_info).items() if top != 'capm'}
+
+    with mock.patch.object(TechInfo, 'overlap_cap_by_layer_names', property(without_capm)), \
+         mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert [c.args[0] for c in error_mock.call_args_list if 'overlap' in c.args[0]] == [
         "The tech info has no overlap capacitance for these layer pairs of the layout, "

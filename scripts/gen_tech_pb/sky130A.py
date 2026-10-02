@@ -469,6 +469,13 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "met5",      "met4",      82.82)
     add_sidewall_overlap_cap(ci, "met4",      "met5",      46.98)
 
+    # MIM caps, camimc 2.00 fF/µm² and cpmimc 0.19 fF/µm of the device models
+    # sky130_fd_pr__cap_mim_m3_1/2 (libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice)
+    #
+    #              top_plate, bottom_plate, area_cap, perimeter_cap
+    add_mim_cap(ci, "capm",    "met3",       2000.0,   190.0)
+    add_mim_cap(ci, "capm2",   "met4",       2000.0,   190.0)
+
 
 def build_device_models_info(dmi: DeviceModelsInfo):
     # NOTE: the ngspice models set .option scale=1.0u, so they take lengths in µm and areas in µm²,
