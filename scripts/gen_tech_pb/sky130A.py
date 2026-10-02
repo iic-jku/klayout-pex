@@ -499,6 +499,12 @@ def build_device_models_info(dmi: DeviceModelsInfo):
                 'pfet_01v8', 'pfet_01v8_hvt', 'pfet_01v8_lvt', 'pfet_g5v0d10v5'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__{fet}", "X", ["D", "G", "S", "B"], mos)
 
+    # the SONOS FET of the flash cells
+    #
+    #     NOTE: sky130.lib.spice doesn't include its model,
+    #           a simulation needs to include it (libs.tech/ngspice/sonos/begin_of_life.spice or end_of_life) itself
+    add_device_model_mapping(dmi, "sky130_fd_bs_flash__special_sonosfet_star", "X", ["D", "G", "S", "B"], mos)
+
     for diode in ('diode_pd2nw_05v5', 'diode_pd2nw_05v5_hvt', 'diode_pd2nw_05v5_lvt', 'diode_pd2nw_11v0',
                   'diode_pw2nd_05v5', 'diode_pw2nd_05v5_lvt', 'diode_pw2nd_05v5_nvt', 'diode_pw2nd_11v0'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__{diode}", "X", ["A", "C"],
@@ -594,8 +600,9 @@ def build_device_models_info(dmi: DeviceModelsInfo):
 
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
     #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3
-    #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode,
-    #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models
+    #       - fuse_m4, photodiode: no ngspice models
+    #       - cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models,
+    #         their files in libs.ref/sky130_fd_pr/spice are empty
 
 
 def build_substrate_info(si: SubstrateInfo):

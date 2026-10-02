@@ -536,3 +536,13 @@ def test_hv_diffusion_resistors__blackboxed():
         'X$1 ND_R2 ND_R1 sky130_gnd sky130_fd_pr__res_generic_nd__hv w=1 l=4',
         'X$2 PD_R2 PD_R1 PD_B sky130_fd_pr__res_generic_pd__hv w=1 l=4',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_sonos_fet__blackboxed():
+    # The SONOS FET of the PDK's device generator (magic), with the core marker areaid.ce, which LVS needs for it
+    assert pex_blackboxed.written_device_lines('test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz') == [
+        'X$1 S G D sky130_gnd sky130_fd_bs_flash__special_sonosfet_star l=0.22 w=0.45 as=0.1305 ad=0.1305 ps=1.48 pd=1.48',
+    ]
