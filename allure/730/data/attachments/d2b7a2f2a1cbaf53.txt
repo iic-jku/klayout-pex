@@ -1,0 +1,42 @@
+[22:39:07] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1243
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox y --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w1
+8p9_l5p1/cap_mim_m3_w18p9_l5p1.gds.gz --out_dir                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[22:39:07] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:583
+[22:39:07] INFO     No explicit top cell specified, using top    kpex_cli.py:623
+                    cell 'cap_mim_m3_w18p9_l5p1'                                
+[22:39:07] INFO     LVS input schematic not specified (argument  kpex_cli.py:664
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[22:39:07] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1185
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w18p9_
+l5p1/cap_mim_m3_w18p9_l5p1.gds.gz/cap_mim_m3_w18p9_l5p1.lvsdb.gz                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[22:39:07] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1412
+[22:39:07] INFO     (70, 20) -> (met3_ncap)                     kpex_cli.py:1412
+[22:39:07] INFO     (70, 144) -> (via3_ncap)                    kpex_cli.py:1412
+[22:39:07] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1412
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;mimcap_bot;mimcap_top;5.424;                                                 
+C2;VSUBS;mimcap_bot;4.417;                                                      
+C3;VSUBS;mimcap_top;3.752;                                                      
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_w18p9_l5p1__
+cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1_k25d_pex_netlist.csv                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_w18p9_l5p1__
+cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1_k25d_pex_netlist.spice              
