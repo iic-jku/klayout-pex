@@ -55,7 +55,7 @@ def build_layers(tech: Technology):
     add_layer(tech, VIA,     "Via3",    (40, 0),  None,     None,      "Contact from Metal3 to Metal4")
     add_layer(tech, METAL,   "Metal4",  (46, 0),  (46, 0),  (46, 10),  "Metal 4 interconnect")
     add_layer(tech, VIA,     "Via4",    (41, 0),  None,     None,      "Contact from Metal4 to Metal5")
-    add_layer(tech, MIM,     "FuseTop", (75, 0),  None,     None,      "MiM capacitor plate over Metal5")
+    add_layer(tech, MIM,     "FuseTop", (75, 0),  None,     None,      "MiM capacitor top plate over Metal4")
     add_layer(tech, METAL,   "Metal5",  (81, 0),  (81, 0),  (81, 10),  "Metal 5 interconnect")
 
 
@@ -80,6 +80,8 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via4_n_cap",  (41, 144),   "Via4",      "Computed layer for via4 (no MIM cap)")
+    add_computed_layer(tech, VIA,     KCAP, "top_via_cap", (41, 244),   "Via4",      "Computed layer for via4 (with MIM cap)")
+    add_computed_layer(tech, MIM,     KCAP, "fuse_cap",    (75, 0),     "FuseTop",   "MiM cap top plate over Metal4")
 
     # NOTE: for CC whiteboxing to work,
     #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
@@ -87,12 +89,6 @@ def build_lvs_computed_layers(tech: Technology):
     #
     #       for R mode, MIM cap vias should point to a different GDS number than the regular via
     #       as they have different resistances
-    # add_computed_layer(tech, VIA,   KCAP, "via3_cap",    (70, 244),   "via3",      "Computed layer for via3 (with MIM cap)")
-    # add_computed_layer(tech, VIA,   KCAP, "via4_cap",    (71, 244),   "via4",      "Computed layer for via4 (with MIM cap)")
-    # add_computed_layer(tech, METAL, KCAP, "met3_cap",    (70, 20),    "Metal4",    "metal3 part of MiM cap")
-    # add_computed_layer(tech, METAL, KCAP, "met4_cap",    (71, 20),    "Metal5",    "metal4 part of MiM cap")
-    # add_computed_layer(tech, MIM,   KCAP, "capm",        (89, 44),    "capm",      "MiM cap above metal3")
-    # add_computed_layer(tech, MIM,   KCAP, "capm2",       (97, 44),    "capm2",     "MiM cap above metal4")
     # add_computed_layer(tech, METAL, KCAP, "poly_vpp",    (66, 20),    "Poly2",     "Computed layer for poly (MOM cap)")
     # add_computed_layer(tech, METAL, KCAP, "li_vpp",      (67, 20),    "Metal1",    "Capacitor device metal (MOM cap)")
     # add_computed_layer(tech, METAL, KCAP, "met1_vpp",    (68, 20),    "Metal2",    "Capacitor device metal (MOM cap)")
@@ -177,9 +173,30 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     met4 = add_metal_layer(psi,     "Metal4", 4.68,   0.55)
 
+    # MIM cap (option B), with the heights of the PDK's KLayout 2.5D view (libs.tech/klayout/tech/d25/gf180mcu.lyd25)
+    fusetop_thickness = 0.295
+    capild_thickness = 0.042
+    capild_k = 9.44  # 1.99 fF/µm² of cap_mim_2f0_m4m5_noshield (the deck's default mim_cap)
+
+    # NOTE: the deck has no layer of its own for the Metal4 under FuseTop (like sky130A's met3_cap),
+    #       so for FasterCap the MIM dielectric covers all of Metal4 (2.5D uses the capacitance tables)
+
+    # DIELECTRIC (conformal)        name,     dielectric_k, thickness,        thickness,      thickness, ref
+    #                                                       over metal,       where no metal, sidewall
+    #-----------------------------------------------------------------------------------------------
+    add_conformal_dielectric(psi,   "capild", capild_k,     capild_thickness, 0.0,            0.0,       "Metal4")
+
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
     add_simple_dielectric(psi,   "imd4",   4.0,          "imd3")
+
+    # METAL:                          name,      z,                                         thickness
+    #-----------------------------------------------------------------------------------------------
+    fusetop = add_metal_layer(psi,    "FuseTop", met4.z + met4.thickness + capild_thickness, fusetop_thickness)
+
+    # DIELECTRIC (simple)        name,     dielectric_k, ref
+    #-----------------------------------------------------------------------------------------------
+    add_simple_dielectric(psi,   "imd4b",  4.0,          "imd3")  # same material as imd4, above FuseTop
 
     # METAL:                        name,     z,      thickness
     #-----------------------------------------------------------------------------------------------
@@ -204,6 +221,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     via2 = met2.contact_above
     via3 = met3.contact_above
     via4 = met4.contact_above
+    via4_cap = fusetop.contact_above
 
     # NOTE: contacts to diffusion start at z = 0, all others at the top of the layer below
     #       width, spacing and border (metal enclosure) are the DRC rules CO.1, CO.2a, CO.6 and Vx.1, Vx.2a, Vx.3b/4a
@@ -218,6 +236,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     set_contact(via2,     "via2_n_cap",       "Metal2",    "Metal3",    met3.z - (met2.z + met2.thickness),   0.26,  0.26,    0.01)
     set_contact(via3,     "via3_n_cap",       "Metal3",    "Metal4",    met4.z - (met3.z + met3.thickness),   0.26,  0.26,    0.01)
     set_contact(via4,     "via4_n_cap",       "Metal4",    "Metal5",    met5.z - (met4.z + met4.thickness),   0.26,  0.26,    0.01)
+    set_contact(via4_cap, "top_via_cap",      "FuseTop",   "Metal5",    met5.z - (fusetop.z + fusetop.thickness), 0.26,  0.26,    0.4)  # MIMTM.4
 
 
 def build_process_parasitics_info(ex: ProcessParasiticsInfo):
@@ -359,6 +378,12 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "Metal3",    "Metal5",    22.988)
     add_sidewall_overlap_cap(ci, "Metal5",    "Metal4",    52.692)
     add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    34.954)
+
+    # MIM cap, c_cox 1.99e-3 F/m² and c_capsw 2.383e-10 F/m of the device model
+    # cap_mim_2f0_m4m5_noshield (sm141064_mim.ngspice), the deck's default mim_cap
+    #
+    #              top_plate, bottom_plate, area_cap, perimeter_cap
+    add_mim_cap(ci, "FuseTop", "Metal4",     1990.0,   238.3)
 
 
 def build_device_models_info(dmi: DeviceModelsInfo):
