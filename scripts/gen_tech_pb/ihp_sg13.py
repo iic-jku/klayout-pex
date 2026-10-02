@@ -656,8 +656,8 @@ class TechBuilder:
         add_device_model_mapping(dmi, "rhigh",            "X",   ["rhigh_1", "rhigh_2", "rhigh_sub"], poly_res)
         add_device_model_mapping(dmi, "ntap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
         add_device_model_mapping(dmi, "ptap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
-        add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       cap)
-        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       cap)
+        add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
+        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
         add_device_model_mapping(dmi, "sg13_hv_svaricap", "X",   ["G1", "W", "G2", "SUB"],
                                  [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('Nx', 'Nx')])
         add_device_model_mapping(dmi, "sg13_moscap_n",    "X",   ["G", "SUB"],
@@ -675,7 +675,7 @@ class TechBuilder:
         add_device_model_mapping(dmi, "dantenna",         "X",   ["A", "C"],                   antenna)
         add_device_model_mapping(dmi, "dpantenna",        "X",   ["A", "C"],                   antenna)
         if self.is_g2:  # sg13cmos5l has no models for these
-            add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap)
+            add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
             add_device_model_mapping(dmi, "npn13G2",       "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2l",      "X",   ["C", "B", "E", "S"],         hbt)
             add_device_model_mapping(dmi, "npn13G2v",      "X",   ["C", "B", "E", "S"],         hbt)

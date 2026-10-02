@@ -39,8 +39,21 @@ message DeviceModelsInfo {
 }
 
 message DeviceModelMapping {
+    enum Kind {
+        // e.g. a MOS, a diode, or a MOS capacitor (or varactor), whose capacitance the extraction doesn't have
+        KIND_UNSPECIFIED = 0;
+
+        // a capacitor of metal plates or fingers (e.g. a MIM or MOM cap), whose capacitance the extraction has
+        // from its geometry, so that white-box mode (--blackbox n) removes it from the netlist.
+        //
+        //     NOTE: the LVS device class doesn't tell, e.g. sky130A reads VPP caps with 4 terminals as MOS4
+        KIND_METAL_CAPACITOR = 1;
+    }
+
     // name of the LVS device class, e.g. "rfnmos"
     string lvs_device_class_name = 1;
+
+    Kind kind = 2;
 
     // SPICE instance prefix, e.g. "X" for a subcircuit, "M" for a MOS model
     string spice_prefix = 10;

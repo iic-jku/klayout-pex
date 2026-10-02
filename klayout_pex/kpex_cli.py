@@ -1052,6 +1052,7 @@ class KpexCLI:
                 top_cell_name=pex_context.annotated_top_cell.name,
                 extraction_results=extraction_results,
                 blackbox_devices=args.blackbox_devices,
+                device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name
             )
 
@@ -1066,6 +1067,7 @@ class KpexCLI:
                 top_cell_name=pex_context.annotated_top_cell.name,
                 summary=extraction_results.summarize(),
                 blackbox_devices=args.blackbox_devices,
+                device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name
             )
             # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers

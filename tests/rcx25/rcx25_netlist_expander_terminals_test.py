@@ -26,9 +26,11 @@ import unittest
 
 import klayout.db as kdb
 
+from klayout_pex.device_models import DeviceModels
 from klayout_pex.rcx25.extraction_results import CellExtractionResults, ExtractionResults
 from klayout_pex.rcx25.netlist_expander import RCX25NetlistExpander
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 @allure.parent_suite("Unit Tests")
@@ -74,7 +76,8 @@ class Test(unittest.TestCase):
                 element.node_b.node_id = node_b
 
         expanded = RCX25NetlistExpander.expand(netlist, 'chip', ExtractionResults({'chip': results}),
-                                               blackbox_devices=True)
+                                               blackbox_devices=True,
+                                               device_models=DeviceModels(device_models_pb2.DeviceModelsInfo()))
         circuit = expanded.circuit_by_name('chip')
 
         def net_of(device_name: str, terminal: str) -> str:

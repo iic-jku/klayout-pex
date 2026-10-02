@@ -29,12 +29,14 @@ import unittest
 
 import klayout.db as kdb
 
+from klayout_pex.device_models import DeviceModels
 from klayout_pex.klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
 from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
 from klayout_pex.rcx25.netlist_checks import check_rc_netlist
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 def lvs_netlist(mim_cap: bool = False) -> kdb.Netlist:
@@ -125,8 +127,13 @@ class Test(unittest.TestCase):
             resistances={},
             device_terminal_nodes={key(terminal): node for terminal, node in (device_terminal_nodes or {}).items()}
         )
+        # NOTE: the MIM cap is a metal capacitor, which white-box mode removes
+        device_models = device_models_pb2.DeviceModelsInfo()
+        device_models.device_model_mappings.add(lvs_device_class_name='mim',
+                                                kind=device_models_pb2.DeviceModelMapping.KIND_METAL_CAPACITOR)
         return check_rc_netlist(lvs_netlist=rc.lvs, rc_netlist=rc.netlist, top_cell_name='chip', summary=summary,
-                                blackbox_devices=blackbox_devices, substrate_net_name=substrate_net_name)
+                                blackbox_devices=blackbox_devices, device_models=DeviceModels(device_models),
+                                substrate_net_name=substrate_net_name)
 
     def rc_netlist(self, mim_cap: bool = False) -> RCNetlist:
         lvs = lvs_netlist(mim_cap)

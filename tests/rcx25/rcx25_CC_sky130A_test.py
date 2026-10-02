@@ -456,6 +456,18 @@ C3;C1;VSUBS;0.117;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mom_cap_with_4_terminals__whiteboxed():
+    # The LVS script reads VPP caps with 4 terminals as MOS4, so white-box mode kept the device,
+    # whose capacitance is extracted from its fingers: counted twice
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+                                                           'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
+    with open(csv_path[:-len('.csv')] + '.spice') as f:
+        assert [line for line in f if line.startswith('X')] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The device model gives camimc 2.0 fF/µm² * 18.9 µm * 5.1 µm = 192.78 fF (capm over met3)
     # plus cpmimc 0.19 fF/µm * 48 µm = 9.12 fF, the fringe to the bottom plate around the top plate

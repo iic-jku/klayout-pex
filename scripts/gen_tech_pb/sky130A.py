@@ -550,7 +550,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
                 '11p5x11p7_m1m2m3_shieldl1',
                 '11p5x11p7_m1m4_noshield',
                 '44p7x23p1_pol1m1m2m3m4m5_noshield'):
-        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["A", "B", "W"], [])
+        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["A", "B", "W"], [], kind=METAL_CAP)
     for vpp in ('03p9x03p9_m1m2_shieldl1_floatm3',          # not in sky130.lib.spice
                 '04p4x04p6_l1m1m2_shieldpo_floatm3',        # not in sky130.lib.spice
                 '04p4x04p6_m1m2m3_shieldl1m5_floatm4',
@@ -567,7 +567,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
                 '11p5x11p7_m1m2m3_shieldl1m5_floatm4',
                 '11p5x11p7_m1m2m3m4_shieldl1m5',
                 '11p5x11p7_m1m2m3m4_shieldm5'):
-        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["S", "G", "D", "B"], [])
+        add_device_model_mapping(dmi, f"sky130_fd_pr__cap_vpp_{vpp}", "X", ["S", "G", "D", "B"], [], kind=METAL_CAP)
 
     # MIM caps, the top plate (B, capm and capm2) first
     #
@@ -575,8 +575,10 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #           Their capacitance depends on w*l and w+l only, the series resistance of the plate also on l/w
     #           (w is the long side)
     mim = lvs_area_perimeter_params('w', 'l', 'A', 'P')
-    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_1")
-    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim_m4", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_2")
+    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_1",
+                             kind=METAL_CAP)
+    add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim_m4", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_2",
+                             kind=METAL_CAP)
 
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
     #       - cap_var_hvt, cap_var_lvt: the models take w and l, LVS extracts area and perimeter,

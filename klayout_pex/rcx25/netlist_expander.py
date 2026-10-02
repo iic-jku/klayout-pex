@@ -33,6 +33,7 @@ from ..log import (
     warning,
 )
 from .extraction_results import ExtractionResults
+from ..device_models import DeviceModels
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
 
@@ -42,27 +43,27 @@ SUBSTRATE = 'VSUBS'
 
 class RCX25NetlistExpander:
     @staticmethod
-    def is_whiteboxed(device_class: kdb.DeviceClass) -> bool:
+    def is_whiteboxed(device_class: kdb.DeviceClass, device_models: DeviceModels) -> bool:
         """
         :return: whether white-box mode (--blackbox n) removes the devices of the class,
                  as their capacitances are extracted from their plates and fingers (e.g. MIM and MOM caps)
+
+        NOTE: the kind of their device model tells, not the LVS device class:
+              e.g. sky130A reads VPP caps with 4 terminals as MOS4,
+              while the MOS capacitors and varactors are capacitor classes,
+              whose capacitance (of the gate oxide) the extraction doesn't have
         """
-        # TODO: we'll need additional information about the available devices
-        #       because we only want to replace resistor / capacitor devices
-        #       and for example not transitors
-        match device_class.__class__:
-            case kdb.DeviceClassCapacitor | kdb.DeviceClassCapacitorWithBulk:
-                return True
-            case _:  # e.g. resistors, inductors, transistors, diodes
-                return False
+        return device_class.name in device_models.metal_capacitor_class_names
 
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
                top_cell_name: str,
                extraction_results: ExtractionResults,
                blackbox_devices: bool,
+               device_models: DeviceModels,
                substrate_net_name: Optional[str] = None) -> kdb.Netlist:
         """
+        :param device_models: the device models of the tech info, which tell the whiteboxed devices
         :param substrate_net_name: the net the capacitances to the substrate go to,
                                    a port of its own if the netlist has none (VSUBS if not given)
         """
@@ -73,7 +74,7 @@ class RCX25NetlistExpander:
             # NOTE: removing a device ends the iteration over the circuit's devices,
             #       so iterate over a list of them
             for d in list(top_circuit.each_device()):
-                if RCX25NetlistExpander.is_whiteboxed(d.device_class()):
+                if RCX25NetlistExpander.is_whiteboxed(d.device_class(), device_models):
                     info(f"Removing whiteboxed device {d.name or d.expanded_name()}")
                     top_circuit.remove_device(d)
 

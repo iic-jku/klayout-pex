@@ -26,8 +26,10 @@ import unittest
 
 import klayout.db as kdb
 
+from klayout_pex.device_models import DeviceModels
 from klayout_pex.rcx25.extraction_results import ExtractionSummary, NetCoupleKey
 from klayout_pex.rcx25.netlist_expander import RCX25NetlistExpander
+import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
 class Results:
@@ -69,6 +71,7 @@ class Test(unittest.TestCase):
 
     def test_capacitances_to_the_substrate_are_on_its_net(self):
         expanded = RCX25NetlistExpander.expand(netlist(), 'chip', Results(self.SUMMARY), blackbox_devices=True,
+                                               device_models=DeviceModels(device_models_pb2.DeviceModelsInfo()),
                                                substrate_net_name='B')
         circuit = expanded.circuit_by_name('chip')
         # NOTE: the capacitance of B to the substrate is shorted, as B is the substrate net
@@ -79,6 +82,7 @@ class Test(unittest.TestCase):
     def test_substrate_without_net_is_a_port(self):
         # e.g. a metal test pattern, without taps or transistors
         expanded = RCX25NetlistExpander.expand(netlist(), 'chip', Results(self.SUMMARY), blackbox_devices=True,
+                                               device_models=DeviceModels(device_models_pb2.DeviceModelsInfo()),
                                                substrate_net_name='sky130_gnd')
         circuit = expanded.circuit_by_name('chip')
         self.assertEqual({frozenset(('D', 'sky130_gnd')): 1.0, frozenset(('B', 'sky130_gnd')): 2.0},
