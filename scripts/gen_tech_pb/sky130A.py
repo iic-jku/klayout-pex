@@ -518,6 +518,11 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_po", "X", ["A", "B"], w_l)
     add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_nd", "X", ["A", "B", "W"], w_l)
     add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_pd", "X", ["A", "B", "W"], w_l)
+    # NOTE: the models of the HV diffusion resistors are named ..._nd__hv and ..._pd__hv
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_nd_hv", "X", ["A", "B", "W"], w_l,
+                             "sky130_fd_pr__res_generic_nd__hv")
+    add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_pd_hv", "X", ["A", "B", "W"], w_l,
+                             "sky130_fd_pr__res_generic_pd__hv")
     add_device_model_mapping(dmi, "sky130_fd_pr__res_iso_pw", "X", ["A", "B", "W"], w_l)
     for width in ('0p35', '0p69', '1p41', '2p85', '5p73'):  # the width is the one of the model name
         add_device_model_mapping(dmi, f"sky130_fd_pr__res_high_po_{width}", "X", ["A", "B", "W"], [lvs_param('l', 'L')])
@@ -589,7 +594,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
 
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
     #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3
-    #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode, res_generic_nd_hv, res_generic_pd_hv,
+    #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode,
     #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models
 
 

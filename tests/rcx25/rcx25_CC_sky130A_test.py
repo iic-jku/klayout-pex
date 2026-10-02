@@ -525,3 +525,14 @@ def test_varactors__blackboxed():
         'X$1 LVT_C0 LVT_C1 LVT_B sky130_fd_pr__cap_var_lvt w=1 l=2',
         'X$2 HVT_C0 HVT_C1 HVT_B sky130_fd_pr__cap_var_hvt w=2 l=0.5',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_hv_diffusion_resistors__blackboxed():
+    # The HV diffusion resistors of the PDK's device generator (magic), their models are named ..._nd__hv, ..._pd__hv
+    assert pex_blackboxed.written_device_lines('test_patterns', 'res_generic_nd_hv_pd_hv_w1_l4.gds.gz') == [
+        'X$1 ND_R2 ND_R1 sky130_gnd sky130_fd_pr__res_generic_nd__hv w=1 l=4',
+        'X$2 PD_R2 PD_R1 PD_B sky130_fd_pr__res_generic_pd__hv w=1 l=4',
+    ]
