@@ -2024,6 +2024,10 @@ logger.info("Starting LVS INDUCTOR CONNECTIONS")
 # General Inductor capacitor connections
 connect(inductor_sub      , pwell_label)
 
+# [PEX] The substrate under the inductor is the substrate (NOTE: a regular LVS would not do this,
+#       we need it for PEX, as the capacitances to the substrate go to it)
+connect_global(inductor_sub, substrate_name)
+
 
 #================================
 # ------- VPP CONNECTIONS -------

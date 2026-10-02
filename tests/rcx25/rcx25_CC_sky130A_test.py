@@ -23,6 +23,8 @@
 #
 
 import allure
+import glob
+import os
 import pytest
 from unittest import mock
 
@@ -546,3 +548,23 @@ def test_sonos_fet__blackboxed():
     assert pex_blackboxed.written_device_lines('test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz') == [
         'X$1 S G D sky130_gnd sky130_fd_bs_flash__special_sonosfet_star l=0.22 w=0.45 as=0.1305 ad=0.1305 ps=1.48 pd=1.48',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_label_of_substrate_under_inductor_names_the_substrate():
+    # A label (SUB) names the substrate under the inductor marker, like the ones of the PDK's VPP caps,
+    # so the capacitances to the substrate (of the met1 plate over the marker) go to SUB,
+    # like the bulk of the nfet next to it. It used to name a net of its own, that connected to nothing
+    pex_whiteboxed.run_rcx25d_single_cell('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
+    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pex_whiteboxed.pdk.name}"))
+    netlist_path, = glob.glob(os.path.join(output_dir_path, 'inductor_substrate_pin__*', '*_k25d_pex_netlist.spice'))
+    with open(netlist_path) as f:
+        lines = f.read().replace('\n+', ' ').splitlines()
+    subckt_line, = [l for l in lines if l.startswith('.SUBCKT ')]
+    nfet_line, = [l for l in lines if l.startswith('X$1 ')]
+    plate_cap_line, = [l for l in lines if l.startswith('C') and 'PLATE' in l.split()[1:3]]
+    assert subckt_line.split()[2:] == ['D', 'G', 'S', 'SUB']
+    assert nfet_line.split()[4] == 'SUB'  # B
+    assert sorted(plate_cap_line.split()[1:3]) == ['PLATE', 'SUB']
