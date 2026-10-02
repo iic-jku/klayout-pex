@@ -134,8 +134,12 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     nwell =    add_nwell_layer(psi,     "nwell", 0.1,    "fox")
 
-    ndiff = add_diffusion_layer(psi,    "nsd",   0.323,  "fox")
-    pdiff = add_diffusion_layer(psi,    "psd",   0.323,  "fox")
+    # NOTE: the diffusion is 0.12 µm deep below the silicon surface (z = 0), where the licon over it starts,
+    #       see the SkyWater metal stack (module docstring). 0.323 was the height of the top of the diffusion
+    #       in capiche (sky130A/metal_stack_sky130A.py), whose stack is planar: it lifts the diffusion up
+    #       to the gate oxide (3.2 nm) below the poly (0.3262), like the magic tech (alldiff 0.2062, 0.12 thick)
+    ndiff = add_diffusion_layer(psi,    "nsd",   -0.12,  "fox")
+    pdiff = add_diffusion_layer(psi,    "psd",   -0.12,  "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
