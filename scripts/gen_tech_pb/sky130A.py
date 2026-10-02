@@ -631,6 +631,10 @@ def build_substrate_info(si: SubstrateInfo):
     si.net_names.append("sky130_gnd")
     si.lvs_layer_names.extend(["sub", "vpp_sub"])
 
+    # NOTE: the deck has no nets of the isolated p-wells (the dnwell without the nwell), their transistors' bulk
+    #       is the substrate (sub), so they are the substrate here too
+    si.well_lvs_layer_names.append("nwell")
+
 
 def build_tech() -> Technology:
     tech = Technology(name="sky130A")

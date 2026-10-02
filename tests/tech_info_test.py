@@ -110,6 +110,20 @@ class Test(unittest.TestCase):
                 self.assertNotEqual([], list(substrate.net_names))
                 self.assertNotEqual([], list(substrate.lvs_layer_names))
 
+    def test_shipped_tech_definitions_have_wells_of_lvs_computed_layers(self):
+        # The capacitances above a well go to its net, which the extraction has on the shapes
+        # of the LVS computed layers, so the substrate would cover a well of another layer
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech_info = TechInfo(TechInfo.parse_tech_def(path), dielectric_filter=None)
+            well_layer_names = list(tech_info.tech.substrate.well_lvs_layer_names)
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual([], well_layer_names)
+                self.assertEqual([], [name for name in well_layer_names
+                                      if name not in tech_info.computed_layer_info_by_name])
+
     def test_shipped_tech_definitions_declare_each_capacitance_once(self):
         # The capacitances are looked up by layer (pair), so one declared twice
         # keeps only the last value: ihp-sg13g2 and ihp-sg13cmos5l declared

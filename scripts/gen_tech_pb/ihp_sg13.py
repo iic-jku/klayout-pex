@@ -706,6 +706,10 @@ class TechBuilder:
         si.net_names.append("sub!")
         si.lvs_layer_names.append("pwell_sub")
 
+        # TODO: the isolated p-wells (iso_pwell, the holes of the nwell over nBuLay) are nets of their own,
+        #       but the LVS layer that has them (pwell) has the substrate too, so they are the substrate here
+        si.well_lvs_layer_names.append("nwell_drw")
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 

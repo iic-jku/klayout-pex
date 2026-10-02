@@ -467,6 +467,10 @@ def build_substrate_info(si: SubstrateInfo):
     si.net_names.append("SUB")
     si.lvs_layer_names.append("ptap_regular")
 
+    # TODO: the isolated p-wells (lvpwell_con) and the deep nwell around them (dnwell) are nets of their own,
+    #       but the tech info has no layer of lvpwell_con yet, so they are the substrate here
+    si.well_lvs_layer_names.append("nwell_con")
+
 
 def build_tech() -> Technology:
     tech = Technology(name="gf180mcuD")
