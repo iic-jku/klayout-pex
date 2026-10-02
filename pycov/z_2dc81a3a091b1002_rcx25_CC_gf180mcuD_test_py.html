@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">17 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">17<span class="text"> run</span></button>
+            <span class="text">22 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">22<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_2dc81a3a091b1002_rcx25_CC_ihp_sg13g2_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 22:43 +0000
+            created at 2026-10-02 22:57 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -143,12 +143,36 @@
     <p class="run"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t"><span class="op">@</span><span class="nam">allure</span><span class="op">.</span><span class="nam">parent_suite</span><span class="op">(</span><span class="nam">parent_suite</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t"><span class="op">@</span><span class="nam">allure</span><span class="op">.</span><span class="nam">tag</span><span class="op">(</span><span class="op">*</span><span class="nam">tags</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t"><span class="op">@</span><span class="nam">pytest</span><span class="op">.</span><span class="nam">mark</span><span class="op">.</span><span class="nam">slow</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t"><span class="key">def</span> <span class="nam">test_well_diodes__blackboxed</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="com"># The well diodes of the PDK&#x27;s KLayout pcells (2 &#181;m x 4 &#181;m, 3.3V), their models are diode_pw2dw, diode_dw2ps</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">    <span class="key">assert</span> <span class="nam">pex_blackboxed</span><span class="op">.</span><span class="nam">written_device_lines</span><span class="op">(</span><span class="str">&#x27;test_patterns&#x27;</span><span class="op">,</span> <span class="str">&#x27;diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz&#x27;</span><span class="op">)</span> <span class="op">==</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">        <span class="str">&#x27;D$1 PW2DW_P PW2DW_N diode_pw2dw area=8e-12 pj=1.2e-05&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">        <span class="str">&#x27;D$2 SUB DW2PS_N diode_dw2ps area=8e-12 pj=1.2e-05&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t"><span class="key">def</span> <span class="nam">test_mim_cap__blackboxed</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="com"># The black-box extraction leaves the MIM caps to the device model, with both of their plates,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">    <span class="com"># FuseTop and the Metal4 under it (LVS layer metal4_cap), so there&#x27;s no Metal5 over Metal4 under the top plates,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">    <span class="com"># which added 8.758 fF to TOP2 - BOT2 (2 % of the device) and 1.28 fF to TOP1 - BOT1.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">    <span class="com"># Between the plates, the fringe between Metal5 and the Metal4 around the bottom plates is left.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="nam">pex_blackboxed</span><span class="op">.</span><span class="nam">assert_expected_matches_obtained</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">        <span class="str">&#x27;test_patterns&#x27;</span><span class="op">,</span> <span class="str">&#x27;cap_mim_m4m5.gds.gz&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">        <span class="nam">expected_csv_content</span><span class="op">=</span><span class="str">&quot;&quot;&quot;Device;Net1;Net2;Capacitance [fF];Resistance [&#937;]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="str">C1;BOT1;BOT2;0.15;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t"><span class="str">C2;BOT1;TOP1;0.884;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t"><span class="str">C3;BOT1;TOP2;0.031;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t"><span class="str">C4;BOT1;VSUBS;0.879;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t"><span class="str">C5;BOT2;TOP1;0.021;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t"><span class="str">C6;BOT2;TOP2;2.844;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t"><span class="str">C7;BOT2;VSUBS;3.112;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t"><span class="str">C8;TOP1;TOP2;0.118;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t"><span class="str">C9;TOP1;VSUBS;0.594;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t"><span class="str">C10;TOP2;VSUBS;2.763;&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t"><span class="op">@</span><span class="nam">allure</span><span class="op">.</span><span class="nam">parent_suite</span><span class="op">(</span><span class="nam">parent_suite</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t"><span class="op">@</span><span class="nam">allure</span><span class="op">.</span><span class="nam">tag</span><span class="op">(</span><span class="op">*</span><span class="nam">tags</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="op">@</span><span class="nam">pytest</span><span class="op">.</span><span class="nam">mark</span><span class="op">.</span><span class="nam">slow</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="key">def</span> <span class="nam">test_well_diodes__blackboxed</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">    <span class="com"># The well diodes of the PDK&#x27;s KLayout pcells (2 &#181;m x 4 &#181;m, 3.3V), their models are diode_pw2dw, diode_dw2ps</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">    <span class="key">assert</span> <span class="nam">pex_blackboxed</span><span class="op">.</span><span class="nam">written_device_lines</span><span class="op">(</span><span class="str">&#x27;test_patterns&#x27;</span><span class="op">,</span> <span class="str">&#x27;diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz&#x27;</span><span class="op">)</span> <span class="op">==</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">        <span class="str">&#x27;D$1 PW2DW_P PW2DW_N diode_pw2dw area=8e-12 pj=1.2e-05&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="str">&#x27;D$2 SUB DW2PS_N diode_dw2ps area=8e-12 pj=1.2e-05&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -158,7 +182,7 @@
             <a class="nav" href="z_2dc81a3a091b1002_rcx25_CC_ihp_sg13g2_test_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 22:43 +0000
+            created at 2026-10-02 22:57 +0000
         </p>
     </div>
 </footer>
