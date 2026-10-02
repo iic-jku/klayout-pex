@@ -71,7 +71,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, METAL,   KREG, "metal1_con",  (34, 0),     "Metal1",    "Computed layer for met1")
     add_computed_layer(tech, METAL,   KREG, "metal2_con",  (36, 0),     "Metal2",    "Computed layer for met2")
     add_computed_layer(tech, METAL,   KREG, "metal3_con",  (42, 0),     "Metal3",    "Computed layer for met3 (no cap)")
-    add_computed_layer(tech, METAL,   KREG, "metal4_con",  (46, 0),     "Metal4",    "Computed layer for met4 (no cap)")
+    add_computed_layer(tech, METAL,   KREG, "metal4_n_cap", (46, 0),    "Metal4",    "Computed layer for met4 (no MIM cap)")
     add_computed_layer(tech, METAL,   KREG, "metal5_con",  (81, 0),     "Metal5",    "Computed layer for met5")
     add_computed_layer(tech, CONT,    KREG, "contact_nsd_con",  (33, 4401),  "Contact", "Computed layer for contact from nsd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_psd_con",  (33, 4402),  "Contact", "Computed layer for contact from psd to Metal1")
@@ -81,6 +81,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via4_n_cap",  (41, 144),   "Via4",      "Computed layer for via4 (no MIM cap)")
     add_computed_layer(tech, VIA,     KCAP, "top_via_cap", (41, 244),   "Via4",      "Computed layer for via4 (with MIM cap)")
+    add_computed_layer(tech, METAL,   KCAP, "metal4_cap",  (46, 0),     "Metal4",    "Computed layer for met4 (MIM cap bottom plate)")
     add_computed_layer(tech, MIM,     KCAP, "fuse_cap",    (75, 0),     "FuseTop",   "MiM cap top plate over Metal4")
 
     # NOTE: for CC whiteboxing to work,
@@ -169,22 +170,20 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     add_simple_dielectric(psi,   "imd3",   4.0,          "imd2")
 
-    # METAL:                        name,     z,      thickness
+    # METAL:                             name,           z,      thickness
     #-----------------------------------------------------------------------------------------------
-    met4 = add_metal_layer(psi,     "Metal4", 4.68,   0.55)
+    met4_ncap = add_metal_layer(psi,     "metal4_n_cap", 4.68,   0.55)
+    met4_cap  = add_metal_layer(psi,     "metal4_cap",   4.68,   0.55)  # under FuseTop (the MIM cap bottom plate)
 
     # MIM cap (option B), with the heights of the PDK's KLayout 2.5D view (libs.tech/klayout/tech/d25/gf180mcu.lyd25)
     fusetop_thickness = 0.295
     capild_thickness = 0.042
     capild_k = 9.44  # 1.99 fF/µm² of cap_mim_2f0_m4m5_noshield (the deck's default mim_cap)
 
-    # NOTE: the deck has no layer of its own for the Metal4 under FuseTop (like sky130A's met3_cap),
-    #       so for FasterCap the MIM dielectric covers all of Metal4 (2.5D uses the capacitance tables)
-
     # DIELECTRIC (conformal)        name,     dielectric_k, thickness,        thickness,      thickness, ref
     #                                                       over metal,       where no metal, sidewall
     #-----------------------------------------------------------------------------------------------
-    add_conformal_dielectric(psi,   "capild", capild_k,     capild_thickness, 0.0,            0.0,       "Metal4")
+    add_conformal_dielectric(psi,   "capild", capild_k,     capild_thickness, 0.0,            0.0,       "metal4_cap")
 
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
@@ -192,7 +191,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
 
     # METAL:                          name,      z,                                         thickness
     #-----------------------------------------------------------------------------------------------
-    fusetop = add_metal_layer(psi,    "FuseTop", met4.z + met4.thickness + capild_thickness, fusetop_thickness)
+    fusetop = add_metal_layer(psi,    "FuseTop", met4_cap.z + met4_cap.thickness + capild_thickness, fusetop_thickness)
 
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
@@ -220,7 +219,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     via1 = met1.contact_above
     via2 = met2.contact_above
     via3 = met3.contact_above
-    via4 = met4.contact_above
+    via4 = met4_ncap.contact_above
     via4_cap = fusetop.contact_above
 
     # NOTE: contacts to diffusion start at z = 0, all others at the top of the layer below
@@ -234,8 +233,8 @@ def build_process_stack_info(psi: ProcessStackInfo):
     set_contact(m1po,     "contact_poly_con", "Poly2",     "Metal1",    met1.z - (poly.z + poly.thickness),   0.22,  0.25,    0.005)
     set_contact(via1,     "via1",             "Metal1",    "Metal2",    met2.z - (met1.z + met1.thickness),   0.26,  0.26,    0.01)
     set_contact(via2,     "via2_n_cap",       "Metal2",    "Metal3",    met3.z - (met2.z + met2.thickness),   0.26,  0.26,    0.01)
-    set_contact(via3,     "via3_n_cap",       "Metal3",    "Metal4",    met4.z - (met3.z + met3.thickness),   0.26,  0.26,    0.01)
-    set_contact(via4,     "via4_n_cap",       "Metal4",    "Metal5",    met5.z - (met4.z + met4.thickness),   0.26,  0.26,    0.01)
+    set_contact(via3,     "via3_n_cap",       "Metal3",    "Metal4",    met4_ncap.z - (met3.z + met3.thickness),   0.26,  0.26,    0.01)
+    set_contact(via4,     "via4_n_cap",       "Metal4",    "Metal5",    met5.z - (met4_ncap.z + met4_ncap.thickness), 0.26,  0.26,    0.01)
     set_contact(via4_cap, "top_via_cap",      "FuseTop",   "Metal5",    met5.z - (fusetop.z + fusetop.thickness), 0.26,  0.26,    0.4)  # MIMTM.4
 
 

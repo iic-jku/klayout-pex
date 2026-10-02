@@ -372,6 +372,14 @@ contact_nsd_con  = contact.and(nsd)
 contact_psd_con  = contact.and(psd)
 contact_poly_con = contact.and(poly2_con)
 
+# [PEX] Explicitly splitting Metal4 into the bottom plates of the MIM caps (option B, 5LM: FuseTop over Metal4)
+#       and the rest, as the extraction leaves the bottom plates to the devices in black-box mode
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+if MIM_OPTION == 'B' && METAL_LEVEL == '5LM'
+  metal4_n_cap = metal4_con.not(fuse_cap)
+  metal4_cap   = metal4_con.and(fuse_cap)
+end
+
 # %include rule_decks/auto_name_layers.rb
 auto_name_layers!(binding)
 
@@ -379,6 +387,12 @@ auto_name_layers!(binding)
 connect(contact_nsd_con,  contact)
 connect(contact_psd_con,  contact)
 connect(contact_poly_con, contact)
+
+# [PEX] Explicitly splitting Metal4 into the bottom plates of the MIM caps and the rest
+if MIM_OPTION == 'B' && METAL_LEVEL == '5LM'
+  connect(metal4_n_cap, metal4_con)
+  connect(metal4_cap,   metal4_con)
+end
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------
