@@ -372,6 +372,10 @@ contact_nsd_con  = contact.and(nsd)
 contact_psd_con  = contact.and(psd)
 contact_poly_con = contact.and(poly2_con)
 
+# [PEX] the contacts over the n-taps, which join Metal1 to the nwell below them
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+contact_ntap_con = contact.and(ntap)
+
 # [PEX] Explicitly splitting Metal4 into the bottom plates of the MIM caps (option B, 5LM: FuseTop over Metal4)
 #       and the rest, as the extraction leaves the bottom plates to the devices in black-box mode
 #       (NOTE: a regular LVS would not do this, we need it for PEX)
@@ -387,6 +391,7 @@ auto_name_layers!(binding)
 connect(contact_nsd_con,  contact)
 connect(contact_psd_con,  contact)
 connect(contact_poly_con, contact)
+connect(contact_ntap_con, contact)
 
 # [PEX] Explicitly splitting Metal4 into the bottom plates of the MIM caps and the rest
 if MIM_OPTION == 'B' && METAL_LEVEL == '5LM'

@@ -73,6 +73,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "licon_nsd_con",  (66, 4401), "licon1", "Computed layer for contact from nsdm to li1")
     add_computed_layer(tech, CONT,    KREG, "licon_psd_con",  (66, 4402), "licon1", "Computed layer for contact from psdm to li1")
     add_computed_layer(tech, CONT,    KREG, "licon_poly_con", (66, 4403), "licon1", "Computed layer for contact from poly to li1")
+    add_computed_layer(tech, CONT,    KREG, "licon_ntap_con", (66, 4404), "licon1", "Computed layer for contact from ntap (the nwell below) to li1")
     add_computed_layer(tech, VIA,     KREG, "mcon_con",  (67, 44),    "mcon",      "Computed layer for contact between li1 and met1")
     add_computed_layer(tech, VIA,     KREG, "via1_con",  (68, 44),    "via",       "Computed layer for contact between met1 and met2")
     add_computed_layer(tech, VIA,     KREG, "via2_con",  (69, 44),    "via2",      "Computed layer for contact between met2 and met3")
@@ -133,8 +134,12 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     nwell =    add_nwell_layer(psi,     "nwell", 0.1,    "fox")
 
-    ndiff = add_diffusion_layer(psi,    "nsd",   0.323,  "fox")
-    pdiff = add_diffusion_layer(psi,    "psd",   0.323,  "fox")
+    # NOTE: the diffusion is 0.12 µm deep below the silicon surface (z = 0), where the licon over it starts,
+    #       see the SkyWater metal stack (module docstring). 0.323 was the height of the top of the diffusion
+    #       in capiche (sky130A/metal_stack_sky130A.py), whose stack is planar: it lifts the diffusion up
+    #       to the gate oxide (3.2 nm) below the poly (0.3262), like the magic tech (alldiff 0.2062, 0.12 thick)
+    ndiff = add_diffusion_layer(psi,    "nsd",   -0.12,  "fox")
+    pdiff = add_diffusion_layer(psi,    "psd",   -0.12,  "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
@@ -259,13 +264,16 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     add_conformal_dielectric(psi,   "topnit", 7.5,          0.54,        0.4223,         0.3777,    "topox")
 
+    # NOTE: above topnit, the SkyWater metal stack (module docstring) has the polyimide PI1, K = 2.94,
+    #       up to 11.8834 µm, which capiche (sky130A/metal_stack_sky130A.py) names air, with k = 3.0
+    #
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
-    add_simple_dielectric(psi,   "air",    3.0,          "topnit")
+    add_simple_dielectric(psi,   "air",    2.94,         "topnit")
 
     # NOTE: on its own, accessing contact_above declares no contact (unlike C++ mutable_contact_above()),
     #       it's declared by setting its fields in set_contact()
-    # nwellc = nwell.contact_above  # licon over nwell / tap  # TODO!
+    nwellc = nwell.contact_above      # licon over ntap, which lands on the nwell below it
     licon1n = ndiff.contact_above     # licon over nsdm
     licon1p = pdiff.contact_above     # licon over nsdm
     licon1poly = poly.contact_above   # licon over poly
@@ -280,7 +288,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     # CONTACT:  contact,     name,             layer_below, metal_above, thickness,               width, spacing, border
     #                        (LVS)             (LVS)        (LVS)
     #----------------------------------------------------------------------------------------------------------------------
-    # set_contact(nwellc,    "TODO",           "nwell",     "li1",       0.9361,                  0.17,  0.17,    0.0)  # TODO
+    set_contact(nwellc,      "licon_ntap_con", "nwell",     "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(licon1n,     "licon_nsd_con",  "nsdm",      "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(licon1p,     "licon_psd_con",  "psdm",      "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(licon1poly,  "licon_poly_con", "poly",      "li1",       0.4299,                  0.17,  0.17,    0.0)
@@ -325,11 +333,16 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_layer_resistance(ri, "capm",  5800)
     add_layer_resistance(ri, "capm2", 5800)
 
+    # nwell, rnw of the device model sky130_fd_pr__res_generic_nw (libs.tech/ngspice/r+c/res_typical__cap_typical.spice),
+    # as in Table 91 of the SkyWater PDK docs (rules/rcx), the magic tech has 950 Ω/□ instead
+    add_layer_resistance(ri, "nwell", 1700000)
+
     # resistance values are in mΩ / CNT
     #                         contact_layer,    layer_below,  layer_above, resistance
     add_contact_resistance(ri, "licon_nsd_con",  "nsdm",       "li1",        185000)  # licon over nsdm!
     add_contact_resistance(ri, "licon_psd_con",  "psdm",       "li1",        585000)  # licon over psdm!
     add_contact_resistance(ri, "licon_poly_con", "poly",       "li1",        152000)  # licon over poly!
+    add_contact_resistance(ri, "licon_ntap_con", "nwell",      "li1",        185000)  # licon over ntap! (magic nsc)
 
     # resistance values are in mΩ / CNT
     #                     via_layer,  resistance

@@ -168,6 +168,47 @@ def test_nfet_terminals_are_on_the_resistor_network():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_nwell_pfet_ntap_li1():
+    # The bulk of the PMOS is on the nwell, which the licon over the ntap at its far end joins to VPWR.
+    # The extraction left out both, so the bulk was on VPWR, without resistance:
+    #   - licon over ntap: 185 Ω per cut, 1 cut
+    #   - nwell: 1700 Ω/sq, from the licon to the middle of the gate (9.25 µm) along the 3 µm wide nwell, 3.083 sq
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;D;D.P0.psdm;;585.0
+R2;G;G.P0.poly;;363.107
+R3;S;S.P0.psdm;;585.0
+R4;VPWR;VPWR.$0.nwell;;185.0
+R5;VPWR.$0.nwell;VPWR.P0.nwell;;5241.667"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nwell_joined_by_a_label_only():
+    # Like r_nwell_pfet_ntap_li1, without the licon over the ntap, but with the label VPWR on the nwell,
+    # which joins it to VPWR. So the nwell is a piece of the resistance network that joins nothing else,
+    # and the extraction leaves it out, so that the bulk of the PMOS is on VPWR, without resistance
+    with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+        pex_whiteboxed.assert_expected_matches_obtained(
+            'test_patterns', 'r_nwell_pfet_label_li1.gds.gz',
+            expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;D;D.P0.psdm;;585.0
+R2;G;G.P0.poly;;363.107
+R3;S;S.P0.psdm;;585.0"""
+        )
+    assert [c.args[0] for c in warning_mock.call_args_list] == [
+        "The resistance network leaves out the wells of these nets, as no contact joins them "
+        "to the rest of their net (e.g. a label of the net on the well does), "
+        "so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets: VPWR"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_no_resistor_between_pins_with_the_same_label():
     # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
     # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
