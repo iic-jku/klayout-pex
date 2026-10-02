@@ -580,9 +580,14 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     add_device_model_mapping(dmi, "sky130_fd_pr__model__cap_mim_m4", "X", ["B", "A"], mim, "sky130_fd_pr__cap_mim_m3_2",
                              kind=METAL_CAP)
 
+    # varactors, the gate (A, poly) first, then the well (B, n+ diffusion) and the bulk (W)
+    #
+    #     NOTE: LVS extracts them like a MOS gate, l across the poly, w along it (see sky130.lvs, VaractorExtractor),
+    #           as their models depend on w and l, not only on w*l and w+l
+    for var in ('cap_var_lvt', 'cap_var_hvt'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__{var}", "X", ["A", "B", "W"], w_l)
+
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
-    #       - cap_var_hvt, cap_var_lvt: the models take w and l, LVS extracts area and perimeter,
-    #         and the models depend on w and l, not only on w*l and w+l
     #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3
     #       - sky130_fd_bs_flash__special_sonosfet_star, fuse_m4, photodiode, res_generic_nd_hv, res_generic_pd_hv,
     #         cap_vpp_*_o2subcell, cap_vpp_*_pol1m1m2m3m4m5_noshield* (but 44p7x23p1): no ngspice models

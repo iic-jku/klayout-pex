@@ -512,3 +512,16 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
 def test_mim_cap__blackboxed():
     results, _, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert results.summarize().capacitances
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_varactors__blackboxed():
+    # The varactors of the PDK's device generator (magic), W along the poly, L across it:
+    # the lvt one with W < L, the hvt one with W > L. Their models depend on w and l separately,
+    # so LVS extracts them like MOS gates, rather than by area and perimeter, which can't tell w from l
+    assert pex_blackboxed.written_device_lines('test_patterns', 'cap_var_lvt_w1_l2_hvt_w2_l0p5.gds.gz') == [
+        'X$1 LVT_C0 LVT_C1 LVT_B sky130_fd_pr__cap_var_lvt w=1 l=2',
+        'X$2 HVT_C0 HVT_C1 HVT_B sky130_fd_pr__cap_var_hvt w=2 l=0.5',
+    ]
