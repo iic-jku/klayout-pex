@@ -35,7 +35,7 @@ from pathlib import Path
 import subprocess
 import sys
 import textwrap
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Mapping, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Optional, Tuple, Type
 from unittest.mock import Mock
 
 import pytest
@@ -89,36 +89,14 @@ def scene() -> PEX25DScene:
 
 
 @pytest.fixture
-def install_exporter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Callable[..., str]]:
-    """Create real dist-info metadata, restricting discovery to this fixture."""
-    monkeypatch.syspath_prepend(str(tmp_path))
-    modules = []
-
-    def entry_points(*, group: str) -> metadata.EntryPoints:
-        return metadata.EntryPoints(
-            ep for dist in metadata.distributions(path=[str(tmp_path)])
-            for ep in dist.entry_points
-        ).select(group=group)
-
-    monkeypatch.setattr(metadata, 'entry_points', entry_points)
-
+def install_exporter(install_plugin: Callable[..., str]) -> Callable[..., str]:
+    """Install an exporter plugin, by default PLUGIN_SOURCE."""
     def install(distribution: str, name: str, source: str = PLUGIN_SOURCE,
                 group: str = EXPORTER_ENTRY_POINT_GROUP,
                 factory: str = 'create_exporter') -> str:
-        module = 'test_exporter_' + distribution.lower().replace('-', '_')
-        modules.append(module)
-        (tmp_path / f'{module}.py').write_text(textwrap.dedent(source), encoding='utf-8')
-        dist_info = tmp_path / f'{distribution.replace("-", "_")}-1.0.dist-info'
-        dist_info.mkdir()
-        (dist_info / 'METADATA').write_text(
-            f'Metadata-Version: 2.1\nName: {distribution}\nVersion: 1.0\n', encoding='utf-8')
-        (dist_info / 'entry_points.txt').write_text(
-            f'[{group}]\n{name} = {module}:{factory}\n', encoding='utf-8')
-        return module
+        return install_plugin(distribution, name, source, group, factory)
 
-    yield install
-    for module in modules:
-        sys.modules.pop(module, None)
+    return install
 
 
 def test_discovery_does_not_import_plugins_and_ignores_other_api_versions(
@@ -706,13 +684,13 @@ def test_format_import_does_not_load_registry():
 
         class BlockRegistryImports(importlib.abc.MetaPathFinder):
             def find_spec(self, fullname, path=None, target=None):
-                if fullname == 'klayout_pex.plugin.exporter_registry':
+                if fullname.startswith('klayout_pex.plugin.'):
                     raise ImportError('format import loaded ' + fullname)
 
         sys.meta_path.insert(0, BlockRegistryImports())
         from klayout_pex import pex25d
         assert callable(pex25d.read_text)
-        assert 'klayout_pex.plugin.exporter_registry' not in sys.modules
+        assert not [name for name in sys.modules if name.startswith('klayout_pex.plugin.')]
     """
     result = subprocess.run([sys.executable, '-c', textwrap.dedent(script)],
                             cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True)
