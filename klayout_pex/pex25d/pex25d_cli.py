@@ -276,8 +276,8 @@ class Pex25DCLI:
         self._add_input_argument(parser_export)
         parser_export.add_argument("--to", dest='exporter_name', required=True,
                                    type=str, metavar='EXPORTER',
-                                   help="Exporter name or distribution:name; available "
-                                        "exporters are discovered from installed plugins")
+                                   help="Exporter name or distribution:name; run "
+                                        "'pex25d exporters' to list available identifiers")
         parser_export.add_argument("--out_dir", dest='output_dir_path', required=True,
                                    help="Directory to export the solver input files into")
         parser_export.add_argument("--prefix", dest='prefix', default='',
@@ -301,6 +301,14 @@ class Pex25DCLI:
                                    action='store_true', default=None,
                                    help="Validate the geometry before writing")
         self._add_diagnostics_arguments(parser_export)
+
+        # --------------------------------------------------------- exporters
+        subparsers.add_parser(
+            "exporters",
+            help="List installed exporter identifiers without loading plugins",
+            description="List built-in and installed exporters as distribution:name. "
+                        "Listing reads metadata only; it does not check dependencies.",
+            formatter_class=RichHelpFormatter)
 
         # -------------------------------------------------------------- show
         parser_show = subparsers.add_parser(
@@ -346,13 +354,14 @@ class Pex25DCLI:
         # Input spec. A scene default for stdin would be wrong:
         # the only thing you can pipe in without a file name to inspect is what another tool wrote,
         # and the format's own serialization is the text file.
-        try:
-            args.input_spec = infer_artifact_spec(args.input_path,
-                                                  kind=args.in_kind,
-                                                  format=args.in_format)
-        except ArtifactNamingError as e:
-            error(str(e))
-            found_errors = True
+        if hasattr(args, 'input_path'):
+            try:
+                args.input_spec = infer_artifact_spec(args.input_path,
+                                                      kind=args.in_kind,
+                                                      format=args.in_format)
+            except ArtifactNamingError as e:
+                error(str(e))
+                found_errors = True
 
         if hasattr(args, 'output_path') and args.output_path is not None:
             default_kind = ArtifactKind.SCENE if args.command == 'resolve' else ArtifactKind.FILE
@@ -462,6 +471,12 @@ class Pex25DCLI:
             sys.exit(ExitCode.USAGE)
 
         set_log_level(args.log_level)
+
+        if args.command == 'exporters':
+            from .exporters import exporter_registry
+            for exporter in exporter_registry().exporters:
+                print(exporter.qualified_name)
+            sys.exit(ExitCode.OK)
 
         # When the artifact goes to stdout, stdout belongs to the artifact and to
         # nothing else — one stray log line and the consumer of the pipe is parsing garbage.

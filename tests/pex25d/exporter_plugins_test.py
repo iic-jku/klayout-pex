@@ -623,6 +623,30 @@ def test_cli_emits_collected_diagnostics_when_export_fails(
     assert 'PEX25D-E0250' in {d['code'] for d in json.loads(diagnostics.read_text())['diagnostics']}
 
 
+def test_unknown_selector_lists_available_identifiers_without_loading_plugins(
+        install_exporter: Callable[..., str]):
+    module = install_exporter('test-one', 'example', 'raise ImportError("missing mesher")')
+    with pytest.raises(ExportError) as failure:
+        pex25d.exporter_registry().load('unknown')
+    for name in ('klayout-pex:fastercap', 'klayout-pex:fastcap2', 'test-one:example'):
+        assert name in str(failure.value)
+    assert module not in sys.modules
+
+
+def test_cli_lists_exporters_without_input_or_plugin_imports(
+        install_exporter: Callable[..., str], capsys: pytest.CaptureFixture):
+    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+
+    module = install_exporter('test-one', 'example', 'raise ImportError("missing mesher")')
+    with pytest.raises(SystemExit) as completion:
+        Pex25DCLI().main(['pex25d', 'exporters'])
+    assert completion.value.code == pex25d.ExitCode.OK
+    output = capsys.readouterr().out
+    for name in ('klayout-pex:fastercap', 'klayout-pex:fastcap2', 'test-one:example'):
+        assert name in output
+    assert module not in sys.modules
+
+
 @pytest.mark.filterwarnings(
     'ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning:importlib.metadata')
 @pytest.mark.parametrize('missing_name', ['metadata', 'none', 'key_error'])

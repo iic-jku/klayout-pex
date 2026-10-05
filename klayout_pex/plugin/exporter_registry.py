@@ -87,7 +87,8 @@ class ExporterRegistry:
                 matches = builtins
 
         if not matches:
-            raise ExportError(f"No exporter for '{selector}'")
+            choices = ", ".join(info.qualified_name for info in self.exporters) or "(none)"
+            raise ExportError(f"No exporter for '{selector}'. Available exporters: {choices}")
         if len(matches) > 1:
             choices = ', '.join(r.info.qualified_name for r in matches)
             raise ExportError(
