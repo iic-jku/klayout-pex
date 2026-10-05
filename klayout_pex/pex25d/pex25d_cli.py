@@ -29,6 +29,7 @@ Deliberately *not* part of ``kpex``. Everything this tool does is format work:
     - validating
     - converting between encodings
     - resolving a file into a scene
+    - importing another tool's scene description, via importer plugins
     - writing a scene as a solver's native input
     - looking at what is inside
 None of it needs a layout, an LVS run, or KLayout — and that is the point.
@@ -43,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import os
 import shlex
 import sys
 from typing import *
@@ -54,6 +56,7 @@ from rich_argparse import RichHelpFormatter
 
 from ..log import (
     LogLevel,
+    console,
     set_log_level,
     debug,
     info,
@@ -66,6 +69,7 @@ from ..util.argparse_helpers import render_enum_help, true_or_false
 from ..version import __version__
 
 from .exporters import ExportError, ExporterExecutionError
+from .importers import ImporterError, ImporterExecutionError
 from .artifact import (
     ArtifactFormat,
     ArtifactKind,
@@ -99,7 +103,7 @@ EPILOG_MARKDOWN = """
 | 1 | input is not valid PEX25D |
 | 2 | command line is wrong, or an input could not be read |
 | 3 | requested operation is not implemented yet |
-| 4 | unexpected exporter failure |
+| 4 | unexpected plugin failure |
 
 A path of `-` means stdin for inputs and stdout for outputs. 
 When an artifact goes to stdout, diagnostics go to stderr instead, 
@@ -302,11 +306,42 @@ class Pex25DCLI:
                                    help="Validate the geometry before writing")
         self._add_diagnostics_arguments(parser_export)
 
+        # ------------------------------------------------------------ import
+        parser_import = subparsers.add_parser(
+            "import",
+            help="Translate another tool's scene description into a PEX25DFile",
+            description="Run an importer plugin on INPUT, validate the PEX25DFile it "
+                        "produces and write it; the file is written even if it is invalid. "
+                        "Run 'pex25d importers' to list the installed importers.",
+            add_help=False, formatter_class=RichHelpFormatter)
+        parser_import.add_argument("--help", "-h", action='help',
+                                   help="show this help message and exit")
+        parser_import.add_argument("source_path", type=str, metavar='INPUT',
+                                   help="Input in the importer's own format")
+        parser_import.add_argument("--from", dest='importer_name', required=True,
+                                   type=str, metavar='IMPORTER',
+                                   help="Importer name or distribution:name; run "
+                                        "'pex25d importers' to list available identifiers")
+        parser_import.add_argument("--supporting", dest='supporting_args', action='append',
+                                   default=[], metavar='NAME=PATH',
+                                   help="Named supporting input the importer asks for, "
+                                        "e.g. process_stack=stack.txt; repeatable")
+        self._add_output_arguments(parser_import)
+        self._add_diagnostics_arguments(parser_import)
+
         # --------------------------------------------------------- exporters
         subparsers.add_parser(
             "exporters",
             help="List installed exporter identifiers without loading plugins",
             description="List built-in and installed exporters as distribution:name. "
+                        "Listing reads metadata only; it does not check dependencies.",
+            formatter_class=RichHelpFormatter)
+
+        # --------------------------------------------------------- importers
+        subparsers.add_parser(
+            "importers",
+            help="List installed importer identifiers without loading plugins",
+            description="List installed importers as distribution:name. "
                         "Listing reads metadata only; it does not check dependencies.",
             formatter_class=RichHelpFormatter)
 
@@ -382,6 +417,24 @@ class Pex25DCLI:
                     error("'resolve' produces a PEX25DScene; the output path or --out_kind asks for a PEX25DFile.")
                     found_errors = True
 
+            if args.command == 'import' and getattr(args, 'output_spec', None) is not None:
+                if args.output_spec.kind != ArtifactKind.FILE:
+                    error("'import' produces a PEX25DFile; the output path or --out_kind asks for a PEX25DScene.")
+                    found_errors = True
+
+        if hasattr(args, 'supporting_args'):
+            args.supporting_files = {}
+            for argument in args.supporting_args:
+                name, separator, path = argument.partition('=')
+                if not separator or not name or not path:
+                    error(f"--supporting expects NAME=PATH, got '{argument}'")
+                    found_errors = True
+                elif name in args.supporting_files:
+                    error(f"--supporting names '{name}' more than once")
+                    found_errors = True
+                else:
+                    args.supporting_files[name] = path
+
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
 
@@ -454,6 +507,23 @@ class Pex25DCLI:
             subproc(path)
         info(f"Wrote {len(written)} {args.exporter_name} input file(s) to {args.output_dir_path}")
 
+    def run_import(self, args: argparse.Namespace,
+                   report: DiagnosticsReport) -> Optional[Tuple[str, str]]:
+        from .codec import save_artifact
+        from .importers import import_file
+        from .validator import validate
+
+        message = import_file(args.source_path, args.importer_name,
+                              supporting_files=args.supporting_files, report=report)
+        validate(message, report=report, strict=args.strict)
+        save_artifact(message, args.output_spec, comments=args.comments)
+        if args.output_spec.is_stdio:
+            return None
+        info(f"Wrote {args.output_spec}")
+        if report.exit_code != ExitCode.OK:
+            return "The imported file is invalid; review it at:", os.path.abspath(args.output_spec.path)
+        return None
+
     def run_show(self, args: argparse.Namespace, report: DiagnosticsReport) -> None:
         from .codec import load_artifact
         from .show import show
@@ -472,10 +542,12 @@ class Pex25DCLI:
 
         set_log_level(args.log_level)
 
-        if args.command == 'exporters':
+        if args.command in ('exporters', 'importers'):
             from .exporters import exporter_registry
-            for exporter in exporter_registry().exporters:
-                print(exporter.qualified_name)
+            from .importers import importer_registry
+            registry = exporter_registry() if args.command == 'exporters' else importer_registry()
+            for plugin in registry.plugins:
+                print(plugin.qualified_name)
             sys.exit(ExitCode.OK)
 
         # When the artifact goes to stdout, stdout belongs to the artifact and to
@@ -493,7 +565,8 @@ class Pex25DCLI:
             self._run(args)
 
     def _run(self, args: argparse.Namespace) -> None:
-        if args.input_spec.path != STDIO_PATH:
+        input_spec: Optional[ArtifactSpec] = getattr(args, 'input_spec', None)
+        if input_spec is None or input_spec.path != STDIO_PATH:
             rule('Command line arguments')
             subproc(' '.join(map(shlex.quote, sys.argv)))
 
@@ -505,23 +578,24 @@ class Pex25DCLI:
             'convert': self.run_convert,
             'resolve': self.run_resolve,
             'export': self.run_export,
+            'import': self.run_import,
             'show': self.run_show,
         }[args.command]
 
         try:
-            handler(args, report)
+            note = handler(args, report)
         except NotImplementedError as e:
             error(str(e))
             sys.exit(ExitCode.NOT_IMPLEMENTED)
         except ArgumentValidationError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)
-        except ExporterExecutionError as e:
+        except (ExporterExecutionError, ImporterExecutionError) as e:
             error(str(e))
-            debug("Exporter traceback", exc_info=True)
+            debug("Plugin traceback", exc_info=True)
             self._emit_diagnostics(args, report)
             sys.exit(ExitCode.INTERNAL_ERROR)
-        except ExportError as e:
+        except (ExportError, ImporterError) as e:
             error(str(e))
             self._emit_diagnostics(args, report)
             sys.exit(ExitCode.USAGE)
@@ -533,10 +607,14 @@ class Pex25DCLI:
             error(str(e))
             sys.exit(ExitCode.USAGE)
         except (OSError, ValueError) as e:
-            error(f"Failed to process {args.input_spec}: {e}")
+            error(f"Failed to process {input_spec or args.source_path}: {e}")
             sys.exit(ExitCode.USAGE)
 
         self._emit_diagnostics(args, report)
+        if note:  # after the diagnostics, so it stays next to the prompt
+            message, path = note
+            warning(message)
+            console.print(path, soft_wrap=True, markup=False, highlight=False)  # unwrapped, to copy
         sys.exit(report.exit_code)
 
     @staticmethod

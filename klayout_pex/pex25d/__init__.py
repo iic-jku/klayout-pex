@@ -92,6 +92,13 @@ from .exporters import (
     export_with_backend,
     exporter_registry,
 )
+from .importers import (
+    ImporterError,
+    ImporterExecutionError,
+    ImporterUnavailable,
+    import_file,
+    importer_registry,
+)
 from .format_version import (
     FORMAT_VERSION_MAJOR,
     FORMAT_VERSION_MINOR,
@@ -205,6 +212,8 @@ __all__ = [
     'export',
     'export_with_backend',
     'exporter_registry',
+    'import_file',
+    'importer_registry',
     'show',
     # artifacts
     'ArtifactFormat',
@@ -229,6 +238,9 @@ __all__ = [
     'ExportError',
     'ExporterExecutionError',
     'ExporterUnavailable',
+    'ImporterError',
+    'ImporterExecutionError',
+    'ImporterUnavailable',
     'ProtobufNotGeneratedError',
     'ReadError',
     'ResolveError',

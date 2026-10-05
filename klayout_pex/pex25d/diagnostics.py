@@ -60,7 +60,7 @@ class ExitCode(IntEnum):
 
     CI callers distinguish invalid PEX25D (DIAGNOSTIC_ERRORS) from invocation
     or I/O problems (USAGE). NOT_IMPLEMENTED identifies unsupported operations;
-    INTERNAL_ERROR identifies unexpected exporter failures.
+    INTERNAL_ERROR identifies unexpected plugin failures.
     """
 
     OK = 0
