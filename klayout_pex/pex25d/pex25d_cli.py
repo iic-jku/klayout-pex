@@ -55,6 +55,7 @@ from rich_argparse import RichHelpFormatter
 from ..log import (
     LogLevel,
     set_log_level,
+    debug,
     info,
     warning,
     error,
@@ -64,7 +65,7 @@ from ..log import (
 from ..util.argparse_helpers import render_enum_help, true_or_false
 from ..version import __version__
 
-from .exporters import ExportError, ExporterOptions, SolverTarget
+from .exporters import ExportError, ExporterExecutionError
 from .artifact import (
     ArtifactFormat,
     ArtifactKind,
@@ -98,6 +99,7 @@ EPILOG_MARKDOWN = """
 | 1 | input is not valid PEX25D |
 | 2 | command line is wrong, or an input could not be read |
 | 3 | requested operation is not implemented yet |
+| 4 | unexpected exporter failure |
 
 A path of `-` means stdin for inputs and stdout for outputs. 
 When an artifact goes to stdout, diagnostics go to stderr instead, 
@@ -272,34 +274,31 @@ class Pex25DCLI:
         parser_export.add_argument("--help", "-h", action='help',
                                    help="show this help message and exit")
         self._add_input_argument(parser_export)
-        parser_export.add_argument("--to", dest='solver_target', required=True,
-                                   type=SolverTarget, choices=list(SolverTarget),
-                                   help=render_enum_help(topic='to',
-                                                         enum_cls=SolverTarget))
+        parser_export.add_argument("--to", dest='exporter_name', required=True,
+                                   type=str, metavar='EXPORTER',
+                                   help="Exporter name or distribution:name; available "
+                                        "exporters are discovered from installed plugins")
         parser_export.add_argument("--out_dir", dest='output_dir_path', required=True,
                                    help="Directory to export the solver input files into")
         parser_export.add_argument("--prefix", dest='prefix', default='',
                                    help="Prefix for the generated file names "
                                         "(default is the target's own)")
         parser_export.add_argument("--field_margin", dest='field_margin',
-                                   type=float, default=8.0, metavar='UM',
+                                   type=float, default=None, metavar='UM',
                                    help="How far to draw the laterally unbounded "
-                                        "materials beyond the geometry, in µm "
-                                        "(default is %(default)s). Ignored when the "
-                                        "scene carries a DOMAIN_BOX.")
+                                        "materials beyond the geometry, in µm. "
+                                        "Ignored when the scene carries a DOMAIN_BOX.")
         parser_export.add_argument("--delaunay_amax", dest='delaunay_amax',
-                                   type=float, default=0.0, metavar='AREA',
-                                   help="Maximum triangle area (default is "
-                                        "%(default)s, i.e. unconstrained)")
+                                   type=float, default=None, metavar='AREA',
+                                   help="Maximum triangle area; 0 means unconstrained")
         parser_export.add_argument("--delaunay_b", dest='delaunay_b',
-                                   type=float, default=1.0, metavar='B',
-                                   help="Minimum mesh angle as b = 2·sin(angle) "
-                                        "(default is %(default)s, i.e. 30 degrees)")
+                                   type=float, default=None, metavar='B',
+                                   help="Minimum mesh angle as b = 2·sin(angle)")
         parser_export.add_argument("--stl", dest='write_stl',
-                                   action='store_true', default=False,
+                                   action='store_true', default=None,
                                    help="Also dump the generated solids as STL")
         parser_export.add_argument("--geo_check", dest='geometry_check',
-                                   action='store_true', default=False,
+                                   action='store_true', default=None,
                                    help="Validate the geometry before writing")
         self._add_diagnostics_arguments(parser_export)
 
@@ -416,24 +415,35 @@ class Pex25DCLI:
         if not args.output_spec.is_stdio:
             info(f"Wrote {args.output_spec}")
 
-    def run_export(self, args: argparse.Namespace, report: DiagnosticsReport) -> None:
-        from .exporters import export
+    def run_export(self, args: argparse.Namespace, report: DiagnosticsReport):
+        from .exporters import exporter_registry, export_with_backend
         from .codec import load_artifact
         from .resolver import resolve
 
+        registry = exporter_registry()
+        exporter = registry.load(args.exporter_name)
         message = load_artifact(args.input_spec, report=report,
                                 with_source_refs=args.with_source_refs)
         if args.input_spec.kind == ArtifactKind.FILE:
             info("Input is an unresolved PEX25DFile, resolving it first")
             message = resolve(message, report=report, strict=args.strict)
 
-        written = export(message,
-                         target=args.solver_target,
-                         output_dir_path=args.output_dir_path,
-                         prefix=args.prefix)
+        options: Dict[str, Any] = {
+            name: value for name, value in (
+                ('field_margin_um', args.field_margin),
+                ('delaunay_amax', args.delaunay_amax),
+                ('delaunay_b', args.delaunay_b),
+                ('write_stl', args.write_stl),
+                ('geometry_check', args.geometry_check),
+            ) if value is not None
+        }
+        written = export_with_backend(
+            exporter, message, target=args.exporter_name,
+            output_dir_path=args.output_dir_path, prefix=args.prefix,
+            options=options, registry=registry)
         for path in written:
             subproc(path)
-        info(f"Wrote {len(written)} {args.solver_target.value} input file(s) to {args.output_dir_path}")
+        info(f"Wrote {len(written)} {args.exporter_name} input file(s) to {args.output_dir_path}")
 
     def run_show(self, args: argparse.Namespace, report: DiagnosticsReport) -> None:
         from .codec import load_artifact
@@ -491,8 +501,14 @@ class Pex25DCLI:
         except ArgumentValidationError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)
+        except ExporterExecutionError as e:
+            error(str(e))
+            debug("Exporter traceback", exc_info=True)
+            self._emit_diagnostics(args, report)
+            sys.exit(ExitCode.INTERNAL_ERROR)
         except ExportError as e:
             error(str(e))
+            self._emit_diagnostics(args, report)
             sys.exit(ExitCode.USAGE)
         except (ReadError, ResolveError) as e:
             error(str(e))

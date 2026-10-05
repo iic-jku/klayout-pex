@@ -58,17 +58,16 @@ class ExitCode(IntEnum):
     """
     Process exit codes, shared by ``kpex`` and ``pex25d``.
 
-    Distinguishing OK from ERRORS from USAGE matters for the CI use case:
-    a writer-conformance run wants to distinguish
-        1) "your file is wrong"
-        2) "you called me wrong"
-        3) a crash
+    CI callers distinguish invalid PEX25D (DIAGNOSTIC_ERRORS) from invocation
+    or I/O problems (USAGE). NOT_IMPLEMENTED identifies unsupported operations;
+    INTERNAL_ERROR identifies unexpected exporter failures.
     """
 
     OK = 0
     DIAGNOSTIC_ERRORS = 1
     USAGE = 2
     NOT_IMPLEMENTED = 3
+    INTERNAL_ERROR = 4
 
 
 class Severity(IntEnum):

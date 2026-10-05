@@ -71,8 +71,11 @@ class ExporterRegistry:
         """List all registrations, including ambiguous or unavailable ones."""
         return tuple(registration.info for registration in self._registrations)
 
-    def load(self, selector: str) -> PEX25DSceneExporter:
-        """Load a name or ``distribution:name``; built-ins win for bare names."""
+    def get_info(self, selector: str) -> ExporterInfo:
+        """Resolve a selector to its provider metadata without loading code."""
+        return self._registration(selector).info
+
+    def _registration(self, selector: str) -> ExporterRegistration:
         if ':' in selector:
             distribution, name = selector.split(':', 1)
             qualified_name = ExporterInfo(name, distribution).qualified_name
@@ -92,7 +95,11 @@ class ExporterRegistry:
                 "Select a distribution:name; duplicate registrations within one "
                 "distribution must be removed.")
 
-        registration = matches[0]
+        return matches[0]
+
+    def load(self, selector: str) -> PEX25DSceneExporter:
+        """Load a name or ``distribution:name``; built-ins win for bare names."""
+        registration = self._registration(selector)
         try:
             factory = registration.load_factory()
             if not callable(factory):

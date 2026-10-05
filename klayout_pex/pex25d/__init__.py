@@ -86,10 +86,11 @@ from .diagnostics import (
 )
 from .exporters import (
     ExportError,
-    ExporterOptions,
+    ExporterExecutionError,
     ExporterUnavailable,
-    SolverTarget,
     export,
+    export_with_backend,
+    exporter_registry,
 )
 from .format_version import (
     FORMAT_VERSION_MAJOR,
@@ -202,6 +203,8 @@ __all__ = [
     'resolve',
     'validate',
     'export',
+    'export_with_backend',
+    'exporter_registry',
     'show',
     # artifacts
     'ArtifactFormat',
@@ -224,14 +227,13 @@ __all__ = [
     # errors
     'ArtifactNamingError',
     'ExportError',
+    'ExporterExecutionError',
     'ExporterUnavailable',
     'ProtobufNotGeneratedError',
     'ReadError',
     'ResolveError',
     'WriteError',
     # the rest
-    'ExporterOptions',
-    'SolverTarget',
     'FORMAT_VERSION_MAJOR',
     'FORMAT_VERSION_MINOR',
     'FORMAT_VERSION_SUFFIX',

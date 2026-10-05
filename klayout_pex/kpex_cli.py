@@ -781,7 +781,7 @@ class KpexCLI:
         faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
         os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
-        lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
+        written = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
 
         rule('STL File Generation')
         geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
@@ -792,7 +792,7 @@ class KpexCLI:
             rule('Geometry Validation')
             gen.check()
 
-        return lst_file
+        return written[0]
 
 
     def run_fastercap_extraction(self,
