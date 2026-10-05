@@ -42,6 +42,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import *
 
+if TYPE_CHECKING:
+    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+
 
 class SolverTarget(StrEnum):
     """Engines a PEX25D scene can be written out for."""
@@ -85,8 +88,8 @@ class ExporterOptions:
     """Run the generator's own geometry validation before writing."""
 
 
-def export(scene: Any,
-           target: SolverTarget,
+def export(scene: PEX25DScene,
+           target: Union[SolverTarget, str],
            output_dir_path: str,
            prefix: str = '',
            options: Optional[ExporterOptions] = None) -> List[str]:

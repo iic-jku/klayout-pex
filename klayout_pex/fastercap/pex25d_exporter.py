@@ -48,6 +48,9 @@ from ..pex25d.exporters import ExportError, ExporterOptions, SolverTarget
 from ..pex25d.protobuf import pex25d_dielectric_pb2, pex25d_scene_pb2
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 
+if TYPE_CHECKING:
+    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+
 
 DEFAULT_PREFIX = {
     SolverTarget.FASTERCAP: 'FasterCap_Input_',
@@ -56,7 +59,7 @@ DEFAULT_PREFIX = {
 
 
 class Pex25DFasterCapExporter:
-    def __init__(self, scene: Any, options: ExporterOptions):
+    def __init__(self, scene: PEX25DScene, options: ExporterOptions):
         self.scene = scene
         self.options = options
 
@@ -139,7 +142,7 @@ class Pex25DFasterCapExporter:
             raise ExportError("The scene produced no geometry")
         return generator
 
-    def add_ground_plane(self, builder: FasterCapModelBuilder) -> None:
+    def add_ground_plane(self, builder: FasterCapModelBuilder):
         if not self.scene.HasField('ground_plane'):
             warning("The scene declares no ground plane")
             return
@@ -152,7 +155,7 @@ class Pex25DFasterCapExporter:
                               z=self.um(ground_plane.zlow),
                               height=self.um(ground_plane.zhigh - ground_plane.zlow))
 
-    def add_conductors(self, builder: FasterCapModelBuilder) -> None:
+    def add_conductors(self, builder: FasterCapModelBuilder):
         for conductor in self.scene.conductors:
             # A FLOATING conductor belongs to no net and is solved under its own
             # shortname; everything else is reported per net.
@@ -171,7 +174,7 @@ class Pex25DFasterCapExporter:
                                       z=self.um(layer.zlow),
                                       height=self.um(layer.zhigh - layer.zlow))
 
-    def add_dielectrics(self, builder: FasterCapModelBuilder) -> None:
+    def add_dielectrics(self, builder: FasterCapModelBuilder):
         kinds = pex25d_dielectric_pb2()
 
         for dielectric in self.scene.dielectrics:
@@ -195,7 +198,7 @@ class Pex25DFasterCapExporter:
             else:
                 raise ExportError(f"Dielectric '{dielectric.name}' has no kind")
 
-    def add_conformal(self, builder: FasterCapModelBuilder, dielectric: Any) -> None:
+    def add_conformal(self, builder: FasterCapModelBuilder, dielectric: Any):
         """
         A film has up to two solids: the one grown around what it wraps, and —
         when it covers the field — a slab over everything the root layer is
@@ -286,7 +289,7 @@ def grow(box: Any, margin: int) -> Any:
     return grown
 
 
-def export_fastercap(scene: Any,
+def export_fastercap(scene: PEX25DScene,
                      target: SolverTarget,
                      output_dir_path: str,
                      prefix: str,
