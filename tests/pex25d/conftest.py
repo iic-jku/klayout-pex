@@ -56,7 +56,8 @@ def install_plugin(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[
         dist_info = tmp_path / f'{distribution.replace("-", "_")}-1.0.dist-info'
         dist_info.mkdir()
         (dist_info / 'METADATA').write_text(
-            f'Metadata-Version: 2.1\nName: {distribution}\nVersion: 1.0\n', encoding='utf-8')
+            f'Metadata-Version: 2.1\nName: {distribution}\nVersion: 1.0\n'
+            f'Summary: Test plugin from {distribution}\n', encoding='utf-8')
         (dist_info / 'entry_points.txt').write_text(
             f'[{group}]\n{name} = {module}:{factory}\n', encoding='utf-8')
         return module

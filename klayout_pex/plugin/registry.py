@@ -32,6 +32,8 @@ import inspect
 import re
 from typing import Any, Callable, ClassVar, List, Mapping, Optional, Tuple, Type
 
+from ..version import __version__
+
 
 @dataclass(frozen=True)
 class PluginInfo:
@@ -39,6 +41,12 @@ class PluginInfo:
 
     name: str
     distribution: str
+    version: str = ''
+    summary: str = ''
+    """The package summary; for a built-in, the first line of its factory's docstring."""
+
+    target: str = ''
+    """The ``module:attribute`` the factory is loaded from."""
 
     @property
     def qualified_name(self) -> str:
@@ -80,7 +88,9 @@ class PluginRegistry:
 
     def __init__(self, builtins: Optional[Mapping[str, Callable[[], Any]]] = None):
         registrations: List[PluginRegistration] = [
-            PluginRegistration(PluginInfo(name, 'klayout-pex'),
+            PluginRegistration(PluginInfo(name, 'klayout-pex', __version__,
+                                          (inspect.getdoc(factory) or '').split('\n')[0],
+                                          f'{factory.__module__}:{factory.__qualname__}'),
                                lambda factory=factory: factory, builtin=True)
             for name, factory in (builtins or {}).items()
         ]
@@ -91,8 +101,10 @@ class PluginRegistry:
                 distribution = None
             if not isinstance(distribution, str) or not distribution.strip():
                 distribution = 'unknown'
+            version, summary = _version_and_summary(entry_point.dist)
             registrations.append(PluginRegistration(
-                PluginInfo(entry_point.name, distribution), entry_point.load))
+                PluginInfo(entry_point.name, distribution, version, summary, entry_point.value),
+                entry_point.load))
         self._registrations: Tuple[PluginRegistration, ...] = tuple(sorted(
             registrations, key=lambda registration: registration.info.qualified_name))
 
@@ -100,6 +112,15 @@ class PluginRegistry:
     def plugins(self) -> Tuple[PluginInfo, ...]:
         """List all registrations, including ambiguous or unavailable ones."""
         return tuple(registration.info for registration in self._registrations)
+
+    def selector(self, info: PluginInfo) -> str:
+        """The shortest selector that loads ``info``: its bare name unless that is taken."""
+        try:
+            if self.get_info(info.name) == info:
+                return info.name
+        except self.error:
+            pass
+        return info.qualified_name
 
     def get_info(self, selector: str) -> PluginInfo:
         """Resolve a selector to its provider metadata without loading code."""
@@ -145,6 +166,17 @@ class PluginRegistry:
                 f"Could not load {self.kind} '{registration.info.qualified_name}': "
                 f"{type(exc).__name__}: {exc}") from exc
         return plugin
+
+
+def _version_and_summary(distribution: Optional[metadata.Distribution]) -> Tuple[str, str]:
+    """Read from package metadata; broken metadata must not hide the plugin."""
+    try:
+        package = distribution.metadata if distribution is not None else None
+        if package is None:
+            return '', ''
+        return package.get('Version') or '', package.get('Summary') or ''
+    except Exception:
+        return '', ''
 
 
 __all__ = ['PluginInfo', 'PluginRegistration', 'PluginRegistry']

@@ -51,6 +51,7 @@ from typing import *
 
 import rich.console
 import rich.markdown
+import rich.table
 import rich.text
 from rich_argparse import RichHelpFormatter
 
@@ -131,6 +132,28 @@ def _epilog() -> rich.console.Group:
         rich.text.Text('Exit codes and file naming:', style='argparse.groups'),
         rich.markdown.Markdown(EPILOG_MARKDOWN, style='argparse.text')
     )
+
+
+def plugin_tables() -> List[rich.table.Table]:
+    """One table per plugin kind, from package metadata only: no plugin code is imported."""
+    from .exporters import exporter_registry
+    from .importers import importer_registry
+
+    tables: List[rich.table.Table] = []
+    for title, registry in (('Exporters', exporter_registry()), ('Importers', importer_registry())):
+        table = rich.table.Table(title=f"{title} ({registry.group})", title_justify='left')
+        table.add_column('Selector', no_wrap=True)
+        table.add_column('Package')
+        table.add_column('Version', no_wrap=True)
+        table.add_column('Description')
+        table.add_column('Entry point', overflow='fold')
+        for info in registry.plugins:
+            table.add_row(*(rich.text.Text(value) for value in (
+                registry.selector(info), info.distribution, info.version, info.summary, info.target)))
+        if not registry.plugins:
+            table.add_row('', '', '', rich.text.Text('none installed', style='dim'), '')
+        tables.append(table)
+    return tables
 
 
 class Pex25DCLI:
@@ -337,6 +360,15 @@ class Pex25DCLI:
                         "Listing reads metadata only; it does not check dependencies.",
             formatter_class=RichHelpFormatter)
 
+        # ----------------------------------------------------------- plugins
+        subparsers.add_parser(
+            "plugins",
+            help="Show installed importers and exporters with versions and descriptions",
+            description="Show importer and exporter plugins, built-ins included. Selector "
+                        "is what --from / --to take; Description is the package summary. "
+                        "Reads metadata only; it does not import plugins or check dependencies.",
+            formatter_class=RichHelpFormatter)
+
         # --------------------------------------------------------- importers
         subparsers.add_parser(
             "importers",
@@ -541,6 +573,11 @@ class Pex25DCLI:
             sys.exit(ExitCode.USAGE)
 
         set_log_level(args.log_level)
+
+        if args.command == 'plugins':
+            for table in plugin_tables():
+                console.print(table)
+            sys.exit(ExitCode.OK)
 
         if args.command in ('exporters', 'importers'):
             from .exporters import exporter_registry

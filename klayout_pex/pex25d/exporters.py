@@ -118,12 +118,18 @@ def exporter_registry() -> ExporterRegistry:
 
 
 def create_fastercap_exporter() -> PEX25DSceneExporter:
-    """Construct the FasterCap protocol implementation without geometry imports."""
+    """FasterCap input: a list file and one geometry file per surface.
+
+    Constructs the exporter without geometry imports; KLayout loads on export.
+    """
     from ..fastercap.pex25d_exporter import FasterCapSceneExporter
     return FasterCapSceneExporter()
 
 
 def create_fastcap2_exporter() -> PEX25DSceneExporter:
-    """Construct the FastCap2 protocol implementation without geometry imports."""
+    """FastCap2 input: the FasterCap file set, with FastCap file names.
+
+    Constructs the exporter without geometry imports; KLayout loads on export.
+    """
     from ..fastercap.pex25d_exporter import FastCap2SceneExporter
     return FastCap2SceneExporter()

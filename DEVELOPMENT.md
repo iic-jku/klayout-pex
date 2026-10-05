@@ -156,9 +156,16 @@ Discovery reads metadata without importing plugins. Loading creates a fresh
 instance; one plugin's load failure does not prevent loading another.
 
 ```bash
+pex25d plugins
 pex25d exporters
 pex25d export cell.pex25d --to example --out_dir solver-input
 ```
+
+`pex25d plugins` shows all importers and exporters, built-ins included, with:
+- the selector to pass to `--from` / `--to`
+- package and version
+- package summary (for a built-in, the first line of its factory's docstring)
+- entry point
 
 Python callers can pass plugin-specific options to `pex25d.export`. For batches,
 reuse `registry = pex25d.exporter_registry()` and pass `registry=registry` to each
