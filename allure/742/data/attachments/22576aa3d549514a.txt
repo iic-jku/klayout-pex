@@ -1,0 +1,31 @@
+WARNING  __kpex__:kpex_cli.py:1260 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1296 main extract --pdk sky130A --mode CC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:593 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:633 No explicit top cell specified, using top cell 'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5'
+INFO     __kpex__:kpex_cli.py:674 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1195 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1196 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1429 (70, 144) -> (via3_vpp via3_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (69, 44) -> (via2_vpp via2_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 44) -> (via1_vpp via1_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 44) -> (mcon_vpp mcon_con)
+INFO     __kpex__:kpex_cli.py:1429 (72, 20) -> (met5_vpp met5_con)
+INFO     __kpex__:kpex_cli.py:1429 (71, 20) -> (met4_vpp met4_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (70, 20) -> (met3_vpp met3_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (69, 20) -> (met2_vpp met2_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 20) -> (met1_vpp met1_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 20) -> (li_vpp li_con)
+INFO     __kpex__:kpex_cli.py:1429 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (72, 16) -> (met5_pin_con)
+SUBPROCESS __kpex__:kpex_cli.py:1054 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1054 C1;C0;C1;103.537;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C2;C0;SHIELD;7.6;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C3;C0;VSUBS;13.228;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C4;C1;SHIELD;6.13;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C5;C1;VSUBS;3.983;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C6;SHIELD;VSUBS;1.88;
+SUBPROCESS __kpex__:kpex_cli.py:1057 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1073 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5_k25d_pex_netlist.spice

@@ -1,0 +1,69 @@
+[17:15:27] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1260
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --gds                          
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/r_via_stack_1x1_minsize_poly_to_met5.gds.gz --out_dir                          
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:15:27] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:593
+[17:15:27] INFO     No explicit top cell specified, using top    kpex_cli.py:633
+                    cell 'r_via_stack_1x1_minsize_poly_to_met5'                 
+[17:15:27] INFO     LVS input schematic not specified (argument  kpex_cli.py:674
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:15:28] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1195
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_v
+ia_stack_1x1_minsize_poly_to_met5.gds.gz/r_via_stack_1x1_minsize_poly_to_met5.lv
+sdb.gz                                                                          
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:15:28] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1429
+[17:15:28] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1429
+[17:15:28] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (68, 44) -> (via1_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (69, 44) -> (via2_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (72, 20) -> (met5_con)                      kpex_cli.py:1429
+[17:15:28] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1429
+[17:15:28] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (71, 16) -> (met4_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (72, 16) -> (met5_pin_con)                  kpex_cli.py:1429
+[17:15:28] INFO     (70, 20) -> (met3_ncap)                     kpex_cli.py:1429
+[17:15:28] INFO     (70, 144) -> (via3_ncap)                    kpex_cli.py:1429
+[17:15:28] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1429
+[17:15:28] INFO     (71, 144) -> (via4_ncap)                    kpex_cli.py:1429
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:15:28] INFO     LVSDB: found 0pins                          extractor.py:267
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;li1;met1;;9.3                                                                
+R2;li1;poly;;152.0                                                              
+R3;met1;met2;;4.5                                                               
+R4;met2;met3;;3.41                                                              
+R5;met3;met4;;3.41                                                              
+R6;met4;met5;;0.38                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize
+_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly
+_to_met5_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize
+_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly
+_to_met5_k25d_pex_netlist.spice                                                 
+[17:15:28] WARNING  The extracted netlist is inconsistent with  kpex_cli.py:1089
+                    the LVS netlist:                                            
+                      - resistors of the nodes li1, met1, met2                  
+                    and 4 more touch no net                                     

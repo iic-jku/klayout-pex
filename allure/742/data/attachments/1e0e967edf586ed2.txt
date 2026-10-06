@@ -1,0 +1,57 @@
+[17:13:45] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1260
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_11p5x
+11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz --out_dir 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:13:45] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:593
+[17:13:45] INFO     No explicit top cell specified, using top    kpex_cli.py:633
+                    cell 'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5'                
+[17:13:45] INFO     LVS input schematic not specified (argument  kpex_cli.py:674
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:13:46] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1195
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_11p5x11p7
+_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz/cap_vpp_11p5x1
+1p7_l1m1m2m3m4_shieldm5.lvsdb.gz                                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:13:46] INFO     (70, 144) -> (via3_vpp via3_ncap)           kpex_cli.py:1429
+[17:13:46] INFO     (69, 44) -> (via2_vpp via2_con)             kpex_cli.py:1429
+[17:13:46] INFO     (68, 44) -> (via1_vpp via1_con)             kpex_cli.py:1429
+[17:13:46] INFO     (67, 44) -> (mcon_vpp mcon_con)             kpex_cli.py:1429
+[17:13:46] INFO     (72, 20) -> (met5_vpp met5_con)             kpex_cli.py:1429
+[17:13:46] INFO     (71, 20) -> (met4_vpp met4_ncap)            kpex_cli.py:1429
+[17:13:46] INFO     (70, 20) -> (met3_vpp met3_ncap)            kpex_cli.py:1429
+[17:13:46] INFO     (69, 20) -> (met2_vpp met2_con)             kpex_cli.py:1429
+[17:13:46] INFO     (68, 20) -> (met1_vpp met1_con)             kpex_cli.py:1429
+[17:13:46] INFO     (67, 20) -> (li_vpp li_con)                 kpex_cli.py:1429
+[17:13:46] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1429
+[17:13:46] INFO     (72, 16) -> (met5_pin_con)                  kpex_cli.py:1429
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;C0;C1;103.537;                                                               
+C2;C0;SHIELD;7.6;                                                               
+C3;C0;VSUBS;13.228;                                                             
+C4;C1;SHIELD;6.13;                                                              
+C5;C1;VSUBS;3.983;                                                              
+C6;SHIELD;VSUBS;1.88;                                                           
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_11p5x11p7_l1m1m
+2m3m4_shieldm5__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3
+m4_shieldm5_k25d_pex_netlist.csv                                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[17:14:28] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_11p5x11p7_l1m1m
+2m3m4_shieldm5__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5/cap_vpp_11p5x11p7_l1m1m2m3
+m4_shieldm5_k25d_pex_netlist.spice                                              

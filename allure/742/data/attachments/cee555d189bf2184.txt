@@ -1,0 +1,22 @@
+WARNING  __kpex__:kpex_cli.py:1260 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1296 main extract --pdk sky130A --mode CC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:593 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:633 No explicit top cell specified, using top cell 'cap_mim_m3_w18p9_l5p1'
+INFO     __kpex__:kpex_cli.py:674 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1195 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1196 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1.gds.gz/cap_mim_m3_w18p9_l5p1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1429 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:1429 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:1429 (70, 144) -> (via3_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:1429 (71, 20) -> (met4_ncap)
+SUBPROCESS __kpex__:kpex_cli.py:1054 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1054 C1;mimcap_bot;mimcap_top;204.88;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C2;VSUBS;mimcap_bot;4.353;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C3;VSUBS;mimcap_top;2.942;
+SUBPROCESS __kpex__:kpex_cli.py:1057 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_w18p9_l5p1__cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1073 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_w18p9_l5p1__cap_mim_m3_w18p9_l5p1/cap_mim_m3_w18p9_l5p1_k25d_pex_netlist.spice

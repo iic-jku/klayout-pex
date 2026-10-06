@@ -1,0 +1,61 @@
+[17:13:41] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1260
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_
+hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz --out_dir                               
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:13:41] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:593
+[17:13:41] INFO     No explicit top cell specified, using top    kpex_cli.py:633
+                    cell 'sky130_fd_sc_hd__inv_1'                               
+[17:13:41] INFO     LVS input schematic not specified (argument  kpex_cli.py:674
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:13:41] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1195
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_hd__
+inv_1/sky130_fd_sc_hd__inv_1.gds.gz/sky130_fd_sc_hd__inv_1.lvsdb.gz             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:13:41] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1429
+[17:13:41] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1429
+[17:13:41] INFO     (94, 20) -> (psd)                           kpex_cli.py:1429
+[17:13:41] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1429
+[17:13:41] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1429
+[17:13:41] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1429
+[17:13:41] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1429
+[17:13:41] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1429
+[17:13:41] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1429
+[17:13:41] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1429
+[17:13:41] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1429
+[17:13:41] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1429
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VGND;0.04;                                                                 
+C2;A;VPB;0.091;                                                                 
+C3;A;VPWR;0.041;                                                                
+C4;A;VSUBS;0.222;                                                               
+C5;A;Y;0.051;                                                                   
+C6;VGND;VPB;0.012;                                                              
+C7;VGND;VPWR;0.018;                                                             
+C8;VGND;VSUBS;0.248;                                                            
+C9;VGND;Y;0.06;                                                                 
+C10;VPB;VPWR;0.062;                                                             
+C11;VPB;Y;0.018;                                                                
+C12;VPWR;VSUBS;0.211;                                                           
+C13;VPWR;Y;0.074;                                                               
+C14;VSUBS;Y;0.096;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sky130_fd_sc_hd__inv_1_
+_sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1_k25d_pex_netlist.csv             
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sky130_fd_sc_hd__inv_1_
+_sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1_k25d_pex_netlist.spice           

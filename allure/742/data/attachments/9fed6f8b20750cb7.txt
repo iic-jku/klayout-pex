@@ -1,0 +1,43 @@
+WARNING  __kpex__:kpex_cli.py:1260 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1296 main extract --pdk sky130A --mode CC --blackbox y --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_var_lvt_w1_l2_hvt_w2_l0p5.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:593 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:633 No explicit top cell specified, using top cell 'cap_var_lvt_w1_l2_hvt_w2_l0p5'
+INFO     __kpex__:kpex_cli.py:674 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1195 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1196 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_var_lvt_w1_l2_hvt_w2_l0p5.gds.gz/cap_var_lvt_w1_l2_hvt_w2_l0p5.lvsdb.gz
+WARNING  __kpex__:lvsdb_extractor.py:392 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - licon (licon1): 54 of 80 shapes are not within licon_nsd_con, licon_psd_con, licon_poly_con, licon_ntap_con, licon_vpp
+INFO     __kpex__:kpex_cli.py:1429 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1429 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:1429 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:1429 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1429 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1429 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 20) -> (met1_con)
+SUBPROCESS __kpex__:kpex_cli.py:1054 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1054 C1;HVT_B;HVT_C0;0.07;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C2;HVT_B;HVT_C1;0.239;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C3;HVT_B;LVT_B;0.016;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C4;HVT_B;LVT_C1;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C5;HVT_B;VSUBS;0.626;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C6;HVT_C0;HVT_C1;0.555;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C7;HVT_C0;LVT_B;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C8;HVT_C0;LVT_C0;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C9;HVT_C0;LVT_C1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C10;HVT_C0;VSUBS;0.234;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C11;HVT_C1;LVT_B;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C12;HVT_C1;LVT_C0;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C13;HVT_C1;LVT_C1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C14;HVT_C1;VSUBS;0.188;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C15;LVT_B;LVT_C0;0.219;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C16;LVT_B;LVT_C1;0.158;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C17;LVT_B;VSUBS;0.678;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C18;LVT_C0;LVT_C1;0.929;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C19;LVT_C0;VSUBS;0.474;
+SUBPROCESS __kpex__:kpex_cli.py:1054 C20;LVT_C1;VSUBS;0.117;
+SUBPROCESS __kpex__:kpex_cli.py:1057 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_var_lvt_w1_l2_hvt_w2_l0p5__cap_var_lvt_w1_l2_hvt_w2_l0p5/cap_var_lvt_w1_l2_hvt_w2_l0p5_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1073 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_var_lvt_w1_l2_hvt_w2_l0p5__cap_var_lvt_w1_l2_hvt_w2_l0p5/cap_var_lvt_w1_l2_hvt_w2_l0p5_k25d_pex_netlist.spice

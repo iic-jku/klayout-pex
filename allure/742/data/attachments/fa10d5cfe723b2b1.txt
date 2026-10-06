@@ -1,0 +1,41 @@
+WARNING  __kpex__:kpex_cli.py:1260 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1296 main extract --pdk sky130A --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_via_stack_1x1_minsize_poly_to_met5.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:593 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:633 No explicit top cell specified, using top cell 'r_via_stack_1x1_minsize_poly_to_met5'
+INFO     __kpex__:kpex_cli.py:674 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1195 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1196 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_via_stack_1x1_minsize_poly_to_met5.gds.gz/r_via_stack_1x1_minsize_poly_to_met5.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1429 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1429 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 44) -> (via1_con)
+INFO     __kpex__:kpex_cli.py:1429 (69, 44) -> (via2_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1429 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1429 (72, 20) -> (met5_con)
+INFO     __kpex__:kpex_cli.py:1429 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (72, 16) -> (met5_pin_con)
+INFO     __kpex__:kpex_cli.py:1429 (70, 20) -> (met3_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (70, 144) -> (via3_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (71, 20) -> (met4_ncap)
+INFO     __kpex__:kpex_cli.py:1429 (71, 144) -> (via4_ncap)
+INFO     __kpex__:extractor.py:267 LVSDB: found 0pins
+SUBPROCESS __kpex__:kpex_cli.py:1054 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1054 R1;li1;met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1054 R2;li1;poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1054 R3;met1;met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1054 R4;met2;met3;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1054 R5;met3;met4;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1054 R6;met4;met5;;0.38
+SUBPROCESS __kpex__:kpex_cli.py:1057 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly_to_met5_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1073 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly_to_met5_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1089 The extracted netlist is inconsistent with the LVS netlist:
+  - resistors of the nodes li1, met1, met2 and 4 more touch no net
