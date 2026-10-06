@@ -71,9 +71,18 @@ def test_overview_shows_versions_summaries_and_selectors(install_plugin: Callabl
     assert exporter not in sys.modules and importer not in sys.modules
 
 
-def test_overview_marks_missing_importers():
+def test_overview_lists_builtin_importer_stub():
     _, importers = rendered()
-    assert 'none installed' in importers
+    assert row(importers, '│ openrcx-uf ', 'klayout-pex', __version__, 'a stub, not implemented yet')
+
+
+def test_overview_marks_missing_plugins(monkeypatch: pytest.MonkeyPatch):
+    from klayout_pex.pex25d import importers
+    from klayout_pex.plugin.importer_registry import ImporterRegistry
+
+    monkeypatch.setattr(importers, 'importer_registry', ImporterRegistry)
+    _, listed = rendered()
+    assert 'none installed' in listed
 
 
 def test_cli_prints_overview(install_plugin: Callable[..., str], capsys: pytest.CaptureFixture):

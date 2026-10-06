@@ -25,8 +25,8 @@
 """
 Translation of external scene descriptions into an unresolved ``PEX25DFile``.
 
-The CLI exposes this operation as ``pex25d import``. KPEX ships no importer;
-importers are plugins in the ``klayout_pex.importers.v1`` entry-point group.
+The CLI exposes this operation as ``pex25d import``. Importers are plugins in the
+``klayout_pex.importers.v1`` entry-point group; the built-in ``openrcx-uf`` is a stub.
 Resolving and validating the result stay with the caller.
 """
 
@@ -34,7 +34,7 @@ from __future__ import annotations
 
 from typing import *
 
-from ..plugin_api.v1 import ImporterError, ImporterUnavailable
+from ..plugin_api.v1 import ImporterError, ImporterUnavailable, PEX25DImporter
 from . import protobuf
 
 if TYPE_CHECKING:
@@ -88,4 +88,16 @@ def import_file(input_file_path: str,
 def importer_registry() -> ImporterRegistry:
     """Discover installed importers alongside the built-in implementations."""
     from ..plugin.importer_registry import ImporterRegistry
-    return ImporterRegistry()
+    return ImporterRegistry({
+        'openrcx-uf': create_openrcx_uf_importer,
+    })
+
+
+def create_openrcx_uf_importer() -> PEX25DImporter:
+    """OpenRCX Universal Pattern Format input: a stub, not implemented yet.
+
+    Imports raise NotImplementedError; ``klayout_pex/openrcx/pex25d_importer.py``
+    holds the template for the implementation.
+    """
+    from ..openrcx.pex25d_importer import OpenRCXUFImporter
+    return OpenRCXUFImporter()

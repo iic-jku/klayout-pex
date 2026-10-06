@@ -101,9 +101,10 @@ def run_cli(arguments: List[str]) -> int:
 def test_discovery_lists_importers_without_loading_them(
         install_importer: Callable[..., str], capsys: pytest.CaptureFixture):
     module = install_importer('test-one', 'example', 'raise ImportError("missing parser")')
-    assert [info.qualified_name for info in pex25d.importer_registry().importers] == ['test-one:example']
+    expected = ['klayout-pex:openrcx-uf', 'test-one:example']
+    assert [info.qualified_name for info in pex25d.importer_registry().importers] == expected
     assert run_cli(['importers']) == pex25d.ExitCode.OK
-    assert capsys.readouterr().out.split() == ['test-one:example']
+    assert capsys.readouterr().out.split() == expected
     assert module not in sys.modules
 
 
