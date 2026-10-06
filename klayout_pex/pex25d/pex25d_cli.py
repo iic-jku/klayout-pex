@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import json
 import os
 import shlex
 import sys
@@ -142,6 +143,24 @@ SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
     'Help': ('help',),
 }
 """How ``pex25d --help`` groups the subcommands; every subcommand is in exactly one section."""
+
+
+EXPORT_OPTION_FLAGS: Dict[str, str] = {
+    'field_margin_um': 'field_margin',
+    'delaunay_amax': 'delaunay_amax',
+    'delaunay_b': 'delaunay_b',
+    'write_stl': 'write_stl',
+    'geometry_check': 'geometry_check',
+}
+"""Exporter option → the ``pex25d export`` flag (argparse dest) that sets it."""
+
+
+def option_value(text: str) -> Any:
+    """An ``--option`` value: JSON where it parses (``10``, ``1e-9``, ``true``), else the text."""
+    try:
+        return json.loads(text)
+    except ValueError:
+        return text
 
 
 def _epilog() -> rich.console.Group:
@@ -256,6 +275,14 @@ class Pex25DCLI:
                            help="Treat warnings as errors for the exit code "
                                 "(default is %(default)s)")
 
+    @staticmethod
+    def _add_plugin_option_argument(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument("--option", dest='option_args', action='append', default=[],
+                            metavar='NAME=VALUE',
+                            help="Plugin option, e.g. mesh_size_max_um=10; repeatable. "
+                                 "VALUE is read as JSON where it parses (numbers, true, "
+                                 "false), otherwise as text")
+
     def parse_args(self, arg_list: List[str] = None) -> argparse.Namespace:
         main_parser = argparse.ArgumentParser(
             description=f"{PROGRAM_NAME}: PEX25D format tool for KLayout-PEX",
@@ -344,6 +371,7 @@ class Pex25DCLI:
         parser_export.add_argument("--geo_check", dest='geometry_check',
                                    action='store_true', default=None,
                                    help="Validate the geometry before writing")
+        self._add_plugin_option_argument(parser_export)
         self._add_diagnostics_arguments(parser_export)
 
         # ------------------------------------------------------------ import
@@ -366,6 +394,7 @@ class Pex25DCLI:
                                    default=[], metavar='NAME=PATH',
                                    help="Named supporting input the importer asks for, "
                                         "e.g. process_stack=stack.txt; repeatable")
+        self._add_plugin_option_argument(parser_import)
         self._add_output_arguments(parser_import)
         self._add_diagnostics_arguments(parser_import)
 
@@ -496,6 +525,27 @@ class Pex25DCLI:
                         error(f"Supporting input '{name}' not found: {path}")
                         found_errors = True
 
+        # The export flags are shorthands for options; each option may be given once.
+        if hasattr(args, 'option_args'):
+            args.plugin_options = {
+                name: getattr(args, dest) for name, dest in EXPORT_OPTION_FLAGS.items()
+                if getattr(args, dest, None) is not None
+            }
+            given_by_flag = set(args.plugin_options)
+            for argument in args.option_args:
+                name, separator, text = argument.partition('=')
+                if not separator or not name:
+                    error(f"--option expects NAME=VALUE, got '{argument}'")
+                    found_errors = True
+                elif name in given_by_flag:
+                    error(f"Option '{name}' is given both by its own flag and by --option")
+                    found_errors = True
+                elif name in args.plugin_options:
+                    error(f"--option names '{name}' more than once")
+                    found_errors = True
+                else:
+                    args.plugin_options[name] = option_value(text)
+
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
 
@@ -551,19 +601,10 @@ class Pex25DCLI:
             info("Input is an unresolved PEX25DFile, resolving it first")
             message = resolve(message, report=report, strict=args.strict)
 
-        options: Dict[str, Any] = {
-            name: value for name, value in (
-                ('field_margin_um', args.field_margin),
-                ('delaunay_amax', args.delaunay_amax),
-                ('delaunay_b', args.delaunay_b),
-                ('write_stl', args.write_stl),
-                ('geometry_check', args.geometry_check),
-            ) if value is not None
-        }
         written = export_with_backend(
             exporter, message, target=args.exporter_name,
             output_dir_path=args.output_dir_path, prefix=args.prefix,
-            options=options, registry=registry)
+            options=args.plugin_options, registry=registry)
         for path in written:
             subproc(path)
         info(f"Wrote {len(written)} file(s) with '{args.exporter_name}' to {args.output_dir_path}")
@@ -575,7 +616,8 @@ class Pex25DCLI:
         from .validator import validate
 
         message = import_file(args.source_path, args.importer_name,
-                              supporting_files=args.supporting_files, report=report)
+                              supporting_files=args.supporting_files,
+                              options=args.plugin_options, report=report)
         validate(message, report=report, strict=args.strict)
         save_artifact(message, args.output_spec, comments=args.comments)
         if args.output_spec.is_stdio:

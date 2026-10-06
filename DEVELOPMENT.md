@@ -167,10 +167,15 @@ pex25d export cell.pex25d --to example --out_dir solver-input
 - package summary (for a built-in, the first line of its factory's docstring)
 - entry point
 
-Python callers can pass plugin-specific options to `pex25d.export`. For batches,
-reuse `registry = pex25d.exporter_registry()` and pass `registry=registry` to each
-call; create another registry to refresh installed metadata. The CLI forwards only
-explicit geometry/output flags; arbitrary plugin options are currently Python-only.
+Plugin-specific options:
+- Python: `pex25d.export(..., options={...})`
+- CLI: `--option NAME=VALUE`, repeatable, for `pex25d export` and `pex25d import`.
+  VALUE is read as JSON where it parses (`10`, `1e-9`, `true`, `"10"`), otherwise as text.
+- The export flags `--field_margin`, `--delaunay_amax`, `--delaunay_b`, `--stl` and
+  `--geo_check` are shorthands for their options; each option may be given only once.
+
+For batches, reuse `registry = pex25d.exporter_registry()` and pass `registry=registry`
+to each call; create another registry to refresh installed metadata.
 
 `pex25d.export_with_backend(exporter, scene, target, …)` runs an already loaded
 exporter. Unexpected exceptions raise `ExporterExecutionError` (CLI exit 4,

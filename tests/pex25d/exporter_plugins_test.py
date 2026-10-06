@@ -154,7 +154,13 @@ def test_cli_exports_with_an_installed_plugin(
       '--stl', '--geo_check'],
      {'field_margin_um': 15.0, 'delaunay_amax': 0.5, 'delaunay_b': 0.8,
       'write_stl': True, 'geometry_check': True}),
-])
+    (['--option', 'mesh_size=0.5', '--option', 'order=2', '--option', 'verbose=true',
+      '--option', 'boundary=ground', '--option', 'label="10"', '--option', 'note='],
+     {'mesh_size': 0.5, 'order': 2, 'verbose': True, 'boundary': 'ground', 'label': '10',
+      'note': ''}),
+    (['--field_margin', '15', '--option', 'mesh_size=1e-1'],
+     {'field_margin_um': 15.0, 'mesh_size': 0.1}),
+], ids=['none', 'flags', 'options', 'flags-and-options'])
 def test_cli_passes_only_explicit_export_options(
         install_exporter: Callable[..., str], tmp_path: Path,
         extra_arguments: List[str], expected: Dict[str, Any]):
@@ -173,6 +179,30 @@ def test_cli_passes_only_explicit_export_options(
     assert completion.value.code == ExitCode.OK
     actual = ast.literal_eval((directory / 'input.txt').read_text(encoding='utf-8'))
     assert actual == expected
+
+
+@pytest.mark.parametrize('extra_arguments, message', [
+    (['--option', 'mesh_size'], "--option expects NAME=VALUE, got 'mesh_size'"),
+    (['--option', '=1'], "--option expects NAME=VALUE, got '=1'"),
+    (['--option', 'order=1', '--option', 'order=2'], "--option names 'order' more than once"),
+    (['--field_margin', '4', '--option', 'field_margin_um=5'],
+     "Option 'field_margin_um' is given both by its own flag and by --option"),
+], ids=['no-value', 'no-name', 'twice', 'flag-and-option'])
+def test_cli_rejects_malformed_options_before_loading(
+        install_exporter: Callable[..., str], tmp_path: Path,
+        caplog: pytest.LogCaptureFixture, extra_arguments: List[str], message: str):
+    from klayout_pex.pex25d.diagnostics import ExitCode
+    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+
+    module = install_exporter('test-one', 'example')
+    input_path = tmp_path / 'cell.pex25d'
+    input_path.write_text(MINIMAL, encoding='utf-8')
+    with pytest.raises(SystemExit) as completion:
+        Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
+                          '--out_dir', str(tmp_path / 'deck'), *extra_arguments])
+    assert completion.value.code == ExitCode.USAGE
+    assert message in caplog.text
+    assert module not in sys.modules
 
 
 @pytest.mark.parametrize('selector', ['unknown', 'example'])

@@ -129,6 +129,24 @@ def test_cli_imports_validates_and_writes(
         pex25d.read_text(MINIMAL.encode('utf-8')).SerializeToString()
 
 
+def test_cli_passes_options_to_the_importer(
+        install_importer: Callable[..., str], inputs: Tuple[Path, Path], tmp_path: Path):
+    source = IMPORTER_SOURCE.replace(
+        "        return pex25d.read_text(text.encode('utf-8'), report=report)\n",
+        "        imported = pex25d.read_text(text.encode('utf-8'), report=report)\n"
+        "        entry = imported.metadata.add()\n"
+        "        entry.key, entry.value = 'options', repr(dict(options or {}))\n"
+        "        return imported\n")
+    install_importer('test-one', 'example', source)
+    primary, stack = inputs
+    output = tmp_path / 'cell.pex25d'
+    assert run_cli(['import', str(primary), '--from', 'example', '--supporting',
+                    f'process_stack={stack}', '--option', 'dialect=uf2',
+                    '--option', 'scale=0.5', '-o', str(output)]) == pex25d.ExitCode.OK
+    metadata = {entry.key: entry.value for entry in pex25d.read(str(output)).metadata}
+    assert metadata['options'] == repr({'dialect': 'uf2', 'scale': 0.5})
+
+
 def test_cli_writes_invalid_import_and_reports_it(
         install_importer: Callable[..., str], inputs: Tuple[Path, Path], tmp_path: Path):
     install_importer('test-one', 'example')
