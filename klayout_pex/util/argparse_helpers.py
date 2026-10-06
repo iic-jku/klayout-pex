@@ -27,6 +27,10 @@ import argparse
 from enum import Enum, StrEnum
 from typing import *
 
+import rich.console
+import rich.padding
+import rich.table
+import rich.text
 from rich_argparse import RichHelpFormatter
 
 
@@ -85,3 +89,70 @@ def true_or_false(arg) -> bool:
             return False
         case _:
             raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+class SectionedHelpFormatter(RichHelpFormatter):
+    """
+    Leave the subcommands out of the option groups.
+
+    argparse knows a single, flat subcommand list. A parser using this formatter
+    shows its subcommands in sections instead, see :func:`add_subcommand_sections`.
+    The usage line still names them.
+    """
+
+    def add_argument(self, action: argparse.Action):
+        if not isinstance(action, argparse._SubParsersAction):
+            super().add_argument(action)
+
+
+def add_subcommand_sections(parser: argparse.ArgumentParser,
+                            subparsers: argparse._SubParsersAction,
+                            sections: Mapping[str, Sequence[str]]):
+    """
+    List the subcommands of ``parser`` below its description, grouped in sections.
+
+    Call it after all subcommands are added; their help texts come from
+    ``add_parser(help=...)``. The parser needs :class:`SectionedHelpFormatter`.
+
+    :raises ValueError: unless every subcommand is in exactly one section.
+    """
+    help_by_name = {action.dest: action.help for action in subparsers._choices_actions}
+    listed = [name for names in sections.values() for name in names]
+    if sorted(listed) != sorted(help_by_name):
+        raise ValueError(f"Subcommand sections list {sorted(listed)}, "
+                         f"but the subcommands are {sorted(help_by_name)}")
+
+    name_width = max(len(name) for name in listed)
+    renderables: List[rich.console.RenderableType] = [
+        rich.text.Text(str(parser.description), style='argparse.text')]
+    for title, names in sections.items():
+        grid = rich.table.Table.grid(padding=(0, 2))
+        grid.add_column(min_width=name_width, no_wrap=True)
+        grid.add_column()
+        for name in names:
+            grid.add_row(rich.text.Text(name, style='argparse.args'),
+                         rich.text.Text(help_by_name[name] or '', style='argparse.help'))
+        renderables += [rich.text.Text(''), rich.text.Text(f'{title}:', style='argparse.groups'),
+                        rich.padding.Padding(grid, (0, 0, 0, 2))]
+    parser.description = rich.console.Group(*renderables)
+
+
+def add_help_subcommand(subparsers: argparse._SubParsersAction):
+    """Add ``help [SUBCOMMAND]``, the same as ``-h`` on the tool or on that subcommand."""
+    parser = subparsers.add_parser(
+        "help",
+        help="Show this help, or a subcommand's help",
+        description="Show the tool's help, or with SUBCOMMAND the same as 'SUBCOMMAND -h'.",
+        formatter_class=RichHelpFormatter)
+    parser.add_argument("topic", nargs='?', default=None, metavar='SUBCOMMAND',
+                        help="Subcommand to show the help of")
+
+
+def handle_help_subcommand(parser: argparse.ArgumentParser, args: argparse.Namespace):
+    """Print the help that ``help`` asked for and exit like ``-h`` does; otherwise do nothing."""
+    if getattr(args, 'command', None) != 'help':
+        return
+    if args.topic is None:
+        parser.print_help()
+        parser.exit()
+    parser.parse_args([args.topic, '--help'])

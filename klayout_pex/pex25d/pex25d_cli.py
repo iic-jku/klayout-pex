@@ -29,6 +29,7 @@ Deliberately *not* part of ``kpex``. Everything this tool does is format work:
     - validating
     - converting between encodings
     - resolving a file into a scene
+    - importing another tool's scene description, via importer plugins
     - writing a scene as a solver's native input
     - looking at what is inside
 None of it needs a layout, an LVS run, or KLayout — and that is the point.
@@ -43,28 +44,40 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import os
 import shlex
 import sys
 from typing import *
 
 import rich.console
 import rich.markdown
+import rich.table
 import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import (
     LogLevel,
+    console,
     set_log_level,
+    debug,
     info,
     warning,
     error,
     rule,
     subproc,
 )
-from ..util.argparse_helpers import render_enum_help, true_or_false
+from ..util.argparse_helpers import (
+    SectionedHelpFormatter,
+    add_help_subcommand,
+    add_subcommand_sections,
+    handle_help_subcommand,
+    render_enum_help,
+    true_or_false,
+)
 from ..version import __version__
 
-from .exporters import ExportError, ExporterOptions, SolverTarget
+from .exporters import ExportError, ExporterExecutionError
+from .importers import ImporterError, ImporterExecutionError
 from .artifact import (
     ArtifactFormat,
     ArtifactKind,
@@ -98,6 +111,7 @@ EPILOG_MARKDOWN = """
 | 1 | input is not valid PEX25D |
 | 2 | command line is wrong, or an input could not be read |
 | 3 | requested operation is not implemented yet |
+| 4 | unexpected plugin failure |
 
 A path of `-` means stdin for inputs and stdout for outputs. 
 When an artifact goes to stdout, diagnostics go to stderr instead, 
@@ -120,11 +134,43 @@ the text format is the unresolved one, and resolution is not reversible.
 """
 
 
+SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
+    'Inspect': ('show', 'validate'),
+    'Transform': ('convert', 'resolve'),
+    'Exchange with other tools': ('import', 'export'),
+    'Plugins': ('plugins', 'importers', 'exporters'),
+    'Help': ('help',),
+}
+"""How ``pex25d --help`` groups the subcommands; every subcommand is in exactly one section."""
+
+
 def _epilog() -> rich.console.Group:
     return rich.console.Group(
         rich.text.Text('Exit codes and file naming:', style='argparse.groups'),
         rich.markdown.Markdown(EPILOG_MARKDOWN, style='argparse.text')
     )
+
+
+def plugin_tables() -> List[rich.table.Table]:
+    """One table per plugin kind, from package metadata only: no plugin code is imported."""
+    from .exporters import exporter_registry
+    from .importers import importer_registry
+
+    tables: List[rich.table.Table] = []
+    for title, registry in (('Exporters', exporter_registry()), ('Importers', importer_registry())):
+        table = rich.table.Table(title=f"{title} ({registry.group})", title_justify='left')
+        table.add_column('Selector', no_wrap=True)
+        table.add_column('Package')
+        table.add_column('Version', no_wrap=True)
+        table.add_column('Description')
+        table.add_column('Entry point', overflow='fold')
+        for info in registry.plugins:
+            table.add_row(*(rich.text.Text(value) for value in (
+                registry.selector(info), info.distribution, info.version, info.summary, info.target)))
+        if not registry.plugins:
+            table.add_row('', '', '', rich.text.Text('none installed', style='dim'), '')
+        tables.append(table)
+    return tables
 
 
 class Pex25DCLI:
@@ -215,13 +261,12 @@ class Pex25DCLI:
             description=f"{PROGRAM_NAME}: PEX25D format tool for KLayout-PEX",
             prog=PROGRAM_NAME,
             add_help=False,
-            formatter_class=RichHelpFormatter,
+            formatter_class=SectionedHelpFormatter,
             epilog=_epilog(),
         )
         self._add_special_options(main_parser)
 
-        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>',
-                                                help="Sub-commands help")
+        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>')
 
         # ---------------------------------------------------------- validate
         parser_validate = subparsers.add_parser(
@@ -272,36 +317,82 @@ class Pex25DCLI:
         parser_export.add_argument("--help", "-h", action='help',
                                    help="show this help message and exit")
         self._add_input_argument(parser_export)
-        parser_export.add_argument("--to", dest='solver_target', required=True,
-                                   type=SolverTarget, choices=list(SolverTarget),
-                                   help=render_enum_help(topic='to',
-                                                         enum_cls=SolverTarget))
+        parser_export.add_argument("--to", dest='exporter_name', required=True,
+                                   type=str, metavar='EXPORTER',
+                                   help="Exporter name or distribution:name; run "
+                                        "'pex25d exporters' to list available identifiers")
         parser_export.add_argument("--out_dir", dest='output_dir_path', required=True,
                                    help="Directory to export the solver input files into")
         parser_export.add_argument("--prefix", dest='prefix', default='',
                                    help="Prefix for the generated file names "
                                         "(default is the target's own)")
         parser_export.add_argument("--field_margin", dest='field_margin',
-                                   type=float, default=8.0, metavar='UM',
+                                   type=float, default=None, metavar='UM',
                                    help="How far to draw the laterally unbounded "
-                                        "materials beyond the geometry, in µm "
-                                        "(default is %(default)s). Ignored when the "
-                                        "scene carries a DOMAIN_BOX.")
+                                        "materials beyond the geometry, in µm. "
+                                        "Ignored when the scene carries a DOMAIN_BOX.")
         parser_export.add_argument("--delaunay_amax", dest='delaunay_amax',
-                                   type=float, default=0.0, metavar='AREA',
-                                   help="Maximum triangle area (default is "
-                                        "%(default)s, i.e. unconstrained)")
+                                   type=float, default=None, metavar='AREA',
+                                   help="Maximum triangle area; 0 means unconstrained")
         parser_export.add_argument("--delaunay_b", dest='delaunay_b',
-                                   type=float, default=1.0, metavar='B',
-                                   help="Minimum mesh angle as b = 2·sin(angle) "
-                                        "(default is %(default)s, i.e. 30 degrees)")
+                                   type=float, default=None, metavar='B',
+                                   help="Minimum mesh angle as b = 2·sin(angle)")
         parser_export.add_argument("--stl", dest='write_stl',
-                                   action='store_true', default=False,
-                                   help="Also dump the generated solids as STL")
+                                   action='store_true', default=None,
+                                   help="FasterCap / FastCap2: also dump the generated solids "
+                                        "as STL ('--to stl' writes only those)")
         parser_export.add_argument("--geo_check", dest='geometry_check',
-                                   action='store_true', default=False,
+                                   action='store_true', default=None,
                                    help="Validate the geometry before writing")
         self._add_diagnostics_arguments(parser_export)
+
+        # ------------------------------------------------------------ import
+        parser_import = subparsers.add_parser(
+            "import",
+            help="Translate another tool's scene description into a PEX25DFile",
+            description="Run an importer plugin on INPUT, validate the PEX25DFile it "
+                        "produces and write it; the file is written even if it is invalid. "
+                        "Run 'pex25d importers' to list the installed importers.",
+            add_help=False, formatter_class=RichHelpFormatter)
+        parser_import.add_argument("--help", "-h", action='help',
+                                   help="show this help message and exit")
+        parser_import.add_argument("source_path", type=str, metavar='INPUT',
+                                   help="Input in the importer's own format")
+        parser_import.add_argument("--from", dest='importer_name', required=True,
+                                   type=str, metavar='IMPORTER',
+                                   help="Importer name or distribution:name; run "
+                                        "'pex25d importers' to list available identifiers")
+        parser_import.add_argument("--supporting", dest='supporting_args', action='append',
+                                   default=[], metavar='NAME=PATH',
+                                   help="Named supporting input the importer asks for, "
+                                        "e.g. process_stack=stack.txt; repeatable")
+        self._add_output_arguments(parser_import)
+        self._add_diagnostics_arguments(parser_import)
+
+        # --------------------------------------------------------- exporters
+        subparsers.add_parser(
+            "exporters",
+            help="List installed exporter identifiers without loading plugins",
+            description="List built-in and installed exporters as distribution:name. "
+                        "Listing reads metadata only; it does not check dependencies.",
+            formatter_class=RichHelpFormatter)
+
+        # ----------------------------------------------------------- plugins
+        subparsers.add_parser(
+            "plugins",
+            help="Show installed importers and exporters with versions and descriptions",
+            description="Show importer and exporter plugins, built-ins included. Selector "
+                        "is what --from / --to take; Description is the package summary. "
+                        "Reads metadata only; it does not import plugins or check dependencies.",
+            formatter_class=RichHelpFormatter)
+
+        # --------------------------------------------------------- importers
+        subparsers.add_parser(
+            "importers",
+            help="List installed importer identifiers without loading plugins",
+            description="List installed importers as distribution:name. "
+                        "Listing reads metadata only; it does not check dependencies.",
+            formatter_class=RichHelpFormatter)
 
         # -------------------------------------------------------------- show
         parser_show = subparsers.add_parser(
@@ -320,9 +411,13 @@ class Pex25DCLI:
                                           'domain', 'all'],
                                  help="Section to print; repeatable (default is 'all')")
 
+        add_help_subcommand(subparsers)
+        add_subcommand_sections(main_parser, subparsers, SUBCOMMAND_SECTIONS)
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+        handle_help_subcommand(main_parser, args)
 
         if args.command is None:
             main_parser.print_help()
@@ -347,13 +442,14 @@ class Pex25DCLI:
         # Input spec. A scene default for stdin would be wrong:
         # the only thing you can pipe in without a file name to inspect is what another tool wrote,
         # and the format's own serialization is the text file.
-        try:
-            args.input_spec = infer_artifact_spec(args.input_path,
-                                                  kind=args.in_kind,
-                                                  format=args.in_format)
-        except ArtifactNamingError as e:
-            error(str(e))
-            found_errors = True
+        if hasattr(args, 'input_path'):
+            try:
+                args.input_spec = infer_artifact_spec(args.input_path,
+                                                      kind=args.in_kind,
+                                                      format=args.in_format)
+            except ArtifactNamingError as e:
+                error(str(e))
+                found_errors = True
 
         if hasattr(args, 'output_path') and args.output_path is not None:
             default_kind = ArtifactKind.SCENE if args.command == 'resolve' else ArtifactKind.FILE
@@ -373,6 +469,24 @@ class Pex25DCLI:
                 if args.output_spec.kind != ArtifactKind.SCENE:
                     error("'resolve' produces a PEX25DScene; the output path or --out_kind asks for a PEX25DFile.")
                     found_errors = True
+
+            if args.command == 'import' and getattr(args, 'output_spec', None) is not None:
+                if args.output_spec.kind != ArtifactKind.FILE:
+                    error("'import' produces a PEX25DFile; the output path or --out_kind asks for a PEX25DScene.")
+                    found_errors = True
+
+        if hasattr(args, 'supporting_args'):
+            args.supporting_files = {}
+            for argument in args.supporting_args:
+                name, separator, path = argument.partition('=')
+                if not separator or not name or not path:
+                    error(f"--supporting expects NAME=PATH, got '{argument}'")
+                    found_errors = True
+                elif name in args.supporting_files:
+                    error(f"--supporting names '{name}' more than once")
+                    found_errors = True
+                else:
+                    args.supporting_files[name] = path
 
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
@@ -416,24 +530,52 @@ class Pex25DCLI:
         if not args.output_spec.is_stdio:
             info(f"Wrote {args.output_spec}")
 
-    def run_export(self, args: argparse.Namespace, report: DiagnosticsReport) -> None:
-        from .exporters import export
+    def run_export(self, args: argparse.Namespace, report: DiagnosticsReport):
+        from .exporters import exporter_registry, export_with_backend
         from .codec import load_artifact
         from .resolver import resolve
 
+        registry = exporter_registry()
+        exporter = registry.load(args.exporter_name)
         message = load_artifact(args.input_spec, report=report,
                                 with_source_refs=args.with_source_refs)
         if args.input_spec.kind == ArtifactKind.FILE:
             info("Input is an unresolved PEX25DFile, resolving it first")
             message = resolve(message, report=report, strict=args.strict)
 
-        written = export(message,
-                         target=args.solver_target,
-                         output_dir_path=args.output_dir_path,
-                         prefix=args.prefix)
+        options: Dict[str, Any] = {
+            name: value for name, value in (
+                ('field_margin_um', args.field_margin),
+                ('delaunay_amax', args.delaunay_amax),
+                ('delaunay_b', args.delaunay_b),
+                ('write_stl', args.write_stl),
+                ('geometry_check', args.geometry_check),
+            ) if value is not None
+        }
+        written = export_with_backend(
+            exporter, message, target=args.exporter_name,
+            output_dir_path=args.output_dir_path, prefix=args.prefix,
+            options=options, registry=registry)
         for path in written:
             subproc(path)
-        info(f"Wrote {len(written)} {args.solver_target.value} input file(s) to {args.output_dir_path}")
+        info(f"Wrote {len(written)} file(s) with '{args.exporter_name}' to {args.output_dir_path}")
+
+    def run_import(self, args: argparse.Namespace,
+                   report: DiagnosticsReport) -> Optional[Tuple[str, str]]:
+        from .codec import save_artifact
+        from .importers import import_file
+        from .validator import validate
+
+        message = import_file(args.source_path, args.importer_name,
+                              supporting_files=args.supporting_files, report=report)
+        validate(message, report=report, strict=args.strict)
+        save_artifact(message, args.output_spec, comments=args.comments)
+        if args.output_spec.is_stdio:
+            return None
+        info(f"Wrote {args.output_spec}")
+        if report.exit_code != ExitCode.OK:
+            return "The imported file is invalid; review it at:", os.path.abspath(args.output_spec.path)
+        return None
 
     def run_show(self, args: argparse.Namespace, report: DiagnosticsReport) -> None:
         from .codec import load_artifact
@@ -453,6 +595,19 @@ class Pex25DCLI:
 
         set_log_level(args.log_level)
 
+        if args.command == 'plugins':
+            for table in plugin_tables():
+                console.print(table)
+            sys.exit(ExitCode.OK)
+
+        if args.command in ('exporters', 'importers'):
+            from .exporters import exporter_registry
+            from .importers import importer_registry
+            registry = exporter_registry() if args.command == 'exporters' else importer_registry()
+            for plugin in registry.plugins:
+                print(plugin.qualified_name)
+            sys.exit(ExitCode.OK)
+
         # When the artifact goes to stdout, stdout belongs to the artifact and to
         # nothing else — one stray log line and the consumer of the pipe is parsing garbage.
         # Redirecting sys.stdout to stderr for the whole run is therefore necessary:
@@ -468,7 +623,8 @@ class Pex25DCLI:
             self._run(args)
 
     def _run(self, args: argparse.Namespace) -> None:
-        if args.input_spec.path != STDIO_PATH:
+        input_spec: Optional[ArtifactSpec] = getattr(args, 'input_spec', None)
+        if input_spec is None or input_spec.path != STDIO_PATH:
             rule('Command line arguments')
             subproc(' '.join(map(shlex.quote, sys.argv)))
 
@@ -480,19 +636,26 @@ class Pex25DCLI:
             'convert': self.run_convert,
             'resolve': self.run_resolve,
             'export': self.run_export,
+            'import': self.run_import,
             'show': self.run_show,
         }[args.command]
 
         try:
-            handler(args, report)
+            note = handler(args, report)
         except NotImplementedError as e:
             error(str(e))
             sys.exit(ExitCode.NOT_IMPLEMENTED)
         except ArgumentValidationError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)
-        except ExportError as e:
+        except (ExporterExecutionError, ImporterExecutionError) as e:
             error(str(e))
+            debug("Plugin traceback", exc_info=True)
+            self._emit_diagnostics(args, report)
+            sys.exit(ExitCode.INTERNAL_ERROR)
+        except (ExportError, ImporterError) as e:
+            error(str(e))
+            self._emit_diagnostics(args, report)
             sys.exit(ExitCode.USAGE)
         except (ReadError, ResolveError) as e:
             error(str(e))
@@ -502,10 +665,14 @@ class Pex25DCLI:
             error(str(e))
             sys.exit(ExitCode.USAGE)
         except (OSError, ValueError) as e:
-            error(f"Failed to process {args.input_spec}: {e}")
+            error(f"Failed to process {input_spec or args.source_path}: {e}")
             sys.exit(ExitCode.USAGE)
 
         self._emit_diagnostics(args, report)
+        if note:  # after the diagnostics, so it stays next to the prompt
+            message, path = note
+            warning(message)
+            console.print(path, soft_wrap=True, markup=False, highlight=False)  # unwrapped, to copy
         sys.exit(report.exit_code)
 
     @staticmethod

@@ -107,7 +107,14 @@ from .tool_version_constraints import (
     check_tool_versions
 )
 from .util.multiple_choice import MultipleChoicePattern
-from .util.argparse_helpers import render_enum_help, true_or_false
+from .util.argparse_helpers import (
+    SectionedHelpFormatter,
+    add_help_subcommand,
+    add_subcommand_sections,
+    handle_help_subcommand,
+    render_enum_help,
+    true_or_false,
+)
 from .version import __version__
 
 
@@ -451,7 +458,7 @@ class KpexCLI:
                                                           f"KLayout-integrated Parasitic Extraction Tool",
                                               epilog=epilog_md,
                                               add_help=False,
-                                              formatter_class=RichHelpFormatter)
+                                              formatter_class=SectionedHelpFormatter)
 
         group_special = main_parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help',
@@ -459,8 +466,7 @@ class KpexCLI:
         group_special.add_argument("--version", "-v", action='version',
                                    version=f'{PROGRAM_NAME} {__version__}')
 
-        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>',
-                                                help="Sub-commands help")
+        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>')
 
         parser_extract = subparsers.add_parser(
             "extract",
@@ -496,9 +502,13 @@ class KpexCLI:
         KpexCLI._add_pex25d_output_arguments(parser_pex25d)
         Pex25DCLI._add_diagnostics_arguments(parser_pex25d)
 
+        add_help_subcommand(subparsers)
+        add_subcommand_sections(main_parser, subparsers, KpexCLI.SUBCOMMAND_SECTIONS)
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+        handle_help_subcommand(main_parser, args)
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
@@ -781,7 +791,7 @@ class KpexCLI:
         faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
         os.makedirs(faster_cap_input_dir_path, exist_ok=True)
 
-        lst_file = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
+        written = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
 
         rule('STL File Generation')
         geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
@@ -792,7 +802,7 @@ class KpexCLI:
             rule('Geometry Validation')
             gen.check()
 
-        return lst_file
+        return written[0]
 
 
     def run_fastercap_extraction(self,
@@ -1207,7 +1217,14 @@ class KpexCLI:
                 lvsdb.read(lvsdb_path)
         return lvsdb
 
-    SUBCOMMANDS = ('extract', 'pex25d')
+    SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
+        'Extraction': ('extract',),
+        'PEX25D': ('pex25d',),
+        'Help': ('help',),
+    }
+    """How ``kpex --help`` groups the subcommands; every subcommand is in exactly one section."""
+
+    SUBCOMMANDS = ('extract', 'pex25d', 'help')
     LEGACY_SUBCOMMAND = 'extract'
 
     @classmethod
@@ -1274,7 +1291,7 @@ class KpexCLI:
             if writes_to_stdout:
                 stack.enter_context(contextlib.redirect_stdout(sys.stderr))
 
-            if not ({'-v', '--version', '-h', '--help'} & set(argv)):
+            if not ({'-v', '--version', '-h', '--help'} & set(argv)) and argv[1:2] != ['help']:
                 rule('Command line arguments')
                 subproc(' '.join(map(shlex.quote, argv)))
 

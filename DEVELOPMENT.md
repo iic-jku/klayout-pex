@@ -116,6 +116,99 @@ To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 > The older flat form without a subcommand (`./kpex.sh --pdk sky130A --gds …`) still
 > works and is treated as `kpex extract …`, but it warns and will be removed.
 
+## Exporter plugins
+
+Install plugins into the Python environment running KPEX. Register a zero-argument
+factory returning a `PEX25DSceneExporter` from `klayout_pex.plugin_api.v1`:
+
+```toml
+[project.entry-points."klayout_pex.exporters.v1"]
+example = "my_exporter.plugin:create_exporter"
+```
+
+The exporter implements:
+
+```python
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any, List, Mapping, Optional
+
+if TYPE_CHECKING:
+    from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+
+def export(self, scene: PEX25DScene, *, output_dir_path: str,
+           prefix: str = '', options: Optional[Mapping[str, Any]] = None) -> List[str]:
+    ...
+```
+
+Write solver inputs from the resolved scene and return only paths written by this
+call, primary input first. Do not run the solver or mutate the scene or options.
+Validate option names and values; raise `ExportError` for invalid or unsupported
+input and `ExporterUnavailable` for missing dependencies. Both errors come from
+`klayout_pex.plugin_api.v1`. Import optional dependencies only when needed.
+The entry-point group versions the Python contract independently of the PEX25D format.
+`v1` is provisional: it may still change until it is declared stable.
+
+Use a bare entry-point name or `distribution:name`. Built-ins (`fastercap`,
+`fastcap2`, `stl`) take priority for bare names; colliding plugins remain available by
+qualified name. Other collisions require a qualified name. Distribution names
+follow Python package normalization; exporter names are case-sensitive.
+Discovery reads metadata without importing plugins. Loading creates a fresh
+instance; one plugin's load failure does not prevent loading another.
+
+```bash
+pex25d plugins
+pex25d exporters
+pex25d export cell.pex25d --to example --out_dir solver-input
+```
+
+`pex25d plugins` shows all importers and exporters, built-ins included, with:
+- the selector to pass to `--from` / `--to`
+- package and version
+- package summary (for a built-in, the first line of its factory's docstring)
+- entry point
+
+Python callers can pass plugin-specific options to `pex25d.export`. For batches,
+reuse `registry = pex25d.exporter_registry()` and pass `registry=registry` to each
+call; create another registry to refresh installed metadata. The CLI forwards only
+explicit geometry/output flags; arbitrary plugin options are currently Python-only.
+
+`pex25d.export_with_backend(exporter, scene, target, …)` runs an already loaded
+exporter. Unexpected exceptions raise `ExporterExecutionError` (CLI exit 4,
+traceback with `--log_level debug`); `ExportError` and `OSError` exit 2.
+
+## Importer plugins
+
+Importers translate another tool's scene description into one unresolved `PEX25DFile`.
+Register a zero-argument factory returning a `PEX25DImporter` from
+`klayout_pex.plugin_api.v1` in the `klayout_pex.importers.v1` group.
+
+`import_file(input_file_path, *, supporting_files, options, report)`:
+- reads the primary input and the named supporting files the importer defines
+  (e.g. `process_stack`)
+- appends diagnostics to `report` and returns the file
+- leaves resolution and validation to the caller
+- raises `ImporterError` for invalid or unsupported input, `ImporterUnavailable` for
+  missing dependencies, and `NotImplementedError` for what it does not implement yet
+
+Selectors, collisions and discovery work as for exporters.
+
+The built-in `openrcx-uf` is a stub for OpenRCX Universal Pattern Format (UF) input:
+- `pex25d import --from openrcx-uf` exits 3 (not implemented yet)
+- `OpenRCXUFImporter.placeholder_file()` in `klayout_pex/openrcx/pex25d_importer.py`
+  is the template:
+  it fills every part of a `PEX25DFile` with placeholders, each `TODO(UF)` names what
+  the Universal Pattern Format input has to provide
+
+```bash
+pex25d importers
+pex25d import design.xyz --from example --supporting process_stack=stack.xyz -o cell.pex25d
+```
+
+`pex25d import` validates the result and writes it even if it is invalid (exit 1).
+From Python, call `pex25d.import_file(path, 'example', supporting_files=...)`.
+Unexpected importer exceptions, or a result that is not a `PEX25DFile`, raise
+`pex25d.ImporterExecutionError`; the CLI exits 4 for them. `NotImplementedError` exits 3.
+
 ## Debugging Hints for PyCharm
 
 ### Enable `rich` logging

@@ -735,7 +735,8 @@ class FasterCapModelGenerator:
 
         self.diel_data = dk
 
-    def write_fastcap(self, output_dir_path: str, prefix: str) -> str:
+    def write_fastcap(self, output_dir_path: str, prefix: str) -> List[str]:
+        """Return the paths written, with the primary list file first."""
         max_filename_length: Optional[int] = None
         try:
             max_filename_length = os.pathconf(output_dir_path, 'PC_NAME_MAX')
@@ -743,6 +744,7 @@ class FasterCapModelGenerator:
             pass  # NOTE: windows does not support the os.pathconf attribute
 
         lst_fn = os.path.join(output_dir_path, f"{prefix}.lst")
+        written: List[str] = []
         file_num = 0
         lst_file: List[str] = [f"* k_void={'%.12g' % self.k_void}"]
 
@@ -764,6 +766,7 @@ class FasterCapModelGenerator:
                                       cond_name=None,
                                       cond_number=file_num,
                                       rename_conductor=False)
+            written.append(output_path)
 
             # NOTE: for now, we compute the reference points for each triangle
             #       This is a FasterCap feature, reference point in the *.geo file (end of each T line)
@@ -814,6 +817,7 @@ class FasterCapModelGenerator:
                                           cond_number=cond_num,
                                           cond_name=nn,
                                           rename_conductor=(idx == last_cond_index))
+                written.append(output_path)
                 collation_operator = '' if idx == last_cond_index else ' +'
                 lst_file.append(f"C {fn}  {'%.12g' % k_outside}  0 0 0{collation_operator}")
 
@@ -822,7 +826,7 @@ class FasterCapModelGenerator:
             f.write('\n'.join(lst_file))
             f.write('\n')
 
-        return lst_fn
+        return [lst_fn, *written]
 
     @staticmethod
     def _write_fastercap_geo(output_path: str,
@@ -963,22 +967,28 @@ class FasterCapModelGenerator:
                     edges_by_p1[r.p0].append(r)
                     edges_by_p2[r.p1].append(r)
 
-    def dump_stl(self, output_dir_path: str, prefix: str):
+    def dump_stl(self, output_dir_path: str, prefix: str) -> List[str]:
+        """Return STL paths written; empty solids produce no file."""
+        written: List[str] = []
         for mn in self.materials.keys():
             tris = self._collect_diel_tris(mn)
             output_path = os.path.join(output_dir_path, f"{prefix}diel_{mn}.stl")
-            self._write_as_stl(output_path, tris)
+            if self._write_as_stl(output_path, tris):
+                written.append(output_path)
 
         for nn in self.net_names:
             tris = self._collect_cond_tris(nn)
             output_path = os.path.join(output_dir_path, f"{prefix}cond_{nn}.stl")
-            self._write_as_stl(output_path, tris)
+            if self._write_as_stl(output_path, tris):
+                written.append(output_path)
+
+        return written
 
     @staticmethod
     def _write_as_stl(file_name: str,
-                      tris: List[Triangle]):
+                      tris: List[Triangle]) -> bool:
         if len(tris) == 0:
-            return
+            return False
 
         subproc(file_name)
         with open(file_name, 'w', encoding='utf-8') as f:
@@ -992,6 +1002,7 @@ class FasterCapModelGenerator:
                 f.write("  endloop\n")
                 f.write(" endfacet\n")
             f.write("endsolid stl\n")
+        return True
 
     @staticmethod
     def _merge_events(pyra: List[Optional[kdb.Region]],
