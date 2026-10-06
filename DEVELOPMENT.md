@@ -149,7 +149,7 @@ The entry-point group versions the Python contract independently of the PEX25D f
 `v1` is provisional: it may still change until it is declared stable.
 
 Use a bare entry-point name or `distribution:name`. Built-ins (`fastercap`,
-`fastcap2`) take priority for bare names; colliding plugins remain available by
+`fastcap2`, `stl`) take priority for bare names; colliding plugins remain available by
 qualified name. Other collisions require a qualified name. Distribution names
 follow Python package normalization; exporter names are case-sensitive.
 Discovery reads metadata without importing plugins. Loading creates a fresh

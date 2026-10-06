@@ -109,11 +109,12 @@ def export_with_backend(backend: PEX25DSceneExporter,
 
 
 def exporter_registry() -> ExporterRegistry:
-    """Discover installed exporters alongside the two built-in implementations."""
+    """Discover installed exporters alongside the built-in implementations."""
     from ..plugin.exporter_registry import ExporterRegistry
     return ExporterRegistry({
         'fastercap': create_fastercap_exporter,
         'fastcap2': create_fastcap2_exporter,
+        'stl': create_stl_exporter,
     })
 
 
@@ -133,3 +134,13 @@ def create_fastcap2_exporter() -> PEX25DSceneExporter:
     """
     from ..fastercap.pex25d_exporter import FastCap2SceneExporter
     return FastCap2SceneExporter()
+
+
+def create_stl_exporter() -> PEX25DSceneExporter:
+    """STL solids of the scene, one file per dielectric and net, for viewing.
+
+    Constructs the exporter without geometry imports; KLayout loads on export.
+    The solids are built from the FasterCap model for now.
+    """
+    from ..stl.pex25d_exporter import STLSceneExporter
+    return STLSceneExporter()

@@ -64,6 +64,7 @@ def test_overview_shows_versions_summaries_and_selectors(install_plugin: Callabl
     assert row(exporters, '│ fastercap ', 'klayout-pex', __version__, 'FasterCap input:',
                'klayout_pex.pex25d.exporters:create_fastercap_exporter')
     assert row(exporters, '│ fastcap2 ', 'klayout-pex', __version__, 'FastCap2 input:')
+    assert row(exporters, '│ stl ', 'klayout-pex', __version__, 'STL solids of the scene')
     # a bare 'fastercap' selects the built-in, so the plugin needs its qualified name
     assert row(exporters, 'test-one:fastercap', '1.0', 'Test plugin from test-one',
                'test_plugin_test_one:create')

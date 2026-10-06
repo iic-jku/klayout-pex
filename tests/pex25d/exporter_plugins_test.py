@@ -106,7 +106,7 @@ def test_discovery_does_not_import_plugins_and_ignores_other_api_versions(
 
     registry = pex25d.exporter_registry()
     assert {info.qualified_name for info in registry.exporters} == {
-        'klayout-pex:fastercap', 'klayout-pex:fastcap2', 'test-one:example',
+        'klayout-pex:fastercap', 'klayout-pex:fastcap2', 'klayout-pex:stl', 'test-one:example',
     }
     assert module not in sys.modules
     assert other not in sys.modules
@@ -426,15 +426,16 @@ def test_empty_geometry_writers_return_only_files_written(tmp_path: Path):
     for name in ('delaunay_amax', 'delaunay_b', 'field_margin_um')
     for value in ('8', True, None)
 ])
+@pytest.mark.parametrize('target', ['fastercap', 'stl'])
 def test_builtin_rejects_invalid_option_values_before_building(
         install_exporter: Callable[..., str], monkeypatch: pytest.MonkeyPatch,
-        tmp_path: Path, scene: PEX25DScene, name: str, value: Any):
+        tmp_path: Path, scene: PEX25DScene, name: str, value: Any, target: str):
     from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
 
     build = Mock(side_effect=AssertionError('invalid options must not reach meshing'))
     monkeypatch.setattr(PEX25DFasterCapModelBuilder, 'build', build)
     output = tmp_path / 'output'
-    exporter = pex25d.exporter_registry().load('fastercap')
+    exporter = pex25d.exporter_registry().load(target)
     with pytest.raises(ExportError, match=name):
         exporter.export(scene, output_dir_path=str(output), options={name: value})
     build.assert_not_called()
@@ -828,3 +829,17 @@ def test_loaded_exporter_expected_errors_do_not_scan_metadata(
         pex25d.export_with_backend(exporter, scene, 'mine', str(tmp_path))
     assert raised.value is failure
     discover.assert_not_called()
+
+
+def test_stl_exporter_writes_the_fastercap_solids_only(
+        install_exporter: Callable[..., str], tmp_path: Path, scene: PEX25DScene):
+    stl = pex25d.export(scene, 'stl', str(tmp_path / 'stl'), prefix='cell_')
+    fastercap = pex25d.export(scene, 'fastercap', str(tmp_path / 'fastercap'), prefix='cell_',
+                              options={'write_stl': True})
+    names = sorted(Path(path).name for path in stl)
+    assert names == sorted(Path(path).name for path in fastercap if path.endswith('.stl'))
+    assert any(name.startswith('cell_diel_') for name in names)
+    assert any(name.startswith('cell_cond_') for name in names)
+    assert sorted(path.name for path in (tmp_path / 'stl').iterdir()) == names
+    for path in stl:
+        assert Path(path).read_bytes() == (tmp_path / 'fastercap' / Path(path).name).read_bytes()

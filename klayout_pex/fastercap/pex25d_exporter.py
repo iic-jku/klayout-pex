@@ -26,6 +26,7 @@
 
 Both solvers use the same input format. Exporter instances hold no per-scene
 state; each export builds its own model. Geometry dependencies load on export.
+The STL exporter builds its solids with :func:`build_fastercap_model` for now.
 """
 
 from __future__ import annotations
