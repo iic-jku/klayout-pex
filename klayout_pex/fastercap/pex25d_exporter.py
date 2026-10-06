@@ -41,8 +41,8 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class FasterCapExporterOptions:
-    """FasterCap and FastCap2 geometry and output settings."""
+class FasterCapModelOptions:
+    """Geometry and meshing settings of the FasterCap model."""
 
     delaunay_amax: float = 0.0
     """Maximum triangle area; 0 leaves it to the mesher."""
@@ -58,9 +58,6 @@ class FasterCapExporterOptions:
     outright.
     """
 
-    write_stl: bool = False
-    """Also dump the generated solids as STL, for looking at."""
-
     geometry_check: bool = False
     """Run the generator's own geometry validation before writing."""
 
@@ -72,6 +69,14 @@ class FasterCapExporterOptions:
             if field.type == 'float' and (isinstance(value, bool)
                                           or not isinstance(value, (int, float))):
                 raise TypeError(f"'{field.name}' must be an int or float (not bool)")
+
+
+@dataclass
+class FasterCapExporterOptions(FasterCapModelOptions):
+    """FasterCap and FastCap2 settings: the model's, and STL alongside the solver input."""
+
+    write_stl: bool = False
+    """Also dump the generated solids as STL, for looking at."""
 
 
 class FasterCapSceneExporter(PEX25DSceneExporter):

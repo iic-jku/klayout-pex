@@ -46,7 +46,7 @@ from ..plugin_api.v1 import ExportError
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 
 if TYPE_CHECKING:
-    from .pex25d_exporter import FasterCapExporterOptions
+    from .pex25d_exporter import FasterCapModelOptions
 
     from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 class PEX25DFasterCapModelBuilder:
     """Convert one scene and its export settings into solver geometry."""
 
-    def __init__(self, scene: PEX25DScene, options: FasterCapExporterOptions):
+    def __init__(self, scene: PEX25DScene, options: FasterCapModelOptions):
         self.scene = scene
         self.options = options
 
