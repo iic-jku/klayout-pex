@@ -558,7 +558,7 @@ class Pex25DCLI:
             options=options, registry=registry)
         for path in written:
             subproc(path)
-        info(f"Wrote {len(written)} {args.exporter_name} input file(s) to {args.output_dir_path}")
+        info(f"Wrote {len(written)} file(s) with '{args.exporter_name}' to {args.output_dir_path}")
 
     def run_import(self, args: argparse.Namespace,
                    report: DiagnosticsReport) -> Optional[Tuple[str, str]]:
