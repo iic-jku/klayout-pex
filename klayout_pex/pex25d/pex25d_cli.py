@@ -475,6 +475,11 @@ class Pex25DCLI:
                     error("'import' produces a PEX25DFile; the output path or --out_kind asks for a PEX25DScene.")
                     found_errors = True
 
+        # Importers get plain paths, so missing inputs are caught here, before a plugin loads.
+        if hasattr(args, 'source_path') and not os.path.exists(args.source_path):
+            error(f"Input not found: {args.source_path}")
+            found_errors = True
+
         if hasattr(args, 'supporting_args'):
             args.supporting_files = {}
             for argument in args.supporting_args:
@@ -487,6 +492,9 @@ class Pex25DCLI:
                     found_errors = True
                 else:
                     args.supporting_files[name] = path
+                    if not os.path.exists(path):
+                        error(f"Supporting input '{name}' not found: {path}")
+                        found_errors = True
 
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")

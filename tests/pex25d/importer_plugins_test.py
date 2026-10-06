@@ -163,16 +163,35 @@ def test_cli_points_to_invalid_import_after_diagnostics(
 
 @pytest.mark.parametrize('arguments', [
     ['--supporting', 'stack.txt'],
-    ['--supporting', 'stack=a.txt', '--supporting', 'stack=b.txt'],
+    ['--supporting', 'stack=stack.txt', '--supporting', 'stack=stack.txt'],
     ['-o', 'cell.pex25d.scene.pb'],
 ], ids=['no-name', 'duplicate-name', 'scene-output'])
 def test_cli_rejects_bad_arguments_before_loading(
-        install_importer: Callable[..., str], tmp_path: Path, arguments: List[str]):
+        install_importer: Callable[..., str], inputs: Tuple[Path, Path], tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch, arguments: List[str]):
     module = install_importer('test-one', 'example')
-    arguments = ['-o', str(tmp_path / 'cell.pex25d'), *arguments]
-    assert run_cli(['import', str(tmp_path / 'design.txt'), '--from', 'example', *arguments]) \
+    monkeypatch.chdir(tmp_path)
+    arguments = ['-o', 'cell.pex25d', *arguments]
+    assert run_cli(['import', 'design.txt', '--from', 'example', *arguments]) \
         == pex25d.ExitCode.USAGE
     assert module not in sys.modules
+
+
+@pytest.mark.parametrize('source, stack', [
+    ('missing.txt', 'stack.txt'),
+    ('design.txt', 'missing.txt'),
+], ids=['input', 'supporting'])
+def test_cli_rejects_missing_inputs_before_loading(
+        install_importer: Callable[..., str], inputs: Tuple[Path, Path], tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
+        source: str, stack: str):
+    module = install_importer('test-one', 'example')
+    monkeypatch.chdir(tmp_path)
+    assert run_cli(['import', source, '--from', 'example', '--supporting', f'stack={stack}',
+                    '-o', 'cell.pex25d']) == pex25d.ExitCode.USAGE
+    assert any('not found: missing.txt' in record.getMessage() for record in caplog.records)
+    assert module not in sys.modules
+    assert not (tmp_path / 'cell.pex25d').exists()
 
 
 @pytest.mark.parametrize('selector, source', [
