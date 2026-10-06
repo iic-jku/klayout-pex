@@ -1,0 +1,24 @@
+SUBPROCESS __kpex__:pex25d_cli.py:629 /Users/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m 'not slow and not smoke' --alluredir build/allure-results --color no
+INFO     __kpex__:pex25d_cli.py:543 Input is an unresolved PEX25DFile, resolving it first
+ERROR    __kpex__:pex25d_cli.py:652 Exporter 'test-one:example' crashed: KeyError: 'mesh_size'
+DEBUG    __kpex__:pex25d_cli.py:653 Plugin traceback
+Traceback (most recent call last):
+  File "/Users/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/exporters.py", line 97, in export_with_backend
+    return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/var/folders/36/tjdph2t965j8snz9_vkdnw0r0000gn/T/pytest-of-runner/pytest-0/test_plugin_execution_errors_a2/test_plugin_test_one.py", line 13, in export
+    raise KeyError("mesh_size")
+KeyError: 'mesh_size'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/pex25d_cli.py", line 644, in _run
+    note = handler(args, report)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/pex25d_cli.py", line 555, in run_export
+    written = export_with_backend(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/exporters.py", line 107, in export_with_backend
+    raise ExporterExecutionError(
+klayout_pex.pex25d.exporters.ExporterExecutionError: Exporter 'test-one:example' crashed: KeyError: 'mesh_size'
