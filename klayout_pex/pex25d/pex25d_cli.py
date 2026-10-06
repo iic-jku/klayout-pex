@@ -339,7 +339,8 @@ class Pex25DCLI:
                                    help="Minimum mesh angle as b = 2·sin(angle)")
         parser_export.add_argument("--stl", dest='write_stl',
                                    action='store_true', default=None,
-                                   help="Also dump the generated solids as STL")
+                                   help="FasterCap / FastCap2: also dump the generated solids "
+                                        "as STL ('--to stl' writes only those)")
         parser_export.add_argument("--geo_check", dest='geometry_check',
                                    action='store_true', default=None,
                                    help="Validate the geometry before writing")
