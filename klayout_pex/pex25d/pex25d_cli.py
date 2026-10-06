@@ -66,7 +66,14 @@ from ..log import (
     rule,
     subproc,
 )
-from ..util.argparse_helpers import render_enum_help, true_or_false
+from ..util.argparse_helpers import (
+    SectionedHelpFormatter,
+    add_help_subcommand,
+    add_subcommand_sections,
+    handle_help_subcommand,
+    render_enum_help,
+    true_or_false,
+)
 from ..version import __version__
 
 from .exporters import ExportError, ExporterExecutionError
@@ -125,6 +132,16 @@ A trailing `.gz` is honoured on any of them.
 There is deliberately no text-format spelling of a scene: 
 the text format is the unresolved one, and resolution is not reversible.
 """
+
+
+SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
+    'Inspect': ('show', 'validate'),
+    'Transform': ('convert', 'resolve'),
+    'Exchange with other tools': ('import', 'export'),
+    'Plugins': ('plugins', 'importers', 'exporters'),
+    'Help': ('help',),
+}
+"""How ``pex25d --help`` groups the subcommands; every subcommand is in exactly one section."""
 
 
 def _epilog() -> rich.console.Group:
@@ -244,13 +261,12 @@ class Pex25DCLI:
             description=f"{PROGRAM_NAME}: PEX25D format tool for KLayout-PEX",
             prog=PROGRAM_NAME,
             add_help=False,
-            formatter_class=RichHelpFormatter,
+            formatter_class=SectionedHelpFormatter,
             epilog=_epilog(),
         )
         self._add_special_options(main_parser)
 
-        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>',
-                                                help="Sub-commands help")
+        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>')
 
         # ---------------------------------------------------------- validate
         parser_validate = subparsers.add_parser(
@@ -394,9 +410,13 @@ class Pex25DCLI:
                                           'domain', 'all'],
                                  help="Section to print; repeatable (default is 'all')")
 
+        add_help_subcommand(subparsers)
+        add_subcommand_sections(main_parser, subparsers, SUBCOMMAND_SECTIONS)
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+        handle_help_subcommand(main_parser, args)
 
         if args.command is None:
             main_parser.print_help()
