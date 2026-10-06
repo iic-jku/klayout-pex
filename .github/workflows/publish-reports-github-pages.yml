@@ -105,7 +105,17 @@ jobs:
       - name: "[🐍] Unpack Source 📦"
         run: |
           tar xvfz dist/klayout_pex*.tar.gz --strip-components=1
-      
+
+      # NOTE: the paths ci-cd.yml's plugin tests ran from, for the plugins' sources;
+      #       a plugin that can't be cloned did not run its tests either
+      - name: "Checkout plugins"
+        run: |
+          for plugin in gmsh palace elmer; do
+            git clone --depth 1 "https://github.com/iic-jku/klayout-pex-plugin-$plugin.git" \
+                      "plugins/klayout-pex-plugin-$plugin" \
+              || echo "::warning::Could not clone klayout-pex-plugin-$plugin"
+          done
+
       - name: "[🐍] Download and merge coverage artifacts"
         uses: actions/download-artifact@v8
         with:

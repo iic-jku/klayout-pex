@@ -179,6 +179,121 @@ jobs:
         retention-days: 1
         if-no-files-found: error
 
+  # The plugin repositories' tests, against this checkout rather than the klayout-pex
+  # release they pin: a change that breaks a plugin fails here. Their results join
+  # the Allure and coverage pages.
+  plugin-tests:
+    name: Plugin Tests ${{ matrix.plugin }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [gmsh, palace, elmer]
+
+    env:
+      ALLURE_RESULTS_PATH: build/allure-results
+      COVERAGE_DATA_PATH: build/python-coverage.sqlite
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: "[🐍] Setup python"
+      id: setup-python
+      uses: actions/setup-python@v7
+      with:
+        python-version: '3.12'
+
+    - name: "[🐍] Install Poetry"
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        virtualenvs-path: .venv
+        installer-parallel: true
+
+    # NOTE: a key of its own: this venv also holds the plugins, whose entry points
+    #       would show up in klayout-pex's own tests
+    - name: "[🐍] Load cached venv"
+      uses: actions/cache@v6
+      with:
+        path: .venv
+        key: venv-plugin-tests-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: "[🐍] Install dependencies"
+      run: poetry install --no-interaction --no-root
+
+    # NOTE: the same steps as gen_tech_pb.sh
+    - name: "[🐍] Generate protobuf python modules"
+      run: >
+        poetry run python -m grpc_tools.protoc
+        --proto_path=protos
+        --python_out=klayout_pex_protobuf
+        $(find protos -name '*.proto')
+
+    - name: "[🐍] Generate PB Tech"
+      run: poetry run python scripts/gen_tech_pb klayout_pex_protobuf
+
+    - name: "[🐍] Install project"
+      run: poetry install --no-interaction
+
+    # NOTE: the same paths as in publish-reports-github-pages.yml, which needs
+    #       the sources for the coverage report
+    - name: "Checkout plugins"
+      run: |
+        for plugin in gmsh palace elmer; do
+          git clone --depth 1 "https://github.com/iic-jku/klayout-pex-plugin-$plugin.git" \
+                    "plugins/klayout-pex-plugin-$plugin"
+        done
+
+    # NOTE: the gmsh wheel links against these
+    - name: "Install gmsh's system libraries"
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes libgl1 libglu1-mesa libgomp1 libxcursor1 libxft2 libxinerama1 libxrender1
+
+    # --no-deps: keep this checkout of klayout-pex, whatever release the plugins pin
+    - name: "[🐍] Install plugins"
+      run: |
+        poetry run pip install gmsh
+        poetry run pip install --no-deps \
+          -e plugins/klayout-pex-plugin-gmsh \
+          -e plugins/klayout-pex-plugin-palace \
+          -e plugins/klayout-pex-plugin-elmer
+
+    - name: "Install Elmer FEM"
+      if: matrix.plugin == 'elmer'
+      run: |
+        sudo add-apt-repository --yes ppa:elmer-csc-ubuntu/elmer-csc-ppa
+        sudo apt-get update
+        sudo apt-get install --yes elmerfem-csc
+
+    - name: "[🐍] Run plugin tests"
+      run: >
+        poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }}
+        -m pytest plugins/klayout-pex-plugin-${{ matrix.plugin }}
+        --alluredir ${{ env.ALLURE_RESULTS_PATH }}
+        --color no
+        -rA
+
+    - name: "[🐍] Store coverage results"
+      if: success() || failure()
+      uses: actions/upload-artifact@v6
+      with:
+        name: python-plugin-${{ matrix.plugin }}-tests-coverage-report-ubuntu-latest_py3.12
+        path: ${{ env.COVERAGE_DATA_PATH }}
+        retention-days: 1
+        if-no-files-found: error
+
+    - name: "[🐍] Store allure test results"
+      if: success() || failure()
+      uses: actions/upload-artifact@v6
+      with:
+        name: python-plugin-${{ matrix.plugin }}-tests-allure-report-ubuntu-latest_py3.12
+        path: ${{ env.ALLURE_RESULTS_PATH }}
+        retention-days: 1
+        if-no-files-found: error
+
   call-smoke-tests:
     name: "Smoke Tests"
     needs: build_and_test
@@ -204,11 +319,13 @@ jobs:
       cancel-in-progress: true
     uses: ./.github/workflows/integration-tests.yml
 
-  # NOTE: this is called from integration tests
-  # call-publish-reports-github-pages:
-  #   name: "Publish reports to GitHub Pages"
-  #   needs: build_and_test
-  #   concurrency:
-  #     group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-reports-github-pages
-  #     cancel-in-progress: true
-  #   uses: ./.github/workflows/publish-reports-github-pages.yml
+  # NOTE: after every suite, so that each one's results are in the reports;
+  #       also when some failed, which is what the reports are for
+  call-publish-reports-github-pages:
+    name: "Publish reports to GitHub Pages"
+    needs: [build_and_test, call-smoke-tests, call-integration-tests, plugin-tests]
+    if: ${{ !cancelled() }}
+    concurrency:
+      group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-reports-github-pages
+      cancel-in-progress: true
+    uses: ./.github/workflows/publish-reports-github-pages.yml

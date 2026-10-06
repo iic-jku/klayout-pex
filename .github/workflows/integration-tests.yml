@@ -167,9 +167,11 @@ jobs:
         path: output_sky130A/.kpex_cache
         key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache
 
+  # NOTE: only when run on its own; ci-cd.yml publishes after all of its suites
   call-publish-reports-github-pages:
     name: "Publish reports to GitHub Pages"
     needs: run-tests
+    if: github.event_name == 'workflow_dispatch'
     concurrency:
       group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-reports-github-pages
       cancel-in-progress: true
