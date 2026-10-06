@@ -39,6 +39,8 @@ from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporte
 if TYPE_CHECKING:
     from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
 
+    from .fastercap_model_generator import FasterCapModelGenerator
+
 
 @dataclass
 class FasterCapModelOptions:
@@ -79,6 +81,23 @@ class FasterCapExporterOptions(FasterCapModelOptions):
     """Also dump the generated solids as STL, for looking at."""
 
 
+def build_fastercap_model(scene: PEX25DScene,
+                          settings: FasterCapModelOptions,
+                          exporter_name: str) -> FasterCapModelGenerator:
+    """Build the FasterCap model of ``scene``; KLayout loads here."""
+    try:
+        from .pex25d_model_builder import PEX25DFasterCapModelBuilder
+    except ImportError as exc:
+        raise ExporterUnavailable(
+            f"The {exporter_name} exporter needs KLayout and its geometry dependencies. "
+            f"Original error: {exc}") from exc
+
+    generator = PEX25DFasterCapModelBuilder(scene, settings).build()
+    if settings.geometry_check:
+        generator.check()
+    return generator
+
+
 class FasterCapSceneExporter(PEX25DSceneExporter):
     """Write a FasterCap solver deck from a resolved PEX25D scene."""
 
@@ -97,16 +116,7 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
         except TypeError as exc:
             raise ExportError(f"Invalid options for '{self.name}': {exc}") from exc
 
-        try:
-            from .pex25d_model_builder import PEX25DFasterCapModelBuilder
-        except ImportError as exc:
-            raise ExporterUnavailable(
-                f"The {self.name} exporter needs KLayout and its geometry dependencies. "
-                f"Original error: {exc}") from exc
-
-        generator = PEX25DFasterCapModelBuilder(scene, settings).build()
-        if settings.geometry_check:
-            generator.check()
+        generator = build_fastercap_model(scene, settings, self.name)
 
         os.makedirs(output_dir_path, exist_ok=True)
         effective_prefix = prefix or self.default_prefix
