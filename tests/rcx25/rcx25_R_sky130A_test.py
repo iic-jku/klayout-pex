@@ -251,6 +251,23 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_device_terminals_without_a_net_stay_unconnected():
+    # The bulk terminal W of the varactor is the gate on the hole of a ptap ring (varactor_bulk_lvt), but there's
+    # no ring around it, so the LVS netlist leaves W unconnected (as in iic-sar-adc/adc_comp_latch).
+    # The extraction crashed on it with an AttributeError
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'cap_var_lvt_without_ptap_ring.gds.gz')
+    messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
+    assert messages == [
+        "These device terminals are unconnected in the LVS netlist, "
+        "so they stay unconnected in the extracted netlist:\n"
+        "  - sky130_fd_pr__cap_var_lvt terminal W: $1"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_via_without_conductor_below_is_an_error():
     # The via1 has no met1 below it, so it joins nothing there. The extraction report crashed on it with a KeyError,
     # as with gf180mcuD before #229, whose tech info put the layer below its vias on another GDS pair

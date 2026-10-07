@@ -558,6 +558,8 @@ class KLayoutExtractionContext:
 
         # (device class, terminal, LVS layer) -> device names
         devices_by_unknown_terminal_layer: Dict[Tuple[str, str, str], List[str]] = defaultdict(list)
+        # (device class, terminal) -> device names
+        devices_by_unconnected_terminal: Dict[Tuple[str, str], List[str]] = defaultdict(list)
 
         for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html
@@ -576,16 +578,14 @@ class KLayoutExtractionContext:
                 p.value = d_kly.parameter(pd.id())
 
             for td in d_kly.device_class().terminal_definitions():
-                n: kdb.Net = d_kly.net_for_terminal(td.id())
-                net_name = n.name or f"${n.cluster_id}"
+                n: Optional[kdb.Net] = d_kly.net_for_terminal(td.id())
                 if n is None:
-                    warning(f"Skipping terminal {td.name} of device {d.name} ({d.device_class}) "
-                            f"is not connected to any net")
-                    terminal = d.terminals.add()
-                    terminal.id = td.id()
-                    terminal.name = td.name
-                    terminal.net_name = ''  # TODO
+                    # NOTE: the LVS netlist leaves the terminal unconnected, as its shapes touch no conductor
+                    #       (e.g. the bulk of a sky130A varactor without a ptap ring around it),
+                    #       so the RC netlist leaves it unconnected too
+                    devices_by_unconnected_terminal[(d.device_class_name, td.name)].append(d.device_name)
                     continue
+                net_name = n.name or f"${n.cluster_id}"
 
                 for nt in n.each_terminal():
                     nt: kdb.NetTerminalRef
@@ -632,13 +632,20 @@ class KLayoutExtractionContext:
 
             dd[d.device_name] = d
 
+        def device_list(device_names: List[str]) -> str:
+            listed = ', '.join(device_names[:3])
+            return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
+
+        if devices_by_unconnected_terminal:
+            warning("These device terminals are unconnected in the LVS netlist, "
+                    "so they stay unconnected in the extracted netlist:\n" +
+                    '\n'.join(f"  - {device_class} terminal {terminal}: {device_list(device_names)}"
+                              for (device_class, terminal), device_names
+                              in sorted(devices_by_unconnected_terminal.items())))
+
         # NOTE: a terminal without a node stays on its net, which a node of the resistance network carries
         #       (#211 §6), so it misses only the resistance to where it is
         if devices_by_unknown_terminal_layer:
-            def device_list(device_names: List[str]) -> str:
-                listed = ', '.join(device_names[:3])
-                return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
-
             warning("The resistance network has no nodes for these device terminals, "
                     "as the tech info has no layer for their LVS layer, and they overlap no conductor of their net "
                     "(e.g. a terminal on the substrate or a well):\n" +
