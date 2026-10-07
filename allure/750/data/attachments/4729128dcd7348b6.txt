@@ -1,0 +1,23 @@
+[15:54:45] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1192
+/tmp/lvs_run_22_77zmb/.kpex_cache/ihp-sg13cmos5l/tmp/lvs_run_22_77zmb/cell.gds/c
+ell.lvsdb.gz                                                                    
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r /tmp/lvs_run_22_77zmb/deck/sg13cmos5l.lvs -rd                     
+input=/tmp/lvs_run_22_77zmb/cell.gds -rd                                        
+report=/tmp/lvs_run_22_77zmb/cell.lvsdb.gz -rd                                  
+target_netlist=/tmp/lvs_run_22_77zmb/cell_extracted.cir -rd                     
+schematic=/tmp/lvs_run_22_77zmb/cell.spice -rd thr=22 -rd run_mode=deep -rd     
+spice_net_names=true -rd spice_comments=false -rd scale=false -rd               
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true -rd verbose=false                                              
+/tmp/lvs_run_22_77zmb/cell_lvs.log                                              
+ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file:                             
+/pdk/rule_decks//sram_integration.lvs (errno=2) in                              
+MacroInterpreter::include_expansion                                             
+ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs 
+(errno=2) in MacroInterpreter::include_expansion in Executable::execute         
+  :/built-in-macros/lvs_interpreters.lym:27:in                                  
+'RBA::MacroInterpreter#include_expansion'                                       
+  :/built-in-macros/lvs_interpreters.lym:27:in 'LVS::LVSExecutable#execute'     
+────────────────────────────────────────────────────────────────────────────────
