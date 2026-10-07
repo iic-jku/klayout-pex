@@ -1,0 +1,25 @@
+[17:43:32] INFO     Cache miss: there is no cached LVSDB       kpex_cli.py:1192
+C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\.kpex_cache\ihp-sg13cmos5
+l\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell.gds\cell.lvsdb.gz    
+───────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                  
+C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\deck\sg13cmos5l.lvs -rd  
+input=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell.gds -rd       
+report=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell.lvsdb.gz -rd 
+target_netlist=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell_extra
+cted.cir -rd                                                                   
+schematic=C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell.spice -rd 
+thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd 
+scale=false -rd schematic_simplify=false -rd net_only=false -rd                
+top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false  
+-rd purge_nets=false -rd no_simplify=true -rd verbose=false                    
+C:\Users\RUNNER~1\AppData\Local\Temp\lvs_run_hs81qr2u\cell_lvs.log             
+ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file:                            
+/pdk/rule_decks//sram_integration.lvs (errno=2) in                             
+MacroInterpreter::include_expansion                                            
+ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs
+(errno=2) in MacroInterpreter::include_expansion in Executable::execute        
+  :/built-in-macros/lvs_interpreters.lym:27:in                                 
+'RBA::MacroInterpreter#include_expansion'                                      
+  :/built-in-macros/lvs_interpreters.lym:27:in 'LVS::LVSExecutable#execute'    
+───────────────────────────────────────────────────────────────────────────────
