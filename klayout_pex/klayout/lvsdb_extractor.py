@@ -24,7 +24,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 import tempfile
 from typing import *
@@ -121,6 +121,9 @@ class KLayoutExtractionContext:
     unmodeled_layers: List[str]
     # the devices are black-boxed (--blackbox), their models have their capacitances (see ComputedLayerInfo.Kind)
     blackbox_devices: bool
+    # (device abstract cell index, terminal ID) -> shapes by LVS layer index, see shapes_of_terminal
+    terminal_shapes_by_abstract: Dict[Tuple[int, int], Dict[int, kdb.Region]] = field(default_factory=dict,
+                                                                                       init=False, repr=False)
 
     @classmethod
     def prepare_extraction(cls,
@@ -402,35 +405,58 @@ class KLayoutExtractionContext:
         else:
             return b2
 
+    @cached_property
+    def shapes_by_net_name_by_gds_pair(self) -> Dict[GDSPair, Dict[str, kdb.Region]]:
+        """
+        The shapes of each net on each extracted layer
+
+        NOTE: in one pass over the shapes of a layer, rather than one for each net,
+              which is quadratic in the size of the layout (e.g. for the resistance extraction of each net)
+        """
+        shapes_by_net_name_by_gds_pair: Dict[GDSPair, Dict[str, kdb.Region]] = {}
+
+        for gds_pair, lyr in self.extracted_layers.items():
+            shapes_by_net_name: Dict[str, kdb.Region] = {}
+
+            def add_shapes_from_region(source_region: kdb.Region):
+                iter, transform = source_region.begin_shapes_rec()
+                while not iter.at_end():
+                    shape = iter.shape()
+                    net_name = shape.property('net')
+                    shapes = shapes_by_net_name.get(net_name, None)
+                    if shapes is None:
+                        shapes = kdb.Region()
+                        shapes.enable_properties()
+                        shapes_by_net_name[net_name] = shapes
+                    shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
+                                  iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
+                                  shape.polygon)
+                    iter.next()
+
+            match len(lyr.source_layers):
+                case 0:
+                    raise AssertionError('Internal error: Empty list of source_layers')
+                case _:
+                    for sl in lyr.source_layers:
+                        add_shapes_from_region(sl.region)
+
+            shapes_by_net_name_by_gds_pair[gds_pair] = shapes_by_net_name
+
+        return shapes_by_net_name_by_gds_pair
+
     def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net | str) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
             return None
 
-        shapes = kdb.Region()
-        shapes.enable_properties()
-
         requested_net_name = net.name if isinstance(net, kdb.Net) else net
 
-        def add_shapes_from_region(source_region: kdb.Region):
-            iter, transform = source_region.begin_shapes_rec()
-            while not iter.at_end():
-                shape = iter.shape()
-                net_name = shape.property('net')
-                if net_name == requested_net_name:
-                    shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
-                                  iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
-                                  shape.polygon)
-                iter.next()
-
-        match len(lyr.source_layers):
-            case 0:
-                raise AssertionError('Internal error: Empty list of source_layers')
-            case _:
-                for sl in lyr.source_layers:
-                    add_shapes_from_region(sl.region)
-
-        return shapes
+        shapes = self.shapes_by_net_name_by_gds_pair[gds_pair].get(requested_net_name, None)
+        if shapes is None:
+            shapes = kdb.Region()
+            shapes.enable_properties()
+            return shapes
+        return shapes.dup()  # NOTE: the caller may change it
 
     def shapes_of_layer(self,
                         gds_pair: GDSPair,
@@ -539,6 +565,24 @@ class KLayoutExtractionContext:
 
         return substrate.net_names[0] if substrate.net_names else self.tech.internal_substrate_layer_name
 
+    def shapes_of_terminal(self, device: kdb.Device, nt: kdb.NetTerminalRef) -> Dict[int, kdb.Region]:
+        """
+        The shapes of a device terminal by LVS layer index, like LayoutToNetlist.shapes_of_terminal
+
+        NOTE: LayoutToNetlist.shapes_of_terminal takes long (e.g. 0.1 s for each terminal of gcd, sky130A),
+              so the shapes of each terminal of a device abstract are taken once, and moved to each device of it,
+              but for a device of several abstracts (combined devices), or a non-orthogonal or magnifying placement
+        """
+        trans = kdb.ICplxTrans(device.trans, self.dbu)
+        if any(True for _ in device.each_combined_abstract()) or not trans.is_ortho() or trans.is_mag():
+            return self.lvsdb.shapes_of_terminal(nt)
+        key = (device.device_abstract.cell_index(), nt.terminal_id())
+        shapes_by_lyr_idx = self.terminal_shapes_by_abstract.get(key, None)
+        if shapes_by_lyr_idx is None:
+            shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt, trans.inverted())  # of the abstract
+            self.terminal_shapes_by_abstract[key] = shapes_by_lyr_idx
+        return {idx: shapes.transformed(trans) for idx, shapes in shapes_by_lyr_idx.items()}
+
     @cached_property
     def devices_by_name(self) -> Dict[str, device_pb2.Device]:
         # NOTE: a device the LVS script created, rather than extracted, has no abstract,
@@ -596,7 +640,7 @@ class KLayoutExtractionContext:
                 net_name = n.name or f"${n.cluster_id}"
 
                 for nt in terminal_refs[(d_kly.id(), td.id())]:
-                    shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
+                    shapes_by_lyr_idx = self.shapes_of_terminal(d_kly, nt)
 
                     terminal = d.terminals.add()
                     terminal.device_id = d.id
@@ -714,6 +758,13 @@ class KLayoutExtractionContext:
                 pins = self.pins_of_layer(gds_pair)
                 labels = self.labels_of_layer(gds_pair)
 
+                # NOTE: the pins at a label are found by their boxes, rather than by going through all pins
+                #       for each label, which is quadratic in the number of pins (e.g. the ones of standard cells)
+                pin_polygons: List[kdb.PolygonWithProperties] = list(pins.each())
+                pin_boxes = kdb.Shapes()
+                for pin_index, p in enumerate(pin_polygons):
+                    pin_boxes.insert(kdb.BoxWithProperties(p.bbox(), {'pin_index': pin_index}))
+
                 pin_labels: kdb.Texts = labels & pins
                 for l in pin_labels:
                     l: kdb.Text
@@ -728,9 +779,10 @@ class KLayoutExtractionContext:
 
                     pos = l.position()
 
-                    # is there more elegant / faster way to do this?
-                    for p in pins:
-                        p: kdb.PolygonWithProperties
+                    # NOTE: the first pin the label is inside of
+                    for pin_index in sorted(shape.property('pin_index')
+                                            for shape in pin_boxes.each_touching(kdb.Shapes.SAll, kdb.Box(pos, pos))):
+                        p = pin_polygons[pin_index]
                         if p.inside(pos):
                             pin.net_name = p.property('net')
                             break

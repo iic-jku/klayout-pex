@@ -100,10 +100,26 @@ class OverlapExtractor:
                       neighborhood: PolygonNeighborhood):
             # We just look "upwards", as we don't want to count areas twice
 
-            shielded_region = kdb.Region()
             bottom_region = kdb.Region(polygon)
             bot_layer_name = self.layer_names[self.inside_layer_index]
             net_bot = polygon.property('net')  # NOTE: the substrate's is the one of its well or VSUBS
+
+            def is_shield(net_top: str) -> bool:
+                # NOTE: e.g. VDD over its nwell, which still shields the nwell from the shapes above
+                return net_top != net_bot or bot_layer_name == self.tech_info.internal_substrate_layer_name
+
+            # NOTE: each shield shields the bottom polygon from the polygons above after it (e.g. on the layers above)
+            #       where they overlap, so only the shields near a polygon above are subtracted (found by their boxes),
+            #       rather than all shields before it, which is quadratic in the size of the neighborhood
+            #       (e.g. the whole layout above the substrate)
+            shields = kdb.Shapes()
+            shield_count = 0
+            for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
+                for polygon_above in neighborhood.get(other_layer_index, []):
+                    if is_shield(polygon_above.property('net')):
+                        shields.insert(kdb.PolygonWithProperties(polygon_above, {'shield_index': shield_count}))
+                        shield_count += 1
+            shield_count = 0
 
             for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
                 polygons_above = neighborhood.get(other_layer_index, None)
@@ -113,10 +129,11 @@ class OverlapExtractor:
                 for polygon_above in polygons_above:
                     net_top = polygon_above.property('net')
 
+                    shields_before = shield_count
+                    if is_shield(net_top):
+                        shield_count += 1
+
                     if net_top == net_bot:
-                        # NOTE: e.g. VDD over its nwell, which still shields the nwell from the shapes above
-                        if bot_layer_name == self.tech_info.internal_substrate_layer_name:
-                            shielded_region.insert(polygon_above)
                         continue
 
                     top_layer_name = self.layer_names[other_layer_index]
@@ -124,13 +141,18 @@ class OverlapExtractor:
                     # NOTE: the capacitance of a device, which its model has (e.g. the junction of the diffusion
                     #       and the substrate), but the shape above shields (e.g. the substrate from the metal above)
                     if self.tech_info.is_device_capacitance(top_layer_name, bot_layer_name):
-                        shielded_region.insert(polygon_above)
                         continue
 
                     # NOTE: RCX25Extractor checked that the tech info has the overlap capacitance of each layer pair
                     overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[top_layer_name][bot_layer_name]
 
                     top_region = kdb.Region(polygon_above)
+
+                    shielded_region = kdb.Region([
+                        shield.polygon
+                        for shield in shields.each_touching(kdb.Shapes.SAll, polygon_above.bbox())
+                        if shield.property('shield_index') < shields_before
+                    ])
 
                     overlap_area = top_region.__and__(bottom_region) - shielded_region
 
@@ -162,5 +184,3 @@ class OverlapExtractor:
                                                    bottom_polygon=polygon,
                                                    top_polygon=polygon_above,
                                                    overlap_area=overlap_area)
-
-                    shielded_region.insert(polygon_above)
