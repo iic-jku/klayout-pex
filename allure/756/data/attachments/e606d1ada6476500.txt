@@ -1,0 +1,451 @@
+[17:44:19] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1260
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_
+hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz --out_dir /tmp/tmplki5pd_4 --2.5D       
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:44:19] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:593
+[17:44:19] INFO     No explicit top cell specified, using top    kpex_cli.py:633
+                    cell 'sky130_fd_sc_hd__inv_1'                               
+[17:44:19] INFO     LVS input schematic not specified (argument  kpex_cli.py:674
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:44:19] INFO     Cache miss: there is no cached LVSDB        kpex_cli.py:1192
+/tmp/tmplki5pd_4/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/te
+stdata/designs/sky130A/sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz/sky1
+30_fd_sc_hd__inv_1.lvsdb.gz                                                     
+────────────────────────── Calling KLayout LVS script ──────────────────────────
+klayout -b -r                                                                   
+/home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs 
+-rd                                                                             
+input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_
+fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz -rd                               
+report=/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd
+_sc_hd__inv_1.lvsdb.gz -rd                                                      
+target_netlist=/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/s
+ky130_fd_sc_hd__inv_1_extracted.cir -rd                                         
+schematic=/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130
+_fd_sc_hd__inv_1_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd         
+spice_net_names=true -rd spice_comments=false -rd scale=false -rd               
+schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd           
+combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd
+no_simplify=true -rd verbose=false                                              
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_lvs.log                                                                  
+2026-10-07 17:44:21 +0000: Memory Usage (431948K) : Starting running SKY130     
+Klayout LVS runset on                                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_
+hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz                                         
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Layout file:                
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_
+hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz                                         
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Number of threads: 22       
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Final report:               
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1.lvsdb.gz                                                                 
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : No substrate name given,    
+default name is sky130_gnd                                                      
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Extracted netlist with net  
+names: true                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Extracted netlist with      
+comments in details: false                                                      
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Extracted netlist file:     
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_extracted.cir                                                            
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : device_scaling: false       
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : Verbose mode: false         
+2026-10-07 17:44:21 +0000: Memory Usage (433564K) : deep mode is enabled.       
+2026-10-07 17:44:21 +0000: Memory Usage (433692K) : Netlist file:               
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_dummy_schematic.spice                                                    
+2026-10-07 17:44:21 +0000: Memory Usage (433692K) : Read in polygons from       
+layers.                                                                         
+2026-10-07 17:44:21 +0000: Memory Usage (440388K) : Read in labels from layers. 
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : Evaluate switches start     
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : SCH_SIMPLE enabled  false   
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : NET_ONLY enabled  false     
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : TOP_LVL_PINS enabled  true  
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : COMBINE enabled  false      
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : PURGE enabled  false        
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : PURGE_NETS enabled  false   
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : SIMPLIFY enabled  false     
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : Evaluate switches end.      
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : SKY130 LVS rules started    
+2026-10-07 17:44:21 +0000: Memory Usage (441540K) : Starting deriving base      
+layers.                                                                         
+2026-10-07 17:44:21 +0000: Memory Usage (449404K) : Starting MOSFET DERIVATIONS 
+2026-10-07 17:44:21 +0000: Memory Usage (449404K) : Starting PMOS layers        
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (450548K) : Starting NMOS layers        
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (451700K) : Starting BJT DERIVATIONS    
+2026-10-07 17:44:21 +0000: Memory Usage (452340K) : Starting NPN layers         
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (454260K) : Starting PNP layers         
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (455280K) : Starting DIODE DERIVATIONS  
+2026-10-07 17:44:21 +0000: Memory Usage (456940K) : Starting PHOTODIODE         
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (457708K) : Starting RESISTOR           
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (461284K) : Starting FUSE DERIVATIONS   
+2026-10-07 17:44:21 +0000: Memory Usage (461412K) : Starting MIM DERIVATIONS    
+2026-10-07 17:44:21 +0000: Memory Usage (461668K) : Starting VARACTOR           
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (463076K) : Starting INDUCTOR           
+DERIVATIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (464536K) : Starting VPP CAP DERIVATIONS
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting SONOS DERIVATIONS  
+2026-10-07 17:44:21 +0000: Memory Usage (467216K) : Starting SKY130 LVS         
+connectivity setup                                                              
+2026-10-07 17:44:21 +0000: Memory Usage (467216K) : Starting SKY130 LVS         
+connectivity setup (Inter-layer)                                                
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting SKY130 LVS         
+connectivity setup (Attaching labels)                                           
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting SKY130 LVS         
+connectivity setup (Global connections)                                         
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting SKY130 LVS         
+connectivity setup (Multifinger Devices)                                        
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS BJT CONNECTIONS
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS DIODE          
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS PHOTODIODE     
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS MIMCAP         
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS VARACTOR       
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS RESISTOR       
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS INDUCTOR       
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS VPP CAP        
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting LVS SONOS          
+CONNECTIONS                                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting MOSFET EXTRACTION  
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Starting PMOS EXTRACTION    
+2026-10-07 17:44:21 +0000: Memory Usage (467352K) : Extracting 1.8V PMOS        
+transistor standard                                                             
+2026-10-07 17:44:21 +0000: Memory Usage (467480K) : Extracting 1.8V PMOS        
+transistor low threshold voltage                                                
+2026-10-07 17:44:21 +0000: Memory Usage (467480K) : Extracting 1.8V PMOS        
+transistor high threshold voltage                                               
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V gate 10.5V    
+drain PMOS transistor                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting NMOS EXTRACTION    
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 1.8V NMOS        
+transistor standard                                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 1.8V NMOS        
+transistor low threshold voltage                                                
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 3.3V NMOS        
+transistor native voltage                                                       
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V NMOS          
+transistor native voltage                                                       
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V gate 10.5V    
+drain NMOS transistor                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting BJT EXTRACTION     
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting NPN BJT EXTRACTION 
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L1p00 BJT                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__npn_05v5_W1p00L2p00 BJT                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__npn_11v0_W1p00L1p00 BJT                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting PNP BJT EXTRACTION 
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting DIODE EXTRACTION   
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V N+ diffusion  
+diode                                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V N+ diffusion  
+diode low threshold voltage                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V N+ diffusion  
+diode native threshold voltage                                                  
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 11V N+ diffusion 
+diode                                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V P+ diffusion  
+diode                                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting5V P+ diffusion   
+diode low threshold voltage                                                     
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 5V P+ diffusion  
+diode high threshold voltage                                                    
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting 11V P+ diffusion 
+diode                                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting PHOTODIODE         
+EXTRACTION                                                                      
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting Photodiode       
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Starting RESISTOR EXTRACTION
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_generic_nd device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_generic_pd device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_iso_pw device                                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468120K) : Extracting                  
+sky130_fd_pr__res_generic_po device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_high_po_0p35 device                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_high_po_0p69 device                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_high_po_1p41 device                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_high_po_2p85 device                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_high_po_5p73 device                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p35 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_0p69 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_1p41 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_2p85 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_xhigh_po_5p73 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_l1 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_m1 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_m2 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_m3 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_m4 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__res_generic_m5 device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting FUSE EXTRACTION    
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__fuse_m4 device                                                    
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting MIMCAP EXTRACTION  
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__model__cap_mim device                                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__model__cap_mim_m4 device                                          
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting VARACTOR EXTRACTION
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting low threshold    
+voltage varactor                                                                
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting high threshold   
+voltage varactor                                                                
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting VARACTOR EXTRACTION
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2                    
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell                       
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4                       
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2                                
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4                               
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell                       
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4                       
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap                     
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting vpp cap          
+sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4                               
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3                               
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5                             
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5                               
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1                                 
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4                       
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield                                   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield                         
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin                
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting                  
+sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test                    
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting SONOS EXTRACTION   
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Extracting Build space flash
+special SONOSFET star                                                           
+2026-10-07 17:44:21 +0000: Memory Usage (468248K) : Starting SKY130 LVS         
+comparison section                                                              
+2026-10-07 17:44:21 +0000: Memory Usage (468504K) : LVS Total Run time 0.488027 
+seconds                                                                         
+2026-10-07 17:44:21 +0000: Memory Usage (468504K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+2026-10-07 17:44:21 +0000: Memory Usage (468504K) : ERROR : Netlists don't match
+2026-10-07 17:44:21 +0000: Memory Usage (468504K) :                             
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                      
+────────────────────────────────────────────────────────────────────────────────
+[17:44:21] INFO     klayout LVS finished with status code 1    lvs_runner.py:158
+                    after 2.011s, most likely due to a netlist                  
+                    mismatch against the schematic (irrelevant                  
+                    for PEX), see log file:                                     
+                    /tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__s                  
+                    ky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv                  
+                    _1_lvs.log                                                  
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:44:21] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1429
+[17:44:21] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1429
+[17:44:21] INFO     (94, 20) -> (psd)                           kpex_cli.py:1429
+[17:44:21] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1429
+[17:44:21] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1429
+[17:44:21] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1429
+[17:44:21] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1429
+[17:44:21] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1429
+[17:44:21] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1429
+[17:44:21] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1429
+[17:44:21] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1429
+[17:44:21] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1429
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:44:21] INFO     LVSDB: found 6pins                          extractor.py:267
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VGND;0.042;                                                                
+C2;A;VPB;0.093;                                                                 
+C3;A;VPWR;0.043;                                                                
+C4;A;VSUBS;0.217;                                                               
+C5;A;Y;0.052;                                                                   
+C6;VGND;VPB;0.014;                                                              
+C7;VGND;VPWR;0.018;                                                             
+C8;VGND;VSUBS;0.251;                                                            
+C9;VGND;Y;0.061;                                                                
+C10;VPB;VPWR;0.068;                                                             
+C11;VPB;Y;0.019;                                                                
+C12;VPWR;VSUBS;0.21;                                                            
+C13;VPWR;Y;0.075;                                                               
+C14;VSUBS;Y;0.095;                                                              
+R1;A;A.$1.li1;;2.133                                                            
+R2;A.$0.poly;A.$1.li1;;152.0                                                    
+R3;A.$0.poly;A.P0.poly;;265.1                                                   
+R4;A.$0.poly;A.P1.poly;;192.8                                                   
+R5;VGND;VGND.$4.li1;;9.3                                                        
+R6;VGND;VGND.$7.met1;;0.12                                                      
+R7;VGND.$1.li1;VGND.$10.li1;;17.53                                              
+R8;VGND.$1.li1;VGND.$3.li1;;18.922                                              
+R9;VGND.$1.li1;VGND.P0.nsdm;;185.0                                              
+R10;VGND.$10.li1;VGND.$4.li1;;15.435                                            
+R11;VGND.$10.li1;VGND.$6.li1;;19.2                                              
+R12;VGND.$3.li1;VGND.P0.nsdm;;185.0                                             
+R13;VGND.$6.li1;VGND.$7.met1;;9.3                                               
+R14;VGND.$6.li1;VGND.$8.li1;;34.635                                             
+R15;VGND.$7.met1;VGND.$9.met1;;0.12                                             
+R16;VGND.$8.li1;VGND.$9.met1;;9.3                                               
+R17;VPWR;VPWR.$6.li1;;9.3                                                       
+R18;VPWR;VPWR.$9.met1;;0.12                                                     
+R19;VPWR.$1.li1;VPWR.$3.li1;;20.724                                             
+R20;VPWR.$1.li1;VPWR.P0.psdm;;585.0                                             
+R21;VPWR.$10.li1;VPWR.$11.met1;;9.3                                             
+R22;VPWR.$10.li1;VPWR.$8.li1;;34.635                                            
+R23;VPWR.$11.met1;VPWR.$9.met1;;0.12                                            
+R24;VPWR.$12.li1;VPWR.$5.li1;;17.981                                            
+R25;VPWR.$12.li1;VPWR.$6.li1;;16.188                                            
+R26;VPWR.$12.li1;VPWR.$8.li1;;18.447                                            
+R27;VPWR.$3.li1;VPWR.$5.li1;;20.724                                             
+R28;VPWR.$3.li1;VPWR.P0.psdm;;585.0                                             
+R29;VPWR.$5.li1;VPWR.P0.psdm;;585.0                                             
+R30;VPWR.$8.li1;VPWR.$9.met1;;9.3                                               
+R31;Y;Y.$3.li1;;26.145                                                          
+R32;Y;Y.$5.li1;;8.165                                                           
+R33;Y.$1.li1;Y.$3.li1;;24.023                                                   
+R34;Y.$1.li1;Y.P0.nsdm;;185.0                                                   
+R35;Y.$3.li1;Y.P0.nsdm;;185.0                                                   
+R36;Y.$5.li1;Y.$7.li1;;28.544                                                   
+R37;Y.$5.li1;Y.P0.psdm;;585.0                                                   
+R38;Y.$7.li1;Y.$9.li1;;16.821                                                   
+R39;Y.$7.li1;Y.P0.psdm;;585.0                                                   
+R40;Y.$9.li1;Y.P0.psdm;;585.0                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_k25d_pex_netlist.csv                                                     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmplki5pd_4/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_k25d_pex_netlist.spice                                                   
