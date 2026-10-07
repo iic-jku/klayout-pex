@@ -80,6 +80,9 @@
   plus 1–4 sentences, no Summary/Changes/Testing headings.
 - Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
   merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
+- Issues end with the versions used, e.g. `klayout-pex 0.4.4, KLayout 0.30.12,
+  IIC-OSIC-TOOLS image 83ae1840458f`, plus the versions of the plugins involved. Give both
+  KLayout versions when the binary and the Python module differ.
 - Aim for the sweet spot, not minimal length: too terse makes the reader guess the why;
   repetition and self-justification make the reader parse and check sentences that add
   nothing.
