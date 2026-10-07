@@ -66,7 +66,11 @@ class RCX25Extractor:
                  delaunay_amax: float,
                  delaunay_b: float,
                  tech_info: TechInfo,
-                 report_path: str):
+                 report_path: str,
+                 report_caps: bool):
+        """
+        :param report_caps: the report has each capacitance contribution with its shapes (see ExtractionReporter)
+        """
         self.pex_context = pex_context
         self.pex_mode = pex_mode
         self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
@@ -74,6 +78,7 @@ class RCX25Extractor:
         self.delaunay_b = delaunay_b
         self.tech_info = tech_info
         self.report_path = report_path
+        self.report_caps = report_caps
 
         if "PolygonWithProperties" not in kdb.__all__:
             raise Exception("KLayout version does not support properties (needs 0.30 at least)")
@@ -129,7 +134,8 @@ class RCX25Extractor:
         # TODO: for now, we always flatten and have only 1 cell
         cell_name = self.pex_context.annotated_top_cell.name
         extraction_report = ExtractionReporter(cell_name=cell_name,
-                                               dbu=self.pex_context.dbu)
+                                               dbu=self.pex_context.dbu,
+                                               report_caps=self.report_caps)
         cell_extraction_results = CellExtractionResults(cell_name=cell_name)
 
         # Explicitly log the stacktrace here, because otherwise Exceptions 
