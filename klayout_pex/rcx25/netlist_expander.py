@@ -64,8 +64,8 @@ class RCX25NetlistExpander:
                substrate_net_name: Optional[str] = None) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, which tell the whiteboxed devices
-        :param substrate_net_name: the net the capacitances to the substrate go to,
-                                   a port of its own if the netlist has none (VSUBS if not given)
+        :param substrate_net_name: the net the capacitances to the substrate go to (VSUBS if not given),
+                                   created if the netlist has none, and a port if it has no pin
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
@@ -107,14 +107,18 @@ class RCX25NetlistExpander:
             name2net[net_name] = top_circuit.create_net(net_name)
 
         # NOTE: the capacitances to the substrate are on VSUBS (TechInfo.internal_substrate_layer_name),
-        #       they go to the substrate net, rather than to a net that connects to nothing
+        #       they go to the substrate net, rather than to a net that connects to nothing,
+        #       and the substrate net is a port, also if the LVS netlist has it without pin
+        #       (e.g. IHP's global net sub! in a metal test pattern without taps)
         if any(SUBSTRATE in (key.net1, key.net2) for key, _ in cap_items):
             substrate_net_name = substrate_net_name or SUBSTRATE
-            if substrate_net_name not in name2net:
+            substrate_net = name2net.get(substrate_net_name)
+            if substrate_net is None:
                 substrate_net = top_circuit.create_net(substrate_net_name)
-                top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
                 name2net[substrate_net_name] = substrate_net
-            name2net[SUBSTRATE] = name2net[substrate_net_name]
+            if substrate_net.pin_count() == 0:
+                top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
+            name2net[SUBSTRATE] = substrate_net
 
         # add additional nets for new nodes (e.g. created during R extraction of vias)
         for key, _ in cap_items:
