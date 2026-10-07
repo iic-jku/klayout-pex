@@ -160,6 +160,32 @@ class NetNameTest(unittest.TestCase):
                                   for gds_pair in pex_context.extracted_layers)
                 self.assertGreater(shape_count, 0, net.name)
 
+    def test_shapes_of_net_are_a_copy(self):
+        # NOTE: the shapes of all nets are taken in one pass over each layer, and kept,
+        #       so a caller changing the shapes of a net must not change them for the next one
+        testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_reordered_lvs_layers.lvsdb.gz'))
+        tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
+                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                        dielectric_filter=None)
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+            pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux',
+                                                                      lvsdb=lvsdb,
+                                                                      tech=tech,
+                                                                      blackbox_devices=False)
+
+        gds_pair, net_name = next((gds_pair, shape.property('net'))
+                                  for gds_pair, lyr in pex_context.extracted_layers.items()
+                                  for sl in lyr.source_layers
+                                  for shape in sl.region.each())
+        shapes = pex_context.shapes_of_net(gds_pair, net_name)
+        count = shapes.count()
+        self.assertGreater(count, 0)
+        shapes.clear()
+        self.assertEqual(count, pex_context.shapes_of_net(gds_pair, net_name).count())
+        self.assertTrue(pex_context.shapes_of_net(gds_pair, 'no such net').is_empty())
+
 @allure.parent_suite("Unit Tests")
 @allure.tag("LVS", "LVSDB", "Pins")
 class PinsTest(unittest.TestCase):

@@ -405,35 +405,58 @@ class KLayoutExtractionContext:
         else:
             return b2
 
+    @cached_property
+    def shapes_by_net_name_by_gds_pair(self) -> Dict[GDSPair, Dict[str, kdb.Region]]:
+        """
+        The shapes of each net on each extracted layer
+
+        NOTE: in one pass over the shapes of a layer, rather than one for each net,
+              which is quadratic in the size of the layout (e.g. for the resistance extraction of each net)
+        """
+        shapes_by_net_name_by_gds_pair: Dict[GDSPair, Dict[str, kdb.Region]] = {}
+
+        for gds_pair, lyr in self.extracted_layers.items():
+            shapes_by_net_name: Dict[str, kdb.Region] = {}
+
+            def add_shapes_from_region(source_region: kdb.Region):
+                iter, transform = source_region.begin_shapes_rec()
+                while not iter.at_end():
+                    shape = iter.shape()
+                    net_name = shape.property('net')
+                    shapes = shapes_by_net_name.get(net_name, None)
+                    if shapes is None:
+                        shapes = kdb.Region()
+                        shapes.enable_properties()
+                        shapes_by_net_name[net_name] = shapes
+                    shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
+                                  iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
+                                  shape.polygon)
+                    iter.next()
+
+            match len(lyr.source_layers):
+                case 0:
+                    raise AssertionError('Internal error: Empty list of source_layers')
+                case _:
+                    for sl in lyr.source_layers:
+                        add_shapes_from_region(sl.region)
+
+            shapes_by_net_name_by_gds_pair[gds_pair] = shapes_by_net_name
+
+        return shapes_by_net_name_by_gds_pair
+
     def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net | str) -> Optional[kdb.Region]:
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
             return None
 
-        shapes = kdb.Region()
-        shapes.enable_properties()
-
         requested_net_name = net.name if isinstance(net, kdb.Net) else net
 
-        def add_shapes_from_region(source_region: kdb.Region):
-            iter, transform = source_region.begin_shapes_rec()
-            while not iter.at_end():
-                shape = iter.shape()
-                net_name = shape.property('net')
-                if net_name == requested_net_name:
-                    shapes.insert(transform *     # NOTE: this is a global/initial iterator-wide transformation
-                                  iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
-                                  shape.polygon)
-                iter.next()
-
-        match len(lyr.source_layers):
-            case 0:
-                raise AssertionError('Internal error: Empty list of source_layers')
-            case _:
-                for sl in lyr.source_layers:
-                    add_shapes_from_region(sl.region)
-
-        return shapes
+        shapes = self.shapes_by_net_name_by_gds_pair[gds_pair].get(requested_net_name, None)
+        if shapes is None:
+            shapes = kdb.Region()
+            shapes.enable_properties()
+            return shapes
+        return shapes.dup()  # NOTE: the caller may change it
 
     def shapes_of_layer(self,
                         gds_pair: GDSPair,
