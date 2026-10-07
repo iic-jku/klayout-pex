@@ -561,6 +561,14 @@ class KLayoutExtractionContext:
         # (device class, terminal) -> device names
         devices_by_unconnected_terminal: Dict[Tuple[str, str], List[str]] = defaultdict(list)
 
+        # NOTE: the references of the device terminals by (device ID, terminal ID), in one pass over the nets,
+        #       rather than one over the terminals of its net for each terminal,
+        #       which is quadratic in the size of a net (e.g. the bulk terminals on a supply)
+        terminal_refs: Dict[Tuple[int, int], List[kdb.NetTerminalRef]] = defaultdict(list)
+        for net in self.top_circuit.each_net():
+            for nt in net.each_terminal():
+                terminal_refs[(nt.device().id(), nt.terminal_id())].append(nt)
+
         for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html
             d_kly: kdb.Device
@@ -587,14 +595,7 @@ class KLayoutExtractionContext:
                     continue
                 net_name = n.name or f"${n.cluster_id}"
 
-                for nt in n.each_terminal():
-                    nt: kdb.NetTerminalRef
-
-                    if nt.device().expanded_name() != d_kly.expanded_name():
-                        continue
-                    if nt.terminal_id() != td.id():
-                        continue
-
+                for nt in terminal_refs[(d_kly.id(), td.id())]:
                     shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
 
                     terminal = d.terminals.add()
