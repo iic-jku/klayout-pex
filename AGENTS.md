@@ -78,6 +78,8 @@
 - Commit and PR texts contain only what the reader can't get from the issue, diff or CI:
   the non-obvious why, rejected alternatives, behavior changes, risks. PR: issue reference
   plus 1–4 sentences, no Summary/Changes/Testing headings.
+- Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
+  merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
 - Aim for the sweet spot, not minimal length: too terse makes the reader guess the why;
   repetition and self-justification make the reader parse and check sentences that add
   nothing.
