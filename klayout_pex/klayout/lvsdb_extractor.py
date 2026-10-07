@@ -24,7 +24,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 import tempfile
 from typing import *
@@ -121,6 +121,9 @@ class KLayoutExtractionContext:
     unmodeled_layers: List[str]
     # the devices are black-boxed (--blackbox), their models have their capacitances (see ComputedLayerInfo.Kind)
     blackbox_devices: bool
+    # (device abstract cell index, terminal ID) -> shapes by LVS layer index, see shapes_of_terminal
+    terminal_shapes_by_abstract: Dict[Tuple[int, int], Dict[int, kdb.Region]] = field(default_factory=dict,
+                                                                                       init=False, repr=False)
 
     @classmethod
     def prepare_extraction(cls,
@@ -539,6 +542,24 @@ class KLayoutExtractionContext:
 
         return substrate.net_names[0] if substrate.net_names else self.tech.internal_substrate_layer_name
 
+    def shapes_of_terminal(self, device: kdb.Device, nt: kdb.NetTerminalRef) -> Dict[int, kdb.Region]:
+        """
+        The shapes of a device terminal by LVS layer index, like LayoutToNetlist.shapes_of_terminal
+
+        NOTE: LayoutToNetlist.shapes_of_terminal takes long (e.g. 0.1 s for each terminal of gcd, sky130A),
+              so the shapes of each terminal of a device abstract are taken once, and moved to each device of it,
+              but for a device of several abstracts (combined devices), or a non-orthogonal or magnifying placement
+        """
+        trans = kdb.ICplxTrans(device.trans, self.dbu)
+        if any(True for _ in device.each_combined_abstract()) or not trans.is_ortho() or trans.is_mag():
+            return self.lvsdb.shapes_of_terminal(nt)
+        key = (device.device_abstract.cell_index(), nt.terminal_id())
+        shapes_by_lyr_idx = self.terminal_shapes_by_abstract.get(key, None)
+        if shapes_by_lyr_idx is None:
+            shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt, trans.inverted())  # of the abstract
+            self.terminal_shapes_by_abstract[key] = shapes_by_lyr_idx
+        return {idx: shapes.transformed(trans) for idx, shapes in shapes_by_lyr_idx.items()}
+
     @cached_property
     def devices_by_name(self) -> Dict[str, device_pb2.Device]:
         # NOTE: a device the LVS script created, rather than extracted, has no abstract,
@@ -596,7 +617,7 @@ class KLayoutExtractionContext:
                 net_name = n.name or f"${n.cluster_id}"
 
                 for nt in terminal_refs[(d_kly.id(), td.id())]:
-                    shapes_by_lyr_idx = self.lvsdb.shapes_of_terminal(nt)
+                    shapes_by_lyr_idx = self.shapes_of_terminal(d_kly, nt)
 
                     terminal = d.terminals.add()
                     terminal.device_id = d.id

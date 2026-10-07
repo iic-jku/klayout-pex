@@ -192,3 +192,42 @@ class PinsTest(unittest.TestCase):
         self.assertEqual([('BOT', kdb.Box(0, 0, 100, 100)), ('BOT', kdb.Box(100, 0, 300, 100)),
                           ('OTHER', kdb.Box(400, 0, 500, 100))],
                          sorted((p.property('net'), p.bbox()) for p in pins.each()))
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB", "Devices")
+class TerminalShapesTest(unittest.TestCase):
+    def test_terminal_shapes_of_a_device_abstract_in_each_orientation(self):
+        # NOTE: the nfet of nfet_li1_redux in the 8 orientations (r0 to m135), whose devices share one abstract,
+        #       so the shapes of its terminals are taken once and moved to each device
+        testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_orientations.lvsdb.gz'))
+        tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
+                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                        dielectric_filter=None)
+
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+            pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux_orientations',
+                                                                      lvsdb=lvsdb,
+                                                                      tech=tech,
+                                                                      blackbox_devices=False)
+
+        devices = list(pex_context.top_circuit.each_device())
+        self.assertEqual(set(range(8)), {d.trans.rot() for d in devices})
+        for d in devices:
+            terminals_with_shapes = set()
+            for td in d.device_class().terminal_definitions():
+                for nt in d.net_for_terminal(td.id()).each_terminal():
+                    if nt.device().id() != d.id() or nt.terminal_id() != td.id():
+                        continue
+                    expected = pex_context.lvsdb.shapes_of_terminal(nt)
+                    shapes = pex_context.shapes_of_terminal(d, nt)
+                    self.assertEqual(sorted(expected.keys()), sorted(shapes.keys()))
+                    for idx, region in expected.items():
+                        self.assertTrue((region ^ shapes[idx]).is_empty(),
+                                        f"device {d.expanded_name()} ({d.trans}), terminal {td.name}")
+                        if not region.is_empty():
+                            terminals_with_shapes.add(td.name)
+            self.assertEqual({'S', 'G', 'D'}, terminals_with_shapes)  # NOTE: the bulk B has no shapes of its own
+        self.assertEqual(4, len(pex_context.terminal_shapes_by_abstract))  # S, G, D, B of the one abstract
