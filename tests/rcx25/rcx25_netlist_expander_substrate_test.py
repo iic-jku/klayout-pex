@@ -89,3 +89,17 @@ class Test(unittest.TestCase):
                          capacitances(expanded))
         self.assertEqual(['D', 'B', 'sky130_gnd'], [p.name() for p in circuit.each_pin()])
         self.assertEqual('sky130_gnd', circuit.net_for_pin(circuit.pin_by_name('sky130_gnd').id()).name)
+
+    def test_substrate_net_without_pin_is_a_port(self):
+        # e.g. IHP's global net sub!, which the LVS creates without shapes in a metal test pattern
+        lvs_netlist = netlist()
+        lvs_netlist.circuit_by_name('chip').create_net('sub!')
+        expanded = RCX25NetlistExpander.expand(lvs_netlist, 'chip', Results(self.SUMMARY), blackbox_devices=True,
+                                               device_models=DeviceModels(device_models_pb2.DeviceModelsInfo()),
+                                               substrate_net_name='sub!')
+        circuit = expanded.circuit_by_name('chip')
+        self.assertEqual({frozenset(('D', 'sub!')): 1.0, frozenset(('B', 'sub!')): 2.0},
+                         capacitances(expanded))
+        self.assertEqual(['D', 'B', 'sub!'], [p.name() for p in circuit.each_pin()])
+        self.assertEqual('sub!', circuit.net_for_pin(circuit.pin_by_name('sub!').id()).name)
+        self.assertEqual(1, len([n for n in circuit.each_net() if n.name == 'sub!']))
