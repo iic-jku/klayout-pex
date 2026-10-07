@@ -47,13 +47,20 @@ VarShapes = kdb.Shapes | kdb.Region | List[kdb.Edge] | List[kdb.Polygon | kdb.Bo
 class ExtractionReporter:
     def __init__(self,
                  cell_name: str,
-                 dbu: float):
+                 dbu: float,
+                 report_caps: bool):
+        """
+        :param report_caps: a category for each capacitance contribution (overlap, sidewall, fringe),
+                            with its shapes, which takes much memory and time on large layouts
+                            (e.g. 0.8 GB of 1.8 GB and 12 of 51 s for the RC extraction of adc_comp_latch)
+        """
         self.report = rdb.ReportDatabase(f"PEX {cell_name}")
         self.cell = self.report.create_cell(cell_name)
         self.dbu = dbu
         self.dbu_trans = kdb.CplxTrans(mag=dbu)
         self.category_name_counter: Dict[str, int] = defaultdict(int)
         self.shapes_converter = ShapesConverter(dbu=dbu)
+        self.report_caps = report_caps
 
     @cached_property
     def cat_common(self) -> rdb.RdbCategory:
@@ -142,6 +149,8 @@ class ExtractionReporter:
                        bottom_polygon: kdb.PolygonWithProperties,
                        top_polygon: kdb.PolygonWithProperties,
                        overlap_area: kdb.Region):
+        if not self.report_caps:
+            return
         cat_overlap_top_layer = self.report.create_category(self.cat_overlap,
                                                             f"top_layer={overlap_cap.key.layer_top}")
         cat_overlap_bot_layer = self.report.create_category(cat_overlap_top_layer,
@@ -163,6 +172,8 @@ class ExtractionReporter:
                         sidewall_cap: SidewallCap,
                         inside_edge: kdb.Edge,
                         outside_edge: kdb.Edge):
+        if not self.report_caps:
+            return
         cat_sidewall_layer = self.report.create_category(self.cat_sidewall,
                                                          f"layer={sidewall_cap.key.layer}")
         cat_sidewall_net_inside = self.report.create_category(cat_sidewall_layer,
@@ -185,6 +196,8 @@ class ExtractionReporter:
                            inside_edge: kdb.Edge,
                            outside_polygon: kdb.Polygon,
                            lateral_shield: Optional[kdb.Region]):
+        if not self.report_caps:
+            return
         cat_sideoverlap_layer_inside = self.report.create_category(self.cat_fringe,
                                                                    f"inside_layer={sideoverlap_cap.key.layer_inside}")
         cat_sideoverlap_net_inside = self.report.create_category(cat_sideoverlap_layer_inside,

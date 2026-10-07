@@ -376,6 +376,11 @@ class KpexCLI:
                                     "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
                                     "network of its net, a port that touches nothing, or a lost capacitance "
                                     "(default is True for --mode RC, otherwise these are warnings)")
+        group_25d.add_argument("--report_caps", dest="report_caps",
+                               type=true_or_false, default=False,
+                               help="Write each capacitance contribution with its shapes into the report "
+                                    "(*_k25d_pex_report.rdb.gz), which takes much memory and time "
+                                    "on large layouts (default is %(default)s)")
 
 
     @staticmethod
@@ -1033,7 +1038,8 @@ class KpexCLI:
                                    delaunay_b=args.rcx25d_delaunay_b,
                                    scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                    tech_info=tech_info,
-                                   report_path=report_path)
+                                   report_path=report_path,
+                                   report_caps=args.report_caps)
         extraction_results = extractor.extract()
 
         if netlist_csv_path is not None:
