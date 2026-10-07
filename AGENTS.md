@@ -78,6 +78,8 @@
 - Commit and PR texts contain only what the reader can't get from the issue, diff or CI:
   the non-obvious why, rejected alternatives, behavior changes, risks. PR: issue reference
   plus 1–4 sentences, no Summary/Changes/Testing headings.
+- Propose a PR title with every PR text, in the style of the commit subjects; for several
+  commits, name what they have in common rather than repeating the first subject.
 - Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
   merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
 - Issues end with the versions used, e.g. `klayout-pex 0.4.4, KLayout 0.30.12,
