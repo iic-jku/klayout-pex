@@ -758,6 +758,13 @@ class KLayoutExtractionContext:
                 pins = self.pins_of_layer(gds_pair)
                 labels = self.labels_of_layer(gds_pair)
 
+                # NOTE: the pins at a label are found by their boxes, rather than by going through all pins
+                #       for each label, which is quadratic in the number of pins (e.g. the ones of standard cells)
+                pin_polygons: List[kdb.PolygonWithProperties] = list(pins.each())
+                pin_boxes = kdb.Shapes()
+                for pin_index, p in enumerate(pin_polygons):
+                    pin_boxes.insert(kdb.BoxWithProperties(p.bbox(), {'pin_index': pin_index}))
+
                 pin_labels: kdb.Texts = labels & pins
                 for l in pin_labels:
                     l: kdb.Text
@@ -772,9 +779,10 @@ class KLayoutExtractionContext:
 
                     pos = l.position()
 
-                    # is there more elegant / faster way to do this?
-                    for p in pins:
-                        p: kdb.PolygonWithProperties
+                    # NOTE: the first pin the label is inside of
+                    for pin_index in sorted(shape.property('pin_index')
+                                            for shape in pin_boxes.each_touching(kdb.Shapes.SAll, kdb.Box(pos, pos))):
+                        p = pin_polygons[pin_index]
                         if p.inside(pos):
                             pin.net_name = p.property('net')
                             break
