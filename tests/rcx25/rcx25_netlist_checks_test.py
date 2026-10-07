@@ -43,6 +43,7 @@ DESIGNS = [
     (PDK.SKY130A, 'test_patterns/nfet_li1_redux.gds.gz'),
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_ntap_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_label_li1.gds.gz'),
+    (PDK.SKY130A, 'test_patterns/cap_var_lvt_without_ptap_ring.gds.gz'),
     (PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/nfet_m1.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/r_nwell_pfet_ntap_m1.gds.gz'),
