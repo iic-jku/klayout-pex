@@ -159,6 +159,23 @@ class SubstrateTest(unittest.TestCase):
                          capacitances_by_net_pair(expanded))
         self.assertEqual(['D', 'B', 'sky130_gnd'], [p.name() for p in circuit.each_pin()])
 
+    def test_substrate_net_without_pin_is_a_port(self):
+        # e.g. IHP's global net sub!, which the LVS creates without shapes in a metal test pattern
+        netlist = substrate_test_netlist()
+        netlist.circuit_by_name('chip').create_net('sub!')
+        cap_matrix = CapacitanceMatrix(conductor_names=['g1_sub!', 'g2_D', 'g3_B'],
+                                       rows=CAP_MATRIX_SUBSTRATE_PORT.rows)
+        expanded = NetlistExpander.expand(netlist, 'chip', cap_matrix,
+                                          FasterCapOutputInterpreter(), blackbox_devices=True,
+                                          device_models=device_models(), substrate_net_name='sub!')
+        circuit = expanded.circuit_by_name('chip')
+        self.assertEqual({frozenset(('sub!', 'D')): 1.25,
+                          frozenset(('sub!', 'B')): 2.1,
+                          frozenset(('D', 'B')): 0.5},
+                         capacitances_by_net_pair(expanded))
+        self.assertEqual(['D', 'B', 'sub!'], [p.name() for p in circuit.each_pin()])
+        self.assertEqual(1, len([n for n in circuit.each_net() if n.name == 'sub!']))
+
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("Netlist", "Netlist Expansion")

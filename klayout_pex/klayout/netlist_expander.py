@@ -51,7 +51,7 @@ class NetlistExpander:
         """
         :param device_models: the device models of the tech info, whose metal capacitors white-box mode removes
         :param substrate_net_name: the conductor of the substrate (see FasterCapInputBuilder),
-                                   a port of its own if the netlist has no such net
+                                   created if the netlist has no such net, and a port if it has no pin
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
@@ -82,11 +82,16 @@ class NetlistExpander:
         signal_names = [cap_matrix_interpreter.signal_name_from_conductor_name(nc)
                         for nc in cap_matrix.conductor_names]
 
-        # NOTE: the substrate conductor is the substrate net, or a port of its own (e.g. a metal test pattern)
-        if substrate_net_name in signal_names and substrate_net_name not in name2net:
-            substrate_net = top_circuit.create_net(substrate_net_name)
-            top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
-            name2net[substrate_net_name] = substrate_net
+        # NOTE: the substrate conductor is the substrate net, or a net of its own (e.g. a metal test pattern),
+        #       and the substrate net is a port, also if the LVS netlist has it without pin
+        #       (e.g. IHP's global net sub! in a metal test pattern without taps)
+        if substrate_net_name in signal_names:
+            substrate_net = name2net.get(substrate_net_name)
+            if substrate_net is None:
+                substrate_net = top_circuit.create_net(substrate_net_name)
+                name2net[substrate_net_name] = substrate_net
+            if substrate_net.pin_count() == 0:
+                top_circuit.connect_pin(top_circuit.create_pin(substrate_net_name), substrate_net)
 
         # find nets for the matrix axes
         for nn in signal_names:
