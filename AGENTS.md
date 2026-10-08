@@ -58,6 +58,8 @@
 - Run tests in the poetry venv: `poetry run pytest -m "not slow and not smoke"` (or
   `poetry run pytest tests/<area> -q`) before calling work done; report failures with their
   output. `./run_unit_tests.sh` exits with the status of `open`, not of pytest.
+- Per commit, run the unit tests and the tests of the changed area; run all extraction tests
+  (`poetry run pytest tests/rcx25 -n 3`) once before handing over a PR.
 - Each bug fix gets a test that fails without it. A test that needs a workaround means the
   code is wrong: fix the code.
 - No loosened tolerances or re-baselined numbers without a physical explanation.

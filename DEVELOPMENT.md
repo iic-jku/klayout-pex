@@ -98,6 +98,15 @@ will create the JSON tech info files:
    - `klayout_pex_protobuf/ihp-sg13g2_tech.pb.json`
    - `klayout_pex_protobuf/sky130A_tech.pb.json`
 
+### Running tests
+
+- `./run_unit_tests.sh`, `./run_integration_tests.sh`: with coverage and an allure report in `build/`
+- Quick runs in the poetry venv, e.g. `poetry run pytest tests/rcx25 -n 3` (pytest-xdist):
+  - the workers write their extraction outputs to `output_<pdk>_worker<N>` and share the LVS cache
+    in `output_<pdk>/.kpex_cache`
+  - more workers gain little: the longest test takes 20 s, and a gf180mcuD LVS needs up to 1.7 GB
+  - coverage needs pytest-cov's `--cov` with workers, `coverage run` only sees the main process
+
 ### Running KPEX
 
 `kpex` is organized into subcommands. `kpex extract` runs the extraction engines;
