@@ -33,6 +33,7 @@ import hashlib
 import os
 from pathlib import PurePath
 import shutil
+import tempfile
 from typing import *
 
 import google.protobuf.json_format
@@ -201,5 +202,17 @@ class LVSCacheEntry:
         #       which is never reused
         if os.path.exists(self.fingerprint_path):
             os.remove(self.fingerprint_path)
-        shutil.copy(lvsdb_path, self.lvsdb_path)
-        write_fingerprint(self.fingerprint_path, fingerprint)
+        # NOTE: each file is written beside its place and renamed into it, so that a concurrent run
+        #       reading the entry (e.g. parallel tests sharing the cache) never reads a partly written file
+        self._replace(self.lvsdb_path, lambda tmp_path: shutil.copyfile(lvsdb_path, tmp_path))
+        self._replace(self.fingerprint_path, lambda tmp_path: write_fingerprint(tmp_path, fingerprint))
+
+    def _replace(self, path: str, write: Callable[[str], Any]):
+        fd, tmp_path = tempfile.mkstemp(dir=self.dir_path, prefix=f".{os.path.basename(path)}.", suffix='.tmp')
+        os.close(fd)
+        try:
+            write(tmp_path)
+            os.replace(tmp_path, path)
+        except BaseException:
+            os.remove(tmp_path)
+            raise

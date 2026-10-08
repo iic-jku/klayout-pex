@@ -38,6 +38,7 @@ import klayout.lay as klay
 
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
+from rcx25_test_helpers import PDKName, PDKTestConfig
 
 
 CSVPath = str
@@ -87,12 +88,13 @@ def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CS
 
     preview_png_path = tempfile.mktemp(prefix=f"layout_preview_", suffix=".png")
     _save_layout_preview(gds_path, preview_png_path)
-    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'output_sky130A'))
+    pdk = PDKTestConfig(PDKName.SKY130A)
     cli = KpexCLI()
     cli.main(['main',
               '--pdk', 'sky130A',
               '--gds', gds_path,
-              '--out_dir', output_dir_path,
+              '--out_dir', pdk.output_dir,
+              '--cache-dir', pdk.lvs_cache_dir,
               '--2.5D',
               '--halo', '10000',
               '--scale', 'n'])

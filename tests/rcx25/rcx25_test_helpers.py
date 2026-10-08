@@ -43,6 +43,13 @@ from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
 
 
+def lvs_cache_dir(pdk_name: str) -> str:
+    """
+    The LVS cache of a PDK, shared by all tests and workers (and kept between CI runs, see integration-tests.yml)
+    """
+    return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pdk_name}", '.kpex_cache'))
+
+
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
     IHP_SG13G2 = 'ihp-sg13g2'
@@ -62,6 +69,20 @@ class PDKTestConfig:
     def test_designs_dir(self) -> str:
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                              'testdata', 'designs', self.name))
+
+    @property
+    def output_dir(self) -> str:
+        """
+        Where the extractions write to: one directory per pytest-xdist worker (e.g. output_sky130A_worker0),
+        so that parallel tests never write into each other's outputs
+        """
+        worker = os.environ.get('PYTEST_XDIST_WORKER', None)  # e.g. gw0
+        suffix = f"_worker{worker.removeprefix('gw')}" if worker else ''
+        return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{self.name}{suffix}"))
+
+    @property
+    def lvs_cache_dir(self) -> str:
+        return lvs_cache_dir(self.name)
 
     @property
     def lyt_path(self) -> str:
@@ -107,14 +128,14 @@ class RCX25Extraction:
 
         preview_png_path = tempfile.mktemp(prefix=f"layout_preview_", suffix=".png")
         self.save_layout_preview(gds_path, preview_png_path)
-        output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{self.pdk.name}"))
         cli = KpexCLI()
         cli.main(['main',
                   '--pdk', self.pdk.name,
                   '--mode', self.pex_mode,
                   '--blackbox', 'y' if self.blackbox else 'n',
                   '--gds', gds_path,
-                  '--out_dir', output_dir_path,
+                  '--out_dir', self.pdk.output_dir,
+                  '--cache-dir', self.pdk.lvs_cache_dir,
                   '--2.5D',
                   '--halo', '10000',
                   '--scale', 'n'])

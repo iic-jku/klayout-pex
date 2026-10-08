@@ -53,14 +53,14 @@ class Pex25DWriterTest(unittest.TestCase):
             Fraction(5, 4): '1.25',
         }
         for value, expected in cases.items():
-            with self.subTest(value=value):
+            with self.subTest(value=str(value)):  # NOTE: pytest-xdist reports only plain values
                 assert format_exact(value) == expected
 
     def test_format_exact_refuses_what_it_cannot_render(self):
         # A denominator with a factor other than 2 or 5 has no finite decimal
         # form, and rounding one silently would move geometry off the grid.
         for value in (Fraction(1, 3), Fraction(2, 7)):
-            with self.subTest(value=value):
+            with self.subTest(value=str(value)):  # NOTE: pytest-xdist reports only plain values
                 with self.assertRaises(WriteError):
                     format_exact(value)
 
