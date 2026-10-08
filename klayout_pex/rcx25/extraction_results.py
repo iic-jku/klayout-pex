@@ -176,6 +176,39 @@ def add_distributed_capacitance(capacitance_table: Dict[NetCoupleKey, float],
         capacitance_table[NetCoupleKey(node_a, node_b).normed()] += cap_value * fraction
 
 
+# NOTE: a capacitance between nodes of resistor networks below this goes to a larger one between the same nets,
+#       to keep the netlist small (like the minimum of the fringe capacitances, but keeping the sum)
+MIN_NODE_CAPACITANCE = 1e-3  # fF
+
+
+def merged_small_capacitances(capacitances: Dict[NetCoupleKey, float],
+                              net_by_node: Dict[NetName, NetName],
+                              min_capacitance: float) -> Dict[NetCoupleKey, float]:
+    """
+    Each capacitance below the minimum goes to a larger one between the same nets,
+    preferably one on a node of it, so that the capacitance between each pair of nets stays the same
+
+    :param net_by_node: the net of each node of the resistor networks
+    """
+    keys_by_nets: Dict[NetCoupleKey, List[NetCoupleKey]] = defaultdict(list)
+    for key in sorted(capacitances):
+        nets = NetCoupleKey(net_by_node.get(key.net1, key.net1), net_by_node.get(key.net2, key.net2)).normed()
+        keys_by_nets[nets].append(key)
+
+    merged: Dict[NetCoupleKey, float] = {}
+    for keys in keys_by_nets.values():
+        # NOTE: the largest one stays, if all are small
+        large = [k for k in keys if capacitances[k] >= min_capacitance] or [max(keys, key=capacitances.get)]
+        for key in large:
+            merged[key] = capacitances[key]
+        for key in keys:
+            if key in merged:
+                continue
+            neighbors = [k for k in large if {k.net1, k.net2} & {key.net1, key.net2}] or large
+            merged[max(neighbors, key=capacitances.get)] += capacitances[key]
+    return merged
+
+
 @dataclass(frozen=True, order=True)
 class DeviceTerminalKey:
     device_id: int
@@ -476,10 +509,18 @@ class CellExtractionResults:
                                                label_ports={net_name: [port_names[label] for label in sorted(port_names)]
                                                             for net_name, port_names in port_names_by_net.items()})
 
-        return ExtractionSummary.merged([
+        summary = ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary,
             resistance_summary
         ])
+
+        if node_names_by_net:
+            net_by_node = {node_name: net_name
+                           for net_name, node_names in node_names_by_net.items()
+                           for node_name in node_names.by_node_id.values()}
+            summary.capacitances = merged_small_capacitances(summary.capacitances, net_by_node, MIN_NODE_CAPACITANCE)
+
+        return summary
 
 
 @dataclass

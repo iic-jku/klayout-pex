@@ -163,6 +163,25 @@ class CellExtractionResultsTest(unittest.TestCase):
 
 
 
+    def test_small_capacitances_are_merged_into_larger_ones_between_the_same_nets(self):
+        # the nodes A, A.$1 of net A, and B, B.$1 of net B, net C has no resistor network
+        net_by_node = {'A': 'A', 'A.$1': 'A', 'B': 'B', 'B.$1': 'B'}
+        capacitances = {NetCoupleKey('A', 'B'): 1.0,
+                        NetCoupleKey('A.$1', 'B'): 0.5,
+                        NetCoupleKey('A.$1', 'B.$1'): 0.00001,  # NOTE: goes to the one on its node A.$1
+                        NetCoupleKey('A', 'C'): 0.00002,  # NOTE: goes to the largest, as all are small
+                        NetCoupleKey('A.$1', 'C'): 0.00003,
+                        NetCoupleKey('B', 'C'): 0.00004}  # NOTE: stays, as the only one between B and C
+
+        merged = merged_small_capacitances(capacitances, net_by_node, min_capacitance=1e-4)
+
+        self.assertEqual({NetCoupleKey('A', 'B'), NetCoupleKey('A.$1', 'B'),
+                          NetCoupleKey('A.$1', 'C'), NetCoupleKey('B', 'C')}, set(merged))
+        self.assertEqual(1.0, merged[NetCoupleKey('A', 'B')])
+        self.assertAlmostEqual(0.50001, merged[NetCoupleKey('A.$1', 'B')], places=15)
+        self.assertAlmostEqual(0.00005, merged[NetCoupleKey('A.$1', 'C')], places=15)
+        self.assertEqual(0.00004, merged[NetCoupleKey('B', 'C')])
+
     def test_summarize_overlap(self):
         results = CellExtractionResults(cell_name='Cell')
 
