@@ -49,10 +49,12 @@ def test_single_wire_li1():
     #_______________________________ NOTE: with halo=8µm __________________________________
     # R0 A B 840.534
     # R1 B A 840.534   # reported twice!
+    # NOTE: the net A,B has labels only, so it is tied to the node of A (1 mΩ)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_single_wire_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;B;;840.533"""
+R1;A;A,B;;0.001
+R2;A;B;;840.533"""
         )
 
 
@@ -67,7 +69,8 @@ def test_contact_1x1_minsize_mcon():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_contact_1x1_minsize_mcon.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;BOT;TOP;;9.3"""
+R1;BOT;BOT,TOP;;0.001
+R2;BOT;TOP;;9.3"""
         )
 
 
@@ -125,10 +128,11 @@ def test_via_stack_1x1_minsize_poly_to_met5():
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;li1;met1;;9.3
 R2;li1;poly;;152.0
-R3;met1;met2;;4.5
-R4;met2;met3;;3.41
-R5;met3;met4;;3.41
-R6;met4;met5;;0.38"""
+R3;li1,met1,met2,met3,met4,met5,poly;poly;;0.001
+R4;met1;met2;;4.5
+R5;met2;met3;;3.41
+R6;met3;met4;;3.41
+R7;met4;met5;;0.38"""
         )
 
 

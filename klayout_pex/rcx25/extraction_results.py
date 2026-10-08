@@ -160,6 +160,7 @@ class DeviceTerminalKey:
 
 
 # NOTE: ties the port of a label to the node of another label it's on (#211 §11),
+#       or a net of labels only to the node of its first label (see NetworkNodeNames.net_tie_node_id),
 #       not 0 Ω, which a simulator can't solve for
 LABEL_TIE_RESISTANCE = 1e-3  # Ω
 
@@ -203,6 +204,10 @@ class NetworkNodeNames:
 
     # the IDs of the nodes of each device terminal (its ports)
     terminal_node_ids: Dict[DeviceTerminalKey, List[int]]
+
+    # the ID of the node tied to the net, if every node is a pin's, so that none carries its name
+    # (e.g. a wire between the labels A and B of the net A,B)
+    net_tie_node_id: Optional[int] = None
 
     @classmethod
     def from_network(cls,
@@ -284,15 +289,21 @@ class NetworkNodeNames:
         # NOTE: one node carries the name of the net, so that what stays connected to the net
         #       (its capacitances, device terminals without a port, e.g. a MOS bulk) is on the resistor network:
         #       a pin of that name, otherwise the first device terminal, otherwise the first node (but a pin)
+        #       or, if every node is a pin's, the first node is tied to the net (see summarize),
+        #       rather than leaving the net off the resistor network
+        net_tie_node_id: Optional[int] = None
         if network.net_name not in name_by_root.values():
             candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
                               [find(n.node_id) for n in nodes]
             root = next((r for r in candidate_roots if not has_pin(r)), None)
             if root is not None:
                 name_by_root[root] = network.net_name
+            elif candidate_roots:
+                net_tie_node_id = candidate_roots[0]
 
         return cls(by_node_id={n.node_id: name_by_root[find(n.node_id)] for n in nodes},
-                   terminal_node_ids=terminal_node_ids)
+                   terminal_node_ids=terminal_node_ids,
+                   net_tie_node_id=net_tie_node_id)
 
 
 @dataclass
@@ -376,6 +387,8 @@ class CellExtractionResults:
                     if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN
                     and n.node_name in port_names
                     and port_names[n.node_name] != node_names.by_node_id[n.node_id]}
+            if node_names.net_tie_node_id is not None:
+                ties.add(NetCoupleKey(network.net_name, node_names.by_node_id[node_names.net_tie_node_id]).normed())
             for key in sorted(ties):
                 add_resistance(normalized_resistance_table, key, LABEL_TIE_RESISTANCE)
 
