@@ -40,10 +40,12 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=
 @pytest.mark.slow
 def test_single_wire_m1():
     # Metal1: 90 mΩ/sq, (9.885 - 0.115) µm / 0.23 µm = 42.5 sq
+    # NOTE: the net A,B has labels only, so it is tied to the node of A (1 mΩ)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_single_wire_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;A;B;;3.823"""
+R1;A;A,B;;0.001
+R2;A;B;;3.823"""
     )
 
 
@@ -68,7 +70,8 @@ def test_contact_1x1_minsize_via1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_contact_1x1_minsize_via1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;BOT;TOP;;4.5"""
+R1;BOT;BOT,TOP;;0.001
+R2;BOT;TOP;;4.5"""
     )
 
 
@@ -150,9 +153,10 @@ def test_contact_2x2_minsize_via1():
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_via_stack_1x1_minsize_poly_to_metal5():
-    # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut
+    # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut,
+    # and the tie of the net, whose nodes are all labels, to one of them (1 mΩ)
     assert obtained_resistances('test_patterns', 'r_via_stack_1x1_minsize_poly_to_metal5.gds.gz') == \
-           [4.5] * 4 + [5.9]
+           [0.001] + [4.5] * 4 + [5.9]
 
 
 @allure.parent_suite(parent_suite)

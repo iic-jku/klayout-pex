@@ -332,7 +332,24 @@ class CellExtractionResultsTest(unittest.TestCase):
 
         self.assertEqual({'D,X': ['D$1', 'X']}, summary.label_ports)
         self.assertEqual({NetCoupleKey('D', 'D.$1.Metal1'): 0.5,
-                          NetCoupleKey('D$1', 'X'): 0.6}, summary.resistances)
+                          NetCoupleKey('D$1', 'X'): 0.6,
+                          NetCoupleKey('D$1', 'D,X'): LABEL_TIE_RESISTANCE}, summary.resistances)
+
+    def test_summarize_a_net_of_labels_only_is_tied_to_its_first_label(self):
+        # a wire between the labels A and B: no node carries the net's name A,B,
+        # so the node of A is tied to it, rather than leaving the net (e.g. its capacitances) off the network
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'A,B',
+                         nodes=[(1, K.KIND_PIN, 'A'),
+                                (2, K.KIND_PIN, 'B')],
+                         elements=[(1, 2, 3.823)])
+
+        summary = results.summarize()
+
+        self.assertEqual({'A,B': ['A', 'B']}, summary.label_ports)
+        self.assertEqual({NetCoupleKey('A', 'B'): 3.823,
+                          NetCoupleKey('A', 'A,B'): LABEL_TIE_RESISTANCE}, summary.resistances)
 
     def test_summarize_labels_on_one_node_are_tied(self):
         # NOTE: each label is a port, so the port of X is tied to the node of D (#211 §11)

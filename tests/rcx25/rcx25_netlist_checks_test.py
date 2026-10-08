@@ -42,6 +42,7 @@ DESIGNS = [
     (PDK.SKY130A, 'sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz'),
     (PDK.SKY130A, 'inv/inv.gds.gz'),
     (PDK.SKY130A, 'test_patterns/nfet_li1_redux.gds.gz'),
+    (PDK.SKY130A, 'test_patterns/r_single_wire_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_ntap_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_label_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/cap_var_lvt_without_ptap_ring.gds.gz'),
