@@ -29,6 +29,7 @@ import filecmp
 import io
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from typing import *
@@ -330,3 +331,28 @@ class KpexCLILVSCacheTest(TempDirTestCase):
         with mock.patch.object(Tool, 'detect_version', return_value=Version('0.30.13')):
             _, fake_klayout, info_mock = self.create_lvsdb()
             self.assert_cache_miss("the KLayout version changed (0.30.12 → 0.30.13)", fake_klayout, info_mock)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "Cache")
+class LVSCacheStoreTest(unittest.TestCase):
+    @unittest.skipIf(sys.platform == 'win32', "Windows can't replace a file that is open")
+    def test_a_reader_keeps_a_complete_lvsdb_while_the_entry_is_stored_again(self):
+        # NOTE: e.g. parallel tests that share the cache and extract the same layout
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            entry = LVSCacheEntry(dir_path=os.path.join(tmp_dir, 'cache'), cell_name=CELL_NAME)
+            fingerprint = LVSInputFingerprint(format_version=FINGERPRINT_FORMAT_VERSION)
+            old_lvsdb_path = os.path.join(tmp_dir, 'old.lvsdb')
+            new_lvsdb_path = os.path.join(tmp_dir, 'new.lvsdb')
+            write_file(old_lvsdb_path, 'old\n' * 1000)
+            write_file(new_lvsdb_path, 'new\n' * 2000)
+            entry.store(lvsdb_path=old_lvsdb_path, fingerprint=fingerprint)
+
+            with open(entry.lvsdb_path, 'r', encoding='utf-8') as reader:
+                entry.store(lvsdb_path=new_lvsdb_path, fingerprint=fingerprint)
+                self.assertEqual('old\n' * 1000, reader.read())
+
+            self.assertTrue(filecmp.cmp(new_lvsdb_path, entry.lvsdb_path, shallow=False))
+            self.assertEqual(fingerprint, read_fingerprint(entry.fingerprint_path))
+            self.assertEqual(sorted([f"{CELL_NAME}.lvsdb.gz", f"{CELL_NAME}.lvs_fingerprint.pb.json"]),
+                             sorted(os.listdir(entry.dir_path)))  # NOTE: no temporary files left
