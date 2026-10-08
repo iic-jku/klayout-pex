@@ -25,6 +25,8 @@ import allure
 import pytest
 import unittest
 
+import klayout.db as kdb
+
 from klayout_pex.rcx25.extraction_results import *
 
 
@@ -45,6 +47,34 @@ class NetCoupleKeyTest(unittest.TestCase):
 
 @allure.parent_suite("Unit Tests")
 class CellExtractionResultsTest(unittest.TestCase):
+    def test_capacitances_keep_their_geometry_only_if_asked_to(self):
+        # NOTE: the geometry places each capacitance on the resistor network (RC mode), and takes memory otherwise
+        def add_capacitances(results: CellExtractionResults):
+            results.add_overlap_cap(OverlapCap(key=OverlapKey('met1', 'A', 'li1', 'B'), cap_value=1.0,
+                                               shielded_area=0.0, unshielded_area=0.0, tech_spec=None,
+                                               area=kdb.Region(kdb.Box(0, 0, 100, 100))))
+            results.add_sidewall_cap(SidewallCap(key=SidewallKey('li1', 'A', 'B'), cap_value=1.0,
+                                                 distance=0.2, length=0.1, tech_spec=None,
+                                                 inside_edge=kdb.Edge(0, 0, 100, 0),
+                                                 outside_edge=kdb.Edge(0, 200, 100, 200)))
+            results.add_sideoverlap_cap(SideOverlapCap(key=SideOverlapKey('li1', 'A', 'met1', 'B'), cap_value=1.0,
+                                                       inside_edge=kdb.Edge(0, 0, 100, 0),
+                                                       outside_edge=kdb.Edge(0, 300, 100, 300)))
+
+        def geometries(results: CellExtractionResults) -> List[Any]:
+            o, = [c for caps in results.overlap_table.values() for c in caps]
+            s, = [c for caps in results.sidewall_table.values() for c in caps]
+            f, = [c for caps in results.sideoverlap_table.values() for c in caps]
+            return [o.area, s.inside_edge, s.outside_edge, f.inside_edge, f.outside_edge]
+
+        kept = CellExtractionResults(cell_name='Cell', keep_capacitance_geometry=True)
+        add_capacitances(kept)
+        self.assertTrue(all(g is not None for g in geometries(kept)))
+
+        dropped = CellExtractionResults(cell_name='Cell')
+        add_capacitances(dropped)
+        self.assertEqual([None] * 5, geometries(dropped))
+
     def test_summarize_overlap(self):
         results = CellExtractionResults(cell_name='Cell')
 

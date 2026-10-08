@@ -324,17 +324,25 @@ class SidewallAndFringeExtractor:
 
             # info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
+            inside_edge = geometry_restorer.restore_edge_interval(edge_interval)
+
             swk = SidewallKey(layer=layer_name, net1=net1, net2=net2)
             sw_cap = SidewallCap(key=swk,
                                  cap_value=cap_femto,
                                  distance=distance_um,
                                  length=length_um,
-                                 tech_spec=sidewall_cap_spec)
+                                 tech_spec=sidewall_cap_spec,
+                                 inside_edge=inside_edge,
+                                 # NOTE: the part of the other net facing the edge interval
+                                 outside_edge=geometry_restorer.restore_edge(
+                                     kdb.Edge(kdb.Point(edge_interval[0], avg_distance),
+                                              kdb.Point(edge_interval[1], avg_distance))
+                                 ))
             self.results.add_sidewall_cap(sw_cap)
 
             self.report.output_sidewall(
                 sidewall_cap=sw_cap,
-                inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
+                inside_edge=inside_edge,
                 outside_edge=geometry_restorer.restore_edge(outside_edge)
             )
 
@@ -477,16 +485,27 @@ class SidewallAndFringeExtractor:
                         #      f"{round(cap_femto, 5)} fF, "
                         #      f"edge interval length = {round(edge_interval_length_um, 2)} µm")
 
+                        inside_edge = geometry_restorer.restore_edge_interval(edge_interval)
+                        # NOTE: the fringe ends on the polygon from its near to its far side,
+                        #       so the middle of it along the edge interval stands for it
+                        distance_middle = (distance_near + distance_far) // 2
+
                         sok = SideOverlapKey(layer_inside=inside_layer_name,
                                              net_inside=inside_net_name,
                                              layer_outside=outside_layer_name,
                                              net_outside=outside_net_name)
-                        soc = SideOverlapCap(key=sok, cap_value=cap_femto)
+                        soc = SideOverlapCap(key=sok,
+                                             cap_value=cap_femto,
+                                             inside_edge=inside_edge,
+                                             outside_edge=geometry_restorer.restore_edge(
+                                                 kdb.Edge(kdb.Point(edge_interval[0], distance_middle),
+                                                          kdb.Point(edge_interval[1], distance_middle))
+                                             ))
                         self.results.add_sideoverlap_cap(soc)
 
                         self.report.output_sideoverlap(
                             sideoverlap_cap=soc,
-                            inside_edge=geometry_restorer.restore_edge_interval(edge_interval),
+                            inside_edge=inside_edge,
                             outside_polygon=geometry_restorer.restore_polygon(p),
                             lateral_shield=geometry_restorer.restore_polygon(lateral_shield) \
                                            if lateral_shield is not None else None

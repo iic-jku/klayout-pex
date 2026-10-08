@@ -27,6 +27,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import *
 
+import klayout.db as kdb
+
 from .types import NetName, LayerName, CellName
 from ..klayout.lvsdb_extractor import unique_name
 from ..log import debug, error
@@ -60,6 +62,10 @@ class SidewallCap:  # see Magic EdgeCap, extractInt.c L444
     length: float      # length in µm
     tech_spec: process_parasitics_pb2.CapacitanceInfo.SidewallCapacitance
 
+    # the edge of net1, and the one of net2 facing it (same direction), to distribute the capacitance (in DBU)
+    inside_edge: Optional[kdb.Edge] = None
+    outside_edge: Optional[kdb.Edge] = None
+
 
 @dataclass(frozen=True)
 class OverlapKey:
@@ -76,6 +82,9 @@ class OverlapCap:
     shielded_area: float  # in µm^2
     unshielded_area: float  # in µm^2
     tech_spec: process_parasitics_pb2.CapacitanceInfo.OverlapCapacitance
+
+    # the overlap of both nets, to distribute the capacitance (in DBU)
+    area: Optional[kdb.Region] = None
 
 
 @dataclass(frozen=True)
@@ -104,6 +113,11 @@ class SideOverlapKey:
 class SideOverlapCap:
     key: SideOverlapKey
     cap_value: float  # femto farad
+
+    # the edge of the inside net, and the middle of the polygon of the outside net along it (same direction),
+    # to distribute the capacitance (in DBU)
+    inside_edge: Optional[kdb.Edge] = None
+    outside_edge: Optional[kdb.Edge] = None
 
     def __str__(self) -> str:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
@@ -310,6 +324,10 @@ class NetworkNodeNames:
 class CellExtractionResults:
     cell_name: CellName
 
+    # NOTE: the capacitances keep their geometry (OverlapCap.area, SidewallCap.inside_edge, ...) only if asked to,
+    #       e.g. to place them on the resistor network (RC mode), as it takes memory on large layouts
+    keep_capacitance_geometry: bool = False
+
     overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
     sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
     sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
@@ -317,12 +335,18 @@ class CellExtractionResults:
     r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
 
     def add_overlap_cap(self, cap: OverlapCap):
+        if not self.keep_capacitance_geometry:
+            cap.area = None
         self.overlap_table[cap.key].append(cap)
 
     def add_sidewall_cap(self, cap: SidewallCap):
+        if not self.keep_capacitance_geometry:
+            cap.inside_edge = cap.outside_edge = None
         self.sidewall_table[cap.key].append(cap)
 
     def add_sideoverlap_cap(self, cap: SideOverlapCap):
+        if not self.keep_capacitance_geometry:
+            cap.inside_edge = cap.outside_edge = None
         self.sideoverlap_table[cap.key].append(cap)
 
     def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:

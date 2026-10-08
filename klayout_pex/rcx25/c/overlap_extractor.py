@@ -176,7 +176,8 @@ class OverlapExtractor:
                                          cap_value=cap_femto,
                                          shielded_area=0.0,  # TODO shielded_area_um2,
                                          unshielded_area=0.0,  # TODO unshielded_area_um2,
-                                         tech_spec=overlap_cap_spec)
+                                         tech_spec=overlap_cap_spec,
+                                         area=overlap_area)
 
                         self.results.add_overlap_cap(cap)
 

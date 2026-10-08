@@ -136,7 +136,9 @@ class RCX25Extractor:
         extraction_report = ExtractionReporter(cell_name=cell_name,
                                                dbu=self.pex_context.dbu,
                                                report_caps=self.report_caps)
-        cell_extraction_results = CellExtractionResults(cell_name=cell_name)
+        # NOTE: in RC mode, the capacitances go onto the resistor network, by their geometry
+        cell_extraction_results = CellExtractionResults(cell_name=cell_name,
+                                                        keep_capacitance_geometry=self.pex_mode == PEXMode.RC)
 
         # Explicitly log the stacktrace here, because otherwise Exceptions 
         # raised in the callbacks of *NeighborhoodVisitors can cause RuntimeErrors
