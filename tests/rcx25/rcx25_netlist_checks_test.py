@@ -34,6 +34,7 @@ import pytest
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
+from rcx25_test_helpers import lvs_cache_dir
 
 TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs'))
 
@@ -80,6 +81,7 @@ def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest
                   '--mode', mode,
                   '--gds', os.path.join(TEST_DESIGNS_DIR, pdk, gds),
                   '--out_dir', out_dir,
+                  '--cache-dir', lvs_cache_dir(pdk),
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
@@ -106,6 +108,7 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
                   '--blackbox', 'y',
                   '--gds', os.path.join(TEST_DESIGNS_DIR, pdk, gds),
                   '--out_dir', out_dir,
+                  '--cache-dir', lvs_cache_dir(pdk),
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
@@ -126,7 +129,7 @@ def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
          pytest.raises(SystemExit) as exit_info:
         try:
             KpexCLI().main(['main', '--pdk', PDK.SKY130A, '--mode', 'RC', '--gds', INV_1_GDS,
-                            '--out_dir', out_dir, '--2.5D'])
+                            '--out_dir', out_dir, '--cache-dir', lvs_cache_dir(PDK.SKY130A), '--2.5D'])
         finally:
             netlists = glob.glob(os.path.join(out_dir, '*', '*_k25d_pex_netlist.spice'))
     assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS

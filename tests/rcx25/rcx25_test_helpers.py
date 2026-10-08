@@ -43,6 +43,13 @@ from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
 
 
+def lvs_cache_dir(pdk_name: str) -> str:
+    """
+    The LVS cache of a PDK, shared by all tests and workers (and kept between CI runs, see integration-tests.yml)
+    """
+    return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pdk_name}", '.kpex_cache'))
+
+
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
     IHP_SG13G2 = 'ihp-sg13g2'
@@ -75,10 +82,7 @@ class PDKTestConfig:
 
     @property
     def lvs_cache_dir(self) -> str:
-        """
-        The LVS cache, shared by all tests and workers (and kept between CI runs, see integration-tests.yml)
-        """
-        return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{self.name}", '.kpex_cache'))
+        return lvs_cache_dir(self.name)
 
     @property
     def lyt_path(self) -> str:
