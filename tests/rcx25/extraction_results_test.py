@@ -22,10 +22,15 @@
 # --------------------------------------------------------------------------------
 #
 import allure
+import dataclasses
 import pytest
+import random
 import unittest
 
+import klayout.db as kdb
+
 from klayout_pex.rcx25.extraction_results import *
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 
 
 @allure.parent_suite("Unit Tests")
@@ -45,6 +50,138 @@ class NetCoupleKeyTest(unittest.TestCase):
 
 @allure.parent_suite("Unit Tests")
 class CellExtractionResultsTest(unittest.TestCase):
+    def test_capacitances_keep_their_geometry_only_if_asked_to(self):
+        # NOTE: the geometry places each capacitance on the resistor network (RC mode), and takes memory otherwise
+        def add_capacitances(results: CellExtractionResults):
+            results.add_overlap_cap(OverlapCap(key=OverlapKey('met1', 'A', 'li1', 'B'), cap_value=1.0,
+                                               shielded_area=0.0, unshielded_area=0.0, tech_spec=None,
+                                               area=kdb.Region(kdb.Box(0, 0, 100, 100))))
+            results.add_sidewall_cap(SidewallCap(key=SidewallKey('li1', 'A', 'B'), cap_value=1.0,
+                                                 distance=0.2, length=0.1, tech_spec=None,
+                                                 inside_edge=kdb.Edge(0, 0, 100, 0),
+                                                 outside_edge=kdb.Edge(0, 200, 100, 200)))
+            results.add_sideoverlap_cap(SideOverlapCap(key=SideOverlapKey('li1', 'A', 'met1', 'B'), cap_value=1.0,
+                                                       inside_edge=kdb.Edge(0, 0, 100, 0),
+                                                       outside_edge=kdb.Edge(0, 300, 100, 300)))
+
+        def geometries(results: CellExtractionResults) -> List[Any]:
+            o, = [c for caps in results.overlap_table.values() for c in caps]
+            s, = [c for caps in results.sidewall_table.values() for c in caps]
+            f, = [c for caps in results.sideoverlap_table.values() for c in caps]
+            return [o.area, s.inside_edge, s.outside_edge, f.inside_edge, f.outside_edge]
+
+        kept = CellExtractionResults(cell_name='Cell', keep_capacitance_geometry=True)
+        add_capacitances(kept)
+        self.assertTrue(all(g is not None for g in geometries(kept)))
+
+        dropped = CellExtractionResults(cell_name='Cell')
+        add_capacitances(dropped)
+        self.assertEqual([None] * 5, geometries(dropped))
+
+    def test_summarize_distributes_the_capacitances_onto_the_nodes_of_the_resistor_network(self):
+        # a wire W of 100 µm x 1 µm (DBU 1 nm) with its pin at the left end and a junction at the right end,
+        # 2 µm beside it a wire V without resistor network (#211 §8)
+        results = CellExtractionResults(cell_name='Cell', keep_capacitance_geometry=True)
+        self.add_wire_network(results, 'W', 'met1', [(0, 500, 'W'), (100000, 500, '$1.met1')])
+        results.add_overlap_cap(OverlapCap(key=OverlapKey(layer_top='met1', net_top='W',
+                                                          layer_bot='VSUBS', net_bot='VSUBS'),
+                                           cap_value=4.0, shielded_area=0.0, unshielded_area=0.0, tech_spec=None,
+                                           area=kdb.Region(kdb.Box(0, 0, 100000, 1000))))
+        results.add_sidewall_cap(SidewallCap(key=SidewallKey(layer='met1', net1='W', net2='V'),
+                                             cap_value=2.0, distance=2.0, length=100.0, tech_spec=None,
+                                             inside_edge=kdb.Edge(0, 1000, 100000, 1000),
+                                             outside_edge=kdb.Edge(0, 3000, 100000, 3000)))
+        results.add_sideoverlap_cap(SideOverlapCap(key=SideOverlapKey(layer_inside='met1', net_inside='W',
+                                                                      layer_outside='VSUBS', net_outside='VSUBS'),
+                                                   cap_value=1.0,
+                                                   inside_edge=kdb.Edge(100000, 0, 0, 0),
+                                                   outside_edge=kdb.Edge(100000, -500, 0, -500)))
+
+        summary = results.summarize()
+
+        # NOTE: half of the wire is nearer to each of its nodes (π model)
+        expected = {NetCoupleKey('VSUBS', 'W'): 2.5,
+                    NetCoupleKey('VSUBS', 'W.$1.met1'): 2.5,
+                    NetCoupleKey('V', 'W'): 1.0,
+                    NetCoupleKey('V', 'W.$1.met1'): 1.0}
+        self.assertEqual(set(expected), set(summary.capacitances))
+        for key, capacitance in expected.items():
+            self.assertAlmostEqual(capacitance, summary.capacitances[key], places=12)
+
+
+    def test_summarize_keeps_the_capacitance_between_each_pair_of_nets(self):
+        # NOTE: the capacitances are distributed onto the nodes, but their sum per pair of nets is the same
+        rng = random.Random(211)
+
+        def box() -> kdb.Box:
+            x, y = rng.randrange(0, 50000), rng.randrange(0, 50000)
+            return kdb.Box(x, y, x + rng.randrange(100, 20000), y + rng.randrange(100, 20000))
+
+        def edges() -> Tuple[kdb.Edge, kdb.Edge]:
+            b = box()
+            return kdb.Edge(b.left, b.bottom, b.right, b.bottom), kdb.Edge(b.left, b.top, b.right, b.top)
+
+        layer_by_net = {'A': 'met1', 'B': 'met1', 'C': 'met2', 'D': 'met2'}
+        results = CellExtractionResults(cell_name='Cell', keep_capacitance_geometry=True)
+        for net_name in ('A', 'B', 'C'):  # NOTE: D has no resistor network
+            self.add_wire_network(results, net_name, layer_by_net[net_name],
+                                  [(rng.randrange(0, 70000), rng.randrange(0, 70000), f"$n{i}")
+                                   for i in range(rng.randrange(1, 8))])
+        for _ in range(100):
+            net1, net2 = rng.sample(sorted(layer_by_net), 2)
+            layer1, layer2 = layer_by_net[net1], layer_by_net[net2]
+            area = kdb.Region(box()) + kdb.Region(box())
+            results.add_overlap_cap(OverlapCap(key=OverlapKey(layer_top=layer2, net_top=net2,
+                                                              layer_bot=layer1, net_bot=net1),
+                                               cap_value=rng.uniform(0.001, 10.0),
+                                               shielded_area=0.0, unshielded_area=0.0, tech_spec=None,
+                                               area=area))
+            edge1, edge2 = edges()
+            results.add_sidewall_cap(SidewallCap(key=SidewallKey(layer=layer1, net1=net1, net2=net2),
+                                                 cap_value=rng.uniform(0.001, 10.0), distance=1.0, length=1.0,
+                                                 tech_spec=None, inside_edge=edge1, outside_edge=edge2))
+            edge1, edge2 = edges()
+            results.add_sideoverlap_cap(SideOverlapCap(key=SideOverlapKey(layer_inside=layer1, net_inside=net1,
+                                                                          layer_outside=layer2, net_outside=net2),
+                                                       cap_value=rng.uniform(0.001, 10.0),
+                                                       inside_edge=edge1, outside_edge=edge2))
+
+        distributed = results.summarize()
+        lumped = dataclasses.replace(results, r_extraction_result=pex_result_pb2.RExtractionResult()).summarize()
+
+        def net_of(node_name: str) -> str:
+            return node_name.split('.')[0]
+
+        distributed_by_nets: Dict[NetCoupleKey, float] = defaultdict(float)
+        for key, capacitance in distributed.capacitances.items():
+            distributed_by_nets[NetCoupleKey(net_of(key.net1), net_of(key.net2)).normed()] += capacitance
+
+        self.assertGreater(len(distributed.capacitances), len(lumped.capacitances))
+        self.assertEqual(set(lumped.capacitances), set(distributed_by_nets))
+        for key, capacitance in lumped.capacitances.items():
+            self.assertAlmostEqual(capacitance, distributed_by_nets[key], delta=1e-12 * capacitance)
+
+
+
+    def test_small_capacitances_are_merged_into_larger_ones_between_the_same_nets(self):
+        # the nodes A, A.$1 of net A, and B, B.$1 of net B, net C has no resistor network
+        net_by_node = {'A': 'A', 'A.$1': 'A', 'B': 'B', 'B.$1': 'B'}
+        capacitances = {NetCoupleKey('A', 'B'): 1.0,
+                        NetCoupleKey('A.$1', 'B'): 0.5,
+                        NetCoupleKey('A.$1', 'B.$1'): 0.00001,  # NOTE: goes to the one on its node A.$1
+                        NetCoupleKey('A', 'C'): 0.00002,  # NOTE: goes to the largest, as all are small
+                        NetCoupleKey('A.$1', 'C'): 0.00003,
+                        NetCoupleKey('B', 'C'): 0.00004}  # NOTE: stays, as the only one between B and C
+
+        merged = merged_small_capacitances(capacitances, net_by_node, min_capacitance=1e-4)
+
+        self.assertEqual({NetCoupleKey('A', 'B'), NetCoupleKey('A.$1', 'B'),
+                          NetCoupleKey('A.$1', 'C'), NetCoupleKey('B', 'C')}, set(merged))
+        self.assertEqual(1.0, merged[NetCoupleKey('A', 'B')])
+        self.assertAlmostEqual(0.50001, merged[NetCoupleKey('A.$1', 'B')], places=15)
+        self.assertAlmostEqual(0.00005, merged[NetCoupleKey('A.$1', 'C')], places=15)
+        self.assertEqual(0.00004, merged[NetCoupleKey('B', 'C')])
+
     def test_summarize_overlap(self):
         results = CellExtractionResults(cell_name='Cell')
 
@@ -225,6 +362,31 @@ class CellExtractionResultsTest(unittest.TestCase):
         summary = results.summarize()
 
         self.assertEqual({NetCoupleKey('Y', 'Y.$0.3'): 5.0}, summary.resistances)
+
+    @staticmethod
+    def add_wire_network(results: CellExtractionResults,
+                         net_name: str,
+                         layer_name: str,
+                         nodes: List[Tuple[int, int, str]]):
+        """
+        The resistor network of a wire, each node joined to the one before
+
+        :param nodes: (x, y, node name) of a pin (the first node) and wire junctions
+        """
+        K = r_network_pb2.RNode.Kind
+        network = results.r_extraction_result.networks.add(net_name=net_name)
+        for node_id, (x, y, node_name) in enumerate(nodes, start=1):
+            node = network.nodes.add(node_id=node_id, node_name=node_name, layer_name=layer_name,
+                                     node_kind=K.KIND_PIN if node_id == 1 else K.KIND_WIRE_JUNCTION)
+            if node_id > 1:
+                node.net_name = f"{net_name}.{node_name}"
+            node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_POINT
+            node.location.point.x, node.location.point.y = x, y
+            if node_id > 1:
+                element = network.elements.add(resistance=10.0)
+                element.node_a.node_id = node_id - 1
+                element.node_b.node_id = node_id
+
 
     @staticmethod
     def add_network(results: CellExtractionResults,
