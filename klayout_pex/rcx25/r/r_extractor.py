@@ -430,7 +430,7 @@ class RExtractor:
 
         for v in rex_request.tech.vias:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
-            via_layer_ids.add(c.layer.id)
+            via_layer_ids.add(v.layer.id)
 
         LP = tech_pb2.LayerInfo.Purpose
         well_layer_ids: Set[int] = set()

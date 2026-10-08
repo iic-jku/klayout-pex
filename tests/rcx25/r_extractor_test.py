@@ -251,6 +251,21 @@ class RExtractorDeviceTerminalTest(unittest.TestCase):
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("R", "Node Kinds")
+class RExtractorNodeKindTest(unittest.TestCase):
+    def test_internal_nodes_of_the_conductors_are_wire_junctions(self):
+        # NOTE: the internal nodes of the last conductor (li1) were via junctions
+        K = r_network_pb2.RNode.Kind
+        self.assertEqual({'G': {'$0.poly': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
+                          '$2': {'$0.nsdm': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
+                          '$3': {'$0.nsdm': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
+                          'sky130_gnd': {}},
+                         {net_name: {n.node_name: n.node_kind for n in network.nodes
+                                     if n.node_kind not in (K.KIND_PIN, K.KIND_DEVICE_TERMINAL)}
+                          for net_name, network in nfet_li1_redux_networks().items()})
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("R", "Node Names")
 class RExtractorNodeNameTest(unittest.TestCase):
     def test_node_names_have_the_layer_name(self):
