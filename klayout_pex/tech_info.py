@@ -30,7 +30,7 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .device_models import DeviceModels
-from .types import GDSPair
+from .types import CanonicalLayerName, GDSPair, LVSLayerName
 from .util.multiple_choice import MultipleChoicePattern
 from .log import (
     warning
@@ -46,9 +46,6 @@ class TechDefError(Exception):
 
 class TechInfo:
     """Helper class for Protocol Buffer tech_pb2.Technology"""
-
-    LVSLayerName = str
-    CanonicalLayerName = str
 
     @staticmethod
     def duplicate_names(tech: tech_pb2.Technology) -> List[str]:
