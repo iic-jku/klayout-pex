@@ -30,7 +30,7 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .device_models import DeviceModels
-from .types import CanonicalLayerName, GDSPair, LVSLayerName
+from .types import CanonicalLayerName, GDSPair, LayerName, LVSLayerName
 from .util.multiple_choice import MultipleChoicePattern
 from .log import (
     warning
@@ -202,6 +202,45 @@ class TechInfo:
             if gds_pair is not None and gds_pair not in gds_pairs:
                 gds_pairs.append(gds_pair)
         return gds_pairs
+
+    @cached_property
+    def lvs_layer_names_by_process_layer_name(self) -> Dict[LayerName, List[LVSLayerName]]:
+        """
+        The LVS layers whose shapes each layer of the process stack (a conductor or a contact) has:
+        the one named after it, and those no layer of the stack is named after
+        go to the first layer of their GDS pair, from the bottom up
+
+        NOTE: layers of the stack can share a GDS pair, e.g. sky130A met3_ncap and met3_cap,
+              the parts of met3 without and with a MIM cap above, which have different dielectrics,
+              so each of them has the shapes of its own LVS layer only
+              (and met3_ncap also those of met3_vpp, the met3 of the MOM caps)
+        """
+        stack_layer_names_by_gds_pair: Dict[GDSPair, List[LayerName]] = {}
+        for lyr in self.tech.process_stack.layers:
+            match lyr.layer_type:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION:
+                    layer = lyr.diffusion_layer
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
+                    layer = lyr.metal_layer
+                case _:
+                    continue
+            names = [lyr.name]
+            if layer.HasField('contact_above'):
+                names.append(layer.contact_above.name)
+            for name in names:
+                gds_pair = self.gds_pair_for_computed_layer_name.get(name, None) or \
+                           self.gds_pair_for_layer_name.get(name, None)
+                if gds_pair is not None:
+                    stack_layer_names_by_gds_pair.setdefault(gds_pair, []).append(name)
+
+        lvs_layer_names_by_process_layer_name: Dict[LayerName, List[LVSLayerName]] = {}
+        for lvs_layer_name, gds_pair in self.gds_pair_for_computed_layer_name.items():
+            stack_layer_names = stack_layer_names_by_gds_pair.get(gds_pair, None)
+            if not stack_layer_names:
+                continue
+            process_layer_name = lvs_layer_name if lvs_layer_name in stack_layer_names else stack_layer_names[0]
+            lvs_layer_names_by_process_layer_name.setdefault(process_layer_name, []).append(lvs_layer_name)
+        return lvs_layer_names_by_process_layer_name
 
     @cached_property
     def process_diffusion_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:

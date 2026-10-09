@@ -156,10 +156,22 @@ class PEX25DBuilder:
         return self.tech_info.gds_pair(layer_name)
 
     def shapes_of_net(self, layer_name: str, net: kdb.Net) -> Optional[kdb.Region]:
+        """
+        NOTE: layers of the process stack can share a GDS pair (e.g. a metal without and with a MIM cap above),
+              so each of them has the shapes of its own LVS layers only
+        """
         gds_pair = self.gds_pair(layer_name)
         if not gds_pair:
             return None
-        return self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net)
+        lvs_layer_names = self.tech_info.lvs_layer_names_by_process_layer_name.get(layer_name, [])
+        return self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net, lvs_layer_names=lvs_layer_names)
+
+    @cached_property
+    def process_layer_name_by_lvs_layer_name(self) -> Dict[str, str]:
+        """The profile whose shapes the shapes of an LVS layer are."""
+        return {lvs_layer_name: layer_name
+                for layer_name, lvs_layer_names in self.tech_info.lvs_layer_names_by_process_layer_name.items()
+                for lvs_layer_name in lvs_layer_names}
 
     @cached_property
     def metal_layer_by_name(self) -> Dict[str, Any]:
@@ -622,11 +634,17 @@ class PEX25DBuilder:
 
     def build_terminals(self, pex25d_file: Any) -> None:
         kinds = pex25d_terminal_pb2()
+        # Metals can share their drawn layer (e.g. sky130A met3_ncap and met3_cap, without and with
+        # a MiM cap above), whose pins are then on the one under each label.
+        metal_names_by_gds_pair: Dict[GDSPair, List[str]] = {}
         for metal in pex25d_file.metals:
             canonical = self.canonical_name(metal.name) or metal.name
             gds_pair = self.tech_info.gds_pair_for_layer_name.get(canonical)
             if gds_pair not in self.tech_info.layer_info_by_gds_pair:
                 continue
+            metal_names_by_gds_pair.setdefault(gds_pair, []).append(metal.name)
+
+        for gds_pair, metal_names in metal_names_by_gds_pair.items():
             pins = self.pex_context.pins_of_layer(gds_pair)
             if pins.is_empty():
                 continue
@@ -638,18 +656,21 @@ class PEX25DBuilder:
                 if key in seen:
                     continue
                 seen.add(key)
-                candidates = []
+                candidates: List[Tuple[str, str]] = []  # conductor and metal at the label
                 for net_name, regions in self._conductor_regions.items():
-                    region = regions.get(metal.name)
-                    if region is not None and any(p.inside(point) for p in region.each_merged()):
-                        candidates.append(net_name)
+                    for metal_name in metal_names:
+                        region = regions.get(metal_name)
+                        if region is not None and any(p.inside(point) for p in region.each_merged()):
+                            candidates.append((net_name, metal_name))
+                            break
                 if len(candidates) != 1:
-                    raise BuildError(f"Pin '{label.string}' on '{metal.name}' must select one "
+                    raise BuildError(f"Pin '{label.string}' on '{'/'.join(metal_names)}' must select one "
                                      f"conductor at its label; found {len(candidates)}")
+                net_name, metal_name = candidates[0]
                 # A pin marker may cover the entire wire; only the label is the port.
                 box = kdb.Box(point.x - 1, point.y - 1, point.x + 1, point.y + 1)
                 self.add_terminal(pex25d_file, f'pin:{quote(label.string, safe="._-$[]")}',
-                                  candidates[0], metal.name, kinds.TERMINAL_KIND_PIN, box)
+                                  net_name, metal_name, kinds.TERMINAL_KIND_PIN, box)
 
         for net in self.pex_context.top_circuit.each_net():
             net_name = net.expanded_name()
@@ -667,8 +688,11 @@ class PEX25DBuilder:
                     pair = self.gds_pair(source_name)
                     if pair is None:
                         continue
+                    # Metals can share a GDS pair (e.g. sky130A met3_ncap and met3_cap, whose MiM cap
+                    # bottom plates abut the rest), the terminal is on the one of its LVS layer.
+                    owner = self.process_layer_name_by_lvs_layer_name.get(source_name)
                     for layer, geometry in regions.items():
-                        if self.gds_pair(layer) != pair:
+                        if self.gds_pair(layer) != pair or owner not in (None, layer):
                             continue
                         intersection = geometry & marker
                         if intersection.is_empty():

@@ -23,6 +23,7 @@
 #
 
 from types import SimpleNamespace
+from typing import *
 import unittest
 
 import allure
@@ -40,7 +41,12 @@ import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
 class TerminalFixture:
-    def __init__(self):
+    def __init__(self, metal_names: Tuple[str, ...] = ('met1',)):
+        """
+        :param metal_names: the metals of the stack on the drawn met1 (e.g. split by a MiM cap),
+                            each of them with its LVS layer of the same name
+        """
+        self.metal_names = metal_names
         self.netlist = kdb.Netlist()
         self.circuit = kdb.Circuit()
         self.circuit.name = 'test'
@@ -49,7 +55,7 @@ class TerminalFixture:
         self.device_class = kdb.DeviceClassMOS4Transistor()
         self.device_class.name = 'nfet'
         self.netlist.add(self.device_class)
-        self.geometry = {(1, 0): kdb.Region(kdb.Box(0, 0, 100, 20))}
+        self.geometry = {metal_names[0]: kdb.Region(kdb.Box(0, 0, 100, 20))}  # by LVS layer
         self.markers = {}
         self.labels = kdb.Texts()
         self.pins = kdb.Region(kdb.Box(0, 0, 100, 20))
@@ -64,28 +70,39 @@ class TerminalFixture:
         substrate = stack.layers.add(name='subs', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE)
         substrate.substrate_layer.height = 0.1
         substrate.substrate_layer.thickness = 0.2
-        metal = stack.layers.add(name='met1', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
-        metal.metal_layer.z = 1.0
-        metal.metal_layer.thickness = 0.1
+        for name in metal_names:
+            metal = stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
+            metal.metal_layer.z = 1.0
+            metal.metal_layer.thickness = 0.1
+            tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
+                                                                       drw_gds_pair=tech_pb2.GDSPair(layer=1)),
+                                         original_layer_name='met1')
         air = stack.layers.add(name='air', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
         air.simple_dielectric_layer.dielectric_k = 1.0
         self.tech = TechInfo(tech, None)
         self.context = SimpleNamespace(
             dbu=0.001, top_circuit=self.circuit,
-            shapes_of_net=lambda gds_pair, net: self.geometry.get(gds_pair),
+            shapes_of_net=self.shapes_of_net,
             pins_of_layer=lambda pair: self.pins,
             labels_of_layer=lambda pair: self.labels,
             lvsdb=SimpleNamespace(
-                layer_name=lambda index: 'met1',
+                layer_name=lambda index: self.metal_names[index],
                 shapes_of_terminal=lambda ref: self.markers[ref.device().expanded_name()]))
+
+    def shapes_of_net(self, gds_pair, net, lvs_layer_names=None):
+        shapes = kdb.Region()
+        for lvs_layer_name, region in self.geometry.items():
+            if lvs_layer_names is None or lvs_layer_name in lvs_layer_names:
+                shapes += region
+        return shapes
 
     def pin(self, label, x, y):
         self.labels.insert(kdb.Text(label, kdb.Trans(x, y)))
 
-    def device(self, name, region):
+    def device(self, name, region, lvs_layer_name=None):
         device = self.circuit.create_device(self.device_class, name)
         device.connect_terminal('G', self.net)
-        self.markers[name] = {1: region}
+        self.markers[name] = {self.metal_names.index(lvs_layer_name or self.metal_names[0]): region}
 
     def build(self):
         return PEX25DBuilder(self.context, self.tech, 'test').build()
@@ -109,7 +126,7 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
 
     def test_pin_on_a_bent_wire_resolves(self):
         fixture = TerminalFixture()
-        fixture.geometry[(1, 0)] = kdb.Region(kdb.Polygon([
+        fixture.geometry['met1'] = kdb.Region(kdb.Polygon([
             kdb.Point(0, 0), kdb.Point(100, 0), kdb.Point(100, 20),
             kdb.Point(20, 20), kdb.Point(20, 100), kdb.Point(0, 100)]))
         fixture.pin('A', 10, 10)
@@ -135,14 +152,14 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
     def test_a_pin_without_interconnect_reports_a_build_error(self):
         fixture = TerminalFixture()
         fixture.pin('A', 10, 10)
-        fixture.geometry[(1, 0)] = kdb.Region(kdb.Box(50, 0, 100, 20))
+        fixture.geometry['met1'] = kdb.Region(kdb.Box(50, 0, 100, 20))
         with self.assertRaisesRegex(BuildError, 'must select one conductor'):
             fixture.build()
 
     def test_a_device_terminal_keeps_all_its_disjoint_shapes_in_one_node(self):
         fixture = TerminalFixture()
-        fixture.geometry[(1, 0)] = kdb.Region(kdb.Box(10, 0, 20, 100))
-        fixture.geometry[(1, 0)].insert(kdb.Box(40, 0, 50, 100))
+        fixture.geometry['met1'] = kdb.Region(kdb.Box(10, 0, 20, 100))
+        fixture.geometry['met1'].insert(kdb.Box(40, 0, 50, 100))
         marker = kdb.Region(kdb.Box(10, 40, 20, 50))
         marker.insert(kdb.Box(40, 40, 50, 50))
         fixture.device('M1', marker)
@@ -177,3 +194,34 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         file = fixture.build()
         assert len({t.name for t in file.terminals}) == 2
         assert len(read_pex25d_text(write_pex25d_text(file), '<generated>').terminals) == 2
+
+
+@allure.parent_suite('Unit Tests')
+@allure.tag('PEX25D', 'Builder')
+class Pex25DBuilderMetalsSharingGDSPairTest(unittest.TestCase):
+    # NOTE: e.g. sky130A met3, split into the bottom plates of the MiM caps (met3_cap) and the rest (met3_ncap)
+    @staticmethod
+    def fixture() -> TerminalFixture:
+        fixture = TerminalFixture(metal_names=('met1_ncap', 'met1_cap'))
+        fixture.geometry = {'met1_ncap': kdb.Region(kdb.Box(0, 0, 60, 20)),
+                            'met1_cap': kdb.Region(kdb.Box(60, 0, 100, 20))}
+        return fixture
+
+    def test_each_metal_has_the_shapes_of_its_own_lvs_layer(self):
+        file = self.fixture().build()
+        assert [(s.layer, s.box.lower_left.x, s.box.upper_right.x) for s in file.shapes] == \
+               [('met1_ncap', 0, 600), ('met1_cap', 600, 1000)]
+        assert validate(file, strict=True).exit_code == 0
+
+    def test_a_pin_is_on_the_metal_under_its_label(self):
+        fixture = self.fixture()
+        fixture.pin('A', 10, 10)
+        fixture.pin('B', 90, 10)
+        assert [(t.name, t.layer) for t in fixture.build().terminals] == \
+               [('pin:A', 'met1_ncap'), ('pin:B', 'met1_cap')]
+
+    def test_a_device_terminal_is_on_the_metal_of_its_lvs_layer(self):
+        # NOTE: the bottom plate of a MiM cap abuts the rest of its metal
+        fixture = self.fixture()
+        fixture.device('C1', kdb.Region(kdb.Box(60, 0, 100, 20)), lvs_layer_name='met1_cap')
+        assert [(t.name, t.layer) for t in fixture.build().terminals] == [('device:C1:G', 'met1_cap')]

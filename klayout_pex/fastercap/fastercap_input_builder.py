@@ -81,12 +81,15 @@ class FasterCapInputBuilder:
             return None
         return gds_pair
 
+    # NOTE: layers of the process stack can share a GDS pair (e.g. a metal without and with a MIM cap above),
+    #       so each of them has the shapes of its own LVS layers only
     def shapes_of_net(self, layer_name: str, net: kdb.Net) -> Optional[kdb.Region]:
         gds_pair = self.gds_pair(layer_name=layer_name)
         if not gds_pair:
             return None
 
-        shapes = self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net)
+        lvs_layer_names = self.tech_info.lvs_layer_names_by_process_layer_name.get(layer_name, [])
+        shapes = self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net, lvs_layer_names=lvs_layer_names)
         if not shapes:
             debug(f"Nothing extracted for layer {layer_name}")
         return shapes
@@ -96,7 +99,8 @@ class FasterCapInputBuilder:
         if not gds_pair:
             return None
 
-        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair)
+        lvs_layer_names = self.tech_info.lvs_layer_names_by_process_layer_name.get(layer_name, [])
+        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair, lvs_layer_names=lvs_layer_names)
         if not shapes:
             debug(f"Nothing extracted for layer {layer_name}")
         return shapes
