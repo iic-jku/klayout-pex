@@ -43,4 +43,7 @@ GDSPair = Tuple[int, int]    # a GDS layer and datatype (e.g. (68, 20))
 
 CellName = str
 NetName = str                # a net of the LVS netlist (e.g. VDD, or $3 without a label)
+Label = str                  # the text of a label (e.g. of a pin)
 LVSDeviceClassName = str     # a device class of the LVS netlist (e.g. sky130_fd_pr__nfet_01v8)
+DeviceID = int               # a device of the LVS netlist
+TerminalID = int             # a terminal of a device class

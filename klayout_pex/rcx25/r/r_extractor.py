@@ -30,7 +30,7 @@ from klayout_pex.log import (
     warning,
 )
 
-from klayout_pex.types import GDSPair, LayerName, NetName
+from klayout_pex.types import DeviceID, GDSPair, Label, LayerName, NetName, TerminalID
 
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
@@ -411,10 +411,6 @@ class RExtractor:
         rex_result = pex_result_pb2.RExtractionResult()
 
         rex_tech_kly = klayout_r_extractor_tech(rex_request.tech)
-
-        Label = str
-        DeviceID = int
-        TerminalID = int
 
         # dicts keyed by id / klayout_index
         layer_names: Dict[int, LayerName] = {}
