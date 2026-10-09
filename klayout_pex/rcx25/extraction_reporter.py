@@ -28,7 +28,8 @@ import klayout.rdb as rdb
 import klayout.db as kdb
 
 from .extraction_results import *
-from .types import EdgeNeighborhood, LayerName
+from .types import EdgeNeighborhood
+from ..types import LayerName
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 

@@ -29,7 +29,7 @@ from typing import *
 import klayout.db as kdb
 
 from klayout_pex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
-from klayout_pex.rcx25.types import NetName
+from klayout_pex.types import NetName
 
 Shape = Union[kdb.PolygonWithProperties, kdb.EdgeWithProperties]
 

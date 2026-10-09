@@ -31,6 +31,15 @@ NOTE: imports neither KLayout nor generated protobuf code, so that format-only p
 from typing import Tuple
 
 
+# ------------------------------- Layers and GDS -------------------------------
+
+LayerName = str              # a layer of the process stack, as the extraction engines name it (e.g. met1, met3_cap)
 CanonicalLayerName = str     # a drawn layer of the tech info (e.g. met1, on GDS 68/20)
 LVSLayerName = str           # a layer of the LVS deck (e.g. met1_con, met3_ncap)
 GDSPair = Tuple[int, int]    # a GDS layer and datatype (e.g. (68, 20))
+
+
+# -------------------------- Connectivity and Netlist --------------------------
+
+CellName = str
+NetName = str                # a net of the LVS netlist (e.g. VDD, or $3 without a label)

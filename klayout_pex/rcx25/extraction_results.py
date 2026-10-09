@@ -30,7 +30,7 @@ from typing import *
 import klayout.db as kdb
 
 from .capacitance_distributor import CapacitanceDistributor, NodePair
-from .types import NetName, LayerName, CellName
+from ..types import CellName, LayerName, NetName
 from ..klayout.lvsdb_extractor import unique_name
 from ..log import debug, error
 
