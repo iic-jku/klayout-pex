@@ -23,12 +23,18 @@
 
 logger.info('Starting CAP EXTRACTION')
 
+# [PEX] The bottom terminals are on metal5_cap, the bottom plates as a layer of the process stack,
+#       so that PEX knows their layer (NOTE: a regular LVS would not do this).
+#       sg13cmos5l shares this file, but doesn't split Metal5
+cmim_btm_terminal  = defined?(metal5_cap) ? metal5_cap : cmim_btm
+rfmim_btm_terminal = defined?(metal5_cap) ? metal5_cap : rfmim_btm
+
 # === cap_cmim ===
 logger.info('Extracting cap_cmim device')
 extract_devices(MIMCAPExtractor.new('cap_cmim'), {
                   'core' => cmim_top,
                   'top_mim' => cmim_top,
-                  'btm_mim' => cmim_btm,
+                  'btm_mim' => cmim_btm_terminal,
                   'meas_mk' => cmim_dev,
                   'dev_mk' => cmim_dev,
                 })
@@ -38,7 +44,7 @@ logger.info('Extracting rfcmim device')
 extract_devices(MIMCAPExtractor.new('rfcmim'), {
                   'core' => rfmim_top,
                   'top_mim' => rfmim_top,
-                  'btm_mim' => rfmim_btm,
+                  'btm_mim' => rfmim_btm_terminal,
                   'dev_mk' => rfmim_area.covering(rfmim_dev),
                   'meas_mk' => rfmeas_mk,
                   'sub_mk' => rfmim_sub,

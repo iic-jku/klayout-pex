@@ -22,16 +22,21 @@
 
 logger.info('Starting MIMCAP EXTRACTION')
 
+# [PEX] Where Metal4 is split (option B, 5LM), the bottom terminal is on metal4_cap, the bottom plate
+#       as a layer of the process stack (instead of mim_virtual), so that PEX knows its layer
+#       (NOTE: a regular LVS would not do this)
+mim_btm_terminal = MIM_OPTION == 'B' && METAL_LEVEL == '5LM' ? metal4_cap : mim_virtual
+
 case MIM_CAP
 when '1'
   logger.info('Extracting cap_mim_1f0fF device')
-  extract_devices(capacitor('cap_mim_1f0fF', 1.0e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+  extract_devices(capacitor('cap_mim_1f0fF', 1.0e-15, MIMCap), { 'P1' => mim_btm_terminal, 'P2' => fuse_cap })
 
 when '1.5'
   logger.info('Extracting cap_mim_1f5fF device')
-  extract_devices(capacitor('cap_mim_1f5fF', 1.5e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+  extract_devices(capacitor('cap_mim_1f5fF', 1.5e-15, MIMCap), { 'P1' => mim_btm_terminal, 'P2' => fuse_cap })
 
 when '2'
   logger.info('Extracting cap_mim_2f0fF device')
-  extract_devices(capacitor('cap_mim_2f0fF', 2.0e-15, MIMCap), { 'P1' => mim_virtual, 'P2' => fuse_cap })
+  extract_devices(capacitor('cap_mim_2f0fF', 2.0e-15, MIMCap), { 'P1' => mim_btm_terminal, 'P2' => fuse_cap })
 end
