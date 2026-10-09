@@ -205,7 +205,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     met3_cap  = add_metal_layer(psi,     "met3_cap",  2.7861, 0.845)
 
     capm_thickness = 0.1
-    capild_k = 4.52  # to match design cap_mim_m3_w18p9_l5p1_no_interconnect to 200fF
+    capild_k = 4.52  # camimc 2.00 fF/µm² of the device models (r+c/res_typical__cap_typical__lin.spice), as ε0·k/d
     capild_thickness = 0.02
 
     # DIELECTRIC (conformal)        name,      dielectric_k, thickness,        thickness,      thickness, ref

@@ -188,7 +188,9 @@ class TechBuilder:
         #-----------------------------------------------------------------------------------------------
         add_field_oxide_layer(psi,  "fox",   3.95)  # from SG13G2_os_process_spec.pdf p6
 
-        capild_k = 6.7  # to match design sg13g2__pr.gds/cmim to 74.62fF
+        # MIM dielectric: TISMIM 40 nm (SG13G2_os_process_spec.pdf p17), its k from the area capacitance
+        # CMIMA 1.5 fF/µm² (p13, and cap_carea of cornerCAP.lib), as ε0·k/d
+        capild_k = 6.78
         capild_thickness = 0.04
 
         poly_z = 0.4
