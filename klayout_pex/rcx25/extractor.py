@@ -25,7 +25,7 @@
 
 import klayout.db as kdb
 
-from ..klayout.lvsdb_extractor import KLayoutExtractionContext, GDSPair
+from ..klayout.lvsdb_extractor import KLayoutExtractionContext
 from ..log import (
     debug,
     warning,
@@ -35,6 +35,7 @@ from ..log import (
     rule
 )
 from ..tech_info import TechInfo
+from ..types import GDSPair
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .pex_mode import PEXMode

@@ -43,8 +43,9 @@ from ..pex25d.format_version import (
     FORMAT_VERSION_SUFFIX,
 )
 from ..pex25d.protobuf import pex25d_file_pb2, pex25d_dielectric_pb2, pex25d_terminal_pb2
+from ..types import GDSPair
 from ..version import __version__
-from .lvsdb_extractor import GDSPair, KLayoutExtractionContext
+from .lvsdb_extractor import KLayoutExtractionContext
 
 if TYPE_CHECKING:
     from ..tech_info import TechInfo

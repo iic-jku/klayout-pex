@@ -40,7 +40,7 @@ from typing import *
 
 import klayout.db as kdb
 
-from .types import LayerName, NetName
+from ..types import LayerName, NetName
 
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2

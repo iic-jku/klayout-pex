@@ -39,7 +39,7 @@ import klayout.db as kdb
 from ..device_models import DeviceModels
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
-from .types import NetName
+from ..types import NetName
 from ..klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_DEVICE_CLASS_NAMES,

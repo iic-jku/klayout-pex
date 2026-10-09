@@ -34,7 +34,7 @@ from klayout_pex.log import (
     warning,
 )
 from .conductance import Conductance
-from ..types import LayerName
+from klayout_pex.types import LayerName
 
 NodeID = int
 

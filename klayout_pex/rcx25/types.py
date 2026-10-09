@@ -30,10 +30,6 @@ from typing import *
 import klayout.db as kdb
 
 
-NetName = str
-LayerName = str
-CellName = str
-
 ChildIndex = int
 
 PolygonNeighborhood = Dict[ChildIndex, List[kdb.PolygonWithProperties]]

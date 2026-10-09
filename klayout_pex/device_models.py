@@ -30,6 +30,7 @@ from typing import *
 
 import klayout.db as kdb
 
+from .types import LVSDeviceClassName
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
@@ -59,8 +60,6 @@ def rectangle_sides(area: float, perimeter: float) -> Tuple[float, float]:
 
 class DeviceModels:
     """Helper class for Protocol Buffer device_models_pb2.DeviceModelsInfo"""
-
-    LVSDeviceClassName = str
 
     def __init__(self, device_models: device_models_pb2.DeviceModelsInfo):
         self.device_models = device_models

@@ -26,9 +26,9 @@ from typing import *
 from pathlib import Path
 import re
 
+from ..types import CellName
 from .magic_ext_data_structures import (
     MagicPEXRun,
-    CellName,
     CellExtData,
     ExtData,
     ResExtData,
