@@ -1,0 +1,59 @@
+[20:58:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cap_var_lvt_without_ptap_ring.gds.gz --out_dir /tmp/tmp8h3k0gak --cache-dir    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:58:14] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[20:58:14] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'cap_var_lvt_without_ptap_ring'                        
+[20:58:14] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[20:58:14] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap
+_var_lvt_without_ptap_ring.gds.gz/cap_var_lvt_without_ptap_ring.lvsdb.gz        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:58:14] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1435
+[20:58:14] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1435
+[20:58:14] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1435
+[20:58:14] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[20:58:14] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1435
+[20:58:14] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1435
+[20:58:14] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:58:14] INFO     LVSDB: found 2pins                          extractor.py:276
+[20:58:14] WARNING  These device terminals are            lvsdb_extractor.py:705
+                    unconnected in the LVS netlist, so                          
+                    they stay unconnected in the                                
+                    extracted netlist:                                          
+                      - sky130_fd_pr__cap_var_lvt                               
+                    terminal W: $1                                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;0.018;                                                                   
+C2;A;VSUBS;0.018;                                                               
+C3;A.$0.poly;B;0.36;                                                            
+C4;A.$0.poly;VSUBS;0.051;                                                       
+C5;A.P0.poly;B;0.914;                                                           
+C6;A.P0.poly;VSUBS;0.093;                                                       
+C7;B;VSUBS;0.014;                                                               
+R1;A;A.$0.poly;;152.0                                                           
+R2;A.$0.poly;A.P0.poly;;130.863                                                 
+R3;B;B.$0.nwell;;185.0                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp8h3k0gak/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/ca
+p_var_lvt_without_ptap_ring_k25d_pex_netlist.csv                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp8h3k0gak/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/ca
+p_var_lvt_without_ptap_ring_k25d_pex_netlist.spice                              

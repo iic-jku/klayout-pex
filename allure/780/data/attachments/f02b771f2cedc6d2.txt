@@ -1,0 +1,50 @@
+[20:58:11] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --gds                                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/r_nwell_pfet_ntap_li1.gds.gz --out_dir /tmp/tmp806i48tj --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:58:11] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[20:58:11] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'r_nwell_pfet_ntap_li1'                                
+[20:58:11] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[20:58:12] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_n
+well_pfet_ntap_li1.gds.gz/r_nwell_pfet_ntap_li1.lvsdb.gz                        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:58:12] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1435
+[20:58:12] INFO     (94, 20) -> (psd)                           kpex_cli.py:1435
+[20:58:12] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1435
+[20:58:12] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1435
+[20:58:12] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[20:58:12] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1435
+[20:58:12] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1435
+[20:58:12] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1435
+[20:58:12] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:58:12] INFO     LVSDB: found 4pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.P0.psdm;;585.0                                                           
+R2;G;G.P0.poly;;363.107                                                         
+R3;S;S.P0.psdm;;585.0                                                           
+R4;VPWR;VPWR.$0.nwell;;185.0                                                    
+R5;VPWR.$0.nwell;VPWR.P0.nwell;;5241.667                                        
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp806i48tj/r_nwell_pfet_ntap_li1__r_nwell_pfet_ntap_li1/r_nwell_pfet_ntap_
+li1_k25d_pex_netlist.csv                                                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp806i48tj/r_nwell_pfet_ntap_li1__r_nwell_pfet_ntap_li1/r_nwell_pfet_ntap_
+li1_k25d_pex_netlist.spice                                                      

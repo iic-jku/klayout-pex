@@ -1,0 +1,328 @@
+[20:58:33] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --gds                                   
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_a21
+o_1/sg13g2_a21o_1.gds.gz --out_dir /tmp/tmp3s_ypo3c --cache-dir                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:58:33] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[20:58:33] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'sg13g2_a21o_1'                                        
+[20:58:33] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[20:58:33] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_a
+21o_1/sg13g2_a21o_1.gds.gz/sg13g2_a21o_1.lvsdb.gz                               
+[20:58:33] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:395
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 14 of 39 shapes                        
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con                                 
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:58:33] INFO     (31, 0) -> (nwell_drw)                      kpex_cli.py:1435
+[20:58:33] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1435
+[20:58:33] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1435
+[20:58:33] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1435
+[20:58:33] INFO     (14, 0) -> (psd_fet)                        kpex_cli.py:1435
+[20:58:33] INFO     (65, 144) -> (ntap)                         kpex_cli.py:1435
+[20:58:33] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1435
+[20:58:33] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1435
+[20:58:33] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1435
+[20:58:33] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1435
+[20:58:33] INFO     (6, 4402) -> (cont_psd_con)                 kpex_cli.py:1435
+[20:58:33] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:58:34] INFO     LVSDB: found 6pins                          extractor.py:276
+[20:58:34] WARNING  The resistance network leaves out these   r_extractor.py:293
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$4;A2.$0.GatPoly;0.001;                                                      
+C2;$4;B1.$0.GatPoly;0.004;                                                      
+C3;$4;B1.P0.GatPoly;0.012;                                                      
+C4;$4;VSS;0.004;                                                                
+C5;$4;VSS.$1.Metal1;0.005;                                                      
+C6;$4;VSUBS;0.064;                                                              
+C7;$4;X.$1.Metal1;0.007;                                                        
+C8;$4.$0.GatPoly;B1.$0.GatPoly;0.005;                                           
+C9;$4.$0.GatPoly;VDD.$1.Metal1;0.035;                                           
+C10;$4.$0.GatPoly;VDD.$7.Metal1;0.014;                                          
+C11;$4.$0.GatPoly;VSUBS;0.057;                                                  
+C12;$4.$0.GatPoly;X.$1.Metal1;0.003;                                            
+C13;$4.$0.GatPoly;X.$3.Metal1;0.006;                                            
+C14;$4.$1.Metal1;VDD.$1.Metal1;0.019;                                           
+C15;$4.$1.Metal1;VDD.$7.Metal1;0.002;                                           
+C16;$4.$1.Metal1;VDD.P2.pSD;0.002;                                              
+C17;$4.$1.Metal1;VSUBS;0.004;                                                   
+C18;$4.$1.Metal1;X.$1.Metal1;0.019;                                             
+C19;$4.$1.Metal1;X.$3.Metal1;0.04;                                              
+C20;$4.$10.Metal1;B1;0.025;                                                     
+C21;$4.$10.Metal1;B1.$0.GatPoly;0.005;                                          
+C22;$4.$10.Metal1;B1.$1.Metal1;0.032;                                           
+C23;$4.$10.Metal1;B1.P0.GatPoly;0.002;                                          
+C24;$4.$10.Metal1;B1.P1.GatPoly;0.003;                                          
+C25;$4.$10.Metal1;VDD;0.003;                                                    
+C26;$4.$10.Metal1;VDD.$1.Metal1;0.007;                                          
+C27;$4.$10.Metal1;VDD.$3.Metal1;0.005;                                          
+C28;$4.$10.Metal1;VSS;0.003;                                                    
+C29;$4.$10.Metal1;VSS.$1.Metal1;0.015;                                          
+C30;$4.$10.Metal1;VSS.P0.nSD;0.007;                                             
+C31;$4.$10.Metal1;VSUBS;0.013;                                                  
+C32;$4.$10.Metal1;X.$1.Metal1;0.01;                                             
+C33;$4.$10.Metal1;X.$3.Metal1;0.004;                                            
+C34;$4.$10.Metal1;X.P0.nSD;0.004;                                               
+C35;$4.$3.Metal1;$8;0.001;                                                      
+C36;$4.$3.Metal1;$9.$1.Metal1;0.004;                                            
+C37;$4.$3.Metal1;A1;0.007;                                                      
+C38;$4.$3.Metal1;A1.P0.GatPoly;0.008;                                           
+C39;$4.$3.Metal1;B1;0.022;                                                      
+C40;$4.$3.Metal1;B1.P0.GatPoly;0.012;                                           
+C41;$4.$3.Metal1;VDD.$5.Metal1;0.002;                                           
+C42;$4.$3.Metal1;VSS;0.012;                                                     
+C43;$4.$3.Metal1;VSS.$1.Metal1;0.013;                                           
+C44;$4.$3.Metal1;VSS.$3.Metal1;0.057;                                           
+C45;$4.$3.Metal1;VSS.P0.nSD;0.007;                                              
+C46;$4.$3.Metal1;VSUBS;0.007;                                                   
+C47;$4.$3.Metal1;X.$1.Metal1;0.005;                                             
+C48;$4.$5.Metal1;$9;0.001;                                                      
+C49;$4.$5.Metal1;$9.$1.Metal1;0.023;                                            
+C50;$4.$5.Metal1;B1.$0.GatPoly;0.004;                                           
+C51;$4.$5.Metal1;B1.P1.GatPoly;0.003;                                           
+C52;$4.$5.Metal1;VDD.$1.Metal1;0.025;                                           
+C53;$4.$5.Metal1;VDD.$3.Metal1;0.006;                                           
+C54;$4.$5.Metal1;VDD.$5.Metal1;0.003;                                           
+C55;$4.$5.Metal1;VSUBS;0.003;                                                   
+C56;$4.$5.Metal1;X.$3.Metal1;0.002;                                             
+C57;$4.$7.Metal1;$9.$7.Metal1;0.027;                                            
+C58;$4.$7.Metal1;B1.P1.GatPoly;0.004;                                           
+C59;$4.$7.Metal1;VDD.$3.Metal1;0.023;                                           
+C60;$4.$7.Metal1;VDD.$7.Metal1;0.003;                                           
+C61;$4.$9.Metal1;$9.$9.Metal1;0.02;                                             
+C62;$4.$9.Metal1;B1.P1.GatPoly;0.003;                                           
+C63;$4.$9.Metal1;VDD;0.012;                                                     
+C64;$4.$9.Metal1;VDD.$7.Metal1;0.02;                                            
+C65;$4.P0.nSD;A1;0.001;                                                         
+C66;$4.P0.nSD;VSS;0.001;                                                        
+C67;$4.P0.nSD;VSS.$3.Metal1;0.002;                                              
+C68;$4.P0.pSD;VDD;0.002;                                                        
+C69;$4.P1.GatPoly;B1.P1.GatPoly;0.008;                                          
+C70;$4.P1.GatPoly;VDD.$1.Metal1;0.011;                                          
+C71;$4.P1.GatPoly;VDD.$3.Metal1;0.008;                                          
+C72;$4.P1.GatPoly;VDD.$7.Metal1;0.04;                                           
+C73;$4.P1.GatPoly;VDD.P2.pSD;0.012;                                             
+C74;$4.P1.GatPoly;VSUBS;0.021;                                                  
+C75;$4.P1.GatPoly;X;0.002;                                                      
+C76;$4.P1.GatPoly;X.$3.Metal1;0.004;                                            
+C77;$4.P1.GatPoly;X.$5.Metal1;0.003;                                            
+C78;$4.P1.GatPoly;X.$7.Metal1;0.004;                                            
+C79;$4.P1.GatPoly;X.$8.Metal1;0.001;                                            
+C80;$8;$9.$3.Metal1;0.0;                                                        
+C81;$8;A1;0.0;                                                                  
+C82;$8;A2;0.001;                                                                
+C83;$8;VSS.$3.Metal1;0.011;                                                     
+C84;$9;B1.$1.Metal1;0.002;                                                      
+C85;$9;VDD;0.003;                                                               
+C86;$9;VDD.$9.Metal1;0.002;                                                     
+C87;$9.$1.Metal1;A1.$0.GatPoly;0.003;                                           
+C88;$9.$1.Metal1;A1.$1.Metal1;0.028;                                            
+C89;$9.$1.Metal1;A1.P1.GatPoly;0.009;                                           
+C90;$9.$1.Metal1;B1.$0.GatPoly;0.001;                                           
+C91;$9.$1.Metal1;B1.$1.Metal1;0.014;                                            
+C92;$9.$1.Metal1;B1.P1.GatPoly;0.003;                                           
+C93;$9.$1.Metal1;VDD;0.002;                                                     
+C94;$9.$1.Metal1;VDD.$5.Metal1;0.015;                                           
+C95;$9.$1.Metal1;VDD.$9.Metal1;0.003;                                           
+C96;$9.$1.Metal1;VDD.P0.pSD;0.005;                                              
+C97;$9.$1.Metal1;VSUBS;0.001;                                                   
+C98;$9.$11.Metal1;A2.P1.GatPoly;0.003;                                          
+C99;$9.$11.Metal1;VDD.$9.Metal1;0.035;                                          
+C100;$9.$11.Metal1;VSUBS;0.008;                                                 
+C101;$9.$3.Metal1;A1.$1.Metal1;0.003;                                           
+C102;$9.$3.Metal1;A1.P1.GatPoly;0.002;                                          
+C103;$9.$3.Metal1;A2.P0.GatPoly;0.004;                                          
+C104;$9.$3.Metal1;A2.P1.GatPoly;0.011;                                          
+C105;$9.$3.Metal1;VDD.$5.Metal1;0.025;                                          
+C106;$9.$3.Metal1;VDD.$9.Metal1;0.004;                                          
+C107;$9.$3.Metal1;VDD.P0.pSD;0.006;                                             
+C108;$9.$3.Metal1;VSS.$3.Metal1;0.012;                                          
+C109;$9.$3.Metal1;VSUBS;0.012;                                                  
+C110;$9.$5.Metal1;A2.P1.GatPoly;0.005;                                          
+C111;$9.$5.Metal1;VDD.$5.Metal1;0.021;                                          
+C112;$9.$5.Metal1;VDD.P0.pSD;0.003;                                             
+C113;$9.$5.Metal1;VSUBS;0.011;                                                  
+C114;$9.$7.Metal1;A1.P1.GatPoly;0.004;                                          
+C115;$9.$7.Metal1;B1.$0.GatPoly;0.002;                                          
+C116;$9.$7.Metal1;B1.P1.GatPoly;0.004;                                          
+C117;$9.$7.Metal1;VDD.$5.Metal1;0.016;                                          
+C118;$9.$7.Metal1;VDD.P0.pSD;0.001;                                             
+C119;$9.$9.Metal1;A1.P1.GatPoly;0.003;                                          
+C120;$9.$9.Metal1;B1.P1.GatPoly;0.003;                                          
+C121;$9.$9.Metal1;VDD;0.011;                                                    
+C122;$9.$9.Metal1;VDD.$9.Metal1;0.017;                                          
+C123;$9.P2.pSD;VDD.$9.Metal1;0.003;                                             
+C124;A1;A2.P0.GatPoly;0.002;                                                    
+C125;A1;B1;0.019;                                                               
+C126;A1;VDD.$5.Metal1;0.002;                                                    
+C127;A1;VSS;0.002;                                                              
+C128;A1;VSS.$3.Metal1;0.007;                                                    
+C129;A1;VSUBS;0.012;                                                            
+C130;A1.$0.GatPoly;A2.P0.GatPoly;0.013;                                         
+C131;A1.$0.GatPoly;A2.P1.GatPoly;0.008;                                         
+C132;A1.$0.GatPoly;B1.$0.GatPoly;0.019;                                         
+C133;A1.$0.GatPoly;VDD.$5.Metal1;0.022;                                         
+C134;A1.$0.GatPoly;VDD.$9.Metal1;0.002;                                         
+C135;A1.$0.GatPoly;VSUBS;0.018;                                                 
+C136;A1.$1.Metal1;B1;0.013;                                                     
+C137;A1.$1.Metal1;B1.$1.Metal1;0.008;                                           
+C138;A1.$1.Metal1;VDD.$5.Metal1;0.004;                                          
+C139;A1.$1.Metal1;VSUBS;0.003;                                                  
+C140;A1.P0.GatPoly;A2.$0.GatPoly;0.004;                                         
+C141;A1.P0.GatPoly;A2.P0.GatPoly;0.018;                                         
+C142;A1.P0.GatPoly;B1.P0.GatPoly;0.014;                                         
+C143;A1.P0.GatPoly;VSS;0.003;                                                   
+C144;A1.P0.GatPoly;VSS.$3.Metal1;0.01;                                          
+C145;A1.P0.GatPoly;VSUBS;0.022;                                                 
+C146;A1.P1.GatPoly;A2.P1.GatPoly;0.019;                                         
+C147;A1.P1.GatPoly;B1.P1.GatPoly;0.016;                                         
+C148;A1.P1.GatPoly;VDD;0.006;                                                   
+C149;A1.P1.GatPoly;VDD.$5.Metal1;0.008;                                         
+C150;A1.P1.GatPoly;VDD.$9.Metal1;0.02;                                          
+C151;A1.P1.GatPoly;VDD.P0.pSD;0.002;                                            
+C152;A1.P1.GatPoly;VSUBS;0.002;                                                 
+C153;A2;VSS.$1.Metal1;0.001;                                                    
+C154;A2;VSS.$3.Metal1;0.074;                                                    
+C155;A2;VSS.P2.nSD;0.006;                                                       
+C156;A2;VSUBS;0.019;                                                            
+C157;A2.$0.GatPoly;VDD.$5.Metal1;0.001;                                         
+C158;A2.$0.GatPoly;VSS;0.002;                                                   
+C159;A2.$0.GatPoly;VSS.$3.Metal1;0.011;                                         
+C160;A2.$0.GatPoly;VSUBS;0.067;                                                 
+C161;A2.$1.Metal1;VSS.$1.Metal1;0.001;                                          
+C162;A2.$1.Metal1;VSS.$3.Metal1;0.071;                                          
+C163;A2.$1.Metal1;VSUBS;0.008;                                                  
+C164;A2.P0.GatPoly;VDD.$5.Metal1;0.007;                                         
+C165;A2.P0.GatPoly;VSS.$3.Metal1;0.013;                                         
+C166;A2.P0.GatPoly;VSUBS;0.049;                                                 
+C167;A2.P1.GatPoly;VDD.$5.Metal1;0.03;                                          
+C168;A2.P1.GatPoly;VDD.$9.Metal1;0.032;                                         
+C169;A2.P1.GatPoly;VDD.P0.pSD;0.004;                                            
+C170;A2.P1.GatPoly;VSUBS;0.027;                                                 
+C171;B1;VSUBS;0.002;                                                            
+C172;B1.$0.GatPoly;VDD;0.002;                                                   
+C173;B1.$0.GatPoly;VDD.$1.Metal1;0.021;                                         
+C174;B1.$0.GatPoly;VDD.$5.Metal1;0.011;                                         
+C175;B1.$0.GatPoly;VSUBS;0.02;                                                  
+C176;B1.$1.Metal1;VDD;0.001;                                                    
+C177;B1.P0.GatPoly;VSS;0.003;                                                   
+C178;B1.P0.GatPoly;VSS.$1.Metal1;0.005;                                         
+C179;B1.P0.GatPoly;VSUBS;0.022;                                                 
+C180;B1.P0.GatPoly;X.$1.Metal1;0.001;                                           
+C181;B1.P1.GatPoly;VDD;0.015;                                                   
+C182;B1.P1.GatPoly;VDD.$1.Metal1;0.003;                                         
+C183;B1.P1.GatPoly;VDD.$3.Metal1;0.007;                                         
+C184;B1.P1.GatPoly;VDD.$5.Metal1;0.001;                                         
+C185;B1.P1.GatPoly;VDD.$7.Metal1;0.012;                                         
+C186;B1.P1.GatPoly;VDD.$9.Metal1;0.004;                                         
+C187;B1.P1.GatPoly;VSUBS;0.002;                                                 
+C188;VDD;VSUBS;0.071;                                                           
+C189;VDD.$1.Metal1;X.$3.Metal1;0.035;                                           
+C190;VDD.$3.Metal1;X;0.015;                                                     
+C191;VDD.$3.Metal1;X.$5.Metal1;0.016;                                           
+C192;VDD.$5.Metal1;VSS.$3.Metal1;0.006;                                         
+C193;VDD.$7.Metal1;VSUBS;0.051;                                                 
+C194;VDD.$7.Metal1;X.$7.Metal1;0.041;                                           
+C195;VDD.$7.Metal1;X.P0.pSD;0.003;                                              
+C196;VDD.$9.Metal1;VSUBS;0.053;                                                 
+C197;VDD.P2.pSD;VSS;0.003;                                                      
+C198;VDD.P2.pSD;X.$3.Metal1;0.001;                                              
+C199;VDD.P2.pSD;X.$8.Metal1;0.005;                                              
+C200;VSS;VSUBS;0.235;                                                           
+C201;VSS;X.$1.Metal1;0.025;                                                     
+C202;VSS;X.P0.nSD;0.002;                                                        
+C203;VSS.$1.Metal1;VSUBS;0.024;                                                 
+C204;VSS.$1.Metal1;X.$1.Metal1;0.007;                                           
+C205;VSS.$1.Metal1;X.P0.nSD;0.002;                                              
+C206;VSS.$3.Metal1;VSUBS;0.065;                                                 
+C207;VSS.P0.nSD;X.$1.Metal1;0.003;                                              
+C208;VSUBS;X.$1.Metal1;0.046;                                                   
+C209;VSUBS;X.$3.Metal1;0.041;                                                   
+C210;VSUBS;X.$7.Metal1;0.008;                                                   
+C211;VSUBS;X.$8.Metal1;0.015;                                                   
+R1;$4;$4.$0.GatPoly;;58.516                                                     
+R2;$4.$0.GatPoly;$4.$1.Metal1;;15.0                                             
+R3;$4.$0.GatPoly;$4.P1.GatPoly;;41.976                                          
+R4;$4.$1.Metal1;$4.$10.Metal1;;0.21                                             
+R5;$4.$10.Metal1;$4.$3.Metal1;;0.978                                            
+R6;$4.$10.Metal1;$4.$5.Metal1;;0.348                                            
+R7;$4.$3.Metal1;$4.P0.nSD;;17.0                                                 
+R8;$4.$5.Metal1;$4.$7.Metal1;;0.156                                             
+R9;$4.$5.Metal1;$4.P0.pSD;;17.0                                                 
+R10;$4.$7.Metal1;$4.$9.Metal1;;0.149                                            
+R11;$4.$7.Metal1;$4.P0.pSD;;17.0                                                
+R12;$4.$9.Metal1;$4.P0.pSD;;17.0                                                
+R13;$9;$9.$1.Metal1;;17.0                                                       
+R14;$9;$9.$7.Metal1;;17.0                                                       
+R15;$9;$9.$9.Metal1;;17.0                                                       
+R16;$9.$1.Metal1;$9.$3.Metal1;;0.695                                            
+R17;$9.$1.Metal1;$9.$7.Metal1;;0.155                                            
+R18;$9.$11.Metal1;$9.$5.Metal1;;0.148                                           
+R19;$9.$11.Metal1;$9.P2.pSD;;17.0                                               
+R20;$9.$3.Metal1;$9.$5.Metal1;;0.153                                            
+R21;$9.$3.Metal1;$9.P2.pSD;;17.0                                                
+R22;$9.$5.Metal1;$9.P2.pSD;;17.0                                                
+R23;$9.$7.Metal1;$9.$9.Metal1;;0.146                                            
+R24;A1;A1.$1.Metal1;;0.013                                                      
+R25;A1.$0.GatPoly;A1.$1.Metal1;;15.0                                            
+R26;A1.$0.GatPoly;A1.P0.GatPoly;;35.284                                         
+R27;A1.$0.GatPoly;A1.P1.GatPoly;;45.587                                         
+R28;A2;A2.$1.Metal1;;0.039                                                      
+R29;A2.$0.GatPoly;A2.$1.Metal1;;15.0                                            
+R30;A2.$0.GatPoly;A2.P0.GatPoly;;39.495                                         
+R31;A2.P0.GatPoly;A2.P1.GatPoly;;84.0                                           
+R32;B1;B1.$1.Metal1;;0.026                                                      
+R33;B1.$0.GatPoly;B1.$1.Metal1;;15.0                                            
+R34;B1.$0.GatPoly;B1.P0.GatPoly;;33.228                                         
+R35;B1.$0.GatPoly;B1.P1.GatPoly;;48.433                                         
+R36;VDD;VDD.$7.Metal1;;0.412                                                    
+R37;VDD;VDD.$9.Metal1;;0.442                                                    
+R38;VDD.$1.Metal1;VDD.$3.Metal1;;0.165                                          
+R39;VDD.$1.Metal1;VDD.P2.pSD;;17.0                                              
+R40;VDD.$3.Metal1;VDD.$7.Metal1;;0.167                                          
+R41;VDD.$3.Metal1;VDD.P2.pSD;;17.0                                              
+R42;VDD.$5.Metal1;VDD.$9.Metal1;;0.15                                           
+R43;VDD.$5.Metal1;VDD.P0.pSD;;17.0                                              
+R44;VDD.$7.Metal1;VDD.P2.pSD;;17.0                                              
+R45;VDD.$9.Metal1;VDD.P0.pSD;;17.0                                              
+R46;VSS;VSS.$1.Metal1;;0.286                                                    
+R47;VSS;VSS.$3.Metal1;;1.361                                                    
+R48;VSS.$1.Metal1;VSS.P0.nSD;;17.0                                              
+R49;VSS.$3.Metal1;VSS.P2.nSD;;17.0                                              
+R50;X;X.$5.Metal1;;0.002                                                        
+R51;X;X.$8.Metal1;;0.007                                                        
+R52;X.$1.Metal1;X.$8.Metal1;;1.176                                              
+R53;X.$1.Metal1;X.P0.nSD;;17.0                                                  
+R54;X.$3.Metal1;X.$8.Metal1;;0.217                                              
+R55;X.$3.Metal1;X.P0.pSD;;17.0                                                  
+R56;X.$5.Metal1;X.$7.Metal1;;0.153                                              
+R57;X.$5.Metal1;X.P0.pSD;;17.0                                                  
+R58;X.$7.Metal1;X.P0.pSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp3s_ypo3c/sg13g2_a21o_1__sg13g2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.csv
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp3s_ypo3c/sg13g2_a21o_1__sg13g2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.spi
+ce                                                                              

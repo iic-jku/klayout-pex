@@ -1,0 +1,91 @@
+[20:58:59] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --gds                                   
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/nmos_metal1_redux_twice.gds.gz --out_dir /tmp/tmpy7y46zd3 --cache-dir       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:58:59] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[20:58:59] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'nmos_metal1_redux_twice'                              
+[20:58:59] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[20:59:00] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_pat
+terns/nmos_metal1_redux_twice.gds.gz/nmos_metal1_redux_twice.lvsdb.gz           
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:59:00] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1435
+[20:59:00] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1435
+[20:59:00] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1435
+[20:59:00] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1435
+[20:59:00] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1435
+[20:59:00] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1435
+[20:59:00] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1435
+[20:59:00] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:59:00] INFO     LVSDB: found 5pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;$4;0.002;                                                                 
+C2;$1;D.$1.Metal1;0.005;                                                        
+C3;$1;S.$1.Metal1;0.004;                                                        
+C4;$1;VSUBS;0.055;                                                              
+C5;$1.$0.GatPoly;D;0.003;                                                       
+C6;$1.$0.GatPoly;VSUBS;0.05;                                                    
+C7;$1.$1.Metal1;D;0.034;                                                        
+C8;$1.$1.Metal1;VSUBS;0.017;                                                    
+C9;$4;D$1.$1.Metal1;0.005;                                                      
+C10;$4;S$1.$1.Metal1;0.004;                                                     
+C11;$4;VSUBS;0.055;                                                             
+C12;$4.$0.GatPoly;D$1;0.003;                                                    
+C13;$4.$0.GatPoly;VSUBS;0.05;                                                   
+C14;$4.$1.Metal1;D;0.001;                                                       
+C15;$4.$1.Metal1;D$1;0.034;                                                     
+C16;$4.$1.Metal1;VSUBS;0.016;                                                   
+C17;D;D$1;0.002;                                                                
+C18;D;VSUBS;0.038;                                                              
+C19;D$1;VSUBS;0.04;                                                             
+C20;D$1.$1.Metal1;D.$1.Metal1;0.001;                                            
+C21;D$1.$1.Metal1;S$1.$1.Metal1;0.011;                                          
+C22;D$1.$1.Metal1;S$1.P0.nSD;0.001;                                             
+C23;D$1.$1.Metal1;VSUBS;0.033;                                                  
+C24;D$1.P0.nSD;S$1.$1.Metal1;0.001;                                             
+C25;D.$1.Metal1;S$1.$1.Metal1;0.002;                                            
+C26;D.$1.Metal1;S.$1.Metal1;0.011;                                              
+C27;D.$1.Metal1;S.P0.nSD;0.001;                                                 
+C28;D.$1.Metal1;VSUBS;0.029;                                                    
+C29;D.P0.nSD;S.$1.Metal1;0.001;                                                 
+C30;S;S$1;0.002;                                                                
+C31;S;VSUBS;0.039;                                                              
+C32;S$1;VSUBS;0.039;                                                            
+C33;S$1.$1.Metal1;S.$1.Metal1;0.002;                                            
+C34;S$1.$1.Metal1;VSUBS;0.036;                                                  
+C35;S.$1.Metal1;VSUBS;0.039;                                                    
+R1;$1;$1.$0.GatPoly;;33.654                                                     
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0                                             
+R3;$4;$4.$0.GatPoly;;33.654                                                     
+R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0                                             
+R5;D;D.$1.Metal1;;0.488                                                         
+R6;D$1;D$1.$1.Metal1;;0.488                                                     
+R7;D$1.$1.Metal1;D$1.P0.nSD;;17.0                                               
+R8;D.$1.Metal1;D.P0.nSD;;17.0                                                   
+R9;S;S.$1.Metal1;;0.598                                                         
+R10;S$1;S$1.$1.Metal1;;0.598                                                    
+R11;S$1.$1.Metal1;S$1.P0.nSD;;17.0                                              
+R12;S.$1.Metal1;S.P0.nSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpy7y46zd3/nmos_metal1_redux_twice__nmos_metal1_redux_twice/nmos_metal1_re
+dux_twice_k25d_pex_netlist.csv                                                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpy7y46zd3/nmos_metal1_redux_twice__nmos_metal1_redux_twice/nmos_metal1_re
+dux_twice_k25d_pex_netlist.spice                                                
