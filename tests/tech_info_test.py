@@ -196,6 +196,25 @@ class Test(unittest.TestCase):
                 self.assertNotEqual(set(), mim_and_mom_caps)
                 self.assertEqual(mim_and_mom_caps, tech_info.device_models.metal_capacitor_class_names)
 
+    def test_shipped_mim_dielectrics_give_the_area_capacitance_of_the_device_models(self):
+        # ε0·k/d of the dielectric between the plates of the MIM caps, which the device models give:
+        # sky130A camimc (r+c/res_typical__cap_typical__lin.spice), IHP cap_carea (cornerCAP.lib),
+        # gf180mcuD c_cox of mim_2p0fF (sm141064.ngspice), all in fF/µm²
+        expected_by_tech = {'sky130A': {'capild3': 2.0, 'capild4': 2.0},
+                            'ihp-sg13g2': {'ismim': 1.5},
+                            'gf180mcuD': {'capild': 1.99}}
+        epsilon_0 = 8.854e-3  # fF/µm
+        paths_by_tech = {os.path.basename(path).removesuffix('_tech.pb.json'): path for path in tech_pbjson_paths()}
+        for tech_name, expected in expected_by_tech.items():
+            with self.subTest(tech=tech_name):
+                tech_info = TechInfo.from_json(paths_by_tech[tech_name], dielectric_filter=None)
+                obtained = {}
+                for lyr in tech_info.tech.process_stack.layers:
+                    if lyr.name in expected:
+                        dielectric = lyr.conformal_dielectric_layer
+                        obtained[lyr.name] = round(epsilon_0 * dielectric.dielectric_k / dielectric.thickness_over_metal, 2)
+                self.assertEqual(expected, obtained)
+
     def test_shipped_tech_definitions_have_the_resistances_of_the_wells_their_contacts_land_on(self):
         # The contacts over the taps land on the well below (e.g. sky130A licon_ntap_con on the nwell),
         # which the resistance extraction leaves out without a sheet resistance,
