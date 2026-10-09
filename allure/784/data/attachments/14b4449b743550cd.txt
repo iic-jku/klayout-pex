@@ -1,0 +1,47 @@
+[21:06:44] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --gds                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_pr_
+_cmim/cmim.gds.gz --out_dir                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:06:44] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:06:44] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'cmim'                                                 
+[21:06:44] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:06:44] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_p
+r__cmim/cmim.gds.gz/cmim.lvsdb.gz                                               
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:06:44] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1435
+[21:06:44] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1435
+[21:06:44] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1435
+[21:06:44] INFO     (36, 0) -> (cmim_top)                       kpex_cli.py:1435
+[21:06:44] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1435
+[21:06:44] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1435
+[21:06:44] INFO     (67, 0) -> (metal5_cap metal5_n_cap)        kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;$3;74.784;                                                                
+C2;$2;VSUBS;1.38;                                                               
+C3;$3;VSUBS;0.878;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmim__cmim/cmim_k25d
+_pex_netlist.csv                                                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[21:06:44] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmim__cmim/cmim_k25d
+_pex_netlist.spice                                                              

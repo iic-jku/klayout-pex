@@ -1,0 +1,60 @@
+[21:12:16] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --gds                                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/nfet_m1.gds.gz --out_dir /tmp/tmp4_s118g7 --cache-dir                        
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:12:16] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:12:16] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'nfet_m1'                                              
+[21:12:16] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:12:17] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/nfet_m1.gds.gz/nfet_m1.lvsdb.gz                                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:12:17] INFO     (32, 0) -> (nsd)                            kpex_cli.py:1435
+[21:12:17] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1435
+[21:12:17] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1435
+[21:12:17] INFO     (33, 4401) -> (contact_nsd_con)             kpex_cli.py:1435
+[21:12:17] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:12:17] INFO     LVSDB: found 4pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;S;0.017;                                                                   
+C2;D;VSUBS;0.048;                                                               
+C3;D.$1.Metal1;G.P0.Poly2;0.008;                                                
+C4;D.$1.Metal1;S.$1.Metal1;0.02;                                                
+C5;D.$1.Metal1;S.P0.Nplus;0.001;                                                
+C6;D.$1.Metal1;VSUBS;0.044;                                                     
+C7;D.P0.Nplus;S.$1.Metal1;0.001;                                                
+C8;G;VSUBS;0.054;                                                               
+C9;G.$0.Poly2;VSUBS;0.092;                                                      
+C10;G.$1.Metal1;VSUBS;0.053;                                                    
+C11;G.P0.Poly2;S.$1.Metal1;0.008;                                               
+C12;G.P0.Poly2;VSUBS;0.098;                                                     
+C13;S;VSUBS;0.048;                                                              
+C14;S.$1.Metal1;VSUBS;0.044;                                                    
+R1;D;D.$1.Metal1;;0.208                                                         
+R2;D.$1.Metal1;D.P0.Nplus;;6.3                                                  
+R3;G;G.$1.Metal1;;0.156                                                         
+R4;G.$0.Poly2;G.$1.Metal1;;5.9                                                  
+R5;G.$0.Poly2;G.P0.Poly2;;12.514                                                
+R6;S;S.$1.Metal1;;0.208                                                         
+R7;S.$1.Metal1;S.P0.Nplus;;6.3                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp4_s118g7/nfet_m1__nfet_m1/nfet_m1_k25d_pex_netlist.csv                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp4_s118g7/nfet_m1__nfet_m1/nfet_m1_k25d_pex_netlist.spice                

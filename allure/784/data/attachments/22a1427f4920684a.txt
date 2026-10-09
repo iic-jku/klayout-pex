@@ -1,0 +1,67 @@
+[21:12:58] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --gds                                   
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/nmos_metal1_redux_two_labels_one_node.gds.gz --out_dir /tmp/tmpy8u9fpyk     
+--cache-dir                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:12:58] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:12:58] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'nmos_metal1_redux_two_labels_one_node'                
+[21:12:58] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:12:58] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_pat
+terns/nmos_metal1_redux_two_labels_one_node.gds.gz/nmos_metal1_redux_two_labels_
+one_node.lvsdb.gz                                                               
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:12:58] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1435
+[21:12:58] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1435
+[21:12:58] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1435
+[21:12:58] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1435
+[21:12:58] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1435
+[21:12:58] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1435
+[21:12:58] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1435
+[21:12:58] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:12:58] INFO     LVSDB: found 3pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;D,X.$1.Metal1;0.005;                                                      
+C2;$1;S.$1.Metal1;0.004;                                                        
+C3;$1;VSUBS;0.058;                                                              
+C4;$1.$0.GatPoly;D;0.003;                                                       
+C5;$1.$0.GatPoly;VSUBS;0.052;                                                   
+C6;$1.$1.Metal1;D;0.034;                                                        
+C7;$1.$1.Metal1;VSUBS;0.017;                                                    
+C8;D;VSUBS;0.043;                                                               
+C9;D,X;S.$1.Metal1;0.001;                                                       
+C10;D,X.$1.Metal1;S.$1.Metal1;0.011;                                            
+C11;D,X.$1.Metal1;S.P0.nSD;0.001;                                               
+C12;D,X.$1.Metal1;VSUBS;0.035;                                                  
+C13;S;VSUBS;0.043;                                                              
+C14;S.$1.Metal1;VSUBS;0.042;                                                    
+R1;$1;$1.$0.GatPoly;;33.654                                                     
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0                                             
+R3;D;D,X.$1.Metal1;;0.488                                                       
+R4;D;X;;0.001                                                                   
+R5;D,X;D,X.$1.Metal1;;17.0                                                      
+R6;S;S.$1.Metal1;;0.598                                                         
+R7;S.$1.Metal1;S.P0.nSD;;17.0                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpy8u9fpyk/nmos_metal1_redux_two_labels_one_node__nmos_metal1_redux_two_la
+bels_one_node/nmos_metal1_redux_two_labels_one_node_k25d_pex_netlist.csv        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpy8u9fpyk/nmos_metal1_redux_two_labels_one_node__nmos_metal1_redux_two_la
+bels_one_node/nmos_metal1_redux_two_labels_one_node_k25d_pex_netlist.spice      

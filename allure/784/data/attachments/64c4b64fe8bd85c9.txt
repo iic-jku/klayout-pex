@@ -1,0 +1,48 @@
+[21:12:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --gds                                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/r_nwell_pfet_ntap_m1.gds.gz --out_dir /tmp/tmpa7vuyvcm --cache-dir           
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:12:17] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:12:17] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'r_nwell_pfet_ntap_m1'                                 
+[21:12:17] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:12:17] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/r_nwell_pfet_ntap_m1.gds.gz/r_nwell_pfet_ntap_m1.lvsdb.gz                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:12:17] INFO     (31, 0) -> (psd)                            kpex_cli.py:1435
+[21:12:17] INFO     (22, 144) -> (ntap)                         kpex_cli.py:1435
+[21:12:17] INFO     (21, 0) -> (nwell_con)                      kpex_cli.py:1435
+[21:12:17] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1435
+[21:12:17] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1435
+[21:12:17] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:1435
+[21:12:17] INFO     (33, 4404) -> (contact_ntap_con)            kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:12:17] INFO     LVSDB: found 4pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.P0.Pplus;;5.2                                                            
+R2;G;G.P0.Poly2;;31.633                                                         
+R3;S;S.P0.Pplus;;5.2                                                            
+R4;VDD;VDD.$0.Nwell;;6.3                                                        
+R5;VDD.$0.Nwell;VDD.P0.Nwell;;3083.333                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpa7vuyvcm/r_nwell_pfet_ntap_m1__r_nwell_pfet_ntap_m1/r_nwell_pfet_ntap_m1
+_k25d_pex_netlist.csv                                                           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpa7vuyvcm/r_nwell_pfet_ntap_m1__r_nwell_pfet_ntap_m1/r_nwell_pfet_ntap_m1
+_k25d_pex_netlist.spice                                                         

@@ -1,0 +1,68 @@
+[21:12:02] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/r_nwell_pfet_label_li1.gds.gz --out_dir /tmp/tmpwmlm1_oe --cache-dir           
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:12:02] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:12:02] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'r_nwell_pfet_label_li1'                               
+[21:12:02] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:12:02] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_n
+well_pfet_label_li1.gds.gz/r_nwell_pfet_label_li1.lvsdb.gz                      
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:12:02] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1435
+[21:12:02] INFO     (94, 20) -> (psd)                           kpex_cli.py:1435
+[21:12:02] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1435
+[21:12:02] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1435
+[21:12:02] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[21:12:02] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1435
+[21:12:02] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1435
+[21:12:02] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:12:02] INFO     LVSDB: found 4pins                          extractor.py:276
+[21:12:02] WARNING  The resistance network leaves out the     r_extractor.py:561
+                    wells of these nets, as no contact joins                    
+                    them to the rest of their net (e.g. a                       
+                    label of the net on the well does), so                      
+                    the device terminals on them (e.g. the                      
+                    PMOS bulks) are ideally on their nets:                      
+                    VPWR                                                        
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;G.P0.poly;0.005;                                                           
+C2;D;S;0.006;                                                                   
+C3;D;S.P0.psdm;0.002;                                                           
+C4;D;VPWR;0.017;                                                                
+C5;D;VSUBS;0.012;                                                               
+C6;D.P0.psdm;S;0.002;                                                           
+C7;G;VPWR;0.085;                                                                
+C8;G;VSUBS;0.032;                                                               
+C9;G.P0.poly;S;0.005;                                                           
+C10;G.P0.poly;VPWR;0.096;                                                       
+C11;G.P0.poly;VSUBS;0.018;                                                      
+C12;S;VPWR;0.01;                                                                
+C13;S;VSUBS;0.019;                                                              
+C14;VPWR;VSUBS;0.02;                                                            
+R1;D;D.P0.psdm;;585.0                                                           
+R2;G;G.P0.poly;;363.107                                                         
+R3;S;S.P0.psdm;;585.0                                                           
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpwmlm1_oe/r_nwell_pfet_label_li1__r_nwell_pfet_label_li1/r_nwell_pfet_lab
+el_li1_k25d_pex_netlist.csv                                                     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpwmlm1_oe/r_nwell_pfet_label_li1__r_nwell_pfet_label_li1/r_nwell_pfet_lab
+el_li1_k25d_pex_netlist.spice                                                   

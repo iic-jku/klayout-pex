@@ -1,0 +1,65 @@
+WARNING  __kpex__:kpex_cli.py:1266 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1302 main extract --pdk sky130A --mode R --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz --out_dir /tmp/tmpzsv6yho8 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:598 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:638 No explicit top cell specified, using top cell 'sky130_fd_sc_hd__inv_1'
+INFO     __kpex__:kpex_cli.py:679 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found   Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1201 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1202 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz/sky130_fd_sc_hd__inv_1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1435 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1435 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1435 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:1435 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1435 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1435 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1435 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1435 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1435 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1435 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1435 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1435 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:extractor.py:276 LVSDB: found 6pins
+SUBPROCESS __kpex__:kpex_cli.py:1060 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1060 R1;A;A.$1.li1;;2.133
+SUBPROCESS __kpex__:kpex_cli.py:1060 R2;A.$0.poly;A.$1.li1;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R3;A.$0.poly;A.P0.poly;;265.1
+SUBPROCESS __kpex__:kpex_cli.py:1060 R4;A.$0.poly;A.P1.poly;;192.8
+SUBPROCESS __kpex__:kpex_cli.py:1060 R5;VGND;VGND.$4.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R6;VGND;VGND.$7.met1;;0.12
+SUBPROCESS __kpex__:kpex_cli.py:1060 R7;VGND.$1.li1;VGND.$10.li1;;17.53
+SUBPROCESS __kpex__:kpex_cli.py:1060 R8;VGND.$1.li1;VGND.$3.li1;;18.922
+SUBPROCESS __kpex__:kpex_cli.py:1060 R9;VGND.$1.li1;VGND.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R10;VGND.$10.li1;VGND.$4.li1;;15.435
+SUBPROCESS __kpex__:kpex_cli.py:1060 R11;VGND.$10.li1;VGND.$6.li1;;19.2
+SUBPROCESS __kpex__:kpex_cli.py:1060 R12;VGND.$3.li1;VGND.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R13;VGND.$6.li1;VGND.$7.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R14;VGND.$6.li1;VGND.$8.li1;;34.635
+SUBPROCESS __kpex__:kpex_cli.py:1060 R15;VGND.$7.met1;VGND.$9.met1;;0.12
+SUBPROCESS __kpex__:kpex_cli.py:1060 R16;VGND.$8.li1;VGND.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R17;VPWR;VPWR.$6.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R18;VPWR;VPWR.$9.met1;;0.12
+SUBPROCESS __kpex__:kpex_cli.py:1060 R19;VPWR.$1.li1;VPWR.$3.li1;;20.724
+SUBPROCESS __kpex__:kpex_cli.py:1060 R20;VPWR.$1.li1;VPWR.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R21;VPWR.$10.li1;VPWR.$11.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R22;VPWR.$10.li1;VPWR.$8.li1;;34.635
+SUBPROCESS __kpex__:kpex_cli.py:1060 R23;VPWR.$11.met1;VPWR.$9.met1;;0.12
+SUBPROCESS __kpex__:kpex_cli.py:1060 R24;VPWR.$12.li1;VPWR.$5.li1;;17.981
+SUBPROCESS __kpex__:kpex_cli.py:1060 R25;VPWR.$12.li1;VPWR.$6.li1;;16.188
+SUBPROCESS __kpex__:kpex_cli.py:1060 R26;VPWR.$12.li1;VPWR.$8.li1;;18.447
+SUBPROCESS __kpex__:kpex_cli.py:1060 R27;VPWR.$3.li1;VPWR.$5.li1;;20.724
+SUBPROCESS __kpex__:kpex_cli.py:1060 R28;VPWR.$3.li1;VPWR.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R29;VPWR.$5.li1;VPWR.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R30;VPWR.$8.li1;VPWR.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1060 R31;Y;Y.$3.li1;;26.145
+SUBPROCESS __kpex__:kpex_cli.py:1060 R32;Y;Y.$5.li1;;8.165
+SUBPROCESS __kpex__:kpex_cli.py:1060 R33;Y.$1.li1;Y.$3.li1;;24.023
+SUBPROCESS __kpex__:kpex_cli.py:1060 R34;Y.$1.li1;Y.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R35;Y.$3.li1;Y.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R36;Y.$5.li1;Y.$7.li1;;28.544
+SUBPROCESS __kpex__:kpex_cli.py:1060 R37;Y.$5.li1;Y.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R38;Y.$7.li1;Y.$9.li1;;16.821
+SUBPROCESS __kpex__:kpex_cli.py:1060 R39;Y.$7.li1;Y.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R40;Y.$9.li1;Y.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1063 /tmp/tmpzsv6yho8/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1079 Wrote expanded netlist to: /tmp/tmpzsv6yho8/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd__inv_1_k25d_pex_netlist.spice
