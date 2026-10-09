@@ -1,0 +1,41 @@
+──────────────────────────── Command line arguments ────────────────────────────
+kpex pex25d --pdk ihp-sg13g2 --gds                                              
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_pr_
+_cmim/cmim.gds.gz --out_dir                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache         
+--blackbox n --output_file                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmim.pex25d         
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:02:39] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:02:39] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'cmim'                                                 
+[21:02:39] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:02:39] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_p
+r__cmim/cmim.gds.gz/cmim.lvsdb.gz                                               
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:02:39] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1357
+[21:02:39] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1357
+[21:02:39] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1357
+[21:02:39] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1357
+[21:02:39] INFO     (67, 0) -> (metal5_n_cap metal5_cap)        kpex_cli.py:1357
+[21:02:39] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1357
+[21:02:39] INFO     (36, 0) -> (cmim_top)                       kpex_cli.py:1357
+────────────────────────────── PEX25D Generation ───────────────────────────────
+[21:02:39] INFO     GROUND_PLANE subs: z -2800 … 0         pex25d_builder.py:316
+[21:02:39] INFO     DIELECTRIC_BACKGROUND air: k=1.0       pex25d_builder.py:450
+[21:02:39] INFO     2 conductor(s), 29 shape record(s)     pex25d_builder.py:571
+[21:02:39] INFO     2 terminal record(s)                   pex25d_builder.py:716
+[21:02:39] INFO     10 metal and 8 via resistance          pex25d_builder.py:752
+                    record(s)                                                   
+[21:02:39] INFO     Wrote                                       kpex_cli.py:1374
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/cmim.pex25d (file, text)                   
+[21:02:39] INFO     No diagnostics.                           diagnostics.py:234

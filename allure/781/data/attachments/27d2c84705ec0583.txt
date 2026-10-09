@@ -1,0 +1,191 @@
+[21:09:38] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_
+hd__inv_1/sky130_fd_sc_hd__inv_1.gds.gz --out_dir /tmp/tmpcsudo451 --cache-dir  
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:09:38] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[21:09:38] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'sky130_fd_sc_hd__inv_1'                               
+[21:09:38] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found   Effective range                                                
+KLayout  0.30.4  >=0.30.1,>=0.30.2,>=0.30.3                                     
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[21:09:39] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/sky130_fd_sc_hd__
+inv_1/sky130_fd_sc_hd__inv_1.gds.gz/sky130_fd_sc_hd__inv_1.lvsdb.gz             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:09:39] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1435
+[21:09:39] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1435
+[21:09:39] INFO     (94, 20) -> (psd)                           kpex_cli.py:1435
+[21:09:39] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1435
+[21:09:39] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[21:09:39] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1435
+[21:09:39] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1435
+[21:09:39] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1435
+[21:09:39] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1435
+[21:09:39] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1435
+[21:09:39] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1435
+[21:09:39] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:09:39] INFO     LVSDB: found 6pins                          extractor.py:276
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VGND.$3.li1;0.003;                                                         
+C2;A;VPB;0.001;                                                                 
+C3;A;VPWR.$1.li1;0.01;                                                          
+C4;A;VSUBS;0.01;                                                                
+C5;A.$0.poly;VGND.$1.li1;0.004;                                                 
+C6;A.$0.poly;VGND.$3.li1;0.001;                                                 
+C7;A.$0.poly;VGND.$6.li1;0.003;                                                 
+C8;A.$0.poly;VGND.$7.met1;0.004;                                                
+C9;A.$0.poly;VPB;0.026;                                                         
+C10;A.$0.poly;VPWR.$1.li1;0.001;                                                
+C11;A.$0.poly;VPWR.$3.li1;0.003;                                                
+C12;A.$0.poly;VPWR.$8.li1;0.004;                                                
+C13;A.$0.poly;VPWR.$9.met1;0.004;                                               
+C14;A.$0.poly;VSUBS;0.08;                                                       
+C15;A.$0.poly;Y;0.011;                                                          
+C16;A.$0.poly;Y.$3.li1;0.002;                                                   
+C17;A.$1.li1;VGND.$3.li1;0.009;                                                 
+C18;A.$1.li1;Y;0.01;                                                            
+C19;A.P0.poly;VPB;0.067;                                                        
+C20;A.P0.poly;VPWR.$1.li1;0.004;                                                
+C21;A.P0.poly;VPWR.$12.li1;0.002;                                               
+C22;A.P0.poly;VPWR.$3.li1;0.006;                                                
+C23;A.P0.poly;VPWR.$5.li1;0.004;                                                
+C24;A.P0.poly;VPWR.$8.li1;0.003;                                                
+C25;A.P0.poly;VPWR.$9.met1;0.002;                                               
+C26;A.P0.poly;VSUBS;0.042;                                                      
+C27;A.P0.poly;Y.$5.li1;0.005;                                                   
+C28;A.P0.poly;Y.$7.li1;0.006;                                                   
+C29;A.P0.poly;Y.$9.li1;0.006;                                                   
+C30;A.P1.poly;VGND.$1.li1;0.006;                                                
+C31;A.P1.poly;VGND.$10.li1;0.002;                                               
+C32;A.P1.poly;VGND.$3.li1;0.004;                                                
+C33;A.P1.poly;VGND.$6.li1;0.003;                                                
+C34;A.P1.poly;VGND.$7.met1;0.002;                                               
+C35;A.P1.poly;VSUBS;0.085;                                                      
+C36;A.P1.poly;Y.$1.li1;0.006;                                                   
+C37;A.P1.poly;Y.$3.li1;0.006;                                                   
+C38;VGND;VPB;0.004;                                                             
+C39;VGND;VPWR;0.005;                                                            
+C40;VGND;VSUBS;0.046;                                                           
+C41;VGND.$1.li1;VSUBS;0.014;                                                    
+C42;VGND.$1.li1;Y.$1.li1;0.014;                                                 
+C43;VGND.$10.li1;VSUBS;0.021;                                                   
+C44;VGND.$3.li1;VSUBS;0.014;                                                    
+C45;VGND.$3.li1;Y.$3.li1;0.014;                                                 
+C46;VGND.$4.li1;VPB;0.003;                                                      
+C47;VGND.$4.li1;VPWR.$6.li1;0.002;                                              
+C48;VGND.$4.li1;VSUBS;0.032;                                                    
+C49;VGND.$6.li1;VSUBS;0.019;                                                    
+C50;VGND.$6.li1;Y.$1.li1;0.009;                                                 
+C51;VGND.$7.met1;VPWR.$9.met1;0.006;                                            
+C52;VGND.$7.met1;VSUBS;0.022;                                                   
+C53;VGND.$7.met1;Y;0.006;                                                       
+C54;VGND.$7.met1;Y.$1.li1;0.005;                                                
+C55;VGND.$8.li1;VPB;0.003;                                                      
+C56;VGND.$8.li1;VPWR.$10.li1;0.002;                                             
+C57;VGND.$8.li1;VSUBS;0.036;                                                    
+C58;VGND.$8.li1;Y.$1.li1;0.005;                                                 
+C59;VGND.$9.met1;VPB;0.004;                                                     
+C60;VGND.$9.met1;VPWR.$11.met1;0.004;                                           
+C61;VGND.$9.met1;VSUBS;0.047;                                                   
+C62;VGND.$9.met1;Y;0.007;                                                       
+C63;VGND.$9.met1;Y.$1.li1;0.001;                                                
+C64;VPB;VPWR;0.01;                                                              
+C65;VPB;VPWR.$1.li1;0.004;                                                      
+C66;VPB;VPWR.$10.li1;0.012;                                                     
+C67;VPB;VPWR.$11.met1;0.01;                                                     
+C68;VPB;VPWR.$12.li1;0.007;                                                     
+C69;VPB;VPWR.$3.li1;0.004;                                                      
+C70;VPB;VPWR.$5.li1;0.004;                                                      
+C71;VPB;VPWR.$6.li1;0.011;                                                      
+C72;VPB;VPWR.$8.li1;0.004;                                                      
+C73;VPB;VPWR.$9.met1;0.002;                                                     
+C74;VPB;Y;0.008;                                                                
+C75;VPB;Y.$5.li1;0.003;                                                         
+C76;VPB;Y.$7.li1;0.004;                                                         
+C77;VPB;Y.$9.li1;0.005;                                                         
+C78;VPWR;VSUBS;0.041;                                                           
+C79;VPWR.$1.li1;VSUBS;0.01;                                                     
+C80;VPWR.$1.li1;Y;0.003;                                                        
+C81;VPWR.$1.li1;Y.$5.li1;0.011;                                                 
+C82;VPWR.$10.li1;VSUBS;0.027;                                                   
+C83;VPWR.$10.li1;Y.$9.li1;0.005;                                                
+C84;VPWR.$11.met1;VSUBS;0.041;                                                  
+C85;VPWR.$11.met1;Y;0.007;                                                      
+C86;VPWR.$11.met1;Y.$9.li1;0.001;                                               
+C87;VPWR.$12.li1;VSUBS;0.013;                                                   
+C88;VPWR.$3.li1;VSUBS;0.01;                                                     
+C89;VPWR.$3.li1;Y.$7.li1;0.015;                                                 
+C90;VPWR.$5.li1;VSUBS;0.01;                                                     
+C91;VPWR.$5.li1;Y.$9.li1;0.013;                                                 
+C92;VPWR.$6.li1;VSUBS;0.024;                                                    
+C93;VPWR.$8.li1;VSUBS;0.015;                                                    
+C94;VPWR.$8.li1;Y.$9.li1;0.009;                                                 
+C95;VPWR.$9.met1;VSUBS;0.02;                                                    
+C96;VPWR.$9.met1;Y;0.005;                                                       
+C97;VPWR.$9.met1;Y.$7.li1;0.004;                                                
+C98;VPWR.$9.met1;Y.$9.li1;0.002;                                                
+C99;VSUBS;Y;0.035;                                                              
+C100;VSUBS;Y.$1.li1;0.014;                                                      
+C101;VSUBS;Y.$3.li1;0.02;                                                       
+C102;VSUBS;Y.$5.li1;0.006;                                                      
+C103;VSUBS;Y.$7.li1;0.01;                                                       
+C104;VSUBS;Y.$9.li1;0.009;                                                      
+R1;A;A.$1.li1;;2.133                                                            
+R2;A.$0.poly;A.$1.li1;;152.0                                                    
+R3;A.$0.poly;A.P0.poly;;265.1                                                   
+R4;A.$0.poly;A.P1.poly;;192.8                                                   
+R5;VGND;VGND.$4.li1;;9.3                                                        
+R6;VGND;VGND.$7.met1;;0.12                                                      
+R7;VGND.$1.li1;VGND.$10.li1;;17.53                                              
+R8;VGND.$1.li1;VGND.$3.li1;;18.922                                              
+R9;VGND.$1.li1;VGND.P0.nsdm;;185.0                                              
+R10;VGND.$10.li1;VGND.$4.li1;;15.435                                            
+R11;VGND.$10.li1;VGND.$6.li1;;19.2                                              
+R12;VGND.$3.li1;VGND.P0.nsdm;;185.0                                             
+R13;VGND.$6.li1;VGND.$7.met1;;9.3                                               
+R14;VGND.$6.li1;VGND.$8.li1;;34.635                                             
+R15;VGND.$7.met1;VGND.$9.met1;;0.12                                             
+R16;VGND.$8.li1;VGND.$9.met1;;9.3                                               
+R17;VPWR;VPWR.$6.li1;;9.3                                                       
+R18;VPWR;VPWR.$9.met1;;0.12                                                     
+R19;VPWR.$1.li1;VPWR.$3.li1;;20.724                                             
+R20;VPWR.$1.li1;VPWR.P0.psdm;;585.0                                             
+R21;VPWR.$10.li1;VPWR.$11.met1;;9.3                                             
+R22;VPWR.$10.li1;VPWR.$8.li1;;34.635                                            
+R23;VPWR.$11.met1;VPWR.$9.met1;;0.12                                            
+R24;VPWR.$12.li1;VPWR.$5.li1;;17.981                                            
+R25;VPWR.$12.li1;VPWR.$6.li1;;16.188                                            
+R26;VPWR.$12.li1;VPWR.$8.li1;;18.447                                            
+R27;VPWR.$3.li1;VPWR.$5.li1;;20.724                                             
+R28;VPWR.$3.li1;VPWR.P0.psdm;;585.0                                             
+R29;VPWR.$5.li1;VPWR.P0.psdm;;585.0                                             
+R30;VPWR.$8.li1;VPWR.$9.met1;;9.3                                               
+R31;Y;Y.$3.li1;;26.145                                                          
+R32;Y;Y.$5.li1;;8.165                                                           
+R33;Y.$1.li1;Y.$3.li1;;24.023                                                   
+R34;Y.$1.li1;Y.P0.nsdm;;185.0                                                   
+R35;Y.$3.li1;Y.P0.nsdm;;185.0                                                   
+R36;Y.$5.li1;Y.$7.li1;;28.544                                                   
+R37;Y.$5.li1;Y.P0.psdm;;585.0                                                   
+R38;Y.$7.li1;Y.$9.li1;;16.821                                                   
+R39;Y.$7.li1;Y.P0.psdm;;585.0                                                   
+R40;Y.$9.li1;Y.P0.psdm;;585.0                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpcsudo451/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_k25d_pex_netlist.csv                                                     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpcsudo451/sky130_fd_sc_hd__inv_1__sky130_fd_sc_hd__inv_1/sky130_fd_sc_hd_
+_inv_1_k25d_pex_netlist.spice                                                   
