@@ -45,13 +45,13 @@ from ..log import (
 from .shapes_pb2_converter import ShapesConverter
 
 from ..tech_info import TechInfo
+from ..types import GDSPair
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
-GDSPair = Tuple[int, int]
 
 LayerIndexMap = Dict[int, int]  # maps layer indexes of LVSDB to annotated_layout
 LVSDBRegions = Dict[int, kdb.Region]  # maps layer index of annotated_layout to LVSDB region

@@ -31,9 +31,10 @@ from klayout_pex.log import (
 )
 
 from ..types import LayerName, NetName
+from klayout_pex.types import GDSPair
 
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.klayout.lvsdb_extractor import GDSPair, KLayoutExtractionContext
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
 
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2

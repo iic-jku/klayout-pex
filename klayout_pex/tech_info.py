@@ -30,6 +30,7 @@ from functools import cached_property
 import google.protobuf.json_format
 
 from .device_models import DeviceModels
+from .types import GDSPair
 from .util.multiple_choice import MultipleChoicePattern
 from .log import (
     warning
@@ -48,7 +49,6 @@ class TechInfo:
 
     LVSLayerName = str
     CanonicalLayerName = str
-    GDSPair = Tuple[int, int]
 
     @staticmethod
     def duplicate_names(tech: tech_pb2.Technology) -> List[str]:
@@ -195,7 +195,7 @@ class TechInfo:
         """
         The GDS pairs of the conductors of the process stack (its diffusion and metal layers), from the bottom up
         """
-        gds_pairs: List[TechInfo.GDSPair] = []
+        gds_pairs: List[GDSPair] = []
         for lyr in self.tech.process_stack.layers:
             if lyr.layer_type not in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
                                       process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL):
