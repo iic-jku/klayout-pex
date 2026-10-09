@@ -39,6 +39,7 @@ from klayout_pex.klayout.lvsdb_extractor import (
     KLayoutMergedExtractedLayerInfo,
     LVSDBError
 )
+from klayout_pex.types import LVSLayerName, NetName
 from klayout_pex.tech_info import TechInfo
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
@@ -257,3 +258,42 @@ class TerminalShapesTest(unittest.TestCase):
                             terminals_with_shapes.add(td.name)
             self.assertEqual({'S', 'G', 'D'}, terminals_with_shapes)  # NOTE: the bulk B has no shapes of its own
         self.assertEqual(4, len(pex_context.terminal_shapes_by_abstract))  # S, G, D, B of the one abstract
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB")
+class ShapesOfLVSLayersTest(unittest.TestCase):
+    def test_shapes_of_some_of_the_lvs_layers_of_a_gds_pair(self):
+        # NOTE: e.g. sky130A met3, split into the bottom plates of the MIM caps (met3_cap) and the rest (met3_ncap),
+        #       which are layers of the process stack of their own
+        def extracted_layer(lvs_layer_name: LVSLayerName,
+                            boxes_by_net: Dict[NetName, List[kdb.Box]]) -> KLayoutExtractedLayerInfo:
+            region = kdb.Region()
+            for net_name, boxes in boxes_by_net.items():
+                for box in boxes:
+                    region.insert(kdb.PolygonWithProperties(kdb.Polygon(box), {'net': net_name}))
+            return KLayoutExtractedLayerInfo(index=0, lvs_layer_name=lvs_layer_name, gds_pair=(70, 20), region=region)
+
+        source_layers = [extracted_layer('met3_ncap', {'A': [kdb.Box(0, 0, 100, 100)], 'B': [kdb.Box(200, 0, 300, 100)]}),
+                         extracted_layer('met3_cap', {'A': [kdb.Box(400, 0, 500, 100)]})]
+        pex_context = KLayoutExtractionContext(
+            lvsdb=None, tech=TechInfo(tech=tech_pb2.Technology(name='test'), dielectric_filter=None), dbu=0.001,
+            layer_index_map={}, lvsdb_regions={}, cell_mapping=None,
+            annotated_top_cell=None, annotated_layout=None,
+            extracted_layers={(70, 20): KLayoutMergedExtractedLayerInfo(source_layers=source_layers, gds_pair=(70, 20))},
+            unnamed_layers=[], unmodeled_layers=[], blackbox_devices=False
+        )
+
+        def boxes(region: kdb.Region) -> List[kdb.Box]:
+            return [p.bbox() for p in region.each()]
+
+        self.assertEqual([kdb.Box(0, 0, 100, 100), kdb.Box(400, 0, 500, 100)],
+                         boxes(pex_context.shapes_of_net((70, 20), 'A')))
+        self.assertEqual([kdb.Box(400, 0, 500, 100)],
+                         boxes(pex_context.shapes_of_net((70, 20), 'A', lvs_layer_names=['met3_cap'])))
+        self.assertEqual([], boxes(pex_context.shapes_of_net((70, 20), 'B', lvs_layer_names=['met3_cap'])))
+        self.assertIsNone(pex_context.shapes_of_net((70, 20), 'A', lvs_layer_names=['met4_cap']))
+        self.assertEqual([('A', kdb.Box(0, 0, 100, 100)), ('B', kdb.Box(200, 0, 300, 100))],
+                         [(p.property('net'), p.bbox())
+                          for p in pex_context.shapes_of_layer((70, 20), lvs_layer_names=['met3_ncap']).each()])
+        self.assertEqual(3, pex_context.shapes_of_layer((70, 20)).count())

@@ -45,7 +45,7 @@ from ..log import (
 from .shapes_pb2_converter import ShapesConverter
 
 from ..tech_info import TechInfo
-from ..types import GDSPair
+from ..types import GDSPair, LVSLayerName, NetName
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
@@ -87,7 +87,7 @@ def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str
 @dataclass
 class KLayoutExtractedLayerInfo:
     index: int
-    lvs_layer_name: str        # NOTE: this can be computed, so gds_pair is preferred
+    lvs_layer_name: LVSLayerName  # NOTE: this can be computed, so gds_pair is preferred
     gds_pair: GDSPair
     region: kdb.Region
 
@@ -406,20 +406,22 @@ class KLayoutExtractionContext:
             return b2
 
     @cached_property
-    def shapes_by_net_name_by_gds_pair(self) -> Dict[GDSPair, Dict[str, kdb.Region]]:
+    def shapes_by_net_name_by_lvs_layer(self) -> Dict[LVSLayerName, Dict[NetName, kdb.Region]]:
         """
-        The shapes of each net on each extracted layer
+        The shapes of each net on each extracted LVS layer
+        (several of them can share a GDS pair, e.g. sky130A met3_cap and met3_ncap)
 
         NOTE: in one pass over the shapes of a layer, rather than one for each net,
               which is quadratic in the size of the layout (e.g. for the resistance extraction of each net)
         """
-        shapes_by_net_name_by_gds_pair: Dict[GDSPair, Dict[str, kdb.Region]] = {}
+        shapes_by_net_name_by_lvs_layer: Dict[LVSLayerName, Dict[NetName, kdb.Region]] = {}
 
-        for gds_pair, lyr in self.extracted_layers.items():
-            shapes_by_net_name: Dict[str, kdb.Region] = {}
-
-            def add_shapes_from_region(source_region: kdb.Region):
-                iter, transform = source_region.begin_shapes_rec()
+        for lyr in self.extracted_layers.values():
+            if not lyr.source_layers:
+                raise AssertionError('Internal error: Empty list of source_layers')
+            for sl in lyr.source_layers:
+                shapes_by_net_name: Dict[NetName, kdb.Region] = {}
+                iter, transform = sl.region.begin_shapes_rec()
                 while not iter.at_end():
                     shape = iter.shape()
                     net_name = shape.property('net')
@@ -432,43 +434,63 @@ class KLayoutExtractionContext:
                                   iter.trans() *  # NOTE: this is local during the iteration (due to sub hierarchy)
                                   shape.polygon)
                     iter.next()
+                shapes_by_net_name_by_lvs_layer[sl.lvs_layer_name] = shapes_by_net_name
 
-            match len(lyr.source_layers):
-                case 0:
-                    raise AssertionError('Internal error: Empty list of source_layers')
-                case _:
-                    for sl in lyr.source_layers:
-                        add_shapes_from_region(sl.region)
+        return shapes_by_net_name_by_lvs_layer
 
-            shapes_by_net_name_by_gds_pair[gds_pair] = shapes_by_net_name
+    def source_layers(self,
+                      gds_pair: GDSPair,
+                      lvs_layer_names: Optional[Collection[LVSLayerName]] = None) \
+            -> List[KLayoutExtractedLayerInfo]:
+        """
+        The extracted LVS layers of a GDS pair
 
-        return shapes_by_net_name_by_gds_pair
-
-    def shapes_of_net(self, gds_pair: GDSPair, net: kdb.Net | str) -> Optional[kdb.Region]:
+        :param lvs_layer_names: only these of them, default is all
+        """
         lyr = self.extracted_layers.get(gds_pair, None)
         if not lyr:
+            return []
+        if lvs_layer_names is None:
+            return lyr.source_layers
+        return [sl for sl in lyr.source_layers if sl.lvs_layer_name in lvs_layer_names]
+
+    def shapes_of_net(self,
+                      gds_pair: GDSPair,
+                      net: kdb.Net | NetName,
+                      lvs_layer_names: Optional[Collection[LVSLayerName]] = None) -> Optional[kdb.Region]:
+        """
+        :param lvs_layer_names: only the shapes of these of the GDS pair's LVS layers, default is all of them
+                                (e.g. a layer of the process stack sharing its GDS pair with another one)
+        :return: a copy, as the caller may change it, None if the GDS pair has none of the LVS layers
+        """
+        source_layers = self.source_layers(gds_pair, lvs_layer_names)
+        if not source_layers:
             return None
 
         requested_net_name = net.name if isinstance(net, kdb.Net) else net
 
-        shapes = self.shapes_by_net_name_by_gds_pair[gds_pair].get(requested_net_name, None)
-        if shapes is None:
-            shapes = kdb.Region()
-            shapes.enable_properties()
-            return shapes
-        return shapes.dup()  # NOTE: the caller may change it
+        shapes = kdb.Region()
+        shapes.enable_properties()
+        for sl in source_layers:
+            net_shapes = self.shapes_by_net_name_by_lvs_layer[sl.lvs_layer_name].get(requested_net_name, None)
+            if net_shapes is not None:
+                shapes += net_shapes
+        return shapes
 
     def shapes_of_layer(self,
                         gds_pair: GDSPair,
-                        mark_device_capacitor_plates: bool = False) -> Optional[kdb.Region]:
+                        mark_device_capacitor_plates: bool = False,
+                        lvs_layer_names: Optional[Collection[LVSLayerName]] = None) -> Optional[kdb.Region]:
         """
         :param mark_device_capacitor_plates: give the shapes of the layers of KIND_DEVICE_CAPACITOR_PLATE
                                              (e.g. the fingers of a MOM cap) the property
                                              DEVICE_CAPACITOR_PLATE_PROPERTY, so that they are kept apart
                                              from the other shapes of their nets
+        :param lvs_layer_names: only the shapes of these of the GDS pair's LVS layers, default is all of them
+                                (e.g. a layer of the process stack sharing its GDS pair with another one)
         """
-        lyr = self.extracted_layers.get(gds_pair, None)
-        if not lyr:
+        source_layers = self.source_layers(gds_pair, lvs_layer_names)
+        if not source_layers:
             return None
 
         def is_plate(sl: KLayoutExtractedLayerInfo) -> bool:
@@ -478,19 +500,17 @@ class KLayoutExtractionContext:
 
         shapes: kdb.Region
 
-        match len(lyr.source_layers):
-            case 0:
-                raise AssertionError('Internal error: Empty list of source_layers')
-            case 1 if not is_plate(lyr.source_layers[0]):
-                shapes = lyr.source_layers[0].region
+        match len(source_layers):
+            case 1 if not is_plate(source_layers[0]):
+                shapes = source_layers[0].region
             case _:
                 # NOTE: currently a bug, for now use polygon-per-polygon workaround
                 # shapes = kdb.Region()
-                # for sl in lyr.source_layers:
+                # for sl in source_layers:
                 #     shapes += sl.region
                 shapes = kdb.Region()
                 shapes.enable_properties()
-                for sl in lyr.source_layers:
+                for sl in source_layers:
                     plate_properties = {DEVICE_CAPACITOR_PLATE_PROPERTY: True} if is_plate(sl) else {}
                     iter, transform = sl.region.begin_shapes_rec()
                     while not iter.at_end():
