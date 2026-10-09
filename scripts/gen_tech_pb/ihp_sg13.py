@@ -129,6 +129,7 @@ class TechBuilder:
             add_computed_layer(tech, VIA,   KCAP, "mim_via",        (125, 10),    "TopVia1",   "Original TopVia1 is 125/0, case MiM cap")
             add_computed_layer(tech, MIM,   KCAP, "metal5_cap",     (67, 0),      "Metal5",    "Computed layer for Metal5, case MiM cap")
             add_computed_layer(tech, MIM,   KCAP, "cmim_top",       (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5")
+            add_computed_layer(tech, MIM,   KCAP, "rfmim_top",      (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
 
         # NOTE: the fingers of the MOM caps (cap_cmomi, cap_cmomf, the metal within their markers)
         #       are on the GDS pairs of the regular metal, but with --blackbox, the capacitances between them

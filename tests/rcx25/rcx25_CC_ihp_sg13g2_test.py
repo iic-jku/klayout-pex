@@ -54,6 +54,20 @@ def test_mim_cap__whiteboxed():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_rf_mim_cap__whiteboxed():
+    # The top plate of the rfcmim (MIM 7 µm x 7 µm, cap_carea 1.5 fF/µm² gives 73.5 fF) is a conductor,
+    # like the one of the cmim: it was left out, as the deck's cmim_top leaves out the RF areas (#280),
+    # and the plates had 2.7 fF between them
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+    with open(csv_path) as f:
+        rows = list(csv.DictReader(f, delimiter=';'))
+    assert [float(row['Capacitance [fF]']) for row in rows
+            if not {'VSUBS', 'sub!'} & {row['Net1'], row['Net2']}] == [75.262]  # between the plates
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mom_cap__whiteboxed():
     # The device model gives 0.915 fF/µm² (fingers on Metal2 … Metal4) * 10 µm * 25 µm = 228.75 fF
     pex_whiteboxed.assert_expected_matches_obtained(
