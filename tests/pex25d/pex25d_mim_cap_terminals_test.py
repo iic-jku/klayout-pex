@@ -86,3 +86,12 @@ def test_rf_mim_cap_terminals_of_ihp_sg13g2():
     # NOTE: the substrate terminal (mim_sub) has no layer of the process stack
     assert device_terminal_layers(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == \
            [('mim_btm', 'metal5_cap'), ('mim_top', 'cmim_top')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap_terminals_of_gf180mcuD():
+    # NOTE: two MIM caps (FuseTop 5 µm x 5 µm and 20 µm x 10 µm), A the bottom and B the top plate
+    assert device_terminal_layers(PDKName.GF180MCUD, 'test_patterns', 'cap_mim_m4m5.gds.gz') == \
+           [('A', 'metal4_cap'), ('A', 'metal4_cap'), ('B', 'FuseTop'), ('B', 'FuseTop')]
