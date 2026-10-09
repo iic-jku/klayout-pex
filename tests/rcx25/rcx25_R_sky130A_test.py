@@ -23,7 +23,6 @@
 #
 
 import allure
-import glob
 import os
 import pytest
 from unittest import mock
@@ -160,10 +159,8 @@ R5;G.$0.poly;G.P0.poly;;316.321"""
 def test_nfet_terminals_are_on_the_resistor_network():
     # The transistor is connected to the nodes of its terminals (#211 §6): the gate to the end of the poly,
     # drain and source to the nodes that carry the names of their nets (which have no pin)
-    pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'nfet_li1_redux.gds.gz')
-    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pex_whiteboxed.pdk.name}"))
-    netlist_path, = glob.glob(os.path.join(output_dir_path, 'nfet_li1_redux__*', '*_k25d_pex_netlist.spice'))
-    with open(netlist_path) as f:
+    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'nfet_li1_redux.gds.gz')
+    with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
         lines = f.read().replace('\n+', ' ').splitlines()
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
     assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.poly', '\\$2', 'sky130_gnd']  # D G S B
