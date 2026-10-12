@@ -1,0 +1,48 @@
+[17:50:04] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/nwell_met1_met2_plates.gds.gz --out_dir                                        
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:50:04] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[17:50:04] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'nwell_met1_met2_plates'                               
+[17:50:04] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:50:04] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nwe
+ll_met1_met2_plates.gds.gz/nwell_met1_met2_plates.lvsdb.gz                      
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:50:04] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1435
+[17:50:04] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1435
+[17:50:04] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[17:50:04] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1435
+[17:50:04] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1435
+[17:50:04] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1435
+[17:50:04] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1435
+[17:50:04] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1435
+[17:50:04] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;VDD;VSUBS;0.923;                                                             
+C2;VDD;X;3.165;                                                                 
+C3;VSUBS;X;0.293;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nwell_met1_met2_plates_
+_nwell_met1_met2_plates/nwell_met1_met2_plates_k25d_pex_netlist.csv             
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nwell_met1_met2_plates_
+_nwell_met1_met2_plates/nwell_met1_met2_plates_k25d_pex_netlist.spice           
