@@ -321,3 +321,23 @@ def test_mim_cap__whiteboxed():
     top_layer_by_node_id = {node.node_id: node.layer_name for node in networks['mimcap_top'].nodes}
     assert [e for e in networks['mimcap_top'].elements
             if {top_layer_by_node_id[e.node_a.node_id], top_layer_by_node_id[e.node_b.node_id]} == {'capm', 'met4'}]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_sonosfet_with_deep_nwell():
+    # The SONOS FET has a deep nwell, which is no conductor of the resistance network
+    # (no via joins it to the nwell over it). It used to stop the extraction (#292)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;D;D.$0.li1;;9.3
+R2;G;G.$6.poly;;73.395
+R3;G;G.$7.poly;;73.395
+R4;G.$0.li1;G.$4.met1;;9.3
+R5;G.$0.li1;G.$6.poly;;152.0
+R6;G.$2.li1;G.$5.met1;;9.3
+R7;G.$2.li1;G.$7.poly;;152.0
+R8;S;S.$0.li1;;9.3"""
+    )
