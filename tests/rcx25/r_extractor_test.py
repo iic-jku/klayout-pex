@@ -256,9 +256,9 @@ class RExtractorNodeKindTest(unittest.TestCase):
     def test_internal_nodes_of_the_conductors_are_wire_junctions(self):
         # NOTE: the internal nodes of the last conductor (li1) were via junctions
         K = r_network_pb2.RNode.Kind
-        self.assertEqual({'G': {'$0.poly': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
-                          '$2': {'$0.nsdm': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
-                          '$3': {'$0.nsdm': K.KIND_WIRE_JUNCTION, '$1.li1': K.KIND_WIRE_JUNCTION},
+        self.assertEqual({'G': {'$0.li1': K.KIND_WIRE_JUNCTION, '$1.poly': K.KIND_WIRE_JUNCTION},
+                          '$2': {'$0.li1': K.KIND_WIRE_JUNCTION, '$1.nsdm': K.KIND_WIRE_JUNCTION},
+                          '$3': {'$0.li1': K.KIND_WIRE_JUNCTION, '$1.nsdm': K.KIND_WIRE_JUNCTION},
                           'sky130_gnd': {}},
                          {net_name: {n.node_name: n.node_kind for n in network.nodes
                                      if n.node_kind not in (K.KIND_PIN, K.KIND_DEVICE_TERMINAL)}
@@ -270,10 +270,12 @@ class RExtractorNodeKindTest(unittest.TestCase):
 class RExtractorNodeNameTest(unittest.TestCase):
     def test_node_names_have_the_layer_name(self):
         # NOTE: KLayout names a node after its layer index (e.g. $1.17),
-        #       which depends on the order of the LVS layers (see RExtractorDeviceTerminalTest)
-        self.assertEqual({'G': ['$0.poly', '$1.li1', 'G', 'P0.poly'],
-                          '$2': ['$0.nsdm', '$1.li1', 'P0.nsdm'],
-                          '$3': ['$0.nsdm', '$1.li1', 'P0.nsdm'],
+        #       which depends on the order of the LVS layers (see RExtractorDeviceTerminalTest),
+        #       and numbers the internal nodes in the order it creates them, which can differ from run to run,
+        #       so they are numbered by layer and location (#286)
+        self.assertEqual({'G': ['$0.li1', '$1.poly', 'G', 'P0.poly'],
+                          '$2': ['$0.li1', '$1.nsdm', 'P0.nsdm'],
+                          '$3': ['$0.li1', '$1.nsdm', 'P0.nsdm'],
                           'sky130_gnd': []},
                          {net_name: sorted(n.node_name for n in network.nodes)
                           for net_name, network in nfet_li1_redux_networks().items()})

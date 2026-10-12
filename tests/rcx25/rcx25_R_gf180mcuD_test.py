@@ -83,13 +83,13 @@ def test_nfet_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;D;D.$1.Metal1;;0.208
-R2;D.$1.Metal1;D.P0.Nplus;;6.3
-R3;G;G.$1.Metal1;;0.156
-R4;G.$0.Poly2;G.$1.Metal1;;5.9
-R5;G.$0.Poly2;G.P0.Poly2;;12.514
-R6;S;S.$1.Metal1;;0.208
-R7;S.$1.Metal1;S.P0.Nplus;;6.3"""
+R1;D;D.$0.Metal1;;0.208
+R2;D.$0.Metal1;D.P0.Nplus;;6.3
+R3;G;G.$0.Metal1;;0.156
+R4;G.$0.Metal1;G.$1.Poly2;;5.9
+R5;G.$1.Poly2;G.P0.Poly2;;12.514
+R6;S;S.$0.Metal1;;0.208
+R7;S.$0.Metal1;S.P0.Nplus;;6.3"""
     )
 
 
@@ -107,8 +107,8 @@ def test_nwell_pfet_ntap_m1():
 R1;D;D.P0.Pplus;;5.2
 R2;G;G.P0.Poly2;;31.633
 R3;S;S.P0.Pplus;;5.2
-R4;VDD;VDD.$0.Nwell;;6.3
-R5;VDD.$0.Nwell;VDD.P0.Nwell;;3083.333"""
+R4;VDD;VDD.$1.Nwell;;6.3
+R5;VDD.$1.Nwell;VDD.P0.Nwell;;3083.333"""
     )
 
 
