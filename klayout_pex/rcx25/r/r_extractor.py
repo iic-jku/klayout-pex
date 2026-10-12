@@ -388,13 +388,15 @@ class RExtractor:
         return rex_request
 
     @staticmethod
-    def node_name(rn: klp.RNode, layer_name: LayerName) -> str:
+    def node_name(rn: klp.RNode, layer_name: LayerName, index: int) -> str:
         """
         The name of a node of the resistor network, unique within the network (but pins),
         e.g. $1.li1 (internal node), P0.poly (polygon port), V0.met1 (vertex port)
 
         NOTE: KLayout names a node after its layer index (e.g. $1.17), but the layer indexes depend on
               the order KLayout creates the LVS layers in, which differs from run to run
+
+        :param index: the port index of a port, the index of an internal node (see internal_node_indexes)
         """
         match rn.type():
             case klp.RNodeType.Internal:
@@ -405,7 +407,39 @@ class RExtractor:
                 prefix = 'P'
             case _:
                 raise NotImplementedError()
-        return f"{prefix}{rn.port_index()}.{layer_name}"
+        return f"{prefix}{index}.{layer_name}"
+
+    def internal_node_indexes(self,
+                              resistor_network: klp.RNetwork,
+                              layer_names: Dict[int, LayerName],
+                              excluded_node_ids: Set[int]) -> Dict[int, int]:
+        """
+        The index of each internal node of a resistor network, by its object ID:
+        in the order of their layers and locations, nodes of the same location by their elements
+
+        NOTE: KLayout numbers the internal nodes in the order it creates them, which can differ from run to run
+              (e.g. KLayout 0.30.12), and their names decide ties in the distribution of the capacitances (#286)
+        """
+        dbu = self.pex_context.dbu
+
+        def location(rn: klp.RNode) -> Tuple[LayerName, str, int, int, int, int, int]:
+            if rn.type() != klp.RNodeType.Internal:
+                # NOTE: a port by its index, as KLayout's location of a vertex port can differ from run to run
+                return layer_names[rn.layer()], str(rn.type()), rn.port_index(), 0, 0, 0, 0
+            box = rn.location()
+            p1 = box.p1.to_itype(dbu)
+            p2 = box.p2.to_itype(dbu)
+            return layer_names[rn.layer()], str(rn.type()), -1, p1.x, p1.y, p2.x, p2.y
+
+        neighbors: Dict[int, List[Tuple[float, Tuple]]] = defaultdict(list)
+        for el in resistor_network.each_element():
+            neighbors[el.a().object_id()].append((el.resistance(), location(el.b())))
+            neighbors[el.b().object_id()].append((el.resistance(), location(el.a())))
+
+        keys = {rn.object_id(): (location(rn), sorted(neighbors[rn.object_id()]))
+                for rn in resistor_network.each_node()
+                if rn.type() == klp.RNodeType.Internal and rn.object_id() not in excluded_node_ids}
+        return {node_id: index for index, node_id in enumerate(sorted(keys, key=keys.get))}
 
     def extract(self, rex_request: pex_request_pb2.RExtractionRequest) -> pex_result_pb2.RExtractionResult:
         rex_result = pex_result_pb2.RExtractionResult()
@@ -473,6 +507,8 @@ class RExtractor:
             if isolated_well_node_ids:
                 nets_with_isolated_wells.append(result_network.net_name)
 
+            internal_node_indexes = self.internal_node_indexes(resistor_network, layer_names, isolated_well_node_ids)
+
             for rn in resistor_network.each_node():
                 if rn.object_id() in isolated_well_node_ids:
                     continue
@@ -485,7 +521,8 @@ class RExtractor:
 
                 r_node = result_network.nodes.add()
                 r_node.node_id = rn.object_id()
-                r_node.node_name = self.node_name(rn, canonical_layer_name)
+                r_node.node_name = self.node_name(rn, canonical_layer_name,
+                                                  internal_node_indexes.get(rn.object_id(), rn.port_index()))
                 r_node.node_kind = r_network_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
                 r_node.layer_name = canonical_layer_name
 

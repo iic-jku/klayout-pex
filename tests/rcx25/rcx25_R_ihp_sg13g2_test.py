@@ -195,14 +195,14 @@ R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
 R3;$4;$4.$0.GatPoly;;33.654
 R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0
-R5;D;D.$1.Metal1;;0.488
-R6;D$1;D$1.$1.Metal1;;0.488
-R7;D$1.$1.Metal1;D$1.P0.nSD;;17.0
-R8;D.$1.Metal1;D.P0.nSD;;17.0
-R9;S;S.$1.Metal1;;0.598
-R10;S$1;S$1.$1.Metal1;;0.598
-R11;S$1.$1.Metal1;S$1.P0.nSD;;17.0
-R12;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+R5;D;D.$0.Metal1;;0.488
+R6;D$1;D$1.$0.Metal1;;0.488
+R7;D$1.$0.Metal1;D$1.P0.nSD;;17.0
+R8;D.$0.Metal1;D.P0.nSD;;17.0
+R9;S;S.$0.Metal1;;0.598
+R10;S$1;S$1.$0.Metal1;;0.598
+R11;S$1.$0.Metal1;S$1.P0.nSD;;17.0
+R12;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 
 
 @allure.parent_suite(parent_suite)
@@ -215,11 +215,11 @@ def test_a_net_of_several_labels_has_a_port_per_label():
     assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
-R3;D;D,X.$1.Metal1;;0.488
-R4;D,X;D,X.$1.Metal1;;17.0
-R5;D,X.$1.Metal1;X;;0.089
-R6;S;S.$1.Metal1;;0.598
-R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+R3;D;D,X.$0.Metal1;;0.488
+R4;D,X;D,X.$0.Metal1;;17.0
+R5;D,X.$0.Metal1;X;;0.089
+R6;S;S.$0.Metal1;;0.598
+R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
     assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
 
@@ -234,11 +234,11 @@ def test_labels_on_one_node_are_tied():
     assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
-R3;D;D,X.$1.Metal1;;0.488
+R3;D;D,X.$0.Metal1;;0.488
 R4;D;X;;0.001
-R5;D,X;D,X.$1.Metal1;;17.0
-R6;S;S.$1.Metal1;;0.598
-R7;S.$1.Metal1;S.P0.nSD;;17.0""".splitlines()
+R5;D,X;D,X.$0.Metal1;;17.0
+R6;S;S.$0.Metal1;;0.598
+R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
     assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
 

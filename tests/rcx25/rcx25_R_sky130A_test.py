@@ -125,9 +125,9 @@ def test_via_stack_1x1_minsize_poly_to_met5():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_via_stack_1x1_minsize_poly_to_met5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;li1;met1;;9.3
-R2;li1;poly;;152.0
-R3;li1,met1,met2,met3,met4,met5,poly;poly;;0.001
+R1;li1;li1,met1,met2,met3,met4,met5,poly;;0.001
+R2;li1;met1;;9.3
+R3;li1;poly;;152.0
 R4;met1;met2;;4.5
 R5;met2;met3;;3.41
 R6;met3;met4;;3.41
@@ -144,11 +144,11 @@ def test_nfet_li1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;$2;$2.$1.li1;;209.667
-R2;$3;$3.$1.li1;;209.667
-R3;G;G.$1.li1;;2.418
-R4;G.$0.poly;G.$1.li1;;152.0
-R5;G.$0.poly;G.P0.poly;;316.321"""
+R1;$2;$2.$0.li1;;209.667
+R2;$3;$3.$0.li1;;209.667
+R3;G;G.$0.li1;;2.418
+R4;G.$0.li1;G.$1.poly;;152.0
+R5;G.$1.poly;G.P0.poly;;316.321"""
         )
 
 
@@ -180,8 +180,8 @@ def test_nwell_pfet_ntap_li1():
 R1;D;D.P0.psdm;;585.0
 R2;G;G.P0.poly;;363.107
 R3;S;S.P0.psdm;;585.0
-R4;VPWR;VPWR.$0.nwell;;185.0
-R5;VPWR.$0.nwell;VPWR.P0.nwell;;5241.667"""
+R4;VPWR;VPWR.$1.nwell;;185.0
+R5;VPWR.$1.nwell;VPWR.P0.nwell;;5241.667"""
     )
 
 
