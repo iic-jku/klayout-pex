@@ -259,6 +259,15 @@ class TechInfo:
         return [self.canonical_layer_name_by_gds_pair[gds_pair] for gds_pair in gds_pairs if gds_pair is not None]
 
     @cached_property
+    def substrate_well_layer_names(self) -> Set[CanonicalLayerName]:
+        """
+        The canonical names of the wells the substrate is split into (see substrate.well_lvs_layer_names)
+        """
+        return {self.canonical_layer_name_by_gds_pair[self.gds_pair_for_computed_layer_name[lvs_layer_name]]
+                for lvs_layer_name in self.tech.substrate.well_lvs_layer_names
+                if lvs_layer_name in self.gds_pair_for_computed_layer_name}
+
+    @cached_property
     def device_capacitance_layer_names(self) -> Set[CanonicalLayerName]:
         """
         The layers between which the diffusion has the capacitances of the devices (see is_device_capacitance)

@@ -260,15 +260,22 @@ class CapacitanceDistributor:
     """
     def __init__(self,
                  sites_by_net_and_layer: Dict[Tuple[NetName, LayerName], NodeSites],
-                 sites_by_net: Dict[NetName, NodeSites]):
+                 sites_by_net: Dict[NetName, NodeSites],
+                 substrate_layer_name: Optional[LayerName] = None):
         self.sites_by_net_and_layer = sites_by_net_and_layer
         self.sites_by_net = sites_by_net
+        self.substrate_layer_name = substrate_layer_name
 
     @classmethod
     def from_networks(cls,
-                      networks: Iterable[Tuple[r_network_pb2.RNetwork, Dict[int, NetName]]]) -> CapacitanceDistributor:
+                      networks: Iterable[Tuple[r_network_pb2.RNetwork, Dict[int, NetName]]],
+                      substrate_layer_name: Optional[LayerName] = None,
+                      substrate_well_layer_names: Collection[LayerName] = ()) -> CapacitanceDistributor:
         """
         :param networks: each resistor network, with the netlist node names by node ID
+        :param substrate_layer_name: the layer of the substrate, which has no nodes of its own
+        :param substrate_well_layer_names: the wells the substrate is split into, whose nodes are the ones
+                                           of the substrate (see sites)
         """
         sites_by_net_and_layer: Dict[Tuple[NetName, LayerName], List[NodeSite]] = defaultdict(list)
         sites_by_net: Dict[NetName, List[NodeSite]] = defaultdict(list)
@@ -278,9 +285,12 @@ class CapacitanceDistributor:
                 if site is None:
                     continue
                 sites_by_net_and_layer[(network.net_name, node.layer_name)].append(site)
+                if substrate_layer_name is not None and node.layer_name in substrate_well_layer_names:
+                    sites_by_net_and_layer[(network.net_name, substrate_layer_name)].append(site)
                 sites_by_net[network.net_name].append(site)
         return cls(sites_by_net_and_layer={key: NodeSites(sites) for key, sites in sites_by_net_and_layer.items()},
-                   sites_by_net={net_name: NodeSites(sites) for net_name, sites in sites_by_net.items()})
+                   sites_by_net={net_name: NodeSites(sites) for net_name, sites in sites_by_net.items()},
+                   substrate_layer_name=substrate_layer_name)
 
     def has_nodes(self, net_name: NetName) -> bool:
         return net_name in self.sites_by_net
@@ -288,10 +298,14 @@ class CapacitanceDistributor:
     def sites(self, net_name: NetName, layer_name: LayerName) -> Optional[NodeSites]:
         """
         The sites of the nodes of the net on the layer,
-        otherwise on any layer (e.g. a layer the resistance extraction doesn't model)
+        otherwise on any layer (e.g. a layer the resistance extraction doesn't model),
+        but on the substrate the ones of its wells, otherwise none (the node of the net),
+        as the rest of the substrate is ideal, and not the metal above (#288)
         """
-        return self.sites_by_net_and_layer.get((net_name, layer_name), None) or \
-               self.sites_by_net.get(net_name, None)
+        sites = self.sites_by_net_and_layer.get((net_name, layer_name), None)
+        if sites or layer_name == self.substrate_layer_name:
+            return sites
+        return self.sites_by_net.get(net_name, None)
 
     def area_fractions(self,
                        net_a: NetName, layer_a: LayerName,
