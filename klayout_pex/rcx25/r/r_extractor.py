@@ -529,7 +529,10 @@ class RExtractor:
                 match rn.type():
                     case klp.RNodeType.VertexPort:   # pins!
                         r_node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_POINT
-                        p = loc.center().to_itype(self.pex_context.dbu)
+                        # NOTE: at its label, the vertex port, rather than where KLayout locates the node,
+                        #       which can differ from run to run (e.g. KLayout 0.30.12), and so would
+                        #       the nodes the capacitances near it go to (#286)
+                        p = vertex_ports[rn.layer()][rn.port_index()]
                         r_node.location.point.x = p.x
                         r_node.location.point.y = p.y
                     case klp.RNodeType.PolygonPort | klp.RNodeType.Internal:

@@ -28,6 +28,7 @@ import pytest
 from unittest import mock
 
 from rcx25_test_helpers import *
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
 CSVPath = str
@@ -183,6 +184,20 @@ R3;S;S.P0.psdm;;585.0
 R4;VPWR;VPWR.$1.nwell;;185.0
 R5;VPWR.$1.nwell;VPWR.P0.nwell;;5241.667"""
     )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_pin_node_is_at_its_label():
+    # Each pin's node is at its label: KLayout located the gate's 60 nm below its label (at 1750, 2690),
+    # and where it locates such a node can differ from run to run,
+    # and so would the nodes the capacitances near it go to (#286)
+    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    assert sorted((n.node_name, n.location.point.x, n.location.point.y)
+                  for network in results.r_extraction_result.networks for n in network.nodes
+                  if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN) == \
+           [('D', 2215, 1500), ('G', 1750, 2750), ('S', 1285, 1500), ('VPWR', 11000, 1500)]  # the labels
 
 
 @allure.parent_suite(parent_suite)
