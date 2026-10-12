@@ -174,3 +174,15 @@ def test_mim_cap__whiteboxed():
         layer_by_node_id = {node.node_id: node.layer_name for node in networks[top].nodes}
         assert [e for e in networks[top].elements
                 if {layer_by_node_id[e.node_a.node_id], layer_by_node_id[e.node_b.node_id]} == {'FuseTop', 'Metal5'}]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_well_diodes_with_deep_nwell():
+    # The deep nwell is no conductor of the resistance network (no via joins it to the nwell over it),
+    # so the terminals of the diodes on it stay on the nodes of their nets. It used to stop the extraction (#292)
+    assert pex_whiteboxed.written_device_lines('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz') == [
+        'D$1 PW2DW_P PW2DW_N diode_pw2dw area=8e-12 pj=1.2e-05',
+        'D$2 SUB DW2PS_N diode_dw2ps area=8e-12 pj=1.2e-05',
+    ]

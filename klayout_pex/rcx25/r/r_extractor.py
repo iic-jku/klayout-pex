@@ -165,6 +165,13 @@ class RExtractor:
                         cond.resistance = self.pex_context.tech.milliohm_to_ohm(layer_resistance.resistance)
                         modeled_gds_pairs.add(gds_pair)
 
+                    case LP.PURPOSE_DNWELL:
+                        # NOTE: no conductor: no via joins the deep nwell to the nwell over it,
+                        #       so it would be a piece that joins nothing (see isolated_well_node_ids),
+                        #       and gf180mcuD has no sheet resistance for it. Like the substrate,
+                        #       the device terminals on it stay on the node of their net (#292)
+                        continue
+
                     case LP.PURPOSE_NTAP | LP.PURPOSE_PTAP:
                         # NOTE: no conductor, the contacts over a tap land on the well below it
                         #       (e.g. sky130A licon_ntap_con on the nwell), neglecting the resistance
