@@ -585,6 +585,43 @@ class KLayoutExtractionContext:
 
         return substrate.net_names[0] if substrate.net_names else self.tech.internal_substrate_layer_name
 
+    @cached_property
+    def terminal_refs(self) -> Dict[Tuple[int, int], List[kdb.NetTerminalRef]]:
+        """
+        The references of the device terminals by (device ID, terminal ID)
+
+        NOTE: in one pass over the nets, rather than one over the terminals of its net for each terminal,
+              which is quadratic in the size of a net (e.g. the bulk terminals on a supply)
+        """
+        terminal_refs: Dict[Tuple[int, int], List[kdb.NetTerminalRef]] = defaultdict(list)
+        for net in self.top_circuit.each_net():
+            for nt in net.each_terminal():
+                terminal_refs[(nt.device().id(), nt.terminal_id())].append(nt)
+        return terminal_refs
+
+    @cached_property
+    def mos_channels(self) -> kdb.Region:
+        """
+        The channels of the MOS transistors, the shapes of their gate terminals on the gate poly
+        (over the active area), whose capacitances (of the gate oxide, the overlap and the fringe)
+        the transistor models have (#290)
+
+        NOTE: by the shapes on the gate poly, as the device class doesn't tell
+              (e.g. sky130A reads VPP caps with 4 terminals as MOS4, whose terminals are on the metal)
+        """
+        gate_poly_gds_pair = self.tech.gds_pair(self.tech.gate_poly_layer.name)
+        channels = kdb.Region()
+        for device in self.top_circuit.each_device():
+            device_class = device.device_class()
+            if not isinstance(device_class, kdb.DeviceClassMOS3Transistor):
+                continue
+            for nt in self.terminal_refs[(device.id(), device_class.terminal_id('G'))]:
+                for layer_index, shapes in self.shapes_of_terminal(device, nt).items():
+                    if self.tech.gds_pair_for_computed_layer_name.get(self.lvsdb.layer_name(layer_index)) == \
+                            gate_poly_gds_pair:
+                        channels += shapes
+        return channels.merged()
+
     def shapes_of_terminal(self, device: kdb.Device, nt: kdb.NetTerminalRef) -> Dict[int, kdb.Region]:
         """
         The shapes of a device terminal by LVS layer index, like LayoutToNetlist.shapes_of_terminal
@@ -625,13 +662,7 @@ class KLayoutExtractionContext:
         # (device class, terminal) -> device names
         devices_by_unconnected_terminal: Dict[Tuple[str, str], List[str]] = defaultdict(list)
 
-        # NOTE: the references of the device terminals by (device ID, terminal ID), in one pass over the nets,
-        #       rather than one over the terminals of its net for each terminal,
-        #       which is quadratic in the size of a net (e.g. the bulk terminals on a supply)
-        terminal_refs: Dict[Tuple[int, int], List[kdb.NetTerminalRef]] = defaultdict(list)
-        for net in self.top_circuit.each_net():
-            for nt in net.each_terminal():
-                terminal_refs[(nt.device().id(), nt.terminal_id())].append(nt)
+        terminal_refs = self.terminal_refs
 
         for d_kly in self.top_circuit.each_device():
             # https://www.klayout.de/doc-qt5/code/class_Device.html

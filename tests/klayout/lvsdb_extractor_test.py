@@ -221,24 +221,30 @@ class PinsTest(unittest.TestCase):
                          sorted((p.property('net'), p.bbox()) for p in pins.each()))
 
 
+def nfet_li1_redux_orientations_context() -> KLayoutExtractionContext:
+    """
+    The nfet of nfet_li1_redux in the 8 orientations (r0 to m135), whose devices share one abstract
+    """
+    testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_orientations.lvsdb.gz'))
+    tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
+                        __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
+                    dielectric_filter=None)
+
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+        return KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux_orientations',
+                                                           lvsdb=lvsdb,
+                                                           tech=tech,
+                                                           blackbox_devices=False)
+
+
 @allure.parent_suite("Unit Tests")
 @allure.tag("LVS", "LVSDB", "Devices")
 class TerminalShapesTest(unittest.TestCase):
     def test_terminal_shapes_of_a_device_abstract_in_each_orientation(self):
-        # NOTE: the nfet of nfet_li1_redux in the 8 orientations (r0 to m135), whose devices share one abstract,
-        #       so the shapes of its terminals are taken once and moved to each device
-        testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
-        lvsdb = kdb.LayoutVsSchematic()
-        lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_orientations.lvsdb.gz'))
-        tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
-                            __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
-                        dielectric_filter=None)
-
-        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
-            pex_context = KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux_orientations',
-                                                                      lvsdb=lvsdb,
-                                                                      tech=tech,
-                                                                      blackbox_devices=False)
+        # NOTE: the devices share one abstract, so the shapes of its terminals are taken once and moved to each
+        pex_context = nfet_li1_redux_orientations_context()
 
         devices = list(pex_context.top_circuit.each_device())
         self.assertEqual(set(range(8)), {d.trans.rot() for d in devices})
@@ -297,3 +303,15 @@ class ShapesOfLVSLayersTest(unittest.TestCase):
                          [(p.property('net'), p.bbox())
                           for p in pex_context.shapes_of_layer((70, 20), lvs_layer_names=['met3_ncap']).each()])
         self.assertEqual(3, pex_context.shapes_of_layer((70, 20)).count())
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB")
+class MOSChannelsTest(unittest.TestCase):
+    def test_channels_are_the_gates_of_the_transistors(self):
+        # NOTE: the capacitances of the channels are the transistor models' (#290)
+        pex_context = nfet_li1_redux_orientations_context()
+        channels = pex_context.mos_channels
+        self.assertEqual(8, channels.count())
+        self.assertAlmostEqual(sum(d.parameter('W') * d.parameter('L') for d in pex_context.top_circuit.each_device()),
+                               channels.area() * pex_context.dbu ** 2, places=6)

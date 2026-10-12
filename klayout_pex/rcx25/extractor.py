@@ -109,6 +109,10 @@ class RCX25Extractor:
         side_halo_um = self.tech_info.tech.process_parasitics.side_halo
         rest = kdb.Region(self.pex_context.top_cell_bbox().enlarged(side_halo_um / dbu))  # e.g. 8 µm halo
 
+        # NOTE: the channels of the transistors aren't substrate the gate poly couples to,
+        #       their capacitances are the transistor models' (#290)
+        rest -= self.pex_context.mos_channels
+
         substrate_region = kdb.Region()
         substrate_region.enable_properties()
 
@@ -269,6 +273,7 @@ class RCX25Extractor:
                 scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
                 tech_info=self.tech_info,
                 device_capacitor_plates=device_capacitor_plates,
+                mos_channels=self.pex_context.mos_channels,
                 results=results,
                 report=report
             )

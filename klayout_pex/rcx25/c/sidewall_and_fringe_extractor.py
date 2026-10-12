@@ -54,8 +54,13 @@ class SidewallAndFringeExtractor:
                  scale_ratio_to_fit_halo: bool,
                  tech_info: TechInfo,
                  device_capacitor_plates: DeviceCapacitorPlates,
+                 mos_channels: kdb.Region,
                  results: CellExtractionResults,
                  report: ExtractionReporter):
+        """
+        :param mos_channels: the channels of the transistors, whose gate edges along them have no fringe
+                             to the substrate and wells (see emit_fringe)
+        """
         self.all_layer_names = all_layer_names
         self.layer_regions_by_name = layer_regions_by_name
         self.dbu = dbu
@@ -64,6 +69,11 @@ class SidewallAndFringeExtractor:
         self.device_capacitor_plates = device_capacitor_plates
         self.results = results
         self.report = report
+
+        # NOTE: found by their boxes, as each gate edge looks them up
+        self.mos_channels = kdb.Shapes()
+        for channel in mos_channels.each():
+            self.mos_channels.insert(channel)
 
         self.all_layer_regions = layer_regions_by_name.values()
 
@@ -88,6 +98,7 @@ class SidewallAndFringeExtractor:
                 scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
                 tech_info=self.tech_info,
                 device_capacitor_plates=self.device_capacitor_plates,
+                mos_channels=self.mos_channels,
                 results=self.results,
                 report=self.report
             )
@@ -121,6 +132,7 @@ class SidewallAndFringeExtractor:
                      tech_info: TechInfo,
                      scale_ratio_to_fit_halo: bool,
                      device_capacitor_plates: DeviceCapacitorPlates,
+                     mos_channels: kdb.Shapes,
                      results: CellExtractionResults,
                      report: ExtractionReporter):
             super().__init__()
@@ -131,6 +143,7 @@ class SidewallAndFringeExtractor:
             self.tech_info = tech_info
             self.scale_ratio_to_fit_halo = scale_ratio_to_fit_halo
             self.device_capacitor_plates = device_capacitor_plates
+            self.mos_channels = mos_channels
             self.results = results
             self.report = report
 
@@ -382,6 +395,14 @@ class SidewallAndFringeExtractor:
 
             return cap_femto
 
+        def is_gate_edge(self, edge: kdb.Edge) -> bool:
+            """
+            Whether the edge runs along the channel of a transistor (its middle is on the channel's boundary)
+            """
+            middle = edge.bbox().center()
+            return any(shape.polygon.inside(middle)
+                       for shape in self.mos_channels.each_touching(kdb.Shapes.SAll, kdb.Box(middle, middle)))
+
         def emit_fringe(self,
                         inside_layer_name: LayerName,
                         outside_layer_name: LayerName,
@@ -393,6 +414,12 @@ class SidewallAndFringeExtractor:
                         geometry_restorer: GeometryRestorer):
             # NOTE: e.g. the fringe of the gate poly to the source/drain, which the transistor model has
             if self.tech_info.is_device_capacitance(inside_layer_name, outside_layer_name):
+                return
+
+            # NOTE: and the fringe of a gate edge along the channel, over the source/drain,
+            #       to the substrate or well beyond (#290)
+            if outside_layer_name == self.tech_info.internal_substrate_layer_name and \
+                    self.is_gate_edge(geometry_restorer.restore_edge_interval(edge_interval)):
                 return
 
             inside_net_name = edge.property('net')
