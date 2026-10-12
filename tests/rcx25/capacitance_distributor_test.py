@@ -35,9 +35,12 @@ from klayout_pex.rcx25.capacitance_distributor import (
     NodeSites,
     edge_parts,
 )
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
-def distributor(sites: Dict[Tuple[str, str], List[Tuple[float, float, str]]]) -> CapacitanceDistributor:
+def distributor(sites: Dict[Tuple[str, str], List[Tuple[float, float, str]]],
+                substrate_layer_name: Optional[str] = None) -> CapacitanceDistributor:
     """
     :param sites: (x, y, node name) by (net, layer)
     """
@@ -46,8 +49,23 @@ def distributor(sites: Dict[Tuple[str, str], List[Tuple[float, float, str]]]) ->
         sites_by_net.setdefault(net, []).extend(NodeSite(*s) for s in net_sites)
     return CapacitanceDistributor(
         sites_by_net_and_layer={key: NodeSites(NodeSite(*s) for s in net_sites) for key, net_sites in sites.items()},
-        sites_by_net={net: NodeSites(net_sites) for net, net_sites in sites_by_net.items()}
+        sites_by_net={net: NodeSites(net_sites) for net, net_sites in sites_by_net.items()},
+        substrate_layer_name=substrate_layer_name
     )
+
+
+def network(net_name: str, nodes: List[Tuple[str, str, int, int]]) -> Tuple[r_network_pb2.RNetwork, Dict[int, str]]:
+    """
+    :param nodes: (node name, layer, x, y) of each node, at a 1 µm box (DBU 1 nm)
+    :return: the resistor network, with the node names by node ID
+    """
+    result = r_network_pb2.RNetwork(net_name=net_name)
+    for node_id, (node_name, layer_name, x, y) in enumerate(nodes):
+        node = result.nodes.add(node_id=node_id, node_name=node_name, layer_name=layer_name)
+        node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_BOX
+        node.location.box.lower_left.x, node.location.box.lower_left.y = x - 500, y - 500
+        node.location.box.upper_right.x, node.location.box.upper_right.y = x + 500, y + 500
+    return result, {node_id: node_name for node_id, (node_name, _, _, _) in enumerate(nodes)}
 
 
 @allure.parent_suite("Unit Tests")
@@ -151,3 +169,17 @@ class Test(unittest.TestCase):
         fractions = distributor(self.WIRE_SITES).area_fractions('W', 'poly', 'VSUBS', 'VSUBS',
                                                                 kdb.Region(kdb.Box(0, 0, 10000, 1000)))
         self.assertFractions({('W', 'VSUBS'): 1.0}, fractions)
+
+    def test_substrate_under_a_well_goes_to_the_nodes_of_the_well(self):
+        # NOTE: rather than to a node of its net on the metal above, which is nearer (#288)
+        vdd = network('VDD', [('VDD', 'met4', 0, 500), ('VDD.$0.nwell', 'nwell', 100000, 500)])
+        fractions = CapacitanceDistributor.from_networks(
+            [vdd], substrate_layer_name='VSUBS', substrate_well_layer_names={'nwell'}
+        ).area_fractions('VDD', 'VSUBS', 'X', 'met1', kdb.Region(kdb.Box(0, 0, 10000, 1000)))
+        self.assertFractions({('VDD.$0.nwell', 'X'): 1.0}, fractions)
+
+    def test_substrate_without_nodes_of_a_well_stays_on_its_net(self):
+        # NOTE: the substrate is ideal, as the R extraction has it, rather than going to the metal above (#288)
+        fractions = distributor(self.WIRE_SITES, substrate_layer_name='VSUBS').area_fractions(
+            'W', 'VSUBS', 'X', 'met2', kdb.Region(kdb.Box(90000, 0, 100000, 1000)))
+        self.assertFractions({('W', 'X'): 1.0}, fractions)

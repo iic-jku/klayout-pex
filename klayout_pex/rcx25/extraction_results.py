@@ -370,6 +370,11 @@ class CellExtractionResults:
     #       e.g. to place them on the resistor network (RC mode), as it takes memory on large layouts
     keep_capacitance_geometry: bool = False
 
+    # NOTE: the substrate has no nodes of its own, so its side of a capacitance goes to the nodes of its wells
+    #       (see CapacitanceDistributor.sites)
+    substrate_layer_name: Optional[LayerName] = None
+    substrate_well_layer_names: Set[LayerName] = field(default_factory=set)
+
     overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
     sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
     sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
@@ -424,8 +429,10 @@ class CellExtractionResults:
         # NOTE: the capacitances of a net with a resistor network go to its nodes nearest to them,
         #       rather than to the net (#211 §8)
         distributor = CapacitanceDistributor.from_networks(
-            (network, node_names_by_net[network.net_name].by_node_id)
-            for network in self.r_extraction_result.networks
+            ((network, node_names_by_net[network.net_name].by_node_id)
+             for network in self.r_extraction_result.networks),
+            substrate_layer_name=self.substrate_layer_name,
+            substrate_well_layer_names=self.substrate_well_layer_names
         )
 
         normalized_overlap_table: Dict[NetCoupleKey, float] = defaultdict(float)
