@@ -426,7 +426,8 @@ def test_met1_over_drain_li1():
     # 33.6 aF/µm² * 8 µm² = 268.8 aF to D, plus the fringe to the drain beyond the plate.
     # The diffusion used to be no part of the extraction, so W had 25.78 aF/µm² to the substrate instead
     # (D-W 0.002 fF, VSUBS-W 0.69 fF).
-    # G is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor
+    # The gate poly has no capacitance to the substrate over its channel, nor from its edges along it,
+    # as the transistor model has these, like with MAGIC (G-VSUBS 0.235 fF before, #290)
     #
     # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -460,7 +461,7 @@ C2;D;S;0.006;
 C3;D;VSUBS;0.029;
 C4;D;W;0.377;
 C5;G;S;0.004;
-C6;G;VSUBS;0.235;
+C6;G;VSUBS;0.178;
 C7;G;W;0.007;
 C8;S;VSUBS;0.029;
 C9;S;W;0.01;
@@ -474,8 +475,9 @@ C10;VSUBS;W;0.388;"""
 def test_inverter_over_nwell():
     # The capacitances of the shapes over the nwell go to its net VPB, the others to the substrate.
     # They all used to go to the substrate (e.g. VPWR-VSUBS 0.273 fF, which is 0.211 fF and VPB-VPWR 0.062 fF now).
-    # A is higher than with MAGIC, as the gate poly over the channel is poly here, rather than the transistor,
-    # and VPB-VNB (VSUBS) is the capacitance of the nwell itself, which MAGIC has, but the tech info doesn't
+    # The gate poly has no capacitance to the substrate or well over its channel, nor from its edges along it,
+    # as the transistor model has these, like with MAGIC (A-VSUBS 0.222 and A-VPB 0.091 fF before, #290).
+    # VPB-VNB (VSUBS) is the capacitance of the nwell itself, which MAGIC has, but the tech info doesn't
     #
     # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm and halo=50µm _____________________
@@ -499,9 +501,9 @@ def test_inverter_over_nwell():
         'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;A;VGND;0.04;
-C2;A;VPB;0.091;
+C2;A;VPB;0.037;
 C3;A;VPWR;0.041;
-C4;A;VSUBS;0.222;
+C4;A;VSUBS;0.126;
 C5;A;Y;0.051;
 C6;VGND;VPB;0.012;
 C7;VGND;VPWR;0.018;
