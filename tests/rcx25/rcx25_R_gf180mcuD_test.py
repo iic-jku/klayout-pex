@@ -25,6 +25,7 @@
 import allure
 import csv
 import pytest
+from unittest import mock
 
 from rcx25_test_helpers import *
 
@@ -186,3 +187,15 @@ def test_well_diodes_with_deep_nwell():
         'D$1 PW2DW_P PW2DW_N diode_pw2dw area=8e-12 pj=1.2e-05',
         'D$2 SUB DW2PS_N diode_dw2ps area=8e-12 pj=1.2e-05',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_contacts_over_the_taps_are_known():
+    # The contacts over the p-taps, the n-taps of the deep nwell and the p-diffusion of the isolated p-wells
+    # join Metal1 to layers that are no conductors of the resistance network, so they are part of the taps,
+    # rather than contact shapes the tech info doesn't know (#294)
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz')
+    assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []

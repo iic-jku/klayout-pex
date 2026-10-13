@@ -77,6 +77,11 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "contact_psd_con",  (33, 4402),  "Contact", "Computed layer for contact from psd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_poly_con", (33, 4403),  "Contact", "Computed layer for contact from poly to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_ntap_con", (33, 4404),  "Contact", "Computed layer for contact from ntap (the nwell below) to Metal1")
+    # NOTE: part of their taps, as the substrate, the deep nwell and the isolated p-wells below are no conductors
+    #       of the resistance network
+    add_computed_layer(tech, PTAP,    KREG, "contact_ptap_con",    (33, 4405), "Contact", "Computed layer for contact from ptap (the substrate below) to Metal1")
+    add_computed_layer(tech, NTAP,    KREG, "contact_ntap_dw_con", (33, 4406), "Contact", "Computed layer for contact from ntap_dw (the deep nwell below) to Metal1")
+    add_computed_layer(tech, PTAP,    KREG, "contact_ptap_dw_con", (33, 4407), "Contact", "Computed layer for contact from the p-diffusion of an isolated p-well to Metal1")
     add_computed_layer(tech, VIA,     KREG, "via1",        (35, 0),     "Via1",      "Computed layer for via1")
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
