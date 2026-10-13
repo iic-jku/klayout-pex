@@ -85,6 +85,8 @@ class TechBuilder:
         add_computed_layer(tech, NWELL, KREG, "nwell_drw",      (31, 0),      "NWell",     "Computed layer for NWell")
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "Computed layer for pSD")
+        add_computed_layer(tech, NIMP,  KREG, "ntap1_tie",      (7, 0),       "nSD",       "Tie of the ntap1 tap device, the same n+ Activ as nsd_fet")
+        add_computed_layer(tech, PIMP,  KREG, "ptap1_tie",      (14, 0),      "pSD",       "Tie of the ptap1 tap device, the same p+ Activ as psd_fet")
         add_computed_layer(tech, NTAP,  KREG, "ntap",           (65, 144),    "Activ",     "Computed layer for ntap")
         add_computed_layer(tech, PTAP,  KREG, "ptap",           (65, 244),    "Activ",     "Computed layer for ptap")
 
