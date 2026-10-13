@@ -143,6 +143,9 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #       to the gate oxide (3.2 nm) below the poly (0.3262), like the magic tech (alldiff 0.2062, 0.12 thick)
     ndiff = add_diffusion_layer(psi,    "nsd",   -0.12,  "fox")
     pdiff = add_diffusion_layer(psi,    "psd",   -0.12,  "fox")
+    # NOTE: the taps are diffusion too, the same stack as the source/drain
+    add_diffusion_layer(psi,            "ntap_conn", -0.12, "fox")
+    add_diffusion_layer(psi,            "ptap_conn", -0.12, "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
@@ -496,8 +499,9 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "met4",      "met5",      46.98)
 
     # NOTE: the extraction has the diffusion as the source/drain implants of the LVS deck,
-    #       nsd and psd (the LVS layers of nsdm and psdm), like the resistance extraction
-    split_layer_capacitances(ci, "diff", ["nsdm", "psdm"])
+    #       nsd and psd (the LVS layers of nsdm and psdm), like the resistance extraction,
+    #       and as the taps (ntap_conn and ptap_conn, both of the layer tap)
+    split_layer_capacitances(ci, "diff", ["nsdm", "psdm", "tap"])
 
     # MIM caps, camimc 2.00 fF/µm² and cpmimc 0.19 fF/µm of the device models
     # sky130_fd_pr__cap_mim_m3_1/2 (libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice)

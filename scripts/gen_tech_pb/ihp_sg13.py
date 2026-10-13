@@ -185,10 +185,13 @@ class TechBuilder:
         # NWELL/DIFF:                    name     z        ref
         #                                         (TODO)
         #-----------------------------------------------------------------------------------------------
-        add_nwell_layer(psi,             "ntap",  0.0,     "fox")
+        add_nwell_layer(psi,             "nwell_drw", 0.0, "fox")
 
         ndiff = add_diffusion_layer(psi, "nSD",   0.0,     "fox")
         pdiff = add_diffusion_layer(psi, "pSD",   0.0,     "fox")
+        # NOTE: the taps are diffusion too, the same stack as the source/drain
+        add_diffusion_layer(psi,         "ntap",  0.0,     "fox")
+        add_diffusion_layer(psi,         "ptap",  0.0,     "fox")
 
         # FOX:                      name     dielectric_k
         #-----------------------------------------------------------------------------------------------
@@ -632,8 +635,9 @@ class TechBuilder:
             add_sidewall_overlap_cap(ci, "Metal4",       "TopMetal1",    35.146)
 
         # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
-        #       nsd_fet and psd_fet (the LVS layers of nSD and pSD), like the resistance extraction
-        split_layer_capacitances(ci, "Activ", ["nSD", "pSD"])
+        #       nsd_fet and psd_fet (the LVS layers of nSD and pSD), like the resistance extraction,
+        #       and as the taps (ntap and ptap, both of the layer Activ)
+        split_layer_capacitances(ci, "Activ", ["nSD", "pSD", "Activ"])
 
         if self.is_g2:
             # MIM cap, cap_carea 1.5 fF/µm² (cornerCAP.lib, cap_typ) and CJSW 40 aF/µm
