@@ -41,18 +41,13 @@ Usage:
 """
 from __future__ import annotations
 
-import argparse
 import os
-from pathlib import Path
 import sys
 from typing import *
 
 import klayout.db as kdb
 
-from pattern_builder import GDSPair, Pattern
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / 'testdata' / 'designs' / 'gf180mcuD' / 'test_patterns'
+from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 POLY2:  GDSPair = (30, 0)
 CONT:   GDSPair = (33, 0)
@@ -168,8 +163,7 @@ def r_via_stack_1x1_minsize_poly_to_metal5() -> Pattern:
 def load_pdk_pcells():
     if kdb.Library.library_by_name('gf180mcu') is not None:
         return
-    pdk_root = os.environ.get('PDK_ROOT', '/foss/pdks')
-    sys.path.insert(0, os.path.join(pdk_root, 'gf180mcuD', 'libs.tech', 'klayout', 'tech', 'pymacros'))
+    sys.path.insert(0, os.path.join(pdk_root(), 'gf180mcuD', 'libs.tech', 'klayout', 'tech', 'pymacros'))
     from cells import gf180mcu
     gf180mcu()
 
@@ -289,24 +283,5 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
 }
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate gf180mcuD test patterns (GDS)")
-    parser.add_argument('--output-dir', type=Path, default=DEFAULT_OUTPUT_DIR,
-                        help="default is %(default)s")
-    parser.add_argument('patterns', nargs='*', choices=list(PATTERNS), metavar='PATTERN',
-                        help=f"patterns to generate (default is all): {', '.join(PATTERNS)}")
-    args = parser.parse_args()
-
-    # NOTE: without timestamps, unchanged patterns are written byte-identical
-    options = kdb.SaveLayoutOptions()
-    options.gds2_write_timestamps = False
-
-    for name in args.patterns or PATTERNS:
-        path = args.output_dir / f"{name}.gds.gz"
-        PATTERNS[name]().layout.write(str(path), options)
-        print(f"Wrote {path}")
-    return 0
-
-
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main('gf180mcuD', PATTERNS))

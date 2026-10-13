@@ -26,11 +26,23 @@ The shared parts of the test pattern generators, one module per PDK (e.g. gf180m
 """
 from __future__ import annotations
 
+import argparse
+import os
+from pathlib import Path
 from typing import *
 
 import klayout.db as kdb
 
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
 GDSPair = Tuple[int, int]
+
+
+def pdk_root() -> str:
+    """
+    The directory of the installed PDKs (e.g. IIC-OSIC-TOOLS), for the pcells of a PDK
+    """
+    return os.environ.get('PDK_ROOT', '/foss/pdks')
 
 
 class Pattern:
@@ -64,3 +76,26 @@ class Pattern:
         """
         label_layer = self.label_layer_by_layer[layer]
         self.top.shapes(self.layout.layer(*label_layer)).insert(kdb.Text(text, kdb.Trans(x, y)))
+
+
+def main(pdk_name: str, patterns: Dict[str, Callable[[], Pattern]]) -> int:
+    """
+    The command line of the generator of a PDK, which writes into testdata/designs/<pdk_name>/test_patterns
+    """
+    parser = argparse.ArgumentParser(description=f"Generate {pdk_name} test patterns (GDS)")
+    parser.add_argument('--output-dir', type=Path,
+                        default=PROJECT_ROOT / 'testdata' / 'designs' / pdk_name / 'test_patterns',
+                        help="default is %(default)s")
+    parser.add_argument('patterns', nargs='*', choices=list(patterns), metavar='PATTERN',
+                        help=f"patterns to generate (default is all): {', '.join(patterns)}")
+    args = parser.parse_args()
+
+    # NOTE: without timestamps, unchanged patterns are written byte-identical
+    options = kdb.SaveLayoutOptions()
+    options.gds2_write_timestamps = False
+
+    for name in args.patterns or patterns:
+        path = args.output_dir / f"{name}.gds.gz"
+        patterns[name]().layout.write(str(path), options)
+        print(f"Wrote {path}")
+    return 0

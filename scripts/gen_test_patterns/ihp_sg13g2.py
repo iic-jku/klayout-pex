@@ -32,18 +32,13 @@ Usage:
 """
 from __future__ import annotations
 
-import argparse
 import os
-from pathlib import Path
 import sys
 from typing import *
 
 import klayout.db as kdb
 
-from pattern_builder import GDSPair, Pattern
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / 'testdata' / 'designs' / 'ihp-sg13g2' / 'test_patterns'
+from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
@@ -65,8 +60,7 @@ def load_pdk_pcells() -> str:
     :return: the technology of the pcell library SG13_dev
     """
     if kdb.Library.library_by_name('SG13_dev', 'sg13g2') is None:
-        pdk_root = os.environ.get('PDK_ROOT', '/foss/pdks')
-        klayout_dir = os.path.join(pdk_root, 'ihp-sg13g2', 'libs.tech', 'klayout')
+        klayout_dir = os.path.join(pdk_root(), 'ihp-sg13g2', 'libs.tech', 'klayout')
         sys.path.insert(0, os.path.join(klayout_dir, 'python'))
         sys.path.insert(0, os.path.join(klayout_dir, 'python', 'pycell4klayout-api', 'source', 'python'))
         import sg13g2_pycell_lib  # noqa: F401, registers the library SG13_dev
@@ -108,24 +102,5 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
 }
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate ihp-sg13g2 test patterns (GDS)")
-    parser.add_argument('--output-dir', type=Path, default=DEFAULT_OUTPUT_DIR,
-                        help="default is %(default)s")
-    parser.add_argument('patterns', nargs='*', choices=list(PATTERNS), metavar='PATTERN',
-                        help=f"patterns to generate (default is all): {', '.join(PATTERNS)}")
-    args = parser.parse_args()
-
-    # NOTE: without timestamps, unchanged patterns are written byte-identical
-    options = kdb.SaveLayoutOptions()
-    options.gds2_write_timestamps = False
-
-    for name in args.patterns or PATTERNS:
-        path = args.output_dir / f"{name}.gds.gz"
-        PATTERNS[name]().layout.write(str(path), options)
-        print(f"Wrote {path}")
-    return 0
-
-
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main('ihp-sg13g2', PATTERNS))
