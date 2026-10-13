@@ -105,6 +105,10 @@ class TechBuilder:
         add_computed_layer(tech, CONT,  KREG, "cont_nsd_con",   (6, 4401),    "Cont",      "Computed layer for contact from nSD to Metal1")
         add_computed_layer(tech, CONT,  KREG, "cont_psd_con",   (6, 4402),    "Cont",      "Computed layer for contact from pSD to Metal1")
         add_computed_layer(tech, CONT,  KREG, "cont_poly_con",  (6, 4403),    "Cont",      "Computed layer for contact from GatPoly to Metal1")
+        # NOTE: part of their taps, as the nwell (no sheet resistance) and the substrate below are no conductors
+        #       of the resistance network
+        add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      "Computed layer for contact from ntap (the nwell below) to Metal1")
+        add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      "Computed layer for contact from ptap (the substrate below) to Metal1")
 
         add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "Computed layer for Via1")
         add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "Computed layer for Via2")
@@ -338,7 +342,7 @@ class TechBuilder:
         #-----------------------------------------------------------------------------------------------
         add_simple_dielectric(psi,   "air",   1.0,          "pass2")
 
-        # TODO: cont over ptap/ntap/nwell!
+        # TODO: cont over ntap (cont_ntap_con, part of the ntap until then), once the nwell has a sheet resistance
         contn = ndiff.contact_above
         contd = pdiff.contact_above
         contp = poly.contact_above
