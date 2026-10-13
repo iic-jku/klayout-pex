@@ -52,6 +52,8 @@
 - Format-only paths must not import KLayout or generated protobuf: import lazily, and put
   type-only imports under `TYPE_CHECKING`.
 - Docs describe contracts, not file layout.
+- Don't duplicate code, test helpers included: share it in a module (e.g. `tests/common/`)
+  rather than copying it, and extend the shared code rather than adding a variant.
 
 ## Tests
 

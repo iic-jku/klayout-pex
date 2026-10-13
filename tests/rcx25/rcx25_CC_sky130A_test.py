@@ -23,15 +23,12 @@
 #
 
 import allure
-import os
 import pytest
 from unittest import mock
 
 from klayout_pex.tech_info import TechInfo
 from rcx25_test_helpers import *
 
-CSVPath = str
-PNGPath = str
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode CC]"
 tags = ("PEX", "2.5D", "MAGIC")
 
@@ -585,7 +582,7 @@ C3;C1;VSUBS;0.117;"""
 def test_mom_cap_with_4_terminals__whiteboxed():
     # The LVS script reads VPP caps with 4 terminals as MOS4, so white-box mode kept the device,
     # whose capacitance is extracted from its fingers: counted twice
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
                                                            'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
     with open(csv_path[:-len('.csv')] + '.spice') as f:
         assert [line for line in f if line.startswith('X')] == []
@@ -636,7 +633,7 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_mim_cap__blackboxed():
-    results, _, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+    results, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert results.summarize().capacitances
 
 
@@ -681,9 +678,7 @@ def test_label_of_substrate_under_inductor_names_the_substrate():
     # A label (SUB) names the substrate under the inductor marker, like the ones of the PDK's VPP caps,
     # so the capacitances to the substrate (of the met1 plate over the marker) go to SUB,
     # like the bulk of the nfet next to it. It used to name a net of its own, that connected to nothing
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
-    with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
-        lines = f.read().replace('\n+', ' ').splitlines()
+    _, lines = pex_whiteboxed.written_netlist_lines('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
     subckt_line, = [l for l in lines if l.startswith('.SUBCKT ')]
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
     plate_cap_line, = [l for l in lines if l.startswith('C') and 'PLATE' in l.split()[1:3]]

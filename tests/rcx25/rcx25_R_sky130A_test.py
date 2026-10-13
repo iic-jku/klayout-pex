@@ -23,7 +23,6 @@
 #
 
 import allure
-import os
 import pytest
 from unittest import mock
 
@@ -31,8 +30,6 @@ from rcx25_test_helpers import *
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
-CSVPath = str
-PNGPath = str
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode R]"
 tags = ("PEX", "2.5D", "MAGIC")
 
@@ -160,9 +157,7 @@ R5;G.$1.poly;G.P0.poly;;316.321"""
 def test_nfet_terminals_are_on_the_resistor_network():
     # The transistor is connected to the nodes of its terminals (#211 §6): the gate to the end of the poly,
     # drain and source to the nodes that carry the names of their nets (which have no pin)
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'nfet_li1_redux.gds.gz')
-    with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
-        lines = f.read().replace('\n+', ' ').splitlines()
+    _, lines = pex_whiteboxed.written_netlist_lines('test_patterns', 'nfet_li1_redux.gds.gz')
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
     assert nfet_line.split()[1:5] == ['\\$3', 'G.P0.poly', '\\$2', 'sky130_gnd']  # D G S B
 
@@ -193,7 +188,7 @@ def test_pin_node_is_at_its_label():
     # Each pin's node is at its label: KLayout located the gate's 60 nm below its label (at 1750, 2690),
     # and where it locates such a node can differ from run to run,
     # and so would the nodes the capacitances near it go to (#286)
-    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
     assert sorted((n.node_name, n.location.point.x, n.location.point.y)
                   for network in results.r_extraction_result.networks for n in network.nodes
                   if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN) == \
@@ -229,7 +224,7 @@ def test_no_resistor_between_pins_with_the_same_label():
     # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
     # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
     with mock.patch('klayout_pex.rcx25.netlist_expander.warning') as warning_mock:
-        results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
+        results, _ = pex_whiteboxed.run_rcx25d_single_cell('sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
     warning_mock.assert_not_called()
     assert [k for k in results.summarize().resistances.keys() if k.net1 == k.net2] == []
 
@@ -240,7 +235,7 @@ def test_no_resistor_between_pins_with_the_same_label():
 def test_vias_within_mom_cap_l1m1m2():
     # The vias within the MOM capacitor (mcon_vpp, via1_vpp) are on the GDS pairs of the regular vias,
     # so they are part of the resistance network (#228 reported them as unmodeled)
-    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_04p4x04p6_l1m1m2_noshield',
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_04p4x04p6_l1m1m2_noshield',
                                                           'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
     assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
     assert results.summarize().resistances
@@ -312,7 +307,7 @@ def test_via_without_conductor_below_is_an_error():
 @pytest.mark.slow
 def test_vias_within_mom_cap_l1m1m2m3m4():
     # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
-    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
                                                           'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
     assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
     assert results.summarize().resistances
@@ -324,7 +319,7 @@ def test_vias_within_mom_cap_l1m1m2m3m4():
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (capm) is a conductor of its net,
     # joined to met4 by the vias on it (via3_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
-    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     networks = {n.net_name: n for n in results.r_extraction_result.networks}
     assert {node.layer_name for node in networks['mimcap_top'].nodes} == {'capm', 'met3', 'met4'}
     assert {node.layer_name for node in networks['mimcap_bot'].nodes} == {'met3', 'met4'}

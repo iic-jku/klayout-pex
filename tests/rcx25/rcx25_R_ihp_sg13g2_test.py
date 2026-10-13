@@ -24,8 +24,6 @@
 
 from __future__ import annotations
 
-import os
-import tempfile
 from typing import *
 from unittest import mock
 
@@ -34,14 +32,25 @@ import klayout.db as kdb
 import pytest
 
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
+from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
+from rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction, read_lvsdb
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
 
-TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs', 'ihp-sg13g2'))
+pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.R, blackbox=False)
+
+
+def extraction_context(lvsdb: kdb.LayoutVsSchematic,
+                       cell_name: str,
+                       blackbox_devices: bool) -> KLayoutExtractionContext:
+    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
+    return KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
+                                                       top_cell=cell_name,
+                                                       tech=tech,
+                                                       blackbox_devices=blackbox_devices)
 
 
 @allure.parent_suite(parent_suite)
@@ -52,28 +61,12 @@ def test_rf_mos_keeps_its_layout_geometry():
     # of the base class (sg13_lv_nmos with rfmode=1), which has no layout geometry,
     # so the resistance extraction could not connect it (#211)
     cell_name = 'rfnmos_w1u_l0u72'
-    gds_path = os.path.join(TEST_DESIGNS_DIR, 'rfnmos', f"{cell_name}.gds.gz")
-
-    with tempfile.TemporaryDirectory() as out_dir:
-        cli = KpexCLI()
-        cli.main(['main',
-                  '--pdk', PDK.IHP_SG13G2,
-                  '--mode', 'R',
-                  '--gds', gds_path,
-                  '--out_dir', out_dir,
-                  '--2.5D'])
-        assert cli.rcx25_extraction_results is not None
-
-        lvsdb = kdb.LayoutVsSchematic()
-        lvsdb.read(os.path.join(out_dir, f"{cell_name}__{cell_name}", f"{cell_name}.lvsdb.gz"))
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('rfnmos', f"{cell_name}.gds.gz")
+    lvsdb = read_lvsdb(csv_path, cell_name)
 
     assert [c.name for c in lvsdb.internal_layout().top_cells()] == [cell_name]
 
-    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
-    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
-                                                              top_cell=cell_name,
-                                                              tech=tech,
-                                                              blackbox_devices=False)
+    pex_context = extraction_context(lvsdb, cell_name, blackbox_devices=False)
     devices = list(pex_context.devices_by_name.values())
     assert [(d.device_class_name, d.device_abstract_name) for d in devices] == [('rfnmos', 'D$rfnmos')]
     assert {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer] for t in devices[0].terminals} \
@@ -87,27 +80,12 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     # The terminals of the MOM capacitor are on its ports (cap_cmomi_m5_ports, the Metal5 pins within its marker),
     # an LVS layer the tech info has no layer for (#217), so they are where they overlap the Metal5 of their nets
     cell_name = 'cmomi_w5u_l5u_m1_m5'
-    gds_path = os.path.join(TEST_DESIGNS_DIR, cell_name, f"{cell_name}.gds.gz")
-
-    with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        KpexCLI().main(['main',
-                        '--pdk', PDK.IHP_SG13G2,
-                        '--mode', 'R',
-                        '--gds', gds_path,
-                        '--out_dir', out_dir,
-                        '--2.5D'])
-
-        lvsdb = kdb.LayoutVsSchematic()
-        lvsdb.read(os.path.join(out_dir, f"{cell_name}__{cell_name}", f"{cell_name}.lvsdb.gz"))
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(cell_name, f"{cell_name}.gds.gz")
 
     assert [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]] == []
 
-    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
-    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
-                                                              top_cell=cell_name,
-                                                              tech=tech,
-                                                              blackbox_devices=True)
+    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=True)
     mom_cap, = [d for d in pex_context.devices_by_name.values() if d.device_class_name == 'cap_cmomi']
     assert {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer] for t in mom_cap.terminals} \
            == {'mim_top': ['Metal5'], 'mim_btm': ['Metal5']}
@@ -123,22 +101,8 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     ('sg13g2_a21o_1', 'sg13g2_a21o_1', 'VSS'),
 ])
 def test_substrate_net_is_found_by_its_name_or_its_layer(design_dir: str, cell_name: str, substrate_net_name: str):
-    gds_path = os.path.join(TEST_DESIGNS_DIR, design_dir, f"{cell_name}.gds.gz")
-    with tempfile.TemporaryDirectory() as out_dir:
-        KpexCLI().main(['main',
-                        '--pdk', PDK.IHP_SG13G2,
-                        '--mode', 'R',
-                        '--gds', gds_path,
-                        '--out_dir', out_dir,
-                        '--2.5D'])
-        lvsdb = kdb.LayoutVsSchematic()
-        lvsdb.read(os.path.join(out_dir, f"{cell_name}__{cell_name}", f"{cell_name}.lvsdb.gz"))
-
-    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
-    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
-                                                              top_cell=cell_name,
-                                                              tech=tech,
-                                                              blackbox_devices=False)
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(design_dir, f"{cell_name}.gds.gz")
+    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=False)
     assert pex_context.substrate_net_name == substrate_net_name
 
 
@@ -149,15 +113,8 @@ def test_contacts_over_the_taps_are_known():
     # The contacts over the n-taps and the p-taps join Metal1 to the nwell (no sheet resistance) and the substrate,
     # which are no conductors of the resistance network, so they are part of the taps,
     # rather than contact shapes the tech info doesn't know (#294)
-    gds_path = os.path.join(TEST_DESIGNS_DIR, 'sg13g2_a21o_1', 'sg13g2_a21o_1.gds.gz')
-    with tempfile.TemporaryDirectory() as out_dir, \
-         mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        KpexCLI().main(['main',
-                        '--pdk', PDK.IHP_SG13G2,
-                        '--mode', 'R',
-                        '--gds', gds_path,
-                        '--out_dir', out_dir,
-                        '--2.5D'])
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('sg13g2_a21o_1', 'sg13g2_a21o_1.gds.gz')
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 
 
@@ -169,20 +126,7 @@ def test_tie_of_tap_device_is_behind_its_contacts():
     # so its 4 contacts are cont_psd_con (17 Ω each, two groups of 2), with the TIE terminal on the tie,
     # rather than contact shapes the tech info doesn't know, with the TIE terminal on the Metal1 over them (#294)
     cell_name = 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin'
-    gds_path = os.path.join(TEST_DESIGNS_DIR, cell_name, f"{cell_name}.gds.gz")
-    with tempfile.TemporaryDirectory() as out_dir:
-        cli = KpexCLI()
-        cli.main(['main',
-                  '--pdk', PDK.IHP_SG13G2,
-                  '--mode', 'R',
-                  '--gds', gds_path,
-                  '--out_dir', out_dir,
-                  '--2.5D'])
-        csv_path = cli.rcx25_extracted_csv_path
-        with open(csv_path) as f:
-            csv_lines = f.read().splitlines()
-        with open(csv_path[:-len('.csv')] + '.spice') as f:
-            spice_lines = f.read().replace('\n+', ' ').splitlines()
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines(cell_name, f"{cell_name}.gds.gz")
 
     # NOTE: without the device names (R1, ...), which depend on the other nets
     assert [line.split(';', 1)[1] for line in csv_lines if 'SUB' in line] == [
@@ -193,27 +137,6 @@ def test_tie_of_tap_device_is_behind_its_contacts():
     ]
     ptap1_line, = [line for line in spice_lines if line.split()[-1:] == ['ptap1']]
     assert ptap1_line.split()[1:3] == ['SUB.P0.pSD', 'sub!']
-
-
-def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:
-    """
-    :return: the lines of the CSV and of the SPICE netlist (with continuation lines joined)
-    """
-    gds_path = os.path.join(TEST_DESIGNS_DIR, 'test_patterns', f"{cell_name}.gds.gz")
-    with tempfile.TemporaryDirectory() as out_dir:
-        cli = KpexCLI()
-        cli.main(['main',
-                  '--pdk', PDK.IHP_SG13G2,
-                  '--mode', 'R',
-                  '--gds', gds_path,
-                  '--out_dir', out_dir,
-                  '--2.5D'])
-        csv_path = cli.rcx25_extracted_csv_path
-        with open(csv_path) as f:
-            csv_lines = f.read().splitlines()
-        with open(csv_path[:-len('.csv')] + '.spice') as f:
-            spice_lines = f.read().replace('\n+', ' ').splitlines()
-    return csv_lines, spice_lines
 
 
 def subckt_ports(spice_lines: List[str]) -> List[str]:
@@ -242,7 +165,7 @@ def test_nets_of_the_same_name_stay_apart():
     # Two transistors, each with its own metal islands labelled D and S, which are not connected
     # (like the islands of a supply, joined only in the parent). The IHP LVS script connects no nets implicitly,
     # so they are distinct nets of the same name, which KLayout's SPICE writer calls D, D$1, S, S$1 (#211 §10)
-    csv_lines, _ = extract_test_pattern('nmos_metal1_redux_twice')
+    csv_lines, _ = pex_whiteboxed.written_netlist_lines('test_patterns', 'nmos_metal1_redux_twice.gds.gz')
     assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
@@ -264,7 +187,7 @@ R12;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 def test_a_net_of_several_labels_has_a_port_per_label():
     # The drain wire of the transistor has the labels D and X at its ends, so LVS has one net D,X with one pin,
     # which the netlist replaces by the ports D and X at the labels, where the parent connects (#211 §11)
-    csv_lines, spice_lines = extract_test_pattern('nmos_metal1_redux_two_drain_labels')
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns', 'nmos_metal1_redux_two_drain_labels.gds.gz')
     assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
@@ -283,7 +206,7 @@ R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 def test_labels_on_one_node_are_tied():
     # The labels D and X are on the same pin of the drain wire, so both ports are on one node,
     # tied by 1 mΩ, rather than one of them touching nothing (#211 §11)
-    csv_lines, spice_lines = extract_test_pattern('nmos_metal1_redux_two_labels_one_node')
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns', 'nmos_metal1_redux_two_labels_one_node.gds.gz')
     assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 R1;$1;$1.$0.GatPoly;;33.654
 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
@@ -304,16 +227,7 @@ def test_mim_cap__whiteboxed():
     # of its net, joined to TopMetal1 by the TopVia1 on it (mim_via), 5 cuts per row (2.2 Ω / 5).
     # It stopped with "unhandled layer purpose PURPOSE_MIM_CAP".
     # The bottom plate (Metal5) has no network, as nothing connects to it
-    gds_path = os.path.join(TEST_DESIGNS_DIR, 'sg13g2_pr__cmim', 'cmim.gds.gz')
-    with tempfile.TemporaryDirectory() as out_dir:
-        cli = KpexCLI()
-        cli.main(['main',
-                  '--pdk', PDK.IHP_SG13G2,
-                  '--mode', 'R',
-                  '--gds', gds_path,
-                  '--out_dir', out_dir,
-                  '--2.5D'])
-    results, = cli.rcx25_extraction_results.cell_extraction_results.values()
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__cmim', 'cmim.gds.gz')
 
     # NOTE: the nets have no labels, so their names ($1, $2, ...) depend on the LVS run
     network, = [n for n in results.r_extraction_result.networks if n.elements]

@@ -43,7 +43,7 @@ def test_mim_cap__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 6.99 µm * 6.99 µm = 73.29 fF
     # plus CJSW 40 aF/µm * 27.96 µm = 1.12 fF, the fringe to the bottom plate (Metal5) around the top plate (MIM)
     # NOTE: the plates' nets have no labels, so their names ($1, $2, ...) depend on the LVS run
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__cmim', 'cmim.gds.gz')
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__cmim', 'cmim.gds.gz')
     with open(csv_path) as f:
         rows = list(csv.DictReader(f, delimiter=';'))
     caps = [(('VSUBS' in (row['Net1'], row['Net2'])), float(row['Capacitance [fF]'])) for row in rows]
@@ -58,7 +58,7 @@ def test_rf_mim_cap__whiteboxed():
     # The top plate of the rfcmim (MIM 7 µm x 7 µm, cap_carea 1.5 fF/µm² gives 73.5 fF) is a conductor,
     # like the one of the cmim: it was left out, as the deck's cmim_top leaves out the RF areas (#280),
     # and the plates had 2.7 fF between them
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
     with open(csv_path) as f:
         rows = list(csv.DictReader(f, delimiter=';'))
     assert [float(row['Capacitance [fF]']) for row in rows

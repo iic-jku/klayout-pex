@@ -120,9 +120,8 @@ def test_nfet_10v0_asym_pair():
     # 2 mirrored LDMOS sharing their drain (the MVSD side), each with its own source:
     # the asymmetric device must be extracted with S and D in place, not swapped
     cell_name = 'nfet_10v0_asym_pair'
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+    lvsdb = read_lvsdb(csv_path, cell_name)
     devices = list(lvsdb.netlist().circuit_by_name(cell_name).each_device())
     assert [d.device_class().name for d in devices] == ['nfet_10v0_asym'] * 2
     drains = {d.net_for_terminal('D').expanded_name() for d in devices}
@@ -135,7 +134,7 @@ def obtained_resistances(*path_components) -> List[float]:
     """
     The resistances, sorted (for patterns with many internal nodes, whose names are not stable)
     """
-    _, csv_path, _ = pex_whiteboxed.run_rcx25d_single_cell(*path_components)
+    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(*path_components)
     with open(csv_path) as f:
         return sorted(float(row['Resistance [Ω]']) for row in csv.DictReader(f, delimiter=';')
                       if row['Resistance [Ω]'])
@@ -166,7 +165,7 @@ def test_via_stack_1x1_minsize_poly_to_metal5():
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (FuseTop) is a conductor of its net,
     # joined to Metal5 by the vias on it (top_via_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
-    results, _, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'cap_mim_m4m5.gds.gz')
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'cap_mim_m4m5.gds.gz')
     networks = {n.net_name: n for n in results.r_extraction_result.networks}
     for top, bottom in (('TOP1', 'BOT1'), ('TOP2', 'BOT2')):
         assert {node.layer_name for node in networks[top].nodes} == {'FuseTop', 'Metal5'}
