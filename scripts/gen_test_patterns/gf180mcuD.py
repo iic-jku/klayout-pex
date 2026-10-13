@@ -49,10 +49,10 @@ from typing import *
 
 import klayout.db as kdb
 
+from pattern_builder import GDSPair, Pattern
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / 'testdata' / 'designs' / 'gf180mcuD' / 'test_patterns'
-
-GDSPair = Tuple[int, int]
 
 POLY2:  GDSPair = (30, 0)
 CONT:   GDSPair = (33, 0)
@@ -79,26 +79,8 @@ LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
 }
 
 
-class Pattern:
-    def __init__(self, name: str):
-        self.layout = kdb.Layout()
-        self.layout.dbu = 0.001
-        self.top = self.layout.create_cell(name)
-
-    def box(self, layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
-        self.top.shapes(self.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
-
-    def square(self, layer: GDSPair, half_size: int):
-        self.box(layer, -half_size, -half_size, half_size, half_size)
-
-    def path(self, layer: GDSPair, points: List[Tuple[int, int]], width: int):
-        self.top.shapes(self.layout.layer(*layer)).insert(kdb.Path([kdb.Point(*p) for p in points], width))
-
-    def polygon(self, layer: GDSPair, points: List[Tuple[int, int]]):
-        self.top.shapes(self.layout.layer(*layer)).insert(kdb.Polygon([kdb.Point(*p) for p in points]))
-
-    def label(self, layer: GDSPair, text: str, x: int, y: int):
-        self.top.shapes(self.layout.layer(*LABEL_BY_LAYER[layer])).insert(kdb.Text(text, kdb.Trans(x, y)))
+def pattern(name: str) -> Pattern:
+    return Pattern(name, label_layer_by_layer=LABEL_BY_LAYER)
 
 
 #
@@ -111,7 +93,7 @@ def metal1_wire(name: str,
     """
     A Metal1 wire of 10 µm (0.23 wide), optionally with a stub in the middle
     """
-    p = Pattern(name)
+    p = pattern(name)
     p.path(METAL1, [(0, 0), (10000, 0)], 230)
     if stub:
         p.box(METAL1, 4885, 115, 5115, 1115)
@@ -133,7 +115,7 @@ def r_wire_and_floating_branch_m1() -> Pattern:
 
 
 def r_meander_trace_m1() -> Pattern:
-    p = Pattern('r_meander_trace_m1')
+    p = pattern('r_meander_trace_m1')
     p.path(METAL1, [(0, 6075), (12500, 6075), (12500, 4075), (0, 4075),
                     (0, 2075), (12500, 2075), (12500, 75), (0, 75)], 230)
     p.label(METAL1, 'A', 115, 6075)
@@ -142,7 +124,7 @@ def r_meander_trace_m1() -> Pattern:
 
 
 def r_contact_1x1_minsize_via1() -> Pattern:
-    p = Pattern('r_contact_1x1_minsize_via1')
+    p = pattern('r_contact_1x1_minsize_via1')
     p.square(VIA1, 130)
     p.square(METAL1, 190)
     p.square(METAL2, 190)
@@ -152,7 +134,7 @@ def r_contact_1x1_minsize_via1() -> Pattern:
 
 
 def r_contact_2x2_minsize_via1() -> Pattern:
-    p = Pattern('r_contact_2x2_minsize_via1')
+    p = pattern('r_contact_2x2_minsize_via1')
     for cx in (-260, 260):
         for cy in (-260, 260):
             p.box(VIA1, cx - 130, cy - 130, cx + 130, cy + 130)
@@ -165,7 +147,7 @@ def r_contact_2x2_minsize_via1() -> Pattern:
 
 def r_via_stack_1x1_minsize_poly_to_metal5() -> Pattern:
     # NOTE: gf180mcuD has 5 metals, Metal5 is the top metal (there is no Via5/MetalTop)
-    p = Pattern('r_via_stack_1x1_minsize_poly_to_metal5')
+    p = pattern('r_via_stack_1x1_minsize_poly_to_metal5')
     p.square(POLY2, 180)
     p.square(CONT, 110)
     for via, metal in ((VIA1, METAL1), (VIA2, METAL2), (VIA3, METAL3), (VIA4, METAL4)):
@@ -194,7 +176,7 @@ def load_pdk_pcells():
 
 def nfet_m1(name: str, labels: str) -> Pattern:
     load_pdk_pcells()
-    p = Pattern(name)
+    p = pattern(name)
     pcell = p.layout.create_cell('nfet', 'gf180mcu', {
         'w_gate': 0.36, 'l_gate': 0.28, 'nf': 1, 'gate_con_pos': 'top', 'bulk': 'None', 'volt': '3.3V'
     })
@@ -217,7 +199,7 @@ def nfet_m1(name: str, labels: str) -> Pattern:
 
 def sidewall_cap_vpp_04p4x04p6_m1_redux() -> Pattern:
     # interdigitated fingers, 0.23 wide, 0.23 apart
-    p = Pattern('sidewall_cap_vpp_04p4x04p6_m1_redux')
+    p = pattern('sidewall_cap_vpp_04p4x04p6_m1_redux')
     p.polygon(METAL1, [(0, 0), (0, 1370), (3150, 1370), (3150, 920), (450, 920),
                        (450, 230), (2470, 230), (2470, 0)])
     p.polygon(METAL1, [(2700, -250), (2700, 460), (680, 460), (680, 690),
@@ -229,7 +211,7 @@ def sidewall_cap_vpp_04p4x04p6_m1_redux() -> Pattern:
 
 def sidewall_non_parallel_m1() -> Pattern:
     # the slanted edge of A is at 45°, not parallel to B
-    p = Pattern('sidewall_non_parallel_m1')
+    p = pattern('sidewall_non_parallel_m1')
     p.polygon(METAL1, [(-2000, 5000), (-2000, 15000), (0, 15000), (5000, 10000), (5000, 5000)])
     p.path(METAL1, [(0, 2000), (8000, 2000), (8000, 10000)], 2000)
     p.box(METAL1, 10000, 3000, 14000, 8000)
@@ -253,7 +235,7 @@ COMPLEX_SHAPE = [
 
 def sideoverlap_complex_m1_m2() -> Pattern:
     # a complex Metal1 shape at each side of a Metal2 plate (20 µm x 20 µm)
-    p = Pattern('sideoverlap_complex_m1_m2')
+    p = pattern('sideoverlap_complex_m1_m2')
     p.box(METAL2, 0, 0, 20000, 20000)
     p.label(METAL2, 'UPPER', 0, 18000)
     for text, dx, dy in (('Complex_Shape_R', 0, 0), ('Complex_Shape_T', -10000, 8000),
@@ -283,7 +265,7 @@ def mim_cap(p: Pattern, x: int, y: int, w: int, l: int, top: str, bottom: str):
 
 def cap_mim_m4m5() -> Pattern:
     # 2 MIM caps, 5 µm x 5 µm and 20 µm x 10 µm
-    p = Pattern('cap_mim_m4m5')
+    p = pattern('cap_mim_m4m5')
     mim_cap(p, 0, 0, 5000, 5000, 'TOP1', 'BOT1')
     mim_cap(p, 7400, 0, 20000, 10000, 'TOP2', 'BOT2')
     return p

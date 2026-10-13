@@ -40,29 +40,24 @@ from typing import *
 
 import klayout.db as kdb
 
+from pattern_builder import GDSPair, Pattern
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / 'testdata' / 'designs' / 'ihp-sg13g2' / 'test_patterns'
 
-GDSPair = Tuple[int, int]
-
+METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
-METAL4_TEXT:  GDSPair = (50, 25)
 METAL5:       GDSPair = (67, 0)
 METAL5_PIN:   GDSPair = (67, 2)
-METAL5_TEXT:  GDSPair = (67, 25)
+
+LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
+    METAL4: (50, 25),
+    METAL5: (67, 25),
+}
 
 
-class Pattern:
-    def __init__(self, name: str):
-        self.layout = kdb.Layout()
-        self.layout.dbu = 0.001
-        self.top = self.layout.create_cell(name)
-
-    def box(self, layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
-        self.top.shapes(self.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
-
-    def label(self, layer: GDSPair, text: str, x: int, y: int):
-        self.top.shapes(self.layout.layer(*layer)).insert(kdb.Text(text, kdb.Trans(x, y)))
+def pattern(name: str) -> Pattern:
+    return Pattern(name, label_layer_by_layer=LABEL_BY_LAYER)
 
 
 def load_pdk_pcells() -> str:
@@ -87,7 +82,7 @@ def cap_cmomf_w10u_l25u_m2_m4_m5_wire() -> Pattern:
     # (the model gives 0.915 fF/µm², 228.75 fF), its terminals labelled PLUS (left) and MINUS (top),
     # and a Metal5 wire X across it
     technology = load_pdk_pcells()
-    p = Pattern('cap_cmomf_w10u_l25u_m2_m4_m5_wire')
+    p = pattern('cap_cmomf_w10u_l25u_m2_m4_m5_wire')
     p.layout.technology_name = technology
     pcell = p.layout.create_cell('cmomf', 'SG13_dev', {'w': '10u', 'l': '25u', 'mmin': 2, 'mmax': 4})
     p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
@@ -98,13 +93,13 @@ def cap_cmomf_w10u_l25u_m2_m4_m5_wire() -> Pattern:
                   key=lambda pin: pin.bbox().left)
     for text, pin in zip(('PLUS', 'MINUS'), pins):
         center = pin.bbox().center()
-        p.label(METAL4_TEXT, text, center.x, center.y)
+        p.label(METAL4, text, center.x, center.y)
 
     bbox = p.top.bbox()
     y = bbox.center().y
     p.box(METAL5, bbox.left - 2000, y - 500, bbox.right + 2000, y + 500)
     p.box(METAL5_PIN, bbox.left - 2000, y - 500, bbox.left - 1000, y + 500)
-    p.label(METAL5_TEXT, 'X', bbox.left - 1500, y)
+    p.label(METAL5, 'X', bbox.left - 1500, y)
     return p
 
 
