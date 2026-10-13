@@ -24,11 +24,8 @@
 
 import allure
 import csv
-import os
 import pytest
 from unittest import mock
-
-import klayout.db as kdb
 
 from rcx25_test_helpers import *
 
@@ -124,8 +121,7 @@ def test_nfet_10v0_asym_pair():
     # the asymmetric device must be extracted with S and D in place, not swapped
     cell_name = 'nfet_10v0_asym_pair'
     _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
+    lvsdb = read_lvsdb(csv_path, cell_name)
     devices = list(lvsdb.netlist().circuit_by_name(cell_name).each_device())
     assert [d.device_class().name for d in devices] == ['nfet_10v0_asym'] * 2
     drains = {d.net_for_terminal('D').expanded_name() for d in devices}

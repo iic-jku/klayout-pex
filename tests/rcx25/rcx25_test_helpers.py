@@ -29,6 +29,8 @@ import glob
 import os
 from typing import *
 
+import klayout.db as kdb
+
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
@@ -37,6 +39,15 @@ from tests.common.layout_preview import attach_layout_preview
 
 
 CSVPath = str
+
+
+def read_lvsdb(csv_path: CSVPath, cell_name: str) -> kdb.LayoutVsSchematic:
+    """
+    The LVS database of the extraction that wrote the CSV, which the CLI writes next to it
+    """
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
+    return lvsdb
 
 
 def lvs_cache_dir(pdk_name: str) -> str:
@@ -116,15 +127,25 @@ class RCX25Extraction:
         assert results.cell_name == path_components[-1][:-len('.gds.gz')]
         return results, cli.rcx25_extracted_csv_path
 
+    def written_netlist_lines(self, *path_components) -> Tuple[List[str], List[str]]:
+        """
+        Extracts the single cell and returns the lines of the written netlists, CSV and SPICE,
+        the latter with their continuation lines joined
+        """
+        _, csv_path = self.run_rcx25d_single_cell(*path_components)
+        with open(csv_path) as f:
+            csv_lines = f.read().splitlines()
+        with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
+            spice_lines = f.read().replace('\n+', '').splitlines()
+        return csv_lines, spice_lines
+
     def written_device_lines(self, *path_components, prefixes: str = 'XDMQ') -> List[str]:
         """
         Extracts the single cell and returns the lines of the written SPICE netlist with these prefixes
         (by default not the capacitors and resistors KPEX adds), with their continuation lines joined
         """
-        _, csv_path = self.run_rcx25d_single_cell(*path_components)
-        with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
-            lines = f.read().replace('\n+', '').splitlines()
-        return [l for l in lines if l and l[0] in prefixes]
+        _, spice_lines = self.written_netlist_lines(*path_components)
+        return [l for l in spice_lines if l and l[0] in prefixes]
 
     def assert_expected_matches_obtained(self,
                                          *path_components,

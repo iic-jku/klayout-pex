@@ -23,7 +23,6 @@
 #
 
 import allure
-import os
 import pytest
 from unittest import mock
 
@@ -679,9 +678,7 @@ def test_label_of_substrate_under_inductor_names_the_substrate():
     # A label (SUB) names the substrate under the inductor marker, like the ones of the PDK's VPP caps,
     # so the capacitances to the substrate (of the met1 plate over the marker) go to SUB,
     # like the bulk of the nfet next to it. It used to name a net of its own, that connected to nothing
-    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
-    with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
-        lines = f.read().replace('\n+', ' ').splitlines()
+    _, lines = pex_whiteboxed.written_netlist_lines('inductor_substrate_pin', 'inductor_substrate_pin.gds.gz')
     subckt_line, = [l for l in lines if l.startswith('.SUBCKT ')]
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
     plate_cap_line, = [l for l in lines if l.startswith('C') and 'PLATE' in l.split()[1:3]]
