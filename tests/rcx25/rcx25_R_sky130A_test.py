@@ -31,7 +31,6 @@ from rcx25_test_helpers import *
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 
-CSVPath = str
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode R]"
 tags = ("PEX", "2.5D", "MAGIC")
 

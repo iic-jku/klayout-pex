@@ -26,18 +26,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 import glob
-import io
-import json
 import os
 from typing import *
-
-import allure
-import csv_diff
 
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
+
+
+CSVPath = str
 
 
 def lvs_cache_dir(pdk_name: str) -> str:
@@ -130,24 +129,7 @@ class RCX25Extraction:
     def assert_expected_matches_obtained(self,
                                          *path_components,
                                          expected_csv_content: str) -> CellExtractionResults:
-        result, csv = self.run_rcx25d_single_cell(*path_components)
-        allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
+        result, csv_path = self.run_rcx25d_single_cell(*path_components)
         attach_layout_preview(self.pdk.lyt_path, self.pdk.gds_path(*path_components))
-        expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
-        with open(csv, 'r') as f:
-            obtained_csv = csv_diff.load_csv(f, key='Device')
-            diff = csv_diff.compare(expected_csv, obtained_csv, show_unchanged=False)
-            human_diff = csv_diff.human_text(
-                diff, current=obtained_csv, extras=(('Net1','{Net1}'),('Net2','{Net2}'))
-            )
-            allure.attach(expected_csv_content, name='pex_expected.csv', attachment_type=allure.attachment_type.CSV)
-            allure.attach(json.dumps(diff, sort_keys=True, indent='    ').encode("utf8"),
-                          name='pex_diff.json', attachment_type=allure.attachment_type.JSON)
-            allure.attach(human_diff.encode("utf8"), name='‼️ pex_diff.txt', attachment_type=allure.attachment_type.TEXT)
-            # assert diff['added'] == []
-            # assert diff['removed'] == []
-            # assert diff['changed'] == []
-            # assert diff['columns_added'] == []
-            # assert diff['columns_removed'] == []
-            assert human_diff == '', 'Diff detected'
+        assert_csv_matches_expected(csv_path, expected_csv_content)
         return result

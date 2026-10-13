@@ -30,7 +30,6 @@ from unittest import mock
 from klayout_pex.tech_info import TechInfo
 from rcx25_test_helpers import *
 
-CSVPath = str
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode CC]"
 tags = ("PEX", "2.5D", "MAGIC")
 

@@ -23,43 +23,28 @@
 #
 from __future__ import annotations
 
-import io
-import json
-
 import allure
-import csv_diff
-import os
 import pytest
 from typing import *
 
 from klayout_pex.kpex_cli import KpexCLI
+from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
 from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig
 
 
-CSVPath = str
 parent_suite = "kpex/FasterCap Extraction Tests"
 tags = ("PEX", "FasterCap", "Maxwell")
 
-
-def _sky130a_testdata_dir() -> str:
-    return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                         'testdata', 'designs', 'sky130A'))
+sky130a = PDKTestConfig(PDKName.SKY130A)
 
 
-def _gds(*path_components) -> str:
-    return os.path.join(_sky130a_testdata_dir(), *path_components)
-
-
-def _extract_single_cell(*path_components) -> CSVPath:
-    gds_path = _gds(*path_components)
-
-    output_dir_path = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'output_sky130A'))
+def _extract_single_cell(*path_components) -> str:
     cli = KpexCLI()
     cli.main(['main',
-              '--pdk', 'sky130A',
-              '--gds', gds_path,
-              '--out_dir', output_dir_path,
+              '--pdk', sky130a.name,
+              '--gds', sky130a.gds_path(*path_components),
+              '--out_dir', sky130a.output_dir,
               '--fastercap',
               '--ooc', '0',
               '--diel', 'none'])
@@ -69,26 +54,9 @@ def _extract_single_cell(*path_components) -> CSVPath:
 
 def assert_expected_matches_obtained(*path_components,
                                      expected_csv_content: str):
-    csv = _extract_single_cell(*path_components)
-    allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
-    attach_layout_preview(PDKTestConfig(PDKName.SKY130A).lyt_path, _gds(*path_components))
-    expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
-    with open(csv, 'r') as f:
-        obtained_csv = csv_diff.load_csv(f, key='Device')
-        diff = csv_diff.compare(expected_csv, obtained_csv, show_unchanged=False)
-        human_diff = csv_diff.human_text(
-            diff, current=obtained_csv, extras=(('Net1','{Net1}'),('Net2','{Net2}'))
-        )
-        allure.attach(expected_csv_content, name='pex_expected.csv', attachment_type=allure.attachment_type.CSV)
-        allure.attach(json.dumps(diff, sort_keys=True, indent='    ').encode("utf8"),
-                      name='pex_diff.json', attachment_type=allure.attachment_type.JSON)
-        allure.attach(human_diff.encode("utf8"), name='‼️ pex_diff.txt', attachment_type=allure.attachment_type.TEXT)
-        # assert diff['added'] == []
-        # assert diff['removed'] == []
-        # assert diff['changed'] == []
-        # assert diff['columns_added'] == []
-        # assert diff['columns_removed'] == []
-        assert human_diff == '', 'Diff detected'
+    csv_path = _extract_single_cell(*path_components)
+    attach_layout_preview(sky130a.lyt_path, sky130a.gds_path(*path_components))
+    assert_csv_matches_expected(csv_path, expected_csv_content)
 
 
 @allure.parent_suite(parent_suite)
