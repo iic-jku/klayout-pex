@@ -1,0 +1,24 @@
+SUBPROCESS __kpex__:pex25d_cli.py:679 'D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py' -m 'not slow and not smoke' --alluredir build/allure-results --color no
+INFO     __kpex__:pex25d_cli.py:601 Input is an unresolved PEX25DFile, resolving it first
+ERROR    __kpex__:pex25d_cli.py:702 Exporter 'klayout-pex:fastercap' crashed: AttributeError: no_such_field
+DEBUG    __kpex__:pex25d_cli.py:703 Plugin traceback
+Traceback (most recent call last):
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\pex25d\exporters.py", line 97, in export_with_backend
+    return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\a\klayout-pex\klayout-pex\tests\pex25d\exporter_plugins_test.py", line 531, in crash
+    raise bug
+AttributeError: no_such_field
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\pex25d\pex25d_cli.py", line 694, in _run
+    note = handler(args, report)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\pex25d\pex25d_cli.py", line 604, in run_export
+    written = export_with_backend(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\pex25d\exporters.py", line 107, in export_with_backend
+    raise ExporterExecutionError(
+klayout_pex.pex25d.exporters.ExporterExecutionError: Exporter 'klayout-pex:fastercap' crashed: AttributeError: no_such_field
