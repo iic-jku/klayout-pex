@@ -161,6 +161,40 @@ def test_contacts_over_the_taps_are_known():
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_tie_of_tap_device_is_behind_its_contacts():
+    # The tie of the ptap1 tap device is the same p+ Activ as the source/drain of the FETs,
+    # so its 4 contacts are cont_psd_con (17 Ω each, two groups of 2), with the TIE terminal on the tie,
+    # rather than contact shapes the tech info doesn't know, with the TIE terminal on the Metal1 over them (#294)
+    cell_name = 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin'
+    gds_path = os.path.join(TEST_DESIGNS_DIR, cell_name, f"{cell_name}.gds.gz")
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main',
+                  '--pdk', PDK.IHP_SG13G2,
+                  '--mode', 'R',
+                  '--gds', gds_path,
+                  '--out_dir', out_dir,
+                  '--2.5D'])
+        csv_path = cli.rcx25_extracted_csv_path
+        with open(csv_path) as f:
+            csv_lines = f.read().splitlines()
+        with open(csv_path[:-len('.csv')] + '.spice') as f:
+            spice_lines = f.read().replace('\n+', ' ').splitlines()
+
+    # NOTE: without the device names (R1, ...), which depend on the other nets
+    assert [line.split(';', 1)[1] for line in csv_lines if 'SUB' in line] == [
+        'SUB;SUB.$0.Metal1;;0.04',
+        'SUB;SUB.$1.Metal1;;0.035',
+        'SUB.$0.Metal1;SUB.P0.pSD;;8.5',
+        'SUB.$1.Metal1;SUB.P0.pSD;;8.5',
+    ]
+    ptap1_line, = [line for line in spice_lines if line.split()[-1:] == ['ptap1']]
+    assert ptap1_line.split()[1:3] == ['SUB.P0.pSD', 'sub!']
+
+
 def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:
     """
     :return: the lines of the CSV and of the SPICE netlist (with continuation lines joined)

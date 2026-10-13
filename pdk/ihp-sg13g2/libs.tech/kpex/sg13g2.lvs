@@ -397,10 +397,11 @@ else
   metal5_cap   = metal5_drw.and(mim_drw)
   metal5_mom   = metal5_drw.not(mim_drw).and(mom_mk)
 
-  # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)
+  # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX),
+  #       the ties of the ntap1/ptap1 tap devices are the same n+/p+ Activ as the source/drain of the FETs
   cont_poly_con = cont_drw.and(poly_con)
-  cont_nsd_con = cont_drw.and(nsd_fet)
-  cont_psd_con = cont_drw.and(psd_fet)
+  cont_nsd_con = cont_drw.and(nsd_fet.join(ntap1_tie))
+  cont_psd_con = cont_drw.and(psd_fet.join(ptap1_tie))
 
   # [PEX] the Cont over the taps, which joins Metal1 to the nwell (ntap) or the substrate (ptap) below them,
   #       which are no conductors of the resistance network, so that PEX knows all of Cont

@@ -60,6 +60,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, DNWELL,  KREG, "dnwell",    (64, 18),    "dnwell",    "Deep NWell")
     add_computed_layer(tech, NWELL,   KREG, "nwell",     (64, 20),    "nwell",     "NWell")
     add_computed_layer(tech, NIMP,    KREG, "nsd",       (93, 44),    "nsdm",      "borrow from nsdm")
+    add_computed_layer(tech, NIMP,    KREG, "sonos_nsd", (93, 44),    "nsdm",      "SONOS source/drain, the same n+ diffusion as nsd")
     add_computed_layer(tech, PIMP,    KREG, "psd",       (94, 20),    "psdm",      "borrow from psdm")
     add_computed_layer(tech, NTAP,    KREG, "ntap_conn", (65, 144),   "tap",       "Separate ntap, original tap is 65,44, we need seperate ntap/ptap")
     add_computed_layer(tech, PTAP,    KREG, "ptap_conn", (65, 244),   "tap",       "Separate ptap, original tap is 65,44, we need seperate ntap/ptap")
