@@ -29,18 +29,15 @@ import glob
 import io
 import json
 import os
-import tempfile
 from typing import *
 
 import allure
 import csv_diff
 
-import klayout.db as kdb
-import klayout.lay as klay
-
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.layout_preview import attach_layout_preview
 
 
 def lvs_cache_dir(pdk_name: str) -> str:
@@ -90,12 +87,6 @@ class PDKTestConfig:
         assert len(lyt_paths) == 1, f"Expected one KLayout technology file in {self.kpex_pdk_dir}"
         return os.path.abspath(lyt_paths[0])
 
-    def load_kdb_technology(self) -> kdb.Technology:
-        kdb.Technology.clear_technologies()
-        tech = kdb.Technology.create_technology(self.name)
-        tech.load(self.lyt_path)
-        return tech
-
     def gds_path(self, *path_components) -> str:
         return os.path.join(self.test_designs_dir, *path_components)
 
@@ -106,28 +97,9 @@ class RCX25Extraction:
     pex_mode: PEXMode
     blackbox: bool
 
-    def save_layout_preview(self, gds_path: str, output_png_path: str):
-        self.pdk.load_kdb_technology()
-        lv = klay.LayoutView()
-        lv.load_layout(gds_path)
-        lv.max_hier()
-        lv.set_config('background-color', '#000000')
-        lv.set_config('bitmap-oversampling', '1')
-        lv.set_config('default-font-size', '4')
-        lv.set_config('default-text-size', '0.1')
-        lv.save_image_with_options(
-            output_png_path,
-            width=4096, height=2160
-            # ,
-            # linewidth=2,
-            # resolution=0.25  # 4x as large fonts
-        )
-
-    def run_rcx25d_single_cell(self, *path_components) -> Tuple[CellExtractionResults, CSVPath, PNGPath]:
+    def run_rcx25d_single_cell(self, *path_components) -> Tuple[CellExtractionResults, CSVPath]:
         gds_path = self.pdk.gds_path(*path_components)
 
-        preview_png_path = tempfile.mktemp(prefix=f"layout_preview_", suffix=".png")
-        self.save_layout_preview(gds_path, preview_png_path)
         cli = KpexCLI()
         cli.main(['main',
                   '--pdk', self.pdk.name,
@@ -143,14 +115,14 @@ class RCX25Extraction:
         assert len(cli.rcx25_extraction_results.cell_extraction_results) == 1  # assume single cell test
         results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
         assert results.cell_name == path_components[-1][:-len('.gds.gz')]
-        return results, cli.rcx25_extracted_csv_path, preview_png_path
+        return results, cli.rcx25_extracted_csv_path
 
     def written_device_lines(self, *path_components, prefixes: str = 'XDMQ') -> List[str]:
         """
         Extracts the single cell and returns the lines of the written SPICE netlist with these prefixes
         (by default not the capacitors and resistors KPEX adds), with their continuation lines joined
         """
-        _, csv_path, _ = self.run_rcx25d_single_cell(*path_components)
+        _, csv_path = self.run_rcx25d_single_cell(*path_components)
         with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
             lines = f.read().replace('\n+', '').splitlines()
         return [l for l in lines if l and l[0] in prefixes]
@@ -158,9 +130,9 @@ class RCX25Extraction:
     def assert_expected_matches_obtained(self,
                                          *path_components,
                                          expected_csv_content: str) -> CellExtractionResults:
-        result, csv, preview_png = self.run_rcx25d_single_cell(*path_components)
+        result, csv = self.run_rcx25d_single_cell(*path_components)
         allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
-        allure.attach.file(preview_png, name='📸 layout_preview.png', attachment_type=allure.attachment_type.PNG)
+        attach_layout_preview(self.pdk.lyt_path, self.pdk.gds_path(*path_components))
         expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
         with open(csv, 'r') as f:
             obtained_csv = csv_diff.load_csv(f, key='Device')

@@ -25,7 +25,6 @@ from __future__ import annotations
 
 import io
 import json
-import tempfile
 
 import allure
 import csv_diff
@@ -33,23 +32,15 @@ import os
 import pytest
 from typing import *
 
-import klayout.db as kdb
-import klayout.lay as klay
-
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from rcx25_test_helpers import PDKName, PDKTestConfig
+from tests.common.layout_preview import attach_layout_preview
 
 
 CSVPath = str
-PNGPath = str
 parent_suite = "kpex/2.5D Extraction Tests"
 tags = ("PEX", "2.5D", "MAGIC")
-
-
-def _kpex_pdk_dir() -> str:
-    return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                         'pdk', 'sky130A', 'libs.tech', 'kpex'))
 
 
 def _sky130a_testdata_dir() -> str:
@@ -61,33 +52,9 @@ def _gds(*path_components) -> str:
     return os.path.join(_sky130a_testdata_dir(), *path_components)
 
 
-def _save_layout_preview(gds_path: str,
-                         output_png_path: str):
-    kdb.Technology.clear_technologies()
-    default_lyt_path = os.path.abspath(f"{_kpex_pdk_dir()}/sky130A.lyt")
-    tech = kdb.Technology.create_technology('sky130A')
-    tech.load(default_lyt_path)
-
-    lv = klay.LayoutView()
-    lv.load_layout(gds_path)
-    lv.max_hier()
-    lv.set_config('background-color', '#000000')
-    lv.set_config('bitmap-oversampling', '1')
-    lv.set_config('default-font-size', '4')
-    lv.set_config('default-text-size', '0.1')
-    lv.save_image_with_options(
-        output_png_path,
-        width=4096, height=2160
-        # ,
-        # linewidth=2,
-        # resolution=0.25  # 4x as large fonts
-    )
-
-def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CSVPath, PNGPath]:
+def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CSVPath]:
     gds_path = _gds(*path_components)
 
-    preview_png_path = tempfile.mktemp(prefix=f"layout_preview_", suffix=".png")
-    _save_layout_preview(gds_path, preview_png_path)
     pdk = PDKTestConfig(PDKName.SKY130A)
     cli = KpexCLI()
     cli.main(['main',
@@ -102,14 +69,14 @@ def _run_rcx25d_single_cell(*path_components) -> Tuple[CellExtractionResults, CS
     assert len(cli.rcx25_extraction_results.cell_extraction_results) == 1  # assume single cell test
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
     assert results.cell_name == path_components[-1][:-len('.gds.gz')]
-    return results, cli.rcx25_extracted_csv_path, preview_png_path
+    return results, cli.rcx25_extracted_csv_path
 
 
 def assert_expected_matches_obtained(*path_components,
                                      expected_csv_content: str) -> CellExtractionResults:
-    result, csv, preview_png = _run_rcx25d_single_cell(*path_components)
+    result, csv = _run_rcx25d_single_cell(*path_components)
     allure.attach.file(csv, name='pex_obtained.csv', attachment_type=allure.attachment_type.CSV)
-    allure.attach.file(preview_png, name='📸 layout_preview.png', attachment_type=allure.attachment_type.PNG)
+    attach_layout_preview(PDKTestConfig(PDKName.SKY130A).lyt_path, _gds(*path_components))
     expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
     with open(csv, 'r') as f:
         obtained_csv = csv_diff.load_csv(f, key='Device')
