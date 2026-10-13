@@ -24,6 +24,7 @@
 
 import allure
 import csv
+import os
 import pytest
 from unittest import mock
 
