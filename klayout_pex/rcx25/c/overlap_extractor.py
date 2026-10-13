@@ -104,21 +104,18 @@ class OverlapExtractor:
             bot_layer_name = self.layer_names[self.inside_layer_index]
             net_bot = polygon.property('net')  # NOTE: the substrate's is the one of its well or VSUBS
 
-            def is_shield(net_top: str) -> bool:
-                # NOTE: e.g. VDD over its nwell, which still shields the nwell from the shapes above
-                return net_top != net_bot or bot_layer_name == self.tech_info.internal_substrate_layer_name
-
-            # NOTE: each shield shields the bottom polygon from the polygons above after it (e.g. on the layers above)
-            #       where they overlap, so only the shields near a polygon above are subtracted (found by their boxes),
+            # NOTE: each polygon above shields the bottom polygon from the polygons above after it
+            #       (e.g. on the layers above) where they overlap, whatever its net, as a conductor shields
+            #       whatever its potential (e.g. VDD over its nwell, or met1 over li1 of the same net, #299).
+            #       So only the shields near a polygon above are subtracted (found by their boxes),
             #       rather than all shields before it, which is quadratic in the size of the neighborhood
             #       (e.g. the whole layout above the substrate)
             shields = kdb.Shapes()
             shield_count = 0
             for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
                 for polygon_above in neighborhood.get(other_layer_index, []):
-                    if is_shield(polygon_above.property('net')):
-                        shields.insert(kdb.PolygonWithProperties(polygon_above, {'shield_index': shield_count}))
-                        shield_count += 1
+                    shields.insert(kdb.PolygonWithProperties(polygon_above, {'shield_index': shield_count}))
+                    shield_count += 1
             shield_count = 0
 
             for other_layer_index in range(self.inside_layer_index + 1, len(self.layer_names)):
@@ -130,8 +127,7 @@ class OverlapExtractor:
                     net_top = polygon_above.property('net')
 
                     shields_before = shield_count
-                    if is_shield(net_top):
-                        shield_count += 1
+                    shield_count += 1
 
                     if net_top == net_bot:
                         continue

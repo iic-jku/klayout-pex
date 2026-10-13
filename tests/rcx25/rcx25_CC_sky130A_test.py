@@ -119,6 +119,47 @@ C10;VSUBS;met3;136.063;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_overlap_shield_same_net_100um_x_100um_li1_m1_m2():
+    # MAGIC GIVES (8.3 revision 681):
+    # C0 A B 1.3386p
+    # C1 B VSUBS 15.104f
+    # C2 A VSUBS 0.40241p
+    #
+    # The met1 of net A shields the li1 of net A below it from the met2 of net B above, so A–B is
+    # met2–met1 only, 133.86 aF/µm² * 100 µm * 100 µm = 1338.6 fF, without met2–li1 (375.6 fF, #299)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'overlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;B;1338.6;
+C2;A;VSUBS;402.405;
+C3;B;VSUBS;15.101;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_overlap_shield_same_net_half_100um_x_100um_li1_m1_m2():
+    # MAGIC GIVES (8.3 revision 681):
+    # C0 A B 0.86178p
+    # C1 B VSUBS 15.104f
+    # C2 A VSUBS 0.39491p
+    #
+    # The met1 of net A covers the left half of the li1 of net A, so A–B is met2–met1 there (669.3 fF),
+    # met2–li1 over the right half (187.8 fF) and the fringe at the edge of met1, without met2–li1
+    # under met1 (187.8 fF, #299)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'overlap_shield_same_net_half_100um_x_100um_li1_m1_m2.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;B;861.896;
+C2;A;VSUBS;394.391;
+C3;B;VSUBS;15.101;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_sidewall_100um_x_100um_distance_200nm_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -552,7 +593,7 @@ def test_mom_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;7.739;
+C1;C0;C1;7.709;
 C2;C0;VSUBS;2.827;
 C3;C1;VSUBS;0.765;"""
         )
@@ -570,7 +611,7 @@ def test_mom_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.141;
+C1;C0;C1;0.134;
 C2;C0;VSUBS;3.562;
 C3;C1;VSUBS;0.117;"""
         )

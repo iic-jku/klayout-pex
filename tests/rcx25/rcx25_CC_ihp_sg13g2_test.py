@@ -75,9 +75,9 @@ def test_mom_cap__whiteboxed():
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;MINUS;PLUS;205.148;
 C2;MINUS;VSUBS;6.757;
-C3;MINUS;X;1.805;
+C3;MINUS;X;1.716;
 C4;PLUS;VSUBS;6.829;
-C5;PLUS;X;1.911;
+C5;PLUS;X;1.786;
 C6;VSUBS;X;1.292;"""
     )
 
@@ -94,9 +94,9 @@ def test_mom_cap__blackboxed():
         'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;MINUS;VSUBS;6.757;
-C2;MINUS;X;1.805;
+C2;MINUS;X;1.716;
 C3;PLUS;VSUBS;6.829;
-C4;PLUS;X;1.911;
+C4;PLUS;X;1.786;
 C5;VSUBS;X;1.292;"""
     )
 
