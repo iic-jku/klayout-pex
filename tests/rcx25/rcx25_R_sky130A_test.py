@@ -267,6 +267,17 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_licons_over_the_p_taps_are_known():
+    # The licons over the p-taps join li1 to the substrate, which is no conductor of the resistance network,
+    # so they are part of the p-taps (licon_ptap_con), rather than LVS shapes the tech info doesn't know (#294)
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('inv', 'inv.gds.gz')
+    assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_device_terminals_without_a_net_stay_unconnected():
     # The bulk terminal W of the varactor is the gate on the hole of a ptap ring (varactor_bulk_lvt), but there's
     # no ring around it, so the LVS netlist leaves W unconnected (as in iic-sar-adc/adc_comp_latch).
