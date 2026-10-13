@@ -134,6 +134,9 @@ def build_process_stack_info(psi: ProcessStackInfo):
 
     ndiff = add_diffusion_layer(psi, "Nplus", 0.312,  "fox")
     pdiff = add_diffusion_layer(psi, "Pplus", 0.312,  "fox")
+    # NOTE: the taps are diffusion too, the same stack as the source/drain
+    add_diffusion_layer(psi,         "ntap",  0.312,  "fox")
+    add_diffusion_layer(psi,         "ptap",  0.312,  "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
@@ -394,8 +397,9 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    34.954)
 
     # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
-    #       nsd and psd (the LVS layers of Nplus and Pplus), like the resistance extraction
-    split_layer_capacitances(ci, "COMP", ["Nplus", "Pplus"])
+    #       nsd and psd (the LVS layers of Nplus and Pplus), like the resistance extraction,
+    #       and as the taps (ntap and ptap, both of the layer COMP)
+    split_layer_capacitances(ci, "COMP", ["Nplus", "Pplus", "COMP"])
 
     # MIM cap, c_cox 1.99e-3 F/m² and c_capsw 2.383e-10 F/m of the device model
     # cap_mim_2f0_m4m5_noshield (sm141064_mim.ngspice), the deck's default mim_cap

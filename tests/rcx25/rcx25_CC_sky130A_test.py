@@ -160,6 +160,45 @@ C3;B;VSUBS;15.101;"""
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_plate_20um_x_20um_li1_over_ntap():
+    # MAGIC GIVES (8.3 revision 681):
+    # C0 W A 25.5042f
+    # C1 A VSUBS 0.2326f
+    # C2 W VSUBS 0.23232p
+    #
+    # The n-tap is diffusion, the same stack as the source/drain, so A–W is li1 over diffusion,
+    # 55.3 aF/µm² * 20 µm * 20 µm = 22.12 fF, plus the fringe, rather than li1 over the nwell (36.99 aF/µm², #301).
+    # The nwell has no capacitance to the substrate (the PDKs model it as a diode)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'plate_20um_x_20um_li1_over_ntap.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;VSUBS;0.232;
+C2;A;W;25.504;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_plate_20um_x_20um_li1_over_ptap():
+    # MAGIC GIVES (8.3 revision 681):
+    # C0 A VSS 18.3132f
+    #
+    # The p-tap is diffusion, the same stack as the source/drain, so A–VSS (the net of the tap) is li1 over diffusion,
+    # 55.3 aF/µm² * 20 µm * 20 µm = 22.12 fF, plus the fringe (#301). magic has the p-tap as part of its substrate node,
+    # whose area gets the field's 36.99 aF/µm² (but its fringe the diffusion's)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'plate_20um_x_20um_li1_over_ptap.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;VSS;25.458;
+C2;A;VSUBS;0.278;
+C3;VSS;VSUBS;0.13;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_sidewall_100um_x_100um_distance_200nm_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________

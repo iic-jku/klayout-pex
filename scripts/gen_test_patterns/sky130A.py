@@ -36,6 +36,11 @@ from typing import *
 
 from pattern_builder import GDSPair, Pattern, main
 
+NWELL:    GDSPair = (64, 20)
+TAP:      GDSPair = (65, 44)
+NSDM:     GDSPair = (93, 44)
+PSDM:     GDSPair = (94, 20)
+LICON:    GDSPair = (66, 44)
 LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
 MCON:     GDSPair = (67, 44)
@@ -44,6 +49,7 @@ MET2:     GDSPair = (69, 20)
 MET2_PIN: GDSPair = (69, 16)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
+    NWELL: (64, 5),
     LI1: (67, 5),
     MET1: (68, 5),
     MET2: (69, 5),
@@ -75,11 +81,38 @@ def overlap_shield_same_net(name: str, met1_width: int) -> Pattern:
     return p
 
 
+def plate_li1_over_tap(name: str, ntap: bool) -> Pattern:
+    """
+    A li1 plate of 20 µm x 20 µm of net A over the middle of a tap of 40 µm x 40 µm,
+    an n-tap in an nwell W, or a p-tap tied to VSS by a licon under a li1 pad in its corner
+    (like in the standard cells, as only the licon joins a p-tap to a net)
+    """
+    p = pattern(name)
+    if ntap:
+        p.box(NWELL, -2000, -2000, 42000, 42000)
+        p.label(NWELL, 'W', -1800, -1800)
+    else:
+        p.box(LICON, 1000, 1000, 1170, 1170)
+        p.box(LI1, 500, 500, 2500, 2500)
+        p.box(LI1_PIN, 500, 500, 2500, 2500)
+        p.label(LI1, 'VSS', 700, 700)
+    p.box(TAP, 0, 0, 40000, 40000)
+    p.box(NSDM if ntap else PSDM, -200, -200, 40200, 40200)
+    p.box(LI1, 10000, 10000, 30000, 30000)
+    p.box(LI1_PIN, 10000, 10000, 15000, 15000)
+    p.label(LI1, 'A', 10200, 10200)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
     'overlap_shield_same_net_half_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_half_100um_x_100um_li1_m1_m2', 50000),
+    'plate_20um_x_20um_li1_over_ptap':
+        lambda: plate_li1_over_tap('plate_20um_x_20um_li1_over_ptap', ntap=False),
+    'plate_20um_x_20um_li1_over_ntap':
+        lambda: plate_li1_over_tap('plate_20um_x_20um_li1_over_ntap', ntap=True),
 }
 
 
