@@ -402,6 +402,12 @@ else
   cont_nsd_con = cont_drw.and(nsd_fet)
   cont_psd_con = cont_drw.and(psd_fet)
 
+  # [PEX] the Cont over the taps, which joins Metal1 to the nwell (ntap) or the substrate (ptap) below them,
+  #       which are no conductors of the resistance network, so that PEX knows all of Cont
+  #       (NOTE: a regular LVS would not do this, we need it for PEX)
+  cont_ntap_con = cont_drw.and(ntap)
+  cont_ptap_con = cont_drw.and(ptap)
+
   # [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
   poly_pin       = polygons(5  , 2)
   metal1_pin     = polygons(8  , 2)
@@ -449,6 +455,10 @@ else
   connect(cont_poly_con,   cont_drw)
   connect(cont_nsd_con,    cont_drw)
   connect(cont_psd_con,    cont_drw)
+
+  # [PEX] the Cont over the taps (NOTE: a regular LVS would not do this, we need it for PEX)
+  connect(cont_ntap_con,   cont_drw)
+  connect(cont_ptap_con,   cont_drw)
 
   # [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
   connect(poly_con      ,    poly_pin_con)

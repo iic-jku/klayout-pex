@@ -142,6 +142,25 @@ def test_substrate_net_is_found_by_its_name_or_its_layer(design_dir: str, cell_n
     assert pex_context.substrate_net_name == substrate_net_name
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_contacts_over_the_taps_are_known():
+    # The contacts over the n-taps and the p-taps join Metal1 to the nwell (no sheet resistance) and the substrate,
+    # which are no conductors of the resistance network, so they are part of the taps,
+    # rather than contact shapes the tech info doesn't know (#294)
+    gds_path = os.path.join(TEST_DESIGNS_DIR, 'sg13g2_a21o_1', 'sg13g2_a21o_1.gds.gz')
+    with tempfile.TemporaryDirectory() as out_dir, \
+         mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        KpexCLI().main(['main',
+                        '--pdk', PDK.IHP_SG13G2,
+                        '--mode', 'R',
+                        '--gds', gds_path,
+                        '--out_dir', out_dir,
+                        '--2.5D'])
+    assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
+
+
 def extract_test_pattern(cell_name: str) -> Tuple[List[str], List[str]]:
     """
     :return: the lines of the CSV and of the SPICE netlist (with continuation lines joined)
