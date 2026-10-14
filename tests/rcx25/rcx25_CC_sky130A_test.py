@@ -720,6 +720,54 @@ def test_mim_cap__blackboxed():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mim_cap_over_m2_wire__whiteboxed():
+    # The device model gives camimc 2.0 fF/µm² * 20 µm * 20 µm = 800 fF (capm over met3)
+    # plus cpmimc 0.19 fF/µm * 80 µm = 15.2 fF, the fringe to the bottom plate around the top plate
+    # (15.079 fF from capm to met3 here). A–B has the fringe from met4 to the met3 around the capm too (4.603 fF)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;B;819.682;
+C2;A;D;6.467;
+C3;A;VSUBS;10.342;
+C4;B;D;0.081;
+C5;B;VSUBS;2.253;
+C6;D;VSUBS;5.013;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mim_cap_over_m2_wire__blackboxed():
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # C0 A B 38.2149f
+    # C2 D A 6.46725f
+    # C4 A VSUBS 10.3425f
+    # C1 D B 0.08101f
+    # C3 B VSUBS 2.25408f
+    # C5 D VSUBS 5.01392f
+    #
+    # The plates of the MIM cap are conductors, the bottom plate shields the wire D and the substrate below it
+    # from the top plate and the met4 above. Only the capacitance of the device model is left out, the overlap
+    # of capm over met3 and the fringe from its edge, so A–B is the fringe from met4 to the met3 around the capm,
+    # and the rest is the same as in white-box mode. Without the plates, D coupled to B through the hole (1.636 fF).
+    # MAGIC's A–B has met4 over met3 through the capm (84.03 aF/µm² * 400 µm² = 33.6 fF), as its mimcap doesn't shield
+    pex_blackboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;A;B;4.603;
+C2;A;D;6.467;
+C3;A;VSUBS;10.342;
+C4;B;D;0.081;
+C5;B;VSUBS;2.253;
+C6;D;VSUBS;5.013;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_varactors__blackboxed():
     # The varactors of the PDK's device generator (magic), W along the poly, L across it:
     # the lvt one with W < L, the hvt one with W > L. Their models depend on w and l separately,

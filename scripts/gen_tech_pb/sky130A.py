@@ -89,12 +89,16 @@ def build_lvs_computed_layers(tech: Technology):
     #
     #       for R mode, MIM cap vias should point to a different GDS number than the regular via,
     #       as they join the top plate below them, not the metal (but their resistance per cut is the same)
-    add_computed_layer(tech, VIA,     KCAP, "via3_cap",  (70, 244),   "via3",      "Computed layer for via3 (with MIM cap)")
-    add_computed_layer(tech, VIA,     KCAP, "via4_cap",  (71, 244),   "via4",      "Computed layer for via4 (with MIM cap)")
-    add_computed_layer(tech, METAL,   KCAP, "met3_cap",  (70, 20),    "met3",      "metal3 part of MiM cap")
-    add_computed_layer(tech, METAL,   KCAP, "met4_cap",  (71, 20),    "met4",      "metal4 part of MiM cap")
-    add_computed_layer(tech, MIM,     KCAP, "capm",      (89, 44),    "capm",      "MiM cap above metal3")
-    add_computed_layer(tech, MIM,     KCAP, "capm2",     (97, 44),    "capm2",     "MiM cap above metal4")
+    #
+    # NOTE: the plates of the MIM caps, with the via on the top plate: their models have the capacitance
+    #       between the plates, but not the ones to the substrate and to other nets, which the plates also shield
+    #       (e.g. a wire below), so with --blackbox, these are extracted
+    add_computed_layer(tech, VIA,     KPLT, "via3_cap",  (70, 244),   "via3",      "Computed layer for via3 (with MIM cap)")
+    add_computed_layer(tech, VIA,     KPLT, "via4_cap",  (71, 244),   "via4",      "Computed layer for via4 (with MIM cap)")
+    add_computed_layer(tech, METAL,   KPLT, "met3_cap",  (70, 20),    "met3",      "metal3 part of MiM cap")
+    add_computed_layer(tech, METAL,   KPLT, "met4_cap",  (71, 20),    "met4",      "metal4 part of MiM cap")
+    add_computed_layer(tech, MIM,     KPLT, "capm",      (89, 44),    "capm",      "MiM cap above metal3")
+    add_computed_layer(tech, MIM,     KPLT, "capm2",     (97, 44),    "capm2",     "MiM cap above metal4")
     add_computed_layer(tech, METAL,   KCAP, "poly_vpp",  (66, 20),    "poly",      "Computed layer for poly (MOM cap)")
     add_computed_layer(tech, METAL,   KCAP, "li_vpp",    (67, 20),    "li1",       "Capacitor device metal (MOM cap)")
     add_computed_layer(tech, METAL,   KCAP, "met1_vpp",  (68, 20),    "met1",      "Capacitor device metal (MOM cap)")
