@@ -341,3 +341,11 @@ class Test(unittest.TestCase):
                           'capm': ['capm'],
                           'via3_cap': ['via3_cap']},  # NOTE: met3_pin_con is on no GDS pair of the stack
                          TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name)
+        self.assertEqual({'met2_con': 'met2', 'met2_vpp': 'met2',
+                          'via2_con': 'via2_con',
+                          'met3_ncap': 'met3_ncap', 'met3_vpp': 'met3_ncap',
+                          'met3_cap': 'met3_cap',
+                          'via3_ncap': 'via3_ncap', 'via3_vpp': 'via3_ncap',
+                          'capm': 'capm',
+                          'via3_cap': 'via3_cap'},
+                         TechInfo(tech, dielectric_filter=None).process_layer_name_by_lvs_layer_name)

@@ -259,8 +259,11 @@ class RExtractor:
                         if via_resistance is None:
                             unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no via resistance")
                             continue
-                        bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(
-                            source_layer.lvs_layer_name, None)
+                        # NOTE: the via of the process stack on the GDS pair, if it has none named after the LVS layer
+                        #       (e.g. the vias of a device, which the LVS deck has apart from the others)
+                        via_name = tech.process_layer_name_by_lvs_layer_name.get(source_layer.lvs_layer_name,
+                                                                                 source_layer.lvs_layer_name)
+                        bot_top = tech.bottom_and_top_layer_name_by_via_computed_layer_name.get(via_name, None)
                         if bot_top is None:
                             unmodeled_layers_by_gds_pair[gds_pair].append(f"{layer_description}: no bottom/top layers")
                             continue
@@ -277,8 +280,7 @@ class RExtractor:
                         via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
                         via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
 
-                        contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[
-                            source_layer.lvs_layer_name]
+                        contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[via_name]
 
                         via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
                             contact=contact,
