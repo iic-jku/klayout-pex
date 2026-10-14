@@ -125,11 +125,17 @@ def cap_cmim_over_m4_wire(name: str) -> Pattern:
 
 def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
     """
-    The rfcmim of the test data (sg13g2_pr__rfcmim, 7 µm x 7 µm, wfeed 3 µm), with a Metal4 wire D of 1 µm width
-    under it, across the cap, which the bottom plate shields from the top plate
+    The rfcmim of the test data (sg13g2_pr__rfcmim, 7 µm x 7 µm, wfeed 3 µm, its terminals PLUS and MINUS),
+    with a Metal4 wire D of 1 µm width under it, across the cap, which the bottom plate shields from the top plate
     """
     p = pattern('cap_rfcmim_w7u_l7u_over_m4_wire')
     p.copy_design('ihp-sg13g2', 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+
+    # NOTE: the cell labels its pins on the text layer only, label them as the terminals of the model
+    for layer, pin_layer, text in ((TOPMETAL1, TOPMETAL1_PIN, 'PLUS'), (METAL5, METAL5_PIN, 'MINUS')):
+        pin, = kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*pin_layer))).merged().each()
+        center = pin.bbox().center()
+        p.label(layer, text, center.x, center.y)
 
     p.box(METAL4, 3000, -8000, 4000, 15000)
     p.box(METAL4_PIN, 3000, -8000, 4000, -7000)
