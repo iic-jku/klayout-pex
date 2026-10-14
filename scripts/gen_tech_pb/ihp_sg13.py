@@ -132,21 +132,21 @@ class TechBuilder:
         #       as they join the top plate below them, not the metal (but their resistance per cut is the same)
 
         if self.is_g2:
-            # NOTE: the plates of the MIM caps (cap_cmim), with the vias on the top plates: their model has
+            # NOTE: the plates of the MIM caps, with the vias on the top plates: the model of cap_cmim has
             #       the capacitance between the plates, but not the ones to the substrate and to other nets,
             #       which the plates also shield (e.g. a wire below), so with --blackbox, these are extracted.
-            #       Unlike the model of the rfcmim, which has the substrate capacitance (csub), so its layers
-            #       (the deck has them apart) are left out
+            #       The model of the rfcmim has the one of its Metal5 to the substrate too (Cox), its terminal bn,
+            #       so all of its Metal5 is a plate (metal5_rfcap and metal5_rfcap_feed)
             add_computed_layer(tech, VIA,   KPLT, "mim_via",        (125, 10),    "TopVia1",   "Original TopVia1 is 125/0, case MiM cap")
             add_computed_layer(tech, MIM,   KPLT, "metal5_cap",     (67, 0),      "Metal5",    "Computed layer for Metal5, case MiM cap")
             add_computed_layer(tech, MIM,   KPLT, "cmim_top",       (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5")
-            add_computed_layer(tech, VIA,   KCAP, "rfmim_via",      (125, 10),    "TopVia1",   "Original TopVia1 is 125/0, case rfcmim (not in mim_via)")
-            add_computed_layer(tech, MIM,   KCAP, "metal5_rfcap",   (67, 0),      "Metal5",    "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
-            add_computed_layer(tech, MIM,   KCAP, "rfmim_top",      (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
+            add_computed_layer(tech, MIM,   KPLT, "metal5_rfcap",   (67, 0),      "Metal5",    "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
+            add_computed_layer(tech, METAL, KPLT, "metal5_rfcap_feed", (67, 0),   "Metal5",    "Computed layer for the rest of the Metal5 of the rfcmim (enclosure, feed)")
+            add_computed_layer(tech, MIM,   KPLT, "rfmim_top",      (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
 
         # NOTE: the fingers of the MOM caps (cap_cmomi, cap_cmomf, the metal within their markers)
         #       are on the GDS pairs of the regular metal, but with --blackbox, the capacitances between them
-        #       are left to the device models. Unlike the models of sky130A's VPP caps (KIND_DEVICE_CAPACITOR),
+        #       are left to the device models. Unlike the models of sky130A's VPP caps,
         #       these have no substrate terminal, so the capacitances of the fingers to the substrate
         #       and to other nets (e.g. a wire across) are extracted.
         #       But the model of cap_cmomi has a substrate shunt (to the global ground 0) of its own

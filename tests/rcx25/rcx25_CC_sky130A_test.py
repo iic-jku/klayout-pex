@@ -647,13 +647,59 @@ def test_mom_cap__blackboxed():
     # C1 C1 SUB 0.77621f
     # C2 C0 SUB 2.83686f
 
+    #
+    # The fingers of the VPP cap (the metal within its marker) are plates, and its model has their capacitances
+    # to each other and to the substrate (c0_sub 1.528 fF, c1_sub 0.44 fF), its terminal B, so these are left out.
+    # What's left is the metal around the marker (0.17 µm wide), whose inner edges fringed to the substrate
+    # where the fingers were left out (C0–VSUBS 3.562 fF, C1–VSUBS 0.117 fF)
     pex_blackboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;C0;C1;0.134;
-C2;C0;VSUBS;3.562;
-C3;C1;VSUBS;0.117;"""
+C2;C0;VSUBS;2.203;
+C3;C1;VSUBS;0.091;"""
         )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mom_cap_beside_m2_wire__whiteboxed():
+    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
+    # C2 C0 C1 7.51226f
+    # C5 C0 SUB 2.69447f
+    # C1 C0 X 0.29419f
+    # C4 C1 SUB 0.74769f
+    # C0 C1 X 0.02239f
+    # C3 X SUB 0.38603f
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;C0;C1;7.709;
+C2;C0;VSUBS;2.684;
+C3;C0;X;0.294;
+C4;C1;VSUBS;0.736;
+C5;C1;X;0.022;
+C6;VSUBS;X;0.385;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mom_cap_beside_m2_wire__blackboxed():
+    # The fingers of the VPP cap are plates, so the capacitances to the wire X beside it are the white-box ones,
+    # and those of the fingers to each other and to the substrate are the model's (see test_mom_cap__blackboxed)
+    pex_blackboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;C0;C1;0.134;
+C2;C0;VSUBS;2.061;
+C3;C0;X;0.294;
+C4;C1;VSUBS;0.068;
+C5;C1;X;0.022;
+C6;VSUBS;X;0.385;"""
+    )
 
 
 @allure.parent_suite(parent_suite)

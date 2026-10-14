@@ -241,9 +241,7 @@ def test_mim_cap__whiteboxed():
 @allure.tag("PEX", "2.5D")
 @pytest.mark.slow
 def test_rf_mim_cap__whiteboxed():
-    # The TopVia1 on the top plate of the rfcmim (LVS layer rfmim_via, apart from mim_via, as the black-box extraction
-    # leaves out the rfcmim) join it to TopMetal1, as the vias of the process stack on their GDS pair (mim_via).
-    # Looked up by their LVS layer only, it stops with "TopVia1 (LVS rfmim_via): no bottom/top layers"
+    # The TopVia1 on the top plate of the rfcmim (mim_via) join it to TopMetal1
     results, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
 
     # NOTE: the nets have no labels, so their names ($1, $2, ...) depend on the LVS run
@@ -262,4 +260,16 @@ def test_mim_cap__blackboxed():
     # The bottom plate (metal5_cap) was left out, so its terminal was on the pin node of A, with a warning
     assert pex_blackboxed.written_device_lines('test_patterns', 'cap_cmim_20um_x_20um_over_m4_wire.gds.gz') == [
         'X$1 B.P0.MIM A.P0.Metal5 cap_cmim w=2e-05 l=2e-05 m=1',
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_rf_mim_cap__blackboxed():
+    # The black-box extraction keeps the plates of the rfcmim, so its terminals are on their nodes.
+    # The plates (rfmim_top, metal5_rfcap) were left out, so the bottom terminal was on the pin node of MINUS,
+    # with a warning
+    assert pex_blackboxed.written_device_lines('test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz') == [
+        'X$1 PLUS.P0.MIM MINUS.P0.Metal5 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06',
     ]
