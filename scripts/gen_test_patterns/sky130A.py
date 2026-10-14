@@ -47,12 +47,20 @@ MCON:     GDSPair = (67, 44)
 MET1:     GDSPair = (68, 20)
 MET2:     GDSPair = (69, 20)
 MET2_PIN: GDSPair = (69, 16)
+MET3:     GDSPair = (70, 20)
+MET3_PIN: GDSPair = (70, 16)
+CAPM:     GDSPair = (89, 44)
+VIA3:     GDSPair = (70, 44)
+MET4:     GDSPair = (71, 20)
+MET4_PIN: GDSPair = (71, 16)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     NWELL: (64, 5),
     LI1: (67, 5),
     MET1: (68, 5),
     MET2: (69, 5),
+    MET3: (70, 5),
+    MET4: (71, 5),
 }
 
 
@@ -104,6 +112,27 @@ def plate_li1_over_tap(name: str, ntap: bool) -> Pattern:
     return p
 
 
+def cap_mim_m3_over_m2_wire(name: str) -> Pattern:
+    """
+    A MIM cap of 20 µm x 20 µm: the capm top plate on a met3 bottom plate of net A, which encloses it by 2 µm,
+    joined by a via3 in its middle to the met4 of net B over it,
+    over a met2 wire D of 2 µm width across it, which the bottom plate shields from the top plate
+    """
+    p = pattern(name)
+    p.box(MET3, 0, 0, 24000, 24000)
+    p.box(MET3_PIN, 0, 0, 2000, 2000)
+    p.label(MET3, 'A', 200, 200)
+    p.box(CAPM, 2000, 2000, 22000, 22000)
+    p.box(VIA3, 11900, 11900, 12100, 12100)
+    p.box(MET4, 2000, 2000, 22000, 22000)
+    p.box(MET4_PIN, 20000, 20000, 22000, 22000)
+    p.label(MET4, 'B', 20200, 20200)
+    p.box(MET2, -10000, 11000, 34000, 13000)
+    p.box(MET2_PIN, -10000, 11000, -8000, 13000)
+    p.label(MET2, 'D', -9800, 11200)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
@@ -113,6 +142,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
         lambda: plate_li1_over_tap('plate_20um_x_20um_li1_over_ptap', ntap=False),
     'plate_20um_x_20um_li1_over_ntap':
         lambda: plate_li1_over_tap('plate_20um_x_20um_li1_over_ntap', ntap=True),
+    'cap_mim_m3_20um_x_20um_over_m2_wire':
+        lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
 }
 
 
