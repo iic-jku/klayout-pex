@@ -40,6 +40,7 @@ class DeviceCapacitorPlates:
     The plates of the black-boxed capacitor devices, whose models have the capacitances between them
     (the shapes of KIND_DEVICE_CAPACITOR_PLATE, e.g. the fingers of a MOM cap),
     but not their capacitances to other nets (e.g. the substrate, a wire across), which are extracted.
+    Unless the substrate is a terminal of the device: then its model has them too (e.g. a VPP cap).
 
     NOTE: a pair of plates is of a device if its nets are the terminal nets of a device,
           and not e.g. a wire of another net across the device, which is on its plate layers too
@@ -51,9 +52,14 @@ class DeviceCapacitorPlates:
     @classmethod
     def from_circuit(cls,
                      circuit: kdb.Circuit,
-                     device_class_names: Set[str]) -> DeviceCapacitorPlates:
+                     device_class_names: Set[str],
+                     substrate_net_name: NetName,
+                     substrate_shapes_net_name: NetName) -> DeviceCapacitorPlates:
         """
         :param device_class_names: the device classes of the capacitors (e.g. the metal capacitors)
+        :param substrate_net_name: the substrate net of the LVS netlist (e.g. sky130_gnd)
+        :param substrate_shapes_net_name: the net of the substrate shapes of the extraction (e.g. VSUBS),
+                                          which are a plate of the devices with a terminal on the substrate net
         """
         terminal_net_pairs: Set[FrozenSet[NetName]] = set()
         for d in circuit.each_device():
@@ -62,8 +68,11 @@ class DeviceCapacitorPlates:
             net_names = sorted({net.expanded_name()
                                 for td in d.device_class().terminal_definitions()
                                 if (net := d.net_for_terminal(td.id())) is not None})
-            terminal_net_pairs.update(frozenset((n1, n2))
-                                      for idx, n1 in enumerate(net_names) for n2 in net_names[idx + 1:])
+            net_pairs = {frozenset((n1, n2)) for idx, n1 in enumerate(net_names) for n2 in net_names[idx + 1:]}
+            terminal_net_pairs.update(net_pairs)
+            terminal_net_pairs.update(frozenset(substrate_shapes_net_name if n == substrate_net_name else n
+                                                for n in net_pair)
+                                      for net_pair in net_pairs if substrate_net_name in net_pair)
         return DeviceCapacitorPlates(terminal_net_pairs=terminal_net_pairs)
 
     def are_plates_of_a_device(self, shape1: Shape, net1: NetName, shape2: Shape, net2: NetName) -> bool:
