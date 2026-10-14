@@ -123,10 +123,25 @@ def cap_cmim_over_m4_wire(name: str) -> Pattern:
     return p
 
 
+def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
+    """
+    The rfcmim of the test data (sg13g2_pr__rfcmim, 7 µm x 7 µm, wfeed 3 µm), with a Metal4 wire D of 1 µm width
+    under it, across the cap, which the bottom plate shields from the top plate
+    """
+    p = pattern('cap_rfcmim_w7u_l7u_over_m4_wire')
+    p.copy_design('ihp-sg13g2', 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+
+    p.box(METAL4, 3000, -8000, 4000, 15000)
+    p.box(METAL4_PIN, 3000, -8000, 4000, -7000)
+    p.label(METAL4, 'D', 3200, -7800)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
+    'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
 }
 
 
