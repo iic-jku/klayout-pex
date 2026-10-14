@@ -44,10 +44,15 @@ METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
 METAL5:       GDSPair = (67, 0)
 METAL5_PIN:   GDSPair = (67, 2)
+MIM:          GDSPair = (36, 0)
+VMIM:         GDSPair = (129, 0)
+TOPMETAL1:    GDSPair = (126, 0)
+TOPMETAL1_PIN: GDSPair = (126, 2)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL4: (50, 25),
     METAL5: (67, 25),
+    TOPMETAL1: (126, 25),
 }
 
 
@@ -97,8 +102,31 @@ def cap_cmomf_w10u_l25u_m2_m4_m5_wire() -> Pattern:
     return p
 
 
+def cap_cmim_over_m4_wire(name: str) -> Pattern:
+    """
+    A MIM cap of 20 µm x 20 µm: the MIM top plate on a Metal5 bottom plate of net A, which encloses it by 2 µm,
+    joined by a Vmim in its middle to the TopMetal1 of net B over it (0.345 µm within it, as in the cmim pcell),
+    over a Metal4 wire D of 2 µm width across it, which the bottom plate shields from the top plate
+    """
+    p = pattern(name)
+    p.box(METAL5, 0, 0, 24000, 24000)
+    p.box(METAL5_PIN, 0, 0, 2000, 2000)
+    p.label(METAL5, 'A', 200, 200)
+    p.box(MIM, 2000, 2000, 22000, 22000)
+    p.box(VMIM, 11790, 11790, 12210, 12210)
+    p.box(TOPMETAL1, 2345, 2345, 21655, 21655)
+    p.box(TOPMETAL1_PIN, 19655, 19655, 21655, 21655)
+    p.label(TOPMETAL1, 'B', 19855, 19855)
+    p.box(METAL4, -10000, 11000, 34000, 13000)
+    p.box(METAL4_PIN, -10000, 11000, -8000, 13000)
+    p.label(METAL4, 'D', -9800, 11200)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
+    'cap_cmim_20um_x_20um_over_m4_wire':
+        lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
 }
 
 
