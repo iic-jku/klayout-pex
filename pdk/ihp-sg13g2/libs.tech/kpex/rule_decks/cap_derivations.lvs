@@ -38,6 +38,10 @@ mim_top = mim_drw.overlapping(topmetal1_con)
 mim_btm = mim_drw.and(metal5_con)
 mim_via = vmim_drw.join(topvia1_drw).and(mim_drw)
 topvia1_n_cap = topvia1_drw.not(mim_via)
+# [PEX] the vias on the top plates of the rfcmims apart, as their model has the substrate capacitance
+#       (like the bottom plates, metal5_rfcap), mim_via are the ones of cap_cmim
+rfmim_via = mim_via.and(rfmim_area)
+mim_via = mim_via.not(rfmim_area)
 
 # === cap_cmim ===
 cmim_top = mim_top.not(mimcap_exclude)

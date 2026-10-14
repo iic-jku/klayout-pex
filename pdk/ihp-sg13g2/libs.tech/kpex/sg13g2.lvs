@@ -390,11 +390,13 @@ else
   metal4_mom   = metal4_con.and(mom_mk)
 
   # metal5_n_cap: metal5 region where no MiM cap is above metal5 (and outside the markers of the MOM caps)
-  # metal5_cap: metal5 region where MiM cap is above
+  # metal5_cap: metal5 region where a MiM cap (cap_cmim) is above
+  # metal5_rfcap: metal5 region where an RF MiM cap (rfcmim) is above, apart, as its model has the substrate capacitance
   # cmim_top: the MiM cap itself (connected to mim_via)
 
   metal5_n_cap = metal5_drw.not(mim_drw).not(mom_mk)
-  metal5_cap   = metal5_drw.and(mim_drw)
+  metal5_cap   = metal5_drw.and(mim_drw).not(rfmim_area)
+  metal5_rfcap = metal5_drw.and(mim_drw).and(rfmim_area)
   metal5_mom   = metal5_drw.not(mim_drw).and(mom_mk)
 
   # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX),
@@ -450,6 +452,7 @@ else
 
   connect(metal5_n_cap, metal5_con)
   connect(metal5_cap, metal5_con)
+  connect(metal5_rfcap, metal5_con)
   connect(metal5_mom, metal5_con)
 
   # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX)

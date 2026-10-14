@@ -243,6 +243,16 @@ class TechInfo:
         return lvs_layer_names_by_process_layer_name
 
     @cached_property
+    def process_layer_name_by_lvs_layer_name(self) -> Dict[LVSLayerName, LayerName]:
+        """
+        The layer of the process stack (a conductor or a contact) of each LVS layer on one of its GDS pairs,
+        see lvs_layer_names_by_process_layer_name
+        """
+        return {lvs_layer_name: process_layer_name
+                for process_layer_name, lvs_layer_names in self.lvs_layer_names_by_process_layer_name.items()
+                for lvs_layer_name in lvs_layer_names}
+
+    @cached_property
     def process_diffusion_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return list(
             filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
