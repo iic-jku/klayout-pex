@@ -41,6 +41,7 @@ parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.R, blackbox=False)
+pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.R, blackbox=True)
 
 
 def extraction_context(lvsdb: kdb.LayoutVsSchematic,
@@ -234,3 +235,31 @@ def test_mim_cap__whiteboxed():
     assert {node.layer_name for node in network.nodes} == {'MIM', 'TopMetal1'}
     assert sorted(round(r, 3) for r in results.summarize().resistances.values()) == \
            [0.004] * 4 + [0.44] * 5 + [2.408] * 4
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_rf_mim_cap__whiteboxed():
+    # The TopVia1 on the top plate of the rfcmim (LVS layer rfmim_via, apart from mim_via, as the black-box extraction
+    # leaves out the rfcmim) join it to TopMetal1, as the vias of the process stack on their GDS pair (mim_via).
+    # Looked up by their LVS layer only, it stops with "TopVia1 (LVS rfmim_via): no bottom/top layers"
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+
+    # NOTE: the nets have no labels, so their names ($1, $2, ...) depend on the LVS run
+    network, = [n for n in results.r_extraction_result.networks if n.elements]
+    assert {node.layer_name for node in network.nodes} == {'MIM', 'TopMetal1'}
+    layer_by_node_id = {node.node_id: node.layer_name for node in network.nodes}
+    assert [e for e in network.elements
+            if {layer_by_node_id[e.node_a.node_id], layer_by_node_id[e.node_b.node_id]} == {'MIM', 'TopMetal1'}]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_mim_cap__blackboxed():
+    # The black-box extraction keeps the plates of the MIM cap, so its terminals are on their nodes.
+    # The bottom plate (metal5_cap) was left out, so its terminal was on the pin node of A, with a warning
+    assert pex_blackboxed.written_device_lines('test_patterns', 'cap_cmim_20um_x_20um_over_m4_wire.gds.gz') == [
+        'X$1 B.P0.MIM A.P0.Metal5 cap_cmim w=2e-05 l=2e-05 m=1',
+    ]
