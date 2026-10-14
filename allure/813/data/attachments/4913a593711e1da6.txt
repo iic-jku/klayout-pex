@@ -1,0 +1,490 @@
+[16:47:54] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1266
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox y --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x
+04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz --out_dir         
+/tmp/tmptwehqihl --cache-dir                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:47:54] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:598
+[16:47:54] INFO     No explicit top cell specified, using top    kpex_cli.py:638
+                    cell 'cap_vpp_04p4x04p6_l1m1m2_noshield'                    
+[16:47:54] INFO     LVS input schematic not specified (argument  kpex_cli.py:679
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:47:54] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1201
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_vpp_04p4x04p6
+_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz/cap_vpp_04p4x04p6_l1m1
+m2_noshield.lvsdb.gz                                                            
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:47:54] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1435
+[16:47:54] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1435
+[16:47:54] INFO     (68, 44) -> (via1_con)                      kpex_cli.py:1435
+[16:47:54] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1435
+[16:47:54] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1435
+[16:47:54] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1435
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:47:54] INFO     LVSDB: found 3pins                          extractor.py:285
+[16:47:54] WARNING  The resistance network has no nodes   lvsdb_extractor.py:745
+                    for these device terminals, as the                          
+                    tech info has no layer for their LVS                        
+                    layer, and they overlap no conductor                        
+                    of their net (e.g. a terminal on the                        
+                    substrate or a well):                                       
+                      -                                                         
+                    sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m                       
+                    2_noshield terminal A on LVS layer                          
+                    met2_vpp: $1                                                
+                      -                                                         
+                    sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m                       
+                    2_noshield terminal B on LVS layer                          
+                    met2_vpp: $1                                                
+                      -                                                         
+                    sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m                       
+                    2_noshield terminal W on LVS layer                          
+                    vpp_sub: $1                                                 
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;C0;VSUBS;0.01;                                                               
+C2;C0.$0.li1;VSUBS;0.056;                                                       
+C3;C0.$1.li1;VSUBS;0.03;                                                        
+C4;C0.$10.li1;VSUBS;0.056;                                                      
+C5;C0.$100.met1;VSUBS;0.012;                                                    
+C6;C0.$101.met1;VSUBS;0.038;                                                    
+C7;C0.$102.met1;VSUBS;0.038;                                                    
+C8;C0.$103.met1;VSUBS;0.025;                                                    
+C9;C0.$104.met1;VSUBS;0.011;                                                    
+C10;C0.$105.met1;VSUBS;0.012;                                                   
+C11;C0.$106.met1;VSUBS;0.013;                                                   
+C12;C0.$107.met1;VSUBS;0.013;                                                   
+C13;C0.$108.met1;VSUBS;0.012;                                                   
+C14;C0.$109.met1;VSUBS;0.013;                                                   
+C15;C0.$11.li1;VSUBS;0.05;                                                      
+C16;C0.$110.met1;VSUBS;0.012;                                                   
+C17;C0.$111.met1;VSUBS;0.013;                                                   
+C18;C0.$112.met1;C1;0.003;                                                      
+C19;C0.$112.met1;VSUBS;0.019;                                                   
+C20;C0.$113.met1;C1;0.006;                                                      
+C21;C0.$113.met1;VSUBS;0.027;                                                   
+C22;C0.$114.met1;C1;0.003;                                                      
+C23;C0.$114.met1;VSUBS;0.019;                                                   
+C24;C0.$115.met1;VSUBS;0.013;                                                   
+C25;C0.$116.met1;VSUBS;0.012;                                                   
+C26;C0.$117.met1;VSUBS;0.013;                                                   
+C27;C0.$118.met1;VSUBS;0.012;                                                   
+C28;C0.$119.met1;VSUBS;0.013;                                                   
+C29;C0.$12.li1;VSUBS;0.05;                                                      
+C30;C0.$120.met1;VSUBS;0.013;                                                   
+C31;C0.$121.met1;VSUBS;0.012;                                                   
+C32;C0.$122.met1;VSUBS;0.011;                                                   
+C33;C0.$123.met1;VSUBS;0.025;                                                   
+C34;C0.$124.met2;VSUBS;0.032;                                                   
+C35;C0.$125.met2;VSUBS;0.021;                                                   
+C36;C0.$126.met2;VSUBS;0.021;                                                   
+C37;C0.$127.met2;VSUBS;0.021;                                                   
+C38;C0.$128.met2;C1;0.01;                                                       
+C39;C0.$128.met2;VSUBS;0.026;                                                   
+C40;C0.$129.met2;C1;0.01;                                                       
+C41;C0.$129.met2;VSUBS;0.069;                                                   
+C42;C0.$13.li1;VSUBS;0.03;                                                      
+C43;C0.$130.met2;VSUBS;0.021;                                                   
+C44;C0.$131.met2;VSUBS;0.021;                                                   
+C45;C0.$132.met2;VSUBS;0.021;                                                   
+C46;C0.$133.met2;VSUBS;0.032;                                                   
+C47;C0.$134.met2;VSUBS;0.04;                                                    
+C48;C0.$135.met2;VSUBS;0.04;                                                    
+C49;C0.$136.met2;VSUBS;0.022;                                                   
+C50;C0.$137.met2;VSUBS;0.022;                                                   
+C51;C0.$138.met2;VSUBS;0.022;                                                   
+C52;C0.$139.met2;VSUBS;0.022;                                                   
+C53;C0.$14.li1;VSUBS;0.03;                                                      
+C54;C0.$140.met2;VSUBS;0.022;                                                   
+C55;C0.$141.met2;VSUBS;0.017;                                                   
+C56;C0.$142.met2;C1;0.01;                                                       
+C57;C0.$142.met2;VSUBS;0.027;                                                   
+C58;C0.$143.met2;C1;0.01;                                                       
+C59;C0.$143.met2;VSUBS;0.022;                                                   
+C60;C0.$144.met2;C1;0.01;                                                       
+C61;C0.$144.met2;VSUBS;0.027;                                                   
+C62;C0.$145.met2;C1;0.01;                                                       
+C63;C0.$145.met2;VSUBS;0.027;                                                   
+C64;C0.$146.met2;VSUBS;0.022;                                                   
+C65;C0.$147.met2;VSUBS;0.022;                                                   
+C66;C0.$148.met2;VSUBS;0.022;                                                   
+C67;C0.$149.met2;VSUBS;0.022;                                                   
+C68;C0.$15.li1;VSUBS;0.03;                                                      
+C69;C0.$150.met2;VSUBS;0.022;                                                   
+C70;C0.$151.met2;VSUBS;0.022;                                                   
+C71;C0.$152.met2;VSUBS;0.04;                                                    
+C72;C0.$153.met2;VSUBS;0.04;                                                    
+C73;C0.$154.met2;VSUBS;0.032;                                                   
+C74;C0.$155.met2;VSUBS;0.021;                                                   
+C75;C0.$156.met2;VSUBS;0.021;                                                   
+C76;C0.$157.met2;VSUBS;0.021;                                                   
+C77;C0.$158.met2;C1;0.01;                                                       
+C78;C0.$158.met2;VSUBS;0.026;                                                   
+C79;C0.$159.met2;C1;0.01;                                                       
+C80;C0.$159.met2;VSUBS;0.026;                                                   
+C81;C0.$16.li1;VSUBS;0.03;                                                      
+C82;C0.$160.met2;VSUBS;0.021;                                                   
+C83;C0.$161.met2;VSUBS;0.021;                                                   
+C84;C0.$162.met2;VSUBS;0.021;                                                   
+C85;C0.$163.met2;VSUBS;0.032;                                                   
+C86;C0.$17.li1;VSUBS;0.03;                                                      
+C87;C0.$18.li1;VSUBS;0.03;                                                      
+C88;C0.$19.li1;VSUBS;0.03;                                                      
+C89;C0.$2.li1;VSUBS;0.03;                                                       
+C90;C0.$20.li1;VSUBS;0.03;                                                      
+C91;C0.$21.li1;C1;0.001;                                                        
+C92;C0.$21.li1;VSUBS;0.03;                                                      
+C93;C0.$22.li1;VSUBS;0.03;                                                      
+C94;C0.$23.li1;VSUBS;0.03;                                                      
+C95;C0.$24.li1;VSUBS;0.03;                                                      
+C96;C0.$25.li1;VSUBS;0.03;                                                      
+C97;C0.$26.li1;VSUBS;0.03;                                                      
+C98;C0.$27.li1;VSUBS;0.03;                                                      
+C99;C0.$28.li1;VSUBS;0.03;                                                      
+C100;C0.$29.li1;VSUBS;0.05;                                                     
+C101;C0.$3.li1;VSUBS;0.03;                                                      
+C102;C0.$30.li1;VSUBS;0.05;                                                     
+C103;C0.$31.li1;VSUBS;0.056;                                                    
+C104;C0.$32.li1;VSUBS;0.03;                                                     
+C105;C0.$33.li1;VSUBS;0.03;                                                     
+C106;C0.$34.li1;VSUBS;0.03;                                                     
+C107;C0.$35.li1;VSUBS;0.03;                                                     
+C108;C0.$36.li1;VSUBS;0.03;                                                     
+C109;C0.$37.li1;VSUBS;0.03;                                                     
+C110;C0.$38.li1;VSUBS;0.03;                                                     
+C111;C0.$39.li1;VSUBS;0.03;                                                     
+C112;C0.$4.li1;VSUBS;0.03;                                                      
+C113;C0.$40.li1;VSUBS;0.03;                                                     
+C114;C0.$41.li1;VSUBS;0.056;                                                    
+C115;C0.$42.met1;VSUBS;0.025;                                                   
+C116;C0.$43.met1;VSUBS;0.013;                                                   
+C117;C0.$44.met1;VSUBS;0.012;                                                   
+C118;C0.$45.met1;VSUBS;0.012;                                                   
+C119;C0.$46.met1;C1;0.003;                                                      
+C120;C0.$46.met1;VSUBS;0.019;                                                   
+C121;C0.$47.met1;C1;0.006;                                                      
+C122;C0.$47.met1;VSUBS;0.027;                                                   
+C123;C0.$48.met1;C1;0.003;                                                      
+C124;C0.$48.met1;VSUBS;0.019;                                                   
+C125;C0.$49.met1;VSUBS;0.012;                                                   
+C126;C0.$5.li1;VSUBS;0.03;                                                      
+C127;C0.$50.met1;VSUBS;0.012;                                                   
+C128;C0.$51.met1;VSUBS;0.013;                                                   
+C129;C0.$52.met1;VSUBS;0.025;                                                   
+C130;C0.$53.met1;VSUBS;0.011;                                                   
+C131;C0.$54.met1;VSUBS;0.012;                                                   
+C132;C0.$55.met1;VSUBS;0.013;                                                   
+C133;C0.$56.met1;VSUBS;0.013;                                                   
+C134;C0.$57.met1;VSUBS;0.013;                                                   
+C135;C0.$58.met1;VSUBS;0.013;                                                   
+C136;C0.$59.met1;VSUBS;0.013;                                                   
+C137;C0.$6.li1;VSUBS;0.03;                                                      
+C138;C0.$60.met1;VSUBS;0.013;                                                   
+C139;C0.$61.met1;VSUBS;0.012;                                                   
+C140;C0.$62.met1;VSUBS;0.011;                                                   
+C141;C0.$63.met1;VSUBS;0.038;                                                   
+C142;C0.$64.met1;VSUBS;0.038;                                                   
+C143;C0.$65.met1;VSUBS;0.012;                                                   
+C144;C0.$66.met1;VSUBS;0.012;                                                   
+C145;C0.$67.met1;VSUBS;0.013;                                                   
+C146;C0.$68.met1;VSUBS;0.013;                                                   
+C147;C0.$69.met1;VSUBS;0.012;                                                   
+C148;C0.$7.li1;VSUBS;0.03;                                                      
+C149;C0.$70.met1;VSUBS;0.012;                                                   
+C150;C0.$71.met1;VSUBS;0.013;                                                   
+C151;C0.$72.met1;VSUBS;0.013;                                                   
+C152;C0.$73.met1;VSUBS;0.012;                                                   
+C153;C0.$74.met1;VSUBS;0.012;                                                   
+C154;C0.$75.met1;VSUBS;0.013;                                                   
+C155;C0.$76.met1;VSUBS;0.013;                                                   
+C156;C0.$77.met1;VSUBS;0.013;                                                   
+C157;C0.$78.met1;VSUBS;0.013;                                                   
+C158;C0.$79.met1;VSUBS;0.013;                                                   
+C159;C0.$8.li1;VSUBS;0.03;                                                      
+C160;C0.$80.met1;VSUBS;0.013;                                                   
+C161;C0.$81.met1;C1;0.01;                                                       
+C162;C0.$81.met1;VSUBS;0.026;                                                   
+C163;C0.$82.met1;C1;0.006;                                                      
+C164;C0.$82.met1;VSUBS;0.026;                                                   
+C165;C0.$83.met1;C1;0.012;                                                      
+C166;C0.$83.met1;VSUBS;0.026;                                                   
+C167;C0.$84.met1;C1;0.006;                                                      
+C168;C0.$84.met1;VSUBS;0.026;                                                   
+C169;C0.$85.met1;VSUBS;0.013;                                                   
+C170;C0.$86.met1;VSUBS;0.013;                                                   
+C171;C0.$87.met1;VSUBS;0.013;                                                   
+C172;C0.$88.met1;VSUBS;0.013;                                                   
+C173;C0.$89.met1;VSUBS;0.013;                                                   
+C174;C0.$9.li1;VSUBS;0.03;                                                      
+C175;C0.$90.met1;VSUBS;0.013;                                                   
+C176;C0.$91.met1;VSUBS;0.012;                                                   
+C177;C0.$92.met1;VSUBS;0.012;                                                   
+C178;C0.$93.met1;VSUBS;0.013;                                                   
+C179;C0.$94.met1;VSUBS;0.013;                                                   
+C180;C0.$95.met1;VSUBS;0.012;                                                   
+C181;C0.$96.met1;VSUBS;0.012;                                                   
+C182;C0.$97.met1;VSUBS;0.013;                                                   
+C183;C0.$98.met1;VSUBS;0.013;                                                   
+C184;C0.$99.met1;VSUBS;0.012;                                                   
+C185;C1;VSUBS;0.124;                                                            
+R1;C0;C0.$141.met2;;0.128                                                       
+R2;C0;C0.$143.met2;;0.107                                                       
+R3;C0.$0.li1;C0.$1.li1;;27.106                                                  
+R4;C0.$0.li1;C0.$11.li1;;72.333                                                 
+R5;C0.$0.li1;C0.$42.met1;;17.567                                                
+R6;C0.$1.li1;C0.$2.li1;;27.106                                                  
+R7;C0.$1.li1;C0.$43.met1;;17.567                                                
+R8;C0.$10.li1;C0.$12.li1;;72.333                                                
+R9;C0.$10.li1;C0.$52.met1;;17.567                                               
+R10;C0.$10.li1;C0.$9.li1;;27.106                                                
+R11;C0.$100.met1;C0.$102.met1;;0.132                                            
+R12;C0.$100.met1;C0.$30.li1;;17.567                                             
+R13;C0.$100.met1;C0.$98.met1;;0.103                                             
+R14;C0.$101.met1;C0.$103.met1;;0.574                                            
+R15;C0.$101.met1;C0.$152.met2;;8.437                                            
+R16;C0.$101.met1;C0.$99.met1;;0.132                                             
+R17;C0.$102.met1;C0.$123.met1;;0.574                                            
+R18;C0.$102.met1;C0.$153.met2;;8.437                                            
+R19;C0.$103.met1;C0.$104.met1;;0.011                                            
+R20;C0.$103.met1;C0.$31.li1;;17.567                                             
+R21;C0.$104.met1;C0.$105.met1;;0.235                                            
+R22;C0.$104.met1;C0.$154.met2;;8.437                                            
+R23;C0.$105.met1;C0.$106.met1;;0.018                                            
+R24;C0.$105.met1;C0.$155.met2;;8.437                                            
+R25;C0.$106.met1;C0.$107.met1;;0.217                                            
+R26;C0.$106.met1;C0.$32.li1;;17.567                                             
+R27;C0.$107.met1;C0.$108.met1;;0.048                                            
+R28;C0.$107.met1;C0.$156.met2;;8.437                                            
+R29;C0.$108.met1;C0.$109.met1;;0.188                                            
+R30;C0.$108.met1;C0.$33.li1;;17.567                                             
+R31;C0.$109.met1;C0.$110.met1;;0.077                                            
+R32;C0.$109.met1;C0.$157.met2;;8.437                                            
+R33;C0.$11.li1;C0.$13.li1;;27.106                                               
+R34;C0.$11.li1;C0.$65.met1;;17.567                                              
+R35;C0.$110.met1;C0.$111.met1;;0.158                                            
+R36;C0.$110.met1;C0.$34.li1;;17.567                                             
+R37;C0.$111.met1;C0.$112.met1;;0.107                                            
+R38;C0.$111.met1;C0.$158.met2;;8.437                                            
+R39;C0.$112.met1;C0.$113.met1;;0.265                                            
+R40;C0.$112.met1;C0.$35.li1;;17.567                                             
+R41;C0.$113.met1;C0.$114.met1;;0.265                                            
+R42;C0.$113.met1;C0.$36.li1;;17.567                                             
+R43;C0.$114.met1;C0.$115.met1;;0.107                                            
+R44;C0.$114.met1;C0.$37.li1;;17.567                                             
+R45;C0.$115.met1;C0.$116.met1;;0.158                                            
+R46;C0.$115.met1;C0.$159.met2;;8.437                                            
+R47;C0.$116.met1;C0.$117.met1;;0.077                                            
+R48;C0.$116.met1;C0.$38.li1;;17.567                                             
+R49;C0.$117.met1;C0.$118.met1;;0.188                                            
+R50;C0.$117.met1;C0.$160.met2;;8.437                                            
+R51;C0.$118.met1;C0.$119.met1;;0.048                                            
+R52;C0.$118.met1;C0.$39.li1;;17.567                                             
+R53;C0.$119.met1;C0.$120.met1;;0.217                                            
+R54;C0.$119.met1;C0.$161.met2;;8.437                                            
+R55;C0.$12.li1;C0.$14.li1;;27.106                                               
+R56;C0.$12.li1;C0.$66.met1;;17.567                                              
+R57;C0.$120.met1;C0.$121.met1;;0.018                                            
+R58;C0.$120.met1;C0.$40.li1;;17.567                                             
+R59;C0.$121.met1;C0.$122.met1;;0.235                                            
+R60;C0.$121.met1;C0.$162.met2;;8.437                                            
+R61;C0.$122.met1;C0.$123.met1;;0.011                                            
+R62;C0.$122.met1;C0.$163.met2;;8.437                                            
+R63;C0.$123.met1;C0.$41.li1;;17.567                                             
+R64;C0.$124.met2;C0.$125.met2;;0.235                                            
+R65;C0.$124.met2;C0.$134.met2;;0.585                                            
+R66;C0.$124.met2;C0.$53.met1;;8.437                                             
+R67;C0.$125.met2;C0.$126.met2;;0.235                                            
+R68;C0.$125.met2;C0.$54.met1;;8.437                                             
+R69;C0.$126.met2;C0.$127.met2;;0.235                                            
+R70;C0.$126.met2;C0.$55.met1;;8.437                                             
+R71;C0.$127.met2;C0.$128.met2;;0.235                                            
+R72;C0.$127.met2;C0.$56.met1;;8.437                                             
+R73;C0.$128.met2;C0.$57.met1;;8.437                                             
+R74;C0.$129.met2;C0.$130.met2;;0.237                                            
+R75;C0.$129.met2;C0.$58.met1;;8.437                                             
+R76;C0.$13.li1;C0.$15.li1;;27.106                                               
+R77;C0.$13.li1;C0.$69.met1;;17.567                                              
+R78;C0.$130.met2;C0.$131.met2;;0.235                                            
+R79;C0.$130.met2;C0.$59.met1;;8.437                                             
+R80;C0.$131.met2;C0.$132.met2;;0.235                                            
+R81;C0.$131.met2;C0.$60.met1;;8.437                                             
+R82;C0.$132.met2;C0.$133.met2;;0.235                                            
+R83;C0.$132.met2;C0.$61.met1;;8.437                                             
+R84;C0.$133.met2;C0.$135.met2;;0.585                                            
+R85;C0.$133.met2;C0.$62.met1;;8.437                                             
+R86;C0.$134.met2;C0.$136.met2;;0.235                                            
+R87;C0.$134.met2;C0.$63.met1;;8.437                                             
+R88;C0.$135.met2;C0.$137.met2;;0.235                                            
+R89;C0.$135.met2;C0.$64.met1;;8.437                                             
+R90;C0.$136.met2;C0.$138.met2;;0.235                                            
+R91;C0.$136.met2;C0.$67.met1;;8.437                                             
+R92;C0.$137.met2;C0.$139.met2;;0.235                                            
+R93;C0.$137.met2;C0.$68.met1;;8.437                                             
+R94;C0.$138.met2;C0.$140.met2;;0.235                                            
+R95;C0.$138.met2;C0.$71.met1;;8.437                                             
+R96;C0.$139.met2;C0.$141.met2;;0.235                                            
+R97;C0.$139.met2;C0.$72.met1;;8.437                                             
+R98;C0.$14.li1;C0.$16.li1;;27.106                                               
+R99;C0.$14.li1;C0.$70.met1;;17.567                                              
+R100;C0.$140.met2;C0.$142.met2;;0.235                                           
+R101;C0.$140.met2;C0.$75.met1;;8.437                                            
+R102;C0.$141.met2;C0.$76.met1;;8.437                                            
+R103;C0.$142.met2;C0.$79.met1;;8.437                                            
+R104;C0.$143.met2;C0.$80.met1;;8.437                                            
+R105;C0.$144.met2;C0.$146.met2;;0.235                                           
+R106;C0.$144.met2;C0.$85.met1;;8.437                                            
+R107;C0.$145.met2;C0.$147.met2;;0.235                                           
+R108;C0.$145.met2;C0.$86.met1;;8.437                                            
+R109;C0.$146.met2;C0.$148.met2;;0.235                                           
+R110;C0.$146.met2;C0.$89.met1;;8.437                                            
+R111;C0.$147.met2;C0.$149.met2;;0.235                                           
+R112;C0.$147.met2;C0.$90.met1;;8.437                                            
+R113;C0.$148.met2;C0.$150.met2;;0.235                                           
+R114;C0.$148.met2;C0.$93.met1;;8.437                                            
+R115;C0.$149.met2;C0.$151.met2;;0.235                                           
+R116;C0.$149.met2;C0.$94.met1;;8.437                                            
+R117;C0.$15.li1;C0.$17.li1;;27.106                                              
+R118;C0.$15.li1;C0.$73.met1;;17.567                                             
+R119;C0.$150.met2;C0.$152.met2;;0.235                                           
+R120;C0.$150.met2;C0.$97.met1;;8.437                                            
+R121;C0.$151.met2;C0.$153.met2;;0.235                                           
+R122;C0.$151.met2;C0.$98.met1;;8.437                                            
+R123;C0.$152.met2;C0.$154.met2;;0.585                                           
+R124;C0.$153.met2;C0.$163.met2;;0.585                                           
+R125;C0.$154.met2;C0.$155.met2;;0.235                                           
+R126;C0.$155.met2;C0.$156.met2;;0.235                                           
+R127;C0.$156.met2;C0.$157.met2;;0.235                                           
+R128;C0.$157.met2;C0.$158.met2;;0.235                                           
+R129;C0.$159.met2;C0.$160.met2;;0.235                                           
+R130;C0.$16.li1;C0.$18.li1;;27.106                                              
+R131;C0.$16.li1;C0.$74.met1;;17.567                                             
+R132;C0.$160.met2;C0.$161.met2;;0.235                                           
+R133;C0.$161.met2;C0.$162.met2;;0.235                                           
+R134;C0.$162.met2;C0.$163.met2;;0.235                                           
+R135;C0.$17.li1;C0.$19.li1;;27.106                                              
+R136;C0.$17.li1;C0.$77.met1;;17.567                                             
+R137;C0.$18.li1;C0.$20.li1;;27.106                                              
+R138;C0.$18.li1;C0.$78.met1;;17.567                                             
+R139;C0.$19.li1;C0.$21.li1;;27.106                                              
+R140;C0.$19.li1;C0.$81.met1;;17.567                                             
+R141;C0.$2.li1;C0.$3.li1;;27.106                                                
+R142;C0.$2.li1;C0.$44.met1;;17.567                                              
+R143;C0.$20.li1;C0.$22.li1;;27.106                                              
+R144;C0.$20.li1;C0.$82.met1;;17.567                                             
+R145;C0.$21.li1;C0.$23.li1;;27.106                                              
+R146;C0.$21.li1;C0.$83.met1;;17.567                                             
+R147;C0.$22.li1;C0.$24.li1;;27.106                                              
+R148;C0.$22.li1;C0.$84.met1;;17.567                                             
+R149;C0.$23.li1;C0.$25.li1;;27.106                                              
+R150;C0.$23.li1;C0.$87.met1;;17.567                                             
+R151;C0.$24.li1;C0.$26.li1;;27.106                                              
+R152;C0.$24.li1;C0.$88.met1;;17.567                                             
+R153;C0.$25.li1;C0.$27.li1;;27.106                                              
+R154;C0.$25.li1;C0.$91.met1;;17.567                                             
+R155;C0.$26.li1;C0.$28.li1;;27.106                                              
+R156;C0.$26.li1;C0.$92.met1;;17.567                                             
+R157;C0.$27.li1;C0.$29.li1;;27.106                                              
+R158;C0.$27.li1;C0.$95.met1;;17.567                                             
+R159;C0.$28.li1;C0.$30.li1;;27.106                                              
+R160;C0.$28.li1;C0.$96.met1;;17.567                                             
+R161;C0.$29.li1;C0.$31.li1;;72.333                                              
+R162;C0.$29.li1;C0.$99.met1;;17.567                                             
+R163;C0.$3.li1;C0.$4.li1;;27.106                                                
+R164;C0.$3.li1;C0.$45.met1;;17.567                                              
+R165;C0.$30.li1;C0.$41.li1;;72.333                                              
+R166;C0.$31.li1;C0.$32.li1;;27.106                                              
+R167;C0.$32.li1;C0.$33.li1;;27.106                                              
+R168;C0.$33.li1;C0.$34.li1;;27.106                                              
+R169;C0.$34.li1;C0.$35.li1;;27.106                                              
+R170;C0.$35.li1;C0.$36.li1;;27.106                                              
+R171;C0.$36.li1;C0.$37.li1;;27.106                                              
+R172;C0.$37.li1;C0.$38.li1;;27.106                                              
+R173;C0.$38.li1;C0.$39.li1;;27.106                                              
+R174;C0.$39.li1;C0.$40.li1;;27.106                                              
+R175;C0.$4.li1;C0.$46.met1;;17.567                                              
+R176;C0.$4.li1;C0.$5.li1;;27.106                                                
+R177;C0.$40.li1;C0.$41.li1;;27.106                                              
+R178;C0.$42.met1;C0.$53.met1;;0.011                                             
+R179;C0.$42.met1;C0.$63.met1;;0.574                                             
+R180;C0.$43.met1;C0.$54.met1;;0.018                                             
+R181;C0.$43.met1;C0.$55.met1;;0.217                                             
+R182;C0.$44.met1;C0.$55.met1;;0.048                                             
+R183;C0.$44.met1;C0.$56.met1;;0.188                                             
+R184;C0.$45.met1;C0.$56.met1;;0.077                                             
+R185;C0.$45.met1;C0.$57.met1;;0.158                                             
+R186;C0.$46.met1;C0.$47.met1;;0.265                                             
+R187;C0.$46.met1;C0.$57.met1;;0.107                                             
+R188;C0.$47.met1;C0.$48.met1;;0.265                                             
+R189;C0.$47.met1;C0.$5.li1;;17.567                                              
+R190;C0.$48.met1;C0.$58.met1;;0.107                                             
+R191;C0.$48.met1;C0.$6.li1;;17.567                                              
+R192;C0.$49.met1;C0.$58.met1;;0.158                                             
+R193;C0.$49.met1;C0.$59.met1;;0.077                                             
+R194;C0.$49.met1;C0.$7.li1;;17.567                                              
+R195;C0.$5.li1;C0.$6.li1;;27.106                                                
+R196;C0.$50.met1;C0.$59.met1;;0.188                                             
+R197;C0.$50.met1;C0.$60.met1;;0.048                                             
+R198;C0.$50.met1;C0.$8.li1;;17.567                                              
+R199;C0.$51.met1;C0.$60.met1;;0.217                                             
+R200;C0.$51.met1;C0.$61.met1;;0.018                                             
+R201;C0.$51.met1;C0.$9.li1;;17.567                                              
+R202;C0.$52.met1;C0.$62.met1;;0.011                                             
+R203;C0.$52.met1;C0.$64.met1;;0.574                                             
+R204;C0.$53.met1;C0.$54.met1;;0.235                                             
+R205;C0.$6.li1;C0.$7.li1;;27.106                                                
+R206;C0.$61.met1;C0.$62.met1;;0.235                                             
+R207;C0.$63.met1;C0.$65.met1;;0.132                                             
+R208;C0.$64.met1;C0.$66.met1;;0.132                                             
+R209;C0.$65.met1;C0.$67.met1;;0.103                                             
+R210;C0.$66.met1;C0.$68.met1;;0.103                                             
+R211;C0.$67.met1;C0.$69.met1;;0.162                                             
+R212;C0.$68.met1;C0.$70.met1;;0.162                                             
+R213;C0.$69.met1;C0.$71.met1;;0.074                                             
+R214;C0.$7.li1;C0.$8.li1;;27.106                                                
+R215;C0.$70.met1;C0.$72.met1;;0.074                                             
+R216;C0.$71.met1;C0.$73.met1;;0.191                                             
+R217;C0.$72.met1;C0.$74.met1;;0.191                                             
+R218;C0.$73.met1;C0.$75.met1;;0.044                                             
+R219;C0.$74.met1;C0.$76.met1;;0.044                                             
+R220;C0.$75.met1;C0.$77.met1;;0.221                                             
+R221;C0.$76.met1;C0.$78.met1;;0.221                                             
+R222;C0.$77.met1;C0.$79.met1;;0.015                                             
+R223;C0.$78.met1;C0.$80.met1;;0.015                                             
+R224;C0.$79.met1;C0.$81.met1;;0.25                                              
+R225;C0.$8.li1;C0.$9.li1;;27.106                                                
+R226;C0.$80.met1;C0.$82.met1;;0.25                                              
+R227;C0.$81.met1;C0.$83.met1;;0.265                                             
+R228;C0.$82.met1;C0.$84.met1;;0.265                                             
+R229;C0.$83.met1;C0.$85.met1;;0.25                                              
+R230;C0.$84.met1;C0.$86.met1;;0.25                                              
+R231;C0.$85.met1;C0.$87.met1;;0.015                                             
+R232;C0.$86.met1;C0.$88.met1;;0.015                                             
+R233;C0.$87.met1;C0.$89.met1;;0.221                                             
+R234;C0.$88.met1;C0.$90.met1;;0.221                                             
+R235;C0.$89.met1;C0.$91.met1;;0.044                                             
+R236;C0.$90.met1;C0.$92.met1;;0.044                                             
+R237;C0.$91.met1;C0.$93.met1;;0.191                                             
+R238;C0.$92.met1;C0.$94.met1;;0.191                                             
+R239;C0.$93.met1;C0.$95.met1;;0.074                                             
+R240;C0.$94.met1;C0.$96.met1;;0.074                                             
+R241;C0.$95.met1;C0.$97.met1;;0.162                                             
+R242;C0.$96.met1;C0.$98.met1;;0.162                                             
+R243;C0.$97.met1;C0.$99.met1;;0.103                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmptwehqihl/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.csv                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmptwehqihl/cap_vpp_04p4x04p6_l1m1m2_noshield__cap_vpp_04p4x04p6_l1m1m2_nos
+hield/cap_vpp_04p4x04p6_l1m1m2_noshield_k25d_pex_netlist.spice                  

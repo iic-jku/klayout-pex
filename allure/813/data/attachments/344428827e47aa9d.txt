@@ -1,0 +1,954 @@
+WARNING  __kpex__:kpex_cli.py:1266 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1302 main extract --pdk ihp-sg13g2 --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:598 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:638 No explicit top cell specified, using top cell 'cmomi_w5u_l5u_m1_m5'
+INFO     __kpex__:kpex_cli.py:679 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+INFO     __kpex__:kpex_cli.py:1198 Cache miss: there is no cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1199 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz/cmomi_w5u_l5u_m1_m5.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:111 klayout -b -r /home/runner/work/klayout-pex/klayout-pex/pdk/ihp-sg13g2/libs.tech/kpex/sg13g2.lvs -rd input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz -rd report=/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.lvsdb.gz -rd target_netlist=/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_extracted.cir -rd schematic=/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false -rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd no_simplify=true -rd verbose=false
+SUBPROCESS __kpex__:lvs_runner.py:112 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_lvs.log
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (437676K) : Starting running SG13G2 Klayout LVS runset on /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.gds.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (437676K) : Ruby Version for klayout: 3.2.3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Loading database to memory is complete.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : SG13G2 Klayout LVS runset output at: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Evaluate switches.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Extracted netlist with net names: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Extracted netlist with comments in details: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected NET_ONLY option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected LAYOUT_NETLIST option: (none)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected IGNORE_TOP_PORTS_MISMATCH option: 
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected IMPLICIT_NETS option: (none)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected TOP_LVL_PINS option: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected COMBINE DEVICES option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected PURGE option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected PURGE_NETS option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected SIMPLIFY option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected SERIES_RES option: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected PARALLEL_RES option: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : Selected DISABLE_TAP_EXTRACTION option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439012K) : deep  mode is enabled.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439140K) : Netlist file: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_dummy_schematic.spice
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439140K) : LVS extracted netlist at: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_extracted.cir
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439140K) : Applying SRAM integration support.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439140K) : Starting SG13G2 LVS runset
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439140K) : Read in polygons from layers.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439652K) : activ_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_iOPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : activ_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : biwind_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : biwind_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_iOPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : gatpoly_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (439780K) : cont_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440164K) : cont_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440164K) : nsd_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440164K) : nsd_block has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440420K) : metal1_drw has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440420K) : metal1_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440420K) : metal1_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440836K) : metal1 has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440964K) : metal1_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (440964K) : metal1_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441092K) : metal1_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441220K) : metal1_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441348K) : metal1_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441476K) : metal1_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441476K) : metal1_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441604K) : metal1_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441732K) : metal1_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441732K) : passiv_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441860K) : passiv_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441860K) : passiv_sbump has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (441988K) : passiv_pillar has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442116K) : passiv_pdl has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442116K) : metal2_drw has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442244K) : metal2_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442244K) : metal2_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442372K) : metal2 has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442500K) : metal2_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442628K) : metal2_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442628K) : metal2_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442756K) : metal2_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442756K) : metal2_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (442884K) : metal2_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443012K) : metal2_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443012K) : metal2_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443140K) : metal2_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443140K) : baspoly_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443268K) : baspoly_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443396K) : psd_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443396K) : nldb_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443524K) : digibnd_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443652K) : via1_drw has 56 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443652K) : backmetal1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443780K) : backmetal1_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443780K) : backmetal1_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (443908K) : backmetal1_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444036K) : backmetal1_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444036K) : backmetal1_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444164K) : backmetal1_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444164K) : backmetal1_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444164K) : backmetal1_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444292K) : backmetal1_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444420K) : backmetal1_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444420K) : backmetal1_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444548K) : backpassiv_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444548K) : res_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444676K) : sram_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444804K) : trans_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444804K) : ind_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444932K) : ind_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (444932K) : ind_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445060K) : salblock_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445188K) : via2_drw has 56 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445188K) : metal3_drw has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445316K) : metal3_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445316K) : metal3_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445572K) : metal3 has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445572K) : metal3_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445700K) : metal3_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445700K) : metal3_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445828K) : metal3_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445828K) : metal3_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (445956K) : metal3_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446084K) : metal3_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446084K) : metal3_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446212K) : metal3_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446340K) : nwell_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446340K) : nwell_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446468K) : nwell_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446468K) : nbulay_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446596K) : nbulay_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446596K) : nbulay_block has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446724K) : emwind_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446852K) : emwind_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446852K) : deepco_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (446980K) : mim_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447108K) : edgeseal_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447108K) : substrate_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : substrate_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : dfpad_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : dfpad_pillar has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : dfpad_sbump has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : thickgateox_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447236K) : pldb_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447364K) : pwell_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447364K) : pwell_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447492K) : pwell_block has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447620K) : ic_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447620K) : via3_drw has 56 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447748K) : metal4_drw has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447748K) : metal4_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (447876K) : metal4_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448004K) : metal4 has 62 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448132K) : metal4_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448132K) : metal4_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448260K) : metal4_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448260K) : metal4_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448388K) : metal4_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448516K) : metal4_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448516K) : metal4_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448644K) : metal4_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448772K) : metal4_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448772K) : heattrans_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448900K) : heatres_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (448900K) : fbe_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449028K) : empoly_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449156K) : digisub_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449284K) : text_drw has 1 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449412K) : via4_drw has 56 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449412K) : metal5_drw has 58 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449540K) : metal5_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449668K) : metal5_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449796K) : metal5 has 58 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449796K) : metal5_pin has 4 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449924K) : metal5_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (449924K) : metal5_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450052K) : metal5_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450052K) : metal5_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450180K) : metal5_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450180K) : metal5_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450308K) : metal5_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450436K) : metal5_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450436K) : radhard_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450564K) : memcap_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450564K) : varicap_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450692K) : intbondvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450820K) : intbondmet_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450820K) : devbondvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450948K) : devbondmet_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (450948K) : devtrench_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451076K) : redist_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451204K) : graphbot_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451204K) : graphtop_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451332K) : antvia1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451460K) : antmetal2_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451460K) : graphcont_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451588K) : siwg_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451588K) : siwg_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451716K) : siwg_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451844K) : sigrating_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451844K) : singrating_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451972K) : graphpas_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (451972K) : emwind3_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452100K) : emwihv3_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452228K) : redbulay_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452228K) : smos_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452356K) : graphpad_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452356K) : polimide_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452484K) : polimide_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452612K) : recog_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452612K) : recog_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452740K) : recog_esd has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452740K) : recog_diode has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452868K) : recog_tsv has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452996K) : recog_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (452996K) : recog_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453124K) : recog_pillar has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453252K) : recog_sbump has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453252K) : recog_otp has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453380K) : recog_pdiode has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453508K) : recog_mom has 1 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453508K) : recog_momf has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453636K) : recog_pcm has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453764K) : colopen_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453764K) : graphmetal1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (453892K) : graphmetal1_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454020K) : graphmetal1_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454020K) : graphmetal1_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454148K) : graphmetal1_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454148K) : graphmet1l_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454276K) : graphmet1l_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454404K) : graphmet1l_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454404K) : graphmet1l_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454532K) : graphmet1l_OPC has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454532K) : extblock_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454660K) : nldd_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454788K) : pldd_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454788K) : next_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454916K) : pext_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (454916K) : nexthv_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455044K) : pexthv_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455172K) : graphgate_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455172K) : sinwg_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455300K) : sinwg_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455300K) : sinwg_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455428K) : mempad_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455556K) : topvia1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455556K) : topmetal1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455684K) : topmetal1_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455684K) : topmetal1_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455940K) : topmetal1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (455940K) : topmetal1_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456068K) : topmetal1_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456068K) : topmetal1_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456196K) : topmetal1_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456324K) : topmetal1_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456324K) : topmetal1_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456452K) : topmetal1_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456452K) : topmetal1_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456580K) : inldpwl_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456708K) : polyres_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456708K) : polyres_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456836K) : vmim_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456836K) : nbulaycut_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456836K) : antmetal1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456964K) : topvia2_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (456964K) : topmetal2_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457092K) : topmetal2_filler has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457092K) : topmetal2_slit has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457220K) : topmetal2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457348K) : topmetal2_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457348K) : topmetal2_mask has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457476K) : topmetal2_nofill has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457476K) : topmetal2_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457604K) : topmetal2_noqrc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457604K) : topmetal2_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457732K) : topmetal2_iprobe has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457732K) : topmetal2_diffprb has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457860K) : snsring_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457860K) : sensor_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457860K) : snsarms_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (457988K) : snscmosvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458116K) : colwind_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458116K) : flm_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458244K) : hafniumox_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458244K) : memvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458372K) : thinfilmres_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458372K) : rfmem_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458372K) : norcx_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458500K) : norcx_m2m3 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458500K) : norcx_m2m4 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458628K) : norcx_m2m5 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458628K) : norcx_m2tm1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458756K) : norcx_m2tm2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458756K) : norcx_m3m4 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458884K) : norcx_m3m5 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (458884K) : norcx_m3tm1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459012K) : norcx_m3tm2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459012K) : norcx_m4m5 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m4tm1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m4tm2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m5tm1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m5tm2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_tm1tm2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m1sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m2sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m3sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m4sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_m5sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_tm1sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : norcx_tm2sub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : snsbotvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : snstopvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : deepvia_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : fgetch_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : ctrgat_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : fgimp_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : emwihv_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : lbe_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : alcustop_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : nometfiller_drw has 1 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : prboundary_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange0_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange0_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange0_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange1_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange1_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange1_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange2_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange2_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange2_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange3_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange3_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange3_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange4_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange4_pin has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : exchange4_text has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : isonwell_drw has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : Total no. of polygons in the design is 537
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : Starting base layers derivations
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (459140K) : Starting general LVS derivations
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting MOSFET DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting NMOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting PMOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting RF-MOSFET DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting RF-NMOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting RF-PMOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting NPN-BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (460676K) : Starting PNP-BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (461316K) : Starting DIODE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (463876K) : Starting RESISTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (465796K) : Starting CAP DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (467332K) : Starting CAP_CMOM DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (469208K) : Starting CAP_CMOMF DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:48 +0000: Memory Usage (469208K) : Starting ESD DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462204K) : Starting Inductor DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462204K) : Starting Taps DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting SG13G2 LVS connectivity setup
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting SG13G2 LVS connectivity setup (Inter-layer)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting SG13G2 LVS connectivity setup (Global)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting LVS MOSFET CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting LVS RF-MOSFET CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting LVS BJT CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting LVS DIODE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting RESISTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462716K) : Starting LVS CAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting CAP_CMOM CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting CAP_CMOMF CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting ESD CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting Inductor CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting LVS Taps CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting SG13G2 LVS DEVICES EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting MOSFET EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting NMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of NMOS-LV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of NMOS-HV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting PMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of PMOS-LV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of PMOS-HV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Starting RF-MOSFET EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of RF-NMOS-LV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of RF-NMOS-HV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of RF-PMOS-LV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462844K) : Extraction of RF-PMOS-HV transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Starting BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Starting NPN-BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extraction of npn13G2 BJT transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extraction of npn13G2L BJT transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extraction of npn13G2V BJT transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Starting PNP-BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting pnpMPA BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Starting DIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting dantenna diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting dpantenna diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting schottky_nbl1 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting isolbox diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Starting RESISTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting rsil resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting rppd resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting rhigh resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (462972K) : Extracting res_metal1 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463100K) : Extracting res_metal2 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463228K) : Extracting res_metal3 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463228K) : Extracting res_metal4 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463356K) : Extracting res_metal5 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463356K) : Extracting res_topmetal1 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463484K) : Extracting res_topmetal2 resistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463484K) : Starting CAP EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463484K) : Extracting cap_cmim device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463612K) : Extracting rfcmim device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463740K) : Extracting sg13_hv_svaricap varactor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463740K) : Extracting cap_cmomi device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (463996K) : Extracting cap_cmomf device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464124K) : Extracting sg13_moscap_n capacitor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464252K) : Extracting sg13_moscap_p capacitor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464252K) : Starting ESD EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464252K) : Extracting diodevdd_2kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464508K) : Extracting diodevdd_4kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464636K) : Extracting diodevss_2kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (464892K) : Extracting diodevss_4kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (465020K) : Extracting idiodevdd_2kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (465276K) : Extracting idiodevdd_4kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (465532K) : Extracting idiodevss_2kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (465788K) : Extracting idiodevss_4kv ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (465916K) : Extracting nmoscl_2 ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466044K) : Extracting nmoscl_4 ESD device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466044K) : Starting Inductor EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466044K) : Extracting Inductor2 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466172K) : Extracting Inductor3 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466300K) : Starting Taps EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466300K) : Extracting ntap1 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466428K) : Extracting ptap1 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466428K) : Starting SG13G2 LVS Options Preparations
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466428K) : SG13G2 LVS flow: extraction -> alignment -> option preparation -> comparison.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466428K) : Starting SG13G2 LVS Alignment
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : Starting SG13G2 LVS Simplification
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [layout_netlist] simplify: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [layout_netlist] make_top_level_pins: ENABLED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [layout_netlist] combine_devices: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [layout_netlist] purge: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [layout_netlist] purge_nets: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [schematic_netlist] simplify: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [schematic_netlist] make_top_level_pins: ENABLED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [schematic_netlist] combine_devices: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [schematic_netlist] purge: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : [schematic_netlist] purge_nets: SKIPPED
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : Starting SG13G2 LVS Comparison in strict port mode.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466684K) : flag_missing_ports enabled: missing/mislabeled top-level ports are treated as errors.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466812K) : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466812K) : ERROR : Netlists don't match
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466812K) : xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-14 16:45:49 +0000: Memory Usage (466812K) : LVS Total Run time 0.705218 seconds
+INFO     __kpex__:lvs_runner.py:156 klayout LVS succeeded after 2.321s
+INFO     __kpex__:kpex_cli.py:1435 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1435 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:1435 (49, 0) -> (via3_drw)
+INFO     __kpex__:kpex_cli.py:1435 (66, 0) -> (via4_drw)
+INFO     __kpex__:kpex_cli.py:1435 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1435 (8, 0) -> (metal1_mom)
+INFO     __kpex__:kpex_cli.py:1435 (10, 0) -> (metal2_mom)
+INFO     __kpex__:kpex_cli.py:1435 (30, 0) -> (metal3_mom)
+INFO     __kpex__:kpex_cli.py:1435 (50, 0) -> (metal4_mom)
+INFO     __kpex__:kpex_cli.py:1435 (67, 0) -> (metal5_mom)
+INFO     __kpex__:kpex_cli.py:1435 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:extractor.py:285 LVSDB: found 0pins
+SUBPROCESS __kpex__:kpex_cli.py:1060 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1060 R1;$I1;$I1.$197.Metal5;;0.065
+SUBPROCESS __kpex__:kpex_cli.py:1060 R2;$I1;$I1.$198.Metal5;;0.196
+SUBPROCESS __kpex__:kpex_cli.py:1060 R3;$I1.$0.Metal1;$I1.$28.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R4;$I1.$0.Metal1;$I1.$3.Metal1;;0.343
+SUBPROCESS __kpex__:kpex_cli.py:1060 R5;$I1.$1.Metal1;$I1.$30.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R6;$I1.$1.Metal1;$I1.$4.Metal1;;0.343
+SUBPROCESS __kpex__:kpex_cli.py:1060 R7;$I1.$10.Metal1;$I1.$12.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R8;$I1.$10.Metal1;$I1.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R9;$I1.$10.Metal1;$I1.$7.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R10;$I1.$100.Metal3;$I1.$110.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R11;$I1.$100.Metal3;$I1.$156.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R12;$I1.$100.Metal3;$I1.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R13;$I1.$100.Metal3;$I1.$90.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R14;$I1.$102.Metal3;$I1.$106.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R15;$I1.$102.Metal3;$I1.$158.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R16;$I1.$102.Metal3;$I1.$46.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R17;$I1.$102.Metal3;$I1.$96.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R18;$I1.$104.Metal3;$I1.$108.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R19;$I1.$104.Metal3;$I1.$160.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R20;$I1.$104.Metal3;$I1.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R21;$I1.$104.Metal3;$I1.$98.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R22;$I1.$106.Metal3;$I1.$112.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R23;$I1.$106.Metal3;$I1.$162.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R24;$I1.$106.Metal3;$I1.$50.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R25;$I1.$108.Metal3;$I1.$114.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R26;$I1.$108.Metal3;$I1.$164.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R27;$I1.$108.Metal3;$I1.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R28;$I1.$11.Metal1;$I1.$14.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R29;$I1.$11.Metal1;$I1.$50.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R30;$I1.$11.Metal1;$I1.$9.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R31;$I1.$110.Metal3;$I1.$120.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R32;$I1.$110.Metal3;$I1.$166.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R33;$I1.$110.Metal3;$I1.$54.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R34;$I1.$112.Metal3;$I1.$116.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R35;$I1.$112.Metal3;$I1.$168.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R36;$I1.$112.Metal3;$I1.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R37;$I1.$114.Metal3;$I1.$118.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R38;$I1.$114.Metal3;$I1.$170.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R39;$I1.$114.Metal3;$I1.$58.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R40;$I1.$116.Metal3;$I1.$122.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R41;$I1.$116.Metal3;$I1.$172.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R42;$I1.$116.Metal3;$I1.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R43;$I1.$118.Metal3;$I1.$124.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R44;$I1.$118.Metal3;$I1.$174.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R45;$I1.$118.Metal3;$I1.$62.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R46;$I1.$12.Metal1;$I1.$15.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R47;$I1.$12.Metal1;$I1.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R48;$I1.$120.Metal3;$I1.$130.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R49;$I1.$120.Metal3;$I1.$176.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R50;$I1.$120.Metal3;$I1.$64.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R51;$I1.$122.Metal3;$I1.$126.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R52;$I1.$122.Metal3;$I1.$178.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R53;$I1.$122.Metal3;$I1.$66.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R54;$I1.$124.Metal3;$I1.$128.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R55;$I1.$124.Metal3;$I1.$180.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R56;$I1.$124.Metal3;$I1.$68.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R57;$I1.$126.Metal3;$I1.$132.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R58;$I1.$126.Metal3;$I1.$182.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R59;$I1.$126.Metal3;$I1.$70.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R60;$I1.$128.Metal3;$I1.$134.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R61;$I1.$128.Metal3;$I1.$184.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R62;$I1.$128.Metal3;$I1.$72.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R63;$I1.$13.Metal1;$I1.$18.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R64;$I1.$13.Metal1;$I1.$54.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R65;$I1.$13.Metal1;$I1.$8.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R66;$I1.$130.Metal3;$I1.$186.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R67;$I1.$130.Metal3;$I1.$74.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R68;$I1.$132.Metal3;$I1.$136.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R69;$I1.$132.Metal3;$I1.$188.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R70;$I1.$132.Metal3;$I1.$76.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R71;$I1.$134.Metal3;$I1.$138.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R72;$I1.$134.Metal3;$I1.$190.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R73;$I1.$134.Metal3;$I1.$78.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R74;$I1.$136.Metal3;$I1.$192.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R75;$I1.$136.Metal3;$I1.$80.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R76;$I1.$138.Metal3;$I1.$194.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R77;$I1.$138.Metal3;$I1.$82.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R78;$I1.$14.Metal1;$I1.$16.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R79;$I1.$14.Metal1;$I1.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R80;$I1.$140.Metal4;$I1.$146.Metal4;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R81;$I1.$140.Metal4;$I1.$196.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R82;$I1.$140.Metal4;$I1.$84.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R83;$I1.$142.Metal4;$I1.$148.Metal4;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R84;$I1.$142.Metal4;$I1.$197.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R85;$I1.$142.Metal4;$I1.$86.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R86;$I1.$144.Metal4;$I1.$150.Metal4;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R87;$I1.$144.Metal4;$I1.$198.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R88;$I1.$144.Metal4;$I1.$88.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R89;$I1.$146.Metal4;$I1.$156.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R90;$I1.$146.Metal4;$I1.$199.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R91;$I1.$146.Metal4;$I1.$90.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R92;$I1.$148.Metal4;$I1.$152.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R93;$I1.$148.Metal4;$I1.$200.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R94;$I1.$148.Metal4;$I1.$92.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R95;$I1.$15.Metal1;$I1.$17.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R96;$I1.$15.Metal1;$I1.$58.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R97;$I1.$150.Metal4;$I1.$154.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R98;$I1.$150.Metal4;$I1.$201.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R99;$I1.$150.Metal4;$I1.$94.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R100;$I1.$152.Metal4;$I1.$158.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R101;$I1.$152.Metal4;$I1.$202.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R102;$I1.$152.Metal4;$I1.$96.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R103;$I1.$154.Metal4;$I1.$160.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R104;$I1.$154.Metal4;$I1.$203.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R105;$I1.$154.Metal4;$I1.$98.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R106;$I1.$156.Metal4;$I1.$166.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R107;$I1.$156.Metal4;$I1.$204.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R108;$I1.$158.Metal4;$I1.$162.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R109;$I1.$158.Metal4;$I1.$205.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R110;$I1.$16.Metal1;$I1.$19.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R111;$I1.$16.Metal1;$I1.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R112;$I1.$160.Metal4;$I1.$164.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R113;$I1.$160.Metal4;$I1.$206.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R114;$I1.$162.Metal4;$I1.$168.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R115;$I1.$162.Metal4;$I1.$207.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R116;$I1.$164.Metal4;$I1.$170.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R117;$I1.$164.Metal4;$I1.$208.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R118;$I1.$166.Metal4;$I1.$176.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R119;$I1.$166.Metal4;$I1.$209.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R120;$I1.$168.Metal4;$I1.$172.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R121;$I1.$168.Metal4;$I1.$210.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R122;$I1.$17.Metal1;$I1.$20.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R123;$I1.$17.Metal1;$I1.$62.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R124;$I1.$170.Metal4;$I1.$174.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R125;$I1.$170.Metal4;$I1.$211.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R126;$I1.$172.Metal4;$I1.$178.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R127;$I1.$172.Metal4;$I1.$212.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R128;$I1.$174.Metal4;$I1.$180.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R129;$I1.$174.Metal4;$I1.$213.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R130;$I1.$176.Metal4;$I1.$186.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R131;$I1.$176.Metal4;$I1.$214.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R132;$I1.$178.Metal4;$I1.$182.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R133;$I1.$178.Metal4;$I1.$215.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R134;$I1.$18.Metal1;$I1.$23.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R135;$I1.$18.Metal1;$I1.$64.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R136;$I1.$180.Metal4;$I1.$184.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R137;$I1.$180.Metal4;$I1.$216.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R138;$I1.$182.Metal4;$I1.$188.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R139;$I1.$182.Metal4;$I1.$217.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R140;$I1.$184.Metal4;$I1.$190.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R141;$I1.$184.Metal4;$I1.$218.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R142;$I1.$186.Metal4;$I1.$219.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R143;$I1.$188.Metal4;$I1.$192.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R144;$I1.$188.Metal4;$I1.$220.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R145;$I1.$19.Metal1;$I1.$21.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R146;$I1.$19.Metal1;$I1.$66.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R147;$I1.$190.Metal4;$I1.$194.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R148;$I1.$190.Metal4;$I1.$221.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R149;$I1.$192.Metal4;$I1.$222.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R150;$I1.$194.Metal4;$I1.$223.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R151;$I1.$196.Metal5;$I1.$197.Metal5;;0.261
+SUBPROCESS __kpex__:kpex_cli.py:1060 R152;$I1.$196.Metal5;$I1.$199.Metal5;;0.17
+SUBPROCESS __kpex__:kpex_cli.py:1060 R153;$I1.$197.Metal5;$I1.$200.Metal5;;0.17
+SUBPROCESS __kpex__:kpex_cli.py:1060 R154;$I1.$198.Metal5;$I1.$201.Metal5;;0.17
+SUBPROCESS __kpex__:kpex_cli.py:1060 R155;$I1.$199.Metal5;$I1.$204.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R156;$I1.$2.Metal1;$I1.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R157;$I1.$2.Metal1;$I1.$5.Metal1;;0.343
+SUBPROCESS __kpex__:kpex_cli.py:1060 R158;$I1.$20.Metal1;$I1.$22.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R159;$I1.$20.Metal1;$I1.$68.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R160;$I1.$200.Metal5;$I1.$202.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R161;$I1.$201.Metal5;$I1.$203.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R162;$I1.$202.Metal5;$I1.$205.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R163;$I1.$203.Metal5;$I1.$206.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R164;$I1.$204.Metal5;$I1.$209.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R165;$I1.$205.Metal5;$I1.$207.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R166;$I1.$206.Metal5;$I1.$208.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R167;$I1.$207.Metal5;$I1.$210.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R168;$I1.$208.Metal5;$I1.$211.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R169;$I1.$209.Metal5;$I1.$214.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R170;$I1.$21.Metal1;$I1.$24.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R171;$I1.$21.Metal1;$I1.$70.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R172;$I1.$210.Metal5;$I1.$212.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R173;$I1.$211.Metal5;$I1.$213.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R174;$I1.$212.Metal5;$I1.$215.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R175;$I1.$213.Metal5;$I1.$216.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R176;$I1.$214.Metal5;$I1.$219.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R177;$I1.$215.Metal5;$I1.$217.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R178;$I1.$216.Metal5;$I1.$218.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R179;$I1.$217.Metal5;$I1.$220.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R180;$I1.$218.Metal5;$I1.$221.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R181;$I1.$22.Metal1;$I1.$25.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R182;$I1.$22.Metal1;$I1.$72.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R183;$I1.$220.Metal5;$I1.$222.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R184;$I1.$221.Metal5;$I1.$223.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R185;$I1.$23.Metal1;$I1.$74.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R186;$I1.$24.Metal1;$I1.$26.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R187;$I1.$24.Metal1;$I1.$76.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R188;$I1.$25.Metal1;$I1.$27.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R189;$I1.$25.Metal1;$I1.$78.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R190;$I1.$26.Metal1;$I1.$80.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R191;$I1.$27.Metal1;$I1.$82.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R192;$I1.$28.Metal2;$I1.$34.Metal2;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R193;$I1.$28.Metal2;$I1.$84.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R194;$I1.$3.Metal1;$I1.$34.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R195;$I1.$3.Metal1;$I1.$8.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R196;$I1.$30.Metal2;$I1.$36.Metal2;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R197;$I1.$30.Metal2;$I1.$86.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R198;$I1.$32.Metal2;$I1.$38.Metal2;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R199;$I1.$32.Metal2;$I1.$88.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R200;$I1.$34.Metal2;$I1.$44.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R201;$I1.$34.Metal2;$I1.$90.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R202;$I1.$36.Metal2;$I1.$4.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R203;$I1.$36.Metal2;$I1.$40.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R204;$I1.$36.Metal2;$I1.$92.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R205;$I1.$38.Metal2;$I1.$42.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R206;$I1.$38.Metal2;$I1.$5.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R207;$I1.$38.Metal2;$I1.$94.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R208;$I1.$4.Metal1;$I1.$6.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R209;$I1.$40.Metal2;$I1.$46.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R210;$I1.$40.Metal2;$I1.$6.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R211;$I1.$40.Metal2;$I1.$96.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R212;$I1.$42.Metal2;$I1.$48.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R213;$I1.$42.Metal2;$I1.$7.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R214;$I1.$42.Metal2;$I1.$98.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R215;$I1.$44.Metal2;$I1.$54.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R216;$I1.$44.Metal2;$I1.$8.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R217;$I1.$46.Metal2;$I1.$50.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R218;$I1.$46.Metal2;$I1.$9.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R219;$I1.$48.Metal2;$I1.$52.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R220;$I1.$5.Metal1;$I1.$7.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R221;$I1.$50.Metal2;$I1.$56.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R222;$I1.$52.Metal2;$I1.$58.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R223;$I1.$54.Metal2;$I1.$64.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R224;$I1.$56.Metal2;$I1.$60.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R225;$I1.$58.Metal2;$I1.$62.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R226;$I1.$6.Metal1;$I1.$9.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R227;$I1.$60.Metal2;$I1.$66.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R228;$I1.$62.Metal2;$I1.$68.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R229;$I1.$64.Metal2;$I1.$74.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R230;$I1.$66.Metal2;$I1.$70.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R231;$I1.$68.Metal2;$I1.$72.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R232;$I1.$70.Metal2;$I1.$76.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R233;$I1.$72.Metal2;$I1.$78.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R234;$I1.$76.Metal2;$I1.$80.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R235;$I1.$78.Metal2;$I1.$82.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R236;$I1.$84.Metal3;$I1.$90.Metal3;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R237;$I1.$86.Metal3;$I1.$92.Metal3;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R238;$I1.$88.Metal3;$I1.$94.Metal3;;0.274
+SUBPROCESS __kpex__:kpex_cli.py:1060 R239;$I1.$92.Metal3;$I1.$96.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R240;$I1.$94.Metal3;$I1.$98.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R241;$I2;$I2.$221.Metal5;;0.196
+SUBPROCESS __kpex__:kpex_cli.py:1060 R242;$I2;$I2.$222.Metal5;;0.065
+SUBPROCESS __kpex__:kpex_cli.py:1060 R243;$I2.$0.Metal1;$I2.$2.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R244;$I2.$0.Metal1;$I2.$28.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R245;$I2.$1.Metal1;$I2.$3.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R246;$I2.$1.Metal1;$I2.$30.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R247;$I2.$10.Metal1;$I2.$12.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R248;$I2.$10.Metal1;$I2.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R249;$I2.$10.Metal1;$I2.$7.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R250;$I2.$100.Metal3;$I2.$106.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R251;$I2.$100.Metal3;$I2.$156.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R252;$I2.$100.Metal3;$I2.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R253;$I2.$100.Metal3;$I2.$96.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R254;$I2.$102.Metal3;$I2.$112.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R255;$I2.$102.Metal3;$I2.$158.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R256;$I2.$102.Metal3;$I2.$46.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R257;$I2.$102.Metal3;$I2.$92.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R258;$I2.$104.Metal3;$I2.$108.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R259;$I2.$104.Metal3;$I2.$160.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R260;$I2.$104.Metal3;$I2.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R261;$I2.$104.Metal3;$I2.$98.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R262;$I2.$106.Metal3;$I2.$110.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R263;$I2.$106.Metal3;$I2.$162.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R264;$I2.$106.Metal3;$I2.$50.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R265;$I2.$108.Metal3;$I2.$114.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R266;$I2.$108.Metal3;$I2.$164.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R267;$I2.$108.Metal3;$I2.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R268;$I2.$11.Metal1;$I2.$13.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R269;$I2.$11.Metal1;$I2.$50.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R270;$I2.$11.Metal1;$I2.$8.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R271;$I2.$110.Metal3;$I2.$116.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R272;$I2.$110.Metal3;$I2.$166.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R273;$I2.$110.Metal3;$I2.$54.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R274;$I2.$112.Metal3;$I2.$122.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R275;$I2.$112.Metal3;$I2.$168.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R276;$I2.$112.Metal3;$I2.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R277;$I2.$114.Metal3;$I2.$118.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R278;$I2.$114.Metal3;$I2.$170.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R279;$I2.$114.Metal3;$I2.$58.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R280;$I2.$116.Metal3;$I2.$120.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R281;$I2.$116.Metal3;$I2.$172.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R282;$I2.$116.Metal3;$I2.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R283;$I2.$118.Metal3;$I2.$124.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R284;$I2.$118.Metal3;$I2.$174.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R285;$I2.$118.Metal3;$I2.$62.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R286;$I2.$12.Metal1;$I2.$15.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R287;$I2.$12.Metal1;$I2.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R288;$I2.$120.Metal3;$I2.$126.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R289;$I2.$120.Metal3;$I2.$176.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R290;$I2.$120.Metal3;$I2.$64.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R291;$I2.$122.Metal3;$I2.$132.Metal3;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R292;$I2.$122.Metal3;$I2.$178.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R293;$I2.$122.Metal3;$I2.$66.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R294;$I2.$124.Metal3;$I2.$128.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R295;$I2.$124.Metal3;$I2.$180.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R296;$I2.$124.Metal3;$I2.$68.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R297;$I2.$126.Metal3;$I2.$130.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R298;$I2.$126.Metal3;$I2.$182.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R299;$I2.$126.Metal3;$I2.$70.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R300;$I2.$128.Metal3;$I2.$134.Metal3;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R301;$I2.$128.Metal3;$I2.$184.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R302;$I2.$128.Metal3;$I2.$72.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R303;$I2.$13.Metal1;$I2.$16.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R304;$I2.$13.Metal1;$I2.$54.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R305;$I2.$130.Metal3;$I2.$136.Metal3;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R306;$I2.$130.Metal3;$I2.$186.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R307;$I2.$130.Metal3;$I2.$74.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R308;$I2.$132.Metal3;$I2.$138.Metal3;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R309;$I2.$132.Metal3;$I2.$188.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R310;$I2.$132.Metal3;$I2.$76.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R311;$I2.$134.Metal3;$I2.$190.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R312;$I2.$134.Metal3;$I2.$78.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R313;$I2.$136.Metal3;$I2.$192.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R314;$I2.$136.Metal3;$I2.$80.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R315;$I2.$138.Metal3;$I2.$194.Metal4;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R316;$I2.$138.Metal3;$I2.$82.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R317;$I2.$14.Metal1;$I2.$19.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R318;$I2.$14.Metal1;$I2.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R319;$I2.$14.Metal1;$I2.$9.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R320;$I2.$140.Metal4;$I2.$144.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R321;$I2.$140.Metal4;$I2.$196.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R322;$I2.$140.Metal4;$I2.$84.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R323;$I2.$142.Metal4;$I2.$146.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R324;$I2.$142.Metal4;$I2.$197.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R325;$I2.$142.Metal4;$I2.$86.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R326;$I2.$144.Metal4;$I2.$150.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R327;$I2.$144.Metal4;$I2.$198.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R328;$I2.$144.Metal4;$I2.$88.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R329;$I2.$146.Metal4;$I2.$152.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R330;$I2.$146.Metal4;$I2.$199.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R331;$I2.$146.Metal4;$I2.$90.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R332;$I2.$148.Metal4;$I2.$158.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R333;$I2.$148.Metal4;$I2.$200.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R334;$I2.$148.Metal4;$I2.$92.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R335;$I2.$15.Metal1;$I2.$17.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R336;$I2.$15.Metal1;$I2.$58.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R337;$I2.$150.Metal4;$I2.$154.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R338;$I2.$150.Metal4;$I2.$201.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R339;$I2.$150.Metal4;$I2.$94.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R340;$I2.$152.Metal4;$I2.$156.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R341;$I2.$152.Metal4;$I2.$202.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R342;$I2.$152.Metal4;$I2.$96.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R343;$I2.$154.Metal4;$I2.$160.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R344;$I2.$154.Metal4;$I2.$203.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R345;$I2.$154.Metal4;$I2.$98.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R346;$I2.$156.Metal4;$I2.$162.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R347;$I2.$156.Metal4;$I2.$204.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R348;$I2.$158.Metal4;$I2.$168.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R349;$I2.$158.Metal4;$I2.$205.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R350;$I2.$16.Metal1;$I2.$18.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R351;$I2.$16.Metal1;$I2.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R352;$I2.$160.Metal4;$I2.$164.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R353;$I2.$160.Metal4;$I2.$206.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R354;$I2.$162.Metal4;$I2.$166.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R355;$I2.$162.Metal4;$I2.$207.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R356;$I2.$164.Metal4;$I2.$170.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R357;$I2.$164.Metal4;$I2.$208.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R358;$I2.$166.Metal4;$I2.$172.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R359;$I2.$166.Metal4;$I2.$209.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R360;$I2.$168.Metal4;$I2.$178.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R361;$I2.$168.Metal4;$I2.$210.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R362;$I2.$17.Metal1;$I2.$20.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R363;$I2.$17.Metal1;$I2.$62.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R364;$I2.$170.Metal4;$I2.$174.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R365;$I2.$170.Metal4;$I2.$211.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R366;$I2.$172.Metal4;$I2.$176.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R367;$I2.$172.Metal4;$I2.$212.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R368;$I2.$174.Metal4;$I2.$180.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R369;$I2.$174.Metal4;$I2.$213.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R370;$I2.$176.Metal4;$I2.$182.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R371;$I2.$176.Metal4;$I2.$214.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R372;$I2.$178.Metal4;$I2.$188.Metal4;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R373;$I2.$178.Metal4;$I2.$215.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R374;$I2.$18.Metal1;$I2.$21.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R375;$I2.$18.Metal1;$I2.$64.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R376;$I2.$180.Metal4;$I2.$184.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R377;$I2.$180.Metal4;$I2.$216.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R378;$I2.$182.Metal4;$I2.$186.Metal4;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R379;$I2.$182.Metal4;$I2.$217.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R380;$I2.$184.Metal4;$I2.$190.Metal4;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R381;$I2.$184.Metal4;$I2.$218.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R382;$I2.$186.Metal4;$I2.$192.Metal4;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R383;$I2.$186.Metal4;$I2.$219.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R384;$I2.$188.Metal4;$I2.$194.Metal4;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R385;$I2.$188.Metal4;$I2.$220.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R386;$I2.$19.Metal1;$I2.$24.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R387;$I2.$19.Metal1;$I2.$66.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R388;$I2.$190.Metal4;$I2.$221.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R389;$I2.$192.Metal4;$I2.$222.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R390;$I2.$194.Metal4;$I2.$223.Metal5;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R391;$I2.$196.Metal5;$I2.$198.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R392;$I2.$197.Metal5;$I2.$199.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R393;$I2.$198.Metal5;$I2.$201.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R394;$I2.$199.Metal5;$I2.$202.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R395;$I2.$2.Metal1;$I2.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R396;$I2.$2.Metal1;$I2.$5.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R397;$I2.$20.Metal1;$I2.$22.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R398;$I2.$20.Metal1;$I2.$68.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R399;$I2.$200.Metal5;$I2.$205.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R400;$I2.$201.Metal5;$I2.$203.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R401;$I2.$202.Metal5;$I2.$204.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R402;$I2.$203.Metal5;$I2.$206.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R403;$I2.$204.Metal5;$I2.$207.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R404;$I2.$205.Metal5;$I2.$210.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R405;$I2.$206.Metal5;$I2.$208.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R406;$I2.$207.Metal5;$I2.$209.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R407;$I2.$208.Metal5;$I2.$211.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R408;$I2.$209.Metal5;$I2.$212.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R409;$I2.$21.Metal1;$I2.$23.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R410;$I2.$21.Metal1;$I2.$70.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R411;$I2.$210.Metal5;$I2.$215.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R412;$I2.$211.Metal5;$I2.$213.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R413;$I2.$212.Metal5;$I2.$214.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R414;$I2.$213.Metal5;$I2.$216.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R415;$I2.$214.Metal5;$I2.$217.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R416;$I2.$215.Metal5;$I2.$220.Metal5;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R417;$I2.$216.Metal5;$I2.$218.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R418;$I2.$217.Metal5;$I2.$219.Metal5;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R419;$I2.$218.Metal5;$I2.$221.Metal5;;0.258
+SUBPROCESS __kpex__:kpex_cli.py:1060 R420;$I2.$219.Metal5;$I2.$222.Metal5;;0.258
+SUBPROCESS __kpex__:kpex_cli.py:1060 R421;$I2.$22.Metal1;$I2.$25.Metal1;;0.453
+SUBPROCESS __kpex__:kpex_cli.py:1060 R422;$I2.$22.Metal1;$I2.$72.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R423;$I2.$220.Metal5;$I2.$223.Metal5;;0.258
+SUBPROCESS __kpex__:kpex_cli.py:1060 R424;$I2.$222.Metal5;$I2.$223.Metal5;;0.261
+SUBPROCESS __kpex__:kpex_cli.py:1060 R425;$I2.$23.Metal1;$I2.$26.Metal1;;0.453
+SUBPROCESS __kpex__:kpex_cli.py:1060 R426;$I2.$23.Metal1;$I2.$74.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R427;$I2.$24.Metal1;$I2.$27.Metal1;;0.453
+SUBPROCESS __kpex__:kpex_cli.py:1060 R428;$I2.$24.Metal1;$I2.$76.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R429;$I2.$25.Metal1;$I2.$78.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R430;$I2.$26.Metal1;$I2.$80.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R431;$I2.$27.Metal1;$I2.$82.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R432;$I2.$28.Metal2;$I2.$32.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R433;$I2.$28.Metal2;$I2.$84.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R434;$I2.$3.Metal1;$I2.$34.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R435;$I2.$3.Metal1;$I2.$6.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R436;$I2.$30.Metal2;$I2.$34.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R437;$I2.$30.Metal2;$I2.$86.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R438;$I2.$32.Metal2;$I2.$38.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R439;$I2.$32.Metal2;$I2.$88.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R440;$I2.$34.Metal2;$I2.$40.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R441;$I2.$34.Metal2;$I2.$90.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R442;$I2.$36.Metal2;$I2.$4.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R443;$I2.$36.Metal2;$I2.$46.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R444;$I2.$36.Metal2;$I2.$92.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R445;$I2.$38.Metal2;$I2.$42.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R446;$I2.$38.Metal2;$I2.$5.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R447;$I2.$38.Metal2;$I2.$94.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R448;$I2.$4.Metal1;$I2.$9.Metal1;;0.44
+SUBPROCESS __kpex__:kpex_cli.py:1060 R449;$I2.$40.Metal2;$I2.$44.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R450;$I2.$40.Metal2;$I2.$6.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R451;$I2.$40.Metal2;$I2.$96.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R452;$I2.$42.Metal2;$I2.$48.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R453;$I2.$42.Metal2;$I2.$7.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R454;$I2.$42.Metal2;$I2.$98.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R455;$I2.$44.Metal2;$I2.$50.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R456;$I2.$44.Metal2;$I2.$8.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R457;$I2.$46.Metal2;$I2.$56.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R458;$I2.$46.Metal2;$I2.$9.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1060 R459;$I2.$48.Metal2;$I2.$52.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R460;$I2.$5.Metal1;$I2.$7.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R461;$I2.$50.Metal2;$I2.$54.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R462;$I2.$52.Metal2;$I2.$58.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R463;$I2.$54.Metal2;$I2.$60.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R464;$I2.$56.Metal2;$I2.$66.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R465;$I2.$58.Metal2;$I2.$62.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R466;$I2.$6.Metal1;$I2.$8.Metal1;;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1060 R467;$I2.$60.Metal2;$I2.$64.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R468;$I2.$62.Metal2;$I2.$68.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R469;$I2.$64.Metal2;$I2.$70.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R470;$I2.$66.Metal2;$I2.$76.Metal2;;0.352
+SUBPROCESS __kpex__:kpex_cli.py:1060 R471;$I2.$68.Metal2;$I2.$72.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R472;$I2.$70.Metal2;$I2.$74.Metal2;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R473;$I2.$72.Metal2;$I2.$78.Metal2;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R474;$I2.$74.Metal2;$I2.$80.Metal2;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R475;$I2.$76.Metal2;$I2.$82.Metal2;;0.362
+SUBPROCESS __kpex__:kpex_cli.py:1060 R476;$I2.$84.Metal3;$I2.$88.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R477;$I2.$86.Metal3;$I2.$90.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R478;$I2.$88.Metal3;$I2.$94.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R479;$I2.$90.Metal3;$I2.$96.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1060 R480;$I2.$94.Metal3;$I2.$98.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1063 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1079 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5/cmomi_w5u_l5u_m1_m5_k25d_pex_netlist.spice
