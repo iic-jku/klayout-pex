@@ -23,6 +23,7 @@
 #
 
 import allure
+from typing import *
 import unittest
 
 import klayout.db as kdb
@@ -51,9 +52,16 @@ def netlist() -> kdb.Netlist:
     return netlist
 
 
+def properties(net: str, plate: bool) -> Dict[str, Any]:
+    return {'net': net, DEVICE_CAPACITOR_PLATE_PROPERTY: True} if plate else {'net': net}
+
+
 def shape(net: str, plate: bool) -> kdb.PolygonWithProperties:
-    properties = {'net': net, DEVICE_CAPACITOR_PLATE_PROPERTY: True} if plate else {'net': net}
-    return kdb.PolygonWithProperties(kdb.Polygon(kdb.Box(0, 0, 100, 100)), properties)
+    return kdb.PolygonWithProperties(kdb.Polygon(kdb.Box(0, 0, 100, 100)), properties(net, plate))
+
+
+def edge(net: str, plate: bool) -> kdb.EdgeWithProperties:
+    return kdb.EdgeWithProperties(kdb.Edge(0, 0, 100, 0), properties(net, plate))
 
 
 @allure.parent_suite("Unit Tests")
@@ -72,3 +80,13 @@ class Test(unittest.TestCase):
         self.assertFalse(plates.are_plates_of_a_device(shape('A', plate=True), 'A', shape('B', plate=False), 'B'))
         # e.g. a wire of the net C across the device, on its plate layers too
         self.assertFalse(plates.are_plates_of_a_device(shape('A', plate=True), 'A', shape('C', plate=True), 'C'))
+
+    def test_plate_edge_of_a_device(self):
+        chip = netlist()
+        plates = DeviceCapacitorPlates.from_circuit(chip.circuit_by_name('chip'), device_class_names={'mom'})
+        # e.g. the edge of the top plate of a MIM cap, to the bottom plate around it, which isn't a plate there
+        self.assertTrue(plates.is_plate_edge_of_a_device(edge('A', plate=True), 'A', 'B'))
+        # e.g. the edge of a wire of the net A, outside of the device
+        self.assertFalse(plates.is_plate_edge_of_a_device(edge('A', plate=False), 'A', 'B'))
+        # e.g. to a wire of the net C across the device
+        self.assertFalse(plates.is_plate_edge_of_a_device(edge('A', plate=True), 'A', 'C'))

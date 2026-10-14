@@ -431,11 +431,12 @@ class SidewallAndFringeExtractor:
 
             outside_net_names = [p.property('net') for p in outside_polygons]
 
-            # NOTE: the model of a device has the capacitance between its plates, so they are like one net
+            # NOTE: the model of a device has the capacitance between its plates, so they are like one net,
+            #       with the fringe from the edge of a plate to the other plate beyond it
             same_net_markers = [
                 inside_net_name == outside_net_name or
-                self.device_capacitor_plates.are_plates_of_a_device(edge, inside_net_name, p, outside_net_name)
-                for p, outside_net_name in zip(outside_polygons, outside_net_names)
+                self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net_name)
+                for outside_net_name in outside_net_names
             ]
 
             # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
