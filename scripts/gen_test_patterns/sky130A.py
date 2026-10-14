@@ -133,6 +133,23 @@ def cap_mim_m3_over_m2_wire(name: str) -> Pattern:
     return p
 
 
+def cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire() -> Pattern:
+    """
+    The VPP cap of the test data (cap_vpp_04p4x04p6_l1m1m2_noshield, fingers on li1, met1 and met2,
+    its terminals C0 and C1), with a met2 wire X of 1 µm width beside it, 0.3 µm away
+
+    NOTE: the wire stays outside the marker of the cap, as the LVS deck tells the VPP caps apart
+          by the layers that touch their marker (a wire across would make it another device)
+    """
+    p = pattern('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire')
+    p.copy_design('sky130A', 'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
+
+    p.box(MET2, 4680, -615, 5680, 4590)
+    p.box(MET2_PIN, 4680, -615, 5680, 385)
+    p.label(MET2, 'X', 4880, -415)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
@@ -144,6 +161,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
         lambda: plate_li1_over_tap('plate_20um_x_20um_li1_over_ntap', ntap=True),
     'cap_mim_m3_20um_x_20um_over_m2_wire':
         lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
+    'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
 }
 
 

@@ -343,6 +343,17 @@ def test_mim_cap__blackboxed():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mom_cap__blackboxed():
+    # The black-box extraction keeps the fingers of the VPP cap, so its terminals are on their nodes.
+    # The fingers (met2_vpp, …) were left out, so its terminals were on the pin nodes of C0 and C1, with a warning
+    assert pex_blackboxed.written_device_lines('test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz') == [
+        'X$1 C0.P0.met2 C1.P0.met2 SUB sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield',
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_sonosfet_with_deep_nwell():
     # The SONOS FET has a deep nwell, which is no conductor of the resistance network
     # (no via joins it to the nwell over it). It used to stop the extraction (#292).

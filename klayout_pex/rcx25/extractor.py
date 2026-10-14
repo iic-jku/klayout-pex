@@ -25,7 +25,7 @@
 
 import klayout.db as kdb
 
-from ..klayout.lvsdb_extractor import KLayoutExtractionContext
+from ..klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY, KLayoutExtractionContext
 from ..log import (
     debug,
     warning,
@@ -104,6 +104,9 @@ class RCX25Extractor:
         """
         The substrate below the layout (and its halo), the bottom plate of the capacitances to the substrate,
         split into its wells, of the nets of the wells (e.g. VDD), and the rest, of the substrate (VSUBS)
+
+        NOTE: with --blackbox, its shapes are plates of the capacitor devices with a terminal on the substrate
+              (e.g. a VPP cap), see DeviceCapacitorPlates
         """
         dbu = self.pex_context.dbu
         side_halo_um = self.tech_info.tech.process_parasitics.side_halo
@@ -116,9 +119,12 @@ class RCX25Extractor:
         substrate_region = kdb.Region()
         substrate_region.enable_properties()
 
+        plate_properties = {DEVICE_CAPACITOR_PLATE_PROPERTY: True} if self.pex_context.blackbox_devices else {}
+
         def insert(region: kdb.Region, net_name: NetName):
             for polygon in region.each():
-                substrate_region.insert(kdb.PolygonWithProperties(polygon.downcast(), {'net': net_name}))
+                substrate_region.insert(kdb.PolygonWithProperties(polygon.downcast(),
+                                                                  {'net': net_name, **plate_properties}))
 
         # NOTE: where wells overlap (e.g. an nwell within a deep nwell), the first one is at the surface
         for well_layer_name in self.tech_info.tech.substrate.well_lvs_layer_names:
@@ -249,10 +255,13 @@ class RCX25Extractor:
                 )
 
             # NOTE: with --blackbox, the capacitances between the plates of a capacitor device
-            #       (e.g. the fingers of a MOM cap) are left to its model
+            #       (e.g. the fingers of a MOM cap) are left to its model,
+            #       and those to the substrate, if the substrate is a terminal of the device (e.g. of a VPP cap)
             device_capacitor_plates = DeviceCapacitorPlates.from_circuit(
                 circuit=self.pex_context.top_circuit,
-                device_class_names=self.tech_info.device_models.metal_capacitor_class_names
+                device_class_names=self.tech_info.device_models.metal_capacitor_class_names,
+                substrate_net_name=self.pex_context.substrate_net_name,
+                substrate_shapes_net_name=self.tech_info.internal_substrate_layer_name
             ) if self.pex_context.blackbox_devices else DeviceCapacitorPlates()
 
             overlap_extractor = OverlapExtractor(

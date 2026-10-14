@@ -68,6 +68,54 @@ def test_rf_mim_cap__whiteboxed():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_rf_mim_cap_over_m4_wire__whiteboxed():
+    # The rfcmim of test_rf_mim_cap__whiteboxed, with a Metal4 wire D under it,
+    # which its bottom plate (MINUS) shields from its top plate (PLUS)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;D;MINUS;1.252;
+C2;D;PLUS;0.077;
+C3;D;sub!;0.343;
+C4;D;VSUBS;1.359;
+C5;MINUS;PLUS;75.262;
+C6;MINUS;sub!;0.345;
+C7;MINUS;VSUBS;1.499;
+C8;PLUS;sub!;0.254;
+C9;PLUS;VSUBS;1.134;
+C10;VSUBS;sub!;4.878;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_rf_mim_cap_over_m4_wire__blackboxed():
+    # The plates of the rfcmim are conductors, so the capacitances to the wire D are the white-box ones.
+    # Its model has the capacitance between the plates, and the one of its Metal5 (MINUS) to the substrate
+    # (Cox, 2.39 fF here), its terminal bn, so these are left out: MINUS–PLUS is the TopMetal1 over the Metal5
+    # around the MIM, MINUS–VSUBS the feed outside the PWellBlock, MINUS–sub! the Metal1 of the ptap ring.
+    # Without the plates, D coupled to PLUS through the hole (0.366 fF), MINUS–PLUS had 0.758 fF more
+    # from the cut edges of the Metal5, and MINUS–VSUBS was 1.529 fF
+    pex_blackboxed.assert_expected_matches_obtained(
+        'test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;D;MINUS;1.252;
+C2;D;PLUS;0.077;
+C3;D;sub!;0.343;
+C4;D;VSUBS;1.359;
+C5;MINUS;PLUS;0.585;
+C6;MINUS;sub!;0.201;
+C7;MINUS;VSUBS;0.22;
+C8;PLUS;sub!;0.254;
+C9;PLUS;VSUBS;1.134;
+C10;VSUBS;sub!;4.878;"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mim_cap_over_m4_wire__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 20 µm * 20 µm = 600 fF (MIM over Metal5)
     # plus CJSW 40 aF/µm * 80 µm = 3.2 fF, the fringe to the bottom plate around the top plate
@@ -144,8 +192,7 @@ C5;VSUBS;X;1.292;"""
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_rf_mim_cap__blackboxed():
-    # The rfcmim of the PDK's cell library (sg13g2_pr), its model is cap_rfcmim, with the substrate as 3rd terminal.
-    # Its model has the capacitance of the plates to the substrate too, so they're left out, unlike those of cap_cmim
+    # The rfcmim of the PDK's cell library (sg13g2_pr), its model is cap_rfcmim, with the substrate as 3rd terminal
     assert pex_blackboxed.written_device_lines('sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == [
         'X$1 \\$5 \\$4 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06',
     ]
