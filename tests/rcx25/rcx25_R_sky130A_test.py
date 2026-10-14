@@ -332,6 +332,17 @@ def test_mim_cap__whiteboxed():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mim_cap__blackboxed():
+    # The black-box extraction keeps the plates of the MIM cap, so its terminals are on their nodes.
+    # The bottom plate (met3_cap) was left out, so its terminal was on the pin node of A, with a warning
+    assert pex_blackboxed.written_device_lines('test_patterns', 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz') == [
+        'X$1 B.P0.capm A.P0.met3 sky130_fd_pr__cap_mim_m3_1 w=20 l=20',
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_sonosfet_with_deep_nwell():
     # The SONOS FET has a deep nwell, which is no conductor of the resistance network
     # (no via joins it to the nwell over it). It used to stop the extraction (#292).

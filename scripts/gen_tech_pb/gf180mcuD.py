@@ -86,9 +86,12 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "Computed layer for via3 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via4_n_cap",  (41, 144),   "Via4",      "Computed layer for via4 (no MIM cap)")
-    add_computed_layer(tech, VIA,     KCAP, "top_via_cap", (41, 244),   "Via4",      "Computed layer for via4 (with MIM cap)")
-    add_computed_layer(tech, METAL,   KCAP, "metal4_cap",  (46, 0),     "Metal4",    "Computed layer for met4 (MIM cap bottom plate)")
-    add_computed_layer(tech, MIM,     KCAP, "fuse_cap",    (75, 0),     "FuseTop",   "MiM cap top plate over Metal4")
+    # NOTE: the plates of the MIM caps, with the via on the top plate: their models have the capacitance
+    #       between the plates, but not the ones to the substrate and to other nets, which the plates also shield
+    #       (e.g. a wire below), so with --blackbox, these are extracted
+    add_computed_layer(tech, VIA,     KPLT, "top_via_cap", (41, 244),   "Via4",      "Computed layer for via4 (with MIM cap)")
+    add_computed_layer(tech, METAL,   KPLT, "metal4_cap",  (46, 0),     "Metal4",    "Computed layer for met4 (MIM cap bottom plate)")
+    add_computed_layer(tech, MIM,     KPLT, "fuse_cap",    (75, 0),     "FuseTop",   "MiM cap top plate over Metal4")
 
     # NOTE: for CC whiteboxing to work,
     #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,

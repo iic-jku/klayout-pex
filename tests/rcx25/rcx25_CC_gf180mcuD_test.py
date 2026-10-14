@@ -62,23 +62,23 @@ C10;TOP2;VSUBS;1.603;"""
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_mim_cap__blackboxed():
-    # The black-box extraction leaves the MIM caps to the device model, with both of their plates,
-    # FuseTop and the Metal4 under it (LVS layer metal4_cap), so there's no Metal5 over Metal4 under the top plates,
-    # which added 8.758 fF to TOP2 - BOT2 (2 % of the device) and 1.28 fF to TOP1 - BOT1.
-    # Between the plates, the fringe between Metal5 and the Metal4 around the bottom plates is left.
+    # The black-box extraction keeps the plates of the MIM caps, FuseTop and the Metal4 under it (LVS layer metal4_cap),
+    # as conductors, and leaves the capacitance between them to the device model: the overlap and the fringe
+    # from the edge of FuseTop. So the other capacitances are the white-box ones, and between the plates,
+    # the fringe between Metal5 and the Metal4 around the bottom plates is left.
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_mim_m4m5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;BOT1;BOT2;0.15;
-C2;BOT1;TOP1;0.884;
-C3;BOT1;TOP2;0.031;
-C4;BOT1;VSUBS;0.879;
-C5;BOT2;TOP1;0.021;
-C6;BOT2;TOP2;2.844;
-C7;BOT2;VSUBS;3.112;
-C8;TOP1;TOP2;0.118;
-C9;TOP1;VSUBS;0.594;
-C10;TOP2;VSUBS;2.763;"""
+C1;BOT1;BOT2;0.132;
+C2;BOT1;TOP1;0.296;
+C3;BOT1;TOP2;0.034;
+C4;BOT1;VSUBS;0.836;
+C5;BOT2;TOP1;0.024;
+C6;BOT2;TOP2;0.888;
+C7;BOT2;VSUBS;3.474;
+C8;TOP1;TOP2;0.183;
+C9;TOP1;VSUBS;0.449;
+C10;TOP2;VSUBS;1.603;"""
     )
 
 

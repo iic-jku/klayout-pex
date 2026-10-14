@@ -74,3 +74,12 @@ class DeviceCapacitorPlates:
         return bool(shape1.property(DEVICE_CAPACITOR_PLATE_PROPERTY)) and \
                bool(shape2.property(DEVICE_CAPACITOR_PLATE_PROPERTY)) and \
                frozenset((net1, net2)) in self.terminal_net_pairs
+
+    def is_plate_edge_of_a_device(self, edge: kdb.EdgeWithProperties, net1: NetName, net2: NetName) -> bool:
+        """
+        :return: whether the edge is one of a plate of a device between the nets,
+                 whose model has the fringe from it to the other plate, also where that is metal beyond the device
+                 (e.g. the perimeter capacitance of a MIM cap, whose bottom plate encloses the top plate)
+        """
+        return bool(edge.property(DEVICE_CAPACITOR_PLATE_PROPERTY)) and \
+               frozenset((net1, net2)) in self.terminal_net_pairs
