@@ -41,14 +41,31 @@ class UnitFormatterTest(unittest.TestCase):
         self.assertEqual(format_spice_number(2.2e-6), '2.2u')
         self.assertEqual(format_spice_number(0.0), '0')
         self.assertEqual(format_spice_number(-3.3e-12), '-3.3p')
-        self.assertEqual(format_spice_number(5e-18), '5a')
+        self.assertEqual(format_spice_number(5e-18), '0.005f')
 
     def test_boundary_cases(self):
         self.assertEqual(format_spice_number(1e-12), '1p')
         self.assertEqual(format_spice_number(1e-15), '1f')
-        self.assertEqual(format_spice_number(1e-18), '1a')
+        self.assertEqual(format_spice_number(1e-18), '0.001f')
         self.assertEqual(format_spice_number(1e-9), '1n')  # 1000p → 1n
         self.assertEqual(format_spice_number(1e-12), '1p')  # exactly 1p
+
+    def test_neither_atto_nor_mil_is_chosen(self):
+        # NOTE: Xyce reads the a of 223.458a as a unit, and mil is no SI prefix
+        self.assertEqual(format_spice_number(223.458e-18), '0.223458f')
+        self.assertEqual(format_spice_number(1e-25), '1e-10f')
+        self.assertEqual(format_spice_number(3e-3), '3m')
+        self.assertEqual(format_spice_number(2.54e-5), '25.4u')
+        self.assertEqual(format_spice_number(5e-5), '50u')
+
+    def test_written_numbers_have_neither_atto_nor_mil_and_read_back(self):
+        for exponent in range(-27, 15):
+            for mantissa in (1.0, 2.54, 4.7, 9.99999):
+                value = mantissa * 10.0 ** exponent
+                with self.subTest(value=value):
+                    text = format_spice_number(value)
+                    self.assertFalse(text.endswith(('a', 'mil')), text)
+                    self.assertEqual(parse_spice_number(text), float(f"{value:.6g}"))
 
     def test_forced_prefix(self):
         self.assertEqual(format_spice_number(1e-9, 'f'), '1000000f')

@@ -54,9 +54,9 @@ KPEX_NETLIST = textwrap.dedent("""\
     .SUBCKT nfet_li1 D G S sky130_gnd
     X$1 D.P0.nsdm G.P0.poly S.P0.nsdm
     + sky130_gnd sky130_fd_pr__nfet_01v8 l=0.15 w=0.65
-    Cext_1 D G.$0.li1 12.3059a
-    Cext_2 D.$0.li1 sky130_gnd 16.7878a
-    Cext_3 G.$0.li1 sky130_gnd 12.871a
+    Cext_1 D G.$0.li1 0.0123059f
+    Cext_2 D.$0.li1 sky130_gnd 0.0167878f
+    Cext_3 G.$0.li1 sky130_gnd 0.012871f
     Rext_1 D D.$0.li1 30.4941176471
     Rext_2 D.$0.li1 D.P0.nsdm 185
     Rext_3 G G.$0.li1 6.4
@@ -304,7 +304,7 @@ def test_port_on_continuation_line_survives_the_reduction():
     # NOTE: b is reached by capacitors only, through the plate p to ground, which is eliminated (#214)
     netlist = SpiceRCNetlist.parse(".subckt w a\n+ b\nC1 b p 1e-15\nC2 p 0 1e-15\n.ends\n")
     reduce_network(scope_named(netlist, 'w').network, ReductionOptions())
-    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 500a\n.ends\n"
+    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 0.5f\n.ends\n"
 
 
 @allure.parent_suite(parent_suite)

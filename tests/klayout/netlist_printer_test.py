@@ -80,7 +80,7 @@ def empty_netlist() -> kdb.Netlist:
     return netlist
 
 
-def netlist_with_parasitics() -> kdb.Netlist:
+def netlist_with_parasitics(capacitance: float = 1e-15) -> kdb.Netlist:
     """
     A netlist with the parasitics KPEX adds
     """
@@ -95,7 +95,7 @@ def netlist_with_parasitics() -> kdb.Netlist:
     c = circuit.create_device(cap, 'ext_1')
     c.connect_terminal('A', a)
     c.connect_terminal('B', b)
-    c.set_parameter('C', 1e-15)
+    c.set_parameter('C', capacitance)
 
     res = kdb.DeviceClassResistor()
     res.name = PARASITIC_RESISTOR_CLASS_NAME
@@ -170,6 +170,13 @@ class Test(unittest.TestCase):
             'Cext_1 a b 1f',
             'Rext_1 a b 12.5',
         ], self.device_lines(self.printer(), netlist_with_parasitics()))
+
+    def test_capacitance_below_1f_is_written_in_f(self):
+        # NOTE: not in a (atto), which Xyce reads as a unit
+        self.assertEqual([
+            'Cext_1 a b 0.223458f',
+            'Rext_1 a b 12.5',
+        ], self.device_lines(self.printer(), netlist_with_parasitics(capacitance=223.458e-18)))
 
     def test_lvs_device_is_written_with_its_device_model_mapping(self):
         self.assertEqual([

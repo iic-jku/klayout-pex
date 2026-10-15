@@ -46,17 +46,22 @@ prefix_scales = [
 
 valid_prefixes = {p for p, _ in prefix_scales}
 
+# NOTE: the prefixes format_spice_number chooses: not mil (no SI prefix, 3e-3 would be 118.11mil),
+#       and not a, which Xyce reads as a unit (Xyce 7.10 reads 2a as 2, but 0.002f as 2e-18)
+_CHOSEN_PREFIX_SCALES = [(p, s) for p, s in prefix_scales if p not in ('mil', 'a')]
+
 
 def format_spice_number(value: float, force_prefix: Optional[str] = None) -> str:
     """
-    Format a spice number into NGSPICE-compatible string.
+    Format a spice number into NGSPICE-compatible string (and Xyce-compatible, unless forced to 'a'):
+    with the largest SI prefix that gives a value ≥ 1, but no smaller one than 'f' (e.g. '0.223458f').
 
     Args:
         value: capacitance in farads (can be negative or zero).
         force_prefix: optional forced prefix (must match NGSPICE case, e.g., 'a','f','p','n','u','m','K','Meg','G','T').
 
     Returns:
-        NGSPICE-compatible string like '4.7n', '1p', '2.2u', '-33f', or '0'.
+        NGSPICE-compatible string like '4.7n', '1p', '2.2u', '-33f', '0.5f', or '0'.
     """
     if value == 0:
         return "0"
@@ -75,7 +80,7 @@ def format_spice_number(value: float, force_prefix: Optional[str] = None) -> str
     chosen_prefix = ''
     chosen_scaled = value
 
-    for i, (prefix, scale) in enumerate(prefix_scales):
+    for i, (prefix, scale) in enumerate(_CHOSEN_PREFIX_SCALES):
         scaled = value / scale
         if 1 <= abs(scaled) < 1000:
             chosen_prefix = prefix
@@ -87,13 +92,13 @@ def format_spice_number(value: float, force_prefix: Optional[str] = None) -> str
                 chosen_prefix = prefix
                 chosen_scaled = scaled
             else:
-                next_prefix, next_scale = prefix_scales[i - 1]
+                next_prefix, next_scale = _CHOSEN_PREFIX_SCALES[i - 1]
                 chosen_prefix = next_prefix
                 chosen_scaled = value / next_scale
             break
     else:
         # too small, pick smallest prefix
-        chosen_prefix, chosen_scaled = prefix_scales[-1][0], value / prefix_scales[-1][1]
+        chosen_prefix, chosen_scaled = _CHOSEN_PREFIX_SCALES[-1][0], value / _CHOSEN_PREFIX_SCALES[-1][1]
 
     # Avoid scientific notation for NGSPICE
     if chosen_scaled.is_integer():
