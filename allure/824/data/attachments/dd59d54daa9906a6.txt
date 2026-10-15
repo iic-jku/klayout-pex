@@ -1,0 +1,24 @@
+SUBPROCESS __kpex__:pex25d_cli.py:679 /home/runner/work/klayout-pex/klayout-pex/.venv/lib/python3.12/site-packages/pytest/__main__.py -m 'not slow and not smoke' --alluredir build/allure-results --color no
+INFO     __kpex__:pex25d_cli.py:601 Input is an unresolved PEX25DFile, resolving it first
+ERROR    __kpex__:pex25d_cli.py:702 Exporter 'test-one:example' crashed: RuntimeError: mesher crashed
+DEBUG    __kpex__:pex25d_cli.py:703 Plugin traceback
+Traceback (most recent call last):
+  File "/home/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/exporters.py", line 97, in export_with_backend
+    return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/pytest-of-runner/pytest-0/test_plugin_execution_errors_a3/test_plugin_test_one.py", line 13, in export
+    raise RuntimeError("mesher crashed")
+RuntimeError: mesher crashed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/pex25d_cli.py", line 694, in _run
+    note = handler(args, report)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/pex25d_cli.py", line 604, in run_export
+    written = export_with_backend(
+              ^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/klayout-pex/klayout-pex/klayout_pex/pex25d/exporters.py", line 107, in export_with_backend
+    raise ExporterExecutionError(
+klayout_pex.pex25d.exporters.ExporterExecutionError: Exporter 'test-one:example' crashed: RuntimeError: mesher crashed
