@@ -46,6 +46,17 @@ VACASK_EXE = shutil.which('vacask')
 requires_vacask = pytest.mark.skipif(VACASK_EXE is None, reason='vacask is not on PATH')
 
 
+def write_vacaskrc(run_dir: str, models_dir: str):
+    """
+    Writes the .vacaskrc.toml into the run directory, by which VACASK finds the devices (OSDI)
+    that the VACASK models of a PDK load by name
+
+    :param models_dir: e.g. the one of PDKTestConfig.simulator_models_dir('vacask')
+    """
+    with open(os.path.join(run_dir, '.vacaskrc.toml'), 'w') as f:
+        f.write(f'[Paths]\nmodule_path_prefix = [ "{models_dir}/osdi" ]\n')
+
+
 def run_vacask(deck_path: str):
     """
     Runs the deck in its directory, where the analyses write their results (e.g. op1.raw)

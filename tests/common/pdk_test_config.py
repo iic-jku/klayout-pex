@@ -34,6 +34,8 @@ import glob
 import os
 from typing import *
 
+import pytest
+
 
 def lvs_cache_dir(pdk_name: str) -> str:
     """
@@ -81,6 +83,22 @@ class PDKTestConfig:
         lyt_paths = glob.glob(os.path.join(self.kpex_pdk_dir, '*.lyt'))
         assert len(lyt_paths) == 1, f"Expected one KLayout technology file in {self.kpex_pdk_dir}"
         return os.path.abspath(lyt_paths[0])
+
+    def simulator_models_dir(self, simulator: str) -> Optional[str]:
+        """
+        The models of the PDK for the simulator (e.g. ngspice, vacask), $PDK_ROOT/<PDK>/libs.tech/<simulator>,
+        None where they aren't installed
+        """
+        path = os.path.join(os.environ.get('PDK_ROOT', ''), self.name, 'libs.tech', simulator)
+        return path if 'PDK_ROOT' in os.environ and os.path.isdir(path) else None
+
+    def requires_simulator_models(self, *simulators: str) -> pytest.MarkDecorator:
+        """
+        Skips a test where the models of the PDK for one of the simulators aren't installed
+        """
+        missing = [s for s in simulators if self.simulator_models_dir(s) is None]
+        return pytest.mark.skipif(bool(missing),
+                                  reason=f"needs the {' and '.join(missing)} models of $PDK_ROOT/{self.name}")
 
     def gds_path(self, *path_components) -> str:
         return os.path.join(self.test_designs_dir, *path_components)
