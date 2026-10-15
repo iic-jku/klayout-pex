@@ -26,12 +26,14 @@
 The resistors and capacitors of a SPICE netlist as RC networks, one per scope, to be reduced and written back.
 
 Reading:
+    - the lines as ngspice reads them (see spice_syntax): continuation lines, comments, the title of a deck
     - a scope is a .SUBCKT … .ENDS definition, or the top level outside of them
     - the network of a scope has its *plain* R and C elements: exactly two nodes and a number as value
       (e.g. 'Rext_1 A B 426.67', 'Cext_1 A B 223.458a'), resistances > 0, capacitances ≥ 0;
       parallel elements add up
     - every other line stays as it is, in its place: devices, subcircuit instances, sources, directives,
-      comments, and R/C elements with other values (models, parameters, expressions, R ≤ 0, C < 0)
+      comments, and R/C elements with other values (models, parameters, expressions, R ≤ 0, C < 0);
+      the comment lines between a line and its continuation stay with it
     - tie elements of a reduction (e.g. 'Rtie_1 plate 0 1e+12') are ties of their node (see RCNetwork.tie),
       no resistors
     - protected nodes (never eliminated): the .SUBCKT ports, the ground nodes '0' and 'gnd',
@@ -57,10 +59,7 @@ from typing import *
 from ..util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 from .rc_network import RCNetwork
 from .rc_reduction import GROUND_NODE_NAME, TIE_RESISTANCE
-
-
-GROUND_NODE_NAMES = ('0', 'gnd')
-"""Ground in SPICE: '0', and 'gnd', which ngspice reads as '0'"""
+from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines
 
 REDUCED_CAPACITOR_PREFIX = 'Cred_'
 REDUCED_RESISTOR_PREFIX = 'Rred_'
@@ -68,7 +67,7 @@ TIE_PREFIX = 'Rtie_'
 
 
 class NetlistReadError(Exception):
-    """A netlist that can't be split into scopes (e.g. .ENDS without .SUBCKT)"""
+    """A netlist that can't be split into scopes (e.g. .ENDS without .SUBCKT), or whose lines ngspice can't read"""
     pass
 
 
@@ -131,15 +130,12 @@ class SpiceRCNetlist:
     @classmethod
     def parse(cls, text: str, source: str = '<text>') -> SpiceRCNetlist:
         """
-        :raises NetlistReadError: if the .SUBCKT and .ENDS don't match
+        :raises NetlistReadError: if the .SUBCKT and .ENDS don't match, or ngspice can't read the lines
         """
-        # NOTE: logical lines, a line starting with '+' continues the line before it
-        logical_lines: List[Tuple[int, List[str]]] = []  # (line number, physical lines)
-        for number, line in enumerate(text.splitlines(), start=1):
-            if line.lstrip().startswith('+') and logical_lines:
-                logical_lines[-1][1].append(line)
-            else:
-                logical_lines.append((number, [line]))
+        try:
+            lines = spice_lines(text)
+        except SpiceSyntaxError as e:
+            raise NetlistReadError(f"{source}:{e.line_number}: {e.message}") from e
 
         items: List[Union[str, _ElementsPlaceholder]] = []
         scopes: List[SpiceScope] = []
@@ -152,15 +148,14 @@ class SpiceRCNetlist:
         def protect_names_of(line: str):
             stack[-1].names_on_other_lines.update(name for name in _NAME_SEPARATORS.split(line) if name)
 
-        for number, physical_lines in logical_lines:
-            verbatim = '\n'.join(physical_lines)
-            text_line = ' '.join([physical_lines[0]] + [l.lstrip()[1:] for l in physical_lines[1:]])
-            tokens = text_line.split()
-            first = tokens[0] if tokens else ''
-
-            if not tokens or first.startswith('*'):
+        for line in lines:
+            verbatim = line.verbatim
+            if line.text is None:  # NOTE: a comment line, a blank line or the title
                 items.append(verbatim)
                 continue
+            number, text_line = line.number, line.text
+            tokens = text_line.split()
+            first = tokens[0]
 
             keyword = first.lower()
             if in_control_block:
