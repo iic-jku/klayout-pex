@@ -24,20 +24,25 @@
 
 """
 The RC netlists of test patterns as SPICE simulators read them: simulated in ngspice and Xyce, their port
-admittance is the one of the R and C elements they have, as SpiceRCNetlist reads them (case-insensitively)
+admittance is the one of the R and C elements they have, as SpiceRCNetlist reads them (case-insensitively),
+and the netlists of all test patterns have what SPICE needs to read them alike
 """
 
 from __future__ import annotations
 
 import os
+import re
 from typing import *
 
 import allure
+import klayout.db as kdb
 import numpy as np
 import pytest
 
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
+from klayout_pex.tech_info import TechInfo
 from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
 from tests.common.rc_networks import node_names, port_admittance, value_of
 from tests.common.xyce import xyce_executable, xyce_port_admittance
@@ -103,3 +108,64 @@ def test_nets_whose_names_differ_in_case_only_stay_apart_in_spice():
     assert node_names(scope.network) == ['A', 'a$1', 'sky130_gnd']
     assert scope.ports == ['A', 'a$1', 'sky130_gnd']
     assert value_of(scope.network, 'A', 'a$1')[1] > 0.0
+
+
+def top_cell_pin_labels(gds_path: str, tech: TechInfo) -> Set[str]:
+    """
+    The labels of the top cell on a pin shape, by the pin and label layers of the tech info
+    (not by the pins KPEX extracts, which this checks)
+    """
+    layout = kdb.Layout()
+    layout.read(gds_path)
+    top = layout.top_cell()
+    labels: Set[str] = set()
+    for info in tech.layer_info_by_gds_pair.values():
+        if not info.HasField('pin_gds_pair') or not info.HasField('label_gds_pair'):
+            continue
+        pin_layer = layout.find_layer(info.pin_gds_pair.layer, info.pin_gds_pair.datatype)
+        label_layer = layout.find_layer(info.label_gds_pair.layer, info.label_gds_pair.datatype)
+        if pin_layer is None or label_layer is None:
+            continue
+        pins = kdb.Region(top.begin_shapes_rec(pin_layer))
+        for text in kdb.Texts(top.shapes(label_layer)).each():
+            if not pins.interacting(kdb.Region(kdb.Box(text.position(), text.position()).enlarged(1))).is_empty():
+                labels.add(text.string)
+    return labels
+
+
+TEST_PATTERNS = [(pdk_name, name)
+                 for pdk_name in PDKName
+                 for name in sorted(os.listdir(PDKTestConfig(pdk_name).gds_path('test_patterns')))
+                 if name.endswith('.gds.gz')]
+
+# NOTE: the patterns of extraction errors, e.g. vias without a conductor below (see rcx25_R_sky130A_test)
+ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz')}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('pdk_name, gds_name', [p for p in TEST_PATTERNS if p not in ERROR_PATTERNS],
+                         ids=[f"{pdk_name}/{name}" for pdk_name, name in TEST_PATTERNS
+                              if (pdk_name, name) not in ERROR_PATTERNS])
+def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: PDKName, gds_name: str):
+    pdk = PDKTestConfig(pdk_name)
+    tech = TechInfo.from_json(PDK.from_string(str(pdk_name)).config.tech_pb_json_path, dielectric_filter=None)
+    labels = top_cell_pin_labels(pdk.gds_path('test_patterns', gds_name), tech)
+
+    cli = RCX25Extraction(pdk=pdk, pex_mode=PEXMode.RC, blackbox=False).run_kpex('test_patterns', gds_name)
+    assert cli.rcx25_netlist_problems == []
+    with open(f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice") as f:
+        lines = f.read().replace('\n+', '').splitlines()
+    ports = next(line for line in lines if line.startswith('.SUBCKT ')).split()[2:]
+
+    # NOTE: a port per pin label (e.g. A$1 if the name is taken), also of a net without devices (#312)
+    assert sorted(l for l in labels if not any(p == l or p.startswith(f"{l}$") for p in ports)) == []
+
+    # NOTE: SPICE reads names case-insensitively, names that differ in case only would be one node (#314)
+    rc_elements = [line.split() for line in lines if line[:1] in 'RC' and len(line.split()) == 4]
+    names = set(ports) | {node for tokens in rc_elements for node in tokens[1:3]}
+    assert len({n.casefold() for n in names}) == len(names)
+
+    # NOTE: Xyce reads the scale factor a (atto) as a unit (#313)
+    assert [tokens for tokens in rc_elements if re.fullmatch(r'.*[0-9.][aA]', tokens[3])] == []
