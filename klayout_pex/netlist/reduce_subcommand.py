@@ -39,9 +39,9 @@ from rich_argparse import RichHelpFormatter
 
 from ..log import error, info, rule
 from ..pex25d.diagnostics import ExitCode
-from ..util.argparse_helpers import true_or_false
-from ..util.unit_formatter import format_spice_number, parse_spice_number
-from .netlist_reduction import UnknownNodesError, reduce_spice_netlist
+from ..util.argparse_helpers import positive_spice_seconds, true_or_false
+from ..util.unit_formatter import format_spice_number
+from .netlist_reduction import UnknownNodesError, reduce_spice_netlist, reduced_netlist_path
 from .rc_reduction import TIE_RESISTANCE, ReductionOptions
 from .spice_rc_netlist import NetlistReadError
 
@@ -77,17 +77,6 @@ written as they are. The reduced R and C elements are named `Rred_<n>` and `Cred
 """
 
 
-def _spice_seconds(text: str) -> float:
-    """argparse type: a time constant > 0 s as a SPICE number"""
-    try:
-        value = parse_spice_number(text)
-    except ValueError as e:
-        raise argparse.ArgumentTypeError(str(e))
-    if value <= 0:
-        raise argparse.ArgumentTypeError(f"must be > 0 s, got '{text}'")
-    return value
-
-
 def _degree(text: str) -> int:
     """argparse type: an integer ≥ 1"""
     try:
@@ -97,12 +86,6 @@ def _degree(text: str) -> int:
     if value < 1:
         raise argparse.ArgumentTypeError(f"must be an integer ≥ 1, got '{text}'")
     return value
-
-
-def default_output_path(input_path: str) -> str:
-    """'<dir>/<name>.spice' → '<dir>/<name>_reduced.spice'"""
-    base, extension = os.path.splitext(input_path)
-    return f"{base}_reduced{extension}"
 
 
 def add_reduce_subcommand(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
@@ -125,7 +108,7 @@ def add_reduce_subcommand(subparsers: argparse._SubParsersAction) -> argparse.Ar
     group_ticer = parser.add_argument_group("TICER")
     group_ticer.add_argument("--ticer", dest="ticer", type=true_or_false, default=DEFAULTS.ticer,
                              help="Eliminate the quick nodes (default is %(default)s)")
-    group_ticer.add_argument("--ticer_tau", dest="ticer_tau", metavar="TAU", type=_spice_seconds,
+    group_ticer.add_argument("--ticer_tau", dest="ticer_tau", metavar="TAU", type=positive_spice_seconds,
                              default=DEFAULTS.ticer_tau,
                              help=f"Time constant threshold in s, a SPICE number like '0.1p' or '1e-13' "
                                   f"(default is {DEFAULTS.ticer_tau * 1e12:g}p)")
@@ -166,7 +149,7 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     if not os.path.isfile(input_path):
         error(f"Input netlist not found: {input_path}")
         return ExitCode.USAGE
-    output_path = args.output_netlist_path or default_output_path(input_path)
+    output_path = args.output_netlist_path or reduced_netlist_path(input_path)
     if os.path.exists(output_path) and os.path.samefile(input_path, output_path):
         error(f"The output would overwrite the input netlist: {output_path}")
         return ExitCode.USAGE
@@ -188,10 +171,6 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
         return ExitCode.USAGE
 
     for scope in reduction.scopes:
-        statistics = scope.statistics
-        info(f"{scope.scope}: {scope.before} → {scope.after} "
-             f"(TICER eliminated {statistics.quick_nodes} nodes; "
-             f"{statistics.floating_islands} floating islands merged, {statistics.floating_island_nodes} nodes less; "
-             f"{statistics.capacitor_only_nodes} capacitor-only nodes eliminated, {statistics.tied_nodes} tied)")
+        info(scope.describe())
     info(f"Wrote reduced netlist to {reduction.output_path}")
     return ExitCode.OK

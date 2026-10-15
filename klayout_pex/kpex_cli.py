@@ -93,6 +93,8 @@ from .pex25d.artifact import (
 from .klayout.pex25d_builder import DEFAULT_GRID_UM
 from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
 from .pex25d.pex25d_cli import Pex25DCLI
+from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, reduced_netlist_path
+from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import CExtractionTechError, RCX25Extractor, ExtractionResults
 from .rcx25.netlist_checks import check_rc_netlist, RCNetlistCheckError
@@ -112,6 +114,7 @@ from .util.argparse_helpers import (
     add_help_subcommand,
     add_subcommand_sections,
     handle_help_subcommand,
+    positive_spice_seconds,
     render_enum_help,
     true_or_false,
 )
@@ -376,6 +379,19 @@ class KpexCLI:
                                     "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
                                     "network of its net, a port that touches nothing, or a lost capacitance "
                                     "(default is True for --mode RC, otherwise these are warnings)")
+        group_25d.add_argument("--reduce", dest="reduce_mode",
+                               default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
+                               help="Reduce the netlist of --mode R or RC, with the passes of 'netlist reduce': "
+                                    "'floating' merges the floating islands and eliminates the capacitor-only nodes "
+                                    "exactly, 'ticer' also eliminates the nodes whose time constant is at most "
+                                    "--reduce_tau (the error grows with the frequency, and losses are not kept). "
+                                    "Written next to the netlist (*_k25d_pex_netlist_reduced.spice), "
+                                    "and to --out_spice. "
+                                    + render_enum_help(topic='reduce', enum_cls=ReductionMode))
+        group_25d.add_argument("--reduce_tau", dest="reduce_tau", metavar="TAU",
+                               type=positive_spice_seconds, default=None,
+                               help=f"TICER's time constant threshold in s for --reduce ticer, a SPICE number "
+                                    f"like '0.1p' (default is {ReductionOptions().ticer_tau * 1e12:g}p)")
         group_25d.add_argument("--report_caps", dest="report_caps",
                                type=true_or_false, default=False,
                                help="Write each capacitance contribution with its shapes into the report "
@@ -579,6 +595,19 @@ class KpexCLI:
                 case (_, _, _, _, None, None):
                     error(f"Neither GDS nor LVSDB was provided")
                     found_errors = True
+
+            args.reduce_mode = ReductionMode(args.reduce_mode)
+            if args.reduce_mode != ReductionMode.NONE:
+                if not args.run_2_5D:
+                    error(f"--reduce {args.reduce_mode} reduces the netlist of the 2.5D engine, it needs --2.5D")
+                    found_errors = True
+                elif not args.pex_mode.need_resistance():
+                    error(f"--reduce {args.reduce_mode} needs --mode R or RC, "
+                          f"a {args.pex_mode} netlist has no nodes to reduce")
+                    found_errors = True
+            if args.reduce_tau is not None and args.reduce_mode != ReductionMode.TICER:
+                error(f"--reduce_tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
+                found_errors = True
 
         # check if we find magicrc
         if args.run_magic:
@@ -1095,10 +1124,26 @@ class KpexCLI:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
 
-            # FIXME: should this be already reduced?
+            # NOTE: the reduction reads the netlist as written, the checks above ran on the full one
+            self._rcx25_reduced_netlist_path = None
+            reduction_options = args.reduce_mode.options(ticer_tau=args.reduce_tau)
+            if reduction_options is not None:
+                rule('kpex/2.5D netlist reduction')
+                reduction = reduce_spice_netlist(input_path=expanded_netlist_path,
+                                                 output_path=reduced_netlist_path(expanded_netlist_path),
+                                                 options=reduction_options)
+                for scope in reduction.scopes:
+                    subproc(scope.describe())
+                info(f"Wrote reduced netlist to: {reduction.output_path}")
+                self._rcx25_reduced_netlist_path = reduction.output_path
+
             if args.output_spice_path:
-                netlist_printer.write(expanded_netlist, args.output_spice_path)
-                info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+                if self._rcx25_reduced_netlist_path is not None:
+                    shutil.copyfile(self._rcx25_reduced_netlist_path, args.output_spice_path)
+                    info(f"Copied reduced SPICE netlist to: {args.output_spice_path}")
+                else:
+                    netlist_printer.write(expanded_netlist, args.output_spice_path)
+                    info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
         #       so that the marker browser could not load the report file
@@ -1516,6 +1561,13 @@ class KpexCLI:
         if not hasattr(self, '_rcx25_extracted_csv_path'):
             raise Exception('rcx25_extracted_csv_path is not initialized, was run_kpex_2_5d_engine called?')
         return self._rcx25_extracted_csv_path
+
+    @property
+    def rcx25_reduced_netlist_path(self) -> Optional[str]:
+        """The reduced netlist the 2.5D engine wrote (--reduce), None without reduction"""
+        if not hasattr(self, '_rcx25_reduced_netlist_path'):
+            raise Exception('rcx25_reduced_netlist_path is not initialized, was run_kpex_2_5d_engine called?')
+        return self._rcx25_reduced_netlist_path
 
     @property
     def rcx25_netlist_problems(self) -> List[str]:

@@ -31,12 +31,46 @@ and :mod:`.spice_rc_netlist` for what is read, protected and written.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 import os
 from typing import *
 
 from .rc_network import RCNetwork
 from .rc_reduction import ReductionOptions, ReductionStatistics, reduce_network
 from .spice_rc_netlist import SpiceRCNetlist
+
+
+class ReductionMode(StrEnum):
+    """
+    The reduction kpex runs on the netlist of its 2.5D engine (--reduce), with the passes of ``netlist reduce``
+    """
+    NONE = 'none'
+    FLOATING = 'floating'
+    """merge the floating islands, eliminate the capacitor-only nodes (exactly), tie the rest to ground"""
+    TICER = 'ticer'
+    """the same, with TICER before the capacitor-only nodes"""
+    DEFAULT = 'none'
+
+    def options(self, ticer_tau: Optional[float] = None) -> Optional[ReductionOptions]:
+        """
+        :param ticer_tau: TICER's time constant threshold [s], None for the default
+        :return: the options of the passes, None for no reduction
+        """
+        match self:
+            case ReductionMode.NONE:
+                return None
+            case ReductionMode.FLOATING:
+                return ReductionOptions(ticer=False)
+            case ReductionMode.TICER:
+                return ReductionOptions() if ticer_tau is None else ReductionOptions(ticer_tau=ticer_tau)
+            case _:
+                raise NotImplementedError()
+
+
+def reduced_netlist_path(input_path: str) -> str:
+    """'<dir>/<name>.spice' → '<dir>/<name>_reduced.spice'"""
+    base, extension = os.path.splitext(input_path)
+    return f"{base}_reduced{extension}"
 
 
 class UnknownNodesError(Exception):
@@ -78,6 +112,14 @@ class ScopeReduction:
     """after adding up parallel elements"""
     after: NetworkSize
     statistics: ReductionStatistics
+
+    def describe(self) -> str:
+        statistics = self.statistics
+        return (f"{self.scope}: {self.before} → {self.after} "
+                f"(TICER eliminated {statistics.quick_nodes} nodes; "
+                f"{statistics.floating_islands} floating islands merged, "
+                f"{statistics.floating_island_nodes} nodes less; "
+                f"{statistics.capacitor_only_nodes} capacitor-only nodes eliminated, {statistics.tied_nodes} tied)")
 
 
 @dataclass(frozen=True)
