@@ -91,7 +91,7 @@ class UnitFormatterTest(unittest.TestCase):
             '1.5': 1.5, '-2': -2.0, '.5': 0.5, '2e-15': 2e-15, '1E+3': 1e3,
             '1T': 1e12, '1g': 1e9, '1Meg': 1e6, '1MEG': 1e6, '1k': 1e3, '1K': 1e3,
             '1m': 1e-3, '1M': 1e-3, '1u': 1e-6, '4.7n': 4.7e-9, '0.1p': 1e-13, '1f': 1e-15, '223.458a': 223.458e-18,
-            '1mil': 25.4e-6, '1e-07a': 1e-25,
+            '1mil': 25.4e-6, '1e-07a': 1e-25, '-2.': -2.0, '1.5E+3k': 1.5e6,
         }
         for text, value in cases.items():
             with self.subTest(text=text):
@@ -110,7 +110,7 @@ class UnitFormatterTest(unittest.TestCase):
                 self.assertEqual(parse_spice_number(format_spice_resistance(value)), float(f"{value:.12g}"))
 
     def test_parse_rejects_what_is_no_number(self):
-        for text in ('', 'abc', '{2*c0}', '1.2.3', 'nan', 'inf', 'k1'):
+        for text in ('', 'abc', '{2*c0}', '1.2.3', 'nan', 'inf', 'k1', '1k5', 'w=1'):
             with self.subTest(text=text):
                 with self.assertRaisesRegex(ValueError, "Not a SPICE number: .*examples of valid numbers"):
                     parse_spice_number(text)
