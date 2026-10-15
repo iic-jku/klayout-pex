@@ -25,7 +25,6 @@
 
 import argparse
 from datetime import datetime
-import logging
 import os
 import os.path
 
@@ -34,12 +33,6 @@ import shlex
 import shutil
 import sys
 from typing import *
-
-import klayout.db as kdb
-
-from klayout_pex.klayout.netlist_expander import NetlistExpander
-from klayout_pex.klayout.netlist_csv import NetlistCSVWriter
-from klayout_pex.klayout.netlist_reducer import NetlistReducer
 
 from klayout_pex.log import (
     LogLevel,
@@ -54,9 +47,8 @@ from klayout_pex.log import (
     error,
     rule
 )
-from klayout_pex.netlistsvg.netlist_json import NetlistJSONWriter
-from klayout_pex.netlistsvg.netlistsvg_runner import run_netlistsvg
-from klayout_pex.util.argparse_helpers import render_enum_help, true_or_false
+from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
+from klayout_pex.util.argparse_helpers import render_enum_help
 from klayout_pex.version import __version__
 
 
@@ -105,6 +97,8 @@ class NetlistCLI:
         parser_netlistsvg.add_argument("--cell", "-c", dest="cell_name", default=None,
                                        help="Cell (default is the top cell)")
 
+        add_reduce_subcommand(subparsers)
+
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
@@ -141,6 +135,11 @@ class NetlistCLI:
 
     def run_netlistsvg(self,
                        args: argparse.Namespace):
+        # NOTE: only this subcommand needs KLayout, the others (e.g. reduce) must not load it
+        import klayout.db as kdb
+        from klayout_pex.netlistsvg.netlist_json import NetlistJSONWriter
+        from klayout_pex.netlistsvg.netlistsvg_runner import run_netlistsvg
+
         netlist = kdb.Netlist()
         netlist_reader = kdb.NetlistSpiceReader()
         netlist.read(args.input_netlist_path, netlist_reader)
@@ -226,6 +225,8 @@ class NetlistCLI:
         match args.command:
             case 'svg':
                 self.run_netlistsvg(args)
+            case 'reduce':
+                sys.exit(run_reduce_subcommand(args))
 
 
 if __name__ == "__main__":

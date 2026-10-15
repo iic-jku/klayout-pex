@@ -107,7 +107,12 @@ class RCX25Extraction:
     pex_mode: PEXMode
     blackbox: bool
 
-    def run_rcx25d_single_cell(self, *path_components) -> Tuple[CellExtractionResults, CSVPath]:
+    def run_kpex(self, *path_components, extra_args: Sequence[str] = ()) -> KpexCLI:
+        """
+        Extracts the single cell with the options of the tests and the extra ones
+
+        :return: the CLI, e.g. for the paths it wrote
+        """
         gds_path = self.pdk.gds_path(*path_components)
 
         cli = KpexCLI()
@@ -120,7 +125,12 @@ class RCX25Extraction:
                   '--cache-dir', self.pdk.lvs_cache_dir,
                   '--2.5D',
                   '--halo', '10000',
-                  '--scale', 'n'])
+                  '--scale', 'n',
+                  *extra_args])
+        return cli
+
+    def run_rcx25d_single_cell(self, *path_components) -> Tuple[CellExtractionResults, CSVPath]:
+        cli = self.run_kpex(*path_components)
         assert cli.rcx25_extraction_results is not None
         assert len(cli.rcx25_extraction_results.cell_extraction_results) == 1  # assume single cell test
         results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]

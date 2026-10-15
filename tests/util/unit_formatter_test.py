@@ -27,7 +27,7 @@ from __future__ import annotations
 import allure
 import unittest
 
-from klayout_pex.util.unit_formatter import format_spice_number
+from klayout_pex.util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 
 
 @allure.parent_suite("Unit Tests")
@@ -62,6 +62,41 @@ class UnitFormatterTest(unittest.TestCase):
     def test_invalid_prefix(self):
         with self.assertRaises(ValueError):
             format_spice_number(1e-6, 'x')  # invalid prefix
+
+    def test_resistance_has_12_significant_digits_without_scale_factor(self):
+        self.assertEqual(format_spice_resistance(1280 / 3), '426.666666667')
+        self.assertEqual(format_spice_resistance(0.001), '0.001')
+        self.assertEqual(format_spice_resistance(185.0), '185')
+        self.assertEqual(format_spice_resistance(1e12), '1e+12')
+
+    def test_parse_scale_factors(self):
+        cases = {
+            '1.5': 1.5, '-2': -2.0, '.5': 0.5, '2e-15': 2e-15, '1E+3': 1e3,
+            '1T': 1e12, '1g': 1e9, '1Meg': 1e6, '1MEG': 1e6, '1k': 1e3, '1K': 1e3,
+            '1m': 1e-3, '1M': 1e-3, '1u': 1e-6, '4.7n': 4.7e-9, '0.1p': 1e-13, '1f': 1e-15, '223.458a': 223.458e-18,
+            '1mil': 25.4e-6, '1e-07a': 1e-25,
+        }
+        for text, value in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(parse_spice_number(text), value)
+
+    def test_parse_ignores_letters_after_the_scale_factor(self):
+        self.assertEqual(parse_spice_number('1pF'), 1e-12)
+        self.assertEqual(parse_spice_number('10kOhm'), 10e3)
+        self.assertEqual(parse_spice_number('10V'), 10.0)
+        self.assertEqual(parse_spice_number('1F'), 1e-15)  # 'F' is femto, not farad
+
+    def test_parse_reads_what_format_writes(self):
+        for value in (1.2e-15, 3.4e-12, 4.7e-9, 2.2e-6, 5e-18, 1.23456e-16, 9.87654e3, 1e-25):
+            with self.subTest(value=value):
+                self.assertEqual(parse_spice_number(format_spice_number(value)), float(f"{value:.6g}"))
+                self.assertEqual(parse_spice_number(format_spice_resistance(value)), float(f"{value:.12g}"))
+
+    def test_parse_rejects_what_is_no_number(self):
+        for text in ('', 'abc', '{2*c0}', '1.2.3', 'nan', 'inf', 'k1'):
+            with self.subTest(text=text):
+                with self.assertRaisesRegex(ValueError, "Not a SPICE number: .*examples of valid numbers"):
+                    parse_spice_number(text)
 
 
 if __name__ == '__main__':

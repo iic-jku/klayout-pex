@@ -35,7 +35,7 @@ from .parasitic_device_classes import (
     PARASITIC_DEVICE_CLASS_NAMES,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
-from ..util.unit_formatter import format_spice_number
+from ..util.unit_formatter import format_spice_number, format_spice_resistance
 
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
@@ -99,7 +99,7 @@ class NetlistPrinter(kdb.NetlistSpiceWriterDelegate):
             r_ohm = device.parameter('R')
             net1 = self.net_to_string(device.net_for_terminal(0))
             net2 = self.net_to_string(device.net_for_terminal(1))
-            self.emit_line(f"R{device.name} {net1} {net2} {r_ohm:.12g}")
+            self.emit_line(f"R{device.name} {net1} {net2} {format_spice_resistance(r_ohm)}")
         else:
             self.write_modeled_device(device, self.device_models.mapping_by_lvs_device_class_name[dc.name])
 

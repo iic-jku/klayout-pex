@@ -33,6 +33,8 @@ import rich.table
 import rich.text
 from rich_argparse import RichHelpFormatter
 
+from .unit_formatter import parse_spice_number
+
 
 def _group_name(name: str) -> str:
     """
@@ -156,3 +158,14 @@ def handle_help_subcommand(parser: argparse.ArgumentParser, args: argparse.Names
         parser.print_help()
         parser.exit()
     parser.parse_args([args.topic, '--help'])
+
+
+def positive_spice_seconds(text: str) -> float:
+    """argparse type: a time > 0 s as a SPICE number, e.g. '0.1p' or '1e-13'"""
+    try:
+        value = parse_spice_number(text)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(str(e))
+    if value <= 0:
+        raise argparse.ArgumentTypeError(f"must be > 0 s, got '{text}'")
+    return value
