@@ -22,6 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 
+import math
+import re
 from typing import Optional
 
 
@@ -98,3 +100,46 @@ def format_spice_number(value: float, force_prefix: Optional[str] = None) -> str
         return f"{int(chosen_scaled)}{chosen_prefix}"
     else:
         return f"{chosen_scaled:.6g}{chosen_prefix}"
+
+
+def format_spice_resistance(value: float) -> str:
+    """
+    Format a resistance in Ω the way KPEX writes it into SPICE netlists:
+    12 significant digits, without scale factor (e.g. '426.666666667', '0.001')
+    """
+    return f"{value:.12g}"
+
+
+_SPICE_NUMBER = re.compile(r'([+-]?(?:\d+\.?\d*|\.\d+))(?:[eE]([+-]?\d+))?([a-zA-Z]*)')
+
+# scale factor (lower case) → power of ten
+_SCALE_EXPONENTS = {prefix.lower(): round(math.log10(scale))
+                    for prefix, scale in prefix_scales
+                    if prefix not in ('', 'mil')}
+
+
+def parse_spice_number(text: str) -> float:
+    """
+    Parse a SPICE number, e.g. '1.5', '2e-15', '223.458a', '0.1p', '10k', '1Meg', '1pF'.
+
+    The scale factor is case-insensitive (NGSPICE manual, Table 2.1 "Ngspice scale factors"),
+    'meg' and 'mil' are matched before 'm'. As in NGSPICE, letters after the scale factor are ignored,
+    so are letters that are no scale factor (e.g. the unit in '10V').
+    The result is the double nearest to the decimal value ('0.1p' is the same as 1e-13).
+
+    :raises ValueError: if the text is no SPICE number (e.g. an expression like '{2*c0}')
+    """
+    match = _SPICE_NUMBER.fullmatch(text.strip())
+    if match is None:
+        raise ValueError(f"Not a SPICE number: '{text}' (examples of valid numbers: "
+                         f"'1.5', '2e-15', '0.1p', '10k', '1Meg')")
+    significand, exponent, letters = match.groups()
+    exponent = int(exponent or 0)
+    letters = letters.lower()
+    if letters.startswith('mil'):
+        return float(f"{significand}e{exponent}") * 25.4e-6
+    if letters.startswith('meg'):
+        exponent += 6
+    elif letters[:1] in _SCALE_EXPONENTS:
+        exponent += _SCALE_EXPONENTS[letters[:1]]
+    return float(f"{significand}e{exponent}")
