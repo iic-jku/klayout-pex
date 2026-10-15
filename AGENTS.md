@@ -60,8 +60,12 @@
 - Run tests in the poetry venv: `poetry run pytest -m "not slow and not smoke"` (or
   `poetry run pytest tests/<area> -q`) before calling work done; report failures with their
   output. `./run_unit_tests.sh` exits with the status of `open`, not of pytest.
-- Per commit, run the unit tests and the tests of the changed area; run all extraction tests
-  (`poetry run pytest tests/rcx25 -n 3`) once before handing over a PR.
+- Per commit, run the unit tests and the tests of the changed area; run all tests but the
+  smoke tests (`poetry run pytest -m "not smoke" -n 3`) once before handing over a PR, as
+  CI runs no slow tests (extraction, simulators).
+- CI runs the unit tests with Python 3.12 and the KLayout Python module only (no
+  executable), on Linux, macOS and Windows: before handing over a PR, also run them with
+  Python 3.12 (e.g. in IIC-OSIC-TOOLS) and with `KPEX_KLAYOUT_EXE=/nonexistent`.
 - Each bug fix gets a test that fails without it. A test that needs a workaround means the
   code is wrong: fix the code.
 - No loosened tolerances or re-baselined numbers without a physical explanation.
@@ -86,6 +90,10 @@
   commits, name what they have in common rather than repeating the first subject.
 - Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
   merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
+- A PR is ready when its CI is green on its final commits: after each push, check the CI
+  and report every red job with its cause.
+- After rewriting a pushed branch, say that it must be pushed before the merge.
+- Merge only green PRs: `main` stays green, as a red baseline hides new failures.
 - Issues end with the versions used, e.g. `klayout-pex 0.4.4, KLayout 0.30.12,
   IIC-OSIC-TOOLS image 83ae1840458f`, plus the versions of the plugins involved. Give both
   KLayout versions when the binary and the Python module differ.
