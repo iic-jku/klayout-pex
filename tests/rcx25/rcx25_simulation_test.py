@@ -43,9 +43,9 @@ from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
-from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
+from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.rc_networks import node_names, port_admittance, value_of
-from tests.common.xyce import xyce_executable, xyce_port_admittance
+from tests.common.xyce import requires_xyce, xyce_port_admittance
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
@@ -54,16 +54,16 @@ tags = ("PEX", "2.5D", "RC", "Simulation")
 
 extraction = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.RC, blackbox=False)
 
-SIMULATORS = {
-    'ngspice': (ngspice_executable, ngspice_port_admittance),
-    'Xyce': (xyce_executable, xyce_port_admittance),
-}
+SIMULATORS = [
+    pytest.param(ngspice_port_admittance, id='ngspice', marks=requires_ngspice),
+    pytest.param(xyce_port_admittance, id='Xyce', marks=requires_xyce),
+]
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-@pytest.mark.parametrize('simulator', SIMULATORS.keys())
+@pytest.mark.parametrize('simulated_port_admittance', SIMULATORS)
 @pytest.mark.parametrize('gds_name, reduce_args', [
     ('r_wire_voltage_divider_li1.gds.gz', []),
     ('r_wire_voltage_divider_li1.gds.gz', ['--reduce', 'ticer']),
@@ -73,11 +73,9 @@ SIMULATORS = {
     ('net_names_A_and_a_m2.gds.gz', []),
     ('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz', ['--reduce', 'floating']),
 ])
-def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(simulator: str, gds_name: str,
-                                                                     reduce_args: List[str], tmp_path):
-    executable, simulated_port_admittance = SIMULATORS[simulator]
-    if executable() is None:
-        pytest.skip(f"{simulator} is not on the PATH")
+def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(
+        simulated_port_admittance: Callable[..., Tuple[np.ndarray, np.ndarray]], gds_name: str,
+        reduce_args: List[str], tmp_path):
 
     cli = extraction.run_kpex('test_patterns', gds_name, extra_args=reduce_args)
     netlist_path = cli.rcx25_reduced_netlist_path or f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
