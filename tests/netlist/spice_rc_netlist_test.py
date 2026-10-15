@@ -54,9 +54,9 @@ KPEX_NETLIST = textwrap.dedent("""\
     .SUBCKT nfet_li1 D G S sky130_gnd
     X$1 D.P0.nsdm G.P0.poly S.P0.nsdm
     + sky130_gnd sky130_fd_pr__nfet_01v8 l=0.15 w=0.65
-    Cext_1 D G.$0.li1 12.3059a
-    Cext_2 D.$0.li1 sky130_gnd 16.7878a
-    Cext_3 G.$0.li1 sky130_gnd 12.871a
+    Cext_1 D G.$0.li1 0.0123059f
+    Cext_2 D.$0.li1 sky130_gnd 0.0167878f
+    Cext_3 G.$0.li1 sky130_gnd 0.012871f
     Rext_1 D D.$0.li1 30.4941176471
     Rext_2 D.$0.li1 D.P0.nsdm 185
     Rext_3 G G.$0.li1 6.4
@@ -100,6 +100,7 @@ def test_ground_is_protected_without_being_a_port(ground: str):
 @allure.tag(*tags)
 def test_global_nodes_and_nodes_of_control_statements_are_protected():
     netlist = SpiceRCNetlist.parse(textwrap.dedent("""\
+        a deck, its first line is the title
         .global vdd
         .subckt cell a
         R1 a vdd 1k
@@ -171,6 +172,40 @@ def test_device_terminals_on_continuation_lines_are_protected():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_device_terminals_on_continuation_lines_after_comment_lines_are_protected():
+    # NOTE: ngspice continues a line across comment and blank lines; the + line used to continue the comment,
+    #       so that mid wasn't protected, and the reduction left X1 on a node without elements
+    netlist = SpiceRCNetlist.parse(".subckt cell a far\nX1 a\n* a comment\n+ mid model\n"
+                                   "R1 a mid 1k\nR2 mid far 1k\nC1 mid 0 1f\n.ends\n")
+    scope = scope_named(netlist, 'cell')
+    assert protected_names(scope.network) == ['0', 'a', 'far', 'mid']
+    reduce_network(scope.network, ReductionOptions(ticer_tau=1e-9))
+    assert netlist.format() == (".subckt cell a far\nX1 a\n* a comment\n+ mid model\n"
+                                "Cred_1 0 mid 1f\nRred_1 a mid 1000\nRred_2 far mid 1000\n.ends\n")
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_end_of_line_comments_are_no_part_of_the_elements():
+    # NOTE: R1 is a plain resistor, and the comment of X1 names no node
+    netlist = SpiceRCNetlist.parse(".subckt cell a\nX1 a model $ mid\nR1 a mid 1k $ wire\nR2 mid far 1k\n"
+                                   "C1 far 0 1f\n.ends\n")
+    scope = scope_named(netlist, 'cell')
+    assert scope.resistors_read == 2
+    assert protected_names(scope.network) == ['0', 'a']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_title_of_a_deck_is_no_element():
+    netlist = SpiceRCNetlist.parse("R1 a b 1k\nR2 a b 2k\n.end\n")
+    scope = scope_named(netlist, None)
+    assert (scope.resistors_read, value_of(scope.network, 'a', 'b')) == (1, (0.5e-3, 0.0))
+    assert netlist.format() == "R1 a b 1k\nRred_1 a b 2000\n.end\n"
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_elements_on_continuation_lines_are_read_and_replaced():
     netlist = SpiceRCNetlist.parse(".subckt cell a b\nR1 a\n+ b 1k\nC1 a\n+ b\n+ 1f\n.ends\n")
     scope = scope_named(netlist, 'cell')
@@ -200,8 +235,9 @@ def test_nested_subcircuits_are_scopes_of_their_own():
     ("R1 a b 1k\n.ends\n", r"<text>:2: \.ENDS without \.SUBCKT"),
     (".subckt cell a\nR1 a b 1k\n", r"<text>: \.SUBCKT cell without \.ENDS"),
     (".subckt\n", r"<text>:1: \.SUBCKT without name"),
+    ("* comment\n+ a b 1k\n", r"<text>:2: continuation line without a line to continue"),
 ])
-def test_unbalanced_subcircuits_are_errors(text: str, message: str):
+def test_unreadable_netlists_are_errors(text: str, message: str):
     with pytest.raises(NetlistReadError, match=message):
         SpiceRCNetlist.parse(text)
 
@@ -268,7 +304,7 @@ def test_port_on_continuation_line_survives_the_reduction():
     # NOTE: b is reached by capacitors only, through the plate p to ground, which is eliminated (#214)
     netlist = SpiceRCNetlist.parse(".subckt w a\n+ b\nC1 b p 1e-15\nC2 p 0 1e-15\n.ends\n")
     reduce_network(scope_named(netlist, 'w').network, ReductionOptions())
-    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 500a\n.ends\n"
+    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 0.5f\n.ends\n"
 
 
 @allure.parent_suite(parent_suite)

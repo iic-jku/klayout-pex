@@ -117,17 +117,15 @@ def test_nfet_keeps_ports_and_device_terminals_dc_and_capacitances_between_nets(
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-def test_mom_capacitor_with_floating_plate(tmp_path):
+def test_mom_capacitor_with_a_wire_beside_it(tmp_path):
     options = ReductionOptions()
     _, _, original, reduced = extract_and_reduce('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
                                                  str(tmp_path), options)
+    # NOTE: the wire X has a pin, hence a port, though no device
     ports = protected_names(original)
-    assert ports == ['C0', 'C1', 'SUB']
-    capacitor_only = [original.name(n) for n in original.nodes()
-                      if original.resistive_degree(n) == 0 and not original.is_protected(n)]
-    assert capacitor_only == ['X']
+    assert ports == ['C0', 'C1', 'SUB', 'X']
     assert protected_names(reduced) == ports
-    assert reduced.find_node('X') is None and reduced.find_node('0') is None  # eliminated, not tied
+    assert reduced.find_node('0') is None  # nothing tied
     assert reduced.connected_node_count() < original.connected_node_count() / 2
 
     # NOTE: the capacitances between the ports (Im Y / ω where the resistances don't matter yet) are kept,

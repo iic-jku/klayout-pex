@@ -70,15 +70,18 @@ class LVSDBError(Exception):
 def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str:
     """
     The name, or if it's present, the name with a number (e.g. vss$1),
-    like KLayout's tl::unique_name, which its SPICE writer names the nets with
+    like KLayout's tl::unique_name, which its SPICE writer names the nets with,
+    but regardless of case, as SPICE reads names (ngspice joins the nets a and A)
+
+    :param present_names: the names taken, case-folded
     """
-    if name not in present_names:
+    if name.casefold() not in present_names:
         return name
     j = 0
     m = 1 << 30
     while m > 0:
         j += m
-        if f"{name}{separator}{j}" not in present_names:
+        if f"{name}{separator}{j}".casefold() not in present_names:
             j -= m
         m >>= 1
     return f"{name}{separator}{j + 1}"
@@ -189,7 +192,7 @@ class KLayoutExtractionContext:
                                                         layer_index_map=layer_index_map,
                                                         blackbox_devices=blackbox_devices)
 
-        return KLayoutExtractionContext(
+        context = KLayoutExtractionContext(
             lvsdb=lvsdb,
             tech=tech,
             dbu=dbu,
@@ -203,11 +206,26 @@ class KLayoutExtractionContext:
             unmodeled_layers=nonempty_layers.unmodeled_layers,
             blackbox_devices=blackbox_devices
         )
+        context.make_pins_of_pin_labels()
+        return context
+
+    def make_pins_of_pin_labels(self):
+        """
+        Gives each net of the top circuit with a label on a pin shape a pin, if it has none,
+        as KLayout's make_top_level_pins makes none for a net without devices (e.g. a wire between two pins)
+        """
+        circuit = self.top_circuit
+        net_names = {pin.net_name for pins in self.pins_pb2_by_layer.values() for pin in pins if pin.net_name}
+        for name in sorted(net_names):
+            net = circuit.net_by_name(name)
+            if net is not None and net.pin_count() == 0:
+                circuit.connect_pin(circuit.create_pin(name), net)
 
     @staticmethod
     def make_net_names_unique(netlist: kdb.Netlist):
         """
-        Names each net of a circuit uniquely, as KLayout's SPICE writer does (e.g. vss, vss$1)
+        Names each net of a circuit uniquely, as KLayout's SPICE writer does (e.g. vss, vss$1),
+        but regardless of case, as SPICE reads names (e.g. A, a$1)
 
         NOTE: nets can share a name, e.g. the metal islands of a supply, joined only in the parent
               (unless the LVS script connects them implicitly), but the extraction identifies a net by its name,
@@ -217,10 +235,10 @@ class KLayoutExtractionContext:
               from the LVSDB without one (newer versions with the expanded name)
         """
         for circuit in netlist.each_circuit():
-            names: Set[str] = set()
+            names: Set[str] = set()  # NOTE: case-folded
             for net in list(circuit.each_net()):
                 name = unique_name(net.expanded_name(), names)
-                names.add(name)
+                names.add(name.casefold())
                 if name != net.name:
                     net.name = name
 

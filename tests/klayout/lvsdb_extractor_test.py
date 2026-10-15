@@ -133,6 +133,19 @@ class NetNameTest(unittest.TestCase):
         self.assertEqual(['D', 'S', 'D$1', 'D$1$1', 'D$2', '$0'], [n.expanded_name() for n in circuit.each_net()])
         self.assertEqual(spice_names, [n.expanded_name() for n in circuit.each_net()])
 
+    def test_net_names_are_unique_regardless_of_case(self):
+        # NOTE: SPICE reads names case-insensitively, ngspice joins the nets a and A
+        netlist = kdb.Netlist()
+        circuit = kdb.Circuit()
+        circuit.name = 'TOP'
+        netlist.add(circuit)
+        for name in ('A', 'a', 'B', 'b$1', 'B'):
+            circuit.create_net(name)
+
+        KLayoutExtractionContext.make_net_names_unique(netlist)
+
+        self.assertEqual(['A', 'a$1', 'B', 'b$1', 'B$2'], [n.expanded_name() for n in circuit.each_net()])
+
     def test_nets_without_label_keep_their_shapes(self):
         # NOTE: KLayout 0.30.4 (CI) reads the nets without a label from the LVSDB without a name
         #       (newer versions with the expanded one, e.g. $2), but the extraction finds the shapes of a net
