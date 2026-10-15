@@ -92,7 +92,10 @@
 - Aim for the sweet spot, not minimal length: too terse makes the reader guess the why;
   repetition and self-justification make the reader parse and check sentences that add
   nothing.
-- In PR texts, issues and docs, prefer bullet lists to long sentences chained with
-  semicolons: one fact per bullet, under a short lead-in such as `New commands:`.
+- In commit bodies, PR texts, issues, comments and docs, prefer bullet lists to long
+  sentences chained with semicolons: one fact per bullet, under a short lead-in such as
+  `New commands:`. No period at the end of a bullet.
+- Mark files, code, command line tools and their arguments as code with backticks, e.g.
+  `tests/common/ngspice.py`, `convert_to_vacask`, `kpex --netlist_format vacask`.
 - No AI attribution: no `Co-Authored-By` trailer, no "Generated with …" line.
 - Before handing over, re-read your diff against `main` and check it against this file.
