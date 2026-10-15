@@ -54,6 +54,7 @@ from klayout_pex.log import (
     error,
     rule
 )
+from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
 from klayout_pex.netlistsvg.netlist_json import NetlistJSONWriter
 from klayout_pex.netlistsvg.netlistsvg_runner import run_netlistsvg
 from klayout_pex.util.argparse_helpers import render_enum_help, true_or_false
@@ -104,6 +105,8 @@ class NetlistCLI:
                                        help="Preview SVG")
         parser_netlistsvg.add_argument("--cell", "-c", dest="cell_name", default=None,
                                        help="Cell (default is the top cell)")
+
+        add_reduce_subcommand(subparsers)
 
         if arg_list is None:
             arg_list = sys.argv[1:]
@@ -226,6 +229,8 @@ class NetlistCLI:
         match args.command:
             case 'svg':
                 self.run_netlistsvg(args)
+            case 'reduce':
+                sys.exit(run_reduce_subcommand(args))
 
 
 if __name__ == "__main__":

@@ -32,7 +32,9 @@ from __future__ import annotations
 
 from collections import defaultdict
 import math
+import os
 import random
+import textwrap
 from typing import *
 
 import numpy as np
@@ -47,6 +49,30 @@ def approx(expected: Any, rel: float = 1e-14) -> Any:
 
 
 # ------------------------------------------------------------------------------------------ builders
+
+# NOTE: an RC line A - m1 - m2 - B (R = 100 Ω each, 1 fF each to ground), a device at B,
+#       and a floating plate between A and B
+LINE_NETLIST = textwrap.dedent("""\
+    .SUBCKT line A B gnd!
+    Xdev B gnd! dev
+    C1 m1 gnd! 1f
+    C2 m2 gnd! 1f
+    C3 A plate 2f
+    C4 plate B 3f
+    R1 A m1 100
+    R2 m1 m2 100
+    R3 m2 B 100
+    .ENDS line
+    """)
+
+
+def write(directory: str, name: str, text: str) -> str:
+    """Write a text file, return its path"""
+    path = os.path.join(directory, name)
+    with open(path, 'w') as f:
+        f.write(text)
+    return path
+
 
 def build_network(branches: Sequence[Tuple[str, str, float, float]],
                   protected: Sequence[str] = ()) -> RCNetwork:
@@ -119,6 +145,18 @@ def random_rc_tree(seed: int, nodes: int = 40) -> RCNetwork:
     for node in [ground, root] + leaves[::2]:
         network.protect(node)
     return network
+
+
+def spice_subcircuit(network: RCNetwork, name: str, ports: Sequence[str]) -> str:
+    """The network as a SPICE subcircuit, its values in full precision"""
+    lines = [f".SUBCKT {name} {' '.join(ports)}"]
+    for number, (node1, node2, branch) in enumerate(network.edges(), start=1):
+        if branch.capacitance:
+            lines.append(f"C{number} {network.name(node1)} {network.name(node2)} {branch.capacitance!r}")
+        if branch.conductance:
+            lines.append(f"R{number} {network.name(node1)} {network.name(node2)} {1.0 / branch.conductance!r}")
+    lines.append(f".ENDS {name}")
+    return '\n'.join(lines) + '\n'
 
 
 # ---------------------------------------------------------------------------------- nodal analysis
