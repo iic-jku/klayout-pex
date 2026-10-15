@@ -192,7 +192,7 @@ class KLayoutExtractionContext:
                                                         layer_index_map=layer_index_map,
                                                         blackbox_devices=blackbox_devices)
 
-        return KLayoutExtractionContext(
+        context = KLayoutExtractionContext(
             lvsdb=lvsdb,
             tech=tech,
             dbu=dbu,
@@ -206,6 +206,20 @@ class KLayoutExtractionContext:
             unmodeled_layers=nonempty_layers.unmodeled_layers,
             blackbox_devices=blackbox_devices
         )
+        context.make_pins_of_pin_labels()
+        return context
+
+    def make_pins_of_pin_labels(self):
+        """
+        Gives each net of the top circuit with a label on a pin shape a pin, if it has none,
+        as KLayout's make_top_level_pins makes none for a net without devices (e.g. a wire between two pins)
+        """
+        circuit = self.top_circuit
+        net_names = {pin.net_name for pins in self.pins_pb2_by_layer.values() for pin in pins if pin.net_name}
+        for name in sorted(net_names):
+            net = circuit.net_by_name(name)
+            if net is not None and net.pin_count() == 0:
+                circuit.connect_pin(circuit.create_pin(name), net)
 
     @staticmethod
     def make_net_names_unique(netlist: kdb.Netlist):

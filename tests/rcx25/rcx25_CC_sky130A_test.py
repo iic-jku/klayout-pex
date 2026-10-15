@@ -856,6 +856,7 @@ def test_label_of_substrate_under_inductor_names_the_substrate():
     subckt_line, = [l for l in lines if l.startswith('.SUBCKT ')]
     nfet_line, = [l for l in lines if l.startswith('X$1 ')]
     plate_cap_line, = [l for l in lines if l.startswith('C') and 'PLATE' in l.split()[1:3]]
-    assert subckt_line.split()[2:] == ['D', 'G', 'S', 'SUB']
+    # NOTE: the met1 plate has a pin of its own (PLATE)
+    assert subckt_line.split()[2:] == ['D', 'G', 'S', 'SUB', 'PLATE']
     assert nfet_line.split()[4] == 'SUB'  # B
     assert sorted(plate_cap_line.split()[1:3]) == ['PLATE', 'SUB']

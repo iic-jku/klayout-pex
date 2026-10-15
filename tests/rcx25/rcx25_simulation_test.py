@@ -59,10 +59,12 @@ SIMULATORS = {
 @pytest.mark.slow
 @pytest.mark.parametrize('simulator', SIMULATORS.keys())
 @pytest.mark.parametrize('gds_name, reduce_args', [
-    # NOTE: patterns with pins, else all nodes are internal (and TICER eliminates them)
+    ('r_wire_voltage_divider_li1.gds.gz', []),
+    ('r_wire_voltage_divider_li1.gds.gz', ['--reduce', 'ticer']),
     ('cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', []),
     ('cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', ['--reduce', 'ticer']),
-    # NOTE: the floating plate has no DC path, which the AC analysis needs for its operating point
+    # NOTE: the ports A and a$1, which would be one node if they were A and a
+    ('net_names_A_and_a_m2.gds.gz', []),
     ('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz', ['--reduce', 'floating']),
 ])
 def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(simulator: str, gds_name: str,
@@ -99,4 +101,5 @@ def test_nets_whose_names_differ_in_case_only_stay_apart_in_spice():
     netlist_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
     scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.network.nodes())
     assert node_names(scope.network) == ['A', 'a$1', 'sky130_gnd']
+    assert scope.ports == ['A', 'a$1', 'sky130_gnd']
     assert value_of(scope.network, 'A', 'a$1')[1] > 0.0

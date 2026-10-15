@@ -39,11 +39,12 @@ from klayout_pex.rcx25.netlist_checks import check_rc_netlist
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
-def lvs_netlist(mim_cap: bool = False) -> kdb.Netlist:
+def lvs_netlist(mim_cap: bool = False, wire: bool = False) -> kdb.Netlist:
     """
     An nmos M1, with a pin on D, G and S
 
     :param mim_cap: with a MIM cap C1 between G and S, before M1
+    :param wire: with a net W of a pin and no device (e.g. a wire between two pins)
     """
     netlist = kdb.Netlist()
     circuit = kdb.Circuit()
@@ -67,6 +68,10 @@ def lvs_netlist(mim_cap: bool = False) -> kdb.Netlist:
     if mim_cap:
         c1.connect_terminal('A', circuit.net_by_name('G'))
         c1.connect_terminal('B', circuit.net_by_name('S'))
+    if wire:
+        net = circuit.create_net('W')
+        net.cluster_id = 5
+        circuit.connect_pin(circuit.create_pin('W'), net)
     return netlist
 
 
@@ -135,8 +140,8 @@ class Test(unittest.TestCase):
                                 blackbox_devices=blackbox_devices, device_models=DeviceModels(device_models),
                                 substrate_net_name=substrate_net_name)
 
-    def rc_netlist(self, mim_cap: bool = False) -> RCNetlist:
-        lvs = lvs_netlist(mim_cap)
+    def rc_netlist(self, mim_cap: bool = False, wire: bool = False) -> RCNetlist:
+        lvs = lvs_netlist(mim_cap, wire)
         rc = RCNetlist(lvs)
         rc.lvs = lvs
         return rc
@@ -216,6 +221,11 @@ class Test(unittest.TestCase):
         rc.circuit.disconnect_pin(pin_d.id())
         rc.circuit.connect_pin(pin_d.id(), rc.net('X'))
         self.assertEqual(['port D touches nothing', 'net D has no port'], self.check(rc, {}))
+
+    def test_port_of_a_net_without_devices_may_touch_nothing(self):
+        # e.g. a wire of one pin in R mode, which has neither resistors nor capacitances
+        # (the port of a net with a device must, see test_port_touching_nothing)
+        self.assertEqual([], self.check(self.rc_netlist(wire=True), {}))
 
     def test_lost_capacitance(self):
         rc = self.rc_netlist()

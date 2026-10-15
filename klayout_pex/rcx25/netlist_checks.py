@@ -210,7 +210,10 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
     for pin in rc_circuit.each_pin():
         rc_net = rc_circuit.net_for_pin(pin.id())
         if rc_net is None or rc_net.terminal_count() == 0:
-            problems.append(f"port {pin.name()} touches nothing")
+            # NOTE: but for a net that touches nothing in the LVS netlist either (e.g. a wire of one pin, R mode)
+            lvs_net = lvs_circuit.net_by_name(lvs_net_name(rc_net)) if rc_net is not None else None
+            if lvs_net is None or lvs_net.terminal_count() + lvs_net.subcircuit_pin_count() > 0:
+                problems.append(f"port {pin.name()} touches nothing")
         if rc_net is not None:
             ported_lvs_nets.add(lvs_net_name(rc_net))
     for pin in lvs_circuit.each_pin():
