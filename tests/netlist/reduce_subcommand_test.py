@@ -160,3 +160,20 @@ def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
                             capture_output=True, text=True)
     assert result.returncode == ExitCode.USAGE, result.stderr
     assert "argument --ticer_max_degree: must be an integer ≥ 1, got 'many'" in result.stderr
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_reduce_loads_neither_klayout_nor_the_protobuf(line_netlist: str, tmp_path):
+    # NOTE: a fresh process, as the tests have loaded both; the reduction is format-only (AGENTS.md)
+    output = os.path.join(str(tmp_path), 'out.spice')
+    script = ("import sys\n"
+              "from klayout_pex.netlist.netlist_cli import NetlistCLI\n"
+              "try:\n"
+              f"    NetlistCLI().main(['netlist', 'reduce', {line_netlist!r}, '-o', {output!r}])\n"
+              "except SystemExit as exit:\n"
+              "    assert exit.code == 0, exit.code\n"
+              "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'klayout_pex_protobuf'))\n"
+              "assert not loaded, loaded\n")
+    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
