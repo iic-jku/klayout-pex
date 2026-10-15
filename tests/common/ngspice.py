@@ -23,7 +23,7 @@
 #
 
 """
-The port admittance matrix of a SPICE subcircuit, by an AC analysis in ngspice
+Simulations with ngspice in tests, which are skipped where ngspice isn't installed (ngspice on PATH)
 """
 
 from __future__ import annotations
@@ -40,14 +40,23 @@ def ngspice_executable() -> Optional[str]:
     return shutil.which('ngspice')
 
 
+def run_ngspice(deck_path: str):
+    """
+    Runs the deck in batch mode in its directory (where ngspice reads .spiceinit)
+    """
+    result = subprocess.run([ngspice_executable(), '-b', os.path.basename(deck_path)],
+                            cwd=os.path.dirname(deck_path), capture_output=True, text=True, timeout=600)
+    assert result.returncode == 0, f"ngspice failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
+
+
 def ngspice_port_admittance(netlist_path: str,
                             subcircuit: str,
                             ports: Sequence[str],
                             decades: Tuple[int, int],
                             work_dir: str) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Y(f) of the subcircuit's ports, by one instance per port: that port driven by an AC voltage of 1 V,
-    the others at 0 V; the currents into the ports are the columns of Y.
+    Y(f) of the subcircuit's ports, by an AC analysis of one instance per port:
+    that port driven by an AC voltage of 1 V, the others at 0 V; the currents into the ports are the columns of Y.
 
     :param ports: all ports of the subcircuit, in the order of its .SUBCKT line
     :param decades: frequencies 10**decades[0] … 10**decades[1] Hz, one point per decade
@@ -75,9 +84,8 @@ def ngspice_port_admittance(netlist_path: str,
     with open(bench_path, 'w') as f:
         f.write('\n'.join(lines) + '\n')
 
-    result = subprocess.run([ngspice_executable(), '-b', bench_path], capture_output=True, text=True, cwd=work_dir)
-    assert result.returncode == 0 and os.path.exists(data_path), \
-        f"ngspice failed on {bench_path}:\n{result.stdout}\n{result.stderr}"
+    run_ngspice(bench_path)
+    assert os.path.exists(data_path), f"ngspice wrote no {data_path}"
 
     data = np.loadtxt(data_path, ndmin=2)
     frequencies = data[:, 0]

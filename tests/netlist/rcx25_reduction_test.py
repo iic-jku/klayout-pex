@@ -45,6 +45,7 @@ from tests.common.rc_networks import (
     approx,
     capacitance_by_component_pair,
     port_admittance,
+    protected_names,
     relative_admittance_error,
     resistive_components,
     schur_complement_conductances,
@@ -73,10 +74,6 @@ def extract_and_reduce(gds_name: str, output_dir: str, options: ReductionOptions
         assert len(scopes) == 1
         networks.append(scopes[0].network)
     return spice_path, reduced_path, networks[0], networks[1]
-
-
-def protected_names(network: RCNetwork) -> List[str]:
-    return sorted(network.name(n) for n in network.nodes() if network.is_protected(n))
 
 
 @allure.parent_suite(parent_suite)

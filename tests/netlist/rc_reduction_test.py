@@ -50,31 +50,21 @@ from tests.common.rc_networks import (
     capacitance_by_component_pair,
     copy_network,
     laplacian_matrices,
+    node_names,
+    protected_names,
     random_extracted_network,
     random_rc_tree,
     relative_admittance_error,
     resistive_components,
     schur_complement_conductances,
     total_capacitance,
+    value_of,
 )
 
 parent_suite = "Unit Tests"
 tags = ("Netlist", "Reduction", "TICER")
 
 SEEDS = range(8)
-
-
-def protected_names(network: RCNetwork) -> List[str]:
-    return [network.name(n) for n in network.nodes() if network.is_protected(n)]
-
-
-def names(network: RCNetwork) -> List[str]:
-    return sorted(network.name(n) for n in network.nodes() if network.degree(n) > 0)
-
-
-def value_of(network: RCNetwork, name1: str, name2: str) -> Tuple[float, float]:
-    branch = network.branch(network.find_node(name1), network.find_node(name2))
-    return (branch.conductance, branch.capacitance) if branch else (0.0, 0.0)
 
 
 # ------------------------------------------------------------------------- Sheehan 2007, Fig. 1 example
@@ -92,14 +82,14 @@ TAU_3 = 0.01 / 2  # c_3 / (g_13 + g_23)
 
 def transfer_function_21(network: RCNetwork, omega: float) -> complex:
     """V_2 / J_1, the current source j(t) driving node 1 (Sheehan 2007, (11))"""
-    names_ = ['0'] + sorted(n for n in names(network) if n != '0')
+    names_ = ['0'] + sorted(n for n in node_names(network) if n != '0')
     g, c = laplacian_matrices(network, names_)
     y = (g + 1j * omega * c)[1:, 1:]  # ground's row and column removed
     return np.linalg.inv(y)[names_.index('2') - 1, names_.index('1') - 1]
 
 
 def poles(network: RCNetwork) -> np.ndarray:
-    names_ = ['0'] + sorted(n for n in names(network) if n != '0')
+    names_ = ['0'] + sorted(n for n in node_names(network) if n != '0')
     g, c = laplacian_matrices(network, names_)
     return np.sort(np.linalg.eigvals(-np.linalg.solve(c[1:, 1:], g[1:, 1:])).real)
 
@@ -113,7 +103,7 @@ def test_quick_node_rules_on_the_2007_example():
     eliminate_quick_node(network, network.find_node('3'))
 
     # Fig. 2 without the negative c_12: g_12 = g_13 g_23 / G_3, c_10 = g_13 c_3 / G_3, c_20 = g_23 c_3 / G_3
-    assert names(network) == ['0', '1', '2']
+    assert node_names(network) == ['0', '1', '2']
     assert value_of(network, '1', '2') == approx((0.5, 0.0), rel=1e-15)
     assert value_of(network, '1', '0') == approx((1.0, 1.005), rel=1e-15)
     assert value_of(network, '2', '0') == approx((0.0, 1.005), rel=1e-15)
@@ -149,7 +139,7 @@ def test_2007_example_keeps_the_dominant_poles_and_the_response_below_1_over_tau
 def test_ticer_keeps_the_2007_example_node_above_the_threshold():
     network = build_network(SHEEHAN_2007_EXAMPLE, protected=['0', '1', '2'])
     assert eliminate_quick_nodes(network, tau=TAU_3 * 0.999, max_degree=5) == 0
-    assert names(network) == ['0', '1', '2', '3']
+    assert node_names(network) == ['0', '1', '2', '3']
 
 
 @allure.parent_suite(parent_suite)
@@ -183,7 +173,7 @@ def ticer_kept_nodes_after(network: RCNetwork, tau: float = 1e-12, max_degree: i
 def test_ticer_is_dc_exact_at_every_kept_node(seed: int):
     original = random_extracted_network(seed, plates=0)
     reduced = ticer_kept_nodes_after(original)
-    kept = names(reduced)
+    kept = node_names(reduced)
     # NOTE: the conductance rule is the Schur complement of G, so the reduced network's conductances are
     #       the original's DC behaviour at all kept nodes, not only at the protected ones
     g_reduced, _ = laplacian_matrices(reduced, kept)
@@ -259,7 +249,7 @@ def test_ticer_keeps_elmore_delays_of_rc_trees(seed: int):
     original = random_rc_tree(seed)
     reduced = copy_network(original)
     assert eliminate_quick_nodes(reduced, tau=1.0, max_degree=5) >= 20
-    kept = [n for n in names(reduced) if n not in ('0', 'root')]
+    kept = [n for n in node_names(reduced) if n not in ('0', 'root')]
     np.testing.assert_allclose(elmore_delays(reduced, kept), elmore_delays(original, kept), rtol=1e-12)
 
 
@@ -271,7 +261,7 @@ def test_plate_between_two_nets_gives_exactly_the_series_capacitance():
     network = build_network([('A', 'plate', 0.0, 2e-15), ('plate', 'B', 0.0, 3e-15)], protected=['A', 'B'])
     statistics = reduce_network(network, ReductionOptions())
     assert statistics.capacitor_only_nodes == 1 and statistics.tied_nodes == 0
-    assert names(network) == ['A', 'B']
+    assert node_names(network) == ['A', 'B']
     assert value_of(network, 'A', 'B') == (0.0, 2e-15 * 3e-15 / 5e-15)
 
 
@@ -282,7 +272,7 @@ def test_capacitor_only_elimination_is_exact_at_every_frequency(seed: int):
     original = random_extracted_network(seed, plates=6)
     reduced = copy_network(original)
     assert eliminate_capacitor_only_nodes(reduced, max_degree=64) == 6
-    ports = names(reduced)
+    ports = node_names(reduced)
     for frequency in (1e3, 1e6, 1e9, 1e12):
         assert relative_admittance_error(original, reduced, ports, frequency) <= 1e-12, frequency
 
@@ -292,7 +282,7 @@ def test_capacitor_only_elimination_is_exact_at_every_frequency(seed: int):
 def test_capacitor_only_node_with_one_neighbour_disappears():
     network = build_network([('A', 'stub', 0.0, 2e-15), ('A', '0', 1e-3, 0.0)], protected=['A', '0'])
     eliminate_capacitor_only_node(network, network.find_node('stub'))
-    assert names(network) == ['0', 'A']
+    assert node_names(network) == ['0', 'A']
     assert value_of(network, 'A', '0') == (1e-3, 0.0)
 
 
@@ -365,7 +355,7 @@ def test_floating_islands_are_merged_then_eliminated():
     statistics = reduce_network(network, ReductionOptions())
     assert (statistics.floating_islands, statistics.floating_island_nodes) == (1, 2)
     assert statistics.capacitor_only_nodes == 1
-    assert names(network) == ['A', 'B']
+    assert node_names(network) == ['A', 'B']
     assert value_of(network, 'A', 'B') == approx((1e-3, 2e-15 * 2e-15 / 4e-15), rel=1e-15)
 
 
@@ -374,7 +364,7 @@ def test_floating_islands_are_merged_then_eliminated():
 def test_island_with_a_protected_node_is_not_merged():
     network = build_network([('w1', 'w2', 1e-2, 0.0), ('w2', 'A', 0.0, 1e-15)], protected=['w1'])
     assert merge_floating_islands(network) == (0, 0)
-    assert names(network) == ['A', 'w1', 'w2']
+    assert node_names(network) == ['A', 'w1', 'w2']
 
 
 # --------------------------------------------------------------------------------- protected nodes
@@ -384,11 +374,11 @@ def test_island_with_a_protected_node_is_not_merged():
 @pytest.mark.parametrize('seed', SEEDS)
 def test_protected_nodes_are_never_eliminated(seed: int):
     network = random_extracted_network(seed, plates=6)
-    protected = sorted(protected_names(network))
+    protected = protected_names(network)
     # NOTE: every time constant is far below 1 s, without degree limits everything else goes
     reduce_network(network, ReductionOptions(ticer_tau=1.0, ticer_max_degree=1000, floating_max_degree=1000))
-    assert sorted(protected_names(network)) == protected
-    assert names(network) == sorted(protected)
+    assert protected_names(network) == protected
+    assert node_names(network) == protected
 
 
 @allure.parent_suite(parent_suite)
@@ -430,7 +420,7 @@ def test_ticer_defers_leaves_to_the_end():
     network = build_network([('J', 'a', 1.0, 0.0), ('a', 'b', 1.0, 0.0), ('a', '0', 0.0, 1.0), ('b', '0', 0.0, 1.0)],
                             protected=['J', '0'])
     assert eliminate_quick_nodes(network, tau=1.2, max_degree=5) == 1
-    assert names(network) == ['0', 'J', 'b']
+    assert node_names(network) == ['0', 'J', 'b']
     assert value_of(network, 'J', 'b') == approx((0.5, 0.0), rel=1e-15)
     assert value_of(network, 'b', '0') == approx((0.0, 1.5), rel=1e-15)
 

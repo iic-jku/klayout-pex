@@ -33,8 +33,13 @@ import allure
 import pytest
 
 from klayout_pex.netlist.rc_reduction import ReductionOptions, reduce_network
-from klayout_pex.netlist.spice_rc_netlist import NetlistReadError, SpiceRCNetlist, SpiceScope
-from tests.common.rc_networks import approx
+from klayout_pex.netlist.spice_rc_netlist import NetlistReadError, SpiceRCNetlist
+from tests.common.rc_networks import (
+    approx,
+    protected_names,
+    scope_named,
+    value_of,
+)
 
 parent_suite = "Unit Tests"
 tags = ("Netlist", "Reduction", "SPICE")
@@ -60,21 +65,6 @@ KPEX_NETLIST = textwrap.dedent("""\
     """)
 
 
-def scope_named(netlist: SpiceRCNetlist, name: Optional[str]) -> SpiceScope:
-    return next(s for s in netlist.scopes if s.name == name)
-
-
-def protected_names(scope: SpiceScope) -> List[str]:
-    network = scope.network
-    return sorted(network.name(n) for n in network.nodes() if network.is_protected(n))
-
-
-def value_of(scope: SpiceScope, name1: str, name2: str) -> Tuple[float, float]:
-    network = scope.network
-    branch = network.branch(network.find_node(name1), network.find_node(name2))
-    return (branch.conductance, branch.capacitance) if branch else (0.0, 0.0)
-
-
 # ----------------------------------------------------------------------------------------- reading
 
 @allure.parent_suite(parent_suite)
@@ -85,8 +75,8 @@ def test_reads_scopes_ports_and_elements():
     scope = scope_named(netlist, 'nfet_li1')
     assert scope.ports == ['D', 'G', 'S', 'sky130_gnd']
     assert (scope.resistors_read, scope.capacitors_read) == (4, 3)
-    assert value_of(scope, 'D', 'G.$0.li1') == (0.0, 12.3059e-18)
-    assert value_of(scope, 'D.$0.li1', 'D.P0.nsdm') == approx((1 / 185, 0.0))
+    assert value_of(scope.network, 'D', 'G.$0.li1') == (0.0, 12.3059e-18)
+    assert value_of(scope.network, 'D.$0.li1', 'D.P0.nsdm') == approx((1 / 185, 0.0))
     assert scope_named(netlist, None).network.nodes() == []
 
 
@@ -95,7 +85,7 @@ def test_reads_scopes_ports_and_elements():
 def test_ports_device_terminals_on_continuation_lines_and_ground_are_protected():
     scope = scope_named(SpiceRCNetlist.parse(KPEX_NETLIST), 'nfet_li1')
     # NOTE: S has no R or C, so it is no node of the network
-    assert protected_names(scope) == ['D', 'D.P0.nsdm', 'G', 'G.P0.poly', 'sky130_gnd']
+    assert protected_names(scope.network) == ['D', 'D.P0.nsdm', 'G', 'G.P0.poly', 'sky130_gnd']
 
 
 @allure.parent_suite(parent_suite)
@@ -103,7 +93,7 @@ def test_ports_device_terminals_on_continuation_lines_and_ground_are_protected()
 @pytest.mark.parametrize('ground', ['0', 'gnd', 'GND'])
 def test_ground_is_protected_without_being_a_port(ground: str):
     scope = scope_named(SpiceRCNetlist.parse(f"R1 a {ground} 1k\nC1 a b 1f\n"), None)
-    assert protected_names(scope) == [ground]
+    assert protected_names(scope.network) == [ground]
 
 
 @allure.parent_suite(parent_suite)
@@ -124,8 +114,8 @@ def test_global_nodes_and_nodes_of_control_statements_are_protected():
         .endc
         .end
         """))
-    assert protected_names(scope_named(netlist, 'cell')) == ['a', 'vdd']
-    assert protected_names(scope_named(netlist, None)) == ['y']
+    assert protected_names(scope_named(netlist, 'cell').network) == ['a', 'vdd']
+    assert protected_names(scope_named(netlist, None).network) == ['y']
 
 
 @allure.parent_suite(parent_suite)
@@ -145,7 +135,7 @@ def test_elements_with_other_values_are_kept_as_they_are_and_protect_their_nodes
     netlist = SpiceRCNetlist.parse(text)
     scope = scope_named(netlist, 'cell')
     assert (scope.resistors_read, scope.capacitors_read) == (1, 1)
-    assert protected_names(scope) == ['a', 'b', 'n1', 'n6']
+    assert protected_names(scope.network) == ['a', 'b', 'n1', 'n6']
     assert scope.other_element_names == {'rtc', 'rexpr', 'rzero', 'cneg', 'rmodel'}
     formatted = netlist.format()
     for line in text.splitlines()[2:7]:
@@ -157,8 +147,8 @@ def test_elements_with_other_values_are_kept_as_they_are_and_protect_their_nodes
 def test_node_names_are_case_insensitive():
     scope = scope_named(SpiceRCNetlist.parse(".subckt cell OUT\nR1 out mid 1k\nC1 MID Out 1f\n.ends\n"), 'cell')
     assert sorted(scope.network.name(n) for n in scope.network.nodes()) == ['mid', 'out']
-    assert protected_names(scope) == ['out']
-    assert value_of(scope, 'OUT', 'mid') == approx((1e-3, 1e-15))
+    assert protected_names(scope.network) == ['out']
+    assert value_of(scope.network, 'OUT', 'mid') == approx((1e-3, 1e-15))
 
 
 @allure.parent_suite(parent_suite)
@@ -167,7 +157,7 @@ def test_ports_on_continuation_lines_and_parameters():
     scope = scope_named(SpiceRCNetlist.parse(".subckt cell a\n+ b c params: w=1\nR1 a b 1k\nR2 c d 1k\n.ends\n"),
                         'cell')
     assert scope.ports == ['a', 'b', 'c']
-    assert protected_names(scope) == ['a', 'b', 'c']
+    assert protected_names(scope.network) == ['a', 'b', 'c']
 
 
 @allure.parent_suite(parent_suite)
@@ -176,7 +166,7 @@ def test_device_terminals_on_continuation_lines_are_protected():
     # NOTE: mid is a node of the continuation line only, and no port
     scope = scope_named(SpiceRCNetlist.parse(".subckt cell a\nX1 a\n+ mid model\nR1 a mid 1k\nR2 mid far 1k\n"
                                              "C1 far 0 1f\n.ends\n"), 'cell')
-    assert protected_names(scope) == ['0', 'a', 'mid']
+    assert protected_names(scope.network) == ['0', 'a', 'mid']
 
 
 @allure.parent_suite(parent_suite)
@@ -200,8 +190,8 @@ def test_nested_subcircuits_are_scopes_of_their_own():
         .ends outer
         """))
     assert [s.title for s in netlist.scopes] == ['.SUBCKT inner', '.SUBCKT outer', 'top level']
-    assert protected_names(scope_named(netlist, 'inner')) == ['x']
-    assert protected_names(scope_named(netlist, 'outer')) == ['a']
+    assert protected_names(scope_named(netlist, 'inner').network) == ['x']
+    assert protected_names(scope_named(netlist, 'outer').network) == ['a']
 
 
 @allure.parent_suite(parent_suite)
@@ -329,8 +319,8 @@ def test_ground_tied_to_two_floating_islands_is_kept():
     #       their capacitors move to their resistive neighbour, ground
     reduce_network(scope.network, ReductionOptions(ticer_tau=1.0, ticer_max_degree=1000, floating=False))
     assert sorted(scope.network.name(n) for n in scope.network.nodes()) == ['0', 'A', 'B']
-    assert value_of(scope, 'A', '0') == approx((0.0, 1e-15))
-    assert value_of(scope, 'B', '0') == approx((0.0, 1e-15))
+    assert value_of(scope.network, 'A', '0') == approx((0.0, 1e-15))
+    assert value_of(scope.network, 'B', '0') == approx((0.0, 1e-15))
 
 
 @allure.parent_suite(parent_suite)

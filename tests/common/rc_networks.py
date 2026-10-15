@@ -41,6 +41,7 @@ import numpy as np
 import pytest
 
 from klayout_pex.netlist.rc_network import RCNetwork
+from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
 
 
 def approx(expected: Any, rel: float = 1e-14) -> Any:
@@ -72,6 +73,29 @@ def write(directory: str, name: str, text: str) -> str:
     with open(path, 'w') as f:
         f.write(text)
     return path
+
+
+# ------------------------------------------------------------------------------------------- queries
+
+def node_names(network: RCNetwork) -> List[str]:
+    """The names of the nodes with elements, sorted"""
+    return sorted(network.name(n) for n in network.nodes() if network.degree(n) > 0)
+
+
+def protected_names(network: RCNetwork) -> List[str]:
+    """The names of the protected nodes, sorted"""
+    return sorted(network.name(n) for n in network.nodes() if network.is_protected(n))
+
+
+def value_of(network: RCNetwork, name1: str, name2: str) -> Tuple[float, float]:
+    """The conductance and capacitance between two nodes, (0, 0) without a branch between them"""
+    branch = network.branch(network.find_node(name1), network.find_node(name2))
+    return (branch.conductance, branch.capacitance) if branch else (0.0, 0.0)
+
+
+def scope_named(netlist: SpiceRCNetlist, name: Optional[str]) -> SpiceScope:
+    """The scope of the .SUBCKT of this name, the top level for None"""
+    return next(s for s in netlist.scopes if s.name == name)
 
 
 def build_network(branches: Sequence[Tuple[str, str, float, float]],

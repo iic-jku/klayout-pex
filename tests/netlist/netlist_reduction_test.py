@@ -37,25 +37,19 @@ import pytest
 
 from klayout_pex.netlist.netlist_reduction import NetworkSize, UnknownNodesError, reduce_spice_netlist
 from klayout_pex.netlist.rc_reduction import ReductionOptions, ReductionStatistics
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
+from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.rc_networks import (
     LINE_NETLIST,
+    node_names,
     port_admittance,
     random_extracted_network,
+    scope_named,
     spice_subcircuit,
     write,
 )
 
 parent_suite = "Unit Tests"
 tags = ("Netlist", "Reduction")
-
-
-def scope_named(path: str, name: str) -> SpiceScope:
-    return next(s for s in SpiceRCNetlist.read(path).scopes if s.name == name)
-
-
-def node_names(scope: SpiceScope) -> List[str]:
-    return sorted(scope.network.name(n) for n in scope.network.nodes() if scope.network.degree(n) > 0)
 
 
 @allure.parent_suite(parent_suite)
@@ -94,7 +88,8 @@ def test_keeps_the_nodes_asked_for(tmp_path):
     input_path = write(str(tmp_path), 'line.spice', LINE_NETLIST)
     output_path = str(tmp_path / 'line_reduced.spice')
     reduce_spice_netlist(input_path, output_path, ReductionOptions(ticer_tau=1e-12), keep=['M1', 'plate'])
-    assert node_names(scope_named(output_path, 'line')) == ['A', 'B', 'gnd!', 'm1', 'plate']
+    reduced = SpiceRCNetlist.read(output_path)
+    assert node_names(scope_named(reduced, 'line').network) == ['A', 'B', 'gnd!', 'm1', 'plate']
 
 
 @allure.parent_suite(parent_suite)
@@ -117,8 +112,9 @@ def test_every_subcircuit_is_reduced_on_its_own(tmp_path):
     output_path = str(tmp_path / 'lines_reduced.spice')
     reduction = reduce_spice_netlist(input_path, output_path, ReductionOptions(ticer_tau=1e-12))
     assert [s.scope for s in reduction.scopes] == ['.SUBCKT line', '.SUBCKT line2']
-    assert node_names(scope_named(output_path, 'line')) == ['A', 'B', 'gnd!']
-    assert node_names(scope_named(output_path, 'line2')) == ['A', 'B', 'gnd!', 'm2']
+    reduced = SpiceRCNetlist.read(output_path)
+    assert node_names(scope_named(reduced, 'line').network) == ['A', 'B', 'gnd!']
+    assert node_names(scope_named(reduced, 'line2').network) == ['A', 'B', 'gnd!', 'm2']
 
 
 @allure.parent_suite(parent_suite)
@@ -132,7 +128,7 @@ def test_written_netlist_has_the_response_of_the_reduced_network(tmp_path, seed:
     output_path = str(tmp_path / 'random_reduced.spice')
     tau = 1e-11
     reduce_spice_netlist(input_path, output_path, ReductionOptions(ticer_tau=tau))
-    reduced = scope_named(output_path, 'random').network
+    reduced = scope_named(SpiceRCNetlist.read(output_path), 'random').network
     for frequency in (1e6, 1e8, 1e10):
         y = port_admittance(network, ports, frequency)
         y_reduced = port_admittance(reduced, ports, frequency)
