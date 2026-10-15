@@ -37,7 +37,12 @@ import pytest
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
-from tests.common.rc_networks import LINE_NETLIST, write
+from tests.common.rc_networks import (
+    LINE_NETLIST,
+    node_names,
+    scope_named,
+    write,
+)
 
 parent_suite = "Unit Tests"
 tags = ("Netlist", "Reduction", "CLI")
@@ -56,16 +61,15 @@ def line_netlist(tmp_path) -> str:
     return write(str(tmp_path), 'line.spice', LINE_NETLIST)
 
 
-def node_names(path: str) -> List[str]:
-    scope = next(s for s in SpiceRCNetlist.read(path).scopes if s.name == 'line')
-    return sorted(scope.network.name(n) for n in scope.network.nodes() if scope.network.degree(n) > 0)
+def line_node_names(path: str) -> List[str]:
+    return node_names(scope_named(SpiceRCNetlist.read(path), 'line').network)
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_writes_next_to_the_input_by_default(line_netlist: str):
     assert run(line_netlist, '--ticer_tau', '1p') == ExitCode.OK
-    assert node_names(os.path.splitext(line_netlist)[0] + '_reduced.spice') == ['A', 'B', 'gnd!']
+    assert line_node_names(os.path.splitext(line_netlist)[0] + '_reduced.spice') == ['A', 'B', 'gnd!']
 
 
 @allure.parent_suite(parent_suite)
@@ -73,15 +77,15 @@ def test_writes_next_to_the_input_by_default(line_netlist: str):
 def test_options_choose_the_passes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'out' / 'reduced.spice')
     assert run(line_netlist, '-o', output, '--ticer', 'n') == ExitCode.OK
-    assert node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
     assert run(line_netlist, '-o', output, '--floating', 'n', '--ticer_tau', '1e-12') == ExitCode.OK
-    assert node_names(output) == ['A', 'B', 'gnd!', 'plate']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
     assert run(line_netlist, '-o', output, '--ticer_tau', '0.01p') == ExitCode.OK  # τ(m1) = 50 fs
-    assert node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
     assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--ticer_max_degree', '1') == ExitCode.OK
-    assert node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
     assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--floating_max_degree', '1') == ExitCode.OK
-    assert node_names(output) == ['A', 'B', 'gnd!', 'plate']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
     with open(output) as f:
         assert 'Rtie_1 plate 0 1e+12' in f.read().splitlines()
 
@@ -91,7 +95,7 @@ def test_options_choose_the_passes(line_netlist: str, tmp_path):
 def test_keep_protects_nodes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
     assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--keep', 'm2', '--keep', 'PLATE') == ExitCode.OK
-    assert node_names(output) == ['A', 'B', 'gnd!', 'm2', 'plate']
+    assert line_node_names(output) == ['A', 'B', 'gnd!', 'm2', 'plate']
 
 
 @allure.parent_suite(parent_suite)
@@ -153,7 +157,7 @@ def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
                              '--ticer_tau', '1p'],
                             capture_output=True, text=True)
     assert result.returncode == ExitCode.OK, result.stderr
-    assert node_names(output) == ['A', 'B', 'gnd!'], result.stderr
+    assert line_node_names(output) == ['A', 'B', 'gnd!'], result.stderr
 
     result = subprocess.run([sys.executable, '-m', 'klayout_pex.netlist', 'reduce', line_netlist,
                              '--ticer_max_degree', 'many'],
