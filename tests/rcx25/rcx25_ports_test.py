@@ -37,7 +37,8 @@ import pytest
 
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D netlist ports"
 tags = ("PEX", "2.5D", "Ports")

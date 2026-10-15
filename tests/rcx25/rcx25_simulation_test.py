@@ -46,7 +46,8 @@ from klayout_pex.tech_info import TechInfo
 from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
 from tests.common.rc_networks import node_names, port_admittance, value_of
 from tests.common.xyce import xyce_executable, xyce_port_admittance
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D RC netlists in simulators"
 tags = ("PEX", "2.5D", "RC", "Simulation")

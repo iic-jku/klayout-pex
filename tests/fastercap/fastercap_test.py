@@ -30,7 +30,7 @@ from typing import *
 from klayout_pex.kpex_cli import KpexCLI
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 parent_suite = "kpex/FasterCap Extraction Tests"

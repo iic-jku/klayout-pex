@@ -24,8 +24,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
-import glob
 import os
 from typing import *
 
@@ -36,6 +34,7 @@ from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
+from tests.common.pdk_test_config import PDKTestConfig
 
 
 CSVPath = str
@@ -48,57 +47,6 @@ def read_lvsdb(csv_path: CSVPath, cell_name: str) -> kdb.LayoutVsSchematic:
     lvsdb = kdb.LayoutVsSchematic()
     lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
     return lvsdb
-
-
-def lvs_cache_dir(pdk_name: str) -> str:
-    """
-    The LVS cache of a PDK, shared by all tests and workers (and kept between CI runs, see integration-tests.yml)
-    """
-    return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pdk_name}", '.kpex_cache'))
-
-
-class PDKName(StrEnum):
-    SKY130A = 'sky130A'
-    IHP_SG13G2 = 'ihp-sg13g2'
-    GF180MCUD = 'gf180mcuD'
-
-
-@dataclass
-class PDKTestConfig:
-    name: PDKName
-
-    @property
-    def kpex_pdk_dir(self) -> str:
-        return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'pdk', self.name, 'libs.tech', 'kpex'))
-
-    @property
-    def test_designs_dir(self) -> str:
-        return os.path.realpath(os.path.join(__file__, '..', '..', '..',
-                                             'testdata', 'designs', self.name))
-
-    @property
-    def output_dir(self) -> str:
-        """
-        Where the extractions write to: one directory per pytest-xdist worker (e.g. output_sky130A_worker0),
-        so that parallel tests never write into each other's outputs
-        """
-        worker = os.environ.get('PYTEST_XDIST_WORKER', None)  # e.g. gw0
-        suffix = f"_worker{worker.removeprefix('gw')}" if worker else ''
-        return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{self.name}{suffix}"))
-
-    @property
-    def lvs_cache_dir(self) -> str:
-        return lvs_cache_dir(self.name)
-
-    @property
-    def lyt_path(self) -> str:
-        lyt_paths = glob.glob(os.path.join(self.kpex_pdk_dir, '*.lyt'))
-        assert len(lyt_paths) == 1, f"Expected one KLayout technology file in {self.kpex_pdk_dir}"
-        return os.path.abspath(lyt_paths[0])
-
-    def gds_path(self, *path_components) -> str:
-        return os.path.join(self.test_designs_dir, *path_components)
 
 
 @dataclass

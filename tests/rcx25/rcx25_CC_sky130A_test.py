@@ -27,7 +27,9 @@ import pytest
 from unittest import mock
 
 from klayout_pex.tech_info import TechInfo
-from rcx25_test_helpers import *
+from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode CC]"
 tags = ("PEX", "2.5D", "MAGIC")

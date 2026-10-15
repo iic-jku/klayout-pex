@@ -35,7 +35,7 @@ import klayout.db as kdb
 from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
 from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 from klayout_pex.kpex_cli import KpexCLI
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 parent_suite = "kpex/FasterCap Input Tests"
