@@ -50,7 +50,8 @@ from tests.common.rc_networks import (
     resistive_components,
     schur_complement_conductances,
 )
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/netlist reduce"
 tags = ("Netlist", "Reduction", "PEX", "2.5D")

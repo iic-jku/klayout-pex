@@ -33,12 +33,16 @@ import subprocess
 from typing import *
 
 import numpy as np
+import pytest
 
 from tests.common.port_admittance_bench import port_admittance_bench, port_admittance_from_currents
 
 
 def xyce_executable() -> Optional[str]:
     return shutil.which('Xyce')
+
+
+requires_xyce = pytest.mark.skipif(xyce_executable() is None, reason='Xyce is not on PATH')
 
 
 def run_xyce(deck_path: str):

@@ -32,7 +32,7 @@ import pytest
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.protobuf import pex25d_terminal_pb2
 from klayout_pex.pex25d.reader import read_pex25d_text
-from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 parent_suite = "kpex/PEX25D Generation Tests"

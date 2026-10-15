@@ -34,7 +34,7 @@ import pytest
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
-from rcx25_test_helpers import lvs_cache_dir
+from tests.common.pdk_test_config import lvs_cache_dir
 
 TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs'))
 

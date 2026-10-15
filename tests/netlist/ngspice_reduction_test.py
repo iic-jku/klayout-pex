@@ -34,7 +34,7 @@ import pytest
 
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
 from klayout_pex.netlist.rc_reduction import ReductionOptions
-from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
+from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.rc_networks import port_admittance, random_extracted_network, spice_subcircuit, write
 
 parent_suite = "kpex/netlist reduce"
@@ -44,7 +44,7 @@ tags = ("Netlist", "Reduction", "ngspice")
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-@pytest.mark.skipif(ngspice_executable() is None, reason="ngspice is not on the PATH")
+@requires_ngspice
 @pytest.mark.parametrize('seed', range(3))
 def test_reduced_netlist_has_the_ac_response_of_the_original(tmp_path, seed: int):
     network = random_extracted_network(seed, plates=4)

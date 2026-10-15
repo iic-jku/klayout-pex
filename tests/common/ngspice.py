@@ -34,12 +34,16 @@ import subprocess
 from typing import *
 
 import numpy as np
+import pytest
 
 from tests.common.port_admittance_bench import port_admittance_bench, port_admittance_from_currents
 
 
 def ngspice_executable() -> Optional[str]:
     return shutil.which('ngspice')
+
+
+requires_ngspice = pytest.mark.skipif(ngspice_executable() is None, reason='ngspice is not on PATH')
 
 
 def run_ngspice(deck_path: str):

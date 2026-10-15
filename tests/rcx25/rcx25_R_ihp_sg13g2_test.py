@@ -35,7 +35,8 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
-from rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction, read_lvsdb
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction, read_lvsdb
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
