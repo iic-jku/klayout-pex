@@ -198,7 +198,8 @@ def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], messag
     invalid = RCX25Extraction(pdk=extraction.pdk, pex_mode=mode, blackbox=False)
     with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         invalid.run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=reduce_args)
-    assert [c.args[0] for c in error_mock.call_args_list] == [message]
+    # NOTE: among others, e.g. a missing KLayout executable (as in CI, which has the Python module only)
+    assert [c.args[0] for c in error_mock.call_args_list if '--reduce' in c.args[0]] == [message]
 
 
 @allure.parent_suite(parent_suite)
