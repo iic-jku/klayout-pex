@@ -74,6 +74,11 @@ class Test(unittest.TestCase):
     def test_mapping_by_lvs_device_class_name(self):
         self.assertEqual(['nmos', 'rppd'], sorted(device_models(NMOS, RPPD).mapping_by_lvs_device_class_name))
 
+    def test_vacask_subcircuits_with_m_are_the_models_of_the_mappings_that_declare_m(self):
+        rfnmos = {**NMOS, 'lvs_device_class_name': 'rfnmos', 'model_name': 'sg13_lv_nmos', 'vacask_declares_m': True}
+        rppd = {**RPPD, 'vacask_declares_m': True}
+        self.assertEqual({'sg13_lv_nmos', 'rppd'}, device_models(NMOS, rfnmos, rppd).vacask_subcircuits_with_m)
+
     def test_device_classes_with_mappings_pass(self):
         # NOTE: cap_cmim has no mapping, but no devices either
         device_models(NMOS, RPPD).check_mappings(netlist())
