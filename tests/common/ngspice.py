@@ -55,6 +55,16 @@ def run_ngspice(deck_path: str):
     assert result.returncode == 0, f"ngspice failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
 
 
+def read_wrdata(path: str) -> List[List[float]]:
+    """
+    The rows of a file of ngspice's wrdata (with set wr_singlescale and wr_vecnames):
+    the scale, then the vectors, a complex one as its real and imaginary part
+    """
+    with open(path) as f:
+        lines = f.read().splitlines()
+    return [[float(v) for v in line.split()] for line in lines[1:]]
+
+
 def ngspice_port_admittance(netlist_path: str,
                             subcircuit: str,
                             ports: Sequence[str],

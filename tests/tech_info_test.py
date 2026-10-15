@@ -206,6 +206,27 @@ class Test(unittest.TestCase):
                 tech_info = TechInfo.from_json(paths_by_tech[tech_name], dielectric_filter=None)
                 self.assertEqual(expected, tech_info.substrate_well_layer_names)
 
+    def test_shipped_tech_definitions_have_the_vacask_subcircuits_that_declare_m(self):
+        # VACASK rejects m on a subcircuit that doesn't declare it. Of the models KPEX writes m for,
+        # the IHP PNP, HBTs, Schottky and antenna diodes don't (libs.tech/vacask of IIC-OSIC-TOOLS 83ae1840458f),
+        # sky130A and gf180mcuD have no VACASK models
+        declaring = {'sg13_lv_nmos', 'sg13_hv_pmos', 'rppd', 'rsil', 'cap_cmomf', 'diodevdd_2kv', 'nmoscl_2'}
+        not_declaring = {'pnpMPA', 'dantenna', 'dpantenna', 'sg13_hv_svaricap'}
+        expected_by_tech = {'ihp-sg13g2': (declaring | {'cap_cmim', 'cap_rfcmim'},
+                                           not_declaring | {'npn13G2', 'schottky_nbl1'}),
+                            'ihp-sg13cmos5l': (declaring, not_declaring),
+                            'sky130A': (set(), set()),
+                            'gf180mcuD': (set(), set())}
+        paths_by_tech = {os.path.basename(path).removesuffix('_tech.pb.json'): path for path in tech_pbjson_paths()}
+        for tech_name, (expected_declaring, expected_not_declaring) in expected_by_tech.items():
+            with self.subTest(tech=tech_name):
+                device_models = TechInfo.from_json(paths_by_tech[tech_name], dielectric_filter=None).device_models
+                obtained = device_models.vacask_subcircuits_with_m
+                self.assertEqual(expected_declaring, expected_declaring & obtained)
+                self.assertEqual(set(), expected_not_declaring & obtained)
+                if not expected_declaring:
+                    self.assertEqual(set(), obtained)
+
     def test_shipped_mim_dielectrics_give_the_area_capacitance_of_the_device_models(self):
         # ε0·k/d of the dielectric between the plates of the MIM caps, which the device models give:
         # sky130A camimc (r+c/res_typical__cap_typical__lin.spice), IHP cap_carea (cornerCAP.lib),

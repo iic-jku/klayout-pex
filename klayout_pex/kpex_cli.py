@@ -84,6 +84,10 @@ from .magic.magic_runner import (
     prepare_magic_script,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
+from .netlist.netlist_convert import convert_to_vacask
+from .netlist.netlist_format import NetlistFormat
+from .netlist.spice_reader import SpiceReaderError
+from .netlist.vacask_writer import VacaskWriterError
 from .pex25d.artifact import (
     ArtifactFormat,
     ArtifactKind,
@@ -184,8 +188,17 @@ class KpexCLI:
                                help="Run directory path (default is '%(default)s')")
 
         if include_spice_output:
-            group_pex.add_argument("--out_spice", "-o", dest="output_spice_path", default=None,
-                                   help="Optional additional SPICE output path (default is none)")
+            group_pex.add_argument("--out_netlist", "-o", dest="output_netlist_path", default=None,
+                                   help="Optional additional output path of the netlist, "
+                                        "in the --netlist_format (default is none)")
+            # NOTE: deprecated, the name of --out_netlist before --netlist_format
+            group_pex.add_argument("--out_spice", dest="output_spice_path", default=None, help=argparse.SUPPRESS)
+            group_pex.add_argument("--netlist_format", dest="netlist_format",
+                                   default=NetlistFormat.SPICE.value, choices=[f.value for f in NetlistFormat],
+                                   help="Format of the netlist the 2.5D engine writes to --out_netlist: "
+                                        "'spice' or 'vacask' (for the VACASK simulator, converted from the "
+                                        "SPICE netlist, as 'netlist convert' does, both are written into "
+                                        "the run directory) (default is %(default)s)")
 
 
     @staticmethod
@@ -386,7 +399,7 @@ class KpexCLI:
                                     "exactly, 'ticer' also eliminates the nodes whose time constant is at most "
                                     "--reduce_tau (the error grows with the frequency, and losses are not kept). "
                                     "Written next to the netlist (*_k25d_pex_netlist_reduced.spice), "
-                                    "and to --out_spice. "
+                                    "and to --out_netlist. "
                                     + render_enum_help(topic='reduce', enum_cls=ReductionMode))
         group_25d.add_argument("--reduce_tau", dest="reduce_tau", metavar="TAU",
                                type=positive_spice_seconds, default=None,
@@ -608,6 +621,29 @@ class KpexCLI:
             if args.reduce_tau is not None and args.reduce_mode != ReductionMode.TICER:
                 error(f"--reduce_tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
                 found_errors = True
+
+            args.netlist_format = NetlistFormat(args.netlist_format)
+            if args.netlist_format != NetlistFormat.SPICE:
+                # NOTE: MAGIC writes its SPICE netlist itself, FasterCap and FastCap2 have no other format (yet)
+                other_engines = [name for name, is_run in (('MAGIC', args.run_magic),
+                                                           ('FastCap2', args.run_fastcap),
+                                                           ('FasterCap', args.run_fastercap)) if is_run]
+                if other_engines:
+                    error(f"Only the 2.5D engine writes {args.netlist_format} netlists "
+                          f"(--netlist_format {args.netlist_format}), not {', '.join(other_engines)}")
+                    found_errors = True
+
+            if args.output_spice_path is not None:
+                if args.output_netlist_path is not None:
+                    error("--out_spice is the deprecated name of --out_netlist, give --out_netlist only")
+                    found_errors = True
+                elif args.netlist_format != NetlistFormat.SPICE:
+                    error(f"--out_spice writes a SPICE netlist, not --netlist_format {args.netlist_format}, "
+                          f"use --out_netlist")
+                    found_errors = True
+                else:
+                    warning("--out_spice is deprecated, use --out_netlist")
+                    args.output_netlist_path = args.output_spice_path
 
         # check if we find magicrc
         if args.run_magic:
@@ -905,9 +941,9 @@ class KpexCLI:
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
         # FIXME: should this be already reduced?
-        if args.output_spice_path:
-            netlist_printer.write(expanded_netlist, args.output_spice_path)
-            info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+        if args.output_netlist_path:
+            netlist_printer.write(expanded_netlist, args.output_netlist_path)
+            info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
@@ -987,9 +1023,9 @@ class KpexCLI:
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
 
         if os.path.exists(output_netlist_path):
-            if args.output_spice_path and os.path.exists(output_netlist_path):
-                shutil.copy(output_netlist_path, args.output_spice_path)
-                info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+            if args.output_netlist_path and os.path.exists(output_netlist_path):
+                shutil.copy(output_netlist_path, args.output_netlist_path)
+                info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
 
             rule("MAGIC PEX SPICE netlist")
             with open(output_netlist_path, 'r') as f:
@@ -1038,9 +1074,9 @@ class KpexCLI:
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
 
         # FIXME: should this be already reduced?
-        if args.output_spice_path:
-            netlist_printer.write(expanded_netlist, args.output_spice_path)
-            info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+        if args.output_netlist_path:
+            netlist_printer.write(expanded_netlist, args.output_netlist_path)
+            info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
@@ -1106,6 +1142,7 @@ class KpexCLI:
             netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D, tech_info)
             netlist_printer.write(expanded_netlist, expanded_netlist_path)
             subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
+            self._rcx25_netlist_paths = {NetlistFormat.SPICE: expanded_netlist_path}  # NOTE: store for test case
 
             # NOTE: a defect of the RC netlist simulates to a plausible, but wrong number (#215)
             self._rcx25_netlist_problems = check_rc_netlist(  # NOTE: store for test case
@@ -1137,13 +1174,22 @@ class KpexCLI:
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
 
-            if args.output_spice_path:
-                if self._rcx25_reduced_netlist_path is not None:
-                    shutil.copyfile(self._rcx25_reduced_netlist_path, args.output_spice_path)
-                    info(f"Copied reduced SPICE netlist to: {args.output_spice_path}")
-                else:
-                    netlist_printer.write(expanded_netlist, args.output_spice_path)
-                    info(f"Copied expanded SPICE netlist to: {args.output_spice_path}")
+            # NOTE: --out_netlist gets the reduced netlist with --reduce, in the --netlist_format,
+            #       which is converted from the SPICE netlist (as 'netlist convert' does)
+            netlist_kind = 'reduced' if self._rcx25_reduced_netlist_path is not None else 'expanded'
+            netlist_path = self._rcx25_reduced_netlist_path or expanded_netlist_path
+            if args.netlist_format == NetlistFormat.VACASK:
+                netlist_path = convert_to_vacask(
+                    input_path=netlist_path,
+                    output_path=os.path.splitext(netlist_path)[0] + NetlistFormat.VACASK.file_extension,
+                    subcircuits_with_m=tech_info.device_models.vacask_subcircuits_with_m)
+                info(f"Wrote {netlist_kind} VACASK netlist to: {netlist_path}")
+                self._rcx25_netlist_paths[NetlistFormat.VACASK] = netlist_path
+
+            if args.output_netlist_path:
+                shutil.copyfile(netlist_path, args.output_netlist_path)
+                info(f"Copied {netlist_kind} {args.netlist_format.name} netlist to: "
+                     f"{args.output_netlist_path}")
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
         #       so that the marker browser could not load the report file
@@ -1365,7 +1411,7 @@ class KpexCLI:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
                     except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
-                            RCNetlistCheckError) as e:
+                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
@@ -1568,6 +1614,16 @@ class KpexCLI:
         if not hasattr(self, '_rcx25_reduced_netlist_path'):
             raise Exception('rcx25_reduced_netlist_path is not initialized, was run_kpex_2_5d_engine called?')
         return self._rcx25_reduced_netlist_path
+
+    @property
+    def rcx25_netlist_paths(self) -> Dict[NetlistFormat, str]:
+        """
+        The paths of the netlists the 2.5D engine wrote into the run directory, by format:
+        the SPICE netlist, and the one converted to the --netlist_format (of the reduced netlist with --reduce)
+        """
+        if not hasattr(self, '_rcx25_netlist_paths'):
+            raise Exception('rcx25_netlist_paths is not initialized, was run_kpex_2_5d_engine called?')
+        return self._rcx25_netlist_paths
 
     @property
     def rcx25_netlist_problems(self) -> List[str]:

@@ -26,7 +26,7 @@ Helpers to fill a kpex.tech.Technology message, one table row per call (see the 
 """
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
+from typing import List, Optional, Set, Tuple
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
@@ -429,3 +429,16 @@ def add_device_model_mapping(dmi: DeviceModelsInfo,
                                   model_name=model_name,
                                   terminal_names=terminal_names,
                                   parameters=parameters)
+
+
+def set_vacask_subcircuits_with_m(dmi: DeviceModelsInfo,
+                                  model_names: Set[str]):
+    """
+    The models whose subcircuits in the PDK's VACASK models declare the multiplier m
+    """
+    mapped_model_names = {m.model_name or m.lvs_device_class_name for m in dmi.device_model_mappings}
+    unknown = model_names - mapped_model_names
+    if unknown:
+        raise ValueError(f"No device model mapping of the models {', '.join(sorted(unknown))}")
+    for m in dmi.device_model_mappings:
+        m.vacask_declares_m = (m.model_name or m.lvs_device_class_name) in model_names

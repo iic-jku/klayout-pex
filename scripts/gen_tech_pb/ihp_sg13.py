@@ -721,6 +721,21 @@ class TechBuilder:
         #       - idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
         #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
 
+        # NOTE: the subcircuits of the VACASK models (libs.tech/vacask, which VACASK's sg13g2tovc.py and
+        #       sg13cmos5ltovc.py convert from the ngspice models) that declare the multiplier m,
+        #       as of IIC-OSIC-TOOLS 83ae1840458f (VACASK 89e888d).
+        #       VACASK rejects m on the others (e.g. pnpMPA, npn13G2, schottky_nbl1, dantenna, sg13_hv_svaricap),
+        #       while ngspice takes m on any subcircuit.
+        #       sg13g2 has no VACASK models of sg13_moscap_n and sg13_moscap_p (yet), sg13cmos5l has
+        vacask_subcircuits_with_m = {
+            'sg13_lv_nmos', 'sg13_lv_pmos', 'sg13_hv_nmos', 'sg13_hv_pmos',
+            'rsil', 'rppd', 'rhigh', 'cap_cmomf', 'cap_cmomi', 'sg13_moscap_n', 'sg13_moscap_p',
+            'diodevdd_2kv', 'diodevdd_4kv', 'diodevss_2kv', 'diodevss_4kv', 'nmoscl_2', 'nmoscl_4',
+        }
+        if self.is_g2:
+            vacask_subcircuits_with_m |= {'cap_cmim', 'cap_rfcmim'}  # NOTE: sg13g2tovc.py adds m to these
+        set_vacask_subcircuits_with_m(dmi, vacask_subcircuits_with_m)
+
     def build_substrate_info(self, si: SubstrateInfo):
         # NOTE: the PEX-LVS script connects pwell_sub (the pwell but the isolated ones) to the global net sub!
         si.net_names.append("sub!")

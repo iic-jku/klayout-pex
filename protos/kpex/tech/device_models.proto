@@ -68,6 +68,13 @@ message DeviceModelMapping {
     // parameters of the model, in the written order
     // (LVS parameters that aren't listed are not written)
     repeated DeviceModelParameter parameters = 40;
+
+    // whether the subcircuit of the model in the PDK's VACASK models declares the multiplier m
+    // (e.g. the IHP MOS, whose VACASK models VACASK's ng2vc converted from the ngspice models).
+    //
+    //     NOTE: VACASK rejects a parameter that a subcircuit doesn't declare,
+    //           so the VACASK netlist writes a device with m = N of another subcircuit as N devices
+    bool vacask_declares_m = 50;
 }
 
 message DeviceModelParameter {

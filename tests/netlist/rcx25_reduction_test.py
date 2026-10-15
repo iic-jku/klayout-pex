@@ -36,11 +36,14 @@ import numpy as np
 import pytest
 
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.netlist.netlist_cli import NetlistCLI
+from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist, reduced_netlist_path
 from klayout_pex.netlist.rc_network import RCNetwork
 from klayout_pex.netlist.rc_reduction import ReductionOptions
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import (
     approx,
     capacitance_by_component_pair,
@@ -155,11 +158,11 @@ def read_text(path: str) -> str:
     (PEXMode.RC, ['--reduce', 'floating'], ReductionOptions(ticer=False)),
     (PEXMode.R, ['--reduce', 'ticer'], ReductionOptions()),
 ])
-def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_spice(
+def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_netlist(
         mode: PEXMode, reduce_args: List[str], options: ReductionOptions, tmp_path):
-    out_spice = os.path.join(str(tmp_path), 'out.spice')
+    out_netlist = os.path.join(str(tmp_path), 'out.spice')
     cli = RCX25Extraction(pdk=extraction.pdk, pex_mode=mode, blackbox=False) \
-        .run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[*reduce_args, '--out_spice', out_spice])
+        .run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[*reduce_args, '--out_netlist', out_netlist])
 
     spice_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
     assert cli.rcx25_reduced_netlist_path == reduced_netlist_path(spice_path)
@@ -168,19 +171,41 @@ def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_sp
     expected_path = os.path.join(str(tmp_path), 'expected.spice')
     reduce_spice_netlist(spice_path, expected_path, options)
     assert read_text(cli.rcx25_reduced_netlist_path) == read_text(expected_path)
-    assert read_text(out_spice) == read_text(expected_path)
+    assert read_text(out_netlist) == read_text(expected_path)
     assert read_text(spice_path) != read_text(expected_path)
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-def test_kpex_without_reduce_writes_the_full_netlist_to_out_spice(tmp_path):
-    out_spice = os.path.join(str(tmp_path), 'out.spice')
-    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=['--out_spice', out_spice])
+def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
+    out_netlist = os.path.join(str(tmp_path), 'out.inc')
+    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
+                              extra_args=['--reduce', 'ticer', '--netlist_format', 'vacask',
+                                          '--out_netlist', out_netlist])
+
+    # NOTE: the same conversion as 'netlist convert' of the reduced netlist
+    reduced_path = cli.rcx25_reduced_netlist_path
+    vacask_path = cli.rcx25_netlist_paths[NetlistFormat.VACASK]
+    assert vacask_path == os.path.splitext(reduced_path)[0] + '.inc'
+    expected_path = os.path.join(str(tmp_path), os.path.basename(vacask_path))
+    code, output = run_cli(NetlistCLI().main, ['netlist', 'convert', '--to', 'vacask', '--pdk', extraction.pdk.name,
+                                               reduced_path, '-o', expected_path])
+    assert code == 0, output
+    assert read_text(vacask_path) == read_text(expected_path)
+    assert read_text(out_netlist) == read_text(expected_path)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('out_option', ['--out_netlist', '--out_spice'])  # NOTE: --out_spice is deprecated
+def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: str, tmp_path):
+    out_netlist = os.path.join(str(tmp_path), 'out.spice')
+    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[out_option, out_netlist])
 
     assert cli.rcx25_reduced_netlist_path is None
-    assert read_text(out_spice) == read_text(f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice")
+    assert read_text(out_netlist) == read_text(f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice")
 
 
 @allure.parent_suite(parent_suite)

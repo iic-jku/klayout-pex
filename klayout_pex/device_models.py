@@ -69,6 +69,15 @@ class DeviceModels:
         return {m.lvs_device_class_name: m for m in self.device_models.device_model_mappings}
 
     @cached_property
+    def vacask_subcircuits_with_m(self) -> Set[str]:
+        """
+        The models whose subcircuits in the PDK's VACASK models declare the multiplier m
+        (VACASK rejects m on the others)
+        """
+        return {m.model_name or m.lvs_device_class_name for m in self.device_models.device_model_mappings
+                if m.vacask_declares_m}
+
+    @cached_property
     def metal_capacitor_class_names(self) -> Set[LVSDeviceClassName]:
         """
         The LVS device classes of the metal capacitors (e.g. MIM and MOM caps),
