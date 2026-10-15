@@ -47,6 +47,7 @@ from klayout_pex.log import (
     error,
     rule
 )
+from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_convert
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
 from klayout_pex.util.argparse_helpers import render_enum_help
 from klayout_pex.version import __version__
@@ -98,6 +99,7 @@ class NetlistCLI:
                                        help="Cell (default is the top cell)")
 
         add_reduce_subcommand(subparsers)
+        add_convert_subcommand(subparsers)
 
         if arg_list is None:
             arg_list = sys.argv[1:]
@@ -227,6 +229,8 @@ class NetlistCLI:
                 self.run_netlistsvg(args)
             case 'reduce':
                 sys.exit(run_reduce_subcommand(args))
+            case 'convert':
+                sys.exit(run_convert(args))
 
 
 if __name__ == "__main__":
