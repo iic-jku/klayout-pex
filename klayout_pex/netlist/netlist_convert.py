@@ -91,19 +91,32 @@ def run_convert(args: argparse.Namespace) -> ExitCode:
         subcircuits_with_m = tech_info.device_models.vacask_subcircuits_with_m
 
     try:
-        netlist = SpiceReader().read(input_path)
+        convert_to_vacask(input_path, output_path, subcircuits_with_m)
     except SpiceReaderError as e:
         error(f"Can't read the SPICE netlist {e}")
         return ExitCode.DIAGNOSTIC_ERRORS
-
-    writer = VacaskWriter(subcircuits_with_m=subcircuits_with_m,
-                          header=[f"VACASK netlist converted by KLayout-PEX {__version__}",
-                                  f"from the SPICE netlist {os.path.basename(input_path)}"])
-    try:
-        writer.write(netlist, output_path)
     except VacaskWriterError as e:
         error(f"Can't write the SPICE netlist {input_path} as VACASK netlist: {e}")
         return ExitCode.DIAGNOSTIC_ERRORS
 
     info(f"Wrote {output_path}")
     return ExitCode.OK
+
+
+def convert_to_vacask(input_path: str,
+                      output_path: str,
+                      subcircuits_with_m: Collection[str]) -> str:
+    """
+    Converts a SPICE netlist to a VACASK netlist, for netlist convert and kpex --netlist_format vacask
+
+    :param subcircuits_with_m: see VacaskWriter
+    :return: the path written
+    :raises SpiceReaderError: if the SPICE netlist can't be read
+    :raises VacaskWriterError: if it has no VACASK equivalent (nothing is written then)
+    """
+    netlist = SpiceReader().read(input_path)
+    writer = VacaskWriter(subcircuits_with_m=subcircuits_with_m,
+                          header=[f"VACASK netlist converted by KLayout-PEX {__version__}",
+                                  f"from the SPICE netlist {os.path.basename(input_path)}"])
+    writer.write(netlist, output_path)
+    return output_path

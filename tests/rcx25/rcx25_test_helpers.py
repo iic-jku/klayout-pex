@@ -32,6 +32,7 @@ from typing import *
 import klayout.db as kdb
 
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.csv_comparison import assert_csv_matches_expected
@@ -136,6 +137,14 @@ class RCX25Extraction:
         results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
         assert results.cell_name == path_components[-1][:-len('.gds.gz')]
         return results, cli.rcx25_extracted_csv_path
+
+    def written_netlist_paths(self,
+                              *path_components,
+                              netlist_format: NetlistFormat) -> Dict[NetlistFormat, str]:
+        """
+        Extracts the single cell and returns the paths of the netlists written into the run directory
+        """
+        return self.run_kpex(*path_components, extra_args=['--netlist_format', netlist_format]).rcx25_netlist_paths
 
     def written_netlist_lines(self, *path_components) -> Tuple[List[str], List[str]]:
         """
