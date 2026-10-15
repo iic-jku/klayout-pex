@@ -37,6 +37,7 @@ import pytest
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from tests.common.cli_runner import assert_netlist_cli_loads_neither_klayout_nor_protobuf, run_cli
 from tests.common.rc_networks import (
     LINE_NETLIST,
     node_names,
@@ -48,12 +49,9 @@ parent_suite = "Unit Tests"
 tags = ("Netlist", "Reduction", "CLI")
 
 
-def run(*arguments: str) -> ExitCode:
-    try:
-        NetlistCLI().main(['netlist', 'reduce', *arguments])
-    except SystemExit as exit:
-        return ExitCode(exit.code)
-    raise AssertionError("netlist reduce returned without exit code")
+def run(*arguments: str) -> Tuple[int, str]:
+    """The exit code and the output of netlist reduce (see run_cli)"""
+    return run_cli(NetlistCLI().main, ['netlist', 'reduce', *arguments])
 
 
 @pytest.fixture
@@ -68,7 +66,7 @@ def line_node_names(path: str) -> List[str]:
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_writes_next_to_the_input_by_default(line_netlist: str):
-    assert run(line_netlist, '--ticer_tau', '1p') == ExitCode.OK
+    assert run(line_netlist, '--ticer_tau', '1p')[0] == ExitCode.OK
     assert line_node_names(os.path.splitext(line_netlist)[0] + '_reduced.spice') == ['A', 'B', 'gnd!']
 
 
@@ -76,15 +74,15 @@ def test_writes_next_to_the_input_by_default(line_netlist: str):
 @allure.tag(*tags)
 def test_options_choose_the_passes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'out' / 'reduced.spice')
-    assert run(line_netlist, '-o', output, '--ticer', 'n') == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer', 'n')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--floating', 'n', '--ticer_tau', '1e-12') == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--floating', 'n', '--ticer_tau', '1e-12')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '0.01p') == ExitCode.OK  # τ(m1) = 50 fs
+    assert run(line_netlist, '-o', output, '--ticer_tau', '0.01p')[0] == ExitCode.OK  # τ(m1) = 50 fs
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--ticer_max_degree', '1') == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--ticer_max_degree', '1')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--floating_max_degree', '1') == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--floating_max_degree', '1')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
     with open(output) as f:
         assert 'Rtie_1 plate 0 1e+12' in f.read().splitlines()
@@ -94,7 +92,7 @@ def test_options_choose_the_passes(line_netlist: str, tmp_path):
 @allure.tag(*tags)
 def test_keep_protects_nodes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--keep', 'm2', '--keep', 'PLATE') == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--keep', 'm2', '--keep', 'PLATE')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm2', 'plate']
 
 
@@ -108,45 +106,49 @@ def test_keep_protects_nodes(line_netlist: str, tmp_path):
     (['--ticer_max_degree', '0'], "argument --ticer_max_degree: must be an integer ≥ 1, got '0'"),
     (['--floating_max_degree', '2.5'], "argument --floating_max_degree: must be an integer ≥ 1, got '2.5'"),
 ])
-def test_invalid_values_are_usage_errors(line_netlist: str, capsys: pytest.CaptureFixture,
-                                         arguments: List[str], message: str):
-    assert run(line_netlist, *arguments) == ExitCode.USAGE
-    assert message in capsys.readouterr().err
+def test_invalid_values_are_usage_errors(line_netlist: str, arguments: List[str], message: str):
+    code, output = run(line_netlist, *arguments)
+    assert code == ExitCode.USAGE
+    assert message in output
     assert not os.path.exists(os.path.splitext(line_netlist)[0] + '_reduced.spice')
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_nothing_to_do_is_a_usage_error(line_netlist: str, caplog: pytest.LogCaptureFixture):
-    assert run(line_netlist, '--ticer', 'n', '--floating', 'n') == ExitCode.USAGE
-    assert 'ticer and floating are both False, there is nothing to do' in caplog.text
+def test_nothing_to_do_is_a_usage_error(line_netlist: str):
+    code, output = run(line_netlist, '--ticer', 'n', '--floating', 'n')
+    assert code == ExitCode.USAGE
+    assert 'ticer and floating are both False, there is nothing to do' in output
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_missing_input_and_overwriting_it_are_usage_errors(line_netlist: str, tmp_path,
-                                                           caplog: pytest.LogCaptureFixture):
-    assert run(str(tmp_path / 'missing.spice')) == ExitCode.USAGE
-    assert 'Input netlist not found' in caplog.text
-    assert run(line_netlist, '-o', line_netlist) == ExitCode.USAGE
-    assert 'The output would overwrite the input netlist' in caplog.text
+def test_missing_input_and_overwriting_it_are_usage_errors(line_netlist: str, tmp_path):
+    code, output = run(str(tmp_path / 'missing.spice'))
+    assert code == ExitCode.USAGE
+    assert 'Input netlist not found' in output
+    code, output = run(line_netlist, '-o', line_netlist)
+    assert code == ExitCode.USAGE
+    assert 'The output would overwrite the input netlist' in output
     with open(line_netlist) as f:
         assert f.read() == LINE_NETLIST
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_unknown_node_to_keep_is_a_usage_error(line_netlist: str, caplog: pytest.LogCaptureFixture):
-    assert run(line_netlist, '--keep', 'nosuch') == ExitCode.USAGE
-    assert 'node(s) to keep nosuch; the nodes are: A, B, gnd!, m1, m2, plate' in caplog.text
+def test_unknown_node_to_keep_is_a_usage_error(line_netlist: str):
+    code, output = run(line_netlist, '--keep', 'nosuch')
+    assert code == ExitCode.USAGE
+    assert 'node(s) to keep nosuch; the nodes are: A, B, gnd!, m1, m2, plate' in output
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_invalid_netlist_exits_one(tmp_path, caplog: pytest.LogCaptureFixture):
+def test_invalid_netlist_exits_one(tmp_path):
     path = write(str(tmp_path), 'broken.spice', LINE_NETLIST.replace('.ENDS line', ''))
-    assert run(path) == ExitCode.DIAGNOSTIC_ERRORS
-    assert '.SUBCKT line without .ENDS' in caplog.text
+    code, output = run(path)
+    assert code == ExitCode.DIAGNOSTIC_ERRORS
+    assert '.SUBCKT line without .ENDS' in output
 
 
 @allure.parent_suite(parent_suite)
@@ -169,15 +171,5 @@ def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_reduce_loads_neither_klayout_nor_the_protobuf(line_netlist: str, tmp_path):
-    # NOTE: a fresh process, as the tests have loaded both; the reduction is format-only (AGENTS.md)
-    output = os.path.join(str(tmp_path), 'out.spice')
-    script = ("import sys\n"
-              "from klayout_pex.netlist.netlist_cli import NetlistCLI\n"
-              "try:\n"
-              f"    NetlistCLI().main(['netlist', 'reduce', {line_netlist!r}, '-o', {output!r}])\n"
-              "except SystemExit as exit:\n"
-              "    assert exit.code == 0, exit.code\n"
-              "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'klayout_pex_protobuf'))\n"
-              "assert not loaded, loaded\n")
-    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True)
-    assert result.returncode == 0, result.stderr
+    assert_netlist_cli_loads_neither_klayout_nor_protobuf(
+        ['netlist', 'reduce', line_netlist, '-o', os.path.join(str(tmp_path), 'out.spice')])
