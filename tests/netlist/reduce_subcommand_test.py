@@ -100,7 +100,8 @@ def test_keep_protects_nodes(line_netlist: str, tmp_path):
 @allure.tag(*tags)
 @pytest.mark.parametrize('arguments, message', [
     (['--ticer_tau', '0'], "argument --ticer_tau: must be > 0 s, got '0'"),
-    (['--ticer_tau', '-1p'], "argument --ticer_tau: must be > 0 s, got '-1p'"),
+    # NOTE: with '=', as Python 3.12's argparse reads '-1p' as an option
+    (['--ticer_tau=-1p'], "argument --ticer_tau: must be > 0 s, got '-1p'"),
     (['--ticer_tau', 'fast'], "argument --ticer_tau: Not a SPICE number: 'fast' (examples of valid numbers: "
                               "'1.5', '2e-15', '0.1p', '10k', '1Meg')"),
     (['--ticer_max_degree', '0'], "argument --ticer_max_degree: must be an integer ≥ 1, got '0'"),
