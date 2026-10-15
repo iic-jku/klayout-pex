@@ -150,6 +150,23 @@ def cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire() -> Pattern:
     return p
 
 
+#
+# Net name patterns
+#
+
+def net_names_A_and_a_m2() -> Pattern:
+    """
+    Two met2 wires of 20 µm x 0.5 µm, 1 µm apart, the nets A and a,
+    which SPICE reads as one, as it reads names case-insensitively
+    """
+    p = pattern('net_names_A_and_a_m2')
+    p.box(MET2, 0, 0, 20000, 500)
+    p.label(MET2, 'A', 100, 100)
+    p.box(MET2, 0, 1500, 20000, 2000)
+    p.label(MET2, 'a', 100, 1600)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
@@ -162,6 +179,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_mim_m3_20um_x_20um_over_m2_wire':
         lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
     'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
+    'net_names_A_and_a_m2': net_names_A_and_a_m2,
 }
 
 

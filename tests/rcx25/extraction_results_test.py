@@ -497,6 +497,23 @@ class CellExtractionResultsTest(unittest.TestCase):
                           NetCoupleKey('D$1', 'X'): 0.6,
                           NetCoupleKey('D$1', 'D,X'): LABEL_TIE_RESISTANCE}, summary.resistances)
 
+    def test_summarize_the_port_of_a_label_is_unique_regardless_of_case(self):
+        # the label D is the name of the net d too, for SPICE, which reads names case-insensitively
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'd',
+                         nodes=[(1, K.KIND_PIN, 'd'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 0.5)])
+        self.add_network(results, 'D,X',
+                         nodes=[(1, K.KIND_PIN, 'D'),
+                                (2, K.KIND_PIN, 'X')],
+                         elements=[(1, 2, 0.6)])
+
+        summary = results.summarize()
+
+        self.assertEqual({'D,X': ['D$1', 'X']}, summary.label_ports)
+
     def test_summarize_a_net_of_labels_only_is_tied_to_its_first_label(self):
         # a wire between the labels A and B: no node carries the net's name A,B,
         # so the node of A is tied to it, rather than leaving the net (e.g. its capacitances) off the network

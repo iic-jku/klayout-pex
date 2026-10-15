@@ -219,9 +219,12 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
             problems.append(f"net {lvs_net.expanded_name()} has no port")
 
     # the capacitances between each pair of nets are the ones of the summary
-    # NOTE: the summary names the nodes, which must be unique for that
-    name_counts = Counter(net.expanded_name() for net in nets)
-    duplicate_names = sorted(name for name, count in name_counts.items() if count > 1)
+    # NOTE: the summary names the nodes, which must be unique for that,
+    #       also regardless of case, as SPICE reads names (ngspice joins the nets d and D)
+    names_by_key: Dict[str, List[NetName]] = defaultdict(list)
+    for net in nets:
+        names_by_key[net.expanded_name().casefold()].append(net.expanded_name())
+    duplicate_names = sorted(name for names in names_by_key.values() if len(names) > 1 for name in set(names))
     if duplicate_names:
         problems.append(f"nets have the same name: {', '.join(duplicate_names)}")
     rc_net_by_name = {net.expanded_name(): net for net in nets}

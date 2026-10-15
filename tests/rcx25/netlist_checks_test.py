@@ -230,6 +230,12 @@ class Test(unittest.TestCase):
         rc.circuit.create_net('D')
         self.assertEqual(['nets have the same name: D'], self.check(rc, {}))
 
+    def test_nets_of_the_same_name_regardless_of_case(self):
+        # NOTE: SPICE reads names case-insensitively, ngspice joins the nets d and D
+        rc = self.rc_netlist()
+        rc.circuit.create_net('d')
+        self.assertEqual(['nets have the same name: D, d'], self.check(rc, {}))
+
     def test_capacitances_to_the_substrate_are_on_its_net(self):
         # the summary has them on VSUBS, the netlist on the substrate net B, but the one of B itself, shorted
         rc = self.rc_netlist()

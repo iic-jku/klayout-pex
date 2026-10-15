@@ -402,11 +402,11 @@ class CellExtractionResults:
 
         NOTE: KLayout names a net of several labels after all of them (e.g. "A,B"),
               but each label is a port of its own (#211 §11), named after the label,
-              unless a net or another port is (e.g. A$1, like KLayout's SPICE writer)
+              unless a net or another port is, regardless of case (e.g. A$1, like KLayout's SPICE writer)
         """
         K = r_network_pb2.RNode.Kind
         networks = sorted(self.r_extraction_result.networks, key=lambda n: n.net_name)
-        taken_names: Set[NetName] = {network.net_name for network in networks}
+        taken_names: Set[NetName] = {network.net_name.casefold() for network in networks}  # NOTE: case-folded
         port_names_by_net: Dict[NetName, Dict[str, NetName]] = {}
         for network in networks:
             labels = sorted({n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN})
@@ -415,7 +415,7 @@ class CellExtractionResults:
             port_names: Dict[str, NetName] = {}
             for label in labels:
                 port_names[label] = unique_name(label, taken_names)
-                taken_names.add(port_names[label])
+                taken_names.add(port_names[label].casefold())
             port_names_by_net[network.net_name] = port_names
         return port_names_by_net
 

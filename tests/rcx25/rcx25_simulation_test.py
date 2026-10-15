@@ -23,8 +23,8 @@
 #
 
 """
-The RC netlists of test patterns, simulated in ngspice and Xyce: their port admittance is the one
-of the R and C elements they have, as SpiceRCNetlist reads them
+The RC netlists of test patterns as SPICE simulators read them: simulated in ngspice and Xyce, their port
+admittance is the one of the R and C elements they have, as SpiceRCNetlist reads them (case-insensitively)
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ import pytest
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
-from tests.common.rc_networks import port_admittance
+from tests.common.rc_networks import node_names, port_admittance, value_of
 from tests.common.xyce import xyce_executable, xyce_port_admittance
 from tests.rcx25.rcx25_test_helpers import PDKName, PDKTestConfig, RCX25Extraction
 
@@ -88,3 +88,15 @@ def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(simulator: 
         y_expected = port_admittance(scope.network, nodes, f)[:len(scope.ports), :len(scope.ports)]
         # NOTE: to the 9 digits the simulators write
         assert np.linalg.norm(y_f - y_expected) <= 1e-7 * np.linalg.norm(y_expected), f
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_nets_whose_names_differ_in_case_only_stay_apart_in_spice():
+    # NOTE: SPICE reads names case-insensitively, ngspice would join the wires A and a, and short their coupling
+    cli = extraction.run_kpex('test_patterns', 'net_names_A_and_a_m2.gds.gz')
+    netlist_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
+    scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.network.nodes())
+    assert node_names(scope.network) == ['A', 'a$1', 'sky130_gnd']
+    assert value_of(scope.network, 'A', 'a$1')[1] > 0.0
