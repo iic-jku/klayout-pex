@@ -34,7 +34,7 @@ import pytest
 
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
 from klayout_pex.netlist.rc_reduction import ReductionOptions
-from tests.common.ngspice_ac import ngspice_executable, ngspice_port_admittance
+from tests.common.ngspice import ngspice_executable, ngspice_port_admittance
 from tests.common.rc_networks import port_admittance, random_extracted_network, spice_subcircuit, write
 
 parent_suite = "kpex/netlist reduce"
