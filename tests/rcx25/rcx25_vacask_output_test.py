@@ -28,21 +28,26 @@ from typing import *
 import allure
 import pytest
 
-from rcx25_test_helpers import *
 from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.netlist.spice_reader import SpiceReader
-from tests.common.ngspice import ngspice_executable, read_wrdata, run_ngspice
+from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.ngspice import read_wrdata, requires_ngspice, run_ngspice, write_spiceinit
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.vacask import (
-    VACASK_EXE,
     assert_same_nets_and_values,
     read_ascii_raw,
     read_vacask_subcircuits,
+    requires_vacask,
     run_vacask,
+    write_vacaskrc,
 )
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 
 parent_suite = "kpex/2.5D Extraction Tests [VACASK netlist]"
 tags = ("PEX", "2.5D", "VACASK")
+
+IHP_SG13G2 = PDKTestConfig(PDKName.IHP_SG13G2)
 
 
 def vacask_and_spice_netlists(extraction: RCX25Extraction, *path_components) -> Tuple[str, str]:
@@ -84,7 +89,7 @@ def test_rc_netlist_of_wire_with_t_junction_sky130A():
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_rc_netlist_of_nmos_ihp_sg13g2():
-    extraction = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.RC, blackbox=True)
+    extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=True)
     text = assert_vacask_netlist_is_the_spice_netlist(extraction, 'test_patterns', 'nmos_metal1_redux.gds.gz')
     mos = [i for i in read_vacask_subcircuits(text)['nmos_metal1_redux'].instances.values()
            if i.master == 'sg13_lv_nmos']
@@ -96,40 +101,30 @@ def test_rc_netlist_of_nmos_ihp_sg13g2():
 @pytest.mark.slow
 def test_rc_netlist_of_rfcmim_ihp_sg13g2():
     # NOTE: the VACASK subcircuit cap_rfcmim of the IHP PDK declares m
-    extraction = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.RC, blackbox=True)
+    extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=True)
     text = assert_vacask_netlist_is_the_spice_netlist(extraction, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
     caps = [i for i in read_vacask_subcircuits(text)['rfcmim'].instances.values() if i.master == 'cap_rfcmim']
     assert len(caps) == 1
     assert caps[0].parameters['m'] == '1'
 
 
-IHP_SG13G2_DIR = os.path.join(os.environ.get('PDK_ROOT', ''), 'ihp-sg13g2')
-
-requires_ihp_simulators = pytest.mark.skipif(
-    VACASK_EXE is None or ngspice_executable() is None
-    or not os.path.isdir(os.path.join(IHP_SG13G2_DIR, 'libs.tech', 'vacask'))
-    or not os.path.isfile(os.path.join(IHP_SG13G2_DIR, 'libs.tech', 'ngspice', '.spiceinit')),
-    reason='needs vacask and ngspice on PATH, and the VACASK and ngspice models of $PDK_ROOT/ihp-sg13g2'
-)
-
-
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-@requires_ihp_simulators
+@requires_vacask
+@requires_ngspice
+@IHP_SG13G2.requires_simulator_models('vacask', 'ngspice')
 def test_vacask_simulates_the_rc_netlist_of_an_nmos_as_ngspice_ihp_sg13g2():
     # NOTE: the diode-connected NMOS between VDD and VSS, with the parasitic resistances and capacitances,
     #       in VACASK (with the VACASK models of the PDK) and in ngspice (with its ngspice models)
-    extraction = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.RC, blackbox=True)
+    extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=True)
     vacask_path, spice_path = vacask_and_spice_netlists(extraction, 'nmos_diode2', 'nmos_diode2.gds.gz')
     run_dir = os.path.join(os.path.dirname(vacask_path), 'simulation')
     os.makedirs(run_dir, exist_ok=True)
-    vacask_models = os.path.join(IHP_SG13G2_DIR, 'libs.tech', 'vacask')
-    ngspice_models = os.path.join(IHP_SG13G2_DIR, 'libs.tech', 'ngspice')
+    vacask_models = IHP_SG13G2.simulator_models_dir('vacask')
+    ngspice_models = IHP_SG13G2.simulator_models_dir('ngspice')
 
-    # NOTE: the VACASK models of the PDK load their devices (OSDI) by name, from the module path
-    with open(os.path.join(run_dir, '.vacaskrc.toml'), 'w') as f:
-        f.write(f'[Paths]\nmodule_path_prefix = [ "{vacask_models}/osdi" ]\n')
+    write_vacaskrc(run_dir, vacask_models)
     with open(os.path.join(run_dir, 'tb.sim'), 'w') as f:
         f.write(f"""nmos_diode2 in VACASK
 
@@ -149,11 +144,7 @@ endc
 """)
     run_vacask(os.path.join(run_dir, 'tb.sim'))
 
-    # NOTE: the ngspice models of the PDK need their devices (OSDI), which its .spiceinit loads
-    with open(os.path.join(ngspice_models, '.spiceinit')) as f:
-        spiceinit = f.read().replace('$PDK_ROOT/$PDK', IHP_SG13G2_DIR)
-    with open(os.path.join(run_dir, '.spiceinit'), 'w') as f:
-        f.write(spiceinit)
+    write_spiceinit(run_dir, ngspice_models)
     with open(os.path.join(run_dir, 'tb.cir'), 'w') as f:
         f.write(f"""nmos_diode2 in ngspice
 .lib {ngspice_models}/models/cornerMOSlv.lib mos_tt

@@ -46,6 +46,20 @@ def ngspice_executable() -> Optional[str]:
 requires_ngspice = pytest.mark.skipif(ngspice_executable() is None, reason='ngspice is not on PATH')
 
 
+def write_spiceinit(run_dir: str, models_dir: str):
+    """
+    Writes the .spiceinit of the ngspice models of a PDK into the run directory, where ngspice reads it
+    (e.g. to load the devices of the models), with the directory of the PDK for its $PDK_ROOT/$PDK
+
+    :param models_dir: e.g. the one of PDKTestConfig.simulator_models_dir('ngspice')
+    """
+    pdk_dir = os.path.dirname(os.path.dirname(models_dir))  # NOTE: <PDK>/libs.tech/ngspice
+    with open(os.path.join(models_dir, '.spiceinit')) as f:
+        spiceinit = f.read().replace('$PDK_ROOT/$PDK', pdk_dir)
+    with open(os.path.join(run_dir, '.spiceinit'), 'w') as f:
+        f.write(spiceinit)
+
+
 def run_ngspice(deck_path: str):
     """
     Runs the deck in batch mode in its directory (where ngspice reads .spiceinit)
