@@ -35,6 +35,8 @@ from typing import *
 
 import numpy as np
 
+from tests.common.port_admittance_bench import port_admittance_bench, port_admittance_from_currents
+
 
 def ngspice_executable() -> Optional[str]:
     return shutil.which('ngspice')
@@ -55,8 +57,7 @@ def ngspice_port_admittance(netlist_path: str,
                             decades: Tuple[int, int],
                             work_dir: str) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Y(f) of the subcircuit's ports, by an AC analysis of one instance per port:
-    that port driven by an AC voltage of 1 V, the others at 0 V; the currents into the ports are the columns of Y.
+    Y(f) of the subcircuit's ports, by an AC analysis of the bench of port_admittance_bench
 
     :param ports: all ports of the subcircuit, in the order of its .SUBCKT line
     :param decades: frequencies 10**decades[0] … 10**decades[1] Hz, one point per decade
@@ -66,19 +67,11 @@ def ngspice_port_admittance(netlist_path: str,
     name = os.path.splitext(os.path.basename(netlist_path))[0]
     bench_path = os.path.join(work_dir, f"{name}_ac.cir")
     data_path = os.path.join(work_dir, f"{name}_ac.txt")
-    lines = [f"* port admittance of {subcircuit}", f".include {os.path.abspath(netlist_path)}"]
-    sources = []
-    for driven in range(count):
-        nodes = [f"p{driven}_{port}" for port in range(count)]
-        lines.append(f"Xdut{driven} {' '.join(nodes)} {subcircuit}")
-        for port, node in enumerate(nodes):
-            source = f"v{driven}_{port}"
-            lines.append(f"{source} {node} 0 DC 0 AC {1 if port == driven else 0}")
-            sources.append(f"{source}#branch")
+    lines, sources = port_admittance_bench(os.path.abspath(netlist_path), subcircuit, count)
     lines += [".control",
               "set wr_singlescale",
               f"ac dec 1 1e{decades[0]} 1e{decades[1]}",
-              f"wrdata {data_path} {' '.join(sources)}",
+              f"wrdata {data_path} {' '.join(f'{source}#branch' for source in sources)}",
               ".endc",
               ".end"]
     with open(bench_path, 'w') as f:
@@ -91,9 +84,4 @@ def ngspice_port_admittance(netlist_path: str,
     frequencies = data[:, 0]
     # NOTE: with wr_singlescale, the columns are the frequency, then real and imaginary part of each vector
     currents = data[:, 1::2] + 1j * data[:, 2::2]
-    y = np.zeros((len(frequencies), count, count), dtype=complex)
-    for driven in range(count):
-        for port in range(count):
-            # NOTE: a source's branch current flows from its + node through it, i.e. out of the port
-            y[:, port, driven] = -currents[:, driven * count + port]
-    return frequencies, y
+    return frequencies, port_admittance_from_currents(currents, count)
