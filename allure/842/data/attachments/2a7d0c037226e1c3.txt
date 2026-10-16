@@ -1,0 +1,20 @@
+WARNING  __kpex__:kpex_cli.py:1368 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1405 main extract --pdk gf180mcuD --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/r_contact_1x1_minsize_via1.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:672 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:712 No explicit top cell specified, using top cell 'r_contact_1x1_minsize_via1'
+INFO     __kpex__:kpex_cli.py:753 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1303 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1304 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/r_contact_1x1_minsize_via1.gds.gz/r_contact_1x1_minsize_via1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1539 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1539 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1539 (36, 0) -> (metal2_con)
+INFO     __kpex__:extractor.py:294 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1127 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1127 C1;BOT;VSUBS;0.064;
+SUBPROCESS __kpex__:kpex_cli.py:1127 C2;TOP;VSUBS;0.051;
+SUBPROCESS __kpex__:kpex_cli.py:1127 R1;BOT;BOT,TOP;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1127 R2;BOT;TOP;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1130 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_contact_1x1_minsize_via1__r_contact_1x1_minsize_via1/r_contact_1x1_minsize_via1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1146 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_contact_1x1_minsize_via1__r_contact_1x1_minsize_via1/r_contact_1x1_minsize_via1_k25d_pex_netlist.spice
