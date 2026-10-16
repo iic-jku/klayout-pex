@@ -136,11 +136,12 @@ class TechBuilder:
             #       the capacitance between the plates, but not the ones to the substrate and to other nets,
             #       which the plates also shield (e.g. a wire below), so with --blackbox, these are extracted.
             #       The model of the rfcmim has the one of its Metal5 to the substrate too (Cox), its terminal bn,
-            #       so all of its Metal5 is a plate (metal5_rfcap and metal5_rfcap_feed)
+            #       so all of its Metal5 is a plate (metal5_rfcap and metal5_rfcap_feed).
+            #       The Metal5 under its MIM (metal5_rfcap) is the stack's metal5_cap, as the one of the cmim
             add_computed_layer(tech, VIA,   KPLT, "mim_via",        (125, 10),    "TopVia1",   "mim_via",       "Original TopVia1 is 125/0, case MiM cap")
             add_computed_layer(tech, MIM,   KPLT, "metal5_cap",     (67, 0),      "Metal5",    "metal5_cap",    "Computed layer for Metal5, case MiM cap")
             add_computed_layer(tech, MIM,   KPLT, "cmim_top",       (36, 0),      "MIM",       "cmim_top",      "Computed layer for MiM cap above Metal5")
-            add_computed_layer(tech, MIM,   KPLT, "metal5_rfcap",   (67, 0),      "Metal5",    "metal5_n_cap",  "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
+            add_computed_layer(tech, MIM,   KPLT, "metal5_rfcap",   (67, 0),      "Metal5",    "metal5_cap",    "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
             add_computed_layer(tech, METAL, KPLT, "metal5_rfcap_feed", (67, 0),   "Metal5",    "metal5_n_cap",  "Computed layer for the rest of the Metal5 of the rfcmim (enclosure, feed)")
             add_computed_layer(tech, MIM,   KPLT, "rfmim_top",      (36, 0),      "MIM",       "cmim_top",      "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
 
