@@ -23,7 +23,7 @@
 #
 
 """
-The convert subcommand of the netlist tool: a SPICE netlist to a VACASK netlist.
+The convert subcommand of the netlist tool: a SPICE netlist to the netlist format of another simulator.
 
 NOTE: imports neither KLayout nor generated protobuf code (but for the tech info of --pdk)
 """
@@ -33,6 +33,9 @@ import argparse
 import os
 from typing import *
 
+import rich.console
+import rich.markdown
+import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import error, info
@@ -45,31 +48,42 @@ from .spice_reader import SpiceReader, SpiceReaderError
 from .vacask_writer import VacaskWriter, VacaskWriterError
 
 
-CONVERSION_FORMATS = (NetlistFormat.VACASK,)
+CONVERSION_FORMATS: Dict[NetlistFormat, str] = {
+    NetlistFormat.VACASK: "to be included by a VACASK testbench. A subcircuit call with m = N becomes N calls, "
+                          "unless the subcircuit declares m: `--pdk` tells which of the PDK's models do "
+                          "(e.g. the MOS)",
+}
+"""The formats a SPICE netlist converts to, with what the help says about each"""
+
+
+def _formats_epilog() -> rich.console.Group:
+    formats = '\n'.join(f"- `{f.value}` (`{f.file_extension}`): {text}" for f, text in CONVERSION_FORMATS.items())
+    return rich.console.Group(rich.text.Text('Formats:', style='argparse.groups'),
+                              rich.markdown.Markdown(formats, style='argparse.text'))
 
 
 def add_convert_subcommand(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
         'convert',
-        help="Convert a SPICE netlist to another format (VACASK)",
-        description="Convert a SPICE netlist (e.g. an extracted one) to another format. "
+        help="Convert a SPICE netlist to the netlist format of another simulator",
+        description="Convert a SPICE netlist (e.g. an extracted one) to the netlist format of another simulator. "
                     "Reads the elements R, C, L, K, D, M, V, I, E, F, G, H and X, "
                     "subcircuits and .global, with numbers as values "
                     "(no parameters, expressions, models, includes or analyses)",
+        epilog=_formats_epilog(),
         formatter_class=RichHelpFormatter)
     parser.add_argument('input_netlist_path',
                         help="Path to the input SPICE netlist")
     parser.add_argument('--to', dest='output_format', required=True,
                         choices=[f.value for f in CONVERSION_FORMATS],
-                        help="Format of the output netlist")
+                        help="Format of the output netlist, see the formats below")
     add_argument_with_former_name(parser, '--out-netlist', '--output', '-o', dest='output_path', default=None,
                                   help="Path of the output netlist (default is the input path "
-                                       "with the extension of the format, e.g. .inc for VACASK)")
+                                       "with the extension of the format, see the formats below)")
     all_pdk_choices = [p.value for p in PDK] + list(PDK.legacy_aliases().keys())
     parser.add_argument('--pdk', dest='pdk', default=None, choices=all_pdk_choices,
-                        help="PDK of the netlist, whose VACASK subcircuits that declare m "
-                             "(e.g. the MOS) are called with m = N, "
-                             "other subcircuits N times (default is none, all of them N times)")
+                        help="PDK of the netlist: the output calls its devices as the PDK's models "
+                             "of that format declare them (default is none, see the formats below)")
 
 
 def run_convert(args: argparse.Namespace) -> ExitCode:
