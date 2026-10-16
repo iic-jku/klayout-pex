@@ -61,3 +61,17 @@ def test_log_files_hold_their_own_run_only(gds_path: Optional[str], log_dir: str
         with open(tmp_path / 'first' / log_dir / log_name) as f:
             log = f.read()
         assert log.count('GDS input file passed, running in LVS mode') == 1, log
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX25D")
+def test_pex25d_outputs_are_named_as_their_kind(tmp_path):
+    # NOTE: the readers take the kind from the name, binary protobuf doesn't record it (#328)
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A', '--gds', str(tmp_path / 'missing.gds'),
+                                            '--out-dir', str(tmp_path),
+                                            '--out-file', 'x.pex25d.scene.pb', '--out-scene', 'x.scene.pex25d.pb'])
+    assert code == 1, output
+    assert ("--out-file x.pex25d.scene.pb is named as a PEX25D scene (.pex25d.scene.pb), which pex25d would read it as; "
+            "name a file with one of: .pex25d, .pex25d.pb, .pex25d.textpb") in output
+    assert ("--out-scene x.scene.pex25d.pb is named as a PEX25D file (.pex25d.pb), which pex25d would read it as; "
+            "name a scene with one of: .pex25d.scene.pb, .pex25d.scene.textpb") in output

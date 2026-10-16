@@ -31,7 +31,7 @@ import unittest
 
 from klayout_pex.pex25d.artifact import (
     ArtifactFormat, ArtifactKind, ArtifactNamingError, STDIO_PATH,
-    infer_artifact_spec,
+    infer_artifact_spec, named_kind_and_format,
 )
 from klayout_pex.pex25d.codec import load_artifact, save_artifact
 from klayout_pex.pex25d.resolver import resolve
@@ -58,6 +58,12 @@ class Pex25DArtifactTest(unittest.TestCase):
             with self.subTest(path=path):
                 spec = infer_artifact_spec(path)
                 assert (spec.kind, spec.format, spec.gzipped) == (kind, format, gzipped)
+
+    def test_a_name_says_kind_and_format_by_its_suffix_only(self):
+        assert named_kind_and_format('x.pex25d.scene.pb.gz') == (ArtifactKind.SCENE, ArtifactFormat.PB)
+        assert named_kind_and_format('x.scene.pex25d.pb') == (ArtifactKind.FILE, ArtifactFormat.PB)
+        assert named_kind_and_format('/tmp/whatever.dat') is None
+        assert named_kind_and_format(STDIO_PATH) is None
 
     def test_an_unconventional_name_has_to_be_stated(self):
         with self.assertRaises(ArtifactNamingError):

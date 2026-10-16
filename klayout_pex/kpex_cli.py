@@ -89,10 +89,12 @@ from .netlist.netlist_format import NetlistFormat
 from .netlist.spice_reader import SpiceReaderError
 from .netlist.vacask_writer import VacaskWriterError
 from .pex25d.artifact import (
+    CANONICAL_SUFFIX,
     ArtifactFormat,
     ArtifactKind,
     ArtifactNamingError,
     infer_artifact_spec,
+    named_kind_and_format,
 )
 from .klayout.pex25d_builder import DEFAULT_GRID_UM
 from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
@@ -801,6 +803,16 @@ class KpexCLI:
             except ArtifactNamingError as e:
                 error(str(e))
                 found_errors = True
+
+            # NOTE: the name says the kind too, which the readers go by (binary protobuf doesn't record it)
+            for option, path, kind in (('--out-file', args.pex25d_file_path, ArtifactKind.FILE),
+                                       ('--out-scene', args.pex25d_scene_path, ArtifactKind.SCENE)):
+                named = named_kind_and_format(path) if path is not None else None
+                if named is not None and named[0] != kind:
+                    suffixes = [suffix for (k, _), suffix in CANONICAL_SUFFIX.items() if k == kind]
+                    error(f"{option} {path} is named as a PEX25D {named[0].value} ({CANONICAL_SUFFIX[named]}), "
+                          f"which pex25d would read it as; name a {kind.value} with one of: {', '.join(suffixes)}")
+                    found_errors = True
 
         # KLayout runs the LVS script, which the MAGIC wrapper does not need
         # ("no need to run LVS etc if only running magic engine") and which an
