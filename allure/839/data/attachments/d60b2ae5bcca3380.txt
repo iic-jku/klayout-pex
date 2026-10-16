@@ -1,0 +1,40 @@
+WARNING  __kpex__:kpex_cli.py:1366 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1402 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.gds.gz --out_dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:663 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:703 No explicit top cell specified, using top cell 'cap_cmim_20um_x_20um_over_m4_wire'
+INFO     __kpex__:kpex_cli.py:744 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1301 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1302 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.gds.gz/cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1535 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1535 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1535 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:1535 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1535 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1535 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1535 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:1535 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:1535 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:extractor.py:294 LVSDB: found 3pins
+SUBPROCESS __kpex__:kpex_cli.py:1125 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1125 C1;A;B.$1.TopMetal1;0.61;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C2;A;B.P0.MIM;51.158;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C3;A;D;0.374;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C4;A;VSUBS;1.177;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C5;A.P0.Metal5;B;0.789;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C6;A.P0.Metal5;B.$1.TopMetal1;1.261;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C7;A.P0.Metal5;B.P0.MIM;552.008;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C8;A.P0.Metal5;D;4.969;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C9;A.P0.Metal5;VSUBS;5.165;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C10;B;D;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C11;B;VSUBS;0.682;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C12;B.$1.TopMetal1;D;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C13;B.$1.TopMetal1;VSUBS;1.662;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C14;D;VSUBS;3.462;
+SUBPROCESS __kpex__:kpex_cli.py:1125 R1;A;A.P0.Metal5;;0.043
+SUBPROCESS __kpex__:kpex_cli.py:1125 R2;B;B.$1.TopMetal1;;0.007
+SUBPROCESS __kpex__:kpex_cli.py:1125 R3;B.$1.TopMetal1;B.P0.MIM;;2.2
+SUBPROCESS __kpex__:kpex_cli.py:1128 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1144 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.spice

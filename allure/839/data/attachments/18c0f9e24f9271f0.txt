@@ -1,0 +1,43 @@
+WARNING  __kpex__:kpex_cli.py:1366 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1402 main extract --pdk ihp-sg13g2 --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz --out_dir /tmp/tmpkcscp303 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:663 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:703 No explicit top cell specified, using top cell 'nmos_metal1_redux_two_drain_labels'
+INFO     __kpex__:kpex_cli.py:744 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1301 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1302 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz/nmos_metal1_redux_two_drain_labels.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1535 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1535 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1535 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1535 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1535 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1535 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1535 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:1535 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:extractor.py:294 LVSDB: found 3pins
+SUBPROCESS __kpex__:kpex_cli.py:1125 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1125 C1;$1;D,X.$0.Metal1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C2;$1;S.$0.Metal1;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C3;$1;VSUBS;0.048;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C4;$1.$0.GatPoly;D;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C5;$1.$0.GatPoly;VSUBS;0.052;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C6;$1.$1.Metal1;D;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C7;$1.$1.Metal1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C8;D;VSUBS;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C9;D,X;S.$0.Metal1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C10;D,X.$0.Metal1;S.$0.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C11;D,X.$0.Metal1;VSUBS;0.029;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C12;S;VSUBS;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C13;S.$0.Metal1;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C14;S.$0.Metal1;X;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1125 C15;VSUBS;X;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1125 R1;$1;$1.$0.GatPoly;;33.654
+SUBPROCESS __kpex__:kpex_cli.py:1125 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1125 R3;D;D,X.$0.Metal1;;0.488
+SUBPROCESS __kpex__:kpex_cli.py:1125 R4;D,X;D,X.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1125 R5;D,X.$0.Metal1;X;;0.089
+SUBPROCESS __kpex__:kpex_cli.py:1125 R6;S;S.$0.Metal1;;0.598
+SUBPROCESS __kpex__:kpex_cli.py:1125 R7;S.$0.Metal1;S.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1128 /tmp/tmpkcscp303/nmos_metal1_redux_two_drain_labels__nmos_metal1_redux_two_drain_labels/nmos_metal1_redux_two_drain_labels_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1144 Wrote expanded netlist to: /tmp/tmpkcscp303/nmos_metal1_redux_two_drain_labels__nmos_metal1_redux_two_drain_labels/nmos_metal1_redux_two_drain_labels_k25d_pex_netlist.spice
