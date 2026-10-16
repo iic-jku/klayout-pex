@@ -70,6 +70,16 @@ def tech_with_duplicates() -> tech_pb2.Technology:
     return tech
 
 
+def write_tech_def(directory: str, tech: tech_pb2.Technology) -> str:
+    """
+    :return: the path of the JSON file of the tech definition, as the generator writes it
+    """
+    path = os.path.join(directory, f"{tech.name}_tech.pb.json")
+    with open(path, 'w') as f:
+        f.write(google.protobuf.json_format.MessageToJson(tech))
+    return path
+
+
 def tech_with_metal_on_one_gds_pair(stack_layer_names: Sequence[str],
                                     process_layer_name_by_lvs_layer_name: Dict[str, str]) -> tech_pb2.Technology:
     """
@@ -327,11 +337,17 @@ class Test(unittest.TestCase):
 
     def test_the_reader_refuses_a_duplicate(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
-            path = os.path.join(tmp_dir, 'duplicates_tech.pb.json')
-            with open(path, 'w') as f:
-                f.write(google.protobuf.json_format.MessageToJson(tech_with_duplicates()))
             with self.assertRaises(TechDefError):
-                TechInfo.parse_tech_def(path)
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech_with_duplicates()))
+
+    def test_the_reader_refuses_a_layer_of_the_stack_off_the_gds_pair_of_the_lvs_layer_naming_it(self):
+        # NOTE: kpex looks up the layers of the stack after reading, where it can't report a TechDefError
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
+                                               {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': 'met4'})
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaisesRegex(TechDefError, r"but in .*test_tech\.pb\.json\n"
+                                                      r"  - the LVS computed layer met5_rfcap names the layer met4 "):
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
@@ -353,7 +369,7 @@ class Test(unittest.TestCase):
     def test_an_lvs_layer_on_a_gds_pair_of_the_stack_names_its_layer(self):
         tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
                                                {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': ''})
-        with self.assertRaisesRegex(TechDefError, r"The LVS computed layer met5_rfcap names no layer of the process "
+        with self.assertRaisesRegex(TechDefError, r"the LVS computed layer met5_rfcap names no layer of the process "
                                                   r"stack, but the layers of the stack on its GDS pair \(67, 0\) "
                                                   r"are: met5_ncap, met5_cap"):
             _ = TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name
@@ -361,16 +377,24 @@ class Test(unittest.TestCase):
     def test_an_lvs_layer_names_a_layer_of_the_stack_on_its_gds_pair(self):
         tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
                                                {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': 'met4'})
-        with self.assertRaisesRegex(TechDefError, r"The LVS computed layer met5_rfcap names the layer met4 "
+        with self.assertRaisesRegex(TechDefError, r"the LVS computed layer met5_rfcap names the layer met4 "
                                                   r"of the process stack, but the layers of the stack "
                                                   r"on its GDS pair \(67, 0\) are: met5_ncap, met5_cap"):
             _ = TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name
 
+    def test_an_lvs_layer_names_no_layer_of_the_stack_where_the_stack_has_none_on_its_gds_pair(self):
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap'], {'met5_ncap': 'met5_ncap'})
+        tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name='met5_pin',
+                                                                   drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=2)),
+                                     process_layer_name='met5_ncap')
+        self.assertEqual(["the LVS computed layer met5_pin names the layer met5_ncap of the process stack, "
+                          "but the layers of the stack on its GDS pair (67, 2) are: none"],
+                         TechInfo.process_layer_problems(tech))
+
     def test_shipped_tech_definitions_name_layers_of_the_stack_on_the_gds_pairs(self):
         for path in tech_pbjson_paths():
             with self.subTest(tech=os.path.basename(path)):
-                # NOTE: raises TechDefError otherwise
-                self.assertTrue(TechInfo.from_json(path, dielectric_filter=None).lvs_layer_names_by_process_layer_name)
+                self.assertEqual([], TechInfo.process_layer_problems(TechInfo.parse_tech_def(path)))
 
     def test_layers_of_the_stack_on_one_gds_pair_have_the_shapes_of_their_own_lvs_layers(self):
         # e.g. sky130A, whose met3 is split into the bottom plates of the MIM caps (met3_cap) and the rest (met3_ncap),

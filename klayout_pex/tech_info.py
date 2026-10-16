@@ -107,7 +107,21 @@ class TechInfo:
             raise TechDefError(
                 f"Names have to be unique, but in {jsonpb_path}"
                 + ''.join(f"\n  - {p}" for p in problems))
+        # NOTE: so are the layers of the process stack, which kpex looks up after reading, where it can't report
+        problems = TechInfo.process_layer_problems(tech)
+        if problems:
+            raise TechDefError(
+                f"LVS computed layers have to name the layers of the process stack on their GDS pairs, "
+                f"but in {jsonpb_path}" + ''.join(f"\n  - {p}" for p in problems))
         return tech
+
+    @staticmethod
+    def process_layer_problems(tech: tech_pb2.Technology) -> List[str]:
+        """
+        Report every LVS computed layer that names no layer of the process stack on its GDS pair,
+        where the stack has one, or names one that isn't (see lvs_layer_names_by_process_layer_name)
+        """
+        return TechInfo(tech, dielectric_filter=None)._process_layers_of_lvs_layers[1]
 
     @classmethod
     def from_json(cls,
@@ -210,12 +224,23 @@ class TechInfo:
         those that name it (ComputedLayerInfo.process_layer_name), on its GDS pair
 
         :raises TechDefError: if an LVS layer names no layer of the stack on its GDS pair, where the stack has one,
-                              or names one that isn't
+                              or names one that isn't (see process_layer_problems)
 
         NOTE: layers of the stack can share a GDS pair, e.g. sky130A met3_ncap and met3_cap,
               the parts of met3 without and with a MIM cap above, which have different dielectrics,
               so each of them has the shapes of its own LVS layer only
               (and met3_ncap also those of met3_vpp, the met3 of the MOM caps)
+        """
+        lvs_layer_names_by_process_layer_name, problems = self._process_layers_of_lvs_layers
+        if problems:
+            raise TechDefError("LVS computed layers have to name the layers of the process stack on their GDS pairs:"
+                               + ''.join(f"\n  - {p}" for p in problems))
+        return lvs_layer_names_by_process_layer_name
+
+    @cached_property
+    def _process_layers_of_lvs_layers(self) -> Tuple[Dict[LayerName, List[LVSLayerName]], List[str]]:
+        """
+        :return: lvs_layer_names_by_process_layer_name, and the problems (see process_layer_problems)
         """
         stack_layer_names_by_gds_pair: Dict[GDSPair, List[LayerName]] = {}
         for lyr in self.tech.process_stack.layers:
@@ -236,21 +261,23 @@ class TechInfo:
                     stack_layer_names_by_gds_pair.setdefault(gds_pair, []).append(name)
 
         lvs_layer_names_by_process_layer_name: Dict[LayerName, List[LVSLayerName]] = {}
+        problems: List[str] = []
         for lvs_layer_name, gds_pair in self.gds_pair_for_computed_layer_name.items():
             stack_layer_names = stack_layer_names_by_gds_pair.get(gds_pair, [])
             process_layer_name = self.computed_layer_info_by_name[lvs_layer_name].process_layer_name
             if not process_layer_name:
                 if stack_layer_names:
-                    raise TechDefError(f"The LVS computed layer {lvs_layer_name} names no layer of the process stack, "
-                                       f"but the layers of the stack on its GDS pair {gds_pair} are: "
-                                       f"{', '.join(stack_layer_names)}")
+                    problems.append(f"the LVS computed layer {lvs_layer_name} names no layer of the process stack, "
+                                    f"but the layers of the stack on its GDS pair {gds_pair} are: "
+                                    f"{', '.join(stack_layer_names)}")
                 continue
             if process_layer_name not in stack_layer_names:
-                raise TechDefError(f"The LVS computed layer {lvs_layer_name} names the layer {process_layer_name} "
-                                   f"of the process stack, but the layers of the stack on its GDS pair {gds_pair} "
-                                   f"are: {', '.join(stack_layer_names) or 'none'}")
+                problems.append(f"the LVS computed layer {lvs_layer_name} names the layer {process_layer_name} "
+                                f"of the process stack, but the layers of the stack on its GDS pair {gds_pair} "
+                                f"are: {', '.join(stack_layer_names) or 'none'}")
+                continue
             lvs_layer_names_by_process_layer_name.setdefault(process_layer_name, []).append(lvs_layer_name)
-        return lvs_layer_names_by_process_layer_name
+        return lvs_layer_names_by_process_layer_name, problems
 
     @cached_property
     def process_layer_name_by_lvs_layer_name(self) -> Dict[LVSLayerName, LayerName]:
