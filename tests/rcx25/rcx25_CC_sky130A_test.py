@@ -66,7 +66,7 @@ def test_overlap_plates_100um_x_100um_li1_m1():
     # C2 LOWER VSUBS 0.38618p
     # C0 LOWER UPPER 0.294867p
     # C1 UPPER VSUBS 0.205621p
-    # NOTE: magic with --magic_halo=50 (µm) gives UPPER-VSUBS of 0.205621p
+    # NOTE: magic with --magic-halo=50 (µm) gives UPPER-VSUBS of 0.205621p
     #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',

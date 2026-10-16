@@ -116,7 +116,7 @@ To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 ```bash
 ./kpex.sh extract \
   --pdk sky130A \
-  --out_dir output_sky130A \
+  --out-dir output_sky130A \
   --2.5D \
   --fastercap \
   --gds testdata/sky130A/test_patterns/sideoverlap_complex_li1_m1.gds.gz
@@ -167,7 +167,7 @@ instance; one plugin's load failure does not prevent loading another.
 ```bash
 pex25d plugins
 pex25d exporters
-pex25d export cell.pex25d --to example --out_dir solver-input
+pex25d export cell.pex25d --to example --out-dir solver-input
 ```
 
 `pex25d plugins` shows all importers and exporters, built-ins included, with:
@@ -180,15 +180,15 @@ Plugin-specific options:
 - Python: `pex25d.export(..., options={...})`
 - CLI: `--option NAME=VALUE`, repeatable, for `pex25d export` and `pex25d import`.
   VALUE is read as JSON where it parses (`10`, `1e-9`, `true`, `"10"`), otherwise as text.
-- The export flags `--field_margin`, `--delaunay_amax`, `--delaunay_b`, `--stl` and
-  `--geo_check` are shorthands for their options; each option may be given only once.
+- The export flags `--field-margin`, `--delaunay-amax`, `--delaunay-b`, `--stl` and
+  `--geo-check` are shorthands for their options; each option may be given only once.
 
 For batches, reuse `registry = pex25d.exporter_registry()` and pass `registry=registry`
 to each call; create another registry to refresh installed metadata.
 
 `pex25d.export_with_backend(exporter, scene, target, …)` runs an already loaded
 exporter. Unexpected exceptions raise `ExporterExecutionError` (CLI exit 4,
-traceback with `--log_level debug`); `ExportError` and `OSError` exit 2.
+traceback with `--log-level debug`); `ExportError` and `OSError` exit 2.
 
 ## Importer plugins
 

@@ -48,7 +48,7 @@ class KpexNetlistFormatTest(unittest.TestCase):
 
     def test_netlist_format_is_validated(self):
         code, output = run_kpex('extract', '--pdk', 'ihp-sg13g2', '--gds', 'x.gds', '--2.5D',
-                                '--netlist_format', 'spectre')
+                                '--netlist-format', 'spectre')
         self.assertEqual(2, code)
         self.assertIn("invalid choice: 'spectre'", output)
         self.assertIn('vacask', output)
@@ -57,27 +57,27 @@ class KpexNetlistFormatTest(unittest.TestCase):
         # NOTE: an error before the layout is read (here: there is none)
         with tempfile.TemporaryDirectory() as out_dir:
             code, output = run_kpex('extract', '--pdk', 'ihp-sg13g2', '--gds', os.path.join(out_dir, 'x.gds'),
-                                    '--2.5D', '--fastercap', '--magic', '--netlist_format', 'vacask',
-                                    '--out_dir', out_dir)
+                                    '--2.5D', '--fastercap', '--magic', '--netlist-format', 'vacask',
+                                    '--out-dir', out_dir)
         self.assertEqual(1, code)
-        self.assertIn('Only the 2.5D engine writes vacask netlists (--netlist_format vacask), '
+        self.assertIn('Only the 2.5D engine writes vacask netlists (--netlist-format vacask), '
                       'not MAGIC, FasterCap', output)
 
     def test_deprecated_out_spice_writes_spice_only(self):
         # NOTE: errors before the layout is read (here: there is none)
         with tempfile.TemporaryDirectory() as out_dir:
             arguments = ['extract', '--pdk', 'ihp-sg13g2', '--gds', os.path.join(out_dir, 'x.gds'), '--2.5D',
-                         '--out_dir', out_dir]
-            code, output = run_kpex(*arguments, '--netlist_format', 'vacask', '--out_spice', 'x.inc')
+                         '--out-dir', out_dir]
+            code, output = run_kpex(*arguments, '--netlist-format', 'vacask', '--out_spice', 'x.inc')
             self.assertEqual(1, code)
-            self.assertIn('--out_spice writes a SPICE netlist, not --netlist_format vacask, use --out_netlist',
+            self.assertIn('--out_spice writes a SPICE netlist, not --netlist-format vacask, use --out-netlist',
                           output)
-            code, output = run_kpex(*arguments, '--out_spice', 'x.spice', '--out_netlist', 'y.spice')
+            code, output = run_kpex(*arguments, '--out_spice', 'x.spice', '--out-netlist', 'y.spice')
             self.assertEqual(1, code)
-            self.assertIn('--out_spice is the deprecated name of --out_netlist, give --out_netlist only', output)
+            self.assertIn('--out_spice is the deprecated name of --out-netlist, give --out-netlist only', output)
 
     def test_deprecated_out_spice_is_hidden(self):
         code, output = run_kpex('extract', '--help')
         self.assertEqual(0, code)
-        self.assertIn('--out_netlist', output)
+        self.assertIn('--out-netlist', output)
         self.assertNotIn('--out_spice', output)

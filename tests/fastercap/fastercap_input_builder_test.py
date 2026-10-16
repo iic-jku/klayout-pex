@@ -52,7 +52,7 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
         KpexCLI().main(['main',
                         '--pdk', pdk.name,
                         '--gds', pdk.gds_path(*path_components),
-                        '--out_dir', pdk.output_dir,
+                        '--out-dir', pdk.output_dir,
                         '--cache-dir', pdk.lvs_cache_dir,
                         '--2.5D',
                         '--blackbox', 'n'])

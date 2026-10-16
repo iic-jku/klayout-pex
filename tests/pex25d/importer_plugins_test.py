@@ -156,7 +156,7 @@ def test_cli_writes_invalid_import_and_reports_it(
     diagnostics = tmp_path / 'diagnostics.json'
     assert run_cli(['import', str(primary), '--from', 'example', '--supporting', f'stack={stack}',
                     '-o', str(output), '--diagnostics', 'json',
-                    '--diagnostics_out', str(diagnostics)]) == pex25d.ExitCode.DIAGNOSTIC_ERRORS
+                    '--out-diagnostics', str(diagnostics)]) == pex25d.ExitCode.DIAGNOSTIC_ERRORS
     assert output.exists()
     assert 'PEX25D-E0201' in {d['code'] for d in json.loads(diagnostics.read_text())['diagnostics']}
 

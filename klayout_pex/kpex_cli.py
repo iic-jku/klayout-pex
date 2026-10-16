@@ -115,12 +115,15 @@ from .tool_version_constraints import (
 from .util.multiple_choice import MultipleChoicePattern
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
+    add_argument_with_former_name,
     add_help_subcommand,
+    add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
     positive_spice_seconds,
     render_enum_help,
     true_or_false,
+    warn_deprecated_options,
 )
 from .version import __version__
 
@@ -144,7 +147,7 @@ class KpexCLI:
     #
     # Each group is attached to a *given* parser rather than to one flat parser,
     # so that a subcommand declares exactly the options it can act on. That is
-    # the point of the verb layer: `kpex pex25d` cannot be handed --magic_halo,
+    # the point of the verb layer: `kpex pex25d` cannot be handed --magic-halo,
     # and the validation below no longer has to hand-check which combinations
     # of flags make sense together.
 
@@ -154,13 +157,13 @@ class KpexCLI:
         group_special = parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help',
                                    help="show this help message and exit")
-        group_special.add_argument("--log_level", dest='log_level', default='subprocess',
-                                   help=render_enum_help(topic='log_level', enum_cls=LogLevel))
-        group_special.add_argument("--tool_version_checks", dest='version_check_mode',
-                                   default=VersionCheckMode.DEFAULT, type=VersionCheckMode,
-                                   choices=list(VersionCheckMode),
-                                   help=render_enum_help(topic='tool_version_checks',
-                                                         enum_cls=VersionCheckMode))
+        add_log_level_argument(group_special)
+        add_argument_with_former_name(group_special, "--tool-version-checks", "--tool_version_checks",
+                                      dest='version_check_mode',
+                                      default=VersionCheckMode.DEFAULT, type=VersionCheckMode,
+                                      choices=list(VersionCheckMode),
+                                      help=render_enum_help(topic='tool_version_checks',
+                                                            enum_cls=VersionCheckMode))
         if include_threads:
             group_special.add_argument("--threads", dest='num_threads', type=int,
                                        default=os.cpu_count() * 4,
@@ -184,21 +187,23 @@ class KpexCLI:
                                type=PDK.from_string, choices=all_pdk_choices,
                                help=pdk_help, default=default_pdk)
 
-        group_pex.add_argument("--out_dir", dest="output_dir_base_path", default="output",
-                               help="Run directory path (default is '%(default)s')")
+        add_argument_with_former_name(group_pex, "--out-dir", "--out_dir",
+                                      dest="output_dir_base_path", default="output",
+                                      help="Run directory path (default is '%(default)s')")
 
         if include_spice_output:
-            group_pex.add_argument("--out_netlist", "-o", dest="output_netlist_path", default=None,
-                                   help="Optional additional output path of the netlist, "
-                                        "in the --netlist_format (default is none)")
-            # NOTE: deprecated, the name of --out_netlist before --netlist_format
+            add_argument_with_former_name(group_pex, "--out-netlist", "--out_netlist", "-o",
+                                          dest="output_netlist_path", default=None,
+                                          help="Optional additional output path of the netlist, "
+                                               "in the --netlist-format (default is none)")
+            # NOTE: deprecated, the name of --out-netlist before --netlist-format
             group_pex.add_argument("--out_spice", dest="output_spice_path", default=None, help=argparse.SUPPRESS)
-            group_pex.add_argument("--netlist_format", dest="netlist_format",
-                                   default=NetlistFormat.SPICE.value, choices=[f.value for f in NetlistFormat],
-                                   help="Format of the netlist the 2.5D engine writes to --out_netlist: "
-                                        "'spice' or 'vacask' (for the VACASK simulator, converted from the "
-                                        "SPICE netlist, as 'netlist convert' does, both are written into "
-                                        "the run directory) (default is %(default)s)")
+            add_argument_with_former_name(group_pex, "--netlist-format", "--netlist_format", dest="netlist_format",
+                                          default=NetlistFormat.SPICE.value, choices=[f.value for f in NetlistFormat],
+                                          help="Format of the netlist the 2.5D engine writes to --out-netlist: "
+                                               "'spice' or 'vacask' (for the VACASK simulator, converted from the "
+                                               "SPICE netlist, as 'netlist convert' does, both are written into "
+                                               "the run directory) (default is %(default)s)")
 
 
     @staticmethod
@@ -229,7 +234,7 @@ class KpexCLI:
                                      help="Reuse the cached LVSDB while the LVS inputs are unchanged "
                                           "(layout, schematic, LVS deck, KLayout version) (default is %(default)s)")
         group_pex_input.add_argument("--cache-dir", dest="cache_dir_path", default=None,
-                                     help="Path for cached LVSDB (default is .kpex_cache within --out_dir)")
+                                     help="Path for cached LVSDB (default is .kpex_cache within --out-dir)")
         group_pex_input.add_argument("--lvs-verbose", dest="klayout_lvs_verbose",
                                      type=true_or_false, default=False,
                                      help="Verbose KLayout LVS output (default is %(default)s)")
@@ -272,28 +277,28 @@ class KpexCLI:
     @staticmethod
     def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
         group_fastercap = parser.add_argument_group("FasterCap Options")
-        group_fastercap.add_argument("--k_void", "-k", dest="k_void",
-                                     type=float, default=3.9,
-                                     help="Dielectric constant of void (default is %(default)s)")
+        add_argument_with_former_name(group_fastercap, "--k-void", "--k_void", "-k", dest="k_void",
+                                      type=float, default=3.9,
+                                      help="Dielectric constant of void (default is %(default)s)")
 
         # TODO: reflect that these are also now used by KPEX/2.5D engine!
-        group_fastercap.add_argument("--delaunay_amax", "-a", dest="delaunay_amax",
-                                     type=float, default=50,
-                                     help="Delaunay triangulation maximum area (default is %(default)s)")
-        group_fastercap.add_argument("--delaunay_b", "-b", dest="delaunay_b",
-                                     type=float, default=0.5,
-                                     help="Delaunay triangulation b (default is %(default)s)")
-        group_fastercap.add_argument("--geo_check", dest="geometry_check",
-                                     type=true_or_false, default=False,
-                                     help=f"Validate geometries before passing to FasterCap "
-                                          f"(default is False)")
+        add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
+                                      type=float, default=50,
+                                      help="Delaunay triangulation maximum area (default is %(default)s)")
+        add_argument_with_former_name(group_fastercap, "--delaunay-b", "--delaunay_b", "-b", dest="delaunay_b",
+                                      type=float, default=0.5,
+                                      help="Delaunay triangulation b (default is %(default)s)")
+        add_argument_with_former_name(group_fastercap, "--geo-check", "--geo_check", dest="geometry_check",
+                                      type=true_or_false, default=False,
+                                      help=f"Validate geometries before passing to FasterCap "
+                                           f"(default is False)")
         group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
                                      type=float, default=0.05,
                                      help="FasterCap -aX error tolerance (default is %(default)s)")
-        group_fastercap.add_argument("--d_coeff", dest="fastercap_d_coeff",
-                                     type=float, default=0.5,
-                                     help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
-                                          f"(default is %(default)s)")
+        add_argument_with_former_name(group_fastercap, "--d-coeff", "--d_coeff", dest="fastercap_d_coeff",
+                                      type=float, default=0.5,
+                                      help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
+                                           f"(default is %(default)s)")
         group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
                                      type=float, default=0.5,
                                      help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
@@ -301,9 +306,10 @@ class KpexCLI:
                                      type=float, default=2,
                                      help="FasterCap -f out-of-core free memory to link memory condition "
                                           "(0 = don't go OOC, default is %(default)s)")
-        group_fastercap.add_argument("--auto_precond", dest="fastercap_auto_preconditioner",
-                                     type=true_or_false, default=True,
-                                     help=f"FasterCap -ap Automatic preconditioner usage (default is %(default)s)")
+        add_argument_with_former_name(group_fastercap, "--auto-precond", "--auto_precond",
+                                      dest="fastercap_auto_preconditioner",
+                                      type=true_or_false, default=True,
+                                      help=f"FasterCap -ap Automatic preconditioner usage (default is %(default)s)")
         group_fastercap.add_argument("--galerkin", dest="fastercap_galerkin_scheme",
                                      action='store_true', default=False,
                                      help=f"FasterCap -g Use Galerkin scheme (default is %(default)s)")
@@ -325,53 +331,55 @@ class KpexCLI:
 
         group_magic.add_argument('--magicrc', dest='magicrc_path', default=default_magicrc_path,
                                   help=magicrc_help)
-        group_magic.add_argument("--magic_mode", dest='magic_pex_mode',
-                                 default=MagicPEXMode.DEFAULT, type=MagicPEXMode, choices=list(MagicPEXMode),
-                                 help=render_enum_help(topic='magic_mode', enum_cls=MagicPEXMode))
-        group_magic.add_argument("--magic_cthresh", dest="magic_cthresh",
-                                 type=float, default=0.01,
-                                 help="Threshold (in fF) for ignored parasitic capacitances (default is %(default)s). "
-                                      "(MAGIC command: ext2spice cthresh <value>)")
-        group_magic.add_argument("--magic_rthresh", dest="magic_rthresh",
-                                 type=int, default=100,
-                                 help="Threshold (in Ω) for ignored parasitic resistances (default is %(default)s). "
-                                      "(MAGIC command: ext2spice rthresh <value>)")
-        group_magic.add_argument("--magic_thresh", dest="magic_thresh",
-                                 type=int, default=None,
-                                 help="Lumped resistance threshold (in mΩ) to trigger network extraction. "
-                                      "If not supplied, MAGIC's default is implicitly used. "
-                                      "(MAGIC command: extresist threshold <value>)")
-        group_magic.add_argument("--magic_minres", dest="magic_minres",
-                                 type=int, default=None,
-                                 help="Threshold (in mΩ) for removing individual resistors during network simplification. "
-                                      "If not supplied, MAGIC's default is implicitly used. "
-                                      "(MAGIC command: extresist minres <value>)")
-        group_magic.add_argument("--magic_mindel", dest="magic_mindel",
-                                 type=int, default=None,
-                                 help="Minimum delay threshold (in ps) to trigger network extraction. "
-                                      "If not supplied, MAGIC's default is implicitly used. "
-                                      "(MAGIC command: extresist mindelay <value>)")
-        group_magic.add_argument("--magic_halo", dest="magic_halo",
-                                 type=float, default=None,
-                                 help="Custom sidewall halo distance (in µm) "
-                                      "(MAGIC command: extract halo <value>) (default is no custom halo)")
-        group_magic.add_argument("--magic_short", dest='magic_short_mode',
-                                 default=MagicShortMode.DEFAULT, type=MagicShortMode, choices=list(MagicShortMode),
-                                 help=render_enum_help(topic='magic_short', enum_cls=MagicShortMode))
-        group_magic.add_argument("--magic_merge", dest='magic_merge_mode',
-                                 default=MagicMergeMode.DEFAULT, type=MagicMergeMode, choices=list(MagicMergeMode),
-                                 help=render_enum_help(topic='magic_merge', enum_cls=MagicMergeMode))
-        group_magic.add_argument("--magic_pre_flatten", dest='magic_pre_flatten',
-                                 action='store_true', default=False,
-                                 help="Flatten GDS before reading it with Magic (default is %(default)s).")
-        group_magic.add_argument("--magic_unique", dest='magic_unique_mode',
-                                 default=MagicUniqueMode.DEFAULT, type=MagicUniqueMode, choices=list(MagicUniqueMode),
-                                 help="Control net uniqueness during extraction "
-                                 " ('implicit' omits the command, uses MAGIC's default value). "
-                                 + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
-        group_magic.add_argument("--magic_analyze", dest='magic_analyze',
-                                 type=true_or_false, default=False,
-                                 help="Analyze MAGIC extraction files (report as KLayout RDB)")
+        add_argument_with_former_name(group_magic, "--magic-mode", "--magic_mode", dest='magic_pex_mode',
+                                      default=MagicPEXMode.DEFAULT, type=MagicPEXMode, choices=list(MagicPEXMode),
+                                      help=render_enum_help(topic='magic_mode', enum_cls=MagicPEXMode))
+        add_argument_with_former_name(group_magic, "--magic-cthresh", "--magic_cthresh", dest="magic_cthresh",
+                                      type=float, default=0.01,
+                                      help="Threshold (in fF) for ignored parasitic capacitances "
+                                           "(default is %(default)s). (MAGIC command: ext2spice cthresh <value>)")
+        add_argument_with_former_name(group_magic, "--magic-rthresh", "--magic_rthresh", dest="magic_rthresh",
+                                      type=int, default=100,
+                                      help="Threshold (in Ω) for ignored parasitic resistances "
+                                           "(default is %(default)s). (MAGIC command: ext2spice rthresh <value>)")
+        add_argument_with_former_name(group_magic, "--magic-thresh", "--magic_thresh", dest="magic_thresh",
+                                      type=int, default=None,
+                                      help="Lumped resistance threshold (in mΩ) to trigger network extraction. "
+                                           "If not supplied, MAGIC's default is implicitly used. "
+                                           "(MAGIC command: extresist threshold <value>)")
+        add_argument_with_former_name(group_magic, "--magic-minres", "--magic_minres", dest="magic_minres",
+                                      type=int, default=None,
+                                      help="Threshold (in mΩ) for removing individual resistors during network simplification. "
+                                           "If not supplied, MAGIC's default is implicitly used. "
+                                           "(MAGIC command: extresist minres <value>)")
+        add_argument_with_former_name(group_magic, "--magic-mindel", "--magic_mindel", dest="magic_mindel",
+                                      type=int, default=None,
+                                      help="Minimum delay threshold (in ps) to trigger network extraction. "
+                                           "If not supplied, MAGIC's default is implicitly used. "
+                                           "(MAGIC command: extresist mindelay <value>)")
+        add_argument_with_former_name(group_magic, "--magic-halo", "--magic_halo", dest="magic_halo",
+                                      type=float, default=None,
+                                      help="Custom sidewall halo distance (in µm) "
+                                           "(MAGIC command: extract halo <value>) (default is no custom halo)")
+        add_argument_with_former_name(group_magic, "--magic-short", "--magic_short", dest='magic_short_mode',
+                                      default=MagicShortMode.DEFAULT, type=MagicShortMode, choices=list(MagicShortMode),
+                                      help=render_enum_help(topic='magic_short', enum_cls=MagicShortMode))
+        add_argument_with_former_name(group_magic, "--magic-merge", "--magic_merge", dest='magic_merge_mode',
+                                      default=MagicMergeMode.DEFAULT, type=MagicMergeMode, choices=list(MagicMergeMode),
+                                      help=render_enum_help(topic='magic_merge', enum_cls=MagicMergeMode))
+        add_argument_with_former_name(group_magic, "--magic-pre-flatten", "--magic_pre_flatten",
+                                      dest='magic_pre_flatten',
+                                      action='store_true', default=False,
+                                      help="Flatten GDS before reading it with Magic (default is %(default)s).")
+        add_argument_with_former_name(group_magic, "--magic-unique", "--magic_unique", dest='magic_unique_mode',
+                                      default=MagicUniqueMode.DEFAULT, type=MagicUniqueMode,
+                                      choices=list(MagicUniqueMode),
+                                      help="Control net uniqueness during extraction "
+                                      " ('implicit' omits the command, uses MAGIC's default value). "
+                                      + render_enum_help(topic='magic_unique', enum_cls=MagicUniqueMode))
+        add_argument_with_former_name(group_magic, "--magic-analyze", "--magic_analyze", dest='magic_analyze',
+                                      type=true_or_false, default=False,
+                                      help="Analyze MAGIC extraction files (report as KLayout RDB)")
 
     @staticmethod
     def _add_analytical_25d_arguments(parser: argparse.ArgumentParser) -> None:
@@ -397,38 +405,38 @@ class KpexCLI:
                                help="Reduce the netlist of --mode R or RC, with the passes of 'netlist reduce': "
                                     "'floating' merges the floating islands and eliminates the capacitor-only nodes "
                                     "exactly, 'ticer' also eliminates the nodes whose time constant is at most "
-                                    "--reduce_tau (the error grows with the frequency, and losses are not kept). "
+                                    "--reduce-tau (the error grows with the frequency, and losses are not kept). "
                                     "Written next to the netlist (*_k25d_pex_netlist_reduced.spice), "
-                                    "and to --out_netlist. "
+                                    "and to --out-netlist. "
                                     + render_enum_help(topic='reduce', enum_cls=ReductionMode))
-        group_25d.add_argument("--reduce_tau", dest="reduce_tau", metavar="TAU",
-                               type=positive_spice_seconds, default=None,
-                               help=f"TICER's time constant threshold in s for --reduce ticer, a SPICE number "
-                                    f"like '0.1p' (default is {ReductionOptions().ticer_tau * 1e12:g}p)")
-        group_25d.add_argument("--report_caps", dest="report_caps",
-                               type=true_or_false, default=False,
-                               help="Write each capacitance contribution with its shapes into the report "
-                                    "(*_k25d_pex_report.rdb.gz), which takes much memory and time "
-                                    "on large layouts (default is %(default)s)")
+        add_argument_with_former_name(group_25d, "--reduce-tau", "--reduce_tau", dest="reduce_tau", metavar="TAU",
+                                      type=positive_spice_seconds, default=None,
+                                      help=f"TICER's time constant threshold in s for --reduce ticer, a SPICE number "
+                                           f"like '0.1p' (default is {ReductionOptions().ticer_tau * 1e12:g}p)")
+        add_argument_with_former_name(group_25d, "--report-caps", "--report_caps", dest="report_caps",
+                                      type=true_or_false, default=False,
+                                      help="Write each capacitance contribution with its shapes into the report "
+                                           "(*_k25d_pex_report.rdb.gz), which takes much memory and time "
+                                           "on large layouts (default is %(default)s)")
 
 
     @staticmethod
     def _add_pex25d_output_arguments(parser: argparse.ArgumentParser) -> None:
         group_out = parser.add_argument_group(
             "PEX25D Output",
-            description="At least one of --output_file / --output_scene must be given. "
+            description="At least one of --out-file / --out-scene must be given. "
                         "They are two options rather than one --emit switch because the "
                         "two artifacts are different things with different consumers, and "
                         "a single switch would leave it unclear where each one lands."
         )
-        group_out.add_argument("--output_file", dest='pex25d_file_path',
-                               default=None, metavar='PATH',
+        add_argument_with_former_name(group_out, "--out-file", "--output_file", dest='pex25d_file_path',
+                                      default=None, metavar='PATH',
                                help="Write the unresolved PEX25DFile here ('-' for stdout). "
                                     "The literal form: one message per PEX25D record, "
                                     "references still plain strings, nothing derived. This is "
                                     "what a reader produces and what a validator checks.")
-        group_out.add_argument("--output_scene", dest='pex25d_scene_path',
-                               default=None, metavar='PATH',
+        add_argument_with_former_name(group_out, "--out-scene", "--output_scene", dest='pex25d_scene_path',
+                                      default=None, metavar='PATH',
                                help="Write the resolved PEX25DScene here ('-' for stdout). "
                                     "The adapter-ready form: absolute z extents, CONNECTS / "
                                     "BETWEEN / WRAPS resolved, wrap depth flattened, terminal "
@@ -447,11 +455,11 @@ class KpexCLI:
                                     "Every z offset, thickness and coordinate must be "
                                     "an integer multiple of it, and it must divide the "
                                     "layout DBU exactly.")
-        group_out.add_argument("--domain_margin", dest='pex25d_domain_margin',
-                               type=float, default=None, metavar='UM',
-                               help="Emit DOMAIN_MARGIN with this clearance in µm "
-                                    "(default is none, leaving the domain unset for "
-                                    "the solver adapter to choose)")
+        add_argument_with_former_name(group_out, "--domain-margin", "--domain_margin", dest='pex25d_domain_margin',
+                                      type=float, default=None, metavar='UM',
+                                      help="Emit DOMAIN_MARGIN with this clearance in µm "
+                                           "(default is none, leaving the domain unset for "
+                                           "the solver adapter to choose)")
         group_out.add_argument("--validate", dest='pex25d_validate',
                                type=true_or_false, default=True,
                                help="Check the generated artifacts against the reference "
@@ -466,15 +474,16 @@ class KpexCLI:
                                help="Include the syntax hints from the specification as "
                                     "comments (default is %(default)s). Text format only — "
                                     "the protobuf encodings have no comments.")
-        group_out.add_argument("--with_source_refs", dest='pex25d_with_source_refs',
-                               type=true_or_false, default=False,
-                               help="Populate every SourceRef (default is %(default)s). "
-                                    "Protobuf output formats only — the text format has no "
-                                    "spelling for a source reference. Roughly doubles the size "
-                                    "of a layout-scale file, and means little for geometry "
-                                    "built in memory rather than parsed from text; useful "
-                                    "mainly when diffing generated output against a "
-                                    "hand-written file.")
+        add_argument_with_former_name(group_out, "--with-source-refs", "--with_source_refs",
+                                      dest='pex25d_with_source_refs',
+                                      type=true_or_false, default=False,
+                                      help="Populate every SourceRef (default is %(default)s). "
+                                           "Protobuf output formats only — the text format has no "
+                                           "spelling for a source reference. Roughly doubles the size "
+                                           "of a layout-scale file, and means little for geometry "
+                                           "built in memory rather than parsed from text; useful "
+                                           "mainly when diffing generated output against a "
+                                           "hand-written file.")
 
     # ------------------------------------------------------------------ parsing
 
@@ -619,7 +628,7 @@ class KpexCLI:
                           f"a {args.pex_mode} netlist has no nodes to reduce")
                     found_errors = True
             if args.reduce_tau is not None and args.reduce_mode != ReductionMode.TICER:
-                error(f"--reduce_tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
+                error(f"--reduce-tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
                 found_errors = True
 
             args.netlist_format = NetlistFormat(args.netlist_format)
@@ -630,19 +639,19 @@ class KpexCLI:
                                                            ('FasterCap', args.run_fastercap)) if is_run]
                 if other_engines:
                     error(f"Only the 2.5D engine writes {args.netlist_format} netlists "
-                          f"(--netlist_format {args.netlist_format}), not {', '.join(other_engines)}")
+                          f"(--netlist-format {args.netlist_format}), not {', '.join(other_engines)}")
                     found_errors = True
 
             if args.output_spice_path is not None:
                 if args.output_netlist_path is not None:
-                    error("--out_spice is the deprecated name of --out_netlist, give --out_netlist only")
+                    error("--out_spice is the deprecated name of --out-netlist, give --out-netlist only")
                     found_errors = True
                 elif args.netlist_format != NetlistFormat.SPICE:
-                    error(f"--out_spice writes a SPICE netlist, not --netlist_format {args.netlist_format}, "
-                          f"use --out_netlist")
+                    error(f"--out_spice writes a SPICE netlist, not --netlist-format {args.netlist_format}, "
+                          f"use --out-netlist")
                     found_errors = True
                 else:
-                    warning("--out_spice is deprecated, use --out_netlist")
+                    warning("--out_spice is deprecated, use --out-netlist")
                     args.output_netlist_path = args.output_spice_path
 
         # check if we find magicrc
@@ -752,13 +761,6 @@ class KpexCLI:
                         ])
 
         try:
-            args.log_level = LogLevel[args.log_level.upper()]
-        except KeyError:
-            error(f"Requested log level {args.log_level.lower()} does not exist, "
-                  f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
-            found_errors = True
-
-        try:
             pattern_string: str = args.dielectric_filter
             args.dielectric_filter = MultipleChoicePattern(pattern=pattern_string)
         except ValueError as e:
@@ -770,13 +772,13 @@ class KpexCLI:
 
         if args.command == 'pex25d':
             if args.pex25d_file_path is None and args.pex25d_scene_path is None:
-                error("Nothing to write. Give --output_file (the unresolved PEX25DFile), "
-                      "--output_scene (the resolved PEX25DScene), or both.")
+                error("Nothing to write. Give --out-file (the unresolved PEX25DFile), "
+                      "--out-scene (the resolved PEX25DScene), or both.")
                 found_errors = True
 
             if args.pex25d_file_path is not None \
                     and args.pex25d_file_path == args.pex25d_scene_path:
-                error("--output_file and --output_scene point at the same destination")
+                error("--out-file and --out-scene point at the same destination")
                 found_errors = True
 
             # Resolved here rather than at write time so that a mistyped output
@@ -1174,7 +1176,7 @@ class KpexCLI:
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
 
-            # NOTE: --out_netlist gets the reduced netlist with --reduce, in the --netlist_format,
+            # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
             #       which is converted from the SPICE netlist (as 'netlist convert' does)
             netlist_kind = 'reduced' if self._rcx25_reduced_netlist_path is not None else 'expanded'
             netlist_path = self._rcx25_reduced_netlist_path or expanded_netlist_path
@@ -1377,7 +1379,8 @@ class KpexCLI:
         the redirect has to be in place before anything — argument validation
         included — has a chance to print.
         """
-        return any(previous in ('--output_file', '--output_scene') and current == '-'
+        # NOTE: also by the former names of the options
+        return any(previous in ('--out-file', '--out-scene', '--output_file', '--output_scene') and current == '-'
                    for previous, current in zip(argv, argv[1:]))
 
     def main(self, argv: List[str]):
@@ -1405,6 +1408,7 @@ class KpexCLI:
 
             os.makedirs(args.output_dir_base_path, exist_ok=True)
             self.setup_logging(args, stack)
+            warn_deprecated_options(args)
 
             try:
                 tech_info = TechInfo.from_json(args.tech_pbjson_path,
@@ -1628,7 +1632,7 @@ class KpexCLI:
     def rcx25_netlist_paths(self) -> Dict[NetlistFormat, str]:
         """
         The paths of the netlists the 2.5D engine wrote into the run directory, by format:
-        the SPICE netlist, and the one converted to the --netlist_format (of the reduced netlist with --reduce)
+        the SPICE netlist, and the one converted to the --netlist-format (of the reduced netlist with --reduce)
         """
         if not hasattr(self, '_rcx25_netlist_paths'):
             raise Exception('rcx25_netlist_paths is not initialized, was run_kpex_2_5d_engine called?')

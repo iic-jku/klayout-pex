@@ -57,7 +57,6 @@ import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import (
-    LogLevel,
     console,
     set_log_level,
     debug,
@@ -69,11 +68,14 @@ from ..log import (
 )
 from ..util.argparse_helpers import (
     SectionedHelpFormatter,
+    add_argument_with_former_name,
     add_help_subcommand,
+    add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
     render_enum_help,
     true_or_false,
+    warn_deprecated_options,
 )
 from ..version import __version__
 
@@ -119,7 +121,7 @@ When an artifact goes to stdout, diagnostics go to stderr instead,
 so the stream stays a valid PEX25D artifact.
 
 Artifact naming, inferred from the file name and overridable with
-`--in_kind` / `--in_format` / `--out_kind` / `--out_format`:
+`--in-kind` / `--in-format` / `--out-kind` / `--out-format`:
 
 | Name | Holds | Encoding |
 | ---- | ----- | -------- |
@@ -202,48 +204,47 @@ class Pex25DCLI:
                            help="show this help message and exit")
         group.add_argument("--version", "-v", action='version',
                            version=f'{PROGRAM_NAME} {__version__}')
-        group.add_argument("--log_level", dest='log_level', default='subprocess',
-                           help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        add_log_level_argument(group)
 
     @staticmethod
     def _add_input_argument(parser: argparse.ArgumentParser) -> None:
         parser.add_argument("input_path", type=str, metavar='INPUT',
                             help="Input PEX25D artifact ('-' for stdin)")
         group = parser.add_argument_group("Input Interpretation")
-        group.add_argument("--in_kind", dest='in_kind',
-                           default=ArtifactKind.AUTO, type=ArtifactKind,
-                           choices=list(ArtifactKind),
-                           help="Which message the input holds "
-                                "(default is '%(default)s', i.e. inferred from the file name)")
-        group.add_argument("--in_format", dest='in_format',
-                           default=ArtifactFormat.AUTO, type=ArtifactFormat,
-                           choices=list(ArtifactFormat),
-                           help="How the input is encoded "
-                                "(default is '%(default)s', i.e. inferred from the file name)")
-        group.add_argument("--with_source_refs", dest='with_source_refs',
-                           action='store_true', default=False,
-                           help="Record where each record came from while reading the "
-                                "text format (default is %(default)s). Useful when an "
-                                "INCLUDE tree has been flattened; diagnostics carry "
-                                "positions either way.")
+        add_argument_with_former_name(group, "--in-kind", "--in_kind", dest='in_kind',
+                                      default=ArtifactKind.AUTO, type=ArtifactKind,
+                                      choices=list(ArtifactKind),
+                                      help="Which message the input holds "
+                                           "(default is '%(default)s', i.e. inferred from the file name)")
+        add_argument_with_former_name(group, "--in-format", "--in_format", dest='in_format',
+                                      default=ArtifactFormat.AUTO, type=ArtifactFormat,
+                                      choices=list(ArtifactFormat),
+                                      help="How the input is encoded "
+                                           "(default is '%(default)s', i.e. inferred from the file name)")
+        add_argument_with_former_name(group, "--with-source-refs", "--with_source_refs", dest='with_source_refs',
+                                      action='store_true', default=False,
+                                      help="Record where each record came from while reading the "
+                                           "text format (default is %(default)s). Useful when an "
+                                           "INCLUDE tree has been flattened; diagnostics carry "
+                                           "positions either way.")
 
     @staticmethod
     def _add_output_arguments(parser: argparse.ArgumentParser,
                               required: bool = True) -> None:
         group = parser.add_argument_group("Output")
-        group.add_argument("--output", "-o", dest='output_path',
-                           required=required, metavar='PATH',
-                           help="Output path ('-' for stdout)")
-        group.add_argument("--out_kind", dest='out_kind',
-                           default=ArtifactKind.AUTO, type=ArtifactKind,
-                           choices=list(ArtifactKind),
-                           help="Which message to write "
-                                "(default is '%(default)s', i.e. inferred from the file name)")
-        group.add_argument("--out_format", dest='out_format',
-                           default=ArtifactFormat.AUTO, type=ArtifactFormat,
-                           choices=list(ArtifactFormat),
-                           help="How to encode the output "
-                                "(default is '%(default)s', i.e. inferred from the file name)")
+        add_argument_with_former_name(group, "--out-file", "--output", "-o", dest='output_path',
+                                      required=required, metavar='PATH',
+                                      help="Output path ('-' for stdout)")
+        add_argument_with_former_name(group, "--out-kind", "--out_kind", dest='out_kind',
+                                      default=ArtifactKind.AUTO, type=ArtifactKind,
+                                      choices=list(ArtifactKind),
+                                      help="Which message to write "
+                                           "(default is '%(default)s', i.e. inferred from the file name)")
+        add_argument_with_former_name(group, "--out-format", "--out_format", dest='out_format',
+                                      default=ArtifactFormat.AUTO, type=ArtifactFormat,
+                                      choices=list(ArtifactFormat),
+                                      help="How to encode the output "
+                                           "(default is '%(default)s', i.e. inferred from the file name)")
         group.add_argument("--comments", dest='comments',
                            action='store_true', default=False,
                            help="Include the syntax hints from the specification as "
@@ -261,10 +262,10 @@ class Pex25DCLI:
                            default=DiagnosticsFormat.DEFAULT, type=DiagnosticsFormat,
                            choices=list(DiagnosticsFormat),
                            help=render_enum_help(topic='diagnostics', enum_cls=DiagnosticsFormat))
-        group.add_argument("--diagnostics_out", dest='diagnostics_path', default=None,
-                           metavar='PATH',
-                           help="Write diagnostics here instead of to the console "
-                                "('-' for stdout)")
+        add_argument_with_former_name(group, "--out-diagnostics", "--diagnostics_out", dest='diagnostics_path',
+                                      default=None, metavar='PATH',
+                                      help="Write diagnostics here instead of to the console "
+                                           "('-' for stdout)")
         group.add_argument("--strict", dest='strict',
                            action='store_true', default=False,
                            help="Also run the geometric tier: ring and box "
@@ -348,29 +349,29 @@ class Pex25DCLI:
                                    type=str, metavar='EXPORTER',
                                    help="Exporter name or distribution:name; run "
                                         "'pex25d exporters' to list available identifiers")
-        parser_export.add_argument("--out_dir", dest='output_dir_path', required=True,
-                                   help="Directory to export the solver input files into")
+        add_argument_with_former_name(parser_export, "--out-dir", "--out_dir", dest='output_dir_path', required=True,
+                                      help="Directory to export the solver input files into")
         parser_export.add_argument("--prefix", dest='prefix', default='',
                                    help="Prefix for the generated file names "
                                         "(default is the target's own)")
-        parser_export.add_argument("--field_margin", dest='field_margin',
-                                   type=float, default=None, metavar='UM',
-                                   help="How far to draw the laterally unbounded "
-                                        "materials beyond the geometry, in µm. "
-                                        "Ignored when the scene carries a DOMAIN_BOX.")
-        parser_export.add_argument("--delaunay_amax", dest='delaunay_amax',
-                                   type=float, default=None, metavar='AREA',
-                                   help="Maximum triangle area; 0 means unconstrained")
-        parser_export.add_argument("--delaunay_b", dest='delaunay_b',
-                                   type=float, default=None, metavar='B',
-                                   help="Minimum mesh angle as b = 2·sin(angle)")
+        add_argument_with_former_name(parser_export, "--field-margin", "--field_margin", dest='field_margin',
+                                      type=float, default=None, metavar='UM',
+                                      help="How far to draw the laterally unbounded "
+                                           "materials beyond the geometry, in µm. "
+                                           "Ignored when the scene carries a DOMAIN_BOX.")
+        add_argument_with_former_name(parser_export, "--delaunay-amax", "--delaunay_amax", dest='delaunay_amax',
+                                      type=float, default=None, metavar='AREA',
+                                      help="Maximum triangle area; 0 means unconstrained")
+        add_argument_with_former_name(parser_export, "--delaunay-b", "--delaunay_b", dest='delaunay_b',
+                                      type=float, default=None, metavar='B',
+                                      help="Minimum mesh angle as b = 2·sin(angle)")
         parser_export.add_argument("--stl", dest='write_stl',
                                    action='store_true', default=None,
                                    help="FasterCap / FastCap2: also dump the generated solids "
                                         "as STL ('--to stl' writes only those)")
-        parser_export.add_argument("--geo_check", dest='geometry_check',
-                                   action='store_true', default=None,
-                                   help="Validate the geometry before writing")
+        add_argument_with_former_name(parser_export, "--geo-check", "--geo_check", dest='geometry_check',
+                                      action='store_true', default=None,
+                                      help="Validate the geometry before writing")
         self._add_plugin_option_argument(parser_export)
         self._add_diagnostics_arguments(parser_export)
 
@@ -428,7 +429,7 @@ class Pex25DCLI:
             "show",
             help="Summarize what is inside a PEX25D artifact",
             description="Print a human-readable summary. For machine consumption use "
-                        "'convert --out_format textpb' instead — this output is not stable.",
+                        "'convert --out-format textpb' instead — this output is not stable.",
             add_help=False, formatter_class=RichHelpFormatter)
         parser_show.add_argument("--help", "-h", action='help',
                                  help="show this help message and exit")
@@ -461,13 +462,6 @@ class Pex25DCLI:
     def validate_args(args: argparse.Namespace) -> None:
         found_errors = False
 
-        try:
-            args.log_level = LogLevel[args.log_level.upper()]
-        except KeyError:
-            error(f"Requested log level {args.log_level.lower()} does not exist, "
-                  f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
-            found_errors = True
-
         # Input spec. A scene default for stdin would be wrong:
         # the only thing you can pipe in without a file name to inspect is what another tool wrote,
         # and the format's own serialization is the text file.
@@ -496,12 +490,12 @@ class Pex25DCLI:
 
             if args.command == 'resolve' and getattr(args, 'output_spec', None) is not None:
                 if args.output_spec.kind != ArtifactKind.SCENE:
-                    error("'resolve' produces a PEX25DScene; the output path or --out_kind asks for a PEX25DFile.")
+                    error("'resolve' produces a PEX25DScene; the output path or --out-kind asks for a PEX25DFile.")
                     found_errors = True
 
             if args.command == 'import' and getattr(args, 'output_spec', None) is not None:
                 if args.output_spec.kind != ArtifactKind.FILE:
-                    error("'import' produces a PEX25DFile; the output path or --out_kind asks for a PEX25DScene.")
+                    error("'import' produces a PEX25DFile; the output path or --out-kind asks for a PEX25DScene.")
                     found_errors = True
 
         # Importers get plain paths, so missing inputs are caught here, before a plugin loads.
@@ -670,6 +664,7 @@ class Pex25DCLI:
         with contextlib.ExitStack() as stack:
             if artifact_on_stdout:
                 stack.enter_context(contextlib.redirect_stdout(sys.stderr))
+            warn_deprecated_options(args)
             self._run(args)
 
     def _run(self, args: argparse.Namespace) -> None:

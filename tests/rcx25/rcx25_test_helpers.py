@@ -70,7 +70,7 @@ class RCX25Extraction:
                   '--mode', self.pex_mode,
                   '--blackbox', 'y' if self.blackbox else 'n',
                   '--gds', gds_path,
-                  '--out_dir', self.pdk.output_dir,
+                  '--out-dir', self.pdk.output_dir,
                   '--cache-dir', self.pdk.lvs_cache_dir,
                   '--2.5D',
                   '--halo', '10000',
@@ -92,7 +92,7 @@ class RCX25Extraction:
         """
         Extracts the single cell and returns the paths of the netlists written into the run directory
         """
-        return self.run_kpex(*path_components, extra_args=['--netlist_format', netlist_format]).rcx25_netlist_paths
+        return self.run_kpex(*path_components, extra_args=['--netlist-format', netlist_format]).rcx25_netlist_paths
 
     def written_netlist_lines(self, *path_components) -> Tuple[List[str], List[str]]:
         """

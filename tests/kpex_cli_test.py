@@ -45,7 +45,7 @@ NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_l
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Logging")
 @pytest.mark.parametrize('gds_path, log_dir', [
-    (None, ''),  # NOTE: an error before the run directory is known, the logs stay in --out_dir
+    (None, ''),  # NOTE: an error before the run directory is known, the logs stay in --out-dir
     (NFET_GDS_PATH, 'nfet_li1__nfet_li1'),  # NOTE: an error after, the logs move to the run directory
 ], ids=['missing layout', 'missing KLayout'])
 def test_log_files_hold_their_own_run_only(gds_path: Optional[str], log_dir: str,
@@ -55,7 +55,7 @@ def test_log_files_hold_their_own_run_only(gds_path: Optional[str], log_dir: str
         out_dir = str(tmp_path / run)
         code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
                                                 '--gds', gds_path or os.path.join(out_dir, 'missing.gds'),
-                                                '--out_dir', out_dir])
+                                                '--out-dir', out_dir])
         assert code == 1, output
     for log_name in ('kpex.log', 'kpex_plain.log'):
         with open(tmp_path / 'first' / log_dir / log_name) as f:

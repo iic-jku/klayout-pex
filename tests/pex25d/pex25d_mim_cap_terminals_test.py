@@ -50,10 +50,10 @@ def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[st
     KpexCLI().main(['kpex', 'pex25d',
                     '--pdk', pdk.name,
                     '--gds', pdk.gds_path(*path_components),
-                    '--out_dir', pdk.output_dir,
+                    '--out-dir', pdk.output_dir,
                     '--cache-dir', pdk.lvs_cache_dir,
                     '--blackbox', 'n',
-                    '--output_file', output_path])
+                    '--out-file', output_path])
     with open(output_path, 'rb') as f:
         pex25d_file = read_pex25d_text(f.read(), output_path)
     return sorted((t.name.rsplit(':', 1)[1], t.layer) for t in pex25d_file.terminals

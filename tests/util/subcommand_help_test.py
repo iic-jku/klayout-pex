@@ -22,7 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 
-"""Sectioned subcommand help and the ``help`` subcommand of ``kpex`` and ``pex25d``."""
+"""Sectioned subcommand help and the ``help`` subcommand of ``kpex``, ``pex25d`` and ``netlist``."""
 
 from __future__ import annotations
 
@@ -87,11 +87,17 @@ def kpex_main(argv: List[str]):
     KpexCLI().main(argv)
 
 
+def netlist_main(argv: List[str]):
+    from klayout_pex.netlist.netlist_cli import NetlistCLI
+    NetlistCLI().main(argv)
+
+
 @pytest.mark.parametrize('main, tool, subcommand, sections', [
     (pex25d_main, 'pex25d', 'export', ['Inspect:', 'Transform:', 'Exchange with other tools:',
                                        'Plugins:', 'Help:']),
     (kpex_main, 'kpex', 'extract', ['Extraction:', 'PEX25D:', 'Help:']),
-], ids=['pex25d', 'kpex'])
+    (netlist_main, 'netlist', 'convert', ['Inspect:', 'Transform:', 'Help:']),
+], ids=['pex25d', 'kpex', 'netlist'])
 def test_help_subcommand_is_dash_h(main: Callable[[List[str]], None], tool: str, subcommand: str,
                                    sections: List[str], capsys: pytest.CaptureFixture):
     overview = run(main, [tool, '-h'], capsys)

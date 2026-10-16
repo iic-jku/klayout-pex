@@ -138,7 +138,7 @@ def test_cli_exports_with_an_installed_plugin(
     input_path.write_text(MINIMAL, encoding='utf-8')
     directory = tmp_path / 'deck'
     arguments = ['export', str(input_path), '--to', selector,
-                 '--out_dir', str(directory), '--prefix', 'custom_']
+                 '--out-dir', str(directory), '--prefix', 'custom_']
     cli = Pex25DCLI()
     assert cli.parse_args(arguments).exporter_name == selector
     assert module not in sys.modules
@@ -150,15 +150,15 @@ def test_cli_exports_with_an_installed_plugin(
 
 @pytest.mark.parametrize('extra_arguments, expected', [
     ([], {}),
-    (['--field_margin', '15', '--delaunay_amax', '0.5', '--delaunay_b', '0.8',
-      '--stl', '--geo_check'],
+    (['--field-margin', '15', '--delaunay-amax', '0.5', '--delaunay-b', '0.8',
+      '--stl', '--geo-check'],
      {'field_margin_um': 15.0, 'delaunay_amax': 0.5, 'delaunay_b': 0.8,
       'write_stl': True, 'geometry_check': True}),
     (['--option', 'mesh_size=0.5', '--option', 'order=2', '--option', 'verbose=true',
       '--option', 'boundary=ground', '--option', 'label="10"', '--option', 'note='],
      {'mesh_size': 0.5, 'order': 2, 'verbose': True, 'boundary': 'ground', 'label': '10',
       'note': ''}),
-    (['--field_margin', '15', '--option', 'mesh_size=1e-1'],
+    (['--field-margin', '15', '--option', 'mesh_size=1e-1'],
      {'field_margin_um': 15.0, 'mesh_size': 0.1}),
 ], ids=['none', 'flags', 'options', 'flags-and-options'])
 def test_cli_passes_only_explicit_export_options(
@@ -175,7 +175,7 @@ def test_cli_passes_only_explicit_export_options(
     directory = tmp_path / 'deck'
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
-                         '--out_dir', str(directory), *extra_arguments])
+                         '--out-dir', str(directory), *extra_arguments])
     assert completion.value.code == ExitCode.OK
     actual = ast.literal_eval((directory / 'input.txt').read_text(encoding='utf-8'))
     assert actual == expected
@@ -185,7 +185,7 @@ def test_cli_passes_only_explicit_export_options(
     (['--option', 'mesh_size'], "--option expects NAME=VALUE, got 'mesh_size'"),
     (['--option', '=1'], "--option expects NAME=VALUE, got '=1'"),
     (['--option', 'order=1', '--option', 'order=2'], "--option names 'order' more than once"),
-    (['--field_margin', '4', '--option', 'field_margin_um=5'],
+    (['--field-margin', '4', '--option', 'field_margin_um=5'],
      "Option 'field_margin_um' is given both by its own flag and by --option"),
 ], ids=['no-value', 'no-name', 'twice', 'flag-and-option'])
 def test_cli_rejects_malformed_options_before_loading(
@@ -199,7 +199,7 @@ def test_cli_rejects_malformed_options_before_loading(
     input_path.write_text(MINIMAL, encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
-                          '--out_dir', str(tmp_path / 'deck'), *extra_arguments])
+                          '--out-dir', str(tmp_path / 'deck'), *extra_arguments])
     assert completion.value.code == ExitCode.USAGE
     assert message in caplog.text
     assert module not in sys.modules
@@ -218,7 +218,7 @@ def test_cli_unknown_or_ambiguous_exporters_exit_usage(
     directory = tmp_path / 'deck'
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', selector,
-                         '--out_dir', str(directory)])
+                         '--out-dir', str(directory)])
     assert completion.value.code == ExitCode.USAGE
     assert not directory.exists()
     assert first not in sys.modules
@@ -500,8 +500,8 @@ def test_plugin_execution_errors_are_wrapped_for_api_and_cli(
     input_path = tmp_path / 'cell.pex25d'
     input_path.write_text(MINIMAL, encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
-        Pex25DCLI().main(['pex25d', '--log_level', log_level, 'export', str(input_path),
-                         '--to', 'example', '--out_dir', str(tmp_path / 'cli-output')])
+        Pex25DCLI().main(['pex25d', '--log-level', log_level, 'export', str(input_path),
+                         '--to', 'example', '--out-dir', str(tmp_path / 'cli-output')])
     assert completion.value.code == pex25d.ExitCode.INTERNAL_ERROR
     output = capsys.readouterr()
     assert 'test-one:example' in output.out + output.err
@@ -534,8 +534,8 @@ def test_builtin_crashes_have_distinct_exit_status_and_debug_traceback(
     input_path = tmp_path / 'cell.pex25d'
     input_path.write_text(MINIMAL, encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
-        Pex25DCLI().main(['pex25d', '--log_level', log_level, 'export', str(input_path),
-                         '--to', 'fastercap', '--out_dir', str(tmp_path / 'deck')])
+        Pex25DCLI().main(['pex25d', '--log-level', log_level, 'export', str(input_path),
+                         '--to', 'fastercap', '--out-dir', str(tmp_path / 'deck')])
     assert completion.value.code == pex25d.ExitCode.INTERNAL_ERROR
     output = capsys.readouterr()
     assert 'klayout-pex:fastercap' in output.out + output.err
@@ -607,7 +607,7 @@ def test_cli_checks_exporter_before_reading_or_resolving(
     monkeypatch.setattr(resolver, 'resolve', resolve)
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(tmp_path / 'missing.pex25d'),
-                         '--to', selector, '--out_dir', str(tmp_path / 'deck')])
+                         '--to', selector, '--out-dir', str(tmp_path / 'deck')])
     assert completion.value.code == pex25d.ExitCode.USAGE
     load.assert_not_called()
     resolve.assert_not_called()
@@ -626,8 +626,8 @@ def test_cli_emits_collected_diagnostics_when_export_fails(
     diagnostics = tmp_path / 'diagnostics.json'
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
-                         '--out_dir', str(tmp_path / 'deck'), '--diagnostics', 'json',
-                         '--diagnostics_out', str(diagnostics)])
+                         '--out-dir', str(tmp_path / 'deck'), '--diagnostics', 'json',
+                         '--out-diagnostics', str(diagnostics)])
     assert completion.value.code == pex25d.ExitCode.USAGE
     assert 'PEX25D-E0250' in {d['code'] for d in json.loads(diagnostics.read_text())['diagnostics']}
 
@@ -703,7 +703,7 @@ def test_cli_loads_selected_factory_only_once(
     input_path.write_text(MINIMAL, encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
-                         '--out_dir', str(tmp_path / 'deck')])
+                         '--out-dir', str(tmp_path / 'deck')])
     assert completion.value.code == pex25d.ExitCode.OK
     assert sys.modules[module].calls == 1
 
@@ -766,8 +766,8 @@ def test_export_io_errors_keep_identity_and_exit_usage(
     input_path = tmp_path / 'cell.pex25d'
     input_path.write_text(MINIMAL, encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
-        Pex25DCLI().main(['pex25d', '--log_level', 'debug', 'export', str(input_path),
-                         '--to', target, '--out_dir', str(directory)])
+        Pex25DCLI().main(['pex25d', '--log-level', 'debug', 'export', str(input_path),
+                         '--to', target, '--out-dir', str(directory)])
     assert completion.value.code == pex25d.ExitCode.USAGE
     output = capsys.readouterr()
     assert any('output unavailable' in record.getMessage() for record in caplog.records)
@@ -788,7 +788,7 @@ def test_cli_rejects_output_directory_that_is_a_file(
     output_path.write_text('existing file', encoding='utf-8')
     with pytest.raises(SystemExit) as completion:
         Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', target,
-                         '--out_dir', str(output_path)])
+                         '--out-dir', str(output_path)])
     assert completion.value.code == pex25d.ExitCode.USAGE
     output = capsys.readouterr()
     assert 'crashed' not in output.out + output.err

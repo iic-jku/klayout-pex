@@ -68,7 +68,7 @@ def line_node_names(path: str) -> List[str]:
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_writes_next_to_the_input_by_default(line_netlist: str):
-    assert run(line_netlist, '--ticer_tau', '1p')[0] == ExitCode.OK
+    assert run(line_netlist, '--ticer-tau', '1p')[0] == ExitCode.OK
     assert line_node_names(os.path.splitext(line_netlist)[0] + '_reduced.spice') == ['A', 'B', 'gnd!']
 
 
@@ -78,13 +78,13 @@ def test_options_choose_the_passes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'out' / 'reduced.spice')
     assert run(line_netlist, '-o', output, '--ticer', 'n')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--floating', 'n', '--ticer_tau', '1e-12')[0] == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--floating', 'n', '--ticer-tau', '1e-12')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '0.01p')[0] == ExitCode.OK  # τ(m1) = 50 fs
+    assert run(line_netlist, '-o', output, '--ticer-tau', '0.01p')[0] == ExitCode.OK  # τ(m1) = 50 fs
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--ticer_max_degree', '1')[0] == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer-tau', '1p', '--ticer-max-degree', '1')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--floating_max_degree', '1')[0] == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer-tau', '1p', '--floating-max-degree', '1')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
     with open(output) as f:
         assert 'Rtie_1 plate 0 1e+12' in f.read().splitlines()
@@ -94,20 +94,20 @@ def test_options_choose_the_passes(line_netlist: str, tmp_path):
 @allure.tag(*tags)
 def test_keep_protects_nodes(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
-    assert run(line_netlist, '-o', output, '--ticer_tau', '1p', '--keep', 'm2', '--keep', 'PLATE')[0] == ExitCode.OK
+    assert run(line_netlist, '-o', output, '--ticer-tau', '1p', '--keep', 'm2', '--keep', 'PLATE')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm2', 'plate']
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('arguments, message', [
-    (['--ticer_tau', '0'], "argument --ticer_tau: must be > 0 s, got '0'"),
+    (['--ticer-tau', '0'], "argument --ticer-tau: must be > 0 s, got '0'"),
     # NOTE: with '=', as Python 3.12's argparse reads '-1p' as an option
-    (['--ticer_tau=-1p'], "argument --ticer_tau: must be > 0 s, got '-1p'"),
-    (['--ticer_tau', 'fast'], "argument --ticer_tau: Not a SPICE number: 'fast' (examples of valid numbers: "
+    (['--ticer-tau=-1p'], "argument --ticer-tau: must be > 0 s, got '-1p'"),
+    (['--ticer-tau', 'fast'], "argument --ticer-tau: Not a SPICE number: 'fast' (examples of valid numbers: "
                               "'1.5', '2e-15', '0.1p', '10k', '1Meg')"),
-    (['--ticer_max_degree', '0'], "argument --ticer_max_degree: must be an integer ≥ 1, got '0'"),
-    (['--floating_max_degree', '2.5'], "argument --floating_max_degree: must be an integer ≥ 1, got '2.5'"),
+    (['--ticer-max-degree', '0'], "argument --ticer-max-degree: must be an integer ≥ 1, got '0'"),
+    (['--floating-max-degree', '2.5'], "argument --floating-max-degree: must be an integer ≥ 1, got '2.5'"),
 ])
 def test_invalid_values_are_usage_errors(line_netlist: str, arguments: List[str], message: str):
     code, output = run(line_netlist, *arguments)
@@ -158,13 +158,13 @@ def test_invalid_netlist_exits_one(tmp_path):
 @allure.tag(*tags)
 def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
-    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '-o', output, '--ticer_tau', '1p'])
+    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '-o', output, '--ticer-tau', '1p'])
     assert result.returncode == ExitCode.OK, result.stderr
     assert line_node_names(output) == ['A', 'B', 'gnd!'], result.stderr
 
-    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '--ticer_max_degree', 'many'])
+    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '--ticer-max-degree', 'many'])
     assert result.returncode == ExitCode.USAGE, result.stderr
-    assert "argument --ticer_max_degree: must be an integer ≥ 1, got 'many'" in result.stderr
+    assert "argument --ticer-max-degree: must be an integer ≥ 1, got 'many'" in result.stderr
 
 
 @allure.parent_suite(parent_suite)
