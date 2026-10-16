@@ -167,6 +167,10 @@ class PEX25DBuilder:
         return self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net, lvs_layer_names=lvs_layer_names)
 
     @cached_property
+    def substrate_lvs_layer_names(self) -> Set[str]:
+        return set(self.tech_info.tech.substrate.lvs_layer_names)
+
+    @cached_property
     def process_layer_name_by_lvs_layer_name(self) -> Dict[str, str]:
         """The profile whose shapes the shapes of an LVS layer are."""
         return {lvs_layer_name: layer_name
@@ -685,6 +689,10 @@ class PEX25DBuilder:
                 selected = {}
                 for index, marker in self.pex_context.lvsdb.shapes_of_terminal(ref).items():
                     source_name = self.pex_context.lvsdb.layer_name(index)
+                    if source_name in self.substrate_lvs_layer_names:
+                        # NOTE: the substrate is the ground plane, a terminal on it needs no node
+                        #       (see TERMINAL_KIND_DEVICE_TERMINAL), e.g. the terminal of a cap to the substrate
+                        continue
                     pair = self.gds_pair(source_name)
                     if pair is None:
                         continue
