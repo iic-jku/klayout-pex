@@ -112,5 +112,23 @@ message ComputedLayerInfo {
 
     Kind kind = 10;
     LayerInfo layer_info = 20;
-    string original_layer_name = 40; // name of the regular layer this is derived from
+
+    // the drawn layer (of Technology.layers) this is derived from, which keys the parasitics tables
+    string original_layer_name = 40;
+
+    // the layer of the process stack whose shapes these are (of Technology.process_stack.layers, or their
+    // contact_above), as the drawn layer may have several; set where the stack has a layer on its GDS pair
+    string process_layer_name = 50;
+
+    // e.g. the computed layers of IHP Metal5 (GDS pair 67/0), whose process stack has metal5_n_cap,
+    // and metal5_cap under the MIM dielectric:
+    //
+    //   +-------------------+---------------------+--------------------+
+    //   | layer_info.name   | original_layer_name | process_layer_name |
+    //   +-------------------+---------------------+--------------------+
+    //   | metal5_n_cap      | Metal5              | metal5_n_cap       |
+    //   | metal5_cap        | Metal5              | metal5_cap         |
+    //   | metal5_rfcap_feed | Metal5              | metal5_n_cap       |
+    //   | metal5_mom        | Metal5              | metal5_n_cap       |
+    //   +-------------------+---------------------+--------------------+
 }

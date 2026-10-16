@@ -207,8 +207,10 @@ class TechInfo:
     def lvs_layer_names_by_process_layer_name(self) -> Dict[LayerName, List[LVSLayerName]]:
         """
         The LVS layers whose shapes each layer of the process stack (a conductor or a contact) has:
-        the one named after it, and those no layer of the stack is named after
-        go to the first layer of their GDS pair, from the bottom up
+        those that name it (ComputedLayerInfo.process_layer_name), on its GDS pair
+
+        :raises TechDefError: if an LVS layer names no layer of the stack on its GDS pair, where the stack has one,
+                              or names one that isn't
 
         NOTE: layers of the stack can share a GDS pair, e.g. sky130A met3_ncap and met3_cap,
               the parts of met3 without and with a MIM cap above, which have different dielectrics,
@@ -235,10 +237,18 @@ class TechInfo:
 
         lvs_layer_names_by_process_layer_name: Dict[LayerName, List[LVSLayerName]] = {}
         for lvs_layer_name, gds_pair in self.gds_pair_for_computed_layer_name.items():
-            stack_layer_names = stack_layer_names_by_gds_pair.get(gds_pair, None)
-            if not stack_layer_names:
+            stack_layer_names = stack_layer_names_by_gds_pair.get(gds_pair, [])
+            process_layer_name = self.computed_layer_info_by_name[lvs_layer_name].process_layer_name
+            if not process_layer_name:
+                if stack_layer_names:
+                    raise TechDefError(f"The LVS computed layer {lvs_layer_name} names no layer of the process stack, "
+                                       f"but the layers of the stack on its GDS pair {gds_pair} are: "
+                                       f"{', '.join(stack_layer_names)}")
                 continue
-            process_layer_name = lvs_layer_name if lvs_layer_name in stack_layer_names else stack_layer_names[0]
+            if process_layer_name not in stack_layer_names:
+                raise TechDefError(f"The LVS computed layer {lvs_layer_name} names the layer {process_layer_name} "
+                                   f"of the process stack, but the layers of the stack on its GDS pair {gds_pair} "
+                                   f"are: {', '.join(stack_layer_names) or 'none'}")
             lvs_layer_names_by_process_layer_name.setdefault(process_layer_name, []).append(lvs_layer_name)
         return lvs_layer_names_by_process_layer_name
 

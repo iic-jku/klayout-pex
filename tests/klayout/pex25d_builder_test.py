@@ -76,7 +76,8 @@ class TerminalFixture:
             metal.metal_layer.thickness = 0.1
             tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
                                                                        drw_gds_pair=tech_pb2.GDSPair(layer=1)),
-                                         original_layer_name='met1')
+                                         original_layer_name='met1',
+                                         process_layer_name=name)
         air = stack.layers.add(name='air', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
         air.simple_dielectric_layer.dielectric_k = 1.0
         self.tech = TechInfo(tech, None)

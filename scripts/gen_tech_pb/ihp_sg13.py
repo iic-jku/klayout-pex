@@ -79,50 +79,50 @@ class TechBuilder:
             add_layer(tech, METAL,    "TopMetal2", (134, 0),  (134, 2),  (134, 25),  "Defines 2-nd thick TopMetal layer")
 
     def build_lvs_computed_layers(self, tech: Technology):
-        #                        purpose kind  lvs_name         lvs_gds_pair  orig. layer  description
-        add_computed_layer(tech, PWELL, KREG, "pwell",          (46, 0),      "PWell",     "Computed layer for PWell")
-        add_computed_layer(tech, PWELL, KREG, "pwell_sub",      (46, 0),      "PWell",     "Computed layer for PWell")
-        add_computed_layer(tech, NWELL, KREG, "nwell_drw",      (31, 0),      "NWell",     "Computed layer for NWell")
-        add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "Computed layer for nSD")
-        add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "Computed layer for pSD")
-        add_computed_layer(tech, NIMP,  KREG, "ntap1_tie",      (7, 0),       "nSD",       "Tie of the ntap1 tap device, the same n+ Activ as nsd_fet")
-        add_computed_layer(tech, PIMP,  KREG, "ptap1_tie",      (14, 0),      "pSD",       "Tie of the ptap1 tap device, the same p+ Activ as psd_fet")
-        add_computed_layer(tech, NTAP,  KREG, "ntap",           (65, 144),    "Activ",     "Computed layer for ntap")
-        add_computed_layer(tech, PTAP,  KREG, "ptap",           (65, 244),    "Activ",     "Computed layer for ptap")
+        #                        purpose kind  lvs_name         lvs_gds_pair  orig. layer  process layer    description
+        add_computed_layer(tech, PWELL, KREG, "pwell",          (46, 0),      "PWell",     None,            "Computed layer for PWell")
+        add_computed_layer(tech, PWELL, KREG, "pwell_sub",      (46, 0),      "PWell",     None,            "Computed layer for PWell")
+        add_computed_layer(tech, NWELL, KREG, "nwell_drw",      (31, 0),      "NWell",     None,            "Computed layer for NWell")
+        add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
+        add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
+        add_computed_layer(tech, NIMP,  KREG, "ntap1_tie",      (7, 0),       "nSD",       "nSD",           "Tie of the ntap1 tap device, the same n+ Activ as nsd_fet")
+        add_computed_layer(tech, PIMP,  KREG, "ptap1_tie",      (14, 0),      "pSD",       "pSD",           "Tie of the ptap1 tap device, the same p+ Activ as psd_fet")
+        add_computed_layer(tech, NTAP,  KREG, "ntap",           (65, 144),    "Activ",     "ntap",          "Computed layer for ntap")
+        add_computed_layer(tech, PTAP,  KREG, "ptap",           (65, 244),    "Activ",     "ptap",          "Computed layer for ptap")
 
-        add_computed_layer(tech, METAL, KREG, "poly_con",       (5, 0),       "GatPoly",   "Computed layer for GatPoly")
-        add_computed_layer(tech, METAL, KREG, "metal1_n_mom",   (8, 0),       "Metal1",    "Computed layer for Metal1 (case where no MOM cap)")
-        add_computed_layer(tech, METAL, KREG, "metal2_n_mom",   (10, 0),      "Metal2",    "Computed layer for Metal2 (case where no MOM cap)")
-        add_computed_layer(tech, METAL, KREG, "metal3_n_mom",   (30, 0),      "Metal3",    "Computed layer for Metal3 (case where no MOM cap)")
-        add_computed_layer(tech, METAL, KREG, "metal4_n_mom",   (50, 0),      "Metal4",    "Computed layer for Metal4 (case where no MOM cap)")
-
-        if self.is_g2:
-            add_computed_layer(tech, METAL, KREG, "metal5_n_cap",   (67, 0),      "Metal5",    "Computed layer for Metal5 (case where no MiM or MOM cap)")
-
-        add_computed_layer(tech, METAL, KREG, "topmetal1_con",  (126, 0),     "TopMetal1", "Computed layer for TopMetal1")
+        add_computed_layer(tech, METAL, KREG, "poly_con",       (5, 0),       "GatPoly",   "GatPoly",       "Computed layer for GatPoly")
+        add_computed_layer(tech, METAL, KREG, "metal1_n_mom",   (8, 0),       "Metal1",    "Metal1",        "Computed layer for Metal1 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal2_n_mom",   (10, 0),      "Metal2",    "Metal2",        "Computed layer for Metal2 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal3_n_mom",   (30, 0),      "Metal3",    "Metal3",        "Computed layer for Metal3 (case where no MOM cap)")
+        add_computed_layer(tech, METAL, KREG, "metal4_n_mom",   (50, 0),      "Metal4",    "Metal4",        "Computed layer for Metal4 (case where no MOM cap)")
 
         if self.is_g2:
-            add_computed_layer(tech, METAL, KREG, "topmetal2_con",  (134, 0),     "TopMetal2", "Computed layer for TopMetal2")
+            add_computed_layer(tech, METAL, KREG, "metal5_n_cap",   (67, 0),      "Metal5",    "metal5_n_cap",  "Computed layer for Metal5 (case where no MiM or MOM cap)")
 
-        add_computed_layer(tech, CONT,  KREG, "cont_nsd_con",   (6, 4401),    "Cont",      "Computed layer for contact from nSD to Metal1")
-        add_computed_layer(tech, CONT,  KREG, "cont_psd_con",   (6, 4402),    "Cont",      "Computed layer for contact from pSD to Metal1")
-        add_computed_layer(tech, CONT,  KREG, "cont_poly_con",  (6, 4403),    "Cont",      "Computed layer for contact from GatPoly to Metal1")
+        add_computed_layer(tech, METAL, KREG, "topmetal1_con",  (126, 0),     "TopMetal1", "TopMetal1",     "Computed layer for TopMetal1")
+
+        if self.is_g2:
+            add_computed_layer(tech, METAL, KREG, "topmetal2_con",  (134, 0),     "TopMetal2", "TopMetal2",     "Computed layer for TopMetal2")
+
+        add_computed_layer(tech, CONT,  KREG, "cont_nsd_con",   (6, 4401),    "Cont",      "cont_nsd_con",  "Computed layer for contact from nSD to Metal1")
+        add_computed_layer(tech, CONT,  KREG, "cont_psd_con",   (6, 4402),    "Cont",      "cont_psd_con",  "Computed layer for contact from pSD to Metal1")
+        add_computed_layer(tech, CONT,  KREG, "cont_poly_con",  (6, 4403),    "Cont",      "cont_poly_con", "Computed layer for contact from GatPoly to Metal1")
         # NOTE: part of their taps, as the nwell (no sheet resistance) and the substrate below are no conductors
         #       of the resistance network
-        add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      "Computed layer for contact from ntap (the nwell below) to Metal1")
-        add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      "Computed layer for contact from ptap (the substrate below) to Metal1")
+        add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      None,            "Computed layer for contact from ntap (the nwell below) to Metal1")
+        add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      None,            "Computed layer for contact from ptap (the substrate below) to Metal1")
 
-        add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "Computed layer for Via1")
-        add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "Computed layer for Via2")
-        add_computed_layer(tech, VIA,   KREG, "via3_drw",       (49, 0),      "Via3",      "Computed layer for Via3")
-
-        if self.is_g2:
-            add_computed_layer(tech, VIA,   KREG, "via4_drw",       (66, 0),      "Via4",      "Computed layer for Via4")
-
-        add_computed_layer(tech, VIA,   KREG, "topvia1_n_cap",  (125, 0),     "TopVia1",   "Original TopVia1 is 125/0 (case where no MiM cap)")
+        add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "via1_drw",      "Computed layer for Via1")
+        add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "via2_drw",      "Computed layer for Via2")
+        add_computed_layer(tech, VIA,   KREG, "via3_drw",       (49, 0),      "Via3",      "via3_drw",      "Computed layer for Via3")
 
         if self.is_g2:
-            add_computed_layer(tech, VIA,   KREG, "topvia2_drw",    (133, 0),     "TopVia2",   "Computed layer for TopVia2")
+            add_computed_layer(tech, VIA,   KREG, "via4_drw",       (66, 0),      "Via4",      "via4_drw",      "Computed layer for Via4")
+
+        add_computed_layer(tech, VIA,   KREG, "topvia1_n_cap",  (125, 0),     "TopVia1",   "topvia1_n_cap", "Original TopVia1 is 125/0 (case where no MiM cap)")
+
+        if self.is_g2:
+            add_computed_layer(tech, VIA,   KREG, "topvia2_drw",    (133, 0),     "TopVia2",   "topvia2_drw",   "Computed layer for TopVia2")
 
         # NOTE: for CC whiteboxing to work,
         #       we must ensure all VPP/MIM metal layers map to the same GDS pair as the non-cap versions,
@@ -137,12 +137,12 @@ class TechBuilder:
             #       which the plates also shield (e.g. a wire below), so with --blackbox, these are extracted.
             #       The model of the rfcmim has the one of its Metal5 to the substrate too (Cox), its terminal bn,
             #       so all of its Metal5 is a plate (metal5_rfcap and metal5_rfcap_feed)
-            add_computed_layer(tech, VIA,   KPLT, "mim_via",        (125, 10),    "TopVia1",   "Original TopVia1 is 125/0, case MiM cap")
-            add_computed_layer(tech, MIM,   KPLT, "metal5_cap",     (67, 0),      "Metal5",    "Computed layer for Metal5, case MiM cap")
-            add_computed_layer(tech, MIM,   KPLT, "cmim_top",       (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5")
-            add_computed_layer(tech, MIM,   KPLT, "metal5_rfcap",   (67, 0),      "Metal5",    "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
-            add_computed_layer(tech, METAL, KPLT, "metal5_rfcap_feed", (67, 0),   "Metal5",    "Computed layer for the rest of the Metal5 of the rfcmim (enclosure, feed)")
-            add_computed_layer(tech, MIM,   KPLT, "rfmim_top",      (36, 0),      "MIM",       "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
+            add_computed_layer(tech, VIA,   KPLT, "mim_via",        (125, 10),    "TopVia1",   "mim_via",       "Original TopVia1 is 125/0, case MiM cap")
+            add_computed_layer(tech, MIM,   KPLT, "metal5_cap",     (67, 0),      "Metal5",    "metal5_cap",    "Computed layer for Metal5, case MiM cap")
+            add_computed_layer(tech, MIM,   KPLT, "cmim_top",       (36, 0),      "MIM",       "cmim_top",      "Computed layer for MiM cap above Metal5")
+            add_computed_layer(tech, MIM,   KPLT, "metal5_rfcap",   (67, 0),      "Metal5",    "metal5_n_cap",  "Computed layer for Metal5, case rfcmim (not in metal5_cap)")
+            add_computed_layer(tech, METAL, KPLT, "metal5_rfcap_feed", (67, 0),   "Metal5",    "metal5_n_cap",  "Computed layer for the rest of the Metal5 of the rfcmim (enclosure, feed)")
+            add_computed_layer(tech, MIM,   KPLT, "rfmim_top",      (36, 0),      "MIM",       "cmim_top",      "Computed layer for MiM cap above Metal5, case rfcmim (not in cmim_top)")
 
         # NOTE: the fingers of the MOM caps (cap_cmomi, cap_cmomf, the metal within their markers)
         #       are on the GDS pairs of the regular metal, but with --blackbox, the capacitances between them
@@ -150,38 +150,38 @@ class TechBuilder:
         #       these have no substrate terminal, so the capacitances of the fingers to the substrate
         #       and to other nets (e.g. a wire across) are extracted.
         #       But the model of cap_cmomi has a substrate shunt (to the global ground 0) of its own
-        add_computed_layer(tech, METAL, KPLT, "metal1_mom",     (8, 0),       "Metal1",    "Metal1 of MOM caps (within their markers)")
-        add_computed_layer(tech, METAL, KPLT, "metal2_mom",     (10, 0),      "Metal2",    "Metal2 of MOM caps (within their markers)")
-        add_computed_layer(tech, METAL, KPLT, "metal3_mom",     (30, 0),      "Metal3",    "Metal3 of MOM caps (within their markers)")
-        add_computed_layer(tech, METAL, KPLT, "metal4_mom",     (50, 0),      "Metal4",    "Metal4 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal1_mom",     (8, 0),       "Metal1",    "Metal1",        "Metal1 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal2_mom",     (10, 0),      "Metal2",    "Metal2",        "Metal2 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal3_mom",     (30, 0),      "Metal3",    "Metal3",        "Metal3 of MOM caps (within their markers)")
+        add_computed_layer(tech, METAL, KPLT, "metal4_mom",     (50, 0),      "Metal4",    "Metal4",        "Metal4 of MOM caps (within their markers)")
         if self.is_g2:
-            add_computed_layer(tech, METAL, KPLT, "metal5_mom",     (67, 0),      "Metal5",    "Metal5 of MOM caps (within their markers)")
+            add_computed_layer(tech, METAL, KPLT, "metal5_mom",     (67, 0),      "Metal5",    "metal5_n_cap",  "Metal5 of MOM caps (within their markers)")
 
-        add_computed_layer(tech, METAL, KPIN, "poly_pin_con",       (5, 2),    "GatPoly.pin",    "Poly pin")
-        add_computed_layer(tech, METAL, KPIN, "metal1_pin_con",     (8, 2),    "Metal1.pin",     "Metal1 pin")
-        add_computed_layer(tech, METAL, KPIN, "metal2_pin_con",     (10, 2),   "Metal2.pin",     "Metal2 pin")
-        add_computed_layer(tech, METAL, KPIN, "metal3_pin_con",     (30, 2),   "Metal3.pin",     "Metal3 pin")
-        add_computed_layer(tech, METAL, KPIN, "metal4_pin_con",     (50, 2),   "Metal4.pin",     "Metal4 pin")
-
-        if self.is_g2:
-            add_computed_layer(tech, METAL, KPIN, "metal5_pin_con",     (67, 2),   "Metal5.pin",     "Metal5 pin")
-
-        add_computed_layer(tech, METAL, KPIN, "topmetal1_pin_con",  (126, 2),  "TopMetal1.pin",  "TopMetal1 pin")
+        add_computed_layer(tech, METAL, KPIN, "poly_pin_con",       (5, 2),    "GatPoly.pin",    None,            "Poly pin")
+        add_computed_layer(tech, METAL, KPIN, "metal1_pin_con",     (8, 2),    "Metal1.pin",     None,            "Metal1 pin")
+        add_computed_layer(tech, METAL, KPIN, "metal2_pin_con",     (10, 2),   "Metal2.pin",     None,            "Metal2 pin")
+        add_computed_layer(tech, METAL, KPIN, "metal3_pin_con",     (30, 2),   "Metal3.pin",     None,            "Metal3 pin")
+        add_computed_layer(tech, METAL, KPIN, "metal4_pin_con",     (50, 2),   "Metal4.pin",     None,            "Metal4 pin")
 
         if self.is_g2:
-            add_computed_layer(tech, METAL, KPIN, "topmetal2_pin_con",  (134, 2),  "TopMetal2.pin",  "TopMetal2 pin")
+            add_computed_layer(tech, METAL, KPIN, "metal5_pin_con",     (67, 2),   "Metal5.pin",     None,            "Metal5 pin")
 
-        add_computed_layer(tech, METAL, KLBL, "poly_text",          (5, 25),   "GatPoly.text",   "Poly label")
-        add_computed_layer(tech, METAL, KLBL, "metal1_text",        (8, 25),   "Metal1.text",    "Metal1 label")
-        add_computed_layer(tech, METAL, KLBL, "metal2_text",        (10, 25),  "Metal2.text",    "Metal2 label")
-        add_computed_layer(tech, METAL, KLBL, "metal3_text",        (30, 25),  "Metal3.text",    "Metal3 label")
-        add_computed_layer(tech, METAL, KLBL, "metal4_text",        (50, 25),  "Metal4.text",    "Metal4 label")
+        add_computed_layer(tech, METAL, KPIN, "topmetal1_pin_con",  (126, 2),  "TopMetal1.pin",  None,            "TopMetal1 pin")
 
         if self.is_g2:
-            add_computed_layer(tech, METAL, KLBL, "metal5_text",        (67, 25),  "Metal5.text",    "Metal5 label")
-        add_computed_layer(tech, METAL, KLBL, "topmetal1_text",     (126, 25), "TopMetal1.text", "TopMetal1 label")
+            add_computed_layer(tech, METAL, KPIN, "topmetal2_pin_con",  (134, 2),  "TopMetal2.pin",  None,            "TopMetal2 pin")
+
+        add_computed_layer(tech, METAL, KLBL, "poly_text",          (5, 25),   "GatPoly.text",   None,            "Poly label")
+        add_computed_layer(tech, METAL, KLBL, "metal1_text",        (8, 25),   "Metal1.text",    None,            "Metal1 label")
+        add_computed_layer(tech, METAL, KLBL, "metal2_text",        (10, 25),  "Metal2.text",    None,            "Metal2 label")
+        add_computed_layer(tech, METAL, KLBL, "metal3_text",        (30, 25),  "Metal3.text",    None,            "Metal3 label")
+        add_computed_layer(tech, METAL, KLBL, "metal4_text",        (50, 25),  "Metal4.text",    None,            "Metal4 label")
+
         if self.is_g2:
-            add_computed_layer(tech, METAL, KLBL, "topmetal2_text",     (134, 25), "TopMetal2.text", "TopMetal2 label")
+            add_computed_layer(tech, METAL, KLBL, "metal5_text",        (67, 25),  "Metal5.text",    None,            "Metal5 label")
+        add_computed_layer(tech, METAL, KLBL, "topmetal1_text",     (126, 25), "TopMetal1.text", None,            "TopMetal1 label")
+        if self.is_g2:
+            add_computed_layer(tech, METAL, KLBL, "topmetal2_text",     (134, 25), "TopMetal2.text", None,            "TopMetal2 label")
 
     def build_process_stack_info(self, psi: ProcessStackInfo):
         # SUBSTRATE:              name    height   thickness         reference

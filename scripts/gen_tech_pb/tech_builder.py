@@ -106,9 +106,14 @@ def add_computed_layer(tech: Technology,
                        name: str,
                        gds: GDSPair,
                        original_layer_name: str,
+                       process_layer_name: Optional[str],
                        description: str):
+    """
+    :param process_layer_name: see ComputedLayerInfo.process_layer_name, None if the stack has no layer on its GDS pair
+    """
     tech.lvs_computed_layers.add(kind=kind,
                                  original_layer_name=original_layer_name,
+                                 process_layer_name=process_layer_name or '',
                                  layer_info=LayerInfo(purpose=purpose,
                                                       name=name,
                                                       description=description,
