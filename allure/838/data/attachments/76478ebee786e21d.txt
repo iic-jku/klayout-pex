@@ -1,0 +1,116 @@
+[18:05:34] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1366
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --gds                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz --out_dir                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:05:34] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:663
+[18:05:34] INFO     No explicit top cell specified, using top    kpex_cli.py:703
+                    cell 'cap_rfcmim_w7u_l7u_over_m4_wire'                      
+[18:05:34] INFO     LVS input schematic not specified (argument  kpex_cli.py:744
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:05:34] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1301
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_pat
+terns/cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz/cap_rfcmim_w7u_l7u_over_m4_wire.lvs
+db.gz                                                                           
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:05:34] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1535
+[18:05:34] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1535
+[18:05:34] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1535
+[18:05:34] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1535
+[18:05:34] INFO     (36, 0) -> (rfmim_top)                      kpex_cli.py:1535
+[18:05:34] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1535
+[18:05:34] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1535
+[18:05:34] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1535
+[18:05:34] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1535
+[18:05:34] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1535
+[18:05:34] INFO     (67, 0) -> (metal5_rfcap_feed metal5_rfcap  kpex_cli.py:1535
+                    metal5_n_cap)                                               
+[18:05:34] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1535
+[18:05:34] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1535
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:05:34] INFO     LVSDB: found 4pins                          extractor.py:294
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;MINUS;0.119;                                                               
+C2;D;MINUS.P0.Metal5;1.133;                                                     
+C3;D;PLUS;0.016;                                                                
+C4;D;PLUS.$48.TopMetal1;0.031;                                                  
+C5;D;PLUS.$54.TopMetal1;0.031;                                                  
+C6;D;sub!;0.343;                                                                
+C7;D;VSUBS;1.359;                                                               
+C8;MINUS;PLUS.$30.MIM;0.12;                                                     
+C9;MINUS;PLUS.$66.TopMetal1;0.136;                                              
+C10;MINUS;sub!;0.143;                                                           
+C11;MINUS;VSUBS;0.52;                                                           
+C12;MINUS.P0.Metal5;PLUS;0.093;                                                 
+C13;MINUS.P0.Metal5;PLUS.$0.MIM;16.03;                                          
+C14;MINUS.P0.Metal5;PLUS.$10.MIM;10.604;                                        
+C15;MINUS.P0.Metal5;PLUS.$12.MIM;10.253;                                        
+C16;MINUS.P0.Metal5;PLUS.$18.MIM;10.249;                                        
+C17;MINUS.P0.Metal5;PLUS.$24.MIM;10.63;                                         
+C18;MINUS.P0.Metal5;PLUS.$30.MIM;15.941;                                        
+C19;MINUS.P0.Metal5;PLUS.$36.TopMetal1;0.228;                                   
+C20;MINUS.P0.Metal5;PLUS.$42.TopMetal1;0.033;                                   
+C21;MINUS.P0.Metal5;PLUS.$48.TopMetal1;0.033;                                   
+C22;MINUS.P0.Metal5;PLUS.$54.TopMetal1;0.033;                                   
+C23;MINUS.P0.Metal5;PLUS.$60.TopMetal1;0.033;                                   
+C24;MINUS.P0.Metal5;PLUS.$66.TopMetal1;0.09;                                    
+C25;MINUS.P0.Metal5;PLUS.P0.MIM;0.758;                                          
+C26;MINUS.P0.Metal5;sub!;0.201;                                                 
+C27;MINUS.P0.Metal5;VSUBS;0.979;                                                
+C28;PLUS;sub!;0.151;                                                            
+C29;PLUS;VSUBS;0.331;                                                           
+C30;PLUS.$36.TopMetal1;sub!;0.047;                                              
+C31;PLUS.$36.TopMetal1;VSUBS;0.339;                                             
+C32;PLUS.$42.TopMetal1;sub!;0.01;                                               
+C33;PLUS.$42.TopMetal1;VSUBS;0.062;                                             
+C34;PLUS.$48.TopMetal1;sub!;0.005;                                              
+C35;PLUS.$48.TopMetal1;VSUBS;0.05;                                              
+C36;PLUS.$54.TopMetal1;sub!;0.005;                                              
+C37;PLUS.$54.TopMetal1;VSUBS;0.05;                                              
+C38;PLUS.$60.TopMetal1;sub!;0.01;                                               
+C39;PLUS.$60.TopMetal1;VSUBS;0.062;                                             
+C40;PLUS.$66.TopMetal1;sub!;0.027;                                              
+C41;PLUS.$66.TopMetal1;VSUBS;0.24;                                              
+C42;VSUBS;sub!;4.878;                                                           
+R1;MINUS;MINUS.P0.Metal5;;0.161                                                 
+R2;PLUS;PLUS.$36.TopMetal1;;0.032                                               
+R3;PLUS.$0.MIM;PLUS.$10.MIM;;1.909                                              
+R4;PLUS.$0.MIM;PLUS.$36.TopMetal1;;0.367                                        
+R5;PLUS.$10.MIM;PLUS.$12.MIM;;1.918                                             
+R6;PLUS.$10.MIM;PLUS.$42.TopMetal1;;0.367                                       
+R7;PLUS.$12.MIM;PLUS.$48.TopMetal1;;0.367                                       
+R8;PLUS.$12.MIM;PLUS.P0.MIM;;0.964                                              
+R9;PLUS.$18.MIM;PLUS.$24.MIM;;1.918                                             
+R10;PLUS.$18.MIM;PLUS.$54.TopMetal1;;0.367                                      
+R11;PLUS.$18.MIM;PLUS.P0.MIM;;0.954                                             
+R12;PLUS.$24.MIM;PLUS.$30.MIM;;1.918                                            
+R13;PLUS.$24.MIM;PLUS.$60.TopMetal1;;0.367                                      
+R14;PLUS.$30.MIM;PLUS.$66.TopMetal1;;0.367                                      
+R15;PLUS.$36.TopMetal1;PLUS.$42.TopMetal1;;0.003                                
+R16;PLUS.$42.TopMetal1;PLUS.$48.TopMetal1;;0.003                                
+R17;PLUS.$48.TopMetal1;PLUS.$54.TopMetal1;;0.003                                
+R18;PLUS.$54.TopMetal1;PLUS.$60.TopMetal1;;0.003                                
+R19;PLUS.$60.TopMetal1;PLUS.$66.TopMetal1;;0.003                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_rfcmim_w7u_l7u_o
+ver_m4_wire__cap_rfcmim_w7u_l7u_over_m4_wire/cap_rfcmim_w7u_l7u_over_m4_wire_k25
+d_pex_netlist.csv                                                               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[18:05:34] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_rfcmim_w7u_l7u_o
+ver_m4_wire__cap_rfcmim_w7u_l7u_over_m4_wire/cap_rfcmim_w7u_l7u_over_m4_wire_k25
+d_pex_netlist.spice                                                             

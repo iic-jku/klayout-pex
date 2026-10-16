@@ -1,0 +1,270 @@
+[18:07:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1366
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --gds                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz --out_dir                                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:07:17] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:663
+[18:07:17] INFO     No explicit top cell specified, using top    kpex_cli.py:703
+                    cell 'cap_mim_m4m5'                                         
+[18:07:17] INFO     LVS input schematic not specified (argument  kpex_cli.py:744
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:07:17] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1301
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz/cap_mim_m4m5.lvsdb.gz                                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:07:17] INFO     (81, 0) -> (metal5_con)                     kpex_cli.py:1535
+[18:07:17] INFO     (41, 244) -> (top_via_cap)                  kpex_cli.py:1535
+[18:07:17] INFO     (46, 0) -> (metal4_cap metal4_n_cap)        kpex_cli.py:1535
+[18:07:17] INFO     (75, 0) -> (fuse_cap)                       kpex_cli.py:1535
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:07:17] INFO     LVSDB: found 4pins                          extractor.py:294
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;BOT1;TOP1;0.018;                                                             
+C2;BOT1;TOP1.$0.FuseTop;3.542;                                                  
+C3;BOT1;TOP1.$10.FuseTop;1.031;                                                 
+C4;BOT1;TOP1.$12.FuseTop;0.147;                                                 
+C5;BOT1;TOP1.$36.Metal5;0.029;                                                  
+C6;BOT1;TOP1.$42.Metal5;0.011;                                                  
+C7;BOT1;TOP1.$48.Metal5;0.007;                                                  
+C8;BOT1;VSUBS;0.213;                                                            
+C9;BOT1.P0.Metal4;BOT2;0.132;                                                   
+C10;BOT1.P0.Metal4;TOP1.$0.FuseTop;7.823;                                       
+C11;BOT1.P0.Metal4;TOP1.$10.FuseTop;6.884;                                      
+C12;BOT1.P0.Metal4;TOP1.$12.FuseTop;7.481;                                      
+C13;BOT1.P0.Metal4;TOP1.$18.FuseTop;7.627;                                      
+C14;BOT1.P0.Metal4;TOP1.$24.FuseTop;7.915;                                      
+C15;BOT1.P0.Metal4;TOP1.$30.FuseTop;11.365;                                     
+C16;BOT1.P0.Metal4;TOP1.$36.Metal5;0.056;                                       
+C17;BOT1.P0.Metal4;TOP1.$42.Metal5;0.011;                                       
+C18;BOT1.P0.Metal4;TOP1.$48.Metal5;0.015;                                       
+C19;BOT1.P0.Metal4;TOP1.$54.Metal5;0.022;                                       
+C20;BOT1.P0.Metal4;TOP1.$60.Metal5;0.022;                                       
+C21;BOT1.P0.Metal4;TOP1.$66.Metal5;0.103;                                       
+C22;BOT1.P0.Metal4;TOP1.P0.FuseTop;0.575;                                       
+C23;BOT1.P0.Metal4;TOP2;0.004;                                                  
+C24;BOT1.P0.Metal4;TOP2.$0.FuseTop;0.004;                                       
+C25;BOT1.P0.Metal4;TOP2.$300.Metal5;0.027;                                      
+C26;BOT1.P0.Metal4;VSUBS;0.623;                                                 
+C27;BOT2;TOP1.$30.FuseTop;0.003;                                                
+C28;BOT2;TOP1.$66.Metal5;0.021;                                                 
+C29;BOT2;TOP2;0.026;                                                            
+C30;BOT2;TOP2.$0.FuseTop;26.985;                                                
+C31;BOT2;TOP2.$12.FuseTop;12.337;                                               
+C32;BOT2;TOP2.$24.FuseTop;10.157;                                               
+C33;BOT2;TOP2.$300.Metal5;0.147;                                                
+C34;BOT2;TOP2.$312.Metal5;0.011;                                                
+C35;BOT2;TOP2.$324.Metal5;0.011;                                                
+C36;BOT2;TOP2.$336.Metal5;0.011;                                                
+C37;BOT2;TOP2.$348.Metal5;0.011;                                                
+C38;BOT2;TOP2.$36.FuseTop;7.976;                                                
+C39;BOT2;TOP2.$360.Metal5;0.011;                                                
+C40;BOT2;TOP2.$372.Metal5;0.011;                                                
+C41;BOT2;TOP2.$384.Metal5;0.003;                                                
+C42;BOT2;TOP2.$48.FuseTop;5.796;                                                
+C43;BOT2;TOP2.$60.FuseTop;3.616;                                                
+C44;BOT2;TOP2.$72.FuseTop;1.435;                                                
+C45;BOT2;TOP2.$84.FuseTop;0.057;                                                
+C46;BOT2;VSUBS;0.704;                                                           
+C47;BOT2.P0.Metal4;TOP2.$0.FuseTop;0.993;                                       
+C48;BOT2.P0.Metal4;TOP2.$100.FuseTop;15.477;                                    
+C49;BOT2.P0.Metal4;TOP2.$108.FuseTop;15.477;                                    
+C50;BOT2.P0.Metal4;TOP2.$12.FuseTop;3.14;                                       
+C51;BOT2.P0.Metal4;TOP2.$120.FuseTop;15.477;                                    
+C52;BOT2.P0.Metal4;TOP2.$132.FuseTop;15.441;                                    
+C53;BOT2.P0.Metal4;TOP2.$156.FuseTop;15.441;                                    
+C54;BOT2.P0.Metal4;TOP2.$168.FuseTop;15.477;                                    
+C55;BOT2.P0.Metal4;TOP2.$180.FuseTop;15.477;                                    
+C56;BOT2.P0.Metal4;TOP2.$192.FuseTop;15.477;                                    
+C57;BOT2.P0.Metal4;TOP2.$204.FuseTop;15.477;                                    
+C58;BOT2.P0.Metal4;TOP2.$216.FuseTop;15.477;                                    
+C59;BOT2.P0.Metal4;TOP2.$228.FuseTop;15.477;                                    
+C60;BOT2.P0.Metal4;TOP2.$24.FuseTop;5.32;                                       
+C61;BOT2.P0.Metal4;TOP2.$240.FuseTop;15.477;                                    
+C62;BOT2.P0.Metal4;TOP2.$252.FuseTop;15.477;                                    
+C63;BOT2.P0.Metal4;TOP2.$264.FuseTop;15.477;                                    
+C64;BOT2.P0.Metal4;TOP2.$276.FuseTop;15.477;                                    
+C65;BOT2.P0.Metal4;TOP2.$288.FuseTop;27.978;                                    
+C66;BOT2.P0.Metal4;TOP2.$300.Metal5;0.012;                                      
+C67;BOT2.P0.Metal4;TOP2.$312.Metal5;0.011;                                      
+C68;BOT2.P0.Metal4;TOP2.$324.Metal5;0.011;                                      
+C69;BOT2.P0.Metal4;TOP2.$336.Metal5;0.011;                                      
+C70;BOT2.P0.Metal4;TOP2.$348.Metal5;0.011;                                      
+C71;BOT2.P0.Metal4;TOP2.$36.FuseTop;7.5;                                        
+C72;BOT2.P0.Metal4;TOP2.$360.Metal5;0.011;                                      
+C73;BOT2.P0.Metal4;TOP2.$372.Metal5;0.011;                                      
+C74;BOT2.P0.Metal4;TOP2.$384.Metal5;0.019;                                      
+C75;BOT2.P0.Metal4;TOP2.$396.Metal5;0.022;                                      
+C76;BOT2.P0.Metal4;TOP2.$408.Metal5;0.022;                                      
+C77;BOT2.P0.Metal4;TOP2.$420.Metal5;0.022;                                      
+C78;BOT2.P0.Metal4;TOP2.$432.Metal5;0.022;                                      
+C79;BOT2.P0.Metal4;TOP2.$444.Metal5;0.022;                                      
+C80;BOT2.P0.Metal4;TOP2.$456.Metal5;0.022;                                      
+C81;BOT2.P0.Metal4;TOP2.$468.Metal5;0.022;                                      
+C82;BOT2.P0.Metal4;TOP2.$48.FuseTop;9.681;                                      
+C83;BOT2.P0.Metal4;TOP2.$480.Metal5;0.022;                                      
+C84;BOT2.P0.Metal4;TOP2.$492.Metal5;0.022;                                      
+C85;BOT2.P0.Metal4;TOP2.$504.Metal5;0.022;                                      
+C86;BOT2.P0.Metal4;TOP2.$516.Metal5;0.022;                                      
+C87;BOT2.P0.Metal4;TOP2.$528.Metal5;0.022;                                      
+C88;BOT2.P0.Metal4;TOP2.$540.Metal5;0.022;                                      
+C89;BOT2.P0.Metal4;TOP2.$552.Metal5;0.022;                                      
+C90;BOT2.P0.Metal4;TOP2.$564.Metal5;0.022;                                      
+C91;BOT2.P0.Metal4;TOP2.$576.Metal5;0.022;                                      
+C92;BOT2.P0.Metal4;TOP2.$588.Metal5;0.185;                                      
+C93;BOT2.P0.Metal4;TOP2.$60.FuseTop;11.861;                                     
+C94;BOT2.P0.Metal4;TOP2.$72.FuseTop;14.041;                                     
+C95;BOT2.P0.Metal4;TOP2.$84.FuseTop;15.42;                                      
+C96;BOT2.P0.Metal4;TOP2.P0.FuseTop;15.548;                                      
+C97;BOT2.P0.Metal4;VSUBS;2.77;                                                  
+C98;TOP1;VSUBS;0.036;                                                           
+C99;TOP1.$30.FuseTop;TOP2.$0.FuseTop;0.064;                                     
+C100;TOP1.$36.Metal5;VSUBS;0.166;                                               
+C101;TOP1.$42.Metal5;VSUBS;0.044;                                               
+C102;TOP1.$48.Metal5;VSUBS;0.044;                                               
+C103;TOP1.$54.Metal5;VSUBS;0.044;                                               
+C104;TOP1.$60.Metal5;VSUBS;0.044;                                               
+C105;TOP1.$66.Metal5;TOP2;0.022;                                                
+C106;TOP1.$66.Metal5;TOP2.$300.Metal5;0.097;                                    
+C107;TOP1.$66.Metal5;VSUBS;0.07;                                                
+C108;TOP2;VSUBS;0.027;                                                          
+C109;TOP2.$300.Metal5;VSUBS;0.198;                                              
+C110;TOP2.$312.Metal5;VSUBS;0.044;                                              
+C111;TOP2.$324.Metal5;VSUBS;0.044;                                              
+C112;TOP2.$336.Metal5;VSUBS;0.044;                                              
+C113;TOP2.$348.Metal5;VSUBS;0.044;                                              
+C114;TOP2.$360.Metal5;VSUBS;0.044;                                              
+C115;TOP2.$372.Metal5;VSUBS;0.044;                                              
+C116;TOP2.$384.Metal5;VSUBS;0.044;                                              
+C117;TOP2.$396.Metal5;VSUBS;0.044;                                              
+C118;TOP2.$408.Metal5;VSUBS;0.044;                                              
+C119;TOP2.$420.Metal5;VSUBS;0.044;                                              
+C120;TOP2.$432.Metal5;VSUBS;0.044;                                              
+C121;TOP2.$444.Metal5;VSUBS;0.044;                                              
+C122;TOP2.$456.Metal5;VSUBS;0.044;                                              
+C123;TOP2.$468.Metal5;VSUBS;0.044;                                              
+C124;TOP2.$480.Metal5;VSUBS;0.044;                                              
+C125;TOP2.$492.Metal5;VSUBS;0.044;                                              
+C126;TOP2.$504.Metal5;VSUBS;0.044;                                              
+C127;TOP2.$516.Metal5;VSUBS;0.044;                                              
+C128;TOP2.$528.Metal5;VSUBS;0.044;                                              
+C129;TOP2.$540.Metal5;VSUBS;0.044;                                              
+C130;TOP2.$552.Metal5;VSUBS;0.044;                                              
+C131;TOP2.$564.Metal5;VSUBS;0.044;                                              
+C132;TOP2.$576.Metal5;VSUBS;0.044;                                              
+C133;TOP2.$588.Metal5;VSUBS;0.363;                                              
+R1;BOT1;BOT1.P0.Metal4;;0.045                                                   
+R2;BOT2;BOT2.P0.Metal4;;0.085                                                   
+R3;TOP1;TOP1.$36.Metal5;;0.005                                                  
+R4;TOP1.$0.FuseTop;TOP1.$10.FuseTop;;0.076                                      
+R5;TOP1.$0.FuseTop;TOP1.$36.Metal5;;0.75                                        
+R6;TOP1.$10.FuseTop;TOP1.$12.FuseTop;;0.076                                     
+R7;TOP1.$10.FuseTop;TOP1.$42.Metal5;;0.75                                       
+R8;TOP1.$12.FuseTop;TOP1.$48.Metal5;;0.75                                       
+R9;TOP1.$12.FuseTop;TOP1.P0.FuseTop;;0.038                                      
+R10;TOP1.$18.FuseTop;TOP1.$24.FuseTop;;0.076                                    
+R11;TOP1.$18.FuseTop;TOP1.$54.Metal5;;0.75                                      
+R12;TOP1.$18.FuseTop;TOP1.P0.FuseTop;;0.038                                     
+R13;TOP1.$24.FuseTop;TOP1.$30.FuseTop;;0.076                                    
+R14;TOP1.$24.FuseTop;TOP1.$60.Metal5;;0.75                                      
+R15;TOP1.$30.FuseTop;TOP1.$66.Metal5;;0.75                                      
+R16;TOP1.$36.Metal5;TOP1.$42.Metal5;;0.006                                      
+R17;TOP1.$42.Metal5;TOP1.$48.Metal5;;0.006                                      
+R18;TOP1.$48.Metal5;TOP1.$54.Metal5;;0.006                                      
+R19;TOP1.$54.Metal5;TOP1.$60.Metal5;;0.006                                      
+R20;TOP1.$60.Metal5;TOP1.$66.Metal5;;0.006                                      
+R21;TOP2;TOP2.$300.Metal5;;0.003                                                
+R22;TOP2.$0.FuseTop;TOP2.$12.FuseTop;;0.038                                     
+R23;TOP2.$0.FuseTop;TOP2.$300.Metal5;;0.375                                     
+R24;TOP2.$100.FuseTop;TOP2.$108.FuseTop;;0.038                                  
+R25;TOP2.$100.FuseTop;TOP2.$396.Metal5;;0.375                                   
+R26;TOP2.$100.FuseTop;TOP2.$84.FuseTop;;0.038                                   
+R27;TOP2.$108.FuseTop;TOP2.$120.FuseTop;;0.038                                  
+R28;TOP2.$108.FuseTop;TOP2.$408.Metal5;;0.375                                   
+R29;TOP2.$12.FuseTop;TOP2.$24.FuseTop;;0.038                                    
+R30;TOP2.$12.FuseTop;TOP2.$312.Metal5;;0.375                                    
+R31;TOP2.$120.FuseTop;TOP2.$132.FuseTop;;0.038                                  
+R32;TOP2.$120.FuseTop;TOP2.$420.Metal5;;0.375                                   
+R33;TOP2.$132.FuseTop;TOP2.$432.Metal5;;0.375                                   
+R34;TOP2.$132.FuseTop;TOP2.P0.FuseTop;;0.038                                    
+R35;TOP2.$156.FuseTop;TOP2.$168.FuseTop;;0.038                                  
+R36;TOP2.$156.FuseTop;TOP2.$456.Metal5;;0.375                                   
+R37;TOP2.$156.FuseTop;TOP2.P0.FuseTop;;0.038                                    
+R38;TOP2.$168.FuseTop;TOP2.$180.FuseTop;;0.038                                  
+R39;TOP2.$168.FuseTop;TOP2.$468.Metal5;;0.375                                   
+R40;TOP2.$180.FuseTop;TOP2.$192.FuseTop;;0.038                                  
+R41;TOP2.$180.FuseTop;TOP2.$480.Metal5;;0.375                                   
+R42;TOP2.$192.FuseTop;TOP2.$204.FuseTop;;0.038                                  
+R43;TOP2.$192.FuseTop;TOP2.$492.Metal5;;0.375                                   
+R44;TOP2.$204.FuseTop;TOP2.$216.FuseTop;;0.038                                  
+R45;TOP2.$204.FuseTop;TOP2.$504.Metal5;;0.375                                   
+R46;TOP2.$216.FuseTop;TOP2.$228.FuseTop;;0.038                                  
+R47;TOP2.$216.FuseTop;TOP2.$516.Metal5;;0.375                                   
+R48;TOP2.$228.FuseTop;TOP2.$240.FuseTop;;0.038                                  
+R49;TOP2.$228.FuseTop;TOP2.$528.Metal5;;0.375                                   
+R50;TOP2.$24.FuseTop;TOP2.$324.Metal5;;0.375                                    
+R51;TOP2.$24.FuseTop;TOP2.$36.FuseTop;;0.038                                    
+R52;TOP2.$240.FuseTop;TOP2.$252.FuseTop;;0.038                                  
+R53;TOP2.$240.FuseTop;TOP2.$540.Metal5;;0.375                                   
+R54;TOP2.$252.FuseTop;TOP2.$264.FuseTop;;0.038                                  
+R55;TOP2.$252.FuseTop;TOP2.$552.Metal5;;0.375                                   
+R56;TOP2.$264.FuseTop;TOP2.$276.FuseTop;;0.038                                  
+R57;TOP2.$264.FuseTop;TOP2.$564.Metal5;;0.375                                   
+R58;TOP2.$276.FuseTop;TOP2.$288.FuseTop;;0.038                                  
+R59;TOP2.$276.FuseTop;TOP2.$576.Metal5;;0.375                                   
+R60;TOP2.$288.FuseTop;TOP2.$588.Metal5;;0.375                                   
+R61;TOP2.$300.Metal5;TOP2.$312.Metal5;;0.003                                    
+R62;TOP2.$312.Metal5;TOP2.$324.Metal5;;0.003                                    
+R63;TOP2.$324.Metal5;TOP2.$336.Metal5;;0.003                                    
+R64;TOP2.$336.Metal5;TOP2.$348.Metal5;;0.003                                    
+R65;TOP2.$336.Metal5;TOP2.$36.FuseTop;;0.375                                    
+R66;TOP2.$348.Metal5;TOP2.$360.Metal5;;0.003                                    
+R67;TOP2.$348.Metal5;TOP2.$48.FuseTop;;0.375                                    
+R68;TOP2.$36.FuseTop;TOP2.$48.FuseTop;;0.038                                    
+R69;TOP2.$360.Metal5;TOP2.$372.Metal5;;0.003                                    
+R70;TOP2.$360.Metal5;TOP2.$60.FuseTop;;0.375                                    
+R71;TOP2.$372.Metal5;TOP2.$384.Metal5;;0.003                                    
+R72;TOP2.$372.Metal5;TOP2.$72.FuseTop;;0.375                                    
+R73;TOP2.$384.Metal5;TOP2.$396.Metal5;;0.003                                    
+R74;TOP2.$384.Metal5;TOP2.$84.FuseTop;;0.375                                    
+R75;TOP2.$396.Metal5;TOP2.$408.Metal5;;0.003                                    
+R76;TOP2.$408.Metal5;TOP2.$420.Metal5;;0.003                                    
+R77;TOP2.$420.Metal5;TOP2.$432.Metal5;;0.003                                    
+R78;TOP2.$432.Metal5;TOP2.$444.Metal5;;0.003                                    
+R79;TOP2.$444.Metal5;TOP2.$456.Metal5;;0.003                                    
+R80;TOP2.$444.Metal5;TOP2.P0.FuseTop;;0.375                                     
+R81;TOP2.$456.Metal5;TOP2.$468.Metal5;;0.003                                    
+R82;TOP2.$468.Metal5;TOP2.$480.Metal5;;0.003                                    
+R83;TOP2.$48.FuseTop;TOP2.$60.FuseTop;;0.038                                    
+R84;TOP2.$480.Metal5;TOP2.$492.Metal5;;0.003                                    
+R85;TOP2.$492.Metal5;TOP2.$504.Metal5;;0.003                                    
+R86;TOP2.$504.Metal5;TOP2.$516.Metal5;;0.003                                    
+R87;TOP2.$516.Metal5;TOP2.$528.Metal5;;0.003                                    
+R88;TOP2.$528.Metal5;TOP2.$540.Metal5;;0.003                                    
+R89;TOP2.$540.Metal5;TOP2.$552.Metal5;;0.003                                    
+R90;TOP2.$552.Metal5;TOP2.$564.Metal5;;0.003                                    
+R91;TOP2.$564.Metal5;TOP2.$576.Metal5;;0.003                                    
+R92;TOP2.$576.Metal5;TOP2.$588.Metal5;;0.003                                    
+R93;TOP2.$60.FuseTop;TOP2.$72.FuseTop;;0.038                                    
+R94;TOP2.$72.FuseTop;TOP2.$84.FuseTop;;0.038                                    
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim
+_m4m5/cap_mim_m4m5_k25d_pex_netlist.csv                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[18:07:18] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+[18:07:18] INFO     Removing whiteboxed device $2         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim
+_m4m5/cap_mim_m4m5_k25d_pex_netlist.spice                                       
