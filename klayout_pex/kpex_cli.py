@@ -1208,7 +1208,13 @@ class KpexCLI:
 
         return extraction_results
 
-    def setup_logging(self, args: argparse.Namespace):
+    def setup_logging(self,
+                      args: argparse.Namespace,
+                      exit_stack: contextlib.ExitStack):
+        """
+        :param exit_stack: the one of the run, which closes the log files when the run ends
+                           (also on errors, so that a later run in this process doesn't write into them)
+        """
         def register_log_file_handler(log_path: str,
                                       formatter: Optional[logging.Formatter]) -> logging.Handler:
             handler = logging.FileHandler(log_path)
@@ -1216,14 +1222,17 @@ class KpexCLI:
             if formatter:
                 handler.setFormatter(formatter)
             register_additional_handler(handler)
+            exit_stack.callback(close_log_file_handler, handler)
             return handler
+
+        def close_log_file_handler(handler: logging.Handler):
+            deregister_additional_handler(handler)
+            handler.close()
 
         def reregister_log_file_handler(handler: logging.Handler,
                                         log_path: str,
                                         formatter: Optional[logging.Formatter]):
-            deregister_additional_handler(handler)
-            handler.flush()
-            handler.close()
+            close_log_file_handler(handler)
             os.makedirs(args.output_dir_path, exist_ok=True)
             new_path = os.path.join(args.output_dir_path, os.path.basename(log_path))
             if os.path.exists(new_path):
@@ -1395,7 +1404,7 @@ class KpexCLI:
             args = self.parse_args(arg_list=argv[1:], env=env)
 
             os.makedirs(args.output_dir_base_path, exist_ok=True)
-            self.setup_logging(args)
+            self.setup_logging(args, stack)
 
             try:
                 tech_info = TechInfo.from_json(args.tech_pbjson_path,
