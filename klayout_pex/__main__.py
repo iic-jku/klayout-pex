@@ -24,7 +24,10 @@
 from .kpex_cli import KpexCLI
 import sys
 
+from .util.stdio import use_utf8_stdio
+
 def main():
+    use_utf8_stdio()
     cli = KpexCLI()
     cli.main(sys.argv)
 
