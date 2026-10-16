@@ -33,7 +33,7 @@ import rich.table
 import rich.text
 from rich_argparse import RichHelpFormatter
 
-from ..log import warning
+from ..log import LogLevel, warning
 from .unit_formatter import parse_spice_number
 
 
@@ -225,3 +225,20 @@ def warn_deprecated_options(args: argparse.Namespace):
     """
     for former_name, name in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
         warning(f"{former_name} is deprecated, use {name}")
+
+
+def log_level_by_name(text: str) -> LogLevel:
+    """argparse type: a log level by its name in any case, e.g. 'debug'"""
+    try:
+        return LogLevel[text.upper()]
+    except KeyError:
+        raise argparse.ArgumentTypeError(
+            f"'{text}' is no log level, "
+            f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
+
+
+def add_log_level_argument(container: argparse._ActionsContainer):
+    """Adds --log-level, as all tools have it"""
+    add_argument_with_former_name(container, "--log-level", "--log_level", dest='log_level',
+                                  type=log_level_by_name, default='subprocess',
+                                  help=render_enum_help(topic='log_level', enum_cls=LogLevel))

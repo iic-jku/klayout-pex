@@ -24,11 +24,13 @@
 
 """
 The long options of the command line tools: dashes between words (e.g. --out-dir), and out at the start
-of the name of an output (e.g. --out-file), their former names (e.g. --out_dir) hidden from the help
+of the name of an output (e.g. --out-file), their former names (e.g. --out_dir) hidden from the help,
+and the options all tools have (e.g. --log-level)
 """
 
 from __future__ import annotations
 
+import argparse
 import re
 from typing import *
 
@@ -37,6 +39,7 @@ import pytest
 
 from klayout_pex.env import Env
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.log import LogLevel
 from klayout_pex.magic import magic_log_analyzer
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
@@ -106,3 +109,16 @@ def test_magic_log_analyzer_reads_former_option_names(tmp_path):
     assert (args.magic_log_dir_path, args.output_rdb_path) == (str(tmp_path), 'report.rdb.gz')
     assert args.deprecated_options == [('--magic_log_dir', '--magic-log-dir'), ('--out', '--out-rdb')]
 
+
+# ------------------------------------------------------------------------------- the options of all tools
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('parse', [
+    lambda *a: KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--gds', 'x.gds', *a], env=Env.from_os_environ()),
+    lambda *a: Pex25DCLI().parse_args([*a, 'plugins']),
+    lambda *a: NetlistCLI().parse_args([*a, 'convert', 'x.spice', '--to', 'vacask']),
+], ids=['kpex', 'pex25d', 'netlist'])
+def test_log_level_by_name(parse: Callable[..., argparse.Namespace]):
+    assert parse().log_level == LogLevel.SUBPROCESS
+    assert parse('--log-level', 'debug').log_level == LogLevel.DEBUG

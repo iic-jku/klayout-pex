@@ -57,7 +57,6 @@ import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import (
-    LogLevel,
     console,
     set_log_level,
     debug,
@@ -71,6 +70,7 @@ from ..util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
     add_help_subcommand,
+    add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
     render_enum_help,
@@ -204,8 +204,7 @@ class Pex25DCLI:
                            help="show this help message and exit")
         group.add_argument("--version", "-v", action='version',
                            version=f'{PROGRAM_NAME} {__version__}')
-        add_argument_with_former_name(group, "--log-level", "--log_level", dest='log_level', default='subprocess',
-                                      help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        add_log_level_argument(group)
 
     @staticmethod
     def _add_input_argument(parser: argparse.ArgumentParser) -> None:
@@ -462,13 +461,6 @@ class Pex25DCLI:
     @staticmethod
     def validate_args(args: argparse.Namespace) -> None:
         found_errors = False
-
-        try:
-            args.log_level = LogLevel[args.log_level.upper()]
-        except KeyError:
-            error(f"Requested log level {args.log_level.lower()} does not exist, "
-                  f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
-            found_errors = True
 
         # Input spec. A scene default for stdin would be wrong:
         # the only thing you can pipe in without a file name to inspect is what another tool wrote,

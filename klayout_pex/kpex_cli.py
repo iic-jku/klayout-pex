@@ -117,6 +117,7 @@ from .util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
     add_help_subcommand,
+    add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
     positive_spice_seconds,
@@ -156,9 +157,7 @@ class KpexCLI:
         group_special = parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help',
                                    help="show this help message and exit")
-        add_argument_with_former_name(group_special, "--log-level", "--log_level",
-                                      dest='log_level', default='subprocess',
-                                      help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        add_log_level_argument(group_special)
         add_argument_with_former_name(group_special, "--tool-version-checks", "--tool_version_checks",
                                       dest='version_check_mode',
                                       default=VersionCheckMode.DEFAULT, type=VersionCheckMode,
@@ -760,13 +759,6 @@ class KpexCLI:
                             '.ends\n',
                             '.end\n'
                         ])
-
-        try:
-            args.log_level = LogLevel[args.log_level.upper()]
-        except KeyError:
-            error(f"Requested log level {args.log_level.lower()} does not exist, "
-                  f"{render_enum_help(topic='log_level', enum_cls=LogLevel, print_default=False)}")
-            found_errors = True
 
         try:
             pattern_string: str = args.dielectric_filter

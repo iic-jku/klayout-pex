@@ -34,8 +34,10 @@ import contextlib
 import io
 from unittest import mock
 
+from klayout_pex.log import LogLevel
 from klayout_pex.util.argparse_helpers import (
     add_argument_with_former_name,
+    add_log_level_argument,
     render_enum_help,
     true_or_false,
     warn_deprecated_options,
@@ -158,3 +160,23 @@ class FormerOptionNameTest(unittest.TestCase):
         self.assertEqual(['--output is deprecated, use --out-file', '--pre_flatten is deprecated, use --pre-flatten'],
                          [c.args[0] for c in warning_mock.call_args_list])
 
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Util")
+class LogLevelArgumentTest(unittest.TestCase):
+    @staticmethod
+    def parser() -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser(prog='tool')
+        add_log_level_argument(parser)
+        return parser
+
+    def test_log_level_by_name_in_any_case(self):
+        self.assertEqual(LogLevel.SUBPROCESS, parse(self.parser())[0].log_level)
+        self.assertEqual(LogLevel.DEBUG, parse(self.parser(), '--log-level', 'DEBUG')[0].log_level)
+        self.assertEqual(LogLevel.WARNING, parse(self.parser(), '--log_level', 'warning')[0].log_level)
+
+    def test_unknown_log_level_is_a_usage_error_naming_the_levels(self):
+        args, stderr = parse(self.parser(), '--log-level', '10')
+        self.assertIsNone(args)
+        self.assertIn("'10' is no log level", stderr)
+        self.assertIn("'debug'", stderr)

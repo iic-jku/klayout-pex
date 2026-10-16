@@ -35,7 +35,6 @@ import sys
 from typing import *
 
 from klayout_pex.log import (
-    LogLevel,
     set_log_level,
     register_additional_handler,
     deregister_additional_handler,
@@ -51,7 +50,7 @@ from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_conv
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
 from klayout_pex.util.argparse_helpers import (
     add_argument_with_former_name,
-    render_enum_help,
+    add_log_level_argument,
     warn_deprecated_options,
 )
 from klayout_pex.version import __version__
@@ -78,9 +77,7 @@ class NetlistCLI:
         group_special = main_parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
         group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
-        add_argument_with_former_name(group_special, "--log-level", "--log_level", dest='log_level',
-                                      default=LogLevel.DEFAULT, type=LogLevel, choices=list(LogLevel),
-                                      help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        add_log_level_argument(group_special)
 
         subparsers = main_parser.add_subparsers(dest="command", help="Sub-commands help")
 
