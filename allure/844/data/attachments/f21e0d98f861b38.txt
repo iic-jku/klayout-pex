@@ -1,0 +1,184 @@
+WARNING  __kpex__:kpex_cli.py:1380 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1417 main extract --pdk gf180mcuD --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/nfet_10v0_asym_pair.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:674 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:714 No explicit top cell specified, using top cell 'nfet_10v0_asym_pair'
+INFO     __kpex__:kpex_cli.py:755 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1315 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1316 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/nfet_10v0_asym_pair.gds.gz/nfet_10v0_asym_pair.lvsdb.gz
+WARNING  __kpex__:lvsdb_extractor.py:413 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - contact (Contact): 8 of 78 shapes are not within contact_nsd_con, contact_psd_con, contact_poly_con, contact_ntap_con, contact_ptap_con, contact_ntap_dw_con, contact_ptap_dw_con
+INFO     __kpex__:kpex_cli.py:1551 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1551 (32, 0) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1551 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1551 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:1551 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1551 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:1551 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:kpex_cli.py:1551 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:1551 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:extractor.py:294 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1139 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1139 C1;$2;$3;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C2;$2;SUB;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C3;$2.$0.Metal1;$3;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C4;$2.$0.Metal1;$5;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C5;$2.$0.Metal1;SUB;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C6;$2.$0.Metal1;VSUBS;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C7;$2.$1.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C8;$2.$1.Metal1;$5;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C9;$2.$1.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C10;$2.$1.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C11;$2.$2.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C12;$2.$2.Metal1;$5;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C13;$2.$2.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C14;$2.$2.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C15;$2.$3.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C16;$2.$3.Metal1;$5;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C17;$2.$3.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C18;$2.$3.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C19;$2.$4.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C20;$2.$4.Metal1;$5;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C21;$2.$4.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C22;$2.$4.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C23;$2.$5.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C24;$2.$5.Metal1;$5;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C25;$2.$5.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C26;$2.$5.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C27;$2.$6.Metal1;$3;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C28;$2.$6.Metal1;$5;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C29;$2.$6.Metal1;$5.$12.Poly2;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C30;$2.$6.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C31;$2.$6.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C32;$2.$7.Metal1;$3;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C33;$2.$7.Metal1;$5.$12.Poly2;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C34;$2.$7.Metal1;SUB;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C35;$2.$7.Metal1;VSUBS;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C36;$3;$4;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C37;$3;$4.$0.Metal1;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C38;$3;$4.$1.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C39;$3;$4.$2.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C40;$3;$4.$3.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C41;$3;$4.$4.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C42;$3;$4.$5.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C43;$3;$4.$6.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C44;$3;$4.$7.Metal1;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C45;$3;$5;0.094;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C46;$3;$5.$10.Metal2;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C47;$3;$5.$12.Poly2;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C48;$3;$5.$14.Poly2;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C49;$3;$5.$9.Metal2;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C50;$3;$5.P1.Poly2;0.094;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C51;$3;SUB;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C52;$3;VSUBS;0.068;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C53;$4;SUB;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C54;$4.$0.Metal1;$5.P1.Poly2;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C55;$4.$0.Metal1;SUB;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C56;$4.$0.Metal1;VSUBS;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C57;$4.$1.Metal1;$5.P1.Poly2;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C58;$4.$1.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C59;$4.$1.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C60;$4.$2.Metal1;$5.P1.Poly2;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C61;$4.$2.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C62;$4.$2.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C63;$4.$3.Metal1;$5.P1.Poly2;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C64;$4.$3.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C65;$4.$3.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C66;$4.$4.Metal1;$5.P1.Poly2;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C67;$4.$4.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C68;$4.$4.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C69;$4.$5.Metal1;$5.P1.Poly2;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C70;$4.$5.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C71;$4.$5.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C72;$4.$6.Metal1;$5.$14.Poly2;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C73;$4.$6.Metal1;$5.P1.Poly2;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C74;$4.$6.Metal1;SUB;0.03;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C75;$4.$6.Metal1;VSUBS;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C76;$4.$7.Metal1;$5.$14.Poly2;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C77;$4.$7.Metal1;SUB;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C78;$4.$7.Metal1;VSUBS;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C79;$5;SUB;0.035;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C80;$5;VSUBS;0.437;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C81;$5.$0.Metal1;SUB;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C82;$5.$0.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C83;$5.$1.Metal1;SUB;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C84;$5.$1.Metal1;VSUBS;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C85;$5.$10.Metal2;SUB;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C86;$5.$10.Metal2;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C87;$5.$11.Metal2;SUB;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C88;$5.$11.Metal2;VSUBS;0.038;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C89;$5.$12.Poly2;SUB;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C90;$5.$12.Poly2;VSUBS;0.274;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C91;$5.$14.Poly2;SUB;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C92;$5.$14.Poly2;VSUBS;0.274;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C93;$5.$2.Metal1;SUB;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C94;$5.$2.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C95;$5.$3.Metal1;SUB;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C96;$5.$3.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C97;$5.$4.Metal1;SUB;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C98;$5.$4.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C99;$5.$5.Metal1;SUB;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C100;$5.$5.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C101;$5.$6.Metal1;SUB;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C102;$5.$6.Metal1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C103;$5.$7.Metal1;SUB;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C104;$5.$7.Metal1;VSUBS;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C105;$5.$8.Metal2;SUB;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C106;$5.$8.Metal2;VSUBS;0.038;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C107;$5.$9.Metal2;SUB;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C108;$5.$9.Metal2;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C109;$5.P1.Poly2;SUB;0.035;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C110;$5.P1.Poly2;VSUBS;0.437;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C111;SUB;VSUBS;1.397;
+SUBPROCESS __kpex__:kpex_cli.py:1139 R1;$2;$2.$0.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R2;$2;$2.$1.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R3;$2;$2.$2.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R4;$2;$2.$3.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R5;$2;$2.$4.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R6;$2;$2.$5.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R7;$2;$2.$6.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R8;$2;$2.$7.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R9;$2.$0.Metal1;$2.$1.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R10;$2.$1.Metal1;$2.$2.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R11;$2.$2.Metal1;$2.$3.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R12;$2.$3.Metal1;$2.$4.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R13;$2.$4.Metal1;$2.$5.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R14;$2.$5.Metal1;$2.$6.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R15;$2.$6.Metal1;$2.$7.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R16;$4;$4.$0.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R17;$4;$4.$1.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R18;$4;$4.$2.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R19;$4;$4.$3.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R20;$4;$4.$4.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R21;$4;$4.$5.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R22;$4;$4.$6.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R23;$4;$4.$7.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R24;$4.$0.Metal1;$4.$1.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R25;$4.$1.Metal1;$4.$2.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R26;$4.$2.Metal1;$4.$3.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R27;$4.$3.Metal1;$4.$4.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R28;$4.$4.Metal1;$4.$5.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R29;$4.$5.Metal1;$4.$6.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R30;$4.$6.Metal1;$4.$7.Metal1;;0.123
+SUBPROCESS __kpex__:kpex_cli.py:1139 R31;$5;$5.$12.Poly2;;15.026
+SUBPROCESS __kpex__:kpex_cli.py:1139 R32;$5.$0.Metal1;$5.$1.Metal1;;0.002
+SUBPROCESS __kpex__:kpex_cli.py:1139 R33;$5.$0.Metal1;$5.$2.Metal1;;0.194
+SUBPROCESS __kpex__:kpex_cli.py:1139 R34;$5.$0.Metal1;$5.$8.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1139 R35;$5.$1.Metal1;$5.$12.Poly2;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1139 R36;$5.$10.Metal2;$5.$11.Metal2;;0.194
+SUBPROCESS __kpex__:kpex_cli.py:1139 R37;$5.$10.Metal2;$5.$4.Metal1;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1139 R38;$5.$10.Metal2;$5.$9.Metal2;;0.218
+SUBPROCESS __kpex__:kpex_cli.py:1139 R39;$5.$11.Metal2;$5.$6.Metal1;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1139 R40;$5.$12.Poly2;$5.$3.Metal1;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1139 R41;$5.$14.Poly2;$5.$5.Metal1;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1139 R42;$5.$14.Poly2;$5.$7.Metal1;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1139 R43;$5.$14.Poly2;$5.P1.Poly2;;15.026
+SUBPROCESS __kpex__:kpex_cli.py:1139 R44;$5.$2.Metal1;$5.$3.Metal1;;0.002
+SUBPROCESS __kpex__:kpex_cli.py:1139 R45;$5.$2.Metal1;$5.$9.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1139 R46;$5.$4.Metal1;$5.$5.Metal1;;0.002
+SUBPROCESS __kpex__:kpex_cli.py:1139 R47;$5.$4.Metal1;$5.$6.Metal1;;0.194
+SUBPROCESS __kpex__:kpex_cli.py:1139 R48;$5.$6.Metal1;$5.$7.Metal1;;0.002
+SUBPROCESS __kpex__:kpex_cli.py:1139 R49;$5.$8.Metal2;$5.$9.Metal2;;0.194
+SUBPROCESS __kpex__:kpex_cli.py:1142 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair__nfet_10v0_asym_pair/nfet_10v0_asym_pair_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1158 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair__nfet_10v0_asym_pair/nfet_10v0_asym_pair_k25d_pex_netlist.spice
