@@ -29,6 +29,7 @@ import glob
 import os
 import re
 import tempfile
+from typing import *
 import unittest
 
 import allure
@@ -66,6 +67,32 @@ def tech_with_duplicates() -> tech_pb2.Technology:
     for name in ('nmos', 'nmos'):
         tech.device_models.device_model_mappings.add(lvs_device_class_name=name)
 
+    return tech
+
+
+def write_tech_def(directory: str, tech: tech_pb2.Technology) -> str:
+    """
+    :return: the path of the JSON file of the tech definition, as the generator writes it
+    """
+    path = os.path.join(directory, f"{tech.name}_tech.pb.json")
+    with open(path, 'w') as f:
+        f.write(google.protobuf.json_format.MessageToJson(tech))
+    return path
+
+
+def tech_with_metal_on_one_gds_pair(stack_layer_names: Sequence[str],
+                                    process_layer_name_by_lvs_layer_name: Dict[str, str]) -> tech_pb2.Technology:
+    """
+    The layers of the stack and the LVS layers of a metal on one GDS pair (67/0),
+    each LVS layer with the layer of the stack it names ('' for none)
+    """
+    tech = tech_pb2.Technology(name='test')
+    for name in stack_layer_names:
+        tech.process_stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
+    for name, process_layer_name in process_layer_name_by_lvs_layer_name.items():
+        tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
+                                                                   drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=0)),
+                                     process_layer_name=process_layer_name)
     return tech
 
 
@@ -310,11 +337,17 @@ class Test(unittest.TestCase):
 
     def test_the_reader_refuses_a_duplicate(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
-            path = os.path.join(tmp_dir, 'duplicates_tech.pb.json')
-            with open(path, 'w') as f:
-                f.write(google.protobuf.json_format.MessageToJson(tech_with_duplicates()))
             with self.assertRaises(TechDefError):
-                TechInfo.parse_tech_def(path)
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech_with_duplicates()))
+
+    def test_the_reader_refuses_a_layer_of_the_stack_off_the_gds_pair_of_the_lvs_layer_naming_it(self):
+        # NOTE: kpex looks up the layers of the stack after reading, where it can't report a TechDefError
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
+                                               {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': 'met4'})
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaisesRegex(TechDefError, r"but in .*test_tech\.pb\.json\n"
+                                                      r"  - the LVS computed layer met5_rfcap names the layer met4 "):
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
@@ -333,6 +366,44 @@ class Test(unittest.TestCase):
                                                                    drw_gds_pair=tech_pb2.GDSPair(layer=8, datatype=0)))
         self.assertEqual([(7, 0), (5, 0), (8, 0)], TechInfo(tech, dielectric_filter=None).process_conductor_gds_pairs)
 
+    def test_an_lvs_layer_on_a_gds_pair_of_the_stack_names_its_layer(self):
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
+                                               {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': ''})
+        with self.assertRaisesRegex(TechDefError, r"the LVS computed layer met5_rfcap names no layer of the process "
+                                                  r"stack, but the layers of the stack on its GDS pair \(67, 0\) "
+                                                  r"are: met5_ncap, met5_cap"):
+            _ = TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name
+
+    def test_an_lvs_layer_names_a_layer_of_the_stack_on_its_gds_pair(self):
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap', 'met5_cap'],
+                                               {'met5_ncap': 'met5_ncap', 'met5_cap': 'met5_cap', 'met5_rfcap': 'met4'})
+        with self.assertRaisesRegex(TechDefError, r"the LVS computed layer met5_rfcap names the layer met4 "
+                                                  r"of the process stack, but the layers of the stack "
+                                                  r"on its GDS pair \(67, 0\) are: met5_ncap, met5_cap"):
+            _ = TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name
+
+    def test_an_lvs_layer_names_no_layer_of_the_stack_where_the_stack_has_none_on_its_gds_pair(self):
+        tech = tech_with_metal_on_one_gds_pair(['met5_ncap'], {'met5_ncap': 'met5_ncap'})
+        tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name='met5_pin',
+                                                                   drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=2)),
+                                     process_layer_name='met5_ncap')
+        self.assertEqual(["the LVS computed layer met5_pin names the layer met5_ncap of the process stack, "
+                          "but the layers of the stack on its GDS pair (67, 2) are: none"],
+                         TechInfo.process_layer_problems(tech))
+
+    def test_shipped_tech_definitions_name_layers_of_the_stack_on_the_gds_pairs(self):
+        for path in tech_pbjson_paths():
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertEqual([], TechInfo.process_layer_problems(TechInfo.parse_tech_def(path)))
+
+    def test_shipped_rfcmim_has_its_plates_on_the_layers_of_the_stack_of_the_cmim(self):
+        # NOTE: its bottom plate is on the GDS pair of Metal5 too, whose first layer of the stack is metal5_n_cap,
+        #       the one without the MIM dielectric
+        path = next(p for p in tech_pbjson_paths() if os.path.basename(p) == 'ihp-sg13g2_tech.pb.json')
+        process_layer_name = TechInfo.from_json(path, dielectric_filter=None).process_layer_name_by_lvs_layer_name
+        self.assertEqual([process_layer_name['metal5_cap'], process_layer_name['cmim_top']],
+                         [process_layer_name['metal5_rfcap'], process_layer_name['rfmim_top']])
+
     def test_layers_of_the_stack_on_one_gds_pair_have_the_shapes_of_their_own_lvs_layers(self):
         # e.g. sky130A, whose met3 is split into the bottom plates of the MIM caps (met3_cap) and the rest (met3_ncap),
         # with the met3 of the MOM caps (met3_vpp) on the same GDS pair
@@ -344,15 +415,19 @@ class Test(unittest.TestCase):
         stack.layers[1].metal_layer.contact_above.name = 'via3_ncap'
         stack.layers[3].metal_layer.contact_above.name = 'via3_cap'
         tech.layers.add(name='met2', drw_gds_pair=tech_pb2.GDSPair(layer=69, datatype=20))
-        for name, gds_pair in (('met2_con', (69, 20)), ('met2_vpp', (69, 20)),
-                               ('via2_con', (69, 44)),
-                               ('met3_ncap', (70, 20)), ('met3_cap', (70, 20)), ('met3_vpp', (70, 20)),
-                               ('via3_ncap', (70, 144)), ('via3_vpp', (70, 144)), ('via3_cap', (70, 244)),
-                               ('capm', (89, 44)),
-                               ('met3_pin_con', (70, 16))):
-            tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(
-                name=name, drw_gds_pair=tech_pb2.GDSPair(layer=gds_pair[0], datatype=gds_pair[1])
-            ))
+        for name, gds_pair, process_layer_name in (
+                ('met2_con', (69, 20), 'met2'), ('met2_vpp', (69, 20), 'met2'),
+                ('via2_con', (69, 44), 'via2_con'),
+                ('met3_ncap', (70, 20), 'met3_ncap'), ('met3_cap', (70, 20), 'met3_cap'),
+                ('met3_vpp', (70, 20), 'met3_ncap'),
+                ('via3_ncap', (70, 144), 'via3_ncap'), ('via3_vpp', (70, 144), 'via3_ncap'),
+                ('via3_cap', (70, 244), 'via3_cap'),
+                ('capm', (89, 44), 'capm'),
+                ('met3_pin_con', (70, 16), '')):  # NOTE: no layer of the stack is on its GDS pair
+            tech.lvs_computed_layers.add(
+                layer_info=tech_pb2.LayerInfo(name=name,
+                                              drw_gds_pair=tech_pb2.GDSPair(layer=gds_pair[0], datatype=gds_pair[1])),
+                process_layer_name=process_layer_name)
 
         self.assertEqual({'met2': ['met2_con', 'met2_vpp'],
                           'via2_con': ['via2_con'],
@@ -360,7 +435,7 @@ class Test(unittest.TestCase):
                           'met3_cap': ['met3_cap'],
                           'via3_ncap': ['via3_ncap', 'via3_vpp'],
                           'capm': ['capm'],
-                          'via3_cap': ['via3_cap']},  # NOTE: met3_pin_con is on no GDS pair of the stack
+                          'via3_cap': ['via3_cap']},
                          TechInfo(tech, dielectric_filter=None).lvs_layer_names_by_process_layer_name)
         self.assertEqual({'met2_con': 'met2', 'met2_vpp': 'met2',
                           'via2_con': 'via2_con',

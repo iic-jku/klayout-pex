@@ -25,6 +25,7 @@
 from types import SimpleNamespace
 from typing import *
 import unittest
+from unittest import mock
 
 import allure
 import klayout.db as kdb
@@ -47,6 +48,7 @@ class TerminalFixture:
                             each of them with its LVS layer of the same name
         """
         self.metal_names = metal_names
+        self.lvs_layer_names = list(metal_names)  # NOTE: by index, those of the markers
         self.netlist = kdb.Netlist()
         self.circuit = kdb.Circuit()
         self.circuit.name = 'test'
@@ -76,7 +78,8 @@ class TerminalFixture:
             metal.metal_layer.thickness = 0.1
             tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
                                                                        drw_gds_pair=tech_pb2.GDSPair(layer=1)),
-                                         original_layer_name='met1')
+                                         original_layer_name='met1',
+                                         process_layer_name=name)
         air = stack.layers.add(name='air', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
         air.simple_dielectric_layer.dielectric_k = 1.0
         self.tech = TechInfo(tech, None)
@@ -86,7 +89,7 @@ class TerminalFixture:
             pins_of_layer=lambda pair: self.pins,
             labels_of_layer=lambda pair: self.labels,
             lvsdb=SimpleNamespace(
-                layer_name=lambda index: self.metal_names[index],
+                layer_name=lambda index: self.lvs_layer_names[index],
                 shapes_of_terminal=lambda ref: self.markers[ref.device().expanded_name()]))
 
     def shapes_of_net(self, gds_pair, net, lvs_layer_names=None):
@@ -100,9 +103,16 @@ class TerminalFixture:
         self.labels.insert(kdb.Text(label, kdb.Trans(x, y)))
 
     def device(self, name, region, lvs_layer_name=None):
+        """
+        :param lvs_layer_name: the LVS layer of its marker, the first metal by default,
+                               one of no metal is one the tech info has no layer for
+        """
         device = self.circuit.create_device(self.device_class, name)
         device.connect_terminal('G', self.net)
-        self.markers[name] = {self.metal_names.index(lvs_layer_name or self.metal_names[0]): region}
+        lvs_layer_name = lvs_layer_name or self.metal_names[0]
+        if lvs_layer_name not in self.lvs_layer_names:
+            self.lvs_layer_names.append(lvs_layer_name)
+        self.markers[name] = {self.lvs_layer_names.index(lvs_layer_name): region}
 
     def build(self):
         return PEX25DBuilder(self.context, self.tech, 'test').build()
@@ -155,6 +165,17 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         fixture.geometry['met1'] = kdb.Region(kdb.Box(50, 0, 100, 20))
         with self.assertRaisesRegex(BuildError, 'must select one conductor'):
             fixture.build()
+
+    def test_a_device_terminal_on_the_substrate_has_no_node_and_no_warning(self):
+        # NOTE: the substrate is the ground plane, e.g. the terminal bn of the IHP rfcmim on rfmim_sub,
+        #       an LVS layer the tech info has no layer for
+        fixture = TerminalFixture()
+        fixture.tech.tech.substrate.lvs_layer_names.append('sub_marker')
+        fixture.device('C1', kdb.Region(kdb.Box(10, 0, 20, 20)), lvs_layer_name='sub_marker')
+        with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+            file = fixture.build()
+        assert not file.terminals
+        warning_mock.assert_not_called()
 
     def test_a_device_terminal_keeps_all_its_disjoint_shapes_in_one_node(self):
         fixture = TerminalFixture()

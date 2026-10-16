@@ -87,6 +87,9 @@ class RExtractorTechTest(unittest.TestCase):
         for layer in tech.lvs_computed_layers:
             if layer.original_layer_name == 'Cont':
                 layer.layer_info.name += '_renamed'
+                # NOTE: the contacts of the stack are on the GDS pairs of the LVS layers named like them,
+                #       so with these, they are gone
+                layer.process_layer_name = ''
         self.assert_unmodeled_layers_error(tech, "cont_drw (Cont): the tech info has no layer derived from it")
 
     def test_layer_without_model_is_an_error(self):
@@ -121,6 +124,7 @@ class RExtractorTechTest(unittest.TestCase):
         tech = ihp_sg13g2_tech()
         layers = {layer.layer_info.name: layer for layer in tech.lvs_computed_layers}
         layers['cont_poly_con'].layer_info.drw_gds_pair.CopyFrom(layers['cont_nsd_con'].layer_info.drw_gds_pair)
+        layers['cont_poly_con'].process_layer_name = 'cont_nsd_con'
         for layer in tech.process_stack.layers:
             if layer.metal_layer.contact_above.name == 'cont_poly_con':
                 layer.metal_layer.contact_above.name = 'renamed'
