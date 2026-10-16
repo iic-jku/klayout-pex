@@ -26,7 +26,7 @@
 Human-readable summary of a PEX25D artifact.
 
 Not a stable output. Anything that wants to consume the contents should use
-``pex25d convert --out_format textpb`` and read the protobuf text format, which
+``pex25d convert --out-format textpb`` and read the protobuf text format, which
 is stable by definition.
 """
 

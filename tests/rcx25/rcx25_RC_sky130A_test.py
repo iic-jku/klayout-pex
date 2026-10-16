@@ -70,7 +70,7 @@ def capacitances_by_net_pair(pex_mode: PEXMode, *path_components) -> Dict[NetCou
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
         cli.main(['main', '--pdk', pdk.name, '--mode', pex_mode, '--gds', pdk.gds_path(*path_components),
-                  '--out_dir', out_dir, '--cache-dir', pdk.lvs_cache_dir, '--2.5D'])
+                  '--out-dir', out_dir, '--cache-dir', pdk.lvs_cache_dir, '--2.5D'])
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
 
     net_by_node: Dict[str, str] = {}

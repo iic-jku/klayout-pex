@@ -44,7 +44,7 @@ def report_category_names(*report_caps_args: str) -> List[str]:
         KpexCLI().main(['main',
                         '--pdk', 'sky130A',
                         '--gds', GDS_PATH,
-                        '--out_dir', out_dir,
+                        '--out-dir', out_dir,
                         '--2.5D',
                         '--mode', 'CC',
                         *report_caps_args])
@@ -61,7 +61,7 @@ def test_report_has_the_capacitances_only_with_report_caps():
     names = report_category_names()
     assert [n for n in names if n.startswith('[C]')] == []
 
-    names = report_category_names('--report_caps', 'y')
+    names = report_category_names('--report-caps', 'y')
     assert '[C] Overlap' in names
     assert '[C] Fringe / Side Overlap' in names
 
@@ -70,5 +70,5 @@ def test_report_has_the_capacitances_only_with_report_caps():
 @allure.tag("PEX", "2.5D", "Report")
 def test_report_caps_rejects_an_invalid_value(capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
-        KpexCLI().main(['main', '--pdk', 'sky130A', '--gds', GDS_PATH, '--2.5D', '--report_caps', 'maybe'])
-    assert "argument --report_caps: Boolean value expected" in capsys.readouterr().err
+        KpexCLI().main(['main', '--pdk', 'sky130A', '--gds', GDS_PATH, '--2.5D', '--report-caps', 'maybe'])
+    assert "argument --report-caps: Boolean value expected" in capsys.readouterr().err

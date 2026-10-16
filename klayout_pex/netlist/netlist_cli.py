@@ -49,7 +49,11 @@ from klayout_pex.log import (
 )
 from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_convert
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
-from klayout_pex.util.argparse_helpers import render_enum_help
+from klayout_pex.util.argparse_helpers import (
+    add_argument_with_former_name,
+    render_enum_help,
+    warn_deprecated_options,
+)
 from klayout_pex.version import __version__
 
 
@@ -74,9 +78,9 @@ class NetlistCLI:
         group_special = main_parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
         group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
-        group_special.add_argument("--log_level", dest='log_level',
-                                   default=LogLevel.DEFAULT, type=LogLevel, choices=list(LogLevel),
-                                   help=render_enum_help(topic='log_level', enum_cls=LogLevel))
+        add_argument_with_former_name(group_special, "--log-level", "--log_level", dest='log_level',
+                                      default=LogLevel.DEFAULT, type=LogLevel, choices=list(LogLevel),
+                                      help=render_enum_help(topic='log_level', enum_cls=LogLevel))
 
         subparsers = main_parser.add_subparsers(dest="command", help="Sub-commands help")
 
@@ -90,8 +94,8 @@ class NetlistCLI:
                                        default='netlistsvg',
                                        help="Path to netlistsvg executable (default is '%(default)s')")
 
-        parser_netlistsvg.add_argument("--output", "-o", dest="output_svg_path",
-                                       help="Output SVG path", default=None)
+        add_argument_with_former_name(parser_netlistsvg, "--out-svg", "--output", "-o", dest="output_svg_path",
+                                      help="Output SVG path", default=None)
         parser_netlistsvg.add_argument("--preview", "-p", dest="preview_svg",
                                        action='store_true', default=False,
                                        help="Preview SVG")
@@ -223,6 +227,7 @@ class NetlistCLI:
         args = self.parse_args(argv[1:])
 
         self.setup_logging(args)
+        warn_deprecated_options(args)
 
         match args.command:
             case 'svg':

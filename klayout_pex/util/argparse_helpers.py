@@ -33,6 +33,7 @@ import rich.table
 import rich.text
 from rich_argparse import RichHelpFormatter
 
+from ..log import warning
 from .unit_formatter import parse_spice_number
 
 
@@ -169,3 +170,58 @@ def positive_spice_seconds(text: str) -> float:
     if value <= 0:
         raise argparse.ArgumentTypeError(f"must be > 0 s, got '{text}'")
     return value
+
+
+DEPRECATED_OPTIONS_DEST = 'deprecated_options'
+"""The namespace attribute with the former option names of the command line, see warn_deprecated_options"""
+
+
+class _FormerOptionName(argparse.Action):
+    """
+    The former name of an option: stores the value as the option does, and notes the former name,
+    as the warning must wait until the CLI decided where its output goes (e.g. stdout for an artifact)
+    """
+
+    def __init__(self, option_strings: List[str], dest: str, option_name: str, **kwargs):
+        self.option_name = option_name
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace,
+                 values: Any, option_string: Optional[str] = None):
+        setattr(namespace, self.dest, self.const if self.nargs == 0 else values)
+        former_names = getattr(namespace, DEPRECATED_OPTIONS_DEST, None) or []
+        former_names.append((option_string, self.option_name))
+        setattr(namespace, DEPRECATED_OPTIONS_DEST, former_names)
+
+
+def add_argument_with_former_name(container: argparse._ActionsContainer,
+                                  name: str,
+                                  former_name: str,
+                                  *short_names: str,
+                                  **kwargs) -> argparse.Action:
+    """
+    Adds the option, and its former name, hidden from the help, for the scripts that still use it.
+    The two exclude each other, and a required option is given by either name.
+
+    :param container: a parser or an argument group
+    :param short_names: e.g. '-o'
+    :param kwargs: those of add_argument, for an option that stores a value or a constant (e.g. store_true)
+    :return: the action of the option
+    """
+    names = container.add_mutually_exclusive_group(required=kwargs.pop('required', False))
+    action = names.add_argument(name, *short_names, **kwargs)
+    if isinstance(action, argparse._StoreConstAction):  # NOTE: also store_true and store_false
+        value_kwargs = dict(nargs=0, const=action.const)
+    else:
+        value_kwargs = dict(nargs=action.nargs, type=action.type, choices=action.choices, metavar=action.metavar)
+    names.add_argument(former_name, dest=action.dest, action=_FormerOptionName, option_name=name,
+                       default=argparse.SUPPRESS, help=argparse.SUPPRESS, **value_kwargs)
+    return action
+
+
+def warn_deprecated_options(args: argparse.Namespace):
+    """
+    Warns about each former option name of the command line (see add_argument_with_former_name)
+    """
+    for former_name, name in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
+        warning(f"{former_name} is deprecated, use {name}")

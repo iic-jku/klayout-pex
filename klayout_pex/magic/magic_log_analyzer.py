@@ -38,6 +38,7 @@ import klayout.rdb as rdb
 from klayout_pex.log import debug
 from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
 from klayout_pex.magic.magic_ext_data_structures import MagicPEXRun, CellExtData
+from klayout_pex.util.argparse_helpers import add_argument_with_former_name, warn_deprecated_options
 from klayout_pex.util.stdio import use_utf8_stdio
 
 PROGRAM_NAME = "magic_log_analyzer"
@@ -178,13 +179,14 @@ def _parse_args(arg_list: List[str] = None) -> argparse.Namespace:
                                           add_help=False,
                                           formatter_class=RichHelpFormatter)
 
-    main_parser.add_argument("--magic_log_dir", "-m",
-                             dest="magic_log_dir_path", required=True,
-                             help="Input magic log directory path")
+    add_argument_with_former_name(main_parser, "--magic-log-dir", "--magic_log_dir", "-m",
+                                  dest="magic_log_dir_path", required=True,
+                                  help="Input magic log directory path")
 
-    main_parser.add_argument("--out", "-o",
-                             dest="output_rdb_path", default=None,
-                             help="Magic log directory path (default is input directory / 'report.rdb.gz')")
+    add_argument_with_former_name(main_parser, "--out-rdb", "--out", "-o",
+                                  dest="output_rdb_path", default=None,
+                                  help="Path of the report database (default is the input directory / "
+                                       "'report.rdb.gz')")
 
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -202,6 +204,7 @@ def _parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 def main():
     use_utf8_stdio()
     args = _parse_args()
+    warn_deprecated_options(args)
     report = rdb.ReportDatabase('')
 
     magic_pex_run = parse_magic_pex_run(Path(args.magic_log_dir_path))

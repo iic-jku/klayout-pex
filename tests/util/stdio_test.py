@@ -56,7 +56,7 @@ def test_help_in_utf8(module: str, argv: List[str], text: str):
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI")
 def test_messages_in_utf8(tmp_path):
-    result = run_cli_process('klayout_pex.netlist', ['reduce', str(tmp_path / 'line.spice'), '--ticer_max_degree', 'x'],
+    result = run_cli_process('klayout_pex.netlist', ['reduce', str(tmp_path / 'line.spice'), '--ticer-max-degree', 'x'],
                              env=CP1252_PIPE)
     assert result.returncode == ExitCode.USAGE, result.stderr
     assert "must be an integer ≥ 1, got 'x'" in result.stderr

@@ -44,7 +44,7 @@ def _extract_single_cell(*path_components) -> str:
     cli.main(['main',
               '--pdk', sky130a.name,
               '--gds', sky130a.gds_path(*path_components),
-              '--out_dir', sky130a.output_dir,
+              '--out-dir', sky130a.output_dir,
               '--fastercap',
               '--ooc', '0',
               '--diel', 'none'])

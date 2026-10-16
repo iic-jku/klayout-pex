@@ -38,6 +38,7 @@ from rich_argparse import RichHelpFormatter
 from ..log import error, info
 from ..pdk_config import PDK
 from ..pex25d.diagnostics import ExitCode
+from ..util.argparse_helpers import add_argument_with_former_name
 from ..version import __version__
 from .netlist_format import NetlistFormat
 from .spice_reader import SpiceReader, SpiceReaderError
@@ -61,9 +62,9 @@ def add_convert_subcommand(subparsers: argparse._SubParsersAction):
     parser.add_argument('--to', dest='output_format', required=True,
                         choices=[f.value for f in CONVERSION_FORMATS],
                         help="Format of the output netlist")
-    parser.add_argument('--output', '-o', dest='output_path', default=None,
-                        help="Path of the output netlist (default is the input path "
-                             "with the extension of the format, e.g. .inc for VACASK)")
+    add_argument_with_former_name(parser, '--out-netlist', '--output', '-o', dest='output_path', default=None,
+                                  help="Path of the output netlist (default is the input path "
+                                       "with the extension of the format, e.g. .inc for VACASK)")
     all_pdk_choices = [p.value for p in PDK] + list(PDK.legacy_aliases().keys())
     parser.add_argument('--pdk', dest='pdk', default=None, choices=all_pdk_choices,
                         help="PDK of the netlist, whose VACASK subcircuits that declare m "
@@ -80,7 +81,7 @@ def run_convert(args: argparse.Namespace) -> ExitCode:
 
     output_path: str = args.output_path or os.path.splitext(input_path)[0] + output_format.file_extension
     if os.path.realpath(output_path) == os.path.realpath(input_path):
-        error(f"The output path is the input path {input_path}, give another one with --output")
+        error(f"The output path is the input path {input_path}, give another one with --out-netlist")
         return ExitCode.USAGE
 
     subcircuits_with_m: Set[str] = set()
@@ -107,7 +108,7 @@ def convert_to_vacask(input_path: str,
                       output_path: str,
                       subcircuits_with_m: Collection[str]) -> str:
     """
-    Converts a SPICE netlist to a VACASK netlist, for netlist convert and kpex --netlist_format vacask
+    Converts a SPICE netlist to a VACASK netlist, for netlist convert and kpex --netlist-format vacask
 
     :param subcircuits_with_m: see VacaskWriter
     :return: the path written

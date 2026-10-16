@@ -154,7 +154,7 @@ def read_text(path: str) -> str:
 @pytest.mark.slow
 @pytest.mark.parametrize('mode, reduce_args, options', [
     (PEXMode.RC, ['--reduce', 'ticer'], ReductionOptions()),
-    (PEXMode.RC, ['--reduce', 'ticer', '--reduce_tau', '1f'], ReductionOptions(ticer_tau=1e-15)),
+    (PEXMode.RC, ['--reduce', 'ticer', '--reduce-tau', '1f'], ReductionOptions(ticer_tau=1e-15)),
     (PEXMode.RC, ['--reduce', 'floating'], ReductionOptions(ticer=False)),
     (PEXMode.R, ['--reduce', 'ticer'], ReductionOptions()),
 ])
@@ -162,7 +162,7 @@ def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_ne
         mode: PEXMode, reduce_args: List[str], options: ReductionOptions, tmp_path):
     out_netlist = os.path.join(str(tmp_path), 'out.spice')
     cli = RCX25Extraction(pdk=extraction.pdk, pex_mode=mode, blackbox=False) \
-        .run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[*reduce_args, '--out_netlist', out_netlist])
+        .run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[*reduce_args, '--out-netlist', out_netlist])
 
     spice_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
     assert cli.rcx25_reduced_netlist_path == reduced_netlist_path(spice_path)
@@ -181,8 +181,8 @@ def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_ne
 def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
     out_netlist = os.path.join(str(tmp_path), 'out.inc')
     cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
-                              extra_args=['--reduce', 'ticer', '--netlist_format', 'vacask',
-                                          '--out_netlist', out_netlist])
+                              extra_args=['--reduce', 'ticer', '--netlist-format', 'vacask',
+                                          '--out-netlist', out_netlist])
 
     # NOTE: the same conversion as 'netlist convert' of the reduced netlist
     reduced_path = cli.rcx25_reduced_netlist_path
@@ -199,7 +199,7 @@ def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-@pytest.mark.parametrize('out_option', ['--out_netlist', '--out_spice'])  # NOTE: --out_spice is deprecated
+@pytest.mark.parametrize('out_option', ['--out-netlist', '--out_spice'])  # NOTE: --out_spice is deprecated
 def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: str, tmp_path):
     out_netlist = os.path.join(str(tmp_path), 'out.spice')
     cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz', extra_args=[out_option, out_netlist])
@@ -213,10 +213,10 @@ def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: 
 @pytest.mark.parametrize('mode, reduce_args, message', [
     (PEXMode.CC, ['--reduce', 'ticer'],
      "--reduce ticer needs --mode R or RC, a CC netlist has no nodes to reduce"),
-    (PEXMode.RC, ['--reduce', 'floating', '--reduce_tau', '1f'],
-     "--reduce_tau applies to --reduce ticer only, not to --reduce floating"),
-    (PEXMode.RC, ['--reduce_tau', '1f'],
-     "--reduce_tau applies to --reduce ticer only, not to --reduce none"),
+    (PEXMode.RC, ['--reduce', 'floating', '--reduce-tau', '1f'],
+     "--reduce-tau applies to --reduce ticer only, not to --reduce floating"),
+    (PEXMode.RC, ['--reduce-tau', '1f'],
+     "--reduce-tau applies to --reduce ticer only, not to --reduce none"),
 ])
 def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], message: str):
     # NOTE: found by the argument validation, before LVS
@@ -233,7 +233,7 @@ def test_kpex_reduce_needs_the_2_5d_engine():
     pdk = extraction.pdk
     with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
         KpexCLI().main(['main', '--pdk', pdk.name, '--gds', pdk.gds_path('test_patterns', 'nfet_li1.gds.gz'),
-                        '--out_dir', pdk.output_dir, '--reduce', 'floating'])
+                        '--out-dir', pdk.output_dir, '--reduce', 'floating'])
     assert "--reduce floating reduces the netlist of the 2.5D engine, it needs --2.5D" in \
            [c.args[0] for c in error_mock.call_args_list]
 
@@ -243,7 +243,7 @@ def test_kpex_reduce_needs_the_2_5d_engine():
 @pytest.mark.parametrize('reduce_args, messages', [
     # NOTE: newer Pythons quote the choices in the message, older ones don't
     (['--reduce', 'all'], ["argument --reduce: invalid choice: 'all' (choose from", 'none', 'floating', 'ticer']),
-    (['--reduce', 'ticer', '--reduce_tau', '0'], ["argument --reduce_tau: must be > 0 s, got '0'"]),
+    (['--reduce', 'ticer', '--reduce-tau', '0'], ["argument --reduce-tau: must be > 0 s, got '0'"]),
 ])
 def test_kpex_reduce_invalid_values_are_usage_errors(reduce_args: List[str], messages: List[str],
                                                      capsys: pytest.CaptureFixture):

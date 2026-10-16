@@ -74,7 +74,7 @@ def test_kpex_extract(pdk: PDK, installed_wheel: InstalledWheel, tmp_path: Path)
                                '--pdk', pdk,
                                '--gds', gds_path,
                                '--2.5D',
-                               '--out_dir', out_dir,
+                               '--out-dir', out_dir,
                                cwd=tmp_path)
     allure.attach(proc.stdout + proc.stderr, name='kpex output', attachment_type=allure.attachment_type.TEXT)
 

@@ -34,6 +34,8 @@ import unittest
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
 
+from tests.common.cli_runner import run_cli_process
+
 from .pex25d_fixtures import MINIMAL, replacing
 
 
@@ -137,6 +139,17 @@ class Pex25DCLITest(unittest.TestCase):
         assert workspace.run('show', workspace.input_path) == ExitCode.OK
         assert workspace.run('show', scene) == ExitCode.OK
 
+    def test_former_output_name_keeps_stdout_for_the_artifact(self):
+        # NOTE: the deprecation warning goes to stderr, as all messages do when the artifact goes to stdout
+        workspace = self.workspace()
+        assert workspace.run('convert', workspace.input_path, '-o', workspace.path('out.pex25d')) == ExitCode.OK
+        result = run_cli_process('klayout_pex.pex25d', ['convert', workspace.input_path, '--output', '-'],
+                                 env={'COLUMNS': '300'})  # NOTE: a message per line
+        assert result.returncode == 0, result.stderr
+        with open(workspace.path('out.pex25d'), encoding='utf-8') as f:
+            assert result.stdout == f.read(), result.stderr
+        assert '--output is deprecated, use --out-file' in result.stderr, result.stderr
+
     # ---------------------------------------------------------- diagnostics
 
     def test_json_diagnostics_carry_the_codes(self):
@@ -145,7 +158,7 @@ class Pex25DCLITest(unittest.TestCase):
         report_path = workspace.path('diagnostics.json')
         assert workspace.run('validate', workspace.input_path,
                              '--diagnostics', 'json',
-                             '--diagnostics_out', report_path) \
+                             '--out-diagnostics', report_path) \
             == ExitCode.DIAGNOSTIC_ERRORS
 
         with open(report_path) as f:
