@@ -30,8 +30,8 @@ import tempfile
 import unittest
 
 from klayout_pex.pex25d.artifact import (
-    ArtifactFormat, ArtifactKind, ArtifactNamingError, STDIO_PATH,
-    infer_artifact_spec,
+    ArtifactFormat, ArtifactKind, ArtifactNamingError, ArtifactSpec, STDIO_PATH,
+    infer_artifact_spec, named_kind_and_format,
 )
 from klayout_pex.pex25d.codec import load_artifact, save_artifact
 from klayout_pex.pex25d.resolver import resolve
@@ -58,6 +58,12 @@ class Pex25DArtifactTest(unittest.TestCase):
             with self.subTest(path=path):
                 spec = infer_artifact_spec(path)
                 assert (spec.kind, spec.format, spec.gzipped) == (kind, format, gzipped)
+
+    def test_a_name_says_kind_and_format_by_its_suffix_only(self):
+        assert named_kind_and_format('x.pex25d.scene.pb.gz') == (ArtifactKind.SCENE, ArtifactFormat.PB)
+        assert named_kind_and_format('x.scene.pex25d.pb') == (ArtifactKind.FILE, ArtifactFormat.PB)
+        assert named_kind_and_format('/tmp/whatever.dat') is None
+        assert named_kind_and_format(STDIO_PATH) is None
 
     def test_an_unconventional_name_has_to_be_stated(self):
         with self.assertRaises(ArtifactNamingError):
@@ -106,6 +112,29 @@ class Pex25DArtifactTest(unittest.TestCase):
                      'a.pex25d.scene.pb.gz'):
             with self.subTest(name=name):
                 self.round_trip(scene, name)
+
+    def test_the_other_kind_is_reported_with_the_way_to_read_it(self):
+        # NOTE: binary protobuf doesn't record its message, so a scene named as a file read as one,
+        #       e.g. what kpex pex25d --out-scene x.scene.pex25d.pb wrote (#328)
+        messages = {ArtifactKind.FILE: read(MINIMAL), ArtifactKind.SCENE: resolve(read(MINIMAL))}
+        for (kind, other), format in ((pair, format)
+                                      for pair in ((ArtifactKind.SCENE, ArtifactKind.FILE),
+                                                   (ArtifactKind.FILE, ArtifactKind.SCENE))
+                                      for format in (ArtifactFormat.PB, ArtifactFormat.TEXTPB)):
+            with self.subTest(kind=kind, format=format), tempfile.TemporaryDirectory() as directory:
+                path = os.path.join(directory, 'a.dat')
+                save_artifact(messages[kind], ArtifactSpec(path, kind, format))
+                with self.assertRaisesRegex(ValueError, f"It holds a PEX25D {kind.value}, not a {other.value}: "
+                                                        f"read it with --in-kind {kind.value}"):
+                    load_artifact(ArtifactSpec(path, other, format))
+
+    def test_data_of_no_kind_is_a_value_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'a.pex25d.pb')
+            with open(path, 'wb') as f:
+                f.write(b'\xff\xff\xff')
+            with self.assertRaisesRegex(ValueError, "Not a PEX25D file in binary protobuf"):
+                load_artifact(infer_artifact_spec(path))
 
     def test_a_scene_has_no_text_spelling(self):
         # Resolution is not reversible; asking for a text scene is refused when

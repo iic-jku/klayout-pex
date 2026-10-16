@@ -127,6 +127,20 @@ class ArtifactSpec:
         return f"{where} ({self.kind.value}, {self.format.value}{', gzipped' if self.gzipped else ''})"
 
 
+def named_kind_and_format(path: str) -> Optional[Tuple[ArtifactKind, ArtifactFormat]]:
+    """
+    The kind and encoding the suffix of the path names (see the table above, a trailing '.gz' aside),
+    None for stdio and for a path without a conventional suffix
+    """
+    if path == STDIO_PATH:
+        return None
+    name = os.path.basename(path).removesuffix('.gz')
+    for suffix, suffix_kind, suffix_format in _SUFFIXES:
+        if name.endswith(suffix):
+            return suffix_kind, suffix_format
+    return None
+
+
 def infer_artifact_spec(path: str,
                         kind: ArtifactKind = ArtifactKind.AUTO,
                         format: ArtifactFormat = ArtifactFormat.AUTO,
@@ -144,30 +158,22 @@ def infer_artifact_spec(path: str,
     :raises ArtifactNamingError: if the path carries no recognized suffix and no
         override was given, or if the resulting combination cannot exist.
     """
-    gzipped = False
+    gzipped = path != STDIO_PATH and os.path.basename(path).endswith('.gz')
     inferred_kind = default_kind
     inferred_format = default_format
 
     if path != STDIO_PATH:
-        name = os.path.basename(path)
-        if name.endswith('.gz'):
-            gzipped = True
-            name = name[:-len('.gz')]
-
-        for suffix, suffix_kind, suffix_format in _SUFFIXES:
-            if name.endswith(suffix):
-                inferred_kind = suffix_kind
-                inferred_format = suffix_format
-                break
-        else:
-            if kind == ArtifactKind.AUTO or format == ArtifactFormat.AUTO:
-                raise ArtifactNamingError(
-                    f"Can't tell what kind of PEX25D artifact '{path}' is meant to be. "
-                    f"Use one of the conventional suffixes "
-                    f"({', '.join(suffix for suffix, _, _ in reversed(_SUFFIXES))}), "
-                    f"or state the encoding explicitly — see --help for the "
-                    f"--format / --kind options this command offers."
-                )
+        named = named_kind_and_format(path)
+        if named is not None:
+            inferred_kind, inferred_format = named
+        elif kind == ArtifactKind.AUTO or format == ArtifactFormat.AUTO:
+            raise ArtifactNamingError(
+                f"Can't tell what kind of PEX25D artifact '{path}' is meant to be. "
+                f"Use one of the conventional suffixes "
+                f"({', '.join(suffix for suffix, _, _ in reversed(_SUFFIXES))}), "
+                f"or state the encoding explicitly — see --help for the "
+                f"--format / --kind options this command offers."
+            )
 
     effective_kind = inferred_kind if kind == ArtifactKind.AUTO else kind
     effective_format = inferred_format if format == ArtifactFormat.AUTO else format
