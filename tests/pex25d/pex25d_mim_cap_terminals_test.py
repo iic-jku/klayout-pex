@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import os
 from typing import *
+from unittest import mock
 
 import allure
 import pytest
@@ -83,9 +84,11 @@ def test_mim_cap_terminals_of_ihp_sg13g2():
 @allure.tag(*tags)
 @pytest.mark.slow
 def test_rf_mim_cap_terminals_of_ihp_sg13g2():
-    # NOTE: the substrate terminal (mim_sub) has no layer of the process stack
-    assert device_terminal_layers(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == \
-           [('mim_btm', 'metal5_cap'), ('mim_top', 'cmim_top')]
+    # NOTE: its terminal on the substrate (bn, on rfmim_sub) is on the ground plane, which needs no node
+    with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+        layers = device_terminal_layers(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+    assert layers == [('mim_btm', 'metal5_cap'), ('mim_top', 'cmim_top')]
+    assert [c.args for c in warning_mock.call_args_list if 'rfmim_sub' in str(c.args)] == []
 
 
 @allure.parent_suite(parent_suite)

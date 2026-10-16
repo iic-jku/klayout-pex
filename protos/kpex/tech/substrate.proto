@@ -41,7 +41,8 @@ message SubstrateInfo {
 
     // LVS layers on the substrate net, to find it when a label names it,
     // e.g. "ptap_conn" (sky130A), "ptap_regular" (gf180mcuD), "pwell_sub" (IHP);
-    // a device terminal on one of them is on the substrate, which PEX25D has no node for (its ground plane)
+    // a device terminal on one of them is on the substrate, which PEX25D has no node for (its ground plane),
+    // e.g. "rfmim_sub" (IHP), the terminal bn of the rfcmim
     repeated string lvs_layer_names = 20;
 
     // LVS layers of the wells within the substrate, e.g. "nwell" (sky130A):

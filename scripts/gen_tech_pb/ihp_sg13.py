@@ -741,6 +741,8 @@ class TechBuilder:
         # NOTE: the PEX-LVS script connects pwell_sub (the pwell but the isolated ones) to the global net sub!
         si.net_names.append("sub!")
         si.lvs_layer_names.append("pwell_sub")
+        # NOTE: the substrate around the rfcmim, the layer of its terminal bn, which the deck connects to the ptap
+        si.lvs_layer_names.append("rfmim_sub")
 
         # TODO: the isolated p-wells (iso_pwell, the holes of the nwell over nBuLay) are nets of their own,
         #       but the LVS layer that has them (pwell) has the substrate too, so they are the substrate here
