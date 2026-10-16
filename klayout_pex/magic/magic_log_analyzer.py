@@ -38,6 +38,7 @@ import klayout.rdb as rdb
 from klayout_pex.log import debug
 from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
 from klayout_pex.magic.magic_ext_data_structures import MagicPEXRun, CellExtData
+from klayout_pex.util.stdio import use_utf8_stdio
 
 PROGRAM_NAME = "magic_log_analyzer"
 
@@ -199,6 +200,7 @@ def _parse_args(arg_list: List[str] = None) -> argparse.Namespace:
 
 
 def main():
+    use_utf8_stdio()
     args = _parse_args()
     report = rdb.ReportDatabase('')
 

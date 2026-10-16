@@ -27,8 +27,6 @@
 from __future__ import annotations
 
 import os
-import subprocess
-import sys
 from typing import *
 
 import allure
@@ -37,7 +35,11 @@ import pytest
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
-from tests.common.cli_runner import assert_netlist_cli_loads_neither_klayout_nor_protobuf, run_cli
+from tests.common.cli_runner import (
+    assert_netlist_cli_loads_neither_klayout_nor_protobuf,
+    run_cli,
+    run_cli_process,
+)
 from tests.common.rc_networks import (
     LINE_NETLIST,
     node_names,
@@ -156,15 +158,11 @@ def test_invalid_netlist_exits_one(tmp_path):
 @allure.tag(*tags)
 def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
     output = str(tmp_path / 'reduced.spice')
-    result = subprocess.run([sys.executable, '-m', 'klayout_pex.netlist', 'reduce', line_netlist, '-o', output,
-                             '--ticer_tau', '1p'],
-                            capture_output=True, text=True)
+    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '-o', output, '--ticer_tau', '1p'])
     assert result.returncode == ExitCode.OK, result.stderr
     assert line_node_names(output) == ['A', 'B', 'gnd!'], result.stderr
 
-    result = subprocess.run([sys.executable, '-m', 'klayout_pex.netlist', 'reduce', line_netlist,
-                             '--ticer_max_degree', 'many'],
-                            capture_output=True, text=True)
+    result = run_cli_process('klayout_pex.netlist', ['reduce', line_netlist, '--ticer_max_degree', 'many'])
     assert result.returncode == ExitCode.USAGE, result.stderr
     assert "argument --ticer_max_degree: must be an integer ≥ 1, got 'many'" in result.stderr
 

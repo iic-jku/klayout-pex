@@ -24,7 +24,10 @@
 from .netlist_cli import NetlistCLI
 import sys
 
+from ..util.stdio import use_utf8_stdio
+
 def main():
+    use_utf8_stdio()
     cli = NetlistCLI()
     cli.main(sys.argv)
 

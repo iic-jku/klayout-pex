@@ -64,6 +64,19 @@ def run_cli(main: Callable[[List[str]], None], argv: List[str]) -> Tuple[int, st
     return code, output.getvalue() + '\n'.join(r.getMessage() for r in records)
 
 
+def run_cli_process(module: str,
+                    argv: Sequence[str],
+                    env: Mapping[str, str] = {}) -> subprocess.CompletedProcess:
+    """
+    Runs a command line tool (e.g. klayout_pex.netlist) in a fresh process, as its console script does
+
+    :param env: variables to set besides those of this process
+    :return: the result, with the output decoded as UTF-8, which the tools write
+    """
+    return subprocess.run([sys.executable, '-m', module, *argv], cwd=REPO_DIR, capture_output=True,
+                          encoding='utf-8', env={**os.environ, **env})
+
+
 def assert_netlist_cli_loads_neither_klayout_nor_protobuf(argv: Sequence[str]):
     """
     Runs the netlist tool in a fresh process (the tests have loaded both) and asserts that it succeeds

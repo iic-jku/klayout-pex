@@ -25,8 +25,11 @@
 from .pex25d_cli import Pex25DCLI
 import sys
 
+from ..util.stdio import use_utf8_stdio
+
 
 def main():
+    use_utf8_stdio()
     cli = Pex25DCLI()
     cli.main(sys.argv)
 

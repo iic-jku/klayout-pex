@@ -22,8 +22,6 @@
 # --------------------------------------------------------------------------------
 #
 import os
-import subprocess
-import sys
 import tempfile
 from typing import *
 import unittest
@@ -32,7 +30,11 @@ import allure
 
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
-from tests.common.cli_runner import REPO_DIR, assert_netlist_cli_loads_neither_klayout_nor_protobuf, run_cli
+from tests.common.cli_runner import (
+    assert_netlist_cli_loads_neither_klayout_nor_protobuf,
+    run_cli,
+    run_cli_process,
+)
 
 
 # as KPEX writes an extracted netlist: the net A,B,C as A|B|C
@@ -184,15 +186,12 @@ class NetlistConvertTest(unittest.TestCase):
 
     def test_netlist_tool_converts_in_a_subprocess(self):
         workspace = self.workspace()
-        result = subprocess.run([sys.executable, '-m', 'klayout_pex.netlist', 'convert', '--to', 'vacask',
-                                 workspace.input_path, '-o', workspace.path('out.inc')],
-                                cwd=REPO_DIR, capture_output=True, text=True)
+        result = run_cli_process('klayout_pex.netlist', ['convert', '--to', 'vacask',
+                                                         workspace.input_path, '-o', workspace.path('out.inc')])
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertEqual(EXPECTED_VACASK_BODY.format(mos=MOS_COPIES), self.body(workspace.read('out.inc')))
 
-        result = subprocess.run([sys.executable, '-m', 'klayout_pex.netlist', 'convert', '--to', 'vacask',
-                                 workspace.path('missing.spice')],
-                                cwd=REPO_DIR, capture_output=True, text=True)
+        result = run_cli_process('klayout_pex.netlist', ['convert', '--to', 'vacask', workspace.path('missing.spice')])
         self.assertEqual(ExitCode.USAGE, result.returncode, result.stdout + result.stderr)
 
     def test_conversion_needs_neither_klayout_nor_generated_protobuf(self):
