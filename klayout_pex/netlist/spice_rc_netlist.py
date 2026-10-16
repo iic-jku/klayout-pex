@@ -46,6 +46,7 @@ Writing:
     - named Cred_<n> and Rred_<n>, skipping the names of the other elements of the scope,
       followed by the ties of the network, named Rtie_<n>, to ground '0'
     - the values are written in the precision KPEX writes them (see NetlistPrinter)
+    - the lines end as the first line of the text read (e.g. CRLF)
 """
 
 from __future__ import annotations
@@ -102,6 +103,7 @@ class _ElementsPlaceholder:
 
 
 _NAME_SEPARATORS = re.compile(r'[\s(),=]+')
+_LINE_BREAK = re.compile(r'\r\n|\r|\n')
 
 
 class SpiceRCNetlist:
@@ -111,9 +113,14 @@ class SpiceRCNetlist:
 
     def __init__(self,
                  items: List[Union[str, _ElementsPlaceholder]],
-                 scopes: List[SpiceScope]):
+                 scopes: List[SpiceScope],
+                 newline: str):
+        """
+        :param newline: the line ending to write (e.g. '\\r\\n')
+        """
         self._items = items
         self.scopes = scopes
+        self.newline = newline
 
     # ----------------------------------------------------------------------------------------- reading
 
@@ -123,8 +130,9 @@ class SpiceRCNetlist:
         :raises OSError: if the file can't be read
         :raises NetlistReadError: if its .SUBCKT and .ENDS don't match
         """
-        # NOTE: bytes that are no UTF-8 (e.g. in comments) are written back as they were
-        with open(path, encoding='utf-8', errors='surrogateescape') as f:
+        # NOTE: bytes that are no UTF-8 (e.g. in comments) are written back as they were,
+        #       and so are the line endings (newline='')
+        with open(path, encoding='utf-8', errors='surrogateescape', newline='') as f:
             return cls.parse(f.read(), source=path)
 
     @classmethod
@@ -228,7 +236,8 @@ class SpiceRCNetlist:
                     network.protect(node)
 
         # NOTE: scopes in the order of the file, the top level last
-        return cls(items=items, scopes=scopes)
+        line_break = _LINE_BREAK.search(text)
+        return cls(items=items, scopes=scopes, newline=line_break.group() if line_break else '\n')
 
     @staticmethod
     def _tied_node_name(tokens: List[str]) -> Optional[str]:
@@ -301,12 +310,12 @@ class SpiceRCNetlist:
                 lines.extend(self.element_lines(item.scope))
             else:
                 lines.append(item)
-        return '\n'.join(lines) + '\n'
+        return self.newline.join(lines) + self.newline
 
     def write(self, path: str) -> str:
         """
         :return: the path written
         """
-        with open(path, 'w', encoding='utf-8', errors='surrogateescape') as f:
+        with open(path, 'w', encoding='utf-8', errors='surrogateescape', newline='') as f:
             f.write(self.format())
         return path

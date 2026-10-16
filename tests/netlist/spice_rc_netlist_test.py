@@ -369,3 +369,16 @@ def test_bytes_that_are_no_utf8_are_written_back_as_they_were(tmp_path):
     SpiceRCNetlist.read(str(input_path)).write(output_path)
     with open(output_path, 'rb') as f:
         assert f.read() == content
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('newline', ['\n', '\r\n'], ids=['LF', 'CRLF'])
+def test_line_endings_are_written_back_as_they_were(newline: str, tmp_path):
+    content = newline.join(['* netlist', '.subckt cell a', 'Rred_1 a b 1000', '.ends', ''])
+    input_path = tmp_path / 'cell.spice'
+    input_path.write_bytes(content.encode())
+    output_path = str(tmp_path / 'out.spice')
+    SpiceRCNetlist.read(str(input_path)).write(output_path)
+    with open(output_path, 'rb') as f:
+        assert f.read() == content.encode()
