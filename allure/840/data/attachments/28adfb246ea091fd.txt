@@ -1,0 +1,42 @@
+──────────────────────────── Command line arguments ────────────────────────────
+kpex pex25d --pdk sky130A --gds                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w1
+8p9_l5p1/cap_mim_m3_w18p9_l5p1.gds.gz --out-dir                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --blackbox 
+n --out-file                                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_w18p9_l5p1.p
+ex25d                                                                           
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:02:06] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:672
+[18:02:06] INFO     No explicit top cell specified, using top    kpex_cli.py:712
+                    cell 'cap_mim_m3_w18p9_l5p1'                                
+[18:02:06] INFO     LVS input schematic not specified (argument  kpex_cli.py:753
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:02:06] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1303
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/cap_mim_m3_w18p9_
+l5p1/cap_mim_m3_w18p9_l5p1.gds.gz/cap_mim_m3_w18p9_l5p1.lvsdb.gz                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:02:06] INFO     (89, 44) -> (capm)                          kpex_cli.py:1461
+[18:02:06] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1461
+[18:02:06] INFO     (70, 20) -> (met3_ncap met3_cap)            kpex_cli.py:1461
+[18:02:06] INFO     (70, 144) -> (via3_ncap)                    kpex_cli.py:1461
+[18:02:06] INFO     (70, 244) -> (via3_cap)                     kpex_cli.py:1461
+[18:02:06] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1461
+────────────────────────────── PEX25D Generation ───────────────────────────────
+[18:02:06] INFO     GROUND_PLANE subs: z -4300 … -1000     pex25d_builder.py:316
+[18:02:06] INFO     DIELECTRIC_BACKGROUND air: k=2.94      pex25d_builder.py:450
+[18:02:06] INFO     2 conductor(s), 628 shape record(s)    pex25d_builder.py:571
+[18:02:06] INFO     14 terminal record(s)                  pex25d_builder.py:716
+[18:02:06] INFO     11 metal and 8 via resistance          pex25d_builder.py:752
+                    record(s)                                                   
+[18:02:06] INFO     Wrote                                       kpex_cli.py:1478
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_sky130A/cap_mim_m3_w18p9_l5p1.pex25d                  
+                    (file, text)                                                
+[18:02:06] INFO     No diagnostics.                           diagnostics.py:234

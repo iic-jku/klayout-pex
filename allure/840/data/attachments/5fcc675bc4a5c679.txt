@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1368 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1405 main extract --pdk sky130A --mode R --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_var_lvt_without_ptap_ring.gds.gz --out-dir /tmp/tmpljp48_e_ --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:672 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:712 No explicit top cell specified, using top cell 'cap_var_lvt_without_ptap_ring'
+INFO     __kpex__:kpex_cli.py:753 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1303 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1304 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_var_lvt_without_ptap_ring.gds.gz/cap_var_lvt_without_ptap_ring.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1539 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1539 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:1539 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1539 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1539 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1539 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:1539 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:294 LVSDB: found 2pins
+WARNING  __kpex__:lvsdb_extractor.py:754 These device terminals are unconnected in the LVS netlist, so they stay unconnected in the extracted netlist:
+  - sky130_fd_pr__cap_var_lvt terminal W: $1
+SUBPROCESS __kpex__:kpex_cli.py:1127 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1127 R1;A;A.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1127 R2;A.$1.poly;A.P0.poly;;130.863
+SUBPROCESS __kpex__:kpex_cli.py:1127 R3;B;B.$1.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1130 /tmp/tmpljp48_e_/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/cap_var_lvt_without_ptap_ring_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1146 Wrote expanded netlist to: /tmp/tmpljp48_e_/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/cap_var_lvt_without_ptap_ring_k25d_pex_netlist.spice

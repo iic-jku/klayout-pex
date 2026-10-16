@@ -1,0 +1,19 @@
+WARNING  __kpex__:kpex_cli.py:1368 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1405 main extract --pdk sky130A --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_single_wire_li1.gds.gz --out-dir /tmp/tmp0s95l9yd --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:672 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:712 No explicit top cell specified, using top cell 'r_single_wire_li1'
+INFO     __kpex__:kpex_cli.py:753 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1303 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1304 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_single_wire_li1.gds.gz/r_single_wire_li1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1539 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1539 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:294 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1127 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1127 C1;A;VSUBS;0.434;
+SUBPROCESS __kpex__:kpex_cli.py:1127 C2;B;VSUBS;0.447;
+SUBPROCESS __kpex__:kpex_cli.py:1127 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1127 R2;A;B;;840.533
+SUBPROCESS __kpex__:kpex_cli.py:1130 /tmp/tmp0s95l9yd/r_single_wire_li1__r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1146 Wrote expanded netlist to: /tmp/tmp0s95l9yd/r_single_wire_li1__r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.spice
