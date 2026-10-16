@@ -49,8 +49,12 @@ from klayout_pex.log import (
 from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_convert
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
 from klayout_pex.util.argparse_helpers import (
+    SectionedHelpFormatter,
     add_argument_with_former_name,
+    add_help_subcommand,
     add_log_level_argument,
+    add_subcommand_sections,
+    handle_help_subcommand,
     warn_deprecated_options,
 )
 from klayout_pex.version import __version__
@@ -60,6 +64,13 @@ from klayout_pex.version import __version__
 
 PROGRAM_NAME = "netlist"
 
+SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
+    'Inspect': ('svg',),
+    'Transform': ('reduce', 'convert'),
+    'Help': ('help',),
+}
+"""How ``netlist --help`` groups the subcommands; every subcommand is in exactly one section."""
+
 
 class ArgumentValidationError(Exception):
     pass
@@ -68,21 +79,22 @@ class ArgumentValidationError(Exception):
 class NetlistCLI:
     def parse_args(self, arg_list: List[str] = None) -> argparse.Namespace:
 
-        main_parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME}: "
+        main_parser = argparse.ArgumentParser(prog=PROGRAM_NAME,
+                                              description=f"{PROGRAM_NAME}: "
                                                           f"Netlist tool for KLayout-PEX",
                                               add_help=False,
-                                              formatter_class=RichHelpFormatter,
-        epilog = f"See '{PROGRAM_NAME} <subcommand> -h' for help on subcommand")
+                                              formatter_class=SectionedHelpFormatter)
 
         group_special = main_parser.add_argument_group("Special Options")
         group_special.add_argument("--help", "-h", action='help', help="show this help message and exit")
         group_special.add_argument("--version", "-v", action='version', version=f'{PROGRAM_NAME} {__version__}')
         add_log_level_argument(group_special)
 
-        subparsers = main_parser.add_subparsers(dest="command", help="Sub-commands help")
+        subparsers = main_parser.add_subparsers(dest="command", metavar='<subcommand>')
 
         parser_netlistsvg = subparsers.add_parser("svg",
-                                                  help="Run netlistsvg on a given netlist",
+                                                  help="Draw the schematic of a SPICE netlist as SVG "
+                                                       "(with netlistsvg)",
                                                   formatter_class=RichHelpFormatter)
         parser_netlistsvg.add_argument("input_netlist_path",
                                        type=str, help="Path to the input netlist file")
@@ -101,10 +113,13 @@ class NetlistCLI:
 
         add_reduce_subcommand(subparsers)
         add_convert_subcommand(subparsers)
+        add_help_subcommand(subparsers)
+        add_subcommand_sections(main_parser, subparsers, SUBCOMMAND_SECTIONS)
 
         if arg_list is None:
             arg_list = sys.argv[1:]
         args = main_parser.parse_args(arg_list)
+        handle_help_subcommand(main_parser, args)
 
         self.validate_args(main_parser, args)
 
@@ -217,7 +232,8 @@ class NetlistCLI:
         if '-v' not in argv and \
            '--version' not in argv and \
            '-h' not in argv and \
-           '--help' not in argv:
+           '--help' not in argv and \
+           argv[1:2] != ['help']:
             rule('Command line arguments')
             subproc(' '.join(map(shlex.quote, sys.argv)))
 
