@@ -35,6 +35,7 @@ from __future__ import annotations
 from typing import *
 
 from .artifact import (
+    CANONICAL_SUFFIX,
     ArtifactFormat,
     ArtifactKind,
     ArtifactSpec,
@@ -54,6 +55,9 @@ def load_artifact(spec: ArtifactSpec,
 
     Syntax- and semantic-tier findings from the text reader are appended to
     ``report`` when one is given; a fatal parse failure raises.
+
+    :raises ValueError: also if the protobuf can't be read, or holds the other kind
+                        (which binary protobuf doesn't record: only its name or --in-kind says which)
     """
     # Read first: a missing or unreadable input is the more likely mistake, and
     # is a better error than 'the generated protobuf modules are not built yet'.
@@ -62,14 +66,27 @@ def load_artifact(spec: ArtifactSpec,
 
     match spec.format:
         case ArtifactFormat.PB:
+            from google.protobuf.message import DecodeError
             message = message_class_for_kind(spec.kind)()
-            message.ParseFromString(data)
+            try:
+                message.ParseFromString(data)
+            except DecodeError as e:
+                raise ValueError(f"Not a PEX25D {spec.kind.value} in binary protobuf: {e}") from e
+            # NOTE: the fields of the other kind are unknown fields here, rather than an error
+            if _unknown_field_count(message) and _holds_the_other_kind(spec, lambda m: m.ParseFromString(data)):
+                raise _other_kind_error(spec)
             return message
 
         case ArtifactFormat.TEXTPB:
             from google.protobuf import text_format
+            text = data.decode('utf-8')
             message = message_class_for_kind(spec.kind)()
-            text_format.Parse(data.decode('utf-8'), message)
+            try:
+                text_format.Parse(text, message)
+            except text_format.ParseError as e:
+                if _holds_the_other_kind(spec, lambda m: text_format.Parse(text, m)):
+                    raise _other_kind_error(spec) from e
+                raise ValueError(f"Not a PEX25D {spec.kind.value} in protobuf text format: {e}") from e
             return message
 
         case ArtifactFormat.TEXT:
@@ -83,6 +100,46 @@ def load_artifact(spec: ArtifactSpec,
 
         case _:
             raise ValueError(f"Unknown artifact format {spec.format}")
+
+
+def _unknown_field_count(message: Any) -> int:
+    """
+    The fields of the message and of those within it that they don't know, which binary protobuf keeps
+    """
+    from google.protobuf import unknown_fields
+    count = len(unknown_fields.UnknownFieldSet(message))
+    for field, value in message.ListFields():
+        if field.message_type is None or field.message_type.GetOptions().map_entry:
+            continue
+        for submessage in (value if field.is_repeated else [value]):
+            count += _unknown_field_count(submessage)
+    return count
+
+
+def _other_kind(spec: ArtifactSpec) -> ArtifactKind:
+    return ArtifactKind.SCENE if spec.kind == ArtifactKind.FILE else ArtifactKind.FILE
+
+
+def _holds_the_other_kind(spec: ArtifactSpec, parse: Callable[[Any], None]) -> bool:
+    """
+    :param parse: reads the data into the given message
+    :return: whether the message of the other kind reads all of the data
+             (if neither kind does, it may be of a newer format version)
+    """
+    from google.protobuf.message import DecodeError
+    from google.protobuf.text_format import ParseError
+    other = message_class_for_kind(_other_kind(spec))()
+    try:
+        parse(other)
+    except (DecodeError, ParseError):
+        return False
+    return not _unknown_field_count(other)
+
+
+def _other_kind_error(spec: ArtifactSpec) -> ValueError:
+    other = _other_kind(spec)
+    return ValueError(f"It holds a PEX25D {other.value}, not a {spec.kind.value}: read it with --in-kind {other.value}, "
+                      f"or name it NAME{CANONICAL_SUFFIX[(other, spec.format)]}")
 
 
 def save_artifact(message: Any, spec: ArtifactSpec, comments: bool = False) -> None:
