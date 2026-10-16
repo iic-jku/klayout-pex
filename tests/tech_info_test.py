@@ -396,6 +396,14 @@ class Test(unittest.TestCase):
             with self.subTest(tech=os.path.basename(path)):
                 self.assertEqual([], TechInfo.process_layer_problems(TechInfo.parse_tech_def(path)))
 
+    def test_shipped_rfcmim_has_its_plates_on_the_layers_of_the_stack_of_the_cmim(self):
+        # NOTE: its bottom plate is on the GDS pair of Metal5 too, whose first layer of the stack is metal5_n_cap,
+        #       the one without the MIM dielectric
+        path = next(p for p in tech_pbjson_paths() if os.path.basename(p) == 'ihp-sg13g2_tech.pb.json')
+        process_layer_name = TechInfo.from_json(path, dielectric_filter=None).process_layer_name_by_lvs_layer_name
+        self.assertEqual([process_layer_name['metal5_cap'], process_layer_name['cmim_top']],
+                         [process_layer_name['metal5_rfcap'], process_layer_name['rfmim_top']])
+
     def test_layers_of_the_stack_on_one_gds_pair_have_the_shapes_of_their_own_lvs_layers(self):
         # e.g. sky130A, whose met3 is split into the bottom plates of the MIM caps (met3_cap) and the rest (met3_ncap),
         # with the met3 of the MOM caps (met3_vpp) on the same GDS pair

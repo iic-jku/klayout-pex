@@ -92,6 +92,15 @@ def test_mim_dielectric_of_ihp_sg13g2():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_mim_dielectric_of_ihp_sg13g2_rfcmim():
+    # MIM 7 µm x 7 µm, over Metal5 of 82.24 µm² (with the feed)
+    areas = dielectric_areas_um2(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
+    assert areas['ismim'] == 49.0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mim_dielectric_of_sky130A():
     # capm 18.9 µm x 5.1 µm, over met3 of 147.36 µm² (with the interconnect), no capm2 over met4
     areas = dielectric_areas_um2(PDKName.SKY130A, 'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
