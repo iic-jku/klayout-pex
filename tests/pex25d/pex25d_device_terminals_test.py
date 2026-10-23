@@ -121,6 +121,16 @@ def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], laye
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
+def test_diffusion_resistor_terminals_of_sky130A():
+    # NOTE: the terminals of the n+ and p+ diffusion resistors (HV here) are diffusion as the source/drain of a MOS,
+    #       at the lower face of their licons
+    assert device_terminal_layers(PDKName.SKY130A, 'test_patterns', 'res_generic_nd_hv_pd_hv_w1_l4.gds.gz') == \
+           [('A', 'licon_nsd_con'), ('A', 'licon_psd_con'), ('B', 'licon_nsd_con'), ('B', 'licon_psd_con')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
 def test_mom_cap_terminals_of_ihp_sg13g2():
     # NOTE: its ports are on LVS layers the tech info has no layer for (cap_cmomi_m5_ports),
     #       so its terminals are on the metal of their net they overlap most, as in the R extraction
