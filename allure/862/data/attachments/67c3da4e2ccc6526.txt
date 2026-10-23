@@ -1,0 +1,40 @@
+──────────────────────────── Command line arguments ────────────────────────────
+kpex pex25d --pdk gf180mcuD --gds                                               
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz --out-dir                                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache          
+--blackbox n --out-file                                                         
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5.pex25d  
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:02:04] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:674
+[18:02:04] INFO     No explicit top cell specified, using top    kpex_cli.py:714
+                    cell 'cap_mim_m4m5'                                         
+[18:02:04] INFO     LVS input schematic not specified (argument  kpex_cli.py:755
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:02:05] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1315
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz/cap_mim_m4m5.lvsdb.gz                                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:02:05] INFO     (81, 0) -> (metal5_con)                     kpex_cli.py:1473
+[18:02:05] INFO     (41, 244) -> (top_via_cap)                  kpex_cli.py:1473
+[18:02:05] INFO     (75, 0) -> (fuse_cap)                       kpex_cli.py:1473
+[18:02:05] INFO     (46, 0) -> (metal4_n_cap metal4_cap)        kpex_cli.py:1473
+────────────────────────────── PEX25D Generation ───────────────────────────────
+[18:02:05] INFO     GROUND_PLANE subs: z -3300 … 0         pex25d_builder.py:322
+[18:02:05] INFO     DIELECTRIC_BACKGROUND pass: k=4.0      pex25d_builder.py:480
+[18:02:05] INFO     DIELECTRIC_BACKGROUND sin: k=8.5225    pex25d_builder.py:480
+[18:02:05] INFO     DIELECTRIC_BACKGROUND air: k=1.0       pex25d_builder.py:480
+[18:02:05] INFO     4 conductor(s), 344 shape record(s)    pex25d_builder.py:601
+[18:02:05] INFO     8 terminal record(s)                   pex25d_builder.py:779
+[18:02:05] INFO     8 metal and 8 via resistance record(s) pex25d_builder.py:841
+[18:02:05] INFO     Wrote                                       kpex_cli.py:1490
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_gf180mcuD/cap_mim_m4m5.pex25d (file,                  
+                    text)                                                       
+[18:02:05] INFO     No diagnostics.                           diagnostics.py:234
