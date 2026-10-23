@@ -216,6 +216,34 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         assert [m.name for m in file.metals] == ['met1']
         assert not file.vias and not file.terminals
 
+    def test_a_device_terminal_on_an_unknown_layer_is_on_the_metal_it_overlaps_most(self):
+        # NOTE: an LVS layer the tech info has no layer for (e.g. the ports of a MOM cap), as in the R extraction
+        fixture = TerminalFixture(metal_names=('met1', 'met2'))
+        fixture.geometry['met2'] = kdb.Region(kdb.Box(0, 0, 30, 20))
+        fixture.device('C1', kdb.Region(kdb.Box(0, 0, 100, 20)), lvs_layer_name='ports')
+        fixture.device('C2', kdb.Region(kdb.Box(0, 0, 30, 20)), lvs_layer_name='ports')
+        with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+            file = fixture.build()
+        assert sorted((t.name, t.layer) for t in file.terminals) == \
+               [('device:C1:G', 'met1'), ('device:C2:G', 'met1')]  # NOTE: C2 on the lowest of equals
+        warning_mock.assert_not_called()
+
+    def test_a_device_terminal_on_an_unknown_layer_is_on_the_cuts_of_device_contacts_first(self):
+        fixture = TerminalFixture(diffusion=True)
+        fixture.geometry['cont_nsd'] = kdb.Region(kdb.Box(10, 5, 20, 15))
+        fixture.device('M1', kdb.Region(kdb.Box(0, 0, 100, 20)), lvs_layer_name='ports')
+        assert [(t.name, t.layer) for t in fixture.build().terminals] == [('device:M1:G', 'cont_nsd')]
+
+    def test_a_device_terminal_on_an_unknown_layer_off_the_interconnect_has_no_node(self):
+        # NOTE: e.g. a terminal on a well, reported as in the R extraction
+        fixture = TerminalFixture()
+        fixture.device('C1', kdb.Region(kdb.Box(200, 0, 300, 20)), lvs_layer_name='well_marker')
+        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+            file = fixture.build()
+        assert not file.terminals
+        warning_mock.assert_called_once()
+        assert 'nfet terminal G on LVS layer well_marker: C1' in warning_mock.call_args.args[0]
+
     def test_a_device_terminal_keeps_all_its_disjoint_shapes_in_one_node(self):
         fixture = TerminalFixture()
         fixture.geometry['met1'] = kdb.Region(kdb.Box(10, 0, 20, 100))

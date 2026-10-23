@@ -117,3 +117,12 @@ def test_mim_cap_terminals_of_gf180mcuD():
 def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], layers: List[Tuple[str, str]]):
     assert device_terminal_layers(pdk_name, *path_components) == layers
 
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_mom_cap_terminals_of_ihp_sg13g2():
+    # NOTE: its ports are on LVS layers the tech info has no layer for (cap_cmomi_m5_ports),
+    #       so its terminals are on the metal of their net they overlap most, as in the R extraction
+    assert device_terminal_layers(PDKName.IHP_SG13G2, 'cmomi_w5u_l5u_m1_m5', 'cmomi_w5u_l5u_m1_m5.gds.gz') == \
+           [('mim_btm', 'metal5_n_cap'), ('mim_top', 'metal5_n_cap')]

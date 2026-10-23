@@ -26,6 +26,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass, field
 from fractions import Fraction
 from functools import cached_property
@@ -45,7 +46,7 @@ from ..pex25d.format_version import (
 from ..pex25d.protobuf import pex25d_file_pb2, pex25d_dielectric_pb2, pex25d_terminal_pb2
 from ..types import GDSPair
 from ..version import __version__
-from .lvsdb_extractor import KLayoutExtractionContext
+from .lvsdb_extractor import KLayoutExtractionContext, device_list
 
 if TYPE_CHECKING:
     from ..tech_info import TechInfo
@@ -701,6 +702,7 @@ class PEX25DBuilder:
                 self.add_terminal(pex25d_file, f'pin:{quote(label.string, safe="._-$[]")}',
                                   net_name, metal_name, kinds.TERMINAL_KIND_PIN, box)
 
+        devices_by_terminal_without_node: Dict[Tuple[str, str, str], List[str]] = defaultdict(list)
         for net in self.pex_context.top_circuit.each_net():
             net_name = net.expanded_name()
             regions = self._conductor_regions.get(net_name)
@@ -712,15 +714,20 @@ class PEX25DBuilder:
                 name = (f'device:{quote(device.expanded_name(), safe="._-$[]")}:'
                         f'{quote(definition.name, safe="._-$[]")}')
                 selected = {}
+                unknown_markers = kdb.Region()
+                unknown_lvs_layer_names: List[str] = []
                 for index, marker in self.pex_context.lvsdb.shapes_of_terminal(ref).items():
                     source_name = self.pex_context.lvsdb.layer_name(index)
                     if source_name in self.substrate_lvs_layer_names:
                         # NOTE: the substrate is the ground plane, a terminal on it needs no node
                         #       (see TERMINAL_KIND_DEVICE_TERMINAL), e.g. the terminal of a cap to the substrate
                         continue
-                    pair = self.gds_pair(source_name)
-                    if pair is None:
+                    if source_name not in self.tech_info.gds_pair_for_computed_layer_name \
+                            and source_name not in self.tech_info.gds_pair_for_layer_name:
+                        unknown_markers += marker
+                        unknown_lvs_layer_names.append(source_name)
                         continue
+                    pair = self.gds_pair(source_name)
                     # Metals can share a GDS pair (e.g. sky130A met3_ncap and met3_cap, whose MiM cap
                     # bottom plates abut the rest), the terminal is on the one of its LVS layer.
                     owner = self.process_layer_name_by_lvs_layer_name.get(source_name)
@@ -741,6 +748,13 @@ class PEX25DBuilder:
                             intersection = geometry & marker.sized(1)
                         if not intersection.is_empty():
                             selected.setdefault(layer, kdb.Region()).insert(intersection)
+                if not selected and unknown_lvs_layer_names:
+                    found = self.terminal_on_overlapped_interconnect(regions, unknown_markers)
+                    if found is None:
+                        key = (device.device_class().name, definition.name, ', '.join(unknown_lvs_layer_names))
+                        devices_by_terminal_without_node[key].append(device.expanded_name())
+                        continue
+                    selected[found[0]] = found[1]
                 if not selected:
                     debug(f"Device terminal '{name}' has no emitted interconnect boundary")
                     continue
@@ -754,7 +768,41 @@ class PEX25DBuilder:
                                      f"without shorting additional interconnect")
                 self.add_terminal(pex25d_file, name, net_name, layer,
                                   kinds.TERMINAL_KIND_DEVICE_TERMINAL, box)
+        if devices_by_terminal_without_node:
+            warning("PEX25D has no nodes for these device terminals, as the tech info has no layer "
+                    "for their LVS layer, and they overlap no interconnect of their net "
+                    "(e.g. a terminal on a well):\n" +
+                    '\n'.join(f"  - {device_class} terminal {terminal} on LVS layer {lvs_layers}: "
+                              f"{device_list(device_names)}"
+                              for (device_class, terminal, lvs_layers), device_names
+                              in sorted(devices_by_terminal_without_node.items())))
         info(f"{len(pex25d_file.terminals)} terminal record(s)")
+
+    def terminal_on_overlapped_interconnect(self,
+                                            regions: Dict[str, kdb.Region],
+                                            marker: kdb.Region) -> Optional[Tuple[str, kdb.Region]]:
+        """
+        Where a device terminal on LVS layers the tech info has no layer for (e.g. the ports of a MOM cap)
+        is on the interconnect of its net, as in the resistance extraction (#237)
+
+        :return: the profile and its part: the cuts of device contacts it overlaps, whole, as of a source/drain
+                 (they stand in for the diffusion), else the part of the metal it overlaps most, the lowest of equals;
+                 None if it overlaps none of them (e.g. a terminal on a well)
+        """
+        for contact in self._device_contact_by_diffusion.values():
+            cuts = regions.get(contact, kdb.Region()).overlapping(marker)
+            if not cuts.is_empty():
+                return contact, cuts
+        best: Optional[Tuple[float, str, kdb.Region]] = None
+        for layer in self.shape_layers:
+            geometry = regions.get(layer)
+            if geometry is None or layer in self._via_contacts:
+                continue
+            overlap = geometry & marker
+            area = overlap.area()
+            if area > 0 and (best is None or area > best[0]):
+                best = (area, layer, overlap)
+        return None if best is None else (best[1], best[2])
 
     # ------------------------------------------------------------- resistance
 
