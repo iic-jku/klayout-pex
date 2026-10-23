@@ -49,6 +49,11 @@ import klayout.db as kdb
 
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
+DNWELL: GDSPair = (12, 0)
+COMP:   GDSPair = (22, 0)
+PPLUS:  GDSPair = (31, 0)
+NPLUS:  GDSPair = (32, 0)
+LVPWELL: GDSPair = (204, 0)
 POLY2:  GDSPair = (30, 0)
 CONT:   GDSPair = (33, 0)
 METAL1: GDSPair = (34, 0)
@@ -265,6 +270,36 @@ def cap_mim_m4m5() -> Pattern:
     return p
 
 
+def tap(p: Pattern, implant: GDSPair, net: str, x: int, y: int):
+    """
+    A tap of 2 µm x 2 µm at (x, y) with one contact, its Metal1 labelled with the net
+    """
+    p.box(COMP, x - 1000, y - 1000, x + 1000, y + 1000)
+    p.box(implant, x - 1200, y - 1200, x + 1200, y + 1200)
+    p.box(CONT, x - 110, y - 110, x + 110, y + 110)
+    p.box(METAL1, x - 300, y - 300, x + 300, y + 300)
+    p.label(METAL1, net, x, y)
+
+
+def plates_m1_over_isolated_pwell_and_dnwell() -> Pattern:
+    """
+    Two Metal1 plates over a DNWELL of 28 µm x 24 µm: A (6 µm x 8 µm) over the isolated p-well within it
+    (LVPWELL, 16 µm x 12 µm, 6 µm inside), tied by a p-tap to W, and B (4 µm x 10 µm) over the DNWELL beside it,
+    tied by an n-tap to D
+    """
+    p = pattern('plates_m1_over_isolated_pwell_and_dnwell')
+    p.box(DNWELL, -6000, -6000, 22000, 18000)
+    p.box(LVPWELL, 0, 0, 16000, 12000)
+    tap(p, PPLUS, 'W', 13000, 6000)
+    tap(p, NPLUS, 'D', 19000, 6000)
+
+    p.box(METAL1, 2000, 2000, 8000, 10000)
+    p.label(METAL1, 'A', 5000, 6000)
+    p.box(METAL1, -5000, 1000, -1000, 11000)
+    p.label(METAL1, 'B', -3000, 6000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'r_single_wire_m1': r_single_wire_m1,
     'r_wire_voltage_divider_m1': r_wire_voltage_divider_m1,
@@ -280,6 +315,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'sidewall_non_parallel_m1': sidewall_non_parallel_m1,
     'sideoverlap_complex_m1_m2': sideoverlap_complex_m1_m2,
     'cap_mim_m4m5': cap_mim_m4m5,
+    'plates_m1_over_isolated_pwell_and_dnwell': plates_m1_over_isolated_pwell_and_dnwell,
 }
 
 

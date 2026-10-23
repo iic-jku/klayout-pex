@@ -486,6 +486,10 @@ else
   #       we need it for PEX, as the capacitances to the substrate go to it). pwell_sub excludes the isolated pwells.
   connect_global(pwell_sub, "sub!")
 
+  # [PEX] The isolated pwells (iso_pwell) on the net of their pwell, e.g. of its taps (NOTE: a regular LVS would not
+  #       do this, we need it for PEX, as the capacitances above them go to it)
+  connect(iso_pwell, pwell)
+
 #===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===!===!====!===
 
   #================================================

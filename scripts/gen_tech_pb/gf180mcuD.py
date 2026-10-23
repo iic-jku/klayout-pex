@@ -41,6 +41,7 @@ def build_layers(tech: Technology):
     #               purpose, name,      drw_gds,  pin_gds,  label_gds, description
     add_layer(tech, DNWELL,  "DNWELL",  (12, 0),  None,     None,      "Deep N-well")
     add_layer(tech, NWELL,   "Nwell",   (21, 0),  None,     None,      "N-well region")
+    add_layer(tech, PWELL,   "LVPWELL", (204, 0), None,     None,      "LV P-well region (isolated within DNWELL)")
     add_layer(tech, DIFF,    "COMP",    (22, 0),  None,     (22, 10),  "Diffusion for device and interconnect")
     # add_layer(tech, N_P_TAP, "tap",   (65, 44), None,     None,      "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)")
     add_layer(tech, PIMP,    "Pplus",   (31, 0),  None,     None,      "P+ source/drain implant")
@@ -63,6 +64,7 @@ def build_lvs_computed_layers(tech: Technology):
     #                        purpose  kind  lvs_name       lvs_gds_pair orig. layer  process layer       description
     add_computed_layer(tech, DNWELL,  KREG, "dnwell",      (12, 0),     "DNWELL",    None,               "Deep NWell")
     add_computed_layer(tech, NWELL,   KREG, "nwell_con",   (21, 0),     "Nwell",     None,               "NWell")
+    add_computed_layer(tech, PWELL,   KREG, "lvpwell_dw_con", (204, 0), "LVPWELL",   None,               "Isolated p-well (LVPWELL within DNWELL)")
     add_computed_layer(tech, NIMP,    KREG, "nsd",         (32, 0),     "Nplus",     "Nplus",            "N+ source/drain")
     add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 0),     "Pplus",     "Pplus",            "P+ source/drain")
     add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "ntap",             "N+ tap (COMP within nwell)")
@@ -479,9 +481,9 @@ def build_substrate_info(si: SubstrateInfo):
     si.net_names.append("SUB")
     si.lvs_layer_names.append("ptap_regular")
 
-    # TODO: the isolated p-wells (lvpwell_con) and the deep nwell around them (dnwell) are nets of their own,
-    #       but the tech info has no layer of lvpwell_con yet, so they are the substrate here
-    si.well_lvs_layer_names.append("nwell_con")
+    # NOTE: the isolated p-wells (lvpwell_dw_con) and the deep nwell around them (dnwell, at the surface
+    #       where its n-taps are) are nets of their own; the deep nwell is below the others, so it comes last
+    si.well_lvs_layer_names.extend(["nwell_con", "lvpwell_dw_con", "dnwell"])
 
 
 def build_tech() -> Technology:

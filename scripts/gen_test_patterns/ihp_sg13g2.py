@@ -40,6 +40,10 @@ import klayout.db as kdb
 
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
+ACTIV:        GDSPair = (1, 0)
+CONT:         GDSPair = (6, 0)
+PSD:          GDSPair = (14, 0)
+NWELL:        GDSPair = (31, 0)
 NBULAY:       GDSPair = (32, 0)
 METAL1:       GDSPair = (8, 0)
 METAL1_PIN:   GDSPair = (8, 2)
@@ -147,6 +151,30 @@ def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
     return p
 
 
+def single_plate_6um_x_8um_m1_over_isolated_pwell() -> Pattern:
+    """
+    A Metal1 plate A of 6 µm x 8 µm over an isolated p-well: the hole of 12 µm x 10 µm of an NWell ring
+    of 2 µm width over an nBuLay, which encloses the ring by 1 µm; a p-tap in the hole ties the p-well to W
+    """
+    p = pattern('single_plate_6um_x_8um_m1_over_isolated_pwell')
+    p.box(NBULAY, -3000, -3000, 15000, 13000)
+    for ring_part in ((-2000, -2000, 14000, 0), (-2000, 10000, 14000, 12000),
+                      (-2000, 0, 0, 10000), (12000, 0, 14000, 10000)):
+        p.box(NWELL, *ring_part)
+
+    p.box(ACTIV, 9000, 4000, 11000, 6000)
+    p.box(PSD, 8800, 3800, 11200, 6200)
+    p.box(CONT, 9920, 4920, 10080, 5080)
+    p.box(METAL1, 9700, 4700, 10300, 5300)
+    p.box(METAL1_PIN, 9700, 4700, 10300, 5300)
+    p.label(METAL1, 'W', 10000, 5000)
+
+    p.box(METAL1, 1000, 1000, 7000, 9000)
+    p.box(METAL1_PIN, 3500, 4500, 4500, 5500)
+    p.label(METAL1, 'A', 4000, 5000)
+    return p
+
+
 #
 # Resistance patterns
 #
@@ -171,6 +199,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
+    'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
 }
 
