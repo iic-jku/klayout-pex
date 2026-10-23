@@ -303,10 +303,6 @@ class TechBuilder:
             #-----------------------------------------------------------------------------------------------
             met5_ncap = add_metal_layer(psi,     "metal5_n_cap", met5_z, met5_thickness)
 
-        # DIELECTRIC (simple)        name,       dielectric_k, ref
-        #-----------------------------------------------------------------------------------------------
-        add_simple_dielectric(psi,   "ildtm1",   4.1,          "ild4")
-
         cmim_cap = None
         if self.is_g2:
             # METAL:                         name,         z,      thickness
@@ -319,8 +315,7 @@ class TechBuilder:
             add_conformal_dielectric(psi,   "ismim", capild_k,     capild_thickness, 0.0,            0.0,       "metal5_cap")
 
             # DIELECTRIC (simple)        name,       dielectric_k, ref
-            # A band of its own: same material as ildtm1, but it fills from
-            # metal5_cap up to cmim_top, and a name may be declared only once.
+            # The oxide of ildtm1 (sg13cmos5l), from metal5_cap up to cmim_top
             #------------------------------------------------------------------------------------------------------------
             add_simple_dielectric(psi,   "ildtm1b",  4.1,          "ild4")
 
@@ -331,6 +326,12 @@ class TechBuilder:
             # DIELECTRIC (simple)        name,       dielectric_k, ref
             #----------------------------------------------------------------------------------------------------
             add_simple_dielectric(psi,   "ildtm1c",  4.1,          "ild4")
+        else:
+            # DIELECTRIC (simple)        name,       dielectric_k, ref
+            # NOTE: sg13g2 has ildtm1b and ildtm1c instead, as its Metal5 is split (metal5_n_cap, metal5_cap)
+            #       at the same z, where ildtm1 would be an empty band
+            #-------------------------------------------------------------------------------------------
+            add_simple_dielectric(psi,   "ildtm1",   4.1,          "ild4")
 
         if self.is_g2:
             # METAL:                           name,        z,            thickness
@@ -339,7 +340,7 @@ class TechBuilder:
 
             # DIELECTRIC (simple)        name,       dielectric_k, ref
             #----------------------------------------------------------------------------------------------------
-            add_simple_dielectric(psi,   "ildtm2",   4.1,          "ildtm1")
+            add_simple_dielectric(psi,   "ildtm2",   4.1,          "ildtm1c")
 
             # METAL:                           name,        z,            thickness
             #----------------------------------------------------------------------------------------------------
