@@ -1,0 +1,47 @@
+[17:30:22] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1380
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/r_wire_same_label_at_both_ends_li1.gds.gz --out-dir                            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:30:22] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:674
+[17:30:22] INFO     No explicit top cell specified, using top    kpex_cli.py:714
+                    cell 'r_wire_same_label_at_both_ends_li1'                   
+[17:30:22] INFO     LVS input schematic not specified (argument  kpex_cli.py:755
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:30:22] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1315
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_w
+ire_same_label_at_both_ends_li1.gds.gz/r_wire_same_label_at_both_ends_li1.lvsdb.
+gz                                                                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:30:22] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1551
+[17:30:22] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1551
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:30:22] INFO     LVSDB: found 1pins                          extractor.py:294
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.453;                                                               
+C2;A,B;VSUBS;0.459;                                                             
+C3;B;VSUBS;0.056;                                                               
+R1;A;A,B;;210.085                                                               
+R2;A,B;B;;72.533                                                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_same_label_at_bo
+th_ends_li1__r_wire_same_label_at_both_ends_li1/r_wire_same_label_at_both_ends_l
+i1_k25d_pex_netlist.csv                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_same_label_at_bo
+th_ends_li1__r_wire_same_label_at_both_ends_li1/r_wire_same_label_at_both_ends_l
+i1_k25d_pex_netlist.spice                                                       

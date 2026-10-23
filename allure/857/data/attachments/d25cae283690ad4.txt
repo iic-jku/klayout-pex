@@ -1,0 +1,61 @@
+[17:34:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1380
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --gds                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz --out-dir                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:34:14] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:674
+[17:34:14] INFO     No explicit top cell specified, using top    kpex_cli.py:714
+                    cell 'diode_pw2dw_dw2ps_03v3_w2_l4'                         
+[17:34:14] INFO     LVS input schematic not specified (argument  kpex_cli.py:755
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:34:14] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1315
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:34:14] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1551
+[17:34:14] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1551
+[17:34:14] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1551
+[17:34:14] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1551
+[17:34:14] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1551
+[17:34:14] INFO     (33, 4407) -> (contact_ptap_dw_con)         kpex_cli.py:1551
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:34:14] INFO     LVSDB: found 4pins                          extractor.py:294
+[17:34:14] WARNING  The resistance network has no nodes   lvsdb_extractor.py:767
+                    for these device terminals, as the                          
+                    tech info has no layer for their LVS                        
+                    layer, and they overlap no conductor                        
+                    of their net (e.g. a terminal on the                        
+                    substrate or a well):                                       
+                      - diode_dw2ps_03v3 terminal A on                          
+                    LVS layer l45: $2                                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;DW2PS_N;SUB;0.059;                                                           
+C2;DW2PS_N;VSUBS;0.252;                                                         
+C3;PW2DW_N;PW2DW_P;0.304;                                                       
+C4;PW2DW_N;SUB;0.031;                                                           
+C5;PW2DW_N;VSUBS;0.294;                                                         
+C6;PW2DW_P;SUB;0.036;                                                           
+C7;PW2DW_P;VSUBS;0.486;                                                         
+C8;SUB;VSUBS;6.306;                                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.csv                                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.spice                                                                       
