@@ -274,3 +274,18 @@ def test_rf_mim_cap__blackboxed():
     assert pex_blackboxed.written_device_lines('test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz') == [
         'X$1 PLUS.P0.MIM MINUS.P0.Metal5 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_wire_over_deep_nwell():
+    # The nBuLay (the deep n-well) is no conductor of the resistance network, as the deep nwell of sky130A and
+    # gf180mcuD (no via joins it to the nwell over it). It stopped the extraction, as the tech info had no layer
+    # for it (#331). Between the pins, the wire has 19 squares of Metal1
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_wire_over_nbulay_m1.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;A;A,B;;0.001
+R2;A;B;;2.09"""
+    )

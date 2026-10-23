@@ -54,6 +54,10 @@ class TechBuilder:
         add_layer(tech, DIFF,     "Activ",     (1, 0),    (1, 2),    None,       "Active (diffusion) area")  # ~ diff.drawing
         add_layer(tech, NWELL,    "NWell",     (31, 0),   (31, 2),   None,       "N-well region")
         add_layer(tech, PWELL,    "PWell",     (46, 0),   (46, 2),   None,       "P-well region")
+
+        if self.is_g2:  # NOTE: nBuLay is a forbidden layer in CMOS5L
+            add_layer(tech, DNWELL,   "nBuLay",    (32, 0),   None,      None,       "N buried layer (deep n-well)")
+
         add_layer(tech, NIMP,     "nSD",       (7, 0),    None,      None,       "Defines areas to receive N+ S/D implant")
         add_layer(tech, PIMP,     "pSD",       (14, 0),   None,      None,       "Defines areas to receive P+ S/D implant")
         add_layer(tech, METAL,    "GatPoly",   (5, 0),    (5, 2),    (5, 25),    "Poly")  # ~ poly.drawing
@@ -83,6 +87,11 @@ class TechBuilder:
         add_computed_layer(tech, PWELL, KREG, "pwell",          (46, 0),      "PWell",     None,            "Computed layer for PWell")
         add_computed_layer(tech, PWELL, KREG, "pwell_sub",      (46, 0),      "PWell",     None,            "Computed layer for PWell")
         add_computed_layer(tech, NWELL, KREG, "nwell_drw",      (31, 0),      "NWell",     None,            "Computed layer for NWell")
+
+        if self.is_g2:
+            # NOTE: no conductor of the resistance network, as the deep nwell of the other PDKs (#292)
+            add_computed_layer(tech, DNWELL, KREG, "nbulay_drw",    (32, 0),      "nBuLay",    None,            "Computed layer for nBuLay (deep n-well)")
+
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
         add_computed_layer(tech, NIMP,  KREG, "ntap1_tie",      (7, 0),       "nSD",       "nSD",           "Tie of the ntap1 tap device, the same n+ Activ as nsd_fet")
