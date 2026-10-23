@@ -40,6 +40,9 @@ import klayout.db as kdb
 
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
+NBULAY:       GDSPair = (32, 0)
+METAL1:       GDSPair = (8, 0)
+METAL1_PIN:   GDSPair = (8, 2)
 METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
 METAL5:       GDSPair = (67, 0)
@@ -50,6 +53,7 @@ TOPMETAL1:    GDSPair = (126, 0)
 TOPMETAL1_PIN: GDSPair = (126, 2)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
+    METAL1: (8, 25),
     METAL4: (50, 25),
     METAL5: (67, 25),
     TOPMETAL1: (126, 25),
@@ -143,11 +147,31 @@ def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
     return p
 
 
+#
+# Resistance patterns
+#
+
+def r_wire_over_nbulay_m1() -> Pattern:
+    """
+    A Metal1 wire of 10 µm x 0.5 µm from A to B, over an nBuLay (the deep n-well),
+    which is no conductor of the resistance network
+    """
+    p = pattern('r_wire_over_nbulay_m1')
+    p.box(NBULAY, -2000, -2000, 12000, 2500)
+    p.box(METAL1, 0, 0, 10000, 500)
+    p.box(METAL1_PIN, 0, 0, 500, 500)
+    p.box(METAL1_PIN, 9500, 0, 10000, 500)
+    p.label(METAL1, 'A', 250, 250)
+    p.label(METAL1, 'B', 9750, 250)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
+    'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
 }
 
 
