@@ -28,10 +28,14 @@ from datetime import datetime
 import os
 import os.path
 
+import rich.console
+import rich.markdown
+import rich.text
 from rich_argparse import RichHelpFormatter
 import shlex
 import shutil
 import sys
+import tempfile
 from typing import *
 
 from klayout_pex.log import (
@@ -48,6 +52,7 @@ from klayout_pex.log import (
 )
 from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_convert
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
+from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
@@ -70,6 +75,20 @@ SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
     'Help': ('help',),
 }
 """How ``netlist --help`` groups the subcommands; every subcommand is in exactly one section."""
+
+
+SVG_EPILOG_MARKDOWN = """\
+| Exit code | Meaning |
+| --------- | ------- |
+| 0 | success |
+| 1 | the netlist can't be drawn: it can't be read, it has no top circuit, or netlistsvg failed |
+| 2 | the command line is wrong, e.g. the input netlist, netlistsvg or the directory of the output is missing, `--cell` names no circuit, or the netlist has several top circuits and no `--cell` |
+"""
+
+
+def svg_output_path(args: argparse.Namespace) -> str:
+    """The SVG that netlist svg writes: --out-svg, else the input path with the extension .svg"""
+    return args.output_svg_path or os.path.splitext(args.input_netlist_path)[0] + '.svg'
 
 
 class ArgumentValidationError(Exception):
@@ -95,7 +114,11 @@ class NetlistCLI:
         parser_netlistsvg = subparsers.add_parser("svg",
                                                   help="Draw the schematic of a SPICE netlist as SVG "
                                                        "(with netlistsvg)",
-                                                  formatter_class=RichHelpFormatter)
+                                                  formatter_class=RichHelpFormatter,
+                                                  epilog=rich.console.Group(
+                                                      rich.text.Text('Exit codes:', style='argparse.groups'),
+                                                      rich.markdown.Markdown(SVG_EPILOG_MARKDOWN,
+                                                                             style='argparse.text')))
         parser_netlistsvg.add_argument("input_netlist_path",
                                        type=str, help="Path to the input netlist file")
 
@@ -104,7 +127,8 @@ class NetlistCLI:
                                        help="Path to netlistsvg executable (default is '%(default)s')")
 
         add_argument_with_former_name(parser_netlistsvg, "--out-svg", "--output", "-o", dest="output_svg_path",
-                                      help="Output SVG path", default=None)
+                                      help="Output SVG path (default is the input path with the extension .svg)",
+                                      default=None)
         parser_netlistsvg.add_argument("--preview", "-p", dest="preview_svg",
                                        action='store_true', default=False,
                                        help="Preview SVG")
@@ -142,25 +166,38 @@ class NetlistCLI:
                 sys.exit(1)
 
             case 'svg':
-                if not os.path.isfile(args.netlistsvg_exe_path):
-                    path = shutil.which(args.netlistsvg_exe_path)
-                    if not path:
-                        error(f"Can't locate netlistsvg executable at {args.netlistsvg_exe_path}")
-                        found_errors = True
+                if not os.path.isfile(args.input_netlist_path):
+                    error(f"Input netlist not found: {args.input_netlist_path}")
+                    found_errors = True
+                if shutil.which(args.netlistsvg_exe_path) is None:
+                    error(f"Can't locate netlistsvg executable at {args.netlistsvg_exe_path} "
+                          f"(install it with 'npm install -g netlistsvg', or give its path with --exe)")
+                    found_errors = True
+                output_dir = os.path.dirname(os.path.abspath(svg_output_path(args)))
+                if not os.path.isdir(output_dir):
+                    error(f"The directory of the output SVG doesn't exist: {output_dir}")
+                    found_errors = True
 
         if found_errors:
             raise ArgumentValidationError("Argument validation failed")
 
     def run_netlistsvg(self,
-                       args: argparse.Namespace):
+                       args: argparse.Namespace) -> ExitCode:
+        """
+        :return: the exit code (see the epilog)
+        """
         # NOTE: only this subcommand needs KLayout, the others (e.g. reduce) must not load it
         import klayout.db as kdb
         from klayout_pex.netlistsvg.netlist_json import NetlistJSONWriter
-        from klayout_pex.netlistsvg.netlistsvg_runner import run_netlistsvg
+        from klayout_pex.netlistsvg.netlistsvg_runner import NetlistSVGError, SKIN_PATH, run_netlistsvg
 
         netlist = kdb.Netlist()
         netlist_reader = kdb.NetlistSpiceReader()
-        netlist.read(args.input_netlist_path, netlist_reader)
+        try:
+            netlist.read(args.input_netlist_path, netlist_reader)
+        except RuntimeError as e:
+            error(f"Can't read the SPICE netlist {args.input_netlist_path}: {e}")
+            return ExitCode.DIAGNOSTIC_ERRORS
 
         rule('netlistsvg Execution')
 
@@ -170,40 +207,45 @@ class NetlistCLI:
 
         top_circuit: kdb.Circuit
 
-        match n_circuits:
-            case 0:
-                error(f"No top circuit found in SPICE netlist, perhaps the SUBCKT with the ports is missing?!")
-                sys.exit(1)
-            case 1:
-                top_circuit = top_circuits[0]
-            case _:
-                info(f"Multiple top circuits found in SPICE netlist: {top_circuit_names}")
-                error('Please specify the desired cell using the --cell argument')
-                sys.exit(2)
+        if args.cell_name is not None:
+            top_circuit = netlist.circuit_by_name(args.cell_name)
+            if top_circuit is None:
+                circuit_names = ', '.join(c.name for c in netlist.each_circuit())
+                error(f"No circuit {args.cell_name} in the SPICE netlist, its circuits are: {circuit_names}")
+                return ExitCode.USAGE
+        else:
+            match n_circuits:
+                case 0:
+                    error(f"No top circuit found in SPICE netlist, perhaps the SUBCKT with the ports is missing?!")
+                    return ExitCode.DIAGNOSTIC_ERRORS
+                case 1:
+                    top_circuit = top_circuits[0]
+                case _:
+                    info(f"Multiple top circuits found in SPICE netlist: {top_circuit_names}")
+                    error('Please specify the desired cell using the --cell argument')
+                    return ExitCode.USAGE
 
-        run_dir = os.path.join('netlist_run', top_circuit.name.lower())
-        os.makedirs(run_dir, exist_ok=True)
+        output_svg_path = svg_output_path(args)
 
-        skin_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..',
-                                                  'testdata', 'netlistsvg', 'analog_skin.svg'))
+        # NOTE: the netlistsvg input is an intermediate file
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            yosys_json_netlist_path = os.path.join(tmp_dir, f"yosys_netlist.json")
+            json_writer = NetlistJSONWriter()
+            json_writer.write_json(netlist=netlist,
+                                   top_circuit=top_circuit,
+                                   output_path=yosys_json_netlist_path)
 
-        yosys_json_netlist_path = os.path.join(run_dir, f"yosys_netlist.json")
-        log_path = os.path.join(run_dir, 'netlistsvg_log.txt')
-        output_svg_path = args.output_svg_path
-        if output_svg_path is None:
-            output_svg_path = os.path.join(run_dir, f"{os.path.basename(args.input_netlist_path)}.svg")
+            try:
+                run_netlistsvg(exe_path=shutil.which(args.netlistsvg_exe_path),
+                               skin_path=SKIN_PATH,
+                               yosys_json_netlist_path=yosys_json_netlist_path,
+                               output_svg_path=output_svg_path,
+                               layout_elk_path=None)
+            except NetlistSVGError as e:
+                error(str(e))
+                return ExitCode.DIAGNOSTIC_ERRORS
 
-        json_writer = NetlistJSONWriter()
-        json_writer.write_json(netlist=netlist,
-                               top_circuit=top_circuit,
-                               output_path=yosys_json_netlist_path)
-
-        run_netlistsvg(exe_path=args.netlistsvg_exe_path,
-                       skin_path=skin_path,
-                       yosys_json_netlist_path=yosys_json_netlist_path,
-                       output_svg_path=output_svg_path,
-                       layout_elk_path=None,
-                       log_path=log_path)
+        info(f"Wrote {output_svg_path}")
 
         if args.preview_svg:
             import webbrowser
@@ -219,6 +261,8 @@ class NetlistCLI:
             # plt.imshow(image)
             # plt.axis('off')
             # plt.show()
+
+        return ExitCode.OK
 
     def setup_logging(self, args: argparse.Namespace):
         set_log_level(args.log_level)
@@ -237,14 +281,17 @@ class NetlistCLI:
             rule('Command line arguments')
             subproc(' '.join(map(shlex.quote, sys.argv)))
 
-        args = self.parse_args(argv[1:])
+        try:
+            args = self.parse_args(argv[1:])
+        except ArgumentValidationError:
+            sys.exit(ExitCode.USAGE)
 
         self.setup_logging(args)
         warn_deprecated_options(args)
 
         match args.command:
             case 'svg':
-                self.run_netlistsvg(args)
+                sys.exit(self.run_netlistsvg(args))
             case 'reduce':
                 sys.exit(run_reduce_subcommand(args))
             case 'convert':

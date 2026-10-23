@@ -23,6 +23,7 @@
 # --------------------------------------------------------------------------------
 #
 
+import os
 import time
 from typing import *
 
@@ -36,12 +37,22 @@ from ..log import (
 )
 
 
+SKIN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'analog_skin.svg')
+"""The analog skin of netlistsvg (its lib/analog.svg), shipped as package data"""
+
+
+class NetlistSVGError(Exception):
+    pass
+
+
 def run_netlistsvg(exe_path: str,
                    skin_path: str,
                    yosys_json_netlist_path: str,
                    output_svg_path: str,
-                   layout_elk_path: Optional[str],
-                   log_path: str):
+                   layout_elk_path: Optional[str]):
+    """
+    :raises NetlistSVGError: if netlistsvg can't be started or fails
+    """
     args = [
         exe_path,
         '-o', output_svg_path,
@@ -56,25 +67,27 @@ def run_netlistsvg(exe_path: str,
     ]
 
     info('Calling netlistsvg')
-    subproc(f"{' '.join(args)}, output file: {log_path}")
+    subproc(' '.join(args))
 
     rule('netlistsvg Output')
 
     start = time.time()
 
-    proc = subprocess.Popen(args,
-                            stdin=subprocess.DEVNULL,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            universal_newlines=True,
-                            text=True)
-    with open(log_path, 'w', encoding='utf-8') as f:
-        while True:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            subproc(line[:-1])  # remove newline
-            f.writelines([line])
+    try:
+        proc = subprocess.Popen(args,
+                                stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                text=True,
+                                encoding='utf-8',
+                                errors='replace')
+    except OSError as e:
+        raise NetlistSVGError(f"Can't run netlistsvg {exe_path}: {e}") from e
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        subproc(line[:-1])  # remove newline
     proc.wait()
 
     duration = time.time() - start
@@ -84,6 +97,5 @@ def run_netlistsvg(exe_path: str,
     if proc.returncode == 0:
         info(f"netlistsvg succeeded after {'%.4g' % duration}s")
     else:
-        raise Exception(f"netlistsvg failed with status code {proc.returncode} after {'%.4g' % duration}s, "
-                        f"see log file: {log_path}")
-
+        raise NetlistSVGError(f"netlistsvg failed with status code {proc.returncode} "
+                              f"after {'%.4g' % duration}s, see its output above")
