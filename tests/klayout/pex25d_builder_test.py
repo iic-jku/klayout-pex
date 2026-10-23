@@ -42,10 +42,13 @@ import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
 class TerminalFixture:
-    def __init__(self, metal_names: Tuple[str, ...] = ('met1',)):
+    def __init__(self, metal_names: Tuple[str, ...] = ('met1',), diffusion: bool = False, contact: bool = True):
         """
         :param metal_names: the metals of the stack on the drawn met1 (e.g. split by a MiM cap),
                             each of them with its LVS layer of the same name
+        :param diffusion: also a diffusion of the stack (nsd, e.g. of a source/drain), with its LVS layer
+        :param contact: whether the diffusion has a contact (cont_nsd, with its LVS layer) up to the first metal,
+                        as a source/drain has, and a tap hasn't
         """
         self.metal_names = metal_names
         self.lvs_layer_names = list(metal_names)  # NOTE: by index, those of the markers
@@ -72,6 +75,18 @@ class TerminalFixture:
         substrate = stack.layers.add(name='subs', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE)
         substrate.substrate_layer.height = 0.1
         substrate.substrate_layer.thickness = 0.2
+        if diffusion:
+            nsd = stack.layers.add(name='nsd', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION)
+            lvs_layers = [('nsd', 2)]
+            if contact:
+                nsd.diffusion_layer.contact_above.name = 'cont_nsd'
+                nsd.diffusion_layer.contact_above.metal_above = metal_names[0]
+                nsd.diffusion_layer.contact_above.thickness = 1.0  # NOTE: from z 0 to the metal
+                lvs_layers.append(('cont_nsd', 3))
+            for name, gds_layer in lvs_layers:
+                tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
+                                                                           drw_gds_pair=tech_pb2.GDSPair(layer=gds_layer)),
+                                             process_layer_name=name)
         for name in metal_names:
             metal = stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
             metal.metal_layer.z = 1.0
@@ -176,6 +191,58 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
             file = fixture.build()
         assert not file.terminals
         warning_mock.assert_not_called()
+
+    def test_a_device_terminal_on_a_diffusion_is_on_the_whole_cuts_of_its_contacts(self):
+        # NOTE: the diffusion is device geometry, an empty profile (an anchor) at the lower end of its contacts,
+        #       so the terminal (e.g. of a source/drain) is a node at their lower face
+        fixture = TerminalFixture(diffusion=True)
+        fixture.geometry['cont_nsd'] = kdb.Region(kdb.Box(10, 5, 20, 15))
+        fixture.geometry['cont_nsd'].insert(kdb.Box(30, 5, 40, 15))
+        fixture.device('M1', kdb.Region(kdb.Box(15, 0, 50, 20)), lvs_layer_name='nsd')  # NOTE: half of a cut
+        file = fixture.build()
+        assert [(m.name, m.zlow, m.zhigh) for m in file.metals if m.name == 'nsd'] == [('nsd', -1, 0)]
+        assert [(v.name, v.connects_below, v.connects_above) for v in file.vias] == [('cont_nsd', 'nsd', 'met1')]
+        assert [(t.name, t.layer) for t in file.terminals] == [('device:M1:G', 'cont_nsd')]
+        region = file.terminals[0].region
+        assert (region.lower_left.x, region.lower_left.y, region.upper_right.x, region.upper_right.y) == \
+               (100, 50, 400, 150)
+        assert validate(file, strict=True).exit_code == 0
+
+    def test_a_diffusion_without_contact_has_no_profile(self):
+        # NOTE: e.g. a tap
+        fixture = TerminalFixture(diffusion=True, contact=False)
+        fixture.device('M1', kdb.Region(kdb.Box(10, 0, 20, 20)), lvs_layer_name='nsd')
+        file = fixture.build()
+        assert [m.name for m in file.metals] == ['met1']
+        assert not file.vias and not file.terminals
+
+    def test_a_device_terminal_on_an_unknown_layer_is_on_the_metal_it_overlaps_most(self):
+        # NOTE: an LVS layer the tech info has no layer for (e.g. the ports of a MOM cap), as in the R extraction
+        fixture = TerminalFixture(metal_names=('met1', 'met2'))
+        fixture.geometry['met2'] = kdb.Region(kdb.Box(0, 0, 30, 20))
+        fixture.device('C1', kdb.Region(kdb.Box(0, 0, 100, 20)), lvs_layer_name='ports')
+        fixture.device('C2', kdb.Region(kdb.Box(0, 0, 30, 20)), lvs_layer_name='ports')
+        with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
+            file = fixture.build()
+        assert sorted((t.name, t.layer) for t in file.terminals) == \
+               [('device:C1:G', 'met1'), ('device:C2:G', 'met1')]  # NOTE: C2 on the lowest of equals
+        warning_mock.assert_not_called()
+
+    def test_a_device_terminal_on_an_unknown_layer_is_on_the_cuts_of_device_contacts_first(self):
+        fixture = TerminalFixture(diffusion=True)
+        fixture.geometry['cont_nsd'] = kdb.Region(kdb.Box(10, 5, 20, 15))
+        fixture.device('M1', kdb.Region(kdb.Box(0, 0, 100, 20)), lvs_layer_name='ports')
+        assert [(t.name, t.layer) for t in fixture.build().terminals] == [('device:M1:G', 'cont_nsd')]
+
+    def test_a_device_terminal_on_an_unknown_layer_off_the_interconnect_has_no_node(self):
+        # NOTE: e.g. a terminal on a well, reported as in the R extraction
+        fixture = TerminalFixture()
+        fixture.device('C1', kdb.Region(kdb.Box(200, 0, 300, 20)), lvs_layer_name='well_marker')
+        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+            file = fixture.build()
+        assert not file.terminals
+        warning_mock.assert_called_once()
+        assert 'nfet terminal G on LVS layer well_marker: C1' in warning_mock.call_args.args[0]
 
     def test_a_device_terminal_keeps_all_its_disjoint_shapes_in_one_node(self):
         fixture = TerminalFixture()

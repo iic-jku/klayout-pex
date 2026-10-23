@@ -87,6 +87,14 @@ def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str
     return f"{name}{separator}{j + 1}"
 
 
+def device_list(device_names: List[str]) -> str:
+    """
+    The first device names, for a message (e.g. 'M1, M2, M3 and 7 more')
+    """
+    listed = ', '.join(device_names[:3])
+    return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
+
+
 @dataclass
 class KLayoutExtractedLayerInfo:
     index: int
@@ -745,10 +753,6 @@ class KLayoutExtractionContext:
                         add_region((lyr_info.layer, lyr_info.datatype), shapes)
 
             dd[d.device_name] = d
-
-        def device_list(device_names: List[str]) -> str:
-            listed = ', '.join(device_names[:3])
-            return listed if len(device_names) <= 3 else f"{listed} and {len(device_names) - 3} more"
 
         if devices_by_unconnected_terminal:
             warning("These device terminals are unconnected in the LVS netlist, "
