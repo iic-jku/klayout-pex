@@ -128,7 +128,11 @@ class RCX25Extractor:
 
         # NOTE: where wells overlap (e.g. an nwell within a deep nwell), the first one is at the surface
         for well_layer_name in self.tech_info.tech.substrate.well_lvs_layer_names:
-            wells = self.shapes_of_layer(well_layer_name)
+            gds_pair = self.gds_pair(layer_name=well_layer_name)
+            if gds_pair is None:
+                continue
+            # NOTE: the well's LVS layer only, not the others of its GDS pair (e.g. the pwell around an isolated pwell)
+            wells = self.pex_context.shapes_of_layer(gds_pair=gds_pair, lvs_layer_names=[well_layer_name])
             if wells is None:
                 continue
             for well in wells.merged().each():  # NOTE: merged per net
