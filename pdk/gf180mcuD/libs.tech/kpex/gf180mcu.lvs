@@ -366,10 +366,11 @@ logger.info('Starting base layers derivations')
 #       in connect, soft_connect, connect_global, soft_connect_global
 #       and extract_devices statements.
 
-# [PEX] Explicitly splitting the contacts for device terminals
+# [PEX] Explicitly splitting the contacts for device terminals, also over the drain of the LDNMOS (nd_ldmos)
+#       and the source/drain of the PMOS within the deep nwell (psd_dw), the same diffusions as nsd and psd
 #       (NOTE: a regular LVS would not do this, we need it for PEX)
-contact_nsd_con  = contact.and(nsd)
-contact_psd_con  = contact.and(psd)
+contact_nsd_con  = contact.and(nsd.or(nd_ldmos))
+contact_psd_con  = contact.and(psd.or(psd_dw))
 contact_poly_con = contact.and(poly2_con)
 
 # [PEX] the contacts over the n-taps, which join Metal1 to the nwell below them
