@@ -226,7 +226,7 @@ class Test(unittest.TestCase):
     def test_shipped_substrate_wells_have_the_layer_names_of_the_resistor_networks(self):
         # NOTE: the substrate's side of a capacitance goes to the nodes of its wells (#288),
         #       which are named after the canonical layers
-        expected_by_tech = {'sky130A': {'nwell'}, 'ihp-sg13g2': {'NWell'}, 'gf180mcuD': {'Nwell'}}
+        expected_by_tech = {'sky130A': {'nwell'}, 'ihp-sg13g2': {'NWell', 'PWell'}, 'gf180mcuD': {'Nwell'}}
         paths_by_tech = {os.path.basename(path).removesuffix('_tech.pb.json'): path for path in tech_pbjson_paths()}
         for tech_name, expected in expected_by_tech.items():
             with self.subTest(tech=tech_name):

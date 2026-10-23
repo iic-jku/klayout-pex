@@ -198,3 +198,21 @@ def test_rf_mim_cap__blackboxed():
     assert pex_blackboxed.written_device_lines('sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == [
         'X$1 \\$5 \\$4 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+def test_single_plate_over_isolated_pwell():
+    # The isolated p-well (the hole of the NWell ring $3 over nBuLay) is a net of its own, W by its p-tap:
+    # the plate couples to it, only its fringe beyond the ring to the substrate (VSUBS).
+    # It was the substrate: A–VSUBS 2.496 fF, A–W 0.013 fF (#337)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;$3;A;0.274;
+C2;$3;W;0.008;
+C3;A;VSUBS;0.261;
+C4;A;W;2.247;
+C5;VSUBS;W;0.012;"""
+    )

@@ -55,6 +55,7 @@ DESIGNS = [
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_twice.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_labels_one_node.gds.gz'),
+    (PDK.IHP_SG13G2, 'test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz'),
     (PDK.IHP_SG13CMOS5L, 'cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz'),
 ]
 

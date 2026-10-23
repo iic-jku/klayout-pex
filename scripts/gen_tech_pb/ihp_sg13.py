@@ -91,6 +91,7 @@ class TechBuilder:
         if self.is_g2:
             # NOTE: no conductor of the resistance network, as the deep nwell of the other PDKs (#292)
             add_computed_layer(tech, DNWELL, KREG, "nbulay_drw",    (32, 0),      "nBuLay",    None,            "Computed layer for nBuLay (deep n-well)")
+            add_computed_layer(tech, PWELL, KREG, "iso_pwell",      (46, 0),      "PWell",     None,            "Computed layer for the isolated PWell (the holes of NWell over nBuLay)")
 
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
@@ -753,9 +754,11 @@ class TechBuilder:
         # NOTE: the substrate around the rfcmim, the layer of its terminal bn, which the deck connects to the ptap
         si.lvs_layer_names.append("rfmim_sub")
 
-        # TODO: the isolated p-wells (iso_pwell, the holes of the nwell over nBuLay) are nets of their own,
-        #       but the LVS layer that has them (pwell) has the substrate too, so they are the substrate here
         si.well_lvs_layer_names.append("nwell_drw")
+        if self.is_g2:
+            # NOTE: the isolated p-wells (the holes of the nwell over nBuLay) are nets of their own,
+            #       which the PEX-LVS script connects iso_pwell to
+            si.well_lvs_layer_names.append("iso_pwell")
 
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
