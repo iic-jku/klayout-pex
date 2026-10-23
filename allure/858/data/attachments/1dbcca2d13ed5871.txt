@@ -1,0 +1,42 @@
+WARNING  __kpex__:kpex_cli.py:1380 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1417 main extract --pdk sky130A --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_nwell_pfet_ntap_li1.gds.gz --out-dir /tmp/tmp_4pnu0bw --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:674 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:714 No explicit top cell specified, using top cell 'r_nwell_pfet_ntap_li1'
+INFO     __kpex__:kpex_cli.py:755 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1315 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1316 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_nwell_pfet_ntap_li1.gds.gz/r_nwell_pfet_ntap_li1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1551 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1551 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:1551 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:1551 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1551 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1551 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:1551 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:294 LVSDB: found 4pins
+SUBPROCESS __kpex__:kpex_cli.py:1139 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1139 C1;D;G.P0.poly;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C2;D;S;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C3;D;S.P0.psdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C4;D;VPWR.$1.nwell;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C5;D;VPWR.P0.nwell;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C6;D;VSUBS;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C7;D.P0.psdm;S;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C8;G;VPWR.P0.nwell;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C9;G;VSUBS;0.029;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C10;G.P0.poly;S;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C11;G.P0.poly;VPWR.P0.nwell;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C12;G.P0.poly;VSUBS;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C13;S;VPWR.P0.nwell;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C14;S;VSUBS;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C15;VPWR;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1139 R1;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1139 R2;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1139 R3;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1139 R4;VPWR;VPWR.$1.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1139 R5;VPWR.$1.nwell;VPWR.P0.nwell;;5241.667
+SUBPROCESS __kpex__:kpex_cli.py:1142 /tmp/tmp_4pnu0bw/r_nwell_pfet_ntap_li1__r_nwell_pfet_ntap_li1/r_nwell_pfet_ntap_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1158 Wrote expanded netlist to: /tmp/tmp_4pnu0bw/r_nwell_pfet_ntap_li1__r_nwell_pfet_ntap_li1/r_nwell_pfet_ntap_li1_k25d_pex_netlist.spice

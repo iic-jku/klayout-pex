@@ -1,0 +1,55 @@
+[17:39:48] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1380
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/overlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz --out-dir               
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:39:48] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:674
+[17:39:48] INFO     No explicit top cell specified, using top    kpex_cli.py:714
+                    cell                                                        
+                    'overlap_shield_same_net_100um_x_100um_li1_m                
+                    1_m2'                                                       
+[17:39:48] INFO     LVS input schematic not specified (argument  kpex_cli.py:755
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:39:48] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1315
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/ove
+rlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz/overlap_shield_same_net_100u
+m_x_100um_li1_m1_m2.lvsdb.gz                                                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:39:48] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1551
+[17:39:48] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1551
+[17:39:48] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1551
+[17:39:48] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1551
+[17:39:48] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1551
+[17:39:48] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1551
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:39:48] INFO     LVSDB: found 2pins                          extractor.py:294
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.135;                                                               
+C2;A.$0.li1;VSUBS;386.043;                                                      
+C3;A.$1.met1;B;1338.6;                                                          
+C4;A.$1.met1;VSUBS;16.226;                                                      
+C5;B;VSUBS;15.101;                                                              
+R1;A;A.$0.li1;;0.113                                                            
+R2;A.$0.li1;A.$1.met1;;9.3                                                      
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net
+_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overla
+p_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.csv                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net
+_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overla
+p_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.spice                
