@@ -1,0 +1,47 @@
+WARNING  __kpex__:kpex_cli.py:1380 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1417 main extract --pdk sky130A --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_via_stack_1x1_minsize_poly_to_met5.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:674 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:714 No explicit top cell specified, using top cell 'r_via_stack_1x1_minsize_poly_to_met5'
+INFO     __kpex__:kpex_cli.py:755 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1315 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1316 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_via_stack_1x1_minsize_poly_to_met5.gds.gz/r_via_stack_1x1_minsize_poly_to_met5.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1551 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1551 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1551 (68, 44) -> (via1_con)
+INFO     __kpex__:kpex_cli.py:1551 (69, 44) -> (via2_con)
+INFO     __kpex__:kpex_cli.py:1551 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1551 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1551 (72, 20) -> (met5_con)
+INFO     __kpex__:kpex_cli.py:1551 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (72, 16) -> (met5_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (70, 20) -> (met3_ncap)
+INFO     __kpex__:kpex_cli.py:1551 (70, 144) -> (via3_ncap)
+INFO     __kpex__:kpex_cli.py:1551 (71, 20) -> (met4_ncap)
+INFO     __kpex__:kpex_cli.py:1551 (71, 144) -> (via4_ncap)
+INFO     __kpex__:extractor.py:294 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1139 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1139 C1;VSUBS;li1;0.04;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C2;VSUBS;met1;0.052;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C3;VSUBS;met2;0.056;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C4;VSUBS;met3;0.054;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C5;VSUBS;met4;0.184;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C6;VSUBS;met5;0.256;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C7;VSUBS;poly;0.085;
+SUBPROCESS __kpex__:kpex_cli.py:1139 R1;li1;li1,met1,met2,met3,met4,met5,poly;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1139 R2;li1;met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1139 R3;li1;poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1139 R4;met1;met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1139 R5;met2;met3;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1139 R6;met3;met4;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1139 R7;met4;met5;;0.38
+SUBPROCESS __kpex__:kpex_cli.py:1142 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly_to_met5_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1158 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly_to_met5_k25d_pex_netlist.spice
