@@ -1,0 +1,53 @@
+[18:44:33] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1380
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz --out-dir                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:44:33] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:674
+[18:44:33] INFO     No explicit top cell specified, using top    kpex_cli.py:714
+                    cell                                                        
+                    'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire'                 
+[18:44:33] INFO     LVS input schematic not specified (argument  kpex_cli.py:755
+                    --schematic), using dummy schematic                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:44:34] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1315
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap
+_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz/cap_vpp_04p4x04p6_l1m1m2_noshield_
+m2_wire.lvsdb.gz                                                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:44:34] INFO     (67, 20) -> (li_con li_vpp)                 kpex_cli.py:1551
+[18:44:34] INFO     (67, 44) -> (mcon_con mcon_vpp)             kpex_cli.py:1551
+[18:44:34] INFO     (68, 44) -> (via1_con via1_vpp)             kpex_cli.py:1551
+[18:44:34] INFO     (68, 20) -> (met1_con met1_vpp)             kpex_cli.py:1551
+[18:44:34] INFO     (69, 20) -> (met2_con met2_vpp)             kpex_cli.py:1551
+[18:44:34] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1551
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;C0;C1;7.709;                                                                 
+C2;C0;VSUBS;2.684;                                                              
+C3;C0;X;0.294;                                                                  
+C4;C1;VSUBS;0.736;                                                              
+C5;C1;X;0.022;                                                                  
+C6;VSUBS;X;0.385;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_04p4x04p6_l1m1m
+2_noshield_m2_wire__cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire/cap_vpp_04p4x04p6_
+l1m1m2_noshield_m2_wire_k25d_pex_netlist.csv                                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[18:44:35] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_04p4x04p6_l1m1m
+2_noshield_m2_wire__cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire/cap_vpp_04p4x04p6_
+l1m1m2_noshield_m2_wire_k25d_pex_netlist.spice                                  

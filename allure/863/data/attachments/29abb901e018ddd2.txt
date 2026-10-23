@@ -1,0 +1,26 @@
+WARNING  __kpex__:kpex_cli.py:1380 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1417 main extract --pdk sky130A --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/overlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:674 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:714 No explicit top cell specified, using top cell 'overlap_shield_same_net_100um_x_100um_li1_m1_m2'
+INFO     __kpex__:kpex_cli.py:755 LVS input schematic not specified (argument --schematic), using dummy schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1315 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1316 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/overlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz/overlap_shield_same_net_100um_x_100um_li1_m1_m2.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1551 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1551 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1551 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1551 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1551 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 2pins
+SUBPROCESS __kpex__:kpex_cli.py:1139 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1139 C1;A;VSUBS;0.135;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C2;A.$0.li1;VSUBS;386.043;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C3;A.$1.met1;B;1338.6;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C4;A.$1.met1;VSUBS;16.226;
+SUBPROCESS __kpex__:kpex_cli.py:1139 C5;B;VSUBS;15.101;
+SUBPROCESS __kpex__:kpex_cli.py:1139 R1;A;A.$0.li1;;0.113
+SUBPROCESS __kpex__:kpex_cli.py:1139 R2;A.$0.li1;A.$1.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1142 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overlap_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1158 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overlap_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.spice
