@@ -98,3 +98,22 @@ def test_mim_cap_terminals_of_gf180mcuD():
     # NOTE: two MIM caps (FuseTop 5 µm x 5 µm and 20 µm x 10 µm), A the bottom and B the top plate
     assert device_terminal_layers(PDKName.GF180MCUD, 'test_patterns', 'cap_mim_m4m5.gds.gz') == \
            [('A', 'metal4_cap'), ('A', 'metal4_cap'), ('B', 'FuseTop'), ('B', 'FuseTop')]
+
+
+# NOTE: the source and drain of a MOS are on its diffusion, device geometry, which PEX25D leaves out:
+#       their terminals are at the lower face of their contacts, whose diffusion is an empty profile (an anchor)
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('pdk_name, path_components, layers', [
+    (PDKName.IHP_SG13G2, ('test_patterns', 'nmos_metal1.gds.gz'),
+     [('D', 'cont_nsd_con'), ('G', 'GatPoly'), ('S', 'cont_nsd_con')]),
+    (PDKName.SKY130A, ('test_patterns', 'nfet_li1.gds.gz'),
+     [('D', 'licon_nsd_con'), ('G', 'poly'), ('S', 'licon_nsd_con')]),
+    (PDKName.GF180MCUD, ('test_patterns', 'nfet_m1.gds.gz'),
+     [('D', 'contact_nsd_con'), ('G', 'Poly2'), ('S', 'contact_nsd_con')]),
+], ids=['ihp_sg13g2', 'sky130A', 'gf180mcuD'])
+def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], layers: List[Tuple[str, str]]):
+    assert device_terminal_layers(pdk_name, *path_components) == layers
+

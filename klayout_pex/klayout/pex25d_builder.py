@@ -115,6 +115,7 @@ class PEX25DBuilder:
         # MiM-cap variant) does not produce a duplicate declaration.
         self._profile_names: Set[str] = set()
         self._via_contacts: Dict[str, Any] = {}
+        self._device_contact_by_diffusion: Dict[str, str] = {}
         self._conductor_regions: Dict[str, Dict[str, kdb.Region]] = {}
         self._terminal_names: Set[str] = set()
 
@@ -356,12 +357,36 @@ class PEX25DBuilder:
             via.connects_above = above
             debug(f"VIA {via.name}: connects {below} → {above}")
 
-        # Device contacts (diffusion, nwell) are deliberately absent: their lower
-        # endpoint is device geometry, which PEX25D does not describe.
-        for name, contact in self.tech_info.contact_by_device_lvs_layer_name.items():
-            if contact.name:
-                debug(f"Skipping device contact '{contact.name}' on '{name}': "
-                      f"device geometry is out of scope for PEX25D")
+        # A device contact (e.g. on a source/drain diffusion) lands on device geometry, which PEX25D
+        # leaves out: the diffusion is an empty profile, an anchor at the lower end of its contacts
+        # (see Metal), as high as the tech info's contact is thick below the metal above,
+        # and a terminal on the device is a node at that lower face (see TERMINAL_KIND_DEVICE_TERMINAL).
+        # Taps have no contact in the process stack, so they stay out.
+        for layer in self.tech_info.process_diffusion_layers:
+            contact = layer.diffusion_layer.contact_above
+            if not contact.name:
+                continue
+            context = f"Contact '{contact.name}'"
+            above = self.resolve_metal(contact.metal_above, context)
+            if not above or not self.claim_name(layer.name, 'Diffusion'):
+                continue
+            if not self.claim_name(contact.name, 'Via'):
+                continue
+
+            metal_above = self.metal_layer_by_name[above].metal_layer
+            anchor = pex25d_file.metals.add()
+            anchor.name = layer.name
+            anchor.zhigh = self.to_grid(metal_above.z - contact.thickness, f"{contact.name} bottom")
+            anchor.zlow = anchor.zhigh - 1
+            debug(f"METAL {anchor.name}: z {anchor.zlow} … {anchor.zhigh}, anchor of {contact.name}")
+
+            self._via_contacts[contact.name] = contact
+            self._device_contact_by_diffusion[layer.name] = contact.name
+            via = pex25d_file.vias.add()
+            via.name = contact.name
+            via.connects_below = layer.name
+            via.connects_above = above
+            debug(f"VIA {via.name}: connects {layer.name} → {above}")
 
     # ------------------------------------------------------------ dielectrics
 
@@ -531,7 +556,7 @@ class PEX25DBuilder:
     @cached_property
     def shape_layers(self) -> List[str]:
         """Profiles that may carry drawn geometry: metals and vias, in stack order."""
-        names: List[str] = []
+        names: List[str] = list(self._device_contact_by_diffusion.values())
         for layer in self.tech_info.process_metal_layers:
             if layer.name in self._profile_names:
                 names.append(layer.name)
@@ -699,6 +724,14 @@ class PEX25DBuilder:
                     # Metals can share a GDS pair (e.g. sky130A met3_ncap and met3_cap, whose MiM cap
                     # bottom plates abut the rest), the terminal is on the one of its LVS layer.
                     owner = self.process_layer_name_by_lvs_layer_name.get(source_name)
+                    contact = self._device_contact_by_diffusion.get(owner)
+                    if contact is not None:
+                        # NOTE: device geometry (e.g. a source/drain), the terminal is on the cuts of its contacts,
+                        #       whole, as a terminal may not clip a cut
+                        cuts = regions.get(contact, kdb.Region()).overlapping(marker)
+                        if not cuts.is_empty():
+                            selected.setdefault(contact, kdb.Region()).insert(cuts)
+                        continue
                     for layer, geometry in regions.items():
                         if self.gds_pair(layer) != pair or owner not in (None, layer):
                             continue
