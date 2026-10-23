@@ -26,18 +26,17 @@
 OpenRCX Universal Pattern Format (UF) → unresolved PEX25DFile,
 the built-in importer ``klayout-pex:openrcx-uf``.
 
-A stub: :meth:`OpenRCXUFImporter.import_file` raises ``NotImplementedError``, which
-``pex25d import`` reports with exit code 3. :meth:`OpenRCXUFImporter.placeholder_file`
-is the template for the implementation. It fills every part of a PEX25DFile with
-placeholder values, and each ``TODO(UF)`` names what the Universal Pattern Format
-input has to provide instead.
+Supports 3D patterns with rectangular wires and one ground plane; other input is
+reported as ``pex25d.ImporterError``. :meth:`OpenRCXUFImporter.placeholder_file`
+is the template the implementation follows: a PEX25DFile with placeholder values.
 
-All coordinates are integers in grid units (``units``); the template's grid is 1 nm.
+All coordinates are integers in grid units (``units``); the grid is 1 nm.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Mapping, Optional
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple
 
 from .. import pex25d
 from ..plugin_api.v1 import PEX25DImporter
@@ -45,6 +44,148 @@ from ..version import __version__
 
 if TYPE_CHECKING:
     from klayout_pex_protobuf.kpex.pex25d.pex25d_file_pb2 import PEX25DFile
+
+
+@dataclass(frozen=True)
+class _UFGroundPlane:
+    name: str
+    zlow: float
+    zhigh: float
+    thickness: float
+    line: int
+
+
+@dataclass(frozen=True)
+class _UFDielectric:
+    name: str
+    zlow: float
+    zhigh: float
+    epsilon: float
+    line: int
+
+
+@dataclass(frozen=True)
+class _UFWire:
+    id: int
+    name: str
+    corners: Dict[str, Tuple[float, float]]  # 'LL', 'LR', 'UR', 'UL' -> (x, z) in µm
+    length: Optional[float]  # None for 2D input
+    voltage: int
+    line: int
+
+
+@dataclass(frozen=True)
+class _UFWindow:
+    """``WINDOW_BBOX LL <x1> <z1> UR <x2> <z2> LENGTH <max_y>``"""
+    x1: float
+    z1: float
+    x2: float
+    z2: float
+    max_y: Optional[float]  # None for 2D input
+    line: int
+
+
+@dataclass(frozen=True)
+class _UFWindowExt:
+    """``SIM_WIN_EXT LL <x1> <z1> UR <x2> <z2> LENGTH <min_y> <max_y>``, relative to the window."""
+    x1: float
+    z1: float
+    x2: float
+    z2: float
+    min_y: Optional[float]  # None for 2D input
+    max_y: Optional[float]
+    line: int
+
+
+@dataclass
+class _UFPattern:
+    """Everything read from the UF file."""
+    name: str = ''
+    ground_planes: List[_UFGroundPlane] = field(default_factory=list)
+    dielectrics: List[_UFDielectric] = field(default_factory=list)
+    wires: List[_UFWire] = field(default_factory=list)
+    window: Optional[_UFWindow] = None
+    window_ext: Optional[_UFWindowExt] = None
+
+
+def _values_after(words: List[str], keyword: str, count: int) -> List[float]:
+    index = words.index(keyword)
+    values = words[index + 1:index + 1 + count]
+    if len(values) != count:
+        raise IndexError(keyword)
+    return [float(value) for value in values]
+
+
+def _optional_values_after(words: List[str], keyword: str, count: int) -> Optional[List[float]]:
+    if keyword not in words:
+        return None
+    return _values_after(words, keyword, count)
+
+
+def _parse_uf(path: str) -> _UFPattern:
+    """Read a Universal Pattern Format file into plain values (µm)."""
+    pattern = _UFPattern()
+    with open(path, encoding='utf-8') as file:
+        for line_number, line in enumerate(file, start=1):
+            words = line.split()
+            if not words or words[0].startswith('#'):
+                continue
+            keyword = words[0]
+            where = f"{path}:{line_number}"
+            try:
+                if keyword == 'PATTERN':
+                    pattern.name = words[1]
+                elif keyword == 'GROUND_PLANE':
+                    zlow, zhigh = _values_after(words, 'HEIGHT', 2)
+                    thickness, = _values_after(words, 'THICKNESS', 1)
+                    pattern.ground_planes.append(
+                        _UFGroundPlane(words[2], zlow, zhigh, thickness, line_number))
+                elif keyword == 'DIELECTRIC':
+                    zlow, zhigh = _values_after(words, 'HEIGHT', 2)
+                    epsilon, = _values_after(words, 'EPSILON', 1)
+                    pattern.dielectrics.append(
+                        _UFDielectric(words[1], zlow, zhigh, epsilon, line_number))
+                elif keyword == 'WIRE':
+                    corners = {corner: tuple(_values_after(words, corner, 2))
+                               for corner in ('LL', 'LR', 'UR', 'UL')}
+                    length = _optional_values_after(words, 'LENGTH', 1)
+                    voltage, = _values_after(words, 'VOLTAGE', 1)
+                    pattern.wires.append(
+                        _UFWire(int(words[1]), words[2], corners,
+                                length[0] if length else None, int(voltage), line_number))
+                elif keyword == 'WINDOW_BBOX':
+                    x1, z1 = _values_after(words, 'LL', 2)
+                    x2, z2 = _values_after(words, 'UR', 2)
+                    max_y = _optional_values_after(words, 'LENGTH', 1)
+                    pattern.window = _UFWindow(x1, z1, x2, z2,
+                                               max_y[0] if max_y else None, line_number)
+                elif keyword == 'SIM_WIN_EXT':
+                    x1, z1 = _values_after(words, 'LL', 2)
+                    x2, z2 = _values_after(words, 'UR', 2)
+                    lengths = _optional_values_after(words, 'LENGTH', 2)
+                    min_y, max_y = lengths if lengths else (None, None)
+                    pattern.window_ext = _UFWindowExt(x1, z1, x2, z2, min_y, max_y, line_number)
+                else:
+                    raise pex25d.ImporterError(f"{where}: unknown directive '{keyword}'")
+            except (IndexError, ValueError) as exc:
+                raise pex25d.ImporterError(
+                    f"{where}: cannot read {keyword} line: {line.strip()}") from exc
+    return pattern
+
+
+_GRID_PER_UM = 1000  # 1 nm grid, as in placeholder_file()
+
+# A zero-thickness UF ground plane is moved to -0.1 … 0.0 µm (as uth-pexconv does)
+_ZERO_THICKNESS_GROUND_PLANE_UM = 0.1
+
+
+def _to_grid(value_um: float, where: str) -> int:
+    """µm → integer grid units; ImporterError if the value is not on the grid."""
+    scaled = value_um * _GRID_PER_UM
+    grid = round(scaled)
+    if abs(scaled - grid) > 1e-6:
+        raise pex25d.ImporterError(f"{where}: {value_um} µm is not on the 1 nm grid")
+    return grid
 
 
 class OpenRCXUFImporter(PEX25DImporter):
@@ -61,13 +202,110 @@ class OpenRCXUFImporter(PEX25DImporter):
                     supporting_files: Optional[Mapping[str, str]] = None,
                     options: Optional[Mapping[str, Any]] = None,
                     report: Optional[pex25d.DiagnosticsReport] = None) -> PEX25DFile:
-        # TODO(UF): parse input_file_path (and any supporting_files, e.g. a process
-        #           stack), then build the file like self.placeholder_file() does.
-        #           Report unsupported constructs as pex25d.ImporterError, never guess
-        #           values.
-        raise NotImplementedError(
-            f"The '{self.name}' importer is a stub; the template to implement it is "
-            f"klayout_pex/openrcx/pex25d_importer.py")
+
+        pattern = _parse_uf(input_file_path)
+
+        def where(line: int) -> str:
+            return f"{input_file_path}:{line}"
+
+        if pattern.window is None:
+            raise pex25d.ImporterError(f"{input_file_path}: no WINDOW_BBOX")
+        if len(pattern.ground_planes) != 1:
+            raise pex25d.ImporterError(
+                f"{input_file_path}: expected exactly one GROUND_PLANE, "
+                f"found {len(pattern.ground_planes)}")
+
+        pex25d_file = pex25d.proto.PEX25DFile()
+
+        # ---------------------------------------------------------------- header
+        pex25d_file.format_version_major = pex25d.FORMAT_VERSION_MAJOR
+        pex25d_file.format_version_minor = pex25d.FORMAT_VERSION_MINOR
+        pex25d_file.format_version_suffix = pex25d.FORMAT_VERSION_SUFFIX
+
+        # ----------------------------------------------------------------- units
+        # UF values are µm without a database unit; every value must be on the 1 nm grid
+        units = pex25d_file.units
+        units.length = units.LENGTH_UNIT_UM
+        units.grid_numerator, units.grid_denominator = 1, _GRID_PER_UM
+
+        # -------------------------------------------------------------- metadata
+        for key, value in (('source_format', 'openrcx-uf'),
+                           ('generator', f'kpex {__version__}'),
+                           ('source_cell', pattern.name)):
+            meta = pex25d_file.metadata.add()
+            meta.key, meta.value = key, value
+
+        # --------------------------------------------------------- process stack
+        uf_ground_plane = pattern.ground_planes[0]
+        ground_plane = pex25d_file.ground_plane
+        ground_plane.name = uf_ground_plane.name
+        zlow = _to_grid(uf_ground_plane.zlow, where(uf_ground_plane.line))
+        thickness = _to_grid(uf_ground_plane.thickness, where(uf_ground_plane.line))
+        if thickness == 0:
+            thickness = _to_grid(_ZERO_THICKNESS_GROUND_PLANE_UM, where(uf_ground_plane.line))
+            zlow -= thickness
+        ground_plane.zlow, ground_plane.zhigh = zlow, zlow + thickness
+        ground_plane.source.line = uf_ground_plane.line
+
+        # one METAL per wire-name prefix (M1_w2 → M1); all its wires must share one z range
+        metal_z: Dict[str, Tuple[int, int]] = {}
+        for wire in pattern.wires:
+            layer = wire.name.split('_')[0]
+            z = (_to_grid(wire.corners['LL'][1], where(wire.line)),
+                 _to_grid(wire.corners['UR'][1], where(wire.line)))
+            if metal_z.setdefault(layer, z) != z:
+                raise pex25d.ImporterError(
+                    f"{where(wire.line)}: wire {wire.name} spans z {z} on layer {layer}, "
+                    f"other wires of {layer} span {metal_z[layer]}")
+        for layer, (zlow, zhigh) in metal_z.items():
+            metal = pex25d_file.metals.add()
+            metal.name = layer
+            metal.zlow, metal.zhigh = zlow, zhigh
+
+        # ----------------------------------------------------------- dielectrics
+        # The topmost UF dielectric fills the rest of the domain, so it becomes the background.
+        # TODO(UF): implement the dielectrics below it
+        top = pattern.dielectrics[-1]
+        background = pex25d_file.background
+        background.name = top.name
+        background.permittivity = top.epsilon
+
+        # ------------------------------------------------------ conductors, shapes
+        for wire in pattern.wires:
+            if wire.length is None:
+                raise pex25d.ImporterError(
+                    f"{where(wire.line)}: 2D UF input (WIRE without LENGTH)")
+            conductor = pex25d_file.conductors.add()
+            conductor.name, conductor.net = wire.name, wire.name
+
+            shape = pex25d_file.shapes.add()
+            shape.conductor, shape.layer = wire.name, wire.name.split('_')[0]
+            shape.kind = shape.SHAPE_KIND_BOX
+            shape.box.lower_left.x = _to_grid(wire.corners['LL'][0], where(wire.line))
+            shape.box.lower_left.y = 0
+            shape.box.upper_right.x = _to_grid(wire.corners['UR'][0], where(wire.line))
+            shape.box.upper_right.y = _to_grid(wire.length, where(wire.line))
+            shape.source.file, shape.source.line = input_file_path, wire.line
+
+        # ----------------------------------------------------------------- domain
+        # x and z from WINDOW_BBOX, y from 0 to its LENGTH; SIM_WIN_EXT is added to every
+        # bound. The lower z face is the ground plane's top (pex25d_domain.proto).
+        window, ext = pattern.window, pattern.window_ext
+        x1, x2, z2 = window.x1, window.x2, window.z2
+        y1, y2 = 0.0, window.max_y
+        if ext is not None:
+            x1, x2, z2 = x1 + ext.x1, x2 + ext.x2, z2 + ext.z2
+            y1, y2 = y1 + ext.min_y, y2 + ext.max_y
+        box = pex25d_file.domain_box.box
+        box.lower_left.x = _to_grid(x1, where(window.line))
+        box.lower_left.y = _to_grid(y1, where(window.line))
+        box.lower_left.z = ground_plane.zhigh
+        box.upper_right.x = _to_grid(x2, where(window.line))
+        box.upper_right.y = _to_grid(y2, where(window.line))
+        box.upper_right.z = _to_grid(z2, where(window.line))
+        pex25d_file.domain_box.source.line = window.line
+
+        return pex25d_file
 
     def placeholder_file(self) -> PEX25DFile:
         """
