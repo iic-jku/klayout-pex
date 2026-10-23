@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import *
 
 from .diagnostics import (Diagnostic, DiagnosticsReport, Severity, Tier,
@@ -501,12 +502,12 @@ class Resolver:
                 if box_contains(region, polygon_bounds(shape.polygon)):
                     polygons.append(shape.polygon)
                 elif boxes_overlap(region, polygon_bounds(shape.polygon)):
-                    clipped = clip_manhattan_polygon(shape.polygon, region)
+                    clipped = clip_polygon(shape.polygon, region)
                     if clipped is None:
                         self.diagnose(
                             'PEX25D-E0241',
-                            f"TERMINAL '{terminal.name}' partially covers a non-Manhattan "
-                            f"polygon on layer '{terminal.layer}'; clipping may leave "
+                            f"TERMINAL '{terminal.name}' is crossed by a non-Manhattan edge "
+                            f"of a polygon on layer '{terminal.layer}'; clipping would leave "
                             f"the coordinate grid", source=terminal)
                         return
                     if on_via and clipped:
@@ -698,30 +699,48 @@ def fill_box3d(box: Any, x0: int, y0: int, x1: int, y1: int, z0: int, z1: int) -
     box.upper_right.x, box.upper_right.y, box.upper_right.z = x1, y1, z1
 
 
-def clip_manhattan_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
-    """Intersect an orthogonal polygon, including holes, with a box on the grid."""
-    rings = [polygon.outer, *polygon.holes]
-    edges = []
-    for ring in rings:
+def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
+    """
+    Intersect a polygon, including holes, with a box on the grid.
+
+    :return: the boxes of the intersection, or None if a non-Manhattan edge passes through the box,
+             so that the intersection would leave the grid
+    """
+    edges = []  # NOTE: all edges but the horizontal ones, as (x, y) of their lower and upper end
+    for ring in [polygon.outer, *polygon.holes]:
         points = list(ring.points)
         for first, second in zip(points, points[1:] + points[:1]):
-            if first.x != second.x and first.y != second.y:
-                return None
             if first.y != second.y:
-                edges.append((first.x, min(first.y, second.y), max(first.y, second.y)))
+                lower, upper = sorted((first, second), key=lambda point: point.y)
+                edges.append((lower.x, lower.y, upper.x, upper.y))
 
+    left_end, right_end = region.lower_left.x, region.upper_right.x
     bottom, top = region.lower_left.y, region.upper_right.y
-    if bottom >= top or region.lower_left.x >= region.upper_right.x:
+    if bottom >= top or left_end >= right_end:
         return []
-    levels = sorted({bottom, top} | {y for _, lo, hi in edges
+    levels = sorted({bottom, top} | {y for _, lo, _, hi in edges
                                      for y in (lo, hi) if bottom < y < top})
     boxes = []
     for low, high in zip(levels, levels[1:]):
-        # Twice the midpoint keeps the scanline exact even between adjacent grid rows.
-        crossings = sorted(x for x, lo, hi in edges if 2 * lo < low + high < 2 * hi)
+        # NOTE: clamping the crossings of the scanline to the box keeps their order and pairs,
+        #       so of a non-Manhattan edge beside the box only its side counts
+        crossings = []
+        for x_lo, lo, x_hi, hi in edges:
+            # Twice the midpoint keeps the scanline exact even between adjacent grid rows.
+            if not 2 * lo < low + high < 2 * hi:
+                continue
+            if x_lo == x_hi:
+                crossings.append(min(max(x_lo, left_end), right_end))
+                continue
+            xs = [x_lo + Fraction((y - lo) * (x_hi - x_lo), hi - lo) for y in (low, high)]
+            if max(xs) <= left_end:
+                crossings.append(left_end)
+            elif min(xs) >= right_end:
+                crossings.append(right_end)
+            else:
+                return None
+        crossings.sort()
         for left, right in zip(crossings[::2], crossings[1::2]):
-            left = max(left, region.lower_left.x)
-            right = min(right, region.upper_right.x)
             if left < right:
                 box = pex25d_geometry_pb2().Box2D()
                 box.lower_left.x, box.lower_left.y = left, low
