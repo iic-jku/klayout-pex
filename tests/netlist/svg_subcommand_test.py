@@ -66,9 +66,11 @@ def fake_netlistsvg(directory: str, exit_code: int = 0) -> str:
             sys.exit({exit_code})
         args = sys.argv[1:]
         skin_path, input_path = args[args.index('--skin') + 1], args[-1]
+        with open(input_path) as f:
+            modules = list(json.load(f)['modules'])
         with open(args[args.index('-o') + 1], 'w') as f:
             json.dump({{'skin': skin_path, 'skin_exists': os.path.isfile(skin_path),
-                        'input': input_path, 'input_exists': os.path.isfile(input_path)}}, f)
+                        'input': input_path, 'modules': modules}}, f)
         """))
     if os.name == 'nt':
         exe_path = write(directory, 'netlistsvg.cmd', f'@"{sys.executable}" "{script_path}" %*\n')
@@ -103,9 +105,27 @@ def test_draws_next_to_the_input_with_the_packaged_skin(divider_netlist: str, tm
     package_dir = os.path.dirname(os.path.abspath(klayout_pex.__file__))
     assert os.path.commonpath([netlistsvg_call['skin'], package_dir]) == package_dir
     assert netlistsvg_call['skin_exists']
-    assert netlistsvg_call['input_exists']
+    assert netlistsvg_call['modules'] == ['DIVIDER']
     assert not os.path.exists(netlistsvg_call['input'])  # NOTE: an intermediate file
     assert os.listdir(work_dir) == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cell_chooses_the_circuit(tmp_path):
+    netlist_path = write(str(tmp_path), 'two.spice', DIVIDER_NETLIST + DIVIDER_NETLIST.replace('divider', 'other'))
+    exe_path = fake_netlistsvg(str(tmp_path))
+    code, output = run(netlist_path, '--exe', exe_path)
+    assert code == ExitCode.USAGE, output
+    assert "Please specify the desired cell using the --cell argument" in output
+    code, output = run(netlist_path, '--exe', exe_path, '--cell', 'missing')
+    assert code == ExitCode.USAGE, output
+    assert "No circuit missing in the SPICE netlist, its circuits are: DIVIDER, OTHER" in output
+
+    code, output = run(netlist_path, '--exe', exe_path, '--cell', 'other')
+    assert code == ExitCode.OK, output
+    with open(os.path.splitext(netlist_path)[0] + '.svg') as f:
+        assert json.load(f)['modules'] == ['OTHER']
 
 
 @allure.parent_suite(parent_suite)

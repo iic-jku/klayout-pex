@@ -82,7 +82,7 @@ SVG_EPILOG_MARKDOWN = """\
 | --------- | ------- |
 | 0 | success |
 | 1 | the netlist can't be drawn: it can't be read, it has no top circuit, or netlistsvg failed |
-| 2 | the command line is wrong, e.g. the input netlist, netlistsvg or the directory of the output is missing |
+| 2 | the command line is wrong, e.g. the input netlist, netlistsvg or the directory of the output is missing, `--cell` names no circuit, or the netlist has several top circuits and no `--cell` |
 """
 
 
@@ -207,16 +207,23 @@ class NetlistCLI:
 
         top_circuit: kdb.Circuit
 
-        match n_circuits:
-            case 0:
-                error(f"No top circuit found in SPICE netlist, perhaps the SUBCKT with the ports is missing?!")
-                return ExitCode.DIAGNOSTIC_ERRORS
-            case 1:
-                top_circuit = top_circuits[0]
-            case _:
-                info(f"Multiple top circuits found in SPICE netlist: {top_circuit_names}")
-                error('Please specify the desired cell using the --cell argument')
+        if args.cell_name is not None:
+            top_circuit = netlist.circuit_by_name(args.cell_name)
+            if top_circuit is None:
+                circuit_names = ', '.join(c.name for c in netlist.each_circuit())
+                error(f"No circuit {args.cell_name} in the SPICE netlist, its circuits are: {circuit_names}")
                 return ExitCode.USAGE
+        else:
+            match n_circuits:
+                case 0:
+                    error(f"No top circuit found in SPICE netlist, perhaps the SUBCKT with the ports is missing?!")
+                    return ExitCode.DIAGNOSTIC_ERRORS
+                case 1:
+                    top_circuit = top_circuits[0]
+                case _:
+                    info(f"Multiple top circuits found in SPICE netlist: {top_circuit_names}")
+                    error('Please specify the desired cell using the --cell argument')
+                    return ExitCode.USAGE
 
         output_svg_path = svg_output_path(args)
 
