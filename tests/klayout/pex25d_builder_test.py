@@ -31,7 +31,8 @@ import allure
 import klayout.db as kdb
 
 from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuildError
-from klayout_pex.pex25d.protobuf import pex25d_terminal_pb2
+from klayout_pex.pdk_config import PDK
+from klayout_pex.pex25d.protobuf import pex25d_file_pb2, pex25d_terminal_pb2
 from klayout_pex.pex25d.reader import read_pex25d_text
 from klayout_pex.pex25d.resolver import resolve
 from klayout_pex.pex25d.validator import validate
@@ -313,3 +314,21 @@ class Pex25DBuilderMetalsSharingGDSPairTest(unittest.TestCase):
         fixture = self.fixture()
         fixture.device('C1', kdb.Region(kdb.Box(60, 0, 100, 20)), lvs_layer_name='met1_cap')
         assert [(t.name, t.layer) for t in fixture.build().terminals] == [('device:C1:G', 'met1_cap')]
+
+
+@allure.parent_suite('Unit Tests')
+@allure.tag('PEX25D', 'Builder')
+class Pex25DBuilderShippedStacksTest(unittest.TestCase):
+    def test_no_simple_dielectric_band_is_empty(self):
+        # NOTE: the FasterCap export skips an empty band with a warning, e.g. one between two metals at the same z
+        #       (sg13g2's ildtm1, between the Metal5 without and with MIM cap)
+        for pdk in PDK:
+            with self.subTest(pdk=pdk.value):
+                tech_info = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None)
+                builder = PEX25DBuilder(SimpleNamespace(dbu=0.001), tech_info, 'stack')
+                pex25d_file = pex25d_file_pb2().PEX25DFile()
+                for build_part in (builder.build_units, builder.build_ground_plane,
+                                   builder.build_layers, builder.build_dielectrics):
+                    build_part(pex25d_file)
+                scene = resolve(pex25d_file)
+                assert [d.name for d in scene.dielectrics if d.zhigh <= d.zlow] == []

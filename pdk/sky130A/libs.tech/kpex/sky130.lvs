@@ -1144,8 +1144,8 @@ li_con    = li.not( li_res ).not(vpp)
 #       we want to split mcon into mcon_con and mcon_vpp
 #       (might not cause an issue in regular LVS, but in PEX context necessary)
 licon_poly_con = licon.and(poly)
-# NOTE: licon_nsd_con follows the SONOS derivations, as it includes their source/drain
-licon_psd_con = licon.and(psd)
+# NOTE: licon_nsd_con and licon_psd_con follow the SONOS and diffusion resistor derivations,
+#       as they include their source/drain and terminals
 
 # [PEX] the licon over the n-taps, which joins li1 to the nwell below them
 #       (NOTE: a regular LVS would not do this, we need it for PEX)
@@ -1813,8 +1813,10 @@ sonos_gate    = sonos_ngate.and(lvtn).and(dnwell).and(tunm).and(ldntm).interacti
 sonos_nsd     = nsdm.and(sd).not(nwell).interacting(sonos_gate)
 
 # [PEX] the licon over the n+ source/drain of the FETs (nsd) and of the SONOS FETs (sonos_nsd),
-#       which are the same diffusion (NOTE: a regular LVS would not do this, we need it for PEX)
-licon_nsd_con = licon.and(nsd.or(sonos_nsd))
+#       and over the terminals of the n+ diffusion resistors (nplus_cont, nplus_hv_cont), which are
+#       the same diffusion, likewise for p+ (NOTE: a regular LVS would not do this, we need it for PEX)
+licon_nsd_con = licon.and(nsd.or(sonos_nsd).or(nplus_cont).or(nplus_hv_cont))
+licon_psd_con = licon.and(psd.or(pplus_cont).or(pplus_hv_cont))
 
 #================================================
 #------------ DEVICES CONNECTIVITY --------------

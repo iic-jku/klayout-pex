@@ -54,6 +54,7 @@ COMP:   GDSPair = (22, 0)
 PPLUS:  GDSPair = (31, 0)
 NPLUS:  GDSPair = (32, 0)
 LVPWELL: GDSPair = (204, 0)
+DUALGATE: GDSPair = (55, 0)
 POLY2:  GDSPair = (30, 0)
 CONT:   GDSPair = (33, 0)
 METAL1: GDSPair = (34, 0)
@@ -192,6 +193,23 @@ def nfet_m1(name: str, labels: str) -> Pattern:
     return p
 
 
+def pfet_06v0_dn() -> Pattern:
+    """
+    A 6V PMOS of 0.36 µm x 0.55 µm within a DNWELL without Nwell, as in the LVS test layouts of the PDK,
+    so its source/drain is p+ within the DNWELL (psd_dw), not within an Nwell (psd)
+    """
+    p = pattern('pfet_06v0_dn')
+    p.box(DUALGATE, -2040, -1600, 2590, 1960)
+    p.box(DNWELL, -1540, -1100, 2090, 1460)
+    p.box(PPLUS, -600, -230, 1150, 590)
+    p.box(COMP, -440, 0, 990, 360)
+    p.box(POLY2, 0, -220, 550, 580)
+    for x in (-370, 700):  # NOTE: the contact and Metal1 of the source and of the drain
+        p.box(CONT, x, 70, x + 220, 290)
+        p.box(METAL1, x - 5, 0, x + 225, 360)
+    return p
+
+
 #
 # Capacitance patterns
 #
@@ -311,6 +329,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'nfet_m1': lambda: nfet_m1('nfet_m1', 'DGS'),
     'nfet_m1_redux': lambda: nfet_m1('nfet_m1_redux', 'DS'),
     'nfet_m1_redux_only_G': lambda: nfet_m1('nfet_m1_redux_only_G', 'G'),
+    'pfet_06v0_dn': pfet_06v0_dn,
     'sidewall_cap_vpp_04p4x04p6_m1_redux': sidewall_cap_vpp_04p4x04p6_m1_redux,
     'sidewall_non_parallel_m1': sidewall_non_parallel_m1,
     'sideoverlap_complex_m1_m2': sideoverlap_complex_m1_m2,

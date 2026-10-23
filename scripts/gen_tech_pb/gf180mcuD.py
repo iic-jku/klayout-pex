@@ -67,6 +67,8 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, PWELL,   KREG, "lvpwell_dw_con", (204, 0), "LVPWELL",   None,               "Isolated p-well (LVPWELL within DNWELL)")
     add_computed_layer(tech, NIMP,    KREG, "nsd",         (32, 0),     "Nplus",     "Nplus",            "N+ source/drain")
     add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 0),     "Pplus",     "Pplus",            "P+ source/drain")
+    add_computed_layer(tech, NIMP,    KREG, "nd_ldmos",    (32, 0),     "Nplus",     "Nplus",            "N+ drain of the LDNMOS, the same n+ diffusion as nsd")
+    add_computed_layer(tech, PIMP,    KREG, "psd_dw",      (31, 0),     "Pplus",     "Pplus",            "P+ source/drain within DNWELL, the same p+ diffusion as psd")
     add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "ntap",             "N+ tap (COMP within nwell)")
     add_computed_layer(tech, PTAP,    KREG, "ptap",        (22, 244),   "COMP",      "ptap",             "P+ tap (COMP outside nwell)")
     add_computed_layer(tech, METAL,   KREG, "poly2_con",   (30, 0),     "Poly2",     "Poly2",            "Computed layer for poly")
