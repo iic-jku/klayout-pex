@@ -242,7 +242,21 @@ class Pex25DResolverTest(unittest.TestCase):
         text = replacing(
             'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
             'POLYGON CONDUCTOR A LAYER met1 OUTER 0 0 1 0 0 1')
+        text = replacing('LL 0.0 0.0 UR 0.2 0.5', 'LL 0.4 0.0 UR 0.8 0.5', text)  # NOTE: across the diagonal
         assert 'PEX25D-E0241' in resolve_codes(text)
+
+    def test_clipping_a_non_manhattan_polygon_beside_its_diagonal_stays_on_the_grid(self):
+        # e.g. the pin of a label on a diagonal wire (#327)
+        for region in ('LL 0.0 0.0 UR 0.2 0.5',     # inside the triangle
+                       'LL -0.1 0.0 UR 0.2 0.5'):   # across its vertical edge
+            with self.subTest(region=region):
+                text = replacing(
+                    'BOX CONDUCTOR A LAYER met1 LL 0.0 0.0 UR 1.0 0.5',
+                    'POLYGON CONDUCTOR A LAYER met1 OUTER 0 0 1 0 0 1')
+                text = replacing('LL 0.0 0.0 UR 0.2 0.5', region, text)
+                terminal = resolved(text).conductors[0].terminals[0]
+                assert [(b.lower_left.x, b.lower_left.y, b.upper_right.x, b.upper_right.y)
+                        for b in terminal.boxes] == [(0, 0, 2000, 5000)]
 
     # ---------------------------------------------------------------- domain
 
