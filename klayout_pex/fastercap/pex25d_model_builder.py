@@ -196,41 +196,57 @@ class PEX25DFasterCapModelBuilder:
     def add_conformal(self, builder: FasterCapModelBuilder, dielectric: Any):
         """
         A film has up to two solids: the one grown around what it wraps, and —
-        when it covers the field — a slab over everything the root layer is
-        absent from. Both are measured from the bottom face of the root, which
-        is what makes a chain of films compose.
+        when it covers the field — a slab over everything the root is absent
+        from. Both are measured from the bottom face of the root, which is what
+        makes a chain of films compose.
         """
-        root = self.layers.get(dielectric.root)
+        root = self.root_of(dielectric)
         if root is None:
             warning(f"Dielectric '{dielectric.name}' is rooted on "
-                    f"'{dielectric.root}', which carries no geometry; skipping")
+                    f"'{dielectric.root}', which the scene does not declare; skipping")
             return
 
-        lateral, top = self.chain_extent(dielectric)
-        shapes = self.shapes_of_layer(dielectric.root)
+        footprint, zlow, zhigh = root
+        lateral, top = self.chain_extent(dielectric, zhigh)
 
-        if not shapes.is_empty():
-            grown = shapes.sized(lateral) if lateral else shapes
-            height = top - root.zlow
+        if not footprint.is_empty():
+            # Like every unbounded material, a film on the ground plane ends at
+            # the field; a film on a conductor lies within it anyway.
+            grown = (footprint.sized(lateral) & self.field) if lateral else footprint
+            height = top - zlow
             info(f"Conformal dielectric {dielectric.name}: "
-                 f"z={self.um(root.zlow)}, height={self.um(height)}")
+                 f"z={self.um(zlow)}, height={self.um(height)}")
             builder.add_dielectric(material_name=dielectric.name,
                                    layer=grown,
-                                   z=self.um(root.zlow),
+                                   z=self.um(zlow),
                                    height=self.um(height))
         else:
             grown = kdb.Region()
 
         if dielectric.thickness_on_field > 0:
             info(f"Conformal dielectric {dielectric.name} (on the field): "
-                 f"z={self.um(root.zlow)}, "
+                 f"z={self.um(zlow)}, "
                  f"height={self.um(dielectric.thickness_on_field)}")
             builder.add_dielectric(material_name=dielectric.name,
                                    layer=self.field - grown,
-                                   z=self.um(root.zlow),
+                                   z=self.um(zlow),
                                    height=self.um(dielectric.thickness_on_field))
 
-    def chain_extent(self, dielectric: Any) -> Tuple[int, int]:
+    def root_of(self, dielectric: Any) -> Optional[Tuple[kdb.Region, int, int]]:
+        """
+        The footprint and z extent of the conductor layer or ground plane at the
+        root of a film's WRAPS chain. The ground plane covers the whole field.
+        """
+        layer = self.layers.get(dielectric.root)
+        if layer is not None:
+            return self.shapes_of_layer(layer.name), layer.zlow, layer.zhigh
+
+        ground_plane = self.scene.ground_plane
+        if self.scene.HasField('ground_plane') and dielectric.root == ground_plane.name:
+            return self.field, ground_plane.zlow, ground_plane.zhigh
+        return None
+
+    def chain_extent(self, dielectric: Any, root_zhigh: int) -> Tuple[int, int]:
         """
         Walk a film's WRAPS chain down to its root, accumulating the offsets.
 
@@ -254,8 +270,7 @@ class PEX25DFasterCapModelBuilder:
                 over += film.thickness_over_wrapped
             name = film.wraps
 
-        root = self.layers[dielectric.root]
-        return lateral, root.zhigh + over
+        return lateral, root_zhigh + over
 
 
 def region_of(conductor_region: Any) -> kdb.Region:
