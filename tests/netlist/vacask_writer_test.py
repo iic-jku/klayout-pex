@@ -33,6 +33,7 @@ from klayout_pex.netlist.spice_netlist import (
     SpiceSourceFunction,
     SpiceSubcircuit,
 )
+from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.netlist.vacask_writer import (
     VacaskWriter,
     VacaskWriterError,
@@ -311,6 +312,26 @@ class VacaskWriterTest(unittest.TestCase):
         with self.assertRaises(VacaskWriterError) as ctx:
             instance_lines(cell(ports=['a', 'a']))
         self.assertEqual("The port 'a' of subcircuit 'cell' is there twice", str(ctx.exception))
+
+    def test_parameters_and_expressions_are_errors(self):
+        # NOTE: VACASK has them too, but the writer writes numbers only
+        errors = {
+            '.subckt cell a b\nR1 a b {r0*2}\n.ends\n':
+                "The value of the element 'R1' of subcircuit 'cell' is the expression r0*2",
+            '.subckt cell a b w=2*l\n.ends\n':
+                "The parameter w of subcircuit 'cell' is the expression 2*l",
+            '.subckt cell a b\n.ends\nX1 a b cell w={l}\n':
+                "The parameter w of the element 'X1' of the top level is the expression l",
+            '.subckt cell a b\n.param r0=1k\nR1 a b 1k\n.ends\n':
+                "Subcircuit 'cell' has .param lines (r0)",
+            '.param vdd=1.8 vss=0\nR1 a 0 1k\n':
+                "The top level has .param lines (vdd, vss)",
+        }
+        for text, message in errors.items():
+            with self.subTest(text):
+                with self.assertRaises(VacaskWriterError) as ctx:
+                    VacaskWriter().text(SpiceReader().parse(text))
+                self.assertEqual(f"{message}, the VACASK writer writes numbers only", str(ctx.exception))
 
     def test_subcircuit_with_the_name_of_a_device_model_is_an_error(self):
         netlist = SpiceNetlist(subcircuits=[SpiceSubcircuit(name='resistor', ports=['a', 'b'])])

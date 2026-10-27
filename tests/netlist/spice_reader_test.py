@@ -25,6 +25,9 @@ import unittest
 
 import allure
 
+from klayout_pex.netlist.expression.ngspice import NGSPICE_SYNTAX
+from klayout_pex.netlist.expression.nodes import Expression
+from klayout_pex.netlist.expression.parser import ExpressionParser
 from klayout_pex.netlist.spice_netlist import (
     SpiceElement,
     SpiceNetlist,
@@ -37,6 +40,10 @@ from klayout_pex.netlist.spice_reader import SpiceReader, SpiceReaderError
 
 def parse(text: str) -> SpiceNetlist:
     return SpiceReader().parse(text)
+
+
+def expression(text: str) -> Expression:
+    return ExpressionParser(NGSPICE_SYNTAX).parse(text)
 
 
 def parse_error(text: str) -> str:
@@ -211,24 +218,71 @@ class SpiceReaderTest(unittest.TestCase):
                           SpiceElement('H1', ['o', '0'], references=['Vsense'], value=50.0)],
                          netlist.elements[:4])
 
+    # ------------------------------------------------------------ parameters and expressions
+
+    def test_parameters_of_param_lines(self):
+        netlist = parse('.param vdd=1.8 w = {2*l}\n'
+                        '.subckt cell a b\n'
+                        '.param r0=\'w*1k\'\n'
+                        'R1 a b {r0}\n'
+                        '.ends\n')
+        self.assertEqual({'vdd': 1.8, 'w': expression('2*l')}, netlist.parameters)
+        self.assertEqual({'r0': expression('w*1k')}, netlist.subcircuits[0].local_parameters)
+        self.assertEqual(SpiceElement('R1', ['a', 'b'], value=expression('r0')), netlist.subcircuits[0].elements[0])
+
+    def test_expressions_in_braces_quotes_or_without_them(self):
+        # NOTE: e.g. as xschem writes the MOS of sky130A, and BAG its subcircuits
+        netlist = parse('.subckt nmos4 D G S B w=150n l=130n nf=4\n'
+                        'MM1 D G S B nmos w=w*nf l=l ng=nf ad = { w / 2 }\n'
+                        '+ as=\'int((nf+1)/2) * w/nf * 0.29\' m={1u}\n'
+                        '.ends\n')
+        self.assertEqual({'w': 150e-9, 'l': 130e-9, 'nf': 4.0}, netlist.subcircuits[0].parameters)
+        self.assertEqual(SpiceElement('MM1', ['D', 'G', 'S', 'B'], model='nmos',
+                                      parameters={'w': expression('w*nf'), 'l': expression('l'),
+                                                  'ng': expression('nf'), 'ad': expression('w / 2'),
+                                                  'as': expression('int((nf+1)/2) * w/nf * 0.29'),
+                                                  'm': 1e-6}),
+                         netlist.subcircuits[0].elements[0])
+
+    def test_values_of_elements_as_expressions(self):
+        netlist = parse('R1 a b {r0*2}\n'
+                        'R2 a b \'r0\' rpoly\n'
+                        'R3 a b rpoly r=r0\n'
+                        'C1 a b c=2*c0\n'
+                        'L1 a b 1n\n'
+                        'K1 L1 L2 {k0}\n'
+                        'D1 a k dmod {a0}\n'
+                        'E1 o 0 a b gain\n')
+        self.assertEqual([expression('r0*2'), expression('r0'), expression('r0'), expression('2*c0'), 1e-9,
+                          expression('k0'), None, expression('gain')],
+                         [e.value for e in netlist.elements])
+        self.assertEqual('rpoly', netlist.elements[1].model)
+        self.assertEqual({'area': expression('a0')}, netlist.elements[6].parameters)
+
+    def test_errors_of_parameters_and_expressions_name_the_line(self):
+        self.assertEqual("line 2: the parameter w is no expression (w*: ends early)",
+                         parse_error('R1 a b 1k\nX1 a b sub w={w*}\n'))
+        self.assertEqual("line 1: the value of R1 is no expression (2*: ends early)",
+                         parse_error("R1 a b '2*'\n"))
+        self.assertEqual("line 1: { has no counterpart (expressions are written {...} or '...')",
+                         parse_error('X1 a b sub w={2*l\n'))
+        self.assertEqual("line 1: ' has no counterpart (expressions are written {...} or '...')",
+                         parse_error("X1 a b sub w='2*l\n"))
+        self.assertEqual("line 1: the parameter w= has no value",
+                         parse_error('.param w=\n'))
+        self.assertEqual("line 1: the source V1 has the expression {vdd}, which is not supported",
+                         parse_error('V1 a 0 {vdd}\n'))
+
     # ------------------------------------------------------------ not supported
 
     def test_unsupported_cards_are_errors_naming_the_line(self):
-        self.assertEqual('line 2: .param is not supported',
-                         parse_error('R1 a b 1k\n.param w=1u\n'))
+        self.assertEqual('line 2: .lib is not supported',
+                         parse_error('R1 a b 1k\n.lib models.lib tt\n'))
         self.assertEqual('line 1: .include is not supported',
                          parse_error('.include "models.lib"\n'))
         self.assertEqual("line 1: the element Q1 is not supported (supported are "
                          "R, C, L, K, D, M, V, I, E, F, G, H and X)",
                          parse_error('Q1 c b e npn\n'))
-
-    def test_expressions_are_errors(self):
-        self.assertEqual("line 1: expressions ({...} or '...') are not supported",
-                         parse_error('R1 a b {2*r}\n'))
-        self.assertEqual("line 2: expressions ({...} or '...') are not supported",
-                         parse_error('X1 a b sub\n+ w=\'2*w0\'\n'))
-        self.assertEqual("line 1: the parameter w=w0 is no number (parameters and expressions are not supported)",
-                         parse_error('X1 a b sub w=w0\n'))
 
     def test_subcircuit_structure_errors(self):
         self.assertEqual('the subcircuit cell has no .ends', parse_error('.subckt cell a\nR1 a 0 1\n'))

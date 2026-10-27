@@ -86,6 +86,7 @@ from .magic.magic_runner import (
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .netlist.netlist_convert import convert_to_vacask
 from .netlist.netlist_format import NetlistFormat
+from .netlist.spice_hierarchy import SpiceEvaluationError
 from .netlist.spice_reader import SpiceReader, SpiceReaderError
 from .netlist.vacask_writer import VacaskWriterError
 from .pex25d.artifact import (
@@ -1110,13 +1111,16 @@ class KpexCLI:
                                         device_models: DeviceModels,
                                         top_cell_name: str) -> List[str]:
         """
-        :return: the problems of check_schematic_device_classes, or that the schematic can't be read
+        :return: the problems of check_schematic_device_classes, or that the schematic can't be read or evaluated
         """
         try:
             netlist = SpiceReader().read(schematic_path)
         except SpiceReaderError as e:
             return [f"kpex can't read the schematic, so no device classes are compared: {e}"]
-        schematic = schematic_devices(netlist=netlist, device_models=device_models, top_cell_name=top_cell_name)
+        try:
+            schematic = schematic_devices(netlist=netlist, device_models=device_models, top_cell_name=top_cell_name)
+        except SpiceEvaluationError as e:
+            return [f"kpex can't evaluate the schematic, so no device classes are compared: {schematic_path}: {e}"]
         if schematic.device_names_by_unknown_model:
             info("The device class check leaves out the devices of the schematic of models without device model "
                  "mapping:\n" +

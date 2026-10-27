@@ -29,6 +29,7 @@ Simulations with ngspice in tests, which are skipped where ngspice isn't install
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from typing import *
@@ -60,13 +61,36 @@ def write_spiceinit(run_dir: str, models_dir: str):
         f.write(spiceinit)
 
 
-def run_ngspice(deck_path: str):
+def run_ngspice(deck_path: str) -> str:
     """
     Runs the deck in batch mode in its directory (where ngspice reads .spiceinit)
+
+    :return: what ngspice printed
     """
     result = subprocess.run([ngspice_executable(), '-b', os.path.basename(deck_path)],
                             cwd=os.path.dirname(deck_path), capture_output=True, text=True, timeout=600)
     assert result.returncode == 0, f"ngspice failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
+    return result.stdout
+
+
+def ngspice_operating_point(netlist: str,
+                            vectors: Sequence[str],
+                            work_dir: str) -> Dict[str, float]:
+    """
+    The vectors at the operating point of the netlist, by name
+
+    :param netlist: the lines of a deck, but its title, .control and .end
+    :param vectors: e.g. v(n1), @r.x1.r1[resistance]
+    """
+    deck_path = os.path.join(work_dir, 'operating_point.cir')
+    with open(deck_path, 'w') as f:
+        f.write('* operating point\n' + netlist +
+                '.control\nop\n' + ''.join(f"print {v}\n" for v in vectors) + '.endc\n.end\n')
+    output = run_ngspice(deck_path)
+    printed = dict(re.findall(r'^(\S+) = (\S+)$', output, re.MULTILINE))
+    missing = [v for v in vectors if v not in printed]
+    assert not missing, f"ngspice printed no {', '.join(missing)} for {deck_path}:\n{output}"
+    return {v: float(printed[v]) for v in vectors}
 
 
 def read_wrdata(path: str) -> List[List[float]]:

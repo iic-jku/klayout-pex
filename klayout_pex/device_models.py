@@ -87,6 +87,7 @@ class DeviceModels:
         (e.g. X1 d g s b sg13_lv_nmos w=1u l=0.13u rfmode=1 is an rfnmos, without rfmode an sg13_lv_nmos),
         or else a model named as an LVS device class (e.g. M1 d g s b sky130_fd_pr__nfet_01v8, as LVS reads it)
 
+        :param element: with its parameters as numbers (e.g. of SpiceHierarchy)
         :return: None, if neither, e.g. a device whose class has no mapping
         """
         if element.model is None:

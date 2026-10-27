@@ -169,10 +169,17 @@ class NetlistConvertTest(unittest.TestCase):
         self.assertEqual(EXTRACTED_SPICE, workspace.read('divider.spice'))
 
     def test_unsupported_card_is_an_error_naming_the_line_and_writes_nothing(self):
+        workspace = self.workspace('.subckt cell a b\n.include models.lib\n.ends\n')
+        code, output = workspace.run('convert', '--to', 'vacask', workspace.input_path)
+        self.assertEqual(ExitCode.DIAGNOSTIC_ERRORS, code)
+        self.assertIn('line 2: .include is not supported', output)
+        self.assertFalse(os.path.exists(workspace.path('divider.inc')))
+
+    def test_expression_is_an_error_and_writes_nothing(self):
         workspace = self.workspace('.subckt cell a b\nR1 a b {r}\n.ends\n')
         code, output = workspace.run('convert', '--to', 'vacask', workspace.input_path)
         self.assertEqual(ExitCode.DIAGNOSTIC_ERRORS, code)
-        self.assertIn('line 2: expressions', output)
+        self.assertIn("The value of the element 'R1' of subcircuit 'cell' is the expression r", output)
         self.assertFalse(os.path.exists(workspace.path('divider.inc')))
 
     def test_netlist_without_vacask_equivalent_is_an_error_and_writes_nothing(self):
