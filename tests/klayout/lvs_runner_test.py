@@ -115,7 +115,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.assertFalse(os.path.exists(self.lvsdb_path))
 
     def test_netlist_mismatch_is_no_error(self):
-        # e.g. the sky130 LVS script exits with 1 on a netlist mismatch
+        # NOTE: the report is the criterion, e.g. of an LVS script that exits with 1 after a mismatch
         with mock.patch('klayout_pex.klayout.lvs_runner.warning') as warning_mock, \
              mock.patch('klayout_pex.klayout.lvs_runner.error') as error_mock:
             self.run_lvs(FakeKLayoutProcess(output="ERROR : Netlists don't match\n",

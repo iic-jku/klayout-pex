@@ -77,15 +77,21 @@ class Pattern:
         label_layer = self.label_layer_by_layer[layer]
         self.top.shapes(self.layout.layer(*label_layer)).insert(kdb.Text(text, kdb.Trans(x, y)))
 
-    def copy_design(self, pdk_name: str, *path_components: str):
+    def copy_design(self, pdk_name: str, *path_components: str, subcell_name: Optional[str] = None):
         """
         Copies the top cell of a design of the test data (testdata/designs/<pdk_name>/<path_components>),
         flattened, e.g. a device the PDK has no pcell for
+
+        :param subcell_name: copy it into a subcell of this name, which the top cell instantiates
         """
         design = kdb.Layout()
         design.read(str(PROJECT_ROOT.joinpath('testdata', 'designs', pdk_name, *path_components)))
-        self.top.copy_tree(design.top_cell())
-        self.top.flatten(-1, True)
+        cell = self.top
+        if subcell_name is not None:
+            cell = self.layout.create_cell(subcell_name)
+            self.top.insert(kdb.CellInstArray(cell.cell_index(), kdb.Trans()))
+        cell.copy_tree(design.top_cell())
+        cell.flatten(-1, True)
 
 
 def main(pdk_name: str, patterns: Dict[str, Callable[[], Pattern]]) -> int:

@@ -1,0 +1,7 @@
+* Schematic of the test pattern nfet_li1_in_subcell: its nfet in the subcircuit SUBNFET
+.subckt SUBNFET D G S VNB
+XM1 S G D VNB sky130_fd_pr__nfet_01v8 L=0.15 W=0.65
+.ends SUBNFET
+.subckt nfet_li1_in_subcell D G S VNB
+X1 D G S VNB SUBNFET
+.ends nfet_li1_in_subcell
