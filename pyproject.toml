@@ -1,20 +1,46 @@
-[tool.poetry]
+[project]
 name = "klayout-pex"
 version = "0.6.14"
 description = "Parasitic Extraction Tool for KLayout"
-authors = ["Martin Köhler <info@martinjankoehler.com>"]
-homepage = "https://iic-jku.github.io/klayout-pex-website/"
-repository = "https://github.com/iic-jku/klayout-pex.git"
+authors = [{ name = "Martin Köhler", email = "info@martinjankoehler.com" }]
 license = "GPL-3.0-or-later"
 readme = "README.md"
 keywords = ["electronic", "pex", "parasitic", "extraction", "vlsi", "eda", "ic", "spice",
             "klayout", "analog", "fsic", "gds", "FasterCap", "magic"]
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "cairosvg>=2.7.1",
+    # NOTE klayout version info:
+    #      0.30.0 … *NeighborhoodVisitor, *WithProperties
+    #      0.30.2 … klayout.pex module
+    #      0.30.3 … bugfixes for resistance extraction
+    #      0.30.12 … the version poetry.lock pins, which CI tests
+    "klayout>=0.30.12",
+    "matplotlib>=3.10.1",
+    "packaging>=24.0",  # tool version constraints
+    "protobuf>=6.33.5",
+    "rich>=13.9.4",
+    "rich-argparse>=1.6.0",
+]
+# NOTE: Poetry adds the classifiers of the Python versions to those of [tool.poetry]
+dynamic = ["classifiers"]
+
+[project.urls]
+Homepage = "https://iic-jku.github.io/klayout-pex-website/"
+Repository = "https://github.com/iic-jku/klayout-pex.git"
+"Bug Tracker" = "https://github.com/iic-jku/klayout-pex/issues"
+
+[project.scripts]
+kpex = 'klayout_pex.__main__:main'
+netlist = 'klayout_pex.netlist.__main__:main'
+pex25d = 'klayout_pex.pex25d.__main__:main'
+
+[tool.poetry]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Manufacturing",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
@@ -71,29 +97,6 @@ include = [
     { path = "klayout_pex_protobuf/kpex/tech/substrate_pb2.py", format = ["sdist", "wheel"] }
 ]
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/iic-jku/klayout-pex/issues"
-
-[tool.poetry.scripts]
-kpex = 'klayout_pex.__main__:main'
-netlist = 'klayout_pex.netlist.__main__:main'
-pex25d = 'klayout_pex.pex25d.__main__:main'
-
-[tool.poetry.dependencies]
-python = "^3.12"
-cairosvg = ">= 2.7.1"
-# NOTE klayout version info:
-#      0.30.0 … *NeighborhoodVisitor, *WithProperties
-#      0.30.2 … klayout.pex module
-#      0.30.3 … bugfixes for resistance extraction
-#      0.30.12 … the version poetry.lock pins, which CI tests
-klayout = ">= 0.30.12"
-matplotlib = ">= 3.10.1"
-packaging = ">= 24.0"   # tool version constraints
-protobuf = ">= 6.33.5"
-rich = ">= 13.9.4"
-rich-argparse = ">= 1.6.0"
-
 [tool.poetry.group.test.dependencies]
 pytest = ">= 8.3.3"
 pytest-cov = ">= 6.0.0"
@@ -117,7 +120,7 @@ grpcio-tools = ">= 1.81, < 1.82"
 [build-system]
 # NOTE: `poetry build` bypasses build-backend (and uses its bundled poetry-core directly)
 #       if `requires` is only poetry-core, keep a second entry here.
-requires = ["poetry-core>=1.0.0", "setuptools>=42"]
+requires = ["poetry-core>=2.0.0", "setuptools>=42"]
 # NOTE: poetry-core, plus resolving the symlinks within `packages` when packaging (#210)
 build-backend = "kpex_build_backend"
 backend-path = ["scripts/build"]
