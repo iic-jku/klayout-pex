@@ -122,13 +122,24 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
 @allure.tag("CLI", "Schematic")
 def test_unreadable_schematic_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
-    schematic_path.write_text('.subckt chip a b\n.param w=1u\n.ends chip\n')
+    schematic_path.write_text('.subckt chip a b\n.include models.lib\n.ends chip\n')
     problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
                                                        lvs_netlist=kdb.Netlist(),
                                                        device_models=device_models(NMOS),
                                                        top_cell_name='chip')
     assert problems == [f"kpex can't read the schematic, so no device classes are compared: "
-                        f"{schematic_path}: line 2: .param is not supported"]
+                        f"{schematic_path}: line 2: .include is not supported"]
+
+
+def test_schematic_without_value_is_a_check_problem(tmp_path):
+    schematic_path = tmp_path / 'chip.spice'
+    schematic_path.write_text('.subckt chip a b\nXM1 a b b b sg13_lv_nmos w={w0*2}\n.ends chip\n')
+    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
+                                                       lvs_netlist=kdb.Netlist(),
+                                                       device_models=device_models(NMOS),
+                                                       top_cell_name='chip')
+    assert problems == [f"kpex can't evaluate the schematic, so no device classes are compared: "
+                        f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
 
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")

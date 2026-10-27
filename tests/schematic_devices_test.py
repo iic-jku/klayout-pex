@@ -84,3 +84,38 @@ R1 a b 1k
         schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='chip')
         self.assertEqual({}, schematic.device_names_by_class_name)
         self.assertEqual({'sg13g2_inv_1': ['Xinv']}, schematic.device_names_by_unknown_model)
+
+    def test_devices_of_parameterized_subcircuits(self):
+        # NOTE: as BAG writes them (#330), the M lines of the LVS device class
+        netlist = SpiceReader().parse("""\
+.subckt inverter VDD I Q VSS
+Xnmos Q I VSS VSS nmos4_lvt w=3.9u l=130n nf=4
+Xdummy VSS VSS VSS VSS nmos4_lvt w=3.9u l=130n nf=2
+.ends
+.subckt nmos4_lvt D G S B w=150n l=130n nf=4
+MM1 D G S B nmos w=w*nf l=l ng=nf
+.ends
+""")
+        schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='inverter')
+        self.assertEqual({'nmos': ['Xnmos.MM1', 'Xdummy.MM1']}, schematic.device_names_by_class_name)
+
+    def test_devices_with_expressions_of_their_parameters(self):
+        # NOTE: as xschem writes the MOS of sky130A
+        netlist = SpiceReader().parse("""\
+.subckt chip a b g
+XM1 a g b b sg13_lv_nmos L=0.13 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' m=1
+.ends
+""")
+        schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='chip')
+        self.assertEqual({'nmos': ['XM1']}, schematic.device_names_by_class_name)
+
+    def test_cell_called_outside_of_subcircuits_counts_once(self):
+        # NOTE: e.g. by a testbench, without subcircuit of the layout's cell
+        netlist = SpiceReader().parse("""\
+.subckt chip a b g
+XM1 a g b b sg13_lv_nmos w=1u l=0.13u
+.ends chip
+Xdut a b g chip
+""")
+        schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='other')
+        self.assertEqual({'nmos': ['Xdut.XM1']}, schematic.device_names_by_class_name)
