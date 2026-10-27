@@ -33,7 +33,8 @@ What differs from SPICE:
       as VACASK would short their nets.
     - case: VACASK is case-sensitive, the names are written as they are, the parameter names in lowercase
       (VACASK lowercases the parameters of its devices, and so does its ng2vc, which converts PDK models)
-    - numbers: plain floats (VACASK reads the SI prefix M as mega, SPICE as milli)
+    - numbers: plain floats (VACASK reads the SI prefix M as mega, SPICE as milli);
+      the writer writes no parameters (.param) and expressions, though VACASK has them
     - R, C, L: VACASK's own resistor, capacitor and inductor devices, and its builtin sources
     - m: the $mfactor of a device, but a VACASK subcircuit takes m only if it declares it,
       a call with m = N of another subcircuit is written as N calls;
@@ -50,12 +51,14 @@ from pathlib import Path
 import re
 from typing import *
 
+from .expression.nodes import Expression, NumberOrExpression
 from .spice_netlist import SpiceElement, SpiceNetlist, SpiceSource, SpiceSubcircuit
 
 
 class VacaskWriterError(Exception):
     """
-    The netlist has no VACASK equivalent, e.g. two of its nets would get the same VACASK name
+    The netlist has no VACASK equivalent, e.g. two of its nets would get the same VACASK name,
+    or the writer doesn't write it, e.g. an expression
     """
     pass
 
@@ -226,6 +229,7 @@ class VacaskWriter:
         """
         :raises VacaskWriterError: if the netlist has no VACASK equivalent
         """
+        self._check_numbers(netlist)
         self._check_subcircuit_names(netlist)
 
         body: List[str] = []
@@ -258,6 +262,33 @@ class VacaskWriter:
         return '\n'.join(lines).rstrip('\n') + '\n'
 
     # --------------------------------------------------------------------------------
+
+    @staticmethod
+    def _check_numbers(netlist: SpiceNetlist):
+        def check(values: Mapping[str, NumberOrExpression], owner: str):
+            for name, value in values.items():
+                if isinstance(value, Expression):
+                    raise VacaskWriterError(f"The {name} of {owner} is the expression {value}, "
+                                            f"the VACASK writer writes numbers only")
+
+        def check_elements(elements: List[SpiceElement], scope: str):
+            for element in elements:
+                owner = f"the element {element.name!r} of {scope}"
+                check({'value': element.value} if element.value is not None else {}, owner)
+                check({f"parameter {n}": v for n, v in element.parameters.items()}, owner)
+
+        def check_no_parameters(parameters: Mapping[str, NumberOrExpression], scope: str):
+            if parameters:
+                raise VacaskWriterError(f"{scope[0].upper()}{scope[1:]} has .param lines ({', '.join(parameters)}), "
+                                        f"the VACASK writer writes numbers only")
+
+        check_no_parameters(netlist.parameters, 'the top level')
+        for subcircuit in netlist.subcircuits:
+            scope = f"subcircuit {subcircuit.name!r}"
+            check_no_parameters(subcircuit.local_parameters, scope)
+            check({f"parameter {n}": v for n, v in subcircuit.parameters.items()}, scope)
+            check_elements(subcircuit.elements, scope)
+        check_elements(netlist.elements, 'the top level')
 
     @staticmethod
     def _check_subcircuit_names(netlist: SpiceNetlist):

@@ -23,7 +23,8 @@
 #
 
 """
-A SPICE netlist as its elements and subcircuits, with the values resolved to numbers.
+A SPICE netlist as its elements and subcircuits, with the values as numbers or expressions
+(of parameters, see spice_hierarchy.py for their values in the subcircuit calls).
 
 It is what the writers of other netlist formats take (e.g. the VACASK writer),
 from a SPICE file (the SPICE reader) or from a KLayout netlist (the netlist printers).
@@ -34,6 +35,8 @@ NOTE: imports neither KLayout nor generated protobuf code, so that format-only p
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import *
+
+from .expression.nodes import NumberOrExpression
 
 
 @dataclass
@@ -72,9 +75,9 @@ class SpiceElement:
 
     # the value of R, C, L (resistance, capacitance, inductance), the coupling of K,
     # the gain of E, F, G, H
-    value: Optional[float] = None
+    value: Optional[NumberOrExpression] = None
 
-    parameters: Dict[str, float] = field(default_factory=dict)
+    parameters: Dict[str, NumberOrExpression] = field(default_factory=dict)
 
     # K: the coupled inductors, F and H: the voltage source of the controlling current
     references: List[str] = field(default_factory=list)
@@ -94,8 +97,11 @@ class SpiceElement:
 class SpiceSubcircuit:
     name: str
     ports: List[str]
-    parameters: Dict[str, float] = field(default_factory=dict)  # the defaults
+    parameters: Dict[str, NumberOrExpression] = field(default_factory=dict)  # the defaults
     elements: List[SpiceElement] = field(default_factory=list)
+
+    # of its .param lines, which its calls don't set
+    local_parameters: Dict[str, NumberOrExpression] = field(default_factory=dict)
 
 
 @dataclass
@@ -107,3 +113,6 @@ class SpiceNetlist:
 
     # nodes that are the same in all subcircuits (.global), besides ground
     global_nodes: List[str] = field(default_factory=list)
+
+    # of the .param lines outside of subcircuits
+    parameters: Dict[str, NumberOrExpression] = field(default_factory=dict)

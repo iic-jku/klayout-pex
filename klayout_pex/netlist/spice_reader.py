@@ -27,11 +27,15 @@ Reads a SPICE netlist (e.g. an extracted netlist, or a simple testbench) as ngsp
 
 Reads:
     - the elements R, C, L, K, D, M, V, I, E, F, G, H and X, the subcircuits (.subckt, .ends),
-      .global and .end
+      .global, .param and .end
     - the lines as ngspice reads them (see spice_syntax): continuation lines, also across comment lines,
       comments, the title of a deck
     - numbers with SI suffix: T, G, MEG, K, M (milli), MIL (25.4 µ), U, N, P, F, A,
       letters after them are ignored (e.g. 10pF)
+    - expressions of parameters as ngspice reads them (see expression/ngspice.py), in {...} or '...',
+      or without them in a parameter (e.g. w=w*nf, as BAG writes it): the values of .param, of the parameters
+      of subcircuits and their calls and of elements, which the netlist keeps as expressions
+      (spice_hierarchy evaluates them in the subcircuit calls)
 
 SPICE is case-insensitive:
     - a node is written as it is first written in its subcircuit (or in .global),
@@ -39,8 +43,8 @@ SPICE is case-insensitive:
     - a subcircuit call has the name of the subcircuit's definition (if in the netlist)
     - the parameter names are lowercase
 
-Doesn't read (an error naming the line): parameters and expressions, .model, .include, .lib, .param,
-.option, analyses, .control, the elements B, Q, J, ...
+Doesn't read (an error naming the line): .model, .include, .lib, .func, .option, analyses, .control,
+expressions in sources, the elements B, Q, J, ...
 
 NOTE: imports neither KLayout nor generated protobuf code, so that format-only paths can use it
 """
@@ -53,7 +57,10 @@ from typing import *
 
 from ..log import warning
 from ..util.unit_formatter import parse_spice_number
-from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines, strip_comment
+from .expression.ngspice import NGSPICE_SYNTAX
+from .expression.nodes import Number, NumberOrExpression
+from .expression.parser import ExpressionParser, ExpressionSyntaxError
+from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines
 from .spice_netlist import (
     SpiceElement,
     SpiceNetlist,
@@ -65,7 +72,7 @@ from .spice_netlist import (
 
 class SpiceReaderError(Exception):
     """
-    The netlist is no SPICE netlist the reader reads (e.g. it has .param or expressions)
+    The netlist is no SPICE netlist the reader reads (e.g. it has .include)
     """
     pass
 
@@ -73,6 +80,9 @@ class SpiceReaderError(Exception):
 GROUND = '0'
 
 _SOURCE_FUNCTIONS = ('pulse', 'sin', 'exp', 'pwl', 'sffm', 'am', 'trnoise', 'trrandom')
+
+# NOTE: a statement is split into words of these pieces, the last one catches an unbalanced { } or '
+_WORD_PIECE = re.compile(r"\s*(\{[^{}]*\}|'[^']*'|=|[^\s{}'=]+|.)")
 
 
 def _optional_number(text: str) -> Optional[float]:
@@ -126,6 +136,9 @@ class _Scope:
 
 
 class SpiceReader:
+    # NOTE: a reader of another SPICE flavour (e.g. HSPICE) reads the expressions with its own syntax
+    expression_parser = ExpressionParser(NGSPICE_SYNTAX)
+
     def read(self, path: str | Path) -> SpiceNetlist:
         """
         :raises SpiceReaderError: if the netlist has a line the reader doesn't read (the message names the line)
@@ -161,6 +174,11 @@ class SpiceReader:
                             if subcircuit is None:
                                 raise SpiceReaderError(".ends without .subckt")
                             subcircuit, scope = None, top_scope
+                        case '.param':
+                            parameters = netlist.parameters if subcircuit is None else subcircuit.local_parameters
+                            for token in line.tokens[1:]:
+                                name, value = self._parameter(token)
+                                parameters[name] = value
                         case '.global':
                             for name in line.tokens[1:]:
                                 if name.casefold() not in global_nodes:
@@ -202,32 +220,59 @@ class SpiceReader:
         for line in lines:
             if line.text is None:  # NOTE: a comment line, a blank line or the title
                 continue
-            for offset, physical_line in enumerate(line.physical_lines):
-                if re.search(r"[{}']", strip_comment(physical_line)):
-                    raise SpiceReaderError(f"line {line.number + offset}: "
-                                           f"expressions ({{...}} or '...') are not supported")
-            yield _Line(number=line.number, tokens=SpiceReader._tokens(line.text))
+            try:
+                tokens = SpiceReader._tokens(line.text)
+            except SpiceReaderError as e:
+                raise SpiceReaderError(f"line {line.number}: {e}") from None
+            yield _Line(number=line.number, tokens=tokens)
 
     @staticmethod
     def _tokens(text: str) -> List[str]:
-        return re.sub(r'\s*=\s*', '=', text).split()
+        """
+        The words of a statement: an expression in {...} or '...' is one word, also with spaces in it,
+        and so is a parameter with spaces around its = (e.g. w = {a + b})
+        """
+        tokens: List[str] = []
+        after_equals = False
+        for match in _WORD_PIECE.finditer(text):
+            piece = match.group(1)
+            if piece in ('{', '}', "'"):
+                raise SpiceReaderError(f"{piece} has no counterpart (expressions are written {{...}} or '...')")
+            if piece == '=':
+                if not tokens:
+                    raise SpiceReaderError("= without parameter name")
+                tokens[-1] += piece
+                after_equals = True
+            elif tokens and (after_equals or match.start(1) == match.start(0)):
+                tokens[-1] += piece
+                after_equals = False
+            else:
+                tokens.append(piece)
+        return tokens
 
-    @staticmethod
-    def _parameter(token: str) -> Tuple[str, float]:
+    def _parameter(self, token: str) -> Tuple[str, NumberOrExpression]:
         name, _, text = token.partition('=')
-        value = _optional_number(text)
-        if not name or value is None:
-            raise SpiceReaderError(f"the parameter {token} is no number "
-                                   f"(parameters and expressions are not supported)")
-        return name.lower(), value
+        if not name or not text:
+            raise SpiceReaderError(f"the parameter {token} has no {'value' if name else 'name'}")
+        return name.lower(), self._value(text, f"parameter {name}")
 
-    @staticmethod
-    def _number(text: str, what: str) -> float:
-        value = _optional_number(text)
-        if value is None:
-            raise SpiceReaderError(f"the {what} {text} is no number "
-                                   f"(parameters and expressions are not supported)")
-        return value
+    def _value(self, text: str, what: str) -> NumberOrExpression:
+        """
+        A number, or an expression: in {...} or '...', or without them (e.g. w*nf)
+        """
+        if text[:1] in ('{', "'"):
+            text = text[1:-1]
+        else:
+            number = _optional_number(text)
+            if number is not None:
+                return number
+        try:
+            expression = self.expression_parser.parse(text.strip())
+        except ExpressionSyntaxError as e:
+            raise SpiceReaderError(f"the {what} is no expression ({e})") from None
+        if isinstance(expression.root, Number):  # NOTE: e.g. {1u}
+            return expression.root.value
+        return expression
 
     def _subcircuit(self,
                     line: _Line,
@@ -237,7 +282,7 @@ class SpiceReader:
         name = line.tokens[1]
         scope = _Scope(f"subcircuit {name}", global_nodes)
         ports: List[str] = []
-        parameters: Dict[str, float] = {}
+        parameters: Dict[str, NumberOrExpression] = {}
         for token in line.tokens[2:]:
             if token.lower() == 'params:':
                 continue
@@ -260,8 +305,8 @@ class SpiceReader:
                 raise SpiceReaderError(f"the element {name} needs {count} nodes")
             return [scope.node(n) for n in tokens[1:1 + count]]
 
-        def parameters(rest: List[str]) -> Dict[str, float]:
-            result: Dict[str, float] = {}
+        def parameters(rest: List[str]) -> Dict[str, NumberOrExpression]:
+            result: Dict[str, NumberOrExpression] = {}
             for token in rest:
                 if '=' not in token:
                     raise SpiceReaderError(f"the element {name} has {token} where a parameter is expected")
@@ -274,9 +319,9 @@ class SpiceReader:
                 element = SpiceElement(name=name, nodes=nodes(2))
                 rest = tokens[3:]
                 while rest and '=' not in rest[0]:
-                    value = _optional_number(rest[0])
-                    if value is not None and element.value is None and element.model is None:
-                        element.value = value
+                    is_value = rest[0][:1] in ('{', "'") or _optional_number(rest[0]) is not None
+                    if is_value and element.value is None and element.model is None:
+                        element.value = self._value(rest[0], f"value of {name}")
                     elif element.model is None:
                         element.model = rest[0]
                     else:
@@ -293,7 +338,7 @@ class SpiceReader:
                 if len(tokens) != 4:
                     raise SpiceReaderError(f"the coupling {name} needs two inductors and a coupling factor")
                 return SpiceElement(name=name, references=tokens[1:3],
-                                    value=self._number(tokens[3], f"coupling factor of {name}"))
+                                    value=self._value(tokens[3], f"coupling factor of {name}"))
             case 'D' | 'M':
                 count = 2 if kind == 'D' else 4
                 element = SpiceElement(name=name, nodes=nodes(count))
@@ -302,7 +347,7 @@ class SpiceReader:
                 element.model = tokens[1 + count]
                 rest = tokens[2 + count:]
                 if kind == 'D' and rest and '=' not in rest[0]:  # the area
-                    element.parameters['area'] = self._number(rest[0], f"area of {name}")
+                    element.parameters['area'] = self._value(rest[0], f"area of {name}")
                     rest = rest[1:]
                 element.parameters.update(parameters(rest))
                 return element
@@ -315,19 +360,23 @@ class SpiceReader:
                                     model=rest[count], parameters=parameters(rest[count + 1:]))
             case 'V' | 'I':
                 element_nodes = nodes(2)
+                expression = next((t for t in tokens[3:] if t[:1] in ('{', "'")), None)
+                if expression is not None:
+                    raise SpiceReaderError(f"the source {name} has the expression {expression}, "
+                                           f"which is not supported")
                 rest = ' '.join(tokens[3:]).replace('(', ' ').replace(')', ' ').replace(',', ' ').split()
                 return SpiceElement(name=name, nodes=element_nodes, source=self._source(name, rest))
             case 'E' | 'G':
                 if len(tokens) != 6:
                     raise SpiceReaderError(f"the controlled source {name} needs 4 nodes and a gain "
                                            f"(VALUE, POLY and TABLE are not supported)")
-                return SpiceElement(name=name, nodes=nodes(4), value=self._number(tokens[5], f"gain of {name}"))
+                return SpiceElement(name=name, nodes=nodes(4), value=self._value(tokens[5], f"gain of {name}"))
             case 'F' | 'H':
                 if len(tokens) != 5:
                     raise SpiceReaderError(f"the controlled source {name} needs 2 nodes, a voltage source "
                                            f"and a gain (POLY is not supported)")
                 return SpiceElement(name=name, nodes=nodes(2), references=[tokens[3]],
-                                    value=self._number(tokens[4], f"gain of {name}"))
+                                    value=self._value(tokens[4], f"gain of {name}"))
             case _:
                 raise SpiceReaderError(f"the element {name} is not supported (supported are "
                                        f"R, C, L, K, D, M, V, I, E, F, G, H and X)")
