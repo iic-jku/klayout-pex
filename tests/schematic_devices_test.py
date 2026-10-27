@@ -85,6 +85,19 @@ R1 a b 1k
         self.assertEqual({}, schematic.device_names_by_class_name)
         self.assertEqual({'sg13g2_inv_1': ['Xinv']}, schematic.device_names_by_unknown_model)
 
+    def test_devices_with_their_lvs_parameters_and_m(self):
+        # NOTE: by the device model mapping in reverse, e.g. W in µm of w in m
+        netlist = SpiceReader().parse("""\
+.subckt chip a b g
+XM1 a g b b sg13_lv_nmos w=2u l=0.13u ng=2 m=3
+.ends
+""")
+        device = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS,
+                                   top_cell_name='chip').devices_by_class_name['nmos'][0]
+        self.assertEqual(('XM1', ['L', 'W'], 3.0), (device.name, sorted(device.lvs_parameters), device.m))
+        self.assertAlmostEqual(2.0, device.lvs_parameters['W'], places=12)
+        self.assertAlmostEqual(0.13, device.lvs_parameters['L'], places=12)
+
     def test_devices_of_parameterized_subcircuits(self):
         # NOTE: as BAG writes them (#330), the M lines of the LVS device class
         netlist = SpiceReader().parse("""\

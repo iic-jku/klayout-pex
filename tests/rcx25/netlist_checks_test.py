@@ -35,8 +35,13 @@ from klayout_pex.klayout.parasitic_device_classes import (
     PARASITIC_RESISTOR_CLASS_NAME,
 )
 from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
-from klayout_pex.rcx25.netlist_checks import check_rc_netlist, check_schematic_device_classes
-from klayout_pex.schematic_devices import SchematicDevices
+from klayout_pex.rcx25.netlist_checks import (
+    check_rc_netlist,
+    check_schematic_device_classes,
+    check_schematic_device_totals,
+)
+from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices
+from tests.common.device_model_mappings import NMOS, device_models
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
@@ -254,25 +259,120 @@ class Test(unittest.TestCase):
         self.assertEqual([], self.check(rc, {('D', 'VSUBS'): 1.0, ('B', 'VSUBS'): 2.0}, substrate_net_name='B'))
 
 
+def schematic(**device_names_by_class_name: List[str]) -> SchematicDevices:
+    return SchematicDevices(devices_by_class_name={c: [SchematicDevice(n) for n in names]
+                                                   for c, names in device_names_by_class_name.items()})
+
+
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Netlist Checks")
 class SchematicDeviceClassesTest(unittest.TestCase):
     def test_classes_of_the_schematic_in_the_lvs_netlist(self):
-        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1']})
-        self.assertEqual([], check_schematic_device_classes(lvs_netlist(), schematic))
+        devices = schematic(nmos=['XM1'])
+        self.assertEqual([], check_schematic_device_classes(lvs_netlist(), devices))
 
     def test_class_of_the_schematic_missing_in_the_lvs_netlist(self):
-        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1'], 'pmos': ['XM2', 'XM3']})
+        devices = schematic(nmos=['XM1'], pmos=['XM2', 'XM3'])
         self.assertEqual(['the schematic has devices of class pmos (XM2, XM3), the LVS netlist none'],
-                         check_schematic_device_classes(lvs_netlist(), schematic))
+                         check_schematic_device_classes(lvs_netlist(), devices))
 
     def test_classes_only_in_the_lvs_netlist_are_no_problem(self):
         # NOTE: e.g. taps, which the schematic needn't have
-        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1']})
-        self.assertEqual([], check_schematic_device_classes(lvs_netlist(mim_cap=True), schematic))
+        devices = schematic(nmos=['XM1'])
+        self.assertEqual([], check_schematic_device_classes(lvs_netlist(mim_cap=True), devices))
 
     def test_schematic_without_devices_of_known_models(self):
-        schematic = SchematicDevices(device_names_by_unknown_model={'nfet': ['XM1']})
+        devices = SchematicDevices(device_names_by_unknown_model={'nfet': ['XM1']})
         self.assertEqual(['kpex reads no devices from the schematic, e.g. of models without device model mapping '
                           '(nfet), so no device classes are compared'],
-                         check_schematic_device_classes(lvs_netlist(), schematic))
+                         check_schematic_device_classes(lvs_netlist(), devices))
+
+
+def mos_netlist(*widths: float, finger_calls: int = 0) -> kdb.Netlist:
+    """
+    The nmos M1, M2, ... of these widths (L = 0.13), and the calls of a circuit finger with an nmos of width 1
+    """
+    netlist = kdb.Netlist()
+    chip = kdb.Circuit()
+    chip.name = 'chip'
+    netlist.add(chip)
+    nmos = kdb.DeviceClassMOS4Transistor()
+    nmos.name = 'nmos'
+    netlist.add(nmos)
+
+    def add_nmos(circuit: kdb.Circuit, name: str, width: float):
+        device = circuit.create_device(nmos, name)
+        device.set_parameter('W', width)
+        device.set_parameter('L', 0.13)
+
+    for index, width in enumerate(widths, start=1):
+        add_nmos(chip, f"M{index}", width)
+    if finger_calls:
+        finger = kdb.Circuit()
+        finger.name = 'finger'
+        netlist.add(finger)
+        add_nmos(finger, 'M1', 1.0)
+        for index in range(finger_calls):
+            chip.create_subcircuit(finger, f"X{index}")
+    return netlist
+
+
+def nmos_schematic(*devices: SchematicDevice) -> SchematicDevices:
+    return SchematicDevices(devices_by_class_name={'nmos': list(devices)})
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Netlist Checks")
+class SchematicDeviceTotalsTest(unittest.TestCase):
+    def test_totals_of_fingers_and_of_a_multiplied_device_agree(self):
+        self.assertEqual([], check_schematic_device_totals(
+            mos_netlist(1.0, 1.0, 1.0, 1.0),
+            nmos_schematic(SchematicDevice('XM1', {'W': 2.0, 'L': 0.13}, m=2)),
+            device_models(NMOS)))
+
+    def test_differing_totals_are_problems(self):
+        self.assertEqual(['the schematic has Σ W·L = 0.39 of class nmos, the LVS netlist 0.52',
+                          'the schematic has Σ W = 3 of class nmos, the LVS netlist 4'],
+                         check_schematic_device_totals(mos_netlist(1.0, 1.0, 2.0),
+                                                       nmos_schematic(SchematicDevice('XM1', {'W': 3.0, 'L': 0.13})),
+                                                       device_models(NMOS)))
+
+    def test_totals_that_differ_by_rounding_agree(self):
+        self.assertEqual([], check_schematic_device_totals(
+            mos_netlist(4.0),
+            nmos_schematic(SchematicDevice('XM1', {'W': 4.000000001, 'L': 0.13})),
+            device_models(NMOS)))
+
+    def test_totals_a_device_of_the_schematic_has_no_value_for_are_left_out_with_a_warning(self):
+        # NOTE: e.g. of a parameter left to the model's default
+        with self.assertLogs('__kpex__', level='WARNING') as logs:
+            self.assertEqual(['the schematic has Σ W = 3 of class nmos, the LVS netlist 4'],
+                             check_schematic_device_totals(mos_netlist(4.0),
+                                                           nmos_schematic(SchematicDevice('XM1', {'W': 3.0})),
+                                                           device_models(NMOS)))
+        self.assertEqual(["WARNING:__kpex__:The device class check leaves out these totals, as devices have no value "
+                          "for them (e.g. of the schematic, which leaves a parameter to the model's default):\n"
+                          "  - Σ W·L of class nmos: no value of XM1"],
+                         logs.output)
+
+    def test_classes_without_totals_are_logged(self):
+        # NOTE: e.g. taps, or caps of a fixed size
+        with self.assertLogs('__kpex__', level='INFO') as logs:
+            self.assertEqual([], check_schematic_device_totals(mos_netlist(4.0),
+                                                               nmos_schematic(SchematicDevice('XM1')),
+                                                               device_models({**NMOS, 'parameters': []})))
+        self.assertEqual(["INFO:__kpex__:The device class check compares only the presence of these classes, "
+                          "as their device model mappings give no totals: nmos"],
+                         logs.output)
+
+    def test_devices_of_a_circuit_count_per_call(self):
+        self.assertEqual([], check_schematic_device_totals(
+            mos_netlist(finger_calls=3),
+            nmos_schematic(SchematicDevice('XM1', {'W': 3.0, 'L': 0.13})),
+            device_models(NMOS)))
+
+    def test_classes_missing_on_one_side_are_left_out(self):
+        # NOTE: check_schematic_device_classes reports those of the schematic
+        schematic = SchematicDevices(devices_by_class_name={'pmos': [SchematicDevice('XM1', {'W': 3.0, 'L': 0.13})]})
+        models = device_models(NMOS, {**NMOS, 'lvs_device_class_name': 'pmos'})
+        self.assertEqual([], check_schematic_device_totals(mos_netlist(1.0), schematic, models))

@@ -28,6 +28,7 @@ The kpex command line tool, run more than once in a process (e.g. by tests or by
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import *
 
@@ -92,7 +93,7 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
                                             '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
     assert code == 1, output  # NOTE: no KLayout
-    assert "--schematic is checked for its device classes only, " \
+    assert "--schematic is checked for its device classes and their totals only, " \
            "use regular LVS to compare layout against schematic" in output
     assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_dummy_schematic.spice')
 
@@ -142,6 +143,19 @@ def test_schematic_without_value_is_a_check_problem(tmp_path):
                         f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
 
 
+def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
+    # NOTE: e.g. a standard cell, which the schematic calls, but doesn't define
+    schematic_path = tmp_path / 'chip.spice'
+    schematic_path.write_text('.subckt chip a b\nXinv a b sg13g2_inv_1\n.ends chip\n')
+    KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
+                                            lvs_netlist=kdb.Netlist(),
+                                            device_models=device_models(NMOS),
+                                            top_cell_name='chip')
+    assert ('__kpex__', logging.WARNING,
+            "The device class check leaves out the devices of the schematic of models without device model "
+            "mapping:\n  - sg13g2_inv_1: Xinv") in caplog.record_tuples
+
+
 @allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
 @allure.tag("PEX", "2.5D", "Schematic")
 @pytest.mark.slow
@@ -159,3 +173,22 @@ def test_device_class_of_the_schematic_missing_in_the_layout_fails_the_rc_run(tm
                                             '--out-dir', str(tmp_path)])
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert "the schematic has devices of class sky130_fd_pr__pfet_01v8 (X1.XM2), the LVS netlist none" in output
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.slow
+def test_device_totals_of_the_schematic_that_differ_from_the_layout_fail_the_rc_run(tmp_path):
+    # NOTE: e.g. a device the PEX-LVS doesn't recognize in a class it recognizes otherwise (#345)
+    config = PDKTestConfig(PDKName.SKY130A)
+    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
+    with open(gds_path.replace('.gds.gz', '.spice')) as f:
+        schematic = f.read()
+    schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
+    schematic_path.write_text(schematic.replace('W=0.65', 'W=0.65 m=2'))
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                            '--gds', gds_path, '--schematic', str(schematic_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert "the schematic has Σ W·L = 0.195 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.0975" in output
+    assert "the schematic has Σ W = 1.3 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.65" in output

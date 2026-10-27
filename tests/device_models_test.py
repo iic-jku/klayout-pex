@@ -27,9 +27,9 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModelError, rectangle_sides
+from klayout_pex.device_models import DeviceModelError, DeviceModels, rectangle_sides
 from klayout_pex.netlist.spice_netlist import SpiceElement
-from tests.common.device_model_mappings import NMOS, RPPD, device_models
+from tests.common.device_model_mappings import MIM, NMOS, NPN, RPPD, device_models
 
 
 def netlist() -> kdb.Netlist:
@@ -151,3 +151,29 @@ class Test(unittest.TestCase):
         models = device_models(NMOS)
         self.assertIsNone(models.lvs_device_class_name(SpiceElement(name='XM1', model='pmos')))
         self.assertIsNone(models.lvs_device_class_name(SpiceElement(name='R1', value=1e3)))
+
+    def test_lvs_parameters_of_a_schematic_device(self):
+        values = DeviceModels.lvs_parameter_values(
+            device_models(NMOS).mapping_by_lvs_device_class_name['nmos'],
+            SpiceElement(name='XM1', model='nmos', parameters={'w': 2e-6, 'l': 0.13e-6, 'ng': 2}))
+        self.assertEqual(['L', 'W'], sorted(values))
+        self.assertAlmostEqual(2.0, values['W'], places=12)
+        self.assertAlmostEqual(0.13, values['L'], places=12)
+
+    def test_lvs_parameters_the_schematic_device_doesnt_give_are_missing(self):
+        # NOTE: e.g. left to the model's default
+        values = DeviceModels.lvs_parameter_values(device_models(NMOS).mapping_by_lvs_device_class_name['nmos'],
+                                                   SpiceElement(name='XM1', model='nmos', parameters={'w': 2e-6}))
+        self.assertEqual(['W'], sorted(values))
+
+    def test_lvs_area_and_perimeter_of_the_sides_of_a_schematic_device(self):
+        values = DeviceModels.lvs_parameter_values(device_models(MIM).mapping_by_lvs_device_class_name['mim'],
+                                                   SpiceElement(name='XC1', model='mim',
+                                                                parameters={'w': 4e-6, 'l': 2e-6}))
+        self.assertAlmostEqual(8.0, values['A'], places=12)
+        self.assertAlmostEqual(12.0, values['P'], places=12)
+
+    def test_multiplier_lvs_parameter_name(self):
+        mappings = device_models(NMOS, NPN).mapping_by_lvs_device_class_name
+        self.assertEqual('NE', DeviceModels.multiplier_lvs_parameter_name(mappings['npn']))
+        self.assertIsNone(DeviceModels.multiplier_lvs_parameter_name(mappings['nmos']))
