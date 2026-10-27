@@ -1,0 +1,113 @@
+[16:25:54] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --gds                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_a21
+o_1/sg13g2_a21o_1.gds.gz --out-dir                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:25:54] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:677
+[16:25:54] INFO     No explicit top cell specified, using top    kpex_cli.py:717
+                    cell 'sg13g2_a21o_1'                                        
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:25:55] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1351
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_a
+21o_1/sg13g2_a21o_1.gds.gz/sg13g2_a21o_1.lvsdb.gz                               
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:25:55] INFO     (31, 0) -> (nwell_drw)                      kpex_cli.py:1587
+[16:25:55] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1587
+[16:25:55] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1587
+[16:25:55] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1587
+[16:25:55] INFO     (14, 0) -> (psd_fet)                        kpex_cli.py:1587
+[16:25:55] INFO     (65, 144) -> (ntap)                         kpex_cli.py:1587
+[16:25:55] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1587
+[16:25:55] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1587
+[16:25:55] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1587
+[16:25:55] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1587
+[16:25:55] INFO     (6, 4402) -> (cont_psd_con)                 kpex_cli.py:1587
+[16:25:55] INFO     (6, 4404) -> (cont_ntap_con)                kpex_cli.py:1587
+[16:25:55] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1587
+[16:25:55] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:25:55] INFO     LVSDB: found 6pins                          extractor.py:298
+[16:25:55] WARNING  The resistance network leaves out these   r_extractor.py:302
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$4;$4.$0.GatPoly;;58.516                                                     
+R2;$4.$0.GatPoly;$4.$1.Metal1;;15.0                                             
+R3;$4.$0.GatPoly;$4.P1.GatPoly;;41.976                                          
+R4;$4.$1.Metal1;$4.$2.Metal1;;0.21                                              
+R5;$4.$2.Metal1;$4.$3.Metal1;;0.327                                             
+R6;$4.$2.Metal1;$4.$6.Metal1;;0.978                                             
+R7;$4.$3.Metal1;$4.$4.Metal1;;0.154                                             
+R8;$4.$3.Metal1;$4.P0.pSD;;17.0                                                 
+R9;$4.$4.Metal1;$4.$5.Metal1;;0.146                                             
+R10;$4.$4.Metal1;$4.P0.pSD;;17.0                                                
+R11;$4.$5.Metal1;$4.P0.pSD;;17.0                                                
+R12;$4.$6.Metal1;$4.P0.nSD;;17.0                                                
+R13;$9;$9.$0.Metal1;;17.0                                                       
+R14;$9;$9.$1.Metal1;;17.0                                                       
+R15;$9;$9.$2.Metal1;;17.0                                                       
+R16;$9.$0.Metal1;$9.$1.Metal1;;0.155                                            
+R17;$9.$0.Metal1;$9.$3.Metal1;;0.695                                            
+R18;$9.$1.Metal1;$9.$2.Metal1;;0.146                                            
+R19;$9.$3.Metal1;$9.$4.Metal1;;0.153                                            
+R20;$9.$3.Metal1;$9.P2.pSD;;17.0                                                
+R21;$9.$4.Metal1;$9.$5.Metal1;;0.148                                            
+R22;$9.$4.Metal1;$9.P2.pSD;;17.0                                                
+R23;$9.$5.Metal1;$9.P2.pSD;;17.0                                                
+R24;A1;A1.$1.Metal1;;0.013                                                      
+R25;A1.$0.GatPoly;A1.$1.Metal1;;15.0                                            
+R26;A1.$0.GatPoly;A1.P0.GatPoly;;35.284                                         
+R27;A1.$0.GatPoly;A1.P1.GatPoly;;45.587                                         
+R28;A2;A2.$1.Metal1;;0.039                                                      
+R29;A2.$0.GatPoly;A2.$1.Metal1;;15.0                                            
+R30;A2.$0.GatPoly;A2.P0.GatPoly;;39.495                                         
+R31;A2.P0.GatPoly;A2.P1.GatPoly;;84.0                                           
+R32;B1;B1.$1.Metal1;;0.026                                                      
+R33;B1.$0.GatPoly;B1.$1.Metal1;;15.0                                            
+R34;B1.$0.GatPoly;B1.P0.GatPoly;;33.228                                         
+R35;B1.$0.GatPoly;B1.P1.GatPoly;;48.433                                         
+R36;VDD;VDD.$2.Metal1;;0.412                                                    
+R37;VDD;VDD.$4.Metal1;;0.442                                                    
+R38;VDD.$0.Metal1;VDD.$1.Metal1;;0.165                                          
+R39;VDD.$0.Metal1;VDD.P2.pSD;;17.0                                              
+R40;VDD.$1.Metal1;VDD.$2.Metal1;;0.167                                          
+R41;VDD.$1.Metal1;VDD.P2.pSD;;17.0                                              
+R42;VDD.$2.Metal1;VDD.P2.pSD;;17.0                                              
+R43;VDD.$3.Metal1;VDD.$4.Metal1;;0.15                                           
+R44;VDD.$3.Metal1;VDD.P0.pSD;;17.0                                              
+R45;VDD.$4.Metal1;VDD.P0.pSD;;17.0                                              
+R46;VSS;VSS.$0.Metal1;;0.286                                                    
+R47;VSS;VSS.$1.Metal1;;1.361                                                    
+R48;VSS.$0.Metal1;VSS.P0.nSD;;17.0                                              
+R49;VSS.$1.Metal1;VSS.P2.nSD;;17.0                                              
+R50;X;X.$0.Metal1;;0.007                                                        
+R51;X;X.$2.Metal1;;0.002                                                        
+R52;X.$0.Metal1;X.$1.Metal1;;0.217                                              
+R53;X.$0.Metal1;X.$4.Metal1;;1.176                                              
+R54;X.$1.Metal1;X.P0.pSD;;17.0                                                  
+R55;X.$2.Metal1;X.$3.Metal1;;0.153                                              
+R56;X.$2.Metal1;X.P0.pSD;;17.0                                                  
+R57;X.$3.Metal1;X.P0.pSD;;17.0                                                  
+R58;X.$4.Metal1;X.P0.nSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sg13g2_a21o_1__sg13g
+2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.csv                                     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sg13g2_a21o_1__sg13g
+2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.spice                                   

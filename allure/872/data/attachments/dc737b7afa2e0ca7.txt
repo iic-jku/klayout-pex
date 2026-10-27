@@ -1,0 +1,64 @@
+[16:27:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --gds                         
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz --out-dir                           
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir            
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:27:14] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:677
+[16:27:14] INFO     No explicit top cell specified, using top    kpex_cli.py:717
+                    cell 'cap_mim_m3_20um_x_20um_over_m2_wire'                  
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:27:15] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1351
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap
+_mim_m3_20um_x_20um_over_m2_wire.gds.gz/cap_mim_m3_20um_x_20um_over_m2_wire.lvsd
+b.gz                                                                            
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:27:15] INFO     (89, 44) -> (capm)                          kpex_cli.py:1587
+[16:27:15] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1587
+[16:27:15] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1587
+[16:27:15] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1587
+[16:27:15] INFO     (71, 16) -> (met4_pin_con)                  kpex_cli.py:1587
+[16:27:15] INFO     (70, 20) -> (met3_ncap met3_cap)            kpex_cli.py:1587
+[16:27:15] INFO     (70, 244) -> (via3_cap)                     kpex_cli.py:1587
+[16:27:15] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:27:15] INFO     LVSDB: found 3pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B.$1.met4;1.059;                                                           
+C2;A;B.P0.capm;70.708;                                                          
+C3;A;D;0.43;                                                                    
+C4;A;VSUBS;1.874;                                                               
+C5;A.P0.met3;B;1.358;                                                           
+C6;A.P0.met3;B.$1.met4;2.186;                                                   
+C7;A.P0.met3;B.P0.capm;744.371;                                                 
+C8;A.P0.met3;D;6.037;                                                           
+C9;A.P0.met3;VSUBS;8.467;                                                       
+C10;B;D;0.041;                                                                  
+C11;B;VSUBS;0.65;                                                               
+C12;B.$1.met4;D;0.041;                                                          
+C13;B.$1.met4;VSUBS;1.603;                                                      
+C14;D;VSUBS;5.013;                                                              
+R1;A;A.P0.met3;;0.023                                                           
+R2;B;B.$1.met4;;0.019                                                           
+R3;B.$1.met4;B.P0.capm;;3.41                                                    
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_
+over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2
+_wire_k25d_pex_netlist.csv                                                      
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[16:27:15] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_
+over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2
+_wire_k25d_pex_netlist.spice                                                    

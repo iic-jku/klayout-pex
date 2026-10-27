@@ -1,0 +1,135 @@
+[16:25:48] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --gds                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz --out-dir                                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:25:48] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:677
+[16:25:48] INFO     No explicit top cell specified, using top    kpex_cli.py:717
+                    cell 'cap_mim_m4m5'                                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:25:49] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1351
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cap_mim_m4m5.gds.gz/cap_mim_m4m5.lvsdb.gz                                    
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:25:49] INFO     (75, 0) -> (fuse_cap)                       kpex_cli.py:1587
+[16:25:49] INFO     (81, 0) -> (metal5_con)                     kpex_cli.py:1587
+[16:25:49] INFO     (41, 244) -> (top_via_cap)                  kpex_cli.py:1587
+[16:25:49] INFO     (46, 0) -> (metal4_n_cap metal4_cap)        kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:25:49] INFO     LVSDB: found 4pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;BOT1;BOT1.P0.Metal4;;0.045                                                   
+R2;BOT2;BOT2.P0.Metal4;;0.085                                                   
+R3;TOP1;TOP1.$36.Metal5;;0.005                                                  
+R4;TOP1.$0.FuseTop;TOP1.$10.FuseTop;;0.076                                      
+R5;TOP1.$0.FuseTop;TOP1.$36.Metal5;;0.75                                        
+R6;TOP1.$10.FuseTop;TOP1.$12.FuseTop;;0.076                                     
+R7;TOP1.$10.FuseTop;TOP1.$42.Metal5;;0.75                                       
+R8;TOP1.$12.FuseTop;TOP1.$48.Metal5;;0.75                                       
+R9;TOP1.$12.FuseTop;TOP1.P0.FuseTop;;0.038                                      
+R10;TOP1.$18.FuseTop;TOP1.$24.FuseTop;;0.076                                    
+R11;TOP1.$18.FuseTop;TOP1.$54.Metal5;;0.75                                      
+R12;TOP1.$18.FuseTop;TOP1.P0.FuseTop;;0.038                                     
+R13;TOP1.$24.FuseTop;TOP1.$30.FuseTop;;0.076                                    
+R14;TOP1.$24.FuseTop;TOP1.$60.Metal5;;0.75                                      
+R15;TOP1.$30.FuseTop;TOP1.$66.Metal5;;0.75                                      
+R16;TOP1.$36.Metal5;TOP1.$42.Metal5;;0.006                                      
+R17;TOP1.$42.Metal5;TOP1.$48.Metal5;;0.006                                      
+R18;TOP1.$48.Metal5;TOP1.$54.Metal5;;0.006                                      
+R19;TOP1.$54.Metal5;TOP1.$60.Metal5;;0.006                                      
+R20;TOP1.$60.Metal5;TOP1.$66.Metal5;;0.006                                      
+R21;TOP2;TOP2.$300.Metal5;;0.003                                                
+R22;TOP2.$0.FuseTop;TOP2.$12.FuseTop;;0.038                                     
+R23;TOP2.$0.FuseTop;TOP2.$300.Metal5;;0.375                                     
+R24;TOP2.$100.FuseTop;TOP2.$108.FuseTop;;0.038                                  
+R25;TOP2.$100.FuseTop;TOP2.$396.Metal5;;0.375                                   
+R26;TOP2.$100.FuseTop;TOP2.$84.FuseTop;;0.038                                   
+R27;TOP2.$108.FuseTop;TOP2.$120.FuseTop;;0.038                                  
+R28;TOP2.$108.FuseTop;TOP2.$408.Metal5;;0.375                                   
+R29;TOP2.$12.FuseTop;TOP2.$24.FuseTop;;0.038                                    
+R30;TOP2.$12.FuseTop;TOP2.$312.Metal5;;0.375                                    
+R31;TOP2.$120.FuseTop;TOP2.$132.FuseTop;;0.038                                  
+R32;TOP2.$120.FuseTop;TOP2.$420.Metal5;;0.375                                   
+R33;TOP2.$132.FuseTop;TOP2.$432.Metal5;;0.375                                   
+R34;TOP2.$132.FuseTop;TOP2.P0.FuseTop;;0.038                                    
+R35;TOP2.$156.FuseTop;TOP2.$168.FuseTop;;0.038                                  
+R36;TOP2.$156.FuseTop;TOP2.$456.Metal5;;0.375                                   
+R37;TOP2.$156.FuseTop;TOP2.P0.FuseTop;;0.038                                    
+R38;TOP2.$168.FuseTop;TOP2.$180.FuseTop;;0.038                                  
+R39;TOP2.$168.FuseTop;TOP2.$468.Metal5;;0.375                                   
+R40;TOP2.$180.FuseTop;TOP2.$192.FuseTop;;0.038                                  
+R41;TOP2.$180.FuseTop;TOP2.$480.Metal5;;0.375                                   
+R42;TOP2.$192.FuseTop;TOP2.$204.FuseTop;;0.038                                  
+R43;TOP2.$192.FuseTop;TOP2.$492.Metal5;;0.375                                   
+R44;TOP2.$204.FuseTop;TOP2.$216.FuseTop;;0.038                                  
+R45;TOP2.$204.FuseTop;TOP2.$504.Metal5;;0.375                                   
+R46;TOP2.$216.FuseTop;TOP2.$228.FuseTop;;0.038                                  
+R47;TOP2.$216.FuseTop;TOP2.$516.Metal5;;0.375                                   
+R48;TOP2.$228.FuseTop;TOP2.$240.FuseTop;;0.038                                  
+R49;TOP2.$228.FuseTop;TOP2.$528.Metal5;;0.375                                   
+R50;TOP2.$24.FuseTop;TOP2.$324.Metal5;;0.375                                    
+R51;TOP2.$24.FuseTop;TOP2.$36.FuseTop;;0.038                                    
+R52;TOP2.$240.FuseTop;TOP2.$252.FuseTop;;0.038                                  
+R53;TOP2.$240.FuseTop;TOP2.$540.Metal5;;0.375                                   
+R54;TOP2.$252.FuseTop;TOP2.$264.FuseTop;;0.038                                  
+R55;TOP2.$252.FuseTop;TOP2.$552.Metal5;;0.375                                   
+R56;TOP2.$264.FuseTop;TOP2.$276.FuseTop;;0.038                                  
+R57;TOP2.$264.FuseTop;TOP2.$564.Metal5;;0.375                                   
+R58;TOP2.$276.FuseTop;TOP2.$288.FuseTop;;0.038                                  
+R59;TOP2.$276.FuseTop;TOP2.$576.Metal5;;0.375                                   
+R60;TOP2.$288.FuseTop;TOP2.$588.Metal5;;0.375                                   
+R61;TOP2.$300.Metal5;TOP2.$312.Metal5;;0.003                                    
+R62;TOP2.$312.Metal5;TOP2.$324.Metal5;;0.003                                    
+R63;TOP2.$324.Metal5;TOP2.$336.Metal5;;0.003                                    
+R64;TOP2.$336.Metal5;TOP2.$348.Metal5;;0.003                                    
+R65;TOP2.$336.Metal5;TOP2.$36.FuseTop;;0.375                                    
+R66;TOP2.$348.Metal5;TOP2.$360.Metal5;;0.003                                    
+R67;TOP2.$348.Metal5;TOP2.$48.FuseTop;;0.375                                    
+R68;TOP2.$36.FuseTop;TOP2.$48.FuseTop;;0.038                                    
+R69;TOP2.$360.Metal5;TOP2.$372.Metal5;;0.003                                    
+R70;TOP2.$360.Metal5;TOP2.$60.FuseTop;;0.375                                    
+R71;TOP2.$372.Metal5;TOP2.$384.Metal5;;0.003                                    
+R72;TOP2.$372.Metal5;TOP2.$72.FuseTop;;0.375                                    
+R73;TOP2.$384.Metal5;TOP2.$396.Metal5;;0.003                                    
+R74;TOP2.$384.Metal5;TOP2.$84.FuseTop;;0.375                                    
+R75;TOP2.$396.Metal5;TOP2.$408.Metal5;;0.003                                    
+R76;TOP2.$408.Metal5;TOP2.$420.Metal5;;0.003                                    
+R77;TOP2.$420.Metal5;TOP2.$432.Metal5;;0.003                                    
+R78;TOP2.$432.Metal5;TOP2.$444.Metal5;;0.003                                    
+R79;TOP2.$444.Metal5;TOP2.$456.Metal5;;0.003                                    
+R80;TOP2.$444.Metal5;TOP2.P0.FuseTop;;0.375                                     
+R81;TOP2.$456.Metal5;TOP2.$468.Metal5;;0.003                                    
+R82;TOP2.$468.Metal5;TOP2.$480.Metal5;;0.003                                    
+R83;TOP2.$48.FuseTop;TOP2.$60.FuseTop;;0.038                                    
+R84;TOP2.$480.Metal5;TOP2.$492.Metal5;;0.003                                    
+R85;TOP2.$492.Metal5;TOP2.$504.Metal5;;0.003                                    
+R86;TOP2.$504.Metal5;TOP2.$516.Metal5;;0.003                                    
+R87;TOP2.$516.Metal5;TOP2.$528.Metal5;;0.003                                    
+R88;TOP2.$528.Metal5;TOP2.$540.Metal5;;0.003                                    
+R89;TOP2.$540.Metal5;TOP2.$552.Metal5;;0.003                                    
+R90;TOP2.$552.Metal5;TOP2.$564.Metal5;;0.003                                    
+R91;TOP2.$564.Metal5;TOP2.$576.Metal5;;0.003                                    
+R92;TOP2.$576.Metal5;TOP2.$588.Metal5;;0.003                                    
+R93;TOP2.$60.FuseTop;TOP2.$72.FuseTop;;0.038                                    
+R94;TOP2.$72.FuseTop;TOP2.$84.FuseTop;;0.038                                    
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim
+_m4m5/cap_mim_m4m5_k25d_pex_netlist.csv                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[16:25:49] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+[16:25:49] INFO     Removing whiteboxed device $2         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cap_mim_m4m5__cap_mim
+_m4m5/cap_mim_m4m5_k25d_pex_netlist.spice                                       
