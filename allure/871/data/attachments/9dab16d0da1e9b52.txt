@@ -1,0 +1,64 @@
+[15:38:53] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1412
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --gds                                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/nfet_li1_redux.gds.gz --out-dir /tmp/tmp7ca1itgq --cache-dir                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D     
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:38:53] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:676
+[15:38:53] INFO     No explicit top cell specified, using top    kpex_cli.py:716
+                    cell 'nfet_li1_redux'                                       
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:38:54] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1347
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/hom
+e/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfe
+t_li1_redux.gds.gz/nfet_li1_redux.lvsdb.gz                                      
+[15:38:54] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:421
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - licon (licon1): 4 of 5 shapes are                       
+                    not within licon_nsd_con,                                   
+                    licon_psd_con, licon_poly_con,                              
+                    licon_ntap_con, licon_ptap_con,                             
+                    licon_vpp                                                   
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:38:54] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1583
+[15:38:54] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1583
+[15:38:54] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1583
+[15:38:54] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1583
+[15:38:54] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1583
+[15:38:54] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1583
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:38:54] INFO     LVSDB: found 2pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2.$0.li1;$3.$0.li1;0.011;                                                   
+C2;$2.$0.li1;G;0.002;                                                           
+C3;$2.$0.li1;G.P0.poly;0.005;                                                   
+C4;$2.$0.li1;VSUBS;0.025;                                                       
+C5;$3.$0.li1;G.$0.li1;0.002;                                                    
+C6;$3.$0.li1;G.P0.poly;0.005;                                                   
+C7;$3.$0.li1;VSUBS;0.026;                                                       
+C8;G;VSUBS;0.025;                                                               
+C9;G.$0.li1;VSUBS;0.045;                                                        
+C10;G.$1.poly;VSUBS;0.081;                                                      
+C11;G.P0.poly;VSUBS;0.074;                                                      
+R1;$2;$2.$0.li1;;209.667                                                        
+R2;$3;$3.$0.li1;;209.667                                                        
+R3;G;G.$0.li1;;2.418                                                            
+R4;G.$0.li1;G.$1.poly;;152.0                                                    
+R5;G.$1.poly;G.P0.poly;;316.321                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp7ca1itgq/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.
+csv                                                                             
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp7ca1itgq/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.
+spice                                                                           

@@ -1,0 +1,17 @@
+WARNING  __kpex__:kpex_cli.py:1412 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1449 main extract --pdk sky130A --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_wire_voltage_divider_li1.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:676 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:716 No explicit top cell specified, using top cell 'r_wire_voltage_divider_li1'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1347 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1348 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_wire_voltage_divider_li1.gds.gz/r_wire_voltage_divider_li1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1583 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1583 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1164 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1164 R1;A;A,B,C;;426.667
+SUBPROCESS __kpex__:kpex_cli.py:1164 R2;A,B,C;B;;413.867
+SUBPROCESS __kpex__:kpex_cli.py:1164 R3;A,B,C;C;;72.533
+SUBPROCESS __kpex__:kpex_cli.py:1167 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1183 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.spice
