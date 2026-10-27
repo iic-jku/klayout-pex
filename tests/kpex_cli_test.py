@@ -34,8 +34,12 @@ from typing import *
 import allure
 import pytest
 
+import klayout.db as kdb
+
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
+from tests.common.device_model_mappings import NMOS, device_models
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -112,3 +116,35 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     assert 'sky130_fd_pr__nfet_01v8' in netlist and 'SUBNFET' not in netlist, netlist
     with open(run_dir / 'nfet_li1_in_subcell_lvs.log') as f:
         assert "Netlists don't match" not in f.read()
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
+def test_unreadable_schematic_is_a_check_problem(tmp_path):
+    schematic_path = tmp_path / 'chip.spice'
+    schematic_path.write_text('.subckt chip a b\n.param w=1u\n.ends chip\n')
+    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
+                                                       lvs_netlist=kdb.Netlist(),
+                                                       device_models=device_models(NMOS),
+                                                       top_cell_name='chip')
+    assert problems == [f"kpex can't read the schematic, so no device classes are compared: "
+                        f"{schematic_path}: line 2: .param is not supported"]
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.slow
+def test_device_class_of_the_schematic_missing_in_the_layout_fails_the_rc_run(tmp_path):
+    # NOTE: e.g. a device the PEX-LVS doesn't recognize, which the extraction then misses (#345)
+    config = PDKTestConfig(PDKName.SKY130A)
+    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
+    with open(gds_path.replace('.gds.gz', '.spice')) as f:
+        schematic = f.read()
+    schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
+    schematic_path.write_text(schematic.replace('.ends SUBNFET',
+                                                'XM2 S G D VNB sky130_fd_pr__pfet_01v8 L=0.15 W=0.65\n.ends SUBNFET'))
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                            '--gds', gds_path, '--schematic', str(schematic_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert "the schematic has devices of class sky130_fd_pr__pfet_01v8 (X1.XM2), the LVS netlist none" in output
