@@ -25,16 +25,11 @@ import allure
 import math
 import unittest
 
-import google.protobuf.json_format
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModelError, DeviceModels, rectangle_sides
-import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
-
-
-def device_models(*mappings: dict) -> DeviceModels:
-    return DeviceModels(google.protobuf.json_format.ParseDict({'device_model_mappings': list(mappings)},
-                                                              device_models_pb2.DeviceModelsInfo()))
+from klayout_pex.device_models import DeviceModelError, rectangle_sides
+from klayout_pex.netlist.spice_netlist import SpiceElement
+from tests.common.device_model_mappings import NMOS, RPPD, device_models
 
 
 def netlist() -> kdb.Netlist:
@@ -62,10 +57,6 @@ def netlist() -> kdb.Netlist:
     netlist.add(cap)
 
     return netlist
-
-
-NMOS = {'lvs_device_class_name': 'nmos', 'spice_prefix': 'X', 'terminal_names': ['D', 'G', 'S', 'B']}
-RPPD = {'lvs_device_class_name': 'rppd', 'spice_prefix': 'X', 'terminal_names': ['A', 'B']}
 
 
 @allure.parent_suite('Unit Tests')
@@ -139,3 +130,24 @@ class Test(unittest.TestCase):
         # NOTE: a regular octagon of side 1 has a perimeter of 8, less than 4·√area
         area = 2 * (1 + math.sqrt(2))
         self.assertEqual((math.sqrt(area), math.sqrt(area)), rectangle_sides(area=area, perimeter=8.0))
+
+    def test_lvs_device_class_of_a_schematic_device(self):
+        rfnmos = {**NMOS, 'lvs_device_class_name': 'rfnmos', 'model_name': 'sg13_lv_nmos',
+                  'parameters': [{'name': 'rfmode', 'constant': 1}]}
+        nmos = {**NMOS, 'model_name': 'sg13_lv_nmos'}
+        models = device_models(nmos, rfnmos, RPPD)
+        self.assertEqual('nmos', models.lvs_device_class_name(
+            SpiceElement(name='XM1', model='SG13_LV_NMOS', parameters={'w': 1e-6})))
+        # NOTE: rfnmos writes the model of nmos with rfmode=1
+        self.assertEqual('rfnmos', models.lvs_device_class_name(
+            SpiceElement(name='XM2', model='sg13_lv_nmos', parameters={'w': 1e-6, 'rfmode': 1})))
+
+    def test_lvs_device_class_of_a_schematic_device_named_as_its_class(self):
+        # NOTE: e.g. M1 d g s b nmos, as LVS reads it, though the mapping writes X1 d g s b sg13_lv_nmos
+        models = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'})
+        self.assertEqual('nmos', models.lvs_device_class_name(SpiceElement(name='M1', model='NMOS')))
+
+    def test_no_lvs_device_class_of_an_unknown_model(self):
+        models = device_models(NMOS)
+        self.assertIsNone(models.lvs_device_class_name(SpiceElement(name='XM1', model='pmos')))
+        self.assertIsNone(models.lvs_device_class_name(SpiceElement(name='R1', value=1e3)))

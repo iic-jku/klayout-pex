@@ -86,7 +86,7 @@ from .magic.magic_runner import (
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .netlist.netlist_convert import convert_to_vacask
 from .netlist.netlist_format import NetlistFormat
-from .netlist.spice_reader import SpiceReaderError
+from .netlist.spice_reader import SpiceReader, SpiceReaderError
 from .netlist.vacask_writer import VacaskWriterError
 from .pex25d.artifact import (
     CANONICAL_SUFFIX,
@@ -103,11 +103,12 @@ from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, redu
 from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import CExtractionTechError, RCX25Extractor, ExtractionResults
-from .rcx25.netlist_checks import check_rc_netlist, RCNetlistCheckError
+from .rcx25.netlist_checks import check_rc_netlist, check_schematic_device_classes, first_names, RCNetlistCheckError
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
-from .device_models import DeviceModelError
+from .schematic_devices import schematic_devices
+from .device_models import DeviceModelError, DeviceModels
 from .tech_info import TechDefError, TechInfo
 from .tool_version_constraints import (
     Tool,
@@ -215,8 +216,8 @@ class KpexCLI:
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path "
-                                          "(not compared against layout, use regular LVS for that)")
+                                     help="Schematic SPICE netlist path (--check checks its device classes only, "
+                                          "use regular LVS to compare layout against schematic)")
         # Developer shortcut, not a supported entry point. It exists so that a
         # PEX25D or engine run can be repeated without paying for LVS again while
         # working on the code downstream of it. An LVSDB is tied to the kpex
@@ -400,7 +401,8 @@ class KpexCLI:
                                type=true_or_false, default=None,
                                help="Fail the run (after writing the netlist), if the extracted netlist is "
                                     "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
-                                    "network of its net, a port that touches nothing, or a lost capacitance "
+                                    "network of its net, a port that touches nothing, or a lost capacitance, "
+                                    "or if the LVS netlist lacks a device class of --schematic "
                                     "(default is True for --mode RC, otherwise these are warnings)")
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -750,7 +752,8 @@ class KpexCLI:
                     if not os.path.isfile(args.schematic_path):
                         error(f"Can't read schematic at path {args.schematic_path}")
                         found_errors = True
-                    warning("--schematic is not compared against layout, use regular LVS for that")
+                    warning("--schematic is checked for its device classes only, "
+                            "use regular LVS to compare layout against schematic")
                 # NOTE: the PEX-LVS compares the layout with an empty dummy schematic only, as KLayout writes
                 #       the LVS database after a comparison: the alignment flattens every circuit of the layout
                 #       into its top circuit, whose devices and nets the extraction takes, while a schematic with
@@ -1101,6 +1104,26 @@ class KpexCLI:
 
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
+    @staticmethod
+    def schematic_device_class_problems(schematic_path: str,
+                                        lvs_netlist: kdb.Netlist,
+                                        device_models: DeviceModels,
+                                        top_cell_name: str) -> List[str]:
+        """
+        :return: the problems of check_schematic_device_classes, or that the schematic can't be read
+        """
+        try:
+            netlist = SpiceReader().read(schematic_path)
+        except SpiceReaderError as e:
+            return [f"kpex can't read the schematic, so no device classes are compared: {e}"]
+        schematic = schematic_devices(netlist=netlist, device_models=device_models, top_cell_name=top_cell_name)
+        if schematic.device_names_by_unknown_model:
+            info("The device class check leaves out the devices of the schematic of models without device model "
+                 "mapping:\n" +
+                 '\n'.join(f"  - {model}: {first_names(names)}"
+                            for model, names in sorted(schematic.device_names_by_unknown_model.items())))
+        return check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic)
+
     def run_kpex_2_5d_engine(self,
                              args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
@@ -1170,6 +1193,13 @@ class KpexCLI:
                 device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name
             )
+            if args.input_mode == InputMode.GDS and args.schematic_path:
+                self._rcx25_netlist_problems += self.schematic_device_class_problems(
+                    schematic_path=args.schematic_path,
+                    lvs_netlist=pex_context.lvsdb.netlist(),
+                    device_models=tech_info.device_models,
+                    top_cell_name=pex_context.annotated_top_cell.name
+                )
             # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers
             check_fails_run = args.check_rc_netlist if args.check_rc_netlist is not None \
                               else args.pex_mode == PEXMode.RC

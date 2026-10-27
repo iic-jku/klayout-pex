@@ -35,7 +35,8 @@ from klayout_pex.klayout.parasitic_device_classes import (
     PARASITIC_RESISTOR_CLASS_NAME,
 )
 from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
-from klayout_pex.rcx25.netlist_checks import check_rc_netlist
+from klayout_pex.rcx25.netlist_checks import check_rc_netlist, check_schematic_device_classes
+from klayout_pex.schematic_devices import SchematicDevices
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
@@ -251,3 +252,27 @@ class Test(unittest.TestCase):
         rc = self.rc_netlist()
         rc.add_capacitor('D', 'B', 1.0)
         self.assertEqual([], self.check(rc, {('D', 'VSUBS'): 1.0, ('B', 'VSUBS'): 2.0}, substrate_net_name='B'))
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Netlist Checks")
+class SchematicDeviceClassesTest(unittest.TestCase):
+    def test_classes_of_the_schematic_in_the_lvs_netlist(self):
+        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1']})
+        self.assertEqual([], check_schematic_device_classes(lvs_netlist(), schematic))
+
+    def test_class_of_the_schematic_missing_in_the_lvs_netlist(self):
+        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1'], 'pmos': ['XM2', 'XM3']})
+        self.assertEqual(['the schematic has devices of class pmos (XM2, XM3), the LVS netlist none'],
+                         check_schematic_device_classes(lvs_netlist(), schematic))
+
+    def test_classes_only_in_the_lvs_netlist_are_no_problem(self):
+        # NOTE: e.g. taps, which the schematic needn't have
+        schematic = SchematicDevices(device_names_by_class_name={'nmos': ['XM1']})
+        self.assertEqual([], check_schematic_device_classes(lvs_netlist(mim_cap=True), schematic))
+
+    def test_schematic_without_devices_of_known_models(self):
+        schematic = SchematicDevices(device_names_by_unknown_model={'nfet': ['XM1']})
+        self.assertEqual(['kpex reads no devices from the schematic, e.g. of models without device model mapping '
+                          '(nfet), so no device classes are compared'],
+                         check_schematic_device_classes(lvs_netlist(), schematic))
