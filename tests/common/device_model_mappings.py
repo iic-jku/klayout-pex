@@ -42,5 +42,21 @@ def device_models(*mappings: dict) -> DeviceModels:
                                                               device_models_pb2.DeviceModelsInfo()))
 
 
-NMOS = {'lvs_device_class_name': 'nmos', 'spice_prefix': 'X', 'terminal_names': ['D', 'G', 'S', 'B']}
-RPPD = {'lvs_device_class_name': 'rppd', 'spice_prefix': 'X', 'terminal_names': ['A', 'B']}
+# NOTE: as the IHP models, which take w and l in m, of W and L in µm
+W_L = [{'name': 'w', 'lvs_parameter_name': 'W', 'lvs_parameter_factor': 1e-6},
+       {'name': 'l', 'lvs_parameter_name': 'L', 'lvs_parameter_factor': 1e-6}]
+
+NMOS = {'lvs_device_class_name': 'nmos', 'spice_prefix': 'X', 'terminal_names': ['D', 'G', 'S', 'B'],
+        'parameters': W_L}
+RPPD = {'lvs_device_class_name': 'rppd', 'spice_prefix': 'X', 'terminal_names': ['A', 'B'], 'parameters': W_L}
+
+# a BJT of a fixed size, whose model's m is the number of emitters NE
+NPN = {'lvs_device_class_name': 'npn', 'spice_prefix': 'X', 'terminal_names': ['C', 'B', 'E'],
+       'parameters': [{'name': 'm', 'lvs_parameter_name': 'NE'}]}
+
+# a MIM cap, whose model takes w and l, of the area A and perimeter P of LVS
+MIM = {'lvs_device_class_name': 'mim', 'spice_prefix': 'X', 'terminal_names': ['A', 'B'],
+       'parameters': [{'name': name, 'lvs_parameter_factor': 1e-6,
+                       'lvs_area_perimeter_side': {'area_parameter_name': 'A', 'perimeter_parameter_name': 'P',
+                                                   'side': side}}
+                      for name, side in (('w', 'SIDE_LONG'), ('l', 'SIDE_SHORT'))]}
