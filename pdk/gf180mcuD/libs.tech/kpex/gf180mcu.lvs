@@ -529,12 +529,8 @@ exec_end_time = Time.now
 run_time = exec_end_time - exec_start_time
 logger.info(format('LVS Total Run time %f seconds', run_time))
 
-if result
-  logger.info('==========================================')
-  logger.info('INFO : Congratulations! Netlists match.')
-  logger.info('==========================================')
-else
-  logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-  logger.error("ERROR : Netlists don't match")
-  logger.info('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-end
+# [PEX] kpex compares the layout with an empty dummy schematic only, as KLayout writes the LVS database
+#       after a comparison, so the netlists never match (NOTE: a regular LVS would report the result,
+#       kpex doesn't, see https://github.com/iic-jku/klayout-pex/issues/330)
+logger.info("[PEX] Compared with the dummy schematic of kpex only, for the LVS database; " \
+            "use regular LVS to compare layout against schematic")

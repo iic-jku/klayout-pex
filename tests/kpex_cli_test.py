@@ -75,3 +75,39 @@ def test_pex25d_outputs_are_named_as_their_kind(tmp_path):
             "name a file with one of: .pex25d, .pex25d.pb, .pex25d.textpb") in output
     assert ("--out-scene x.scene.pex25d.pb is named as a PEX25D file (.pex25d.pb), which pex25d would read it as; "
             "name a scene with one of: .pex25d.scene.pb, .pex25d.scene.textpb") in output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "LVS")
+def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.MonkeyPatch):
+    # NOTE: the PEX-LVS compares the layout with a dummy schematic only (#330)
+    monkeypatch.setenv('KPEX_KLAYOUT_EXE', str(tmp_path / 'no_klayout'))
+    schematic_path = tmp_path / 'nfet_li1.spice'
+    schematic_path.write_text('.subckt nfet_li1 D G S\n.ends\n')
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                            '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 1, output  # NOTE: no KLayout
+    assert "--schematic is not compared against layout, use regular LVS for that" in output
+    assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_dummy_schematic.spice')
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
+@allure.tag("PEX", "2.5D", "LVS")
+@pytest.mark.slow
+def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
+    # NOTE: the alignment with a schematic kept the cells it has as subcircuits, and the RC netlist
+    #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
+    config = PDKTestConfig(PDKName.SKY130A)
+    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                            '--gds', gds_path,
+                                            '--schematic', gds_path.replace('.gds.gz', '.spice'),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    run_dir = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell'
+    with open(run_dir / 'nfet_li1_in_subcell_k25d_pex_netlist.spice') as f:
+        netlist = f.read()
+    assert 'sky130_fd_pr__nfet_01v8' in netlist and 'SUBNFET' not in netlist, netlist
+    with open(run_dir / 'nfet_li1_in_subcell_lvs.log') as f:
+        assert "Netlists don't match" not in f.read()

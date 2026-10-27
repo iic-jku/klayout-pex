@@ -215,8 +215,8 @@ class KpexCLI:
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (for LVS). "
-                                          "If none given, a dummy schematic will be created")
+                                     help="Schematic SPICE netlist path "
+                                          "(not compared against layout, use regular LVS for that)")
         # Developer shortcut, not a supported entry point. It exists so that a
         # PEX25D or engine run can be repeated without paying for LVS again while
         # working on the code downstream of it. An LVSDB is tied to the kpex
@@ -234,7 +234,7 @@ class KpexCLI:
         group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                      type=true_or_false, default=True,
                                      help="Reuse the cached LVSDB while the LVS inputs are unchanged "
-                                          "(layout, schematic, LVS deck, KLayout version) (default is %(default)s)")
+                                          "(layout, LVS deck, KLayout version) (default is %(default)s)")
         group_pex_input.add_argument("--cache-dir", dest="cache_dir_path", default=None,
                                      help="Path for cached LVSDB (default is .kpex_cache within --out-dir)")
         group_pex_input.add_argument("--lvs-verbose", dest="klayout_lvs_verbose",
@@ -747,20 +747,22 @@ class KpexCLI:
             os.makedirs(args.output_dir_path, exist_ok=True)
             if args.input_mode == InputMode.GDS:
                 if args.schematic_path:
-                    args.effective_schematic_path = args.schematic_path
                     if not os.path.isfile(args.schematic_path):
-                        error(f"Can't read schematic (LVS input) at path {args.schematic_path}")
+                        error(f"Can't read schematic at path {args.schematic_path}")
                         found_errors = True
-                else:
-                    info(f"LVS input schematic not specified (argument --schematic), using dummy schematic")
-                    args.effective_schematic_path = os.path.join(args.output_dir_path,
-                                                                 f"{args.effective_cell_name}_dummy_schematic.spice")
-                    with open(args.effective_schematic_path, 'w', encoding='utf-8') as f:
-                        f.writelines([
-                            f".subckt {args.effective_cell_name} VDD VSS\n",
-                            '.ends\n',
-                            '.end\n'
-                        ])
+                    warning("--schematic is not compared against layout, use regular LVS for that")
+                # NOTE: the PEX-LVS compares the layout with an empty dummy schematic only, as KLayout writes
+                #       the LVS database after a comparison: the alignment flattens every circuit of the layout
+                #       into its top circuit, whose devices and nets the extraction takes, while a schematic with
+                #       subcircuits would keep their circuits (#330)
+                args.effective_schematic_path = os.path.join(args.output_dir_path,
+                                                             f"{args.effective_cell_name}_dummy_schematic.spice")
+                with open(args.effective_schematic_path, 'w', encoding='utf-8') as f:
+                    f.writelines([
+                        f".subckt {args.effective_cell_name} VDD VSS\n",
+                        '.ends\n',
+                        '.end\n'
+                    ])
 
         try:
             pattern_string: str = args.dielectric_filter
