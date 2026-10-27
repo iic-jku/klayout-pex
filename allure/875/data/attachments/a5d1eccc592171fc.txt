@@ -1,0 +1,24 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk ihp-sg13g2 --mode R --blackbox y --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'cap_cmim_20um_x_20um_over_m4_wire'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.gds.gz/cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1596 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1596 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:1596 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1596 (67, 0) -> (metal5_cap metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:1596 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:1596 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 3pins
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 R1;A;A.P0.Metal5;;0.043
+SUBPROCESS __kpex__:kpex_cli.py:1177 R2;B;B.$1.TopMetal1;;0.007
+SUBPROCESS __kpex__:kpex_cli.py:1177 R3;B.$1.TopMetal1;B.P0.MIM;;2.2
+SUBPROCESS __kpex__:kpex_cli.py:1180 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.spice
