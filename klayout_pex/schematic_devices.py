@@ -30,10 +30,12 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+from itertools import chain
 from typing import *
 
 from .device_models import DeviceModels
-from .netlist.spice_netlist import SpiceElement, SpiceNetlist
+from .netlist.spice_hierarchy import SpiceHierarchy
+from .netlist.spice_netlist import SpiceNetlist
 from .types import LVSDeviceClassName
 
 
@@ -52,40 +54,25 @@ def schematic_devices(netlist: SpiceNetlist,
                       top_cell_name: str) -> SchematicDevices:
     """
     :param top_cell_name: the cell of the layout, whose subcircuit in the schematic has the devices,
-                          else those of the subcircuits that no other one calls, and the elements outside of them
+                          else those of the subcircuits that no element calls, and the elements outside of them
+    :raises SpiceEvaluationError: if a value of the schematic has no number
     """
-    subcircuit_by_key = {s.name.upper(): s for s in netlist.subcircuits}
-    top = subcircuit_by_key.get(top_cell_name.upper())
+    hierarchy = SpiceHierarchy(netlist)
+    top = hierarchy.subcircuit(top_cell_name)
     if top is not None:
-        roots = [top]
-        elements = []
+        elements = hierarchy.flat_elements(top)
     else:
-        called = {e.model.upper() for s in netlist.subcircuits for e in s.elements if e.kind == 'X'}
-        roots = [s for s in netlist.subcircuits if s.name.upper() not in called]
-        elements = netlist.elements
+        elements = chain(*(hierarchy.flat_elements(s) for s in hierarchy.uncalled_subcircuits()),
+                         hierarchy.flat_elements())
 
     device_names_by_class_name: Dict[LVSDeviceClassName, List[str]] = defaultdict(list)
     device_names_by_unknown_model: Dict[str, List[str]] = defaultdict(list)
-
-    def add(element: SpiceElement, path: str, calls: Tuple[str, ...]):
-        name = f"{path}{element.name}"
-        subcircuit = subcircuit_by_key.get(element.model.upper()) if element.kind == 'X' else None
-        if subcircuit is not None:
-            if subcircuit.name.upper() not in calls:  # NOTE: SPICE allows no recursion
-                for e in subcircuit.elements:
-                    add(e, f"{name}.", calls + (subcircuit.name.upper(),))
-            return
-        class_name = device_models.lvs_device_class_name(element)
+    for e in elements:
+        class_name = device_models.lvs_device_class_name(e.element)
         if class_name is not None:
-            device_names_by_class_name[class_name].append(name)
-        elif element.model is not None:
-            device_names_by_unknown_model[element.model].append(name)
-
-    for root in roots:
-        for element in root.elements:
-            add(element, '', (root.name.upper(),))
-    for element in elements:
-        add(element, '', ())
+            device_names_by_class_name[class_name].append(e.path)
+        elif e.element.model is not None:
+            device_names_by_unknown_model[e.element.model].append(e.path)
 
     return SchematicDevices(device_names_by_class_name=dict(device_names_by_class_name),
                             device_names_by_unknown_model=dict(device_names_by_unknown_model))
