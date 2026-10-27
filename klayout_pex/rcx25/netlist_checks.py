@@ -22,7 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 """
-Consistency checks of the RC netlist against the LVS netlist it's made of (#215)
+Consistency checks of the RC netlist against the LVS netlist it's made of (#215),
+and of the LVS netlist against the schematic (#345)
 
 NOTE: the defects of #211 gave RC netlists that simulate to plausible, but wrong numbers,
       so these checks compare the RC netlist with the LVS netlist by identity
@@ -37,6 +38,7 @@ from typing import *
 import klayout.db as kdb
 
 from ..device_models import DeviceModels
+from ..schematic_devices import SchematicDevices
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
 from ..types import NetName
@@ -264,3 +266,20 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
                             f"but {'%.12g' % expected} fF in the summary")
 
     return problems
+
+
+def check_schematic_device_classes(lvs_netlist: kdb.Netlist,
+                                   schematic: SchematicDevices) -> List[str]:
+    """
+    :return: the problems: the device classes of the schematic that no device of the LVS netlist has,
+             e.g. of a device the PEX-LVS doesn't recognize, which the extraction then misses
+    """
+    lvs_class_names = {device.device_class().name
+                       for circuit in lvs_netlist.each_circuit() for device in circuit.each_device()}
+    if lvs_class_names and not schematic.device_names_by_class_name:
+        models = sorted(schematic.device_names_by_unknown_model)
+        return [f"kpex reads no devices from the schematic, e.g. of models without device model mapping"
+                f"{f' ({first_names(models)})' if models else ''}, so no device classes are compared"]
+    return [f"the schematic has devices of class {class_name} ({first_names(device_names)}), the LVS netlist none"
+            for class_name, device_names in sorted(schematic.device_names_by_class_name.items())
+            if class_name not in lvs_class_names]

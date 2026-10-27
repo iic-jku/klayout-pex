@@ -88,7 +88,8 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
                                             '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
     assert code == 1, output  # NOTE: no KLayout
-    assert "--schematic is not compared against layout, use regular LVS for that" in output
+    assert "--schematic is checked for its device classes only, " \
+           "use regular LVS to compare layout against schematic" in output
     assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_dummy_schematic.spice')
 
 

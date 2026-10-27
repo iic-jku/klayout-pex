@@ -23,13 +23,14 @@
 #
 
 from __future__ import annotations  # allow class type hints within same class
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import cached_property
 import math
 from typing import *
 
 import klayout.db as kdb
 
+from .netlist.spice_netlist import SpiceElement
 from .types import LVSDeviceClassName
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
@@ -67,6 +68,42 @@ class DeviceModels:
     @cached_property
     def mapping_by_lvs_device_class_name(self) -> Dict[LVSDeviceClassName, device_models_pb2.DeviceModelMapping]:
         return {m.lvs_device_class_name: m for m in self.device_models.device_model_mappings}
+
+    @cached_property
+    def mappings_by_spice_model(self) -> Dict[Tuple[str, str], List[device_models_pb2.DeviceModelMapping]]:
+        """
+        The mappings by the SPICE prefix and the model they write, in uppercase (SPICE reads names regardless of case),
+        e.g. ('X', 'SG13_LV_NMOS') for sg13_lv_nmos and rfnmos
+        """
+        mappings: Dict[Tuple[str, str], List[device_models_pb2.DeviceModelMapping]] = defaultdict(list)
+        for m in self.device_models.device_model_mappings:
+            mappings[(m.spice_prefix.upper(), (m.model_name or m.lvs_device_class_name).upper())].append(m)
+        return mappings
+
+    def lvs_device_class_name(self, element: SpiceElement) -> Optional[LVSDeviceClassName]:
+        """
+        The LVS device class of a device of a schematic, the reverse of the mappings:
+        a model the mappings write with their constant parameters
+        (e.g. X1 d g s b sg13_lv_nmos w=1u l=0.13u rfmode=1 is an rfnmos, without rfmode an sg13_lv_nmos),
+        or else a model named as an LVS device class (e.g. M1 d g s b sky130_fd_pr__nfet_01v8, as LVS reads it)
+
+        :return: None, if neither, e.g. a device whose class has no mapping
+        """
+        if element.model is None:
+            return None
+
+        def constants(mapping: device_models_pb2.DeviceModelMapping) -> Dict[str, float]:
+            return {p.name.lower(): p.constant for p in mapping.parameters if p.WhichOneof('value') == 'constant'}
+
+        candidates = [m for m in self.mappings_by_spice_model.get((element.kind, element.model.upper()), [])
+                      if all(element.parameters.get(name) == value for name, value in constants(m).items())]
+        if candidates:
+            # NOTE: the one with the most constants, e.g. rfnmos, which an sg13_lv_nmos with rfmode=1 matches too
+            return max(candidates, key=lambda m: len(constants(m))).lvs_device_class_name
+        for name in self.mapping_by_lvs_device_class_name:
+            if name.upper() == element.model.upper():
+                return name
+        return None
 
     @cached_property
     def vacask_subcircuits_with_m(self) -> Set[str]:
