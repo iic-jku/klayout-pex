@@ -40,13 +40,27 @@ from .types import LVSDeviceClassName
 
 
 @dataclass
+class SchematicDevice:
+    name: str  # e.g. X1.XM2
+
+    # by the device model mapping in reverse, e.g. {'W': 1.0, 'L': 0.13} (µm) of an IHP MOS with w=1u l=0.13u
+    lvs_parameters: Dict[str, float] = field(default_factory=dict)
+
+    m: float = 1.0  # the multiplier of SPICE
+
+
+@dataclass
 class SchematicDevices:
-    # e.g. {'sg13_lv_nmos': ['X1.XM1', 'X1.XM2']}
-    device_names_by_class_name: Dict[LVSDeviceClassName, List[str]] = field(default_factory=dict)
+    # e.g. {'sg13_lv_nmos': [SchematicDevice('X1.XM1', ...), ...]}
+    devices_by_class_name: Dict[LVSDeviceClassName, List[SchematicDevice]] = field(default_factory=dict)
 
     # the devices of models that no device model mapping writes, by model,
     # e.g. a device without a model mapping, or a call of a subcircuit the schematic doesn't define
     device_names_by_unknown_model: Dict[str, List[str]] = field(default_factory=dict)
+
+    @property
+    def device_names_by_class_name(self) -> Dict[LVSDeviceClassName, List[str]]:
+        return {c: [d.name for d in devices] for c, devices in self.devices_by_class_name.items()}
 
 
 def schematic_devices(netlist: SpiceNetlist,
@@ -65,14 +79,18 @@ def schematic_devices(netlist: SpiceNetlist,
         elements = chain(*(hierarchy.flat_elements(s) for s in hierarchy.uncalled_subcircuits()),
                          hierarchy.flat_elements())
 
-    device_names_by_class_name: Dict[LVSDeviceClassName, List[str]] = defaultdict(list)
+    devices_by_class_name: Dict[LVSDeviceClassName, List[SchematicDevice]] = defaultdict(list)
     device_names_by_unknown_model: Dict[str, List[str]] = defaultdict(list)
     for e in elements:
         class_name = device_models.lvs_device_class_name(e.element)
         if class_name is not None:
-            device_names_by_class_name[class_name].append(e.path)
+            mapping = device_models.mapping_by_lvs_device_class_name[class_name]
+            devices_by_class_name[class_name].append(
+                SchematicDevice(name=e.path,
+                                lvs_parameters=device_models.lvs_parameter_values(mapping, e.element),
+                                m=e.element.parameters.get('m', 1.0)))
         elif e.element.model is not None:
             device_names_by_unknown_model[e.element.model].append(e.path)
 
-    return SchematicDevices(device_names_by_class_name=dict(device_names_by_class_name),
+    return SchematicDevices(devices_by_class_name=dict(devices_by_class_name),
                             device_names_by_unknown_model=dict(device_names_by_unknown_model))

@@ -106,6 +106,44 @@ class DeviceModels:
                 return name
         return None
 
+    @staticmethod
+    def lvs_parameter_values(mapping: device_models_pb2.DeviceModelMapping,
+                             element: SpiceElement) -> Dict[str, float]:
+        """
+        The LVS parameters of a device of a schematic, the reverse of the mapping's parameters
+        (e.g. W = 1, in µm, of w=1u of an IHP MOS), and the area and perimeter of the rectangle of a model's sides
+
+        :param element: with its parameters as numbers (e.g. of SpiceHierarchy)
+        :return: by LVS parameter name, without those whose model parameters the device doesn't give
+                 (e.g. left to the model's default)
+        """
+        values: Dict[str, float] = {}
+        sides: List[Tuple[device_models_pb2.LVSAreaPerimeterSide, float]] = []
+        for p in mapping.parameters:
+            value = element.parameters.get(p.name.lower())
+            if value is None:
+                continue
+            factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
+            match p.WhichOneof('value'):
+                case 'lvs_parameter_name':
+                    values[p.lvs_parameter_name] = value / factor
+                case 'lvs_area_perimeter_side':
+                    sides.append((p.lvs_area_perimeter_side, value / factor))
+        if len(sides) == 2:
+            (side, a), (_, b) = sides
+            values[side.area_parameter_name] = a * b
+            values[side.perimeter_parameter_name] = 2 * (a + b)
+        return values
+
+    @staticmethod
+    def multiplier_lvs_parameter_name(mapping: device_models_pb2.DeviceModelMapping) -> Optional[str]:
+        """
+        The LVS parameter the mapping writes as the multiplier m of the model (e.g. NE of a BJT),
+        None if it writes no m
+        """
+        return next((p.lvs_parameter_name for p in mapping.parameters
+                     if p.name.lower() == 'm' and p.WhichOneof('value') == 'lvs_parameter_name'), None)
+
     @cached_property
     def vacask_subcircuits_with_m(self) -> Set[str]:
         """

@@ -33,11 +33,14 @@ NOTE: the defects of #211 gave RC netlists that simulate to plausible, but wrong
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+import math
 from typing import *
 
 import klayout.db as kdb
 
 from ..device_models import DeviceModels
+from ..device_totals import DeviceTotalParameters
+from ..log import info, warning
 from ..schematic_devices import SchematicDevices
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
@@ -60,6 +63,9 @@ class RCNetlistCheckError(Exception):
 
 # NOTE: relative, the capacitances of the summary and the netlist differ by rounding only
 CAPACITANCE_TOLERANCE = 1e-9
+
+# NOTE: relative, the device totals of a schematic and its layout differ by rounding only (e.g. of µm in m and back)
+DEVICE_TOTAL_TOLERANCE = 1e-6
 
 
 def first_names(names: List[str]) -> str:
@@ -283,3 +289,88 @@ def check_schematic_device_classes(lvs_netlist: kdb.Netlist,
     return [f"the schematic has devices of class {class_name} ({first_names(device_names)}), the LVS netlist none"
             for class_name, device_names in sorted(schematic.device_names_by_class_name.items())
             if class_name not in lvs_class_names]
+
+
+class _DeviceTotals:
+    """
+    The totals of the devices of a class, and the devices without value for a quantity
+    """
+
+    def __init__(self):
+        self.sums: Dict[str, float] = defaultdict(float)
+        self.devices_without_value: Dict[str, List[str]] = defaultdict(list)
+
+    def add(self, device_name: str, quantities: Dict[str, Optional[float]], count: int = 1):
+        for name, value in quantities.items():
+            if value is None:
+                self.devices_without_value[name].append(device_name)
+            else:
+                self.sums[name] += value * count
+
+
+def _circuit_counts(netlist: kdb.Netlist) -> Dict[str, int]:
+    """
+    :return: how often each circuit is in the top circuits, by name
+    """
+    counts: Dict[str, int] = {}
+
+    def count(circuit: kdb.Circuit) -> int:
+        if circuit.name not in counts:
+            references = list(circuit.each_ref())
+            counts[circuit.name] = sum(count(r.circuit()) for r in references) if references else 1
+        return counts[circuit.name]
+
+    for c in netlist.each_circuit():
+        count(c)
+    return counts
+
+
+def check_schematic_device_totals(lvs_netlist: kdb.Netlist,
+                                  schematic: SchematicDevices,
+                                  device_models: DeviceModels) -> List[str]:
+    """
+    Compares the totals of the device classes of both (see device_totals), e.g. Σ W·L of a MOS,
+    but those that a device has no value for, which it warns about,
+    and logs the classes without totals, whose presence check_schematic_device_classes compares only
+
+    :return: the problems: the totals that differ, e.g. of a device the PEX-LVS doesn't recognize
+             in a class it recognizes otherwise
+    """
+    circuit_counts = _circuit_counts(lvs_netlist)
+    parameters_by_class_name: Dict[str, DeviceTotalParameters] = {}
+    lvs_totals_by_class_name: Dict[str, _DeviceTotals] = defaultdict(_DeviceTotals)
+    for circuit in lvs_netlist.each_circuit():
+        for device in circuit.each_device():
+            device_class = device.device_class()
+            mapping = device_models.mapping_by_lvs_device_class_name.get(device_class.name)
+            if mapping is None or device_class.name not in schematic.devices_by_class_name:
+                continue
+            parameters = parameters_by_class_name.setdefault(device_class.name,
+                                                             DeviceTotalParameters.of(device_class, mapping))
+            values = {pd.name: device.parameter(pd.name) for pd in device_class.parameter_definitions()}
+            lvs_totals_by_class_name[device_class.name].add(device.expanded_name(), parameters.quantities(values),
+                                                            count=circuit_counts[circuit.name])
+
+    problems: List[str] = []
+    uncompared: List[str] = []
+    for class_name, lvs_totals in sorted(lvs_totals_by_class_name.items()):
+        parameters = parameters_by_class_name[class_name]
+        totals = _DeviceTotals()
+        for device in schematic.devices_by_class_name[class_name]:
+            totals.add(device.name, parameters.quantities(device.lvs_parameters, device.m))
+        for quantity in parameters.quantity_names:
+            without_value = totals.devices_without_value[quantity] + lvs_totals.devices_without_value[quantity]
+            if without_value:
+                uncompared.append(f"Σ {quantity} of class {class_name}: no value of {first_names(without_value)}")
+            elif not math.isclose(totals.sums[quantity], lvs_totals.sums[quantity], rel_tol=DEVICE_TOTAL_TOLERANCE):
+                problems.append(f"the schematic has Σ {quantity} = {'%.9g' % totals.sums[quantity]} "
+                                f"of class {class_name}, the LVS netlist {'%.9g' % lvs_totals.sums[quantity]}")
+    if uncompared:
+        warning("The device class check leaves out these totals, as devices have no value for them "
+                "(e.g. of the schematic, which leaves a parameter to the model's default):\n" +
+                '\n'.join(f"  - {u}" for u in uncompared))
+    presence_only = sorted(c for c, p in parameters_by_class_name.items() if not p.quantity_names)
+    if presence_only:
+        info(f"The device class check compares only the presence of these classes, "
+             f"as their device model mappings give no totals: {', '.join(presence_only)}")
+    return problems

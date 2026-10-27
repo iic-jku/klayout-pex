@@ -104,7 +104,13 @@ from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, redu
 from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
 from .rcx25.extractor import CExtractionTechError, RCX25Extractor, ExtractionResults
-from .rcx25.netlist_checks import check_rc_netlist, check_schematic_device_classes, first_names, RCNetlistCheckError
+from .rcx25.netlist_checks import (
+    check_rc_netlist,
+    check_schematic_device_classes,
+    check_schematic_device_totals,
+    first_names,
+    RCNetlistCheckError,
+)
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
@@ -217,8 +223,8 @@ class KpexCLI:
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (--check checks its device classes only, "
-                                          "use regular LVS to compare layout against schematic)")
+                                     help="Schematic SPICE netlist path (--check checks its device classes "
+                                          "and their totals only, use regular LVS to compare layout against schematic)")
         # Developer shortcut, not a supported entry point. It exists so that a
         # PEX25D or engine run can be repeated without paying for LVS again while
         # working on the code downstream of it. An LVSDB is tied to the kpex
@@ -404,6 +410,7 @@ class KpexCLI:
                                     "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
                                     "network of its net, a port that touches nothing, or a lost capacitance, "
                                     "or if the LVS netlist lacks a device class of --schematic "
+                                    "or differs in its totals (e.g. Σ W·L of a MOS) "
                                     "(default is True for --mode RC, otherwise these are warnings)")
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -753,7 +760,7 @@ class KpexCLI:
                     if not os.path.isfile(args.schematic_path):
                         error(f"Can't read schematic at path {args.schematic_path}")
                         found_errors = True
-                    warning("--schematic is checked for its device classes only, "
+                    warning("--schematic is checked for its device classes and their totals only, "
                             "use regular LVS to compare layout against schematic")
                 # NOTE: the PEX-LVS compares the layout with an empty dummy schematic only, as KLayout writes
                 #       the LVS database after a comparison: the alignment flattens every circuit of the layout
@@ -1111,7 +1118,8 @@ class KpexCLI:
                                         device_models: DeviceModels,
                                         top_cell_name: str) -> List[str]:
         """
-        :return: the problems of check_schematic_device_classes, or that the schematic can't be read or evaluated
+        :return: the problems of check_schematic_device_classes and check_schematic_device_totals,
+                 or that the schematic can't be read or evaluated
         """
         try:
             netlist = SpiceReader().read(schematic_path)
@@ -1122,11 +1130,12 @@ class KpexCLI:
         except SpiceEvaluationError as e:
             return [f"kpex can't evaluate the schematic, so no device classes are compared: {schematic_path}: {e}"]
         if schematic.device_names_by_unknown_model:
-            info("The device class check leaves out the devices of the schematic of models without device model "
-                 "mapping:\n" +
-                 '\n'.join(f"  - {model}: {first_names(names)}"
-                            for model, names in sorted(schematic.device_names_by_unknown_model.items())))
-        return check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic)
+            warning("The device class check leaves out the devices of the schematic of models without device model "
+                    "mapping:\n" +
+                    '\n'.join(f"  - {model}: {first_names(names)}"
+                               for model, names in sorted(schematic.device_names_by_unknown_model.items())))
+        return check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic) + \
+               check_schematic_device_totals(lvs_netlist=lvs_netlist, schematic=schematic, device_models=device_models)
 
     def run_kpex_2_5d_engine(self,
                              args: argparse.Namespace,
