@@ -1,0 +1,23 @@
+WARNING  __kpex__:kpex_cli.py:1412 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1449 main extract --pdk gf180mcuD --mode R --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:676 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:716 No explicit top cell specified, using top cell 'diode_pw2dw_dw2ps_03v3_w2_l4'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1347 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1348 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1583 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1583 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1583 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4407) -> (contact_ptap_dw_con)
+INFO     __kpex__:kpex_cli.py:1583 (204, 0) -> (lvpwell_dw_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 4pins
+WARNING  __kpex__:r_extractor.py:302 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - LVPWELL (LVS lvpwell_dw_con)
+WARNING  __kpex__:lvsdb_extractor.py:767 The resistance network has no nodes for these device terminals, as the tech info has no layer for their LVS layer, and they overlap no conductor of their net (e.g. a terminal on the substrate or a well):
+  - diode_dw2ps_03v3 terminal A on LVS layer l45: $2
+SUBPROCESS __kpex__:kpex_cli.py:1164 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1167 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1183 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netlist.spice

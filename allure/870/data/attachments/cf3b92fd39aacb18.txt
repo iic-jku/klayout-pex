@@ -1,0 +1,298 @@
+WARNING  __kpex__:kpex_cli.py:1412 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1449 main extract --pdk gf180mcuD --mode CC --blackbox y --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:676 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:716 No explicit top cell specified, using top cell 'diode_pw2dw_dw2ps_03v3_w2_l4'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+INFO     __kpex__:kpex_cli.py:1344 Cache miss: there is no cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1345 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:111 klayout -b -r /home/runner/work/klayout-pex/klayout-pex/pdk/gf180mcuD/libs.tech/kpex/gf180mcu.lvs -rd input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz -rd report=/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz -rd target_netlist=/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_extracted.cir -rd schematic=/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false -rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd no_simplify=true -rd verbose=false
+SUBPROCESS __kpex__:lvs_runner.py:112 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_lvs.log
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Starting running GF180MCU Klayout LVS runset on /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Ruby Version for klayout: 3.2.3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Loading database to memory is complete.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : GF180MCU Klayout LVS runset output at: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Evaluate switches.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : schematic translate: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Extracted netlist with net names: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Extracted netlist with comments in details: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : LVS extracted netlist at: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_extracted.cir
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected SIMPLIFY option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected NET_ONLY option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected CHECK_PORTS option: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected TOP_LVL_PINS option: true
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected COMBINE option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected PURGE option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected PURGE_NETS option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected IMPLICIT_CONNECT option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Selected CONSIDER_DN_DW_FEATURES option: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Verbose mode: false
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : deep  mode is enabled.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : METAL_TOP Selected is 11K
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : METAL_STACK Selected is 5LM
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : POLY_RES Selected is 1k
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : MIM Option selected: B
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : MIM CAP selected: 2
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Input schematic file: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_dummy_schematic.spice
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : Read in polygons from layers.
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : comp has 17 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : dnwell has 2 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : nwell has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : lvpwell has 1 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : dualgate has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : poly2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : nplus has 5 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : pplus has 12 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (651728K) : sab has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : esd has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : resistor has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : fhres has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : fusetop has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : fusewindow_d has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : polyfuse has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : mvsd has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : mvpsd has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : nat has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652256K) : comp_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : poly2_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : schottky_diode has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : zener has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : res_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : opc_drc has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : ndmy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (652640K) : pmndmy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : v5_xtor has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : cap_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : mos_cap_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : ind_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : diode_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : drc_bjt has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653048K) : lvs_bjt has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : mim_l_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : latchup_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : guard_ring_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : otp_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : mtpmark has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : neo_ee_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653452K) : sramcore has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : lvs_rf has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : lvs_drain has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : hvpolyrs has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : lvs_io has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : probe_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : esd_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : lvs_source has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (653860K) : well_diode_mk has 2 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : ldmos_xtor has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : plfuse has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : efuse_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : mcell_feol_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : ymtp_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : dev_wf_mk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 Warning: Comp labels are ignored, as comp is not defined as a valid conductive layer
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654252K) : comp_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : poly2_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : mdiode has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : contact has 223 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : metal1_drawn has 17 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : metal1_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (654656K) : metal1_label has 5 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal1_slot has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal1_blk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal1_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : via1 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_drawn has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_slot has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_blk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal2_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : via2 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_drawn has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_slot has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_blk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal3_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : via3 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_drawn has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_slot has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_blk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal4_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : via4 has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_drawn has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_dummy has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_label has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_slot has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_blk has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : metal5_res has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : pad has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : ubmpperi has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : ubmparray has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : ubmeplate has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : pr_bndry has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : border has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : isosub has 0 polygons
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : Total no. of polygons in the design is 284
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : Starting GF180MCU LVS runset
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (655060K) : Starting base layers derivations
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (821316K) : Starting MOSFET DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (822132K) : Starting PMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (824168K) : Starting NMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (827036K) : Starting BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:24 +0000: Memory Usage (827036K) : Starting vnpn layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (832732K) : Starting vpnp layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (835176K) : Starting RESISTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (824976K) : Starting MIMCAP DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (824976K) : Starting MOSCAP DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (826248K) : Starting MOS SAB DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (827060K) : Starting PMOS SAB DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (828284K) : Starting NMOS SAB DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (829912K) : Starting NMOS EFUSE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting GF180 LVS connectivity setup
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting GF180 LVS connectivity setup (Inter-layer)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting GF180 LVS connectivity setup (Global)
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting LVS MOSFET CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting LVS BJT CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting LVS MIMCAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting LVS RESISTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting LVS EFUSE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting GF180 LVS DEVICES EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting MOSFET EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Starting PMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Extracting 3.3V PMOS transistor outside DNWEL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Extracting 5V PMOS transistor outside DNWELL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Extracting 6V PMOS transistor outside DNWELL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Extracting 3.3V PMOS transistor inside DNWELL as regular 3.3V PMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831140K) : Extracting 5V PMOS transistor inside DNWELL as regular 5V PMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : Extracting 6V PMOS transistor inside DNWELL as regular, no dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : Extracting LDPMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : Starting NMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : 3.3V NMOS transistor outside DNWELL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : 5V NMOS transistor outside DNWELL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : 6V NMOS transistor outside DNWELL
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : 3.3V NMOS transistor inside DNWELL as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831528K) : 5V NMOS transistor inside DNWELL as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : 6V NMOS transistor inside DNWELL, as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : Native Vt NMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : Extracting LDNMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : Starting BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : Starting vnpn BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (831936K) : Extracting npn_10p00x10p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (832344K) : Extracting npn_05p00x05p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (832344K) : Extracting npn_00p54x16p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (832752K) : Extracting npn_00p54x08p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (832752K) : Extracting npn_00p54x04p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833156K) : Extracting npn_00p54x02p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833156K) : Starting vpnp BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833156K) : Extracting pnp_10p00x10p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833564K) : Extracting pnp_05p00x05p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833564K) : Extracting pnp_10p00x00p42 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833972K) : Extracting pnp_05p00x00p42 BJT
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (833972K) : Starting DIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (835600K) : Extracting diode_nd2ps_03v3 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836008K) : Extracting diode_nd2ps_03v3_dn diode as diode_nd2ps_03v3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836008K) : Extracting diode_nd2ps_06v0 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836412K) : Extracting diode_nd2ps_06v0_dn diode as diode_nd2ps_06v0
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836412K) : Extracting diode_pd2nw_03v3 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_pd2nw_03v3_dn diode as diode_pd2nw_03v3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_pd2nw_06v0 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_pd2nw_06v0_dn diode as diode_pd2nw_06v0
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_nw2ps_03v3 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_nw2ps_06v0 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_pw2dw_03v3 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_pw2dw_06v0 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_dw2ps_03v3 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting diode_dw2ps_06v0 diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting sc_diode diode
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Starting RESISTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPLUS_U device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPLUS_U_DW device as NPLUS_U
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPLUS_U device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPLUS_U_DW device as PPLUS_U
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPLUS_S device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPLUS_S_DW device NPLUS_S
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPLUS_S device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPLUS_S_DW device as PPLUS_S
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_U SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_U LVPWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_U_DW device NPOLYF_U
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_DW device as PPOLYF_U
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_S SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_S NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting NPOLYF_S_DW device as NPOLYF_S
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_S SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_S NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_S_DW device as PPOLYF_S
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_1K SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_1K NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_1K_DW device as PPOLYF_U_1K
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_1K_6p0 SUB device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_1K_6p0 NWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting PPOLYF_U_DW_1K_6p0_dw device as PPOLYF_U_DW_1k_6p0
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting RM1 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting RM2 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting RM3 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting RM4 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting TM11K device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Starting MIMCAP EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting cap_mim_2f0fF device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Starting MOSCAP EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting cap_nmos_03v3 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:25 +0000: Memory Usage (836820K) : Extracting cap_nmos_03v3_dn device as cap_nmos_03v3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_03v3 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_03v3_dn device as cap_pmos_03v3
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_nmos_06v0 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_nmos_06v0_dn device as cap_nmos_06v0
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_06v0 device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_06v0_dn device as cap_pmos_06v0
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_03v3_b device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_nmos_06v0_b device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting cap_pmos_06v0_b device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Starting MOS SAB EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Starting PMOS SAB EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 3.3V ESD PMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 5V ESD PMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 6V ESD PMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 3.3V ESD PMOS transistor inside DNWELL device, as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 5V ESD PMOS transistor inside DNWELL device as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 6V ESD PMOS transistor inside DNWELL device as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Starting NMOS SAB EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 3.3V ESD NMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 5V ESD NMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 6V ESD NMOS transistor outside DNWELL device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 3.3V ESD NMOS transistor inside DNWELL device, as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 5V ESD NMOS transistor inside DNWELL device as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Extracting 6V ESD NMOS transistor inside DNWELL device as regular, non dw device
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Starting EFUSE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : Starting GF180 LVS comparison section
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : LVS Total Run time 2.004049 seconds
+SUBPROCESS __kpex__:lvs_runner.py:133 2026-10-27 15:35:26 +0000: Memory Usage (836820K) : [PEX] Compared with the dummy schematic of kpex only, for the LVS database; use regular LVS to compare layout against schematic
+INFO     __kpex__:lvs_runner.py:154 klayout LVS succeeded after 3.758s
+INFO     __kpex__:kpex_cli.py:1583 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1583 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1583 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:kpex_cli.py:1583 (33, 4407) -> (contact_ptap_dw_con)
+INFO     __kpex__:kpex_cli.py:1583 (204, 0) -> (lvpwell_dw_con)
+SUBPROCESS __kpex__:kpex_cli.py:1164 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1164 C1;$4;PW2DW_N;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C2;$4;PW2DW_P;0.26;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C3;$4;SUB;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C4;DW2PS_N;SUB;0.112;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C5;DW2PS_N;VSUBS;0.128;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C6;PW2DW_N;PW2DW_P;0.483;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C7;PW2DW_N;SUB;0.317;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C8;PW2DW_N;VSUBS;0.056;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C9;PW2DW_P;SUB;0.036;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C10;PW2DW_P;VSUBS;0.047;
+SUBPROCESS __kpex__:kpex_cli.py:1164 C11;SUB;VSUBS;5.962;
+SUBPROCESS __kpex__:kpex_cli.py:1167 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1183 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netlist.spice
