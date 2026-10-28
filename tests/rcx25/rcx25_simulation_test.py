@@ -140,13 +140,20 @@ TEST_PATTERNS = [(pdk_name, name)
 # NOTE: the patterns of extraction errors, e.g. vias without a conductor below (see rcx25_R_sky130A_test)
 ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz')}
 
+# NOTE: the MOM caps, which take 1.5 to 22 s in RC mode, the others 0.1 s
+SLOW_PATTERNS = {(PDKName.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz'),
+                 (PDKName.SKY130A, 'sidewall_cap_vpp_04p4x04p6_l1_redux_all_layers.gds.gz'),
+                 (PDKName.IHP_SG13G2, 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz'),
+                 (PDKName.IHP_SG13G2, 'sidewall_cap_vpp_04p4x04p6_m1_redux_all_layers.gds.gz')}
+
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
-@pytest.mark.parametrize('pdk_name, gds_name', [p for p in TEST_PATTERNS if p not in ERROR_PATTERNS],
-                         ids=[f"{pdk_name}/{name}" for pdk_name, name in TEST_PATTERNS
-                              if (pdk_name, name) not in ERROR_PATTERNS])
+@pytest.mark.parametrize('pdk_name, gds_name', [
+    pytest.param(pdk_name, name, id=f"{pdk_name}/{name}",
+                 marks=pytest.mark.slow if (pdk_name, name) in SLOW_PATTERNS else ())
+    for pdk_name, name in TEST_PATTERNS if (pdk_name, name) not in ERROR_PATTERNS
+])
 def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: PDKName, gds_name: str):
     pdk = PDKTestConfig(pdk_name)
     tech = TechInfo.from_json(PDK.from_string(str(pdk_name)).config.tech_pb_json_path, dielectric_filter=None)

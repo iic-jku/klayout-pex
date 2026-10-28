@@ -37,13 +37,6 @@ from typing import *
 import pytest
 
 
-def lvs_cache_dir(pdk_name: str) -> str:
-    """
-    The LVS cache of a PDK, shared by all tests and workers (and kept between CI runs, see integration-tests.yml)
-    """
-    return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{pdk_name}", '.kpex_cache'))
-
-
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
     IHP_SG13G2 = 'ihp-sg13g2'
@@ -73,10 +66,6 @@ class PDKTestConfig:
         worker = os.environ.get('PYTEST_XDIST_WORKER', None)  # e.g. gw0
         suffix = f"_worker{worker.removeprefix('gw')}" if worker else ''
         return os.path.realpath(os.path.join(__file__, '..', '..', '..', f"output_{self.name}{suffix}"))
-
-    @property
-    def lvs_cache_dir(self) -> str:
-        return lvs_cache_dir(self.name)
 
     @property
     def lyt_path(self) -> str:

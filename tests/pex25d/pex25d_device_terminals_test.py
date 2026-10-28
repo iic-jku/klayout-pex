@@ -33,6 +33,7 @@ import pytest
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.protobuf import pex25d_terminal_pb2
 from klayout_pex.pex25d.reader import read_pex25d_text
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -50,9 +51,8 @@ def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[st
     output_path = os.path.join(pdk.output_dir, f"{path_components[-1].removesuffix('.gds.gz')}.pex25d")
     KpexCLI().main(['kpex', 'pex25d',
                     '--pdk', pdk.name,
-                    '--gds', pdk.gds_path(*path_components),
+                    '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                     '--out-dir', pdk.output_dir,
-                    '--cache-dir', pdk.lvs_cache_dir,
                     '--blackbox', 'n',
                     '--out-file', output_path])
     with open(output_path, 'rb') as f:
@@ -66,7 +66,6 @@ def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[st
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_terminals_of_sky130A():
     assert device_terminal_layers(PDKName.SKY130A, 'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz') == \
            [('A', 'met3_cap'), ('B', 'capm')]
@@ -74,7 +73,6 @@ def test_mim_cap_terminals_of_sky130A():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_terminals_of_ihp_sg13g2():
     assert device_terminal_layers(PDKName.IHP_SG13G2, 'sg13g2_pr__cmim', 'cmim.gds.gz') == \
            [('mim_btm', 'metal5_cap'), ('mim_top', 'cmim_top')]
@@ -82,7 +80,6 @@ def test_mim_cap_terminals_of_ihp_sg13g2():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mim_cap_terminals_of_ihp_sg13g2():
     # NOTE: its terminal on the substrate (bn, on rfmim_sub) is on the ground plane, which needs no node
     with mock.patch('klayout_pex.tech_info.warning') as warning_mock:
@@ -93,7 +90,6 @@ def test_rf_mim_cap_terminals_of_ihp_sg13g2():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_terminals_of_gf180mcuD():
     # NOTE: two MIM caps (FuseTop 5 µm x 5 µm and 20 µm x 10 µm), A the bottom and B the top plate
     assert device_terminal_layers(PDKName.GF180MCUD, 'test_patterns', 'cap_mim_m4m5.gds.gz') == \
@@ -105,7 +101,6 @@ def test_mim_cap_terminals_of_gf180mcuD():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 @pytest.mark.parametrize('pdk_name, path_components, layers', [
     (PDKName.IHP_SG13G2, ('test_patterns', 'nmos_metal1.gds.gz'),
      [('D', 'cont_nsd_con'), ('G', 'GatPoly'), ('S', 'cont_nsd_con')]),
@@ -126,7 +121,6 @@ def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], laye
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_diffusion_resistor_terminals_of_sky130A():
     # NOTE: the terminals of the n+ and p+ diffusion resistors (HV here) are diffusion as the source/drain of a MOS,
     #       at the lower face of their licons
@@ -136,7 +130,6 @@ def test_diffusion_resistor_terminals_of_sky130A():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap_terminals_of_ihp_sg13g2():
     # NOTE: its ports are on LVS layers the tech info has no layer for (cap_cmomi_m5_ports),
     #       so its terminals are on the metal of their net they overlap most, as in the R extraction
