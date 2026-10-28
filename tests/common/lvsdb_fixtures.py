@@ -41,7 +41,6 @@ from dataclasses import dataclass
 import functools
 import glob
 import importlib.metadata
-import importlib.util
 import os
 from pathlib import Path
 import shutil
@@ -63,6 +62,7 @@ from klayout_pex.klayout.lvs_cache import (
 from klayout_pex.klayout.lvs_runner import LVSRunner
 from klayout_pex.pdk_config import PDK
 from klayout_pex.tool_version_constraints import Tool
+from tests.common.build_scripts import kpex_symlinks
 
 REPO_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
 DESIGNS_DIR = os.path.join(REPO_DIR, 'testdata', 'designs')
@@ -98,12 +98,8 @@ def pdk_symlinks() -> Dict[str, str]:
     The targets of the symlinks within pdk/ (absolute paths), also of those that git checked out as text files
     with the target path (on Windows, see scripts/build/kpex_symlinks.py)
     """
-    spec = importlib.util.spec_from_file_location('kpex_symlinks',
-                                                  os.path.join(REPO_DIR, 'scripts', 'build', 'kpex_symlinks.py'))
-    kpex_symlinks = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(kpex_symlinks)
     return {os.path.join(REPO_DIR, link): os.path.join(REPO_DIR, target)
-            for link, target in kpex_symlinks.find_symlinks(Path(REPO_DIR), ['pdk'])}
+            for link, target in kpex_symlinks().find_symlinks(Path(REPO_DIR), ['pdk'])}
 
 
 @dataclass(frozen=True)
