@@ -46,7 +46,6 @@ tags = ("PEX", "2.5D", "Ports")
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 @pytest.mark.parametrize('gds_name, mode, ports', [
     # NOTE: the wire of the pins A, B and C is the net A,B,C, which has a port per label in R and RC mode
     #       (#211 §11), and one node in CC mode

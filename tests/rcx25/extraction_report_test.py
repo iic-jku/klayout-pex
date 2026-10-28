@@ -56,7 +56,6 @@ def report_category_names(*report_caps_args: str) -> List[str]:
 
 @allure.parent_suite("kpex/2.5D Extraction Tests")
 @allure.tag("PEX", "2.5D", "Report")
-@pytest.mark.slow
 def test_report_has_the_capacitances_only_with_report_caps():
     # NOTE: a category for each capacitance contribution takes much memory and time on large layouts
     names = report_category_names()

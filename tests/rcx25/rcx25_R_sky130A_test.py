@@ -42,7 +42,6 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_single_wire_li1():
     # MAGIC GIVES (8.3 revision 540):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -59,7 +58,6 @@ R2;A;B;;840.533"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_contact_1x1_minsize_mcon():
     # MAGIC GIVES (8.3 revision 540):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -75,7 +73,6 @@ R2;BOT;TOP;;9.3"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_wire_voltage_divider_li1():
     # MAGIC GIVES (8.3 revision 540):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -92,7 +89,6 @@ R3;A,B,C;C;;72.533"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_wire_same_label_at_both_ends_li1():
     # Same layout as r_wire_voltage_divider_li1, but pin A is at both ends of the wire
     # (and B at the stub in the middle). Both pins A are one node in the netlist,
@@ -106,7 +102,6 @@ R2;A,B;B;;72.533"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_via_stack_1x1_minsize_poly_to_met5():
     # MAGIC GIVES (8.3 revision 540):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -137,7 +132,6 @@ R7;met4;met5;;0.38"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nfet_li1_redux():
     # MAGIC GIVES (8.3 revision 540):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -155,7 +149,6 @@ R5;G.$1.poly;G.P0.poly;;316.321"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nfet_terminals_are_on_the_resistor_network():
     # The transistor is connected to the nodes of its terminals (#211 §6): the gate to the end of the poly,
     # drain and source to the nodes that carry the names of their nets (which have no pin)
@@ -166,7 +159,6 @@ def test_nfet_terminals_are_on_the_resistor_network():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nwell_pfet_ntap_li1():
     # The bulk of the PMOS is on the nwell, which the licon over the ntap at its far end joins to VPWR.
     # The extraction left out both, so the bulk was on VPWR, without resistance:
@@ -185,7 +177,6 @@ R5;VPWR.$1.nwell;VPWR.P0.nwell;;5241.667"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_pin_node_is_at_its_label():
     # Each pin's node is at its label: KLayout located the gate's 60 nm below its label (at 1750, 2690),
     # and where it locates such a node can differ from run to run,
@@ -199,7 +190,6 @@ def test_pin_node_is_at_its_label():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nwell_joined_by_a_label_only():
     # Like r_nwell_pfet_ntap_li1, without the licon over the ntap, but with the label VPWR on the nwell,
     # which joins it to VPWR. So the nwell is a piece of the resistance network that joins nothing else,
@@ -221,7 +211,6 @@ R3;S;S.P0.psdm;;585.0"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_no_resistor_between_pins_with_the_same_label():
     # Output Y has two labels, which are one node in the netlist, so the resistance between them is shorted.
     # It used to be a resistor from Y to Y, with a warning "Invalid attempt to create resistor ... between same net"
@@ -233,7 +222,6 @@ def test_no_resistor_between_pins_with_the_same_label():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_vias_within_mom_cap_l1m1m2():
     # The vias within the MOM capacitor (mcon_vpp, via1_vpp) are on the GDS pairs of the regular vias,
     # so they are part of the resistance network (#228 reported them as unmodeled)
@@ -245,7 +233,6 @@ def test_vias_within_mom_cap_l1m1m2():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_once():
     # The substrate terminal B of the MOM capacitor (vpp_sub, the marker of the capacitor) is on an LVS layer
     # the tech info has no layer for, and it overlaps no conductor of its net, as the substrate is none (#217)
@@ -264,7 +251,6 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_licons_over_the_p_taps_are_known():
     # The licons over the p-taps join li1 to the substrate, which is no conductor of the resistance network,
     # so they are part of the p-taps (licon_ptap_con), rather than LVS shapes the tech info doesn't know (#294)
@@ -275,7 +261,6 @@ def test_licons_over_the_p_taps_are_known():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_device_terminals_without_a_net_stay_unconnected():
     # The bulk terminal W of the varactor is the gate on the hole of a ptap ring (varactor_bulk_lvt), but there's
     # no ring around it, so the LVS netlist leaves W unconnected (as in iic-sar-adc/adc_comp_latch).
@@ -292,7 +277,6 @@ def test_device_terminals_without_a_net_stay_unconnected():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_via_without_conductor_below_is_an_error():
     # The via1 has no met1 below it, so it joins nothing there. The extraction report crashed on it with a KeyError,
     # as with gf180mcuD before #229, whose tech info put the layer below its vias on another GDS pair
@@ -307,7 +291,6 @@ def test_via_without_conductor_below_is_an_error():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_vias_within_mom_cap_l1m1m2m3m4():
     # via3_vpp and via4_vpp must be on the GDS pairs of via3_ncap and via4_ncap
     results, _ = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
@@ -318,7 +301,6 @@ def test_vias_within_mom_cap_l1m1m2m3m4():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (capm) is a conductor of its net,
     # joined to met4 by the vias on it (via3_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
@@ -334,7 +316,6 @@ def test_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__blackboxed():
     # The black-box extraction keeps the plates of the MIM cap, so its terminals are on their nodes.
     # The bottom plate (met3_cap) was left out, so its terminal was on the pin node of A, with a warning
@@ -345,7 +326,6 @@ def test_mim_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap__blackboxed():
     # The black-box extraction keeps the fingers of the VPP cap, so its terminals are on their nodes.
     # The fingers (met2_vpp, …) were left out, so its terminals were on the pin nodes of C0 and C1, with a warning
@@ -356,7 +336,6 @@ def test_mom_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sonosfet_with_deep_nwell():
     # The SONOS FET has a deep nwell, which is no conductor of the resistance network
     # (no via joins it to the nwell over it). It used to stop the extraction (#292).

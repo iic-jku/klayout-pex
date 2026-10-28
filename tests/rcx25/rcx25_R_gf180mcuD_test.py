@@ -41,7 +41,6 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_single_wire_m1():
     # Metal1: 90 mΩ/sq, (9.885 - 0.115) µm / 0.23 µm = 42.5 sq
     # NOTE: the net A,B has labels only, so it is tied to the node of A (1 mΩ)
@@ -55,7 +54,6 @@ R2;A;B;;3.823"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_wire_voltage_divider_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_m1.gds.gz',
@@ -68,7 +66,6 @@ R3;A,B,C;C;;0.346"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_contact_1x1_minsize_via1():
     # Via1: 4500 mΩ per cut
     pex_whiteboxed.assert_expected_matches_obtained(
@@ -81,7 +78,6 @@ R2;BOT;TOP;;4.5"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nfet_m1():
     # contacts: 6300 mΩ (N+), 5900 mΩ (poly) per cut, Poly2: 7300 mΩ/sq
     pex_whiteboxed.assert_expected_matches_obtained(
@@ -99,7 +95,6 @@ R7;S.$0.Metal1;S.P0.Nplus;;6.3"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nwell_pfet_ntap_m1():
     # The bulk of the PMOS is on the nwell, which the contact over the ntap at its far end joins to VDD.
     # The extraction left out both, so the bulk was on VDD, without resistance:
@@ -118,7 +113,6 @@ R5;VDD.$1.Nwell;VDD.P0.Nwell;;3083.333"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nfet_10v0_asym_pair():
     # 2 mirrored LDMOS sharing their drain (the MVSD side), each with its own source:
     # the asymmetric device must be extracted with S and D in place, not swapped
@@ -145,7 +139,6 @@ def obtained_resistances(*path_components) -> List[float]:
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_contact_2x2_minsize_via1():
     # 4 cuts in parallel, each 4500 mΩ (2 cuts each join the same nodes, so they are one resistor)
     assert obtained_resistances('test_patterns', 'r_contact_2x2_minsize_via1.gds.gz') == \
@@ -154,7 +147,6 @@ def test_contact_2x2_minsize_via1():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_via_stack_1x1_minsize_poly_to_metal5():
     # poly contact 5900 mΩ, Via1-Via4 4500 mΩ per cut,
     # and the tie of the net, whose nodes are all labels, to one of them (1 mΩ)
@@ -164,7 +156,6 @@ def test_via_stack_1x1_minsize_poly_to_metal5():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (FuseTop) is a conductor of its net,
     # joined to Metal5 by the vias on it (top_via_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
@@ -181,7 +172,6 @@ def test_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_well_diodes_with_deep_nwell():
     # The deep nwell is no conductor of the resistance network (no via joins it to the nwell over it),
     # so the terminals of the diodes on it stay on the nodes of their nets. It used to stop the extraction (#292)
@@ -193,7 +183,6 @@ def test_well_diodes_with_deep_nwell():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_contacts_over_the_taps_are_known():
     # The contacts over the p-taps, the n-taps of the deep nwell and the p-diffusion of the isolated p-wells
     # join Metal1 to layers that are no conductors of the resistance network, so they are part of the taps,

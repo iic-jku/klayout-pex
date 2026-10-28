@@ -40,7 +40,6 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 6.99 µm * 6.99 µm = 73.29 fF
     # plus CJSW 40 aF/µm * 27.96 µm = 1.12 fF, the fringe to the bottom plate (Metal5) around the top plate (MIM)
@@ -55,7 +54,6 @@ def test_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mim_cap__whiteboxed():
     # The top plate of the rfcmim (MIM 7 µm x 7 µm, cap_carea 1.5 fF/µm² gives 73.5 fF) is a conductor,
     # like the one of the cmim: it was left out, as the deck's cmim_top leaves out the RF areas (#280),
@@ -69,7 +67,6 @@ def test_rf_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mim_cap_over_m4_wire__whiteboxed():
     # The rfcmim of test_rf_mim_cap__whiteboxed, with a Metal4 wire D under it,
     # which its bottom plate (MINUS) shields from its top plate (PLUS)
@@ -91,7 +88,6 @@ C10;VSUBS;sub!;4.878;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mim_cap_over_m4_wire__blackboxed():
     # The plates of the rfcmim are conductors, so the capacitances to the wire D are the white-box ones.
     # Its model has the capacitance between the plates, and the one of its Metal5 (MINUS) to the substrate
@@ -117,7 +113,6 @@ C10;VSUBS;sub!;4.878;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_over_m4_wire__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 20 µm * 20 µm = 600 fF (MIM over Metal5)
     # plus CJSW 40 aF/µm * 80 µm = 3.2 fF, the fringe to the bottom plate around the top plate
@@ -136,7 +131,6 @@ C6;D;VSUBS;3.462;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_over_m4_wire__blackboxed():
     # The plates of the MIM cap are conductors, the bottom plate shields the wire D and the substrate below it
     # from the top plate and the TopMetal1 above. Only the capacitance of the device model is left out, the overlap
@@ -192,7 +186,6 @@ C5;VSUBS;X;1.292;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mim_cap__blackboxed():
     # The rfcmim of the PDK's cell library (sg13g2_pr), its model is cap_rfcmim, with the substrate as 3rd terminal
     assert pex_blackboxed.written_device_lines('sg13g2_pr__rfcmim', 'rfcmim.gds.gz') == [
@@ -202,7 +195,6 @@ def test_rf_mim_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_single_plate_over_isolated_pwell():
     # The isolated p-well (the hole of the NWell ring $3 over nBuLay) is a net of its own, W by its p-tap:
     # the plate couples to it, only its fringe beyond the ring to the substrate (VSUBS).

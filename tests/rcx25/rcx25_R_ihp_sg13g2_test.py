@@ -57,7 +57,6 @@ def extraction_context(lvsdb: kdb.LayoutVsSchematic,
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rf_mos_keeps_its_layout_geometry():
     # The IHP LVS script replaced each extracted RF MOS by a newly created device
     # of the base class (sg13_lv_nmos with rfmode=1), which has no layout geometry,
@@ -77,7 +76,6 @@ def test_rf_mos_keeps_its_layout_geometry():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     # The terminals of the MOM capacitor are on its ports (cap_cmomi_m5_ports, the Metal5 pins within its marker),
     # an LVS layer the tech info has no layer for (#217), so they are where they overlap the Metal5 of their nets
@@ -96,7 +94,6 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 @pytest.mark.parametrize('design_dir, cell_name, substrate_net_name', [
     # no label names the substrate, so it's the global net sub! of the PEX-LVS script
     ('rfnmos', 'rfnmos_w1u_l0u72', 'sub!'),
@@ -112,7 +109,6 @@ def test_substrate_net_is_found_by_its_name_or_its_layer(design_dir: str, cell_n
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_contacts_over_the_taps_are_known():
     # The contacts over the n-taps and the p-taps join Metal1 to the nwell (no sheet resistance) and the substrate,
     # which are no conductors of the resistance network, so they are part of the taps,
@@ -124,7 +120,6 @@ def test_contacts_over_the_taps_are_known():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_tie_of_tap_device_is_behind_its_contacts():
     # The tie of the ptap1 tap device is the same p+ Activ as the source/drain of the FETs,
     # so its 4 contacts are cont_psd_con (17 Ω each, two groups of 2), with the TIE terminal on the tie,
@@ -145,7 +140,6 @@ def test_tie_of_tap_device_is_behind_its_contacts():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
     # The contacts over the terminals of the bipolar transistors (and the emitter windows of the npn13G2
     # and the npn13G2L) are within the devices, whose models have their resistances (e.g. re, rbx, rcx),
@@ -172,7 +166,6 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_inductor_is_a_subcircuit_at_the_ends_of_its_leads():
     # The PDK has no models of the inductors, its schematics call the subcircuit inductor, which the user provides
     # (e.g. from an EM simulation). Its ports, within its marker, abut the ends of its TopMetal2 leads,
@@ -189,7 +182,6 @@ R2;LB;LB.P0.TopMetal2;;0.275""".splitlines()
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_vias_within_an_inductor_are_part_of_it():
     # The TopVia2 within the marker of the center-tapped inductor join its windings (TopMetal2) to the underpass
     # crossings (TopMetal1), which LVS leaves out there, so they were floating nets of their own,
@@ -223,7 +215,6 @@ def ports_touching_nothing(spice_lines: List[str]) -> List[str]:
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_nets_of_the_same_name_stay_apart():
     # Two transistors, each with its own metal islands labelled D and S, which are not connected
     # (like the islands of a supply, joined only in the parent). The IHP LVS script connects no nets implicitly,
@@ -246,7 +237,6 @@ R12;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_a_net_of_several_labels_has_a_port_per_label():
     # The drain wire of the transistor has the labels D and X at its ends, so LVS has one net D,X with one pin,
     # which the netlist replaces by the ports D and X at the labels, where the parent connects (#211 §11)
@@ -265,7 +255,6 @@ R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_labels_on_one_node_are_tied():
     # The labels D and X are on the same pin of the drain wire, so both ports are on one node,
     # tied by 1 mΩ, rather than one of them touching nothing (#211 §11)
@@ -284,7 +273,6 @@ R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (MIM, LVS layer cmim_top) is a conductor
     # of its net, joined to TopMetal1 by the TopVia1 on it (mim_via), 5 cuts per row (2.2 Ω / 5).
@@ -301,7 +289,6 @@ def test_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_rf_mim_cap__whiteboxed():
     # The TopVia1 on the top plate of the rfcmim (mim_via) join it to TopMetal1
     results, _ = pex_whiteboxed.run_rcx25d_single_cell('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
@@ -316,7 +303,6 @@ def test_rf_mim_cap__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_mim_cap__blackboxed():
     # The black-box extraction keeps the plates of the MIM cap, so its terminals are on their nodes.
     # The bottom plate (metal5_cap) was left out, so its terminal was on the pin node of A, with a warning
@@ -327,7 +313,6 @@ def test_mim_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_rf_mim_cap__blackboxed():
     # The black-box extraction keeps the plates of the rfcmim, so its terminals are on their nodes.
     # The plates (rfmim_top, metal5_rfcap) were left out, so the bottom terminal was on the pin node of MINUS,
@@ -339,7 +324,6 @@ def test_rf_mim_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_wire_over_deep_nwell():
     # The nBuLay (the deep n-well) is no conductor of the resistance network, as the deep nwell of sky130A and
     # gf180mcuD (no via joins it to the nwell over it). It stopped the extraction, as the tech info had no layer

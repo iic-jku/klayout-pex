@@ -45,7 +45,6 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_wire_voltage_divider_li1():
     # NOTE: the capacitance of the wire (0.969 fF in CC mode) goes to the nodes of its resistor network,
     #       each part of it to the node nearest to it (#211 §8): the T junction A,B,C has the middle half

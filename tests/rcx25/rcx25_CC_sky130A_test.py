@@ -41,7 +41,6 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_single_plate_100um_x_100um_li1_over_substrate():
     # MAGIC GIVES (8.3 revision 485):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -55,7 +54,6 @@ C1;PLATE;VSUBS;386.179;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_overlap_plates_100um_x_100um_li1_m1():
     # MAGIC GIVES (8.3 revision 485):
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -78,7 +76,6 @@ C3;UPPER;VSUBS;205.619;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -120,7 +117,6 @@ C10;VSUBS;met3;136.063;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_overlap_shield_same_net_100um_x_100um_li1_m1_m2():
     # MAGIC GIVES (8.3 revision 681):
     # C0 A B 1.3386p
@@ -140,7 +136,6 @@ C3;B;VSUBS;15.101;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_overlap_shield_same_net_half_100um_x_100um_li1_m1_m2():
     # MAGIC GIVES (8.3 revision 681):
     # C0 A B 0.86178p
@@ -161,7 +156,6 @@ C3;B;VSUBS;15.101;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_plate_20um_x_20um_li1_over_ntap():
     # MAGIC GIVES (8.3 revision 681):
     # C0 W A 25.5042f
@@ -181,7 +175,6 @@ C2;A;W;25.504;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_plate_20um_x_20um_li1_over_ptap():
     # MAGIC GIVES (8.3 revision 681):
     # C0 A VSS 18.3132f
@@ -200,7 +193,6 @@ C3;VSS;VSUBS;0.13;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sidewall_100um_x_100um_distance_200nm_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -221,7 +213,6 @@ C3;B;VSUBS;8.231;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sidewall_net_uturn_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -242,7 +233,6 @@ C3;C1;VSUBS;12.588;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -263,7 +253,6 @@ C3;C1;VSUBS;0.087;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_near_body_shield_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -291,7 +280,6 @@ C6;TOPB;VSUBS;0.299;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_lateral_fringe_shield_by_same_polygon_li1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     #_______________________________ NOTE: with halo=8µm __________________________________
@@ -307,7 +295,6 @@ C1;C0;VSUBS;6.414;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_simple_plates_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -329,7 +316,6 @@ C3;VSUBS;met1;248.899;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_shielding_simple_plates_li1_m1_m2():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=8µm __________________________________
@@ -361,7 +347,6 @@ C6;VSUBS;met2;5.291;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_plates_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -412,7 +397,6 @@ C19;UPPER;VSUBS;214.85;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_fingered_li1_m1_patternA():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -432,7 +416,6 @@ C3;UPPER;VSUBS;72.327;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_fingered_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -467,7 +450,6 @@ C12;UPPER;VSUBS;215.281;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sideoverlap_complex_li1_m1():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -499,7 +481,6 @@ C9;UPPER;VSUBS;13.019;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_met1_over_drain_li1():
     # The met1 plate W (4 µm x 2 µm) is over the drain diffusion of the nfet (W = 2 µm, L = 0.15 µm),
     # 33.6 aF/µm² * 8 µm² = 268.8 aF to D, plus the fringe to the drain beyond the plate.
@@ -550,7 +531,6 @@ C10;VSUBS;W;0.388;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_inverter_over_nwell():
     # The capacitances of the shapes over the nwell go to its net VPB, the others to the substrate.
     # They all used to go to the substrate (e.g. VPWR-VSUBS 0.273 fF, which is 0.211 fF and VPB-VPWR 0.062 fF now).
@@ -598,7 +578,6 @@ C14;VSUBS;Y;0.096;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_met2_over_met1_over_nwell_of_its_net():
     # The nwell is VDD (by an ntap), and so is the met1 plate (8 µm x 8 µm) over it, which has no capacitance
     # to it, and shields it from the met2 plate X (4 µm x 4 µm) above.
@@ -623,7 +602,6 @@ C3;VSUBS;X;0.293;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap__whiteboxed():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -641,7 +619,6 @@ C3;C1;VSUBS;0.765;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap__blackboxed():
     # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
     # _______________________________ NOTE: with halo=50µm __________________________________
@@ -665,7 +642,6 @@ C3;C1;VSUBS;0.091;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap_beside_m2_wire__whiteboxed():
     # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
     # C2 C0 C1 7.51226f
@@ -688,7 +664,6 @@ C6;VSUBS;X;0.385;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mom_cap_beside_m2_wire__blackboxed():
     # The fingers of the VPP cap are plates, so the capacitances to the wire X beside it are the white-box ones,
     # and those of the fingers to each other and to the substrate are the model's (see test_mom_cap__blackboxed)
@@ -718,7 +693,6 @@ def test_mom_cap_with_4_terminals__whiteboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The device model gives camimc 2.0 fF/µm² * 18.9 µm * 5.1 µm = 192.78 fF (capm over met3)
     # plus cpmimc 0.19 fF/µm * 48 µm = 9.12 fF, the fringe to the bottom plate around the top plate
@@ -734,7 +708,6 @@ C3;VSUBS;mimcap_top;2.942;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
     # Without the overlap capacitances of the MIM plate capm, they would be missing,
     # which crashed the sidewall extraction with a KeyError
@@ -759,7 +732,6 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__blackboxed():
     results, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert results.summarize().capacitances
@@ -767,7 +739,6 @@ def test_mim_cap__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_over_m2_wire__whiteboxed():
     # The device model gives camimc 2.0 fF/µm² * 20 µm * 20 µm = 800 fF (capm over met3)
     # plus cpmimc 0.19 fF/µm * 80 µm = 15.2 fF, the fringe to the bottom plate around the top plate
@@ -786,7 +757,6 @@ C6;D;VSUBS;5.013;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap_over_m2_wire__blackboxed():
     # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
     # C0 A B 38.2149f
@@ -815,7 +785,6 @@ C6;D;VSUBS;5.013;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_varactors__blackboxed():
     # The varactors of the PDK's device generator (magic), W along the poly, L across it:
     # the lvt one with W < L, the hvt one with W > L. Their models depend on w and l separately,
@@ -828,7 +797,6 @@ def test_varactors__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_hv_diffusion_resistors__blackboxed():
     # The HV diffusion resistors of the PDK's device generator (magic), their models are named ..._nd__hv, ..._pd__hv
     assert pex_blackboxed.written_device_lines('test_patterns', 'res_generic_nd_hv_pd_hv_w1_l4.gds.gz') == [
@@ -839,7 +807,6 @@ def test_hv_diffusion_resistors__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_sonos_fet__blackboxed():
     # The SONOS FET of the PDK's device generator (magic), with the core marker areaid.ce, which LVS needs for it
     assert pex_blackboxed.written_device_lines('test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz') == [
@@ -849,7 +816,6 @@ def test_sonos_fet__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_label_of_substrate_under_inductor_names_the_substrate():
     # A label (SUB) names the substrate under the inductor marker, like the ones of the PDK's VPP caps,
     # so the capacitances to the substrate (of the met1 plate over the marker) go to SUB,
