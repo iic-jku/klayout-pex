@@ -24,7 +24,7 @@
 """
 Generate ihp-sg13g2 test patterns (testdata/designs/ihp-sg13g2/test_patterns).
 
-The MOM cap patterns use the cmomf pcell of the PDK, so the ihp-sg13g2 PDK must be installed
+The MOM cap and device patterns use the pcells of the PDK, so the ihp-sg13g2 PDK must be installed
 (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/ihp-sg13g2).
 
 Usage:
@@ -194,6 +194,28 @@ def r_wire_over_nbulay_m1() -> Pattern:
     return p
 
 
+#
+# Device patterns
+#
+
+def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
+    """
+    The bipolar transistors (pcells of the PDK) side by side, 10 µm apart: an npn13G2 with 4 emitters,
+    an npn13G2L, an npn13G2V and a pnpMPA, whose terminals are joined to the Metal1 over them by contacts
+    (and the emitters of the npn13G2 and the npn13G2L by their emitter windows) within the devices
+    """
+    technology = load_pdk_pcells()
+    p = pattern('bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa')
+    p.layout.technology_name = technology
+    x = 0
+    for pcell_name, parameters in (('npn13G2', {'Nx': 4}), ('npn13G2L', {}), ('npn13G2V', {}), ('pnpMPA', {})):
+        pcell = p.layout.create_cell(pcell_name, 'SG13_dev', parameters)
+        p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans(x - pcell.bbox().left, 0)))
+        x += pcell.bbox().width() + 10000
+    p.top.flatten(-1, True)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmim_20um_x_20um_over_m4_wire':
@@ -201,6 +223,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
+    'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,
 }
 
 

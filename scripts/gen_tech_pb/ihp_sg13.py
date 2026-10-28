@@ -62,6 +62,10 @@ class TechBuilder:
         add_layer(tech, PIMP,     "pSD",       (14, 0),   None,      None,       "Defines areas to receive P+ S/D implant")
         add_layer(tech, METAL,    "GatPoly",   (5, 0),    (5, 2),    (5, 25),    "Poly")  # ~ poly.drawing
         add_layer(tech, CONT,     "Cont",      (6, 0),    None,      None,       "Defines 1-st metal contacts to Activ, GatPoly")
+
+        if self.is_g2:  # NOTE: the npn HBTs need TRANS, a forbidden layer in CMOS5L
+            add_layer(tech, CONT,     "EmWind",    (33, 0),   None,      None,       "Defines the emitter window of the npn13G2/npn13G2L HBTs")
+
         add_layer(tech, METAL,    "Metal1",    (8, 0),    (8, 2),    (8, 25),    "Defines 1-st metal interconnect")
         add_layer(tech, VIA,      "Via1",      (19, 0),   None,      None,       "Defines 1-st metal to 2-nd metal contact")
         add_layer(tech, METAL,    "Metal2",    (10, 0),   (10, 2),   (10, 25),   "Defines 2-nd metal interconnect")
@@ -121,6 +125,11 @@ class TechBuilder:
         #       of the resistance network
         add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      None,            "Computed layer for contact from ntap (the nwell below) to Metal1")
         add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      None,            "Computed layer for contact from ptap (the substrate below) to Metal1")
+        # NOTE: within the bipolar transistors, whose models have the resistances up to the Metal1 over them,
+        #       so their terminals are on that Metal1
+        add_computed_layer(tech, CONT,  KDEV, "cont_bjt_con",   (6, 4406),    "Cont",      None,            "Computed layer for contact from the terminals of the bipolar transistors to Metal1")
+        if self.is_g2:
+            add_computed_layer(tech, CONT,  KDEV, "emwind_drw",     (33, 0),      "EmWind",    None,            "Computed layer for EmWind, joining the npn emitters to Metal1")
 
         add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "via1_drw",      "Computed layer for Via1")
         add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "via2_drw",      "Computed layer for Via2")
@@ -181,6 +190,9 @@ class TechBuilder:
 
         if self.is_g2:
             add_computed_layer(tech, METAL, KPIN, "topmetal2_pin_con",  (134, 2),  "TopMetal2.pin",  None,            "TopMetal2 pin")
+
+        # NOTE: the ports of the inductors (inductor2, inductor3), which join them to their windings
+        add_computed_layer(tech, METAL, KPIN, "ind_pin",            (27, 2),   "IND.pin",        None,            "Inductor pin")
 
         add_computed_layer(tech, METAL, KLBL, "poly_text",          (5, 25),   "GatPoly.text",   None,            "Poly label")
         add_computed_layer(tech, METAL, KLBL, "metal1_text",        (8, 25),   "Metal1.text",    None,            "Metal1 label")
