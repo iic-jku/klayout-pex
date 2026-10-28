@@ -1,0 +1,19 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk sky130A --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_wire_same_label_at_both_ends_li1.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'r_wire_same_label_at_both_ends_li1'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/r_wire_same_label_at_both_ends_li1.gds.gz/r_wire_same_label_at_both_ends_li1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1596 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 C1;A;VSUBS;0.453;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C2;A,B;VSUBS;0.459;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C3;B;VSUBS;0.056;
+SUBPROCESS __kpex__:kpex_cli.py:1177 R1;A;A,B;;210.085
+SUBPROCESS __kpex__:kpex_cli.py:1177 R2;A,B;B;;72.533
+SUBPROCESS __kpex__:kpex_cli.py:1180 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_same_label_at_both_ends_li1__r_wire_same_label_at_both_ends_li1/r_wire_same_label_at_both_ends_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_same_label_at_both_ends_li1__r_wire_same_label_at_both_ends_li1/r_wire_same_label_at_both_ends_li1_k25d_pex_netlist.spice

@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk sky130A --mode CC --blackbox y --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'cap_mim_m3_20um_x_20um_over_m2_wire'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz/cap_mim_m3_20um_x_20um_over_m2_wire.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:1596 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1596 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:1596 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:1596 (71, 20) -> (met4_ncap)
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 C1;A;B;4.603;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C2;A;D;6.467;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C3;A;VSUBS;10.342;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C4;B;D;0.081;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C5;B;VSUBS;2.253;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C6;D;VSUBS;5.013;
+SUBPROCESS __kpex__:kpex_cli.py:1180 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.spice

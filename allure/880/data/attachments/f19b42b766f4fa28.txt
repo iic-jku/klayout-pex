@@ -1,0 +1,20 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk gf180mcuD --mode RC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/r_wire_voltage_divider_m1.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'r_wire_voltage_divider_m1'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/r_wire_voltage_divider_m1.gds.gz/r_wire_voltage_divider_m1.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (34, 0) -> (metal1_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 C1;A;VSUBS;0.228;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C2;A,B,C;VSUBS;0.447;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C3;B;VSUBS;0.228;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C4;C;VSUBS;0.057;
+SUBPROCESS __kpex__:kpex_cli.py:1177 R1;A;A,B,C;;1.912
+SUBPROCESS __kpex__:kpex_cli.py:1177 R2;A,B,C;B;;1.912
+SUBPROCESS __kpex__:kpex_cli.py:1177 R3;A,B,C;C;;0.346
+SUBPROCESS __kpex__:kpex_cli.py:1180 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_wire_voltage_divider_m1__r_wire_voltage_divider_m1/r_wire_voltage_divider_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_wire_voltage_divider_m1__r_wire_voltage_divider_m1/r_wire_voltage_divider_m1_k25d_pex_netlist.spice

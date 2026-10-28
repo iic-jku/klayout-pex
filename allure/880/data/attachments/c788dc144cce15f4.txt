@@ -1,0 +1,29 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk ihp-sg13g2 --mode CC --blackbox n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_pr__rfcmim/rfcmim.gds.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'rfcmim'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/sg13g2_pr__rfcmim/rfcmim.gds.gz/rfcmim.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1596 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1596 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1596 (36, 0) -> (rfmim_top)
+INFO     __kpex__:kpex_cli.py:1596 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1596 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1596 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1596 (67, 0) -> (metal5_n_cap metal5_rfcap metal5_rfcap_feed)
+INFO     __kpex__:kpex_cli.py:1596 (6, 4405) -> (cont_ptap_con)
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 C1;$4;$5;75.262;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C2;$4;sub!;0.367;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C3;$4;VSUBS;1.578;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C4;$5;sub!;0.264;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C5;$5;VSUBS;1.157;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C6;VSUBS;sub!;4.878;
+SUBPROCESS __kpex__:kpex_cli.py:1180 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/rfcmim__rfcmim/rfcmim_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/rfcmim__rfcmim/rfcmim_k25d_pex_netlist.spice
