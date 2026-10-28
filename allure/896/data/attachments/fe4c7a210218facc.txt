@@ -1,0 +1,27 @@
+WARNING  __kpex__:kpex_cli.py:1417 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1454 main extract --pdk sky130A --mode R --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/nfet_li1.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --reduce ticer --out-netlist /private/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/pytest-of-runner/pytest-0/test_kpex_reduce_writes_the_re3/out.spice
+INFO     __kpex__:kpex_cli.py:736 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1588 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1588 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1588 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1588 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1588 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 4pins
+SUBPROCESS __kpex__:kpex_cli.py:1169 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1169 R1;D;D.$1.li1;;30.494
+SUBPROCESS __kpex__:kpex_cli.py:1169 R2;D.$0.li1;D.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1169 R3;D.$0.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1169 R4;D.$1.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1169 R5;G;G.$0.li1;;6.4
+SUBPROCESS __kpex__:kpex_cli.py:1169 R6;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1169 R7;G.$1.poly;G.P0.poly;;234.381
+SUBPROCESS __kpex__:kpex_cli.py:1169 R8;S;S.$0.li1;;43.294
+SUBPROCESS __kpex__:kpex_cli.py:1169 R9;S.$0.li1;S.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1169 R10;S.$0.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1169 R11;S.$1.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1172 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1__nfet_li1/nfet_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1188 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1__nfet_li1/nfet_li1_k25d_pex_netlist.spice
+SUBPROCESS __kpex__:kpex_cli.py:1224 .SUBCKT nfet_li1: 11 R, 0 C, 12 nodes → 3 R, 0 C, 6 nodes (TICER eliminated 6 nodes; 0 floating islands merged, 0 nodes less; 0 capacitor-only nodes eliminated, 0 tied)
+INFO     __kpex__:kpex_cli.py:1225 Wrote reduced netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1__nfet_li1/nfet_li1_k25d_pex_netlist_reduced.spice
+INFO     __kpex__:kpex_cli.py:1242 Copied reduced SPICE netlist to: /private/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/pytest-of-runner/pytest-0/test_kpex_reduce_writes_the_re3/out.spice

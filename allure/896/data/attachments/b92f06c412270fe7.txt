@@ -1,0 +1,40 @@
+[20:24:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz --out-dir                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:24:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:24:15] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1588
+[20:24:15] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1588
+[20:24:15] INFO     (204, 0) -> (lvpwell_dw_con)                kpex_cli.py:1588
+[20:24:15] INFO     (33, 4407) -> (contact_ptap_dw_con)         kpex_cli.py:1588
+[20:24:15] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1588
+[20:24:15] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1588
+[20:24:15] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:24:15] INFO     LVSDB: found 4pins                          extractor.py:298
+[20:24:15] WARNING  The resistance network leaves out these   r_extractor.py:302
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - LVPWELL (LVS lvpwell_dw_con)                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.csv                                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.spice                                                                       

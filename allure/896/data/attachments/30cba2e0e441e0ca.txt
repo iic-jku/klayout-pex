@@ -1,0 +1,44 @@
+[20:23:51] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --lvsdb                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/single_plate_6um_x_8um_m1_over_isolated_pwell.lvsdb.gz --out-dir             
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpczql1bb0 --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:23:51] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:23:51] INFO     (31, 0) -> (nwell_drw)                      kpex_cli.py:1588
+[20:23:51] INFO     (32, 0) -> (nbulay_drw)                     kpex_cli.py:1588
+[20:23:51] INFO     (46, 0) -> (pwell iso_pwell)                kpex_cli.py:1588
+[20:23:51] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1588
+[20:23:51] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[20:23:51] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[20:23:51] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:23:51] INFO     LVSDB: found 2pins                          extractor.py:298
+[20:23:51] WARNING  The resistance network leaves out these   r_extractor.py:302
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$3;A;0.309;                                                                  
+C2;$3;W;0.009;                                                                  
+C3;A;VSUBS;0.157;                                                               
+C4;A;W;2.318;                                                                   
+C5;VSUBS;W;0.004;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpczql1bb0/single_plate_6um_x_
+8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single
+_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.csv                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpczql1bb0/single_plate_6um_x_
+8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single
+_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.spice                  

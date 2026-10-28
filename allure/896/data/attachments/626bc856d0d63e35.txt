@@ -1,0 +1,228 @@
+[20:25:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/nfet_10v0_asym_pair.lvsdb.gz --out-dir                                         
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:25:14] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:25:14] INFO     (35, 0) -> (via1)                           kpex_cli.py:1588
+[20:25:14] INFO     (32, 0) -> (nsd nd_ldmos)                   kpex_cli.py:1588
+[20:25:14] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1588
+[20:25:14] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1588
+[20:25:14] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1588
+[20:25:14] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1588
+[20:25:14] INFO     (33, 4401) -> (contact_nsd_con)             kpex_cli.py:1588
+[20:25:14] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:1588
+[20:25:14] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:25:14] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;SUB;0.002;                                                                
+C2;$2.$0.Metal1;$3.$0.Metal1;0.008;                                             
+C3;$2.$0.Metal1;$5;0.013;                                                       
+C4;$2.$0.Metal1;SUB;0.031;                                                      
+C5;$2.$0.Metal1;VSUBS;0.009;                                                    
+C6;$2.$1.Metal1;$3.$1.Metal1;0.009;                                             
+C7;$2.$1.Metal1;$5;0.015;                                                       
+C8;$2.$1.Metal1;SUB;0.03;                                                       
+C9;$2.$1.Metal1;VSUBS;0.003;                                                    
+C10;$2.$2.Metal1;$3.$2.Metal1;0.009;                                            
+C11;$2.$2.Metal1;$5;0.015;                                                      
+C12;$2.$2.Metal1;SUB;0.03;                                                      
+C13;$2.$2.Metal1;VSUBS;0.003;                                                   
+C14;$2.$3.Metal1;$3.$3.Metal1;0.009;                                            
+C15;$2.$3.Metal1;$5;0.015;                                                      
+C16;$2.$3.Metal1;SUB;0.03;                                                      
+C17;$2.$3.Metal1;VSUBS;0.003;                                                   
+C18;$2.$4.Metal1;$3.$4.Metal1;0.009;                                            
+C19;$2.$4.Metal1;$5;0.015;                                                      
+C20;$2.$4.Metal1;SUB;0.03;                                                      
+C21;$2.$4.Metal1;VSUBS;0.003;                                                   
+C22;$2.$5.Metal1;$3.$5.Metal1;0.009;                                            
+C23;$2.$5.Metal1;$5;0.015;                                                      
+C24;$2.$5.Metal1;SUB;0.03;                                                      
+C25;$2.$5.Metal1;VSUBS;0.003;                                                   
+C26;$2.$6.Metal1;$3.$6.Metal1;0.009;                                            
+C27;$2.$6.Metal1;$5;0.006;                                                      
+C28;$2.$6.Metal1;$5.$12.Poly2;0.009;                                            
+C29;$2.$6.Metal1;SUB;0.03;                                                      
+C30;$2.$6.Metal1;VSUBS;0.003;                                                   
+C31;$2.$7.Metal1;$3.$7.Metal1;0.008;                                            
+C32;$2.$7.Metal1;$5.$12.Poly2;0.013;                                            
+C33;$2.$7.Metal1;SUB;0.031;                                                     
+C34;$2.$7.Metal1;VSUBS;0.009;                                                   
+C35;$3;$5.$10.Metal2;0.002;                                                     
+C36;$3;$5.$9.Metal2;0.002;                                                      
+C37;$3;SUB;0.005;                                                               
+C38;$3.$0.Metal1;$4.$0.Metal1;0.008;                                            
+C39;$3.$0.Metal1;$5;0.013;                                                      
+C40;$3.$0.Metal1;$5.P1.Poly2;0.013;                                             
+C41;$3.$0.Metal1;SUB;0.005;                                                     
+C42;$3.$0.Metal1;VSUBS;0.007;                                                   
+C43;$3.$1.Metal1;$4.$1.Metal1;0.009;                                            
+C44;$3.$1.Metal1;$5;0.015;                                                      
+C45;$3.$1.Metal1;$5.P1.Poly2;0.015;                                             
+C46;$3.$2.Metal1;$4.$2.Metal1;0.009;                                            
+C47;$3.$2.Metal1;$5;0.015;                                                      
+C48;$3.$2.Metal1;$5.P1.Poly2;0.015;                                             
+C49;$3.$3.Metal1;$4.$3.Metal1;0.009;                                            
+C50;$3.$3.Metal1;$5;0.015;                                                      
+C51;$3.$3.Metal1;$5.$10.Metal2;0.006;                                           
+C52;$3.$3.Metal1;$5.$9.Metal2;0.006;                                            
+C53;$3.$3.Metal1;$5.P1.Poly2;0.015;                                             
+C54;$3.$4.Metal1;$4.$4.Metal1;0.009;                                            
+C55;$3.$4.Metal1;$5;0.015;                                                      
+C56;$3.$4.Metal1;$5.P1.Poly2;0.015;                                             
+C57;$3.$5.Metal1;$4.$5.Metal1;0.009;                                            
+C58;$3.$5.Metal1;$5;0.015;                                                      
+C59;$3.$5.Metal1;$5.P1.Poly2;0.015;                                             
+C60;$3.$6.Metal1;$4.$6.Metal1;0.009;                                            
+C61;$3.$6.Metal1;$5;0.005;                                                      
+C62;$3.$6.Metal1;$5.$12.Poly2;0.01;                                             
+C63;$3.$6.Metal1;$5.$14.Poly2;0.01;                                             
+C64;$3.$6.Metal1;$5.P1.Poly2;0.005;                                             
+C65;$3.$7.Metal1;$4.$7.Metal1;0.008;                                            
+C66;$3.$7.Metal1;$5.$10.Metal2;0.001;                                           
+C67;$3.$7.Metal1;$5.$12.Poly2;0.013;                                            
+C68;$3.$7.Metal1;$5.$14.Poly2;0.013;                                            
+C69;$3.$7.Metal1;$5.$9.Metal2;0.001;                                            
+C70;$3.$7.Metal1;SUB;0.005;                                                     
+C71;$3.$7.Metal1;VSUBS;0.007;                                                   
+C72;$4;SUB;0.002;                                                               
+C73;$4.$0.Metal1;$5.P1.Poly2;0.013;                                             
+C74;$4.$0.Metal1;SUB;0.031;                                                     
+C75;$4.$0.Metal1;VSUBS;0.009;                                                   
+C76;$4.$1.Metal1;$5.P1.Poly2;0.015;                                             
+C77;$4.$1.Metal1;SUB;0.03;                                                      
+C78;$4.$1.Metal1;VSUBS;0.003;                                                   
+C79;$4.$2.Metal1;$5.P1.Poly2;0.015;                                             
+C80;$4.$2.Metal1;SUB;0.03;                                                      
+C81;$4.$2.Metal1;VSUBS;0.003;                                                   
+C82;$4.$3.Metal1;$5.P1.Poly2;0.015;                                             
+C83;$4.$3.Metal1;SUB;0.03;                                                      
+C84;$4.$3.Metal1;VSUBS;0.003;                                                   
+C85;$4.$4.Metal1;$5.P1.Poly2;0.015;                                             
+C86;$4.$4.Metal1;SUB;0.03;                                                      
+C87;$4.$4.Metal1;VSUBS;0.003;                                                   
+C88;$4.$5.Metal1;$5.P1.Poly2;0.015;                                             
+C89;$4.$5.Metal1;SUB;0.03;                                                      
+C90;$4.$5.Metal1;VSUBS;0.003;                                                   
+C91;$4.$6.Metal1;$5.$14.Poly2;0.009;                                            
+C92;$4.$6.Metal1;$5.P1.Poly2;0.006;                                             
+C93;$4.$6.Metal1;SUB;0.03;                                                      
+C94;$4.$6.Metal1;VSUBS;0.003;                                                   
+C95;$4.$7.Metal1;$5.$14.Poly2;0.013;                                            
+C96;$4.$7.Metal1;SUB;0.031;                                                     
+C97;$4.$7.Metal1;VSUBS;0.009;                                                   
+C98;$5;SUB;0.035;                                                               
+C99;$5;VSUBS;0.14;                                                              
+C100;$5.$0.Metal1;SUB;0.012;                                                    
+C101;$5.$0.Metal1;VSUBS;0.005;                                                  
+C102;$5.$1.Metal1;SUB;0.015;                                                    
+C103;$5.$1.Metal1;VSUBS;0.007;                                                  
+C104;$5.$10.Metal2;SUB;0.006;                                                   
+C105;$5.$10.Metal2;VSUBS;0.04;                                                  
+C106;$5.$11.Metal2;SUB;0.005;                                                   
+C107;$5.$11.Metal2;VSUBS;0.038;                                                 
+C108;$5.$12.Poly2;SUB;0.01;                                                     
+C109;$5.$12.Poly2;VSUBS;0.193;                                                  
+C110;$5.$14.Poly2;SUB;0.01;                                                     
+C111;$5.$14.Poly2;VSUBS;0.193;                                                  
+C112;$5.$2.Metal1;SUB;0.012;                                                    
+C113;$5.$2.Metal1;VSUBS;0.005;                                                  
+C114;$5.$3.Metal1;SUB;0.005;                                                    
+C115;$5.$3.Metal1;VSUBS;0.005;                                                  
+C116;$5.$4.Metal1;SUB;0.012;                                                    
+C117;$5.$4.Metal1;VSUBS;0.005;                                                  
+C118;$5.$5.Metal1;SUB;0.005;                                                    
+C119;$5.$5.Metal1;VSUBS;0.005;                                                  
+C120;$5.$6.Metal1;SUB;0.012;                                                    
+C121;$5.$6.Metal1;VSUBS;0.005;                                                  
+C122;$5.$7.Metal1;SUB;0.015;                                                    
+C123;$5.$7.Metal1;VSUBS;0.007;                                                  
+C124;$5.$8.Metal2;SUB;0.005;                                                    
+C125;$5.$8.Metal2;VSUBS;0.038;                                                  
+C126;$5.$9.Metal2;SUB;0.006;                                                    
+C127;$5.$9.Metal2;VSUBS;0.04;                                                   
+C128;$5.P1.Poly2;SUB;0.035;                                                     
+C129;$5.P1.Poly2;VSUBS;0.14;                                                    
+C130;SUB;VSUBS;1.393;                                                           
+R1;$2;$2.$0.Metal1;;6.3                                                         
+R2;$2;$2.$1.Metal1;;6.3                                                         
+R3;$2;$2.$2.Metal1;;6.3                                                         
+R4;$2;$2.$3.Metal1;;6.3                                                         
+R5;$2;$2.$4.Metal1;;6.3                                                         
+R6;$2;$2.$5.Metal1;;6.3                                                         
+R7;$2;$2.$6.Metal1;;6.3                                                         
+R8;$2;$2.$7.Metal1;;6.3                                                         
+R9;$2.$0.Metal1;$2.$1.Metal1;;0.123                                             
+R10;$2.$1.Metal1;$2.$2.Metal1;;0.123                                            
+R11;$2.$2.Metal1;$2.$3.Metal1;;0.123                                            
+R12;$2.$3.Metal1;$2.$4.Metal1;;0.123                                            
+R13;$2.$4.Metal1;$2.$5.Metal1;;0.123                                            
+R14;$2.$5.Metal1;$2.$6.Metal1;;0.123                                            
+R15;$2.$6.Metal1;$2.$7.Metal1;;0.123                                            
+R16;$3;$3.$0.Metal1;;6.3                                                        
+R17;$3;$3.$1.Metal1;;6.3                                                        
+R18;$3;$3.$2.Metal1;;6.3                                                        
+R19;$3;$3.$3.Metal1;;6.3                                                        
+R20;$3;$3.$4.Metal1;;6.3                                                        
+R21;$3;$3.$5.Metal1;;6.3                                                        
+R22;$3;$3.$6.Metal1;;6.3                                                        
+R23;$3;$3.$7.Metal1;;6.3                                                        
+R24;$3.$0.Metal1;$3.$1.Metal1;;0.123                                            
+R25;$3.$1.Metal1;$3.$2.Metal1;;0.123                                            
+R26;$3.$2.Metal1;$3.$3.Metal1;;0.123                                            
+R27;$3.$3.Metal1;$3.$4.Metal1;;0.123                                            
+R28;$3.$4.Metal1;$3.$5.Metal1;;0.123                                            
+R29;$3.$5.Metal1;$3.$6.Metal1;;0.123                                            
+R30;$3.$6.Metal1;$3.$7.Metal1;;0.123                                            
+R31;$4;$4.$0.Metal1;;6.3                                                        
+R32;$4;$4.$1.Metal1;;6.3                                                        
+R33;$4;$4.$2.Metal1;;6.3                                                        
+R34;$4;$4.$3.Metal1;;6.3                                                        
+R35;$4;$4.$4.Metal1;;6.3                                                        
+R36;$4;$4.$5.Metal1;;6.3                                                        
+R37;$4;$4.$6.Metal1;;6.3                                                        
+R38;$4;$4.$7.Metal1;;6.3                                                        
+R39;$4.$0.Metal1;$4.$1.Metal1;;0.123                                            
+R40;$4.$1.Metal1;$4.$2.Metal1;;0.123                                            
+R41;$4.$2.Metal1;$4.$3.Metal1;;0.123                                            
+R42;$4.$3.Metal1;$4.$4.Metal1;;0.123                                            
+R43;$4.$4.Metal1;$4.$5.Metal1;;0.123                                            
+R44;$4.$5.Metal1;$4.$6.Metal1;;0.123                                            
+R45;$4.$6.Metal1;$4.$7.Metal1;;0.123                                            
+R46;$5;$5.$12.Poly2;;15.026                                                     
+R47;$5.$0.Metal1;$5.$1.Metal1;;0.002                                            
+R48;$5.$0.Metal1;$5.$2.Metal1;;0.194                                            
+R49;$5.$0.Metal1;$5.$8.Metal2;;4.5                                              
+R50;$5.$1.Metal1;$5.$12.Poly2;;5.9                                              
+R51;$5.$10.Metal2;$5.$11.Metal2;;0.194                                          
+R52;$5.$10.Metal2;$5.$4.Metal1;;4.5                                             
+R53;$5.$10.Metal2;$5.$9.Metal2;;0.218                                           
+R54;$5.$11.Metal2;$5.$6.Metal1;;4.5                                             
+R55;$5.$12.Poly2;$5.$3.Metal1;;5.9                                              
+R56;$5.$14.Poly2;$5.$5.Metal1;;5.9                                              
+R57;$5.$14.Poly2;$5.$7.Metal1;;5.9                                              
+R58;$5.$14.Poly2;$5.P1.Poly2;;15.026                                            
+R59;$5.$2.Metal1;$5.$3.Metal1;;0.002                                            
+R60;$5.$2.Metal1;$5.$9.Metal2;;4.5                                              
+R61;$5.$4.Metal1;$5.$5.Metal1;;0.002                                            
+R62;$5.$4.Metal1;$5.$6.Metal1;;0.194                                            
+R63;$5.$6.Metal1;$5.$7.Metal1;;0.002                                            
+R64;$5.$8.Metal2;$5.$9.Metal2;;0.194                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair__
+nfet_10v0_asym_pair/nfet_10v0_asym_pair_k25d_pex_netlist.csv                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair__
+nfet_10v0_asym_pair/nfet_10v0_asym_pair_k25d_pex_netlist.spice                  
