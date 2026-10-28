@@ -141,6 +141,32 @@ def test_tie_of_tap_device_is_behind_its_contacts():
     assert ptap1_line.split()[1:3] == ['SUB.P0.pSD', 'sub!']
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
+    # The contacts over the terminals of the bipolar transistors (and the emitter windows of the npn13G2
+    # and the npn13G2L) are within the devices, whose models have their resistances (e.g. re, rbx, rcx),
+    # so the terminals are on the Metal1 over them, rather than on LVS layers the tech info doesn't know (#350)
+    cell_name = 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa'
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+    assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
+
+    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=False)
+    # NOTE: the substrate terminal S stays on its net, as the substrate is no conductor of the resistance network,
+    #       and so do the base and collector of the pnpMPA, on the nwell and substrate taps
+    npn_terminals = {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1'], 'S': []}
+    assert {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
+                                  for t in d.terminals}
+            for d in pex_context.devices_by_name.values()} == {
+        'npn13G2': npn_terminals,
+        'npn13G2l': npn_terminals,
+        'npn13G2v': npn_terminals,
+        'pnpMPA': {'C': ['Activ'], 'B': ['Activ'], 'E': ['Metal1']},
+    }
+
+
 def subckt_ports(spice_lines: List[str]) -> List[str]:
     subckt_line, = [line for line in spice_lines if line.startswith('.SUBCKT ')]
     return [port.replace('\\', '') for port in subckt_line.split()[2:]]

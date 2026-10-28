@@ -108,6 +108,12 @@ message ComputedLayerInfo {
         // so their capacitances to other nets (e.g. the substrate, a wire across) are extracted.
         // Otherwise like a regular layer (e.g. on the GDS pair of the metal, for the resistance extraction)
         KIND_DEVICE_CAPACITOR_PLATE = 6;
+
+        // a layer within a device, whose model has its resistance and capacitance, regardless of --blackbox
+        // (e.g. the contacts and the emitter window of IHP's bipolar transistors, whose models have the resistances
+        // up to the metal over them): known to the tech info, so the extraction doesn't report it as left out,
+        // but no part of the extraction
+        KIND_DEVICE_INTERNAL = 7;
     }
 
     Kind kind = 10;

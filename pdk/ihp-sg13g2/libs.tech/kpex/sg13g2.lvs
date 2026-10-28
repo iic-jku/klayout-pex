@@ -415,6 +415,15 @@ else
   cont_ntap_con = cont_drw.and(ntap)
   cont_ptap_con = cont_drw.and(ptap)
 
+  # [PEX] the Cont over the terminals of the bipolar transistors (of the npn HBTs, the emitter of the pnpMPA),
+  #       whose models have the resistances up to the Metal1 over them, so that PEX knows all of Cont
+  #       (NOTE: a regular LVS would not do this, we need it for PEX). The whole contacts, as the one of
+  #       an npn13G2L/npn13G2V emitter is wider than the emitter
+  cont_bjt_con = cont_drw.overlapping(npn13G2_e_pin.join(npn13G2_b_pin).join(npn13G2_c_pin)
+                                        .join(npn13G2l_e_pin).join(npn13G2l_b_pin).join(npn13G2l_c_pin)
+                                        .join(npn13G2v_e_pin).join(npn13G2v_b_pin).join(npn13G2v_c_pin)
+                                        .join(pnp_mpa_e))
+
   # [PEX] Pins (NOTE: a regular LVS would not do this, we need it for PEX)
   poly_pin       = polygons(5  , 2)
   metal1_pin     = polygons(8  , 2)
@@ -468,6 +477,9 @@ else
   # [PEX] the Cont over the taps (NOTE: a regular LVS would not do this, we need it for PEX)
   connect(cont_ntap_con,   cont_drw)
   connect(cont_ptap_con,   cont_drw)
+
+  # [PEX] the Cont over the terminals of the bipolar transistors (NOTE: a regular LVS would not do this, we need it for PEX)
+  connect(cont_bjt_con,    cont_drw)
 
   # [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
   connect(poly_con      ,    poly_pin_con)

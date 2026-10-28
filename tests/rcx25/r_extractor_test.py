@@ -134,6 +134,13 @@ class RExtractorTechTest(unittest.TestCase):
         self.assertIn('cont_nsd_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
         self.assertNotIn('cont_poly_con', [via.layer.lvs_layer_name for via in rex_tech.vias])
 
+    def test_inductor_pins_are_known(self):
+        # IND.pin marks the ports of the inductors and joins them to their leads, a pin layer like Metal1.pin,
+        # rather than an LVS layer the tech info doesn't know (#350)
+        cell_name = 'inductor2_w2u_d15u48_1_turn'
+        r_extractor(ihp_sg13g2_tech(), top_cell=cell_name, lvsdb_file_name=f"{cell_name}.lvsdb.gz") \
+            .prepare_r_extractor_tech_pb(RExtractorTech())
+
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("R", "Tech")

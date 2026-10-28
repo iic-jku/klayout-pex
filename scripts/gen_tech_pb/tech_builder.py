@@ -69,6 +69,7 @@ KREG = ComputedLayerInfo.KIND_REGULAR
 KCAP = ComputedLayerInfo.KIND_DEVICE_CAPACITOR
 KPLT = ComputedLayerInfo.KIND_DEVICE_CAPACITOR_PLATE
 KRES = ComputedLayerInfo.KIND_DEVICE_RESISTOR
+KDEV = ComputedLayerInfo.KIND_DEVICE_INTERNAL
 KPIN = ComputedLayerInfo.KIND_PIN
 KLBL = ComputedLayerInfo.KIND_LABEL
 
