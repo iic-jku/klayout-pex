@@ -63,12 +63,16 @@ class Test(unittest.TestCase):
         return os.path.realpath(os.path.join(__file__, '..', '..', '..',
                                              'klayout_pex_protobuf', 'ihp-sg13g2_tech.pb.json'))
 
-    def tech_info(self, renamed_layers_derived_from: Optional[str] = None) -> TechInfo:
+    def tech_info(self,
+                  renamed_layers_derived_from: Optional[str] = None,
+                  device_internal_layers: Collection[LVSLayerName] = ()) -> TechInfo:
         tech = TechInfo.parse_tech_def(jsonpb_path=self.tech_info_json_path)
-        # NOTE: e.g. like gf180mcuD, whose tech info names the contacts differently than its LVS deck
         for layer in tech.lvs_computed_layers:
+            # NOTE: e.g. like gf180mcuD, whose tech info names the contacts differently than its LVS deck
             if layer.original_layer_name == renamed_layers_derived_from:
                 layer.layer_info.name += '_renamed'
+            if layer.layer_info.name in device_internal_layers:
+                layer.kind = tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_INTERNAL
         return TechInfo(tech=tech, dielectric_filter=None)
 
     def prepare_extraction(self, tech: Optional[TechInfo] = None) -> KLayoutExtractionContext:
@@ -92,6 +96,20 @@ class Test(unittest.TestCase):
         pex_context = self.prepare_extraction(tech=self.tech_info(renamed_layers_derived_from='Cont'))
         self.assertEqual(['cont_drw (Cont): the tech info has no layer derived from it'],
                          pex_context.unmodeled_layers)
+
+    def test_layers_within_devices_are_known_but_not_extracted(self):
+        # e.g. the contacts and the emitter windows of bipolar transistors, whose models have their resistances
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+            pex_context = self.prepare_extraction(tech=self.tech_info(device_internal_layers=['cont_nsd_con']))
+        lvs_layer_names = {sl.lvs_layer_name for layer in pex_context.extracted_layers.values()
+                           for sl in layer.source_layers}
+        self.assertNotIn('cont_nsd_con', lvs_layer_names)
+        self.assertIn('cont_poly_con', lvs_layer_names)
+        self.assertEqual([], pex_context.unmodeled_layers)
+        # NOTE: they still cover the shapes of the layer they are derived from
+        self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
+                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con",
+                      [call.args[0] for call in warning.call_args_list])
 
     def test_leftover_top_cells_are_ignored_with_a_warning(self):
         with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:

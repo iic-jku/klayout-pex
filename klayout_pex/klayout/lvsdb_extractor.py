@@ -327,6 +327,9 @@ class KLayoutExtractionContext:
                     original_gds_pair_by_unnamed_layer_name[ln] = (original_info.layer, original_info.datatype)
                     continue
 
+                if computed_layer_info.kind == tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_INTERNAL:
+                    continue  # NOTE: the device model has its resistance and capacitance
+
                 if blackbox_devices:
                     match computed_layer_info.kind:
                         case tech_pb2.ComputedLayerInfo.Kind.KIND_DEVICE_RESISTOR:
