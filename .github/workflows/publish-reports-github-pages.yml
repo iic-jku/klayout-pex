@@ -68,15 +68,39 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      # NOTE: the Allure CLI on the JDK above, like simple-elf/allure-report-action did, whose Docker build
+      #       pulls its base image from public.ecr.aws, which rate-limits the GitHub runners (429 Too Many Requests)
       - name: "Build test report"
-        uses: simple-elf/allure-report-action@master
         if: always()
-        with:
-          gh_pages: allure-results
-          # allure_history: allure-history
-          allure_results: build/allure-results
-          subfolder: allure
-          # subfolder: allure-results
+        env:
+          ALLURE_RELEASE: "2.44.0"
+          PAGES_URL: "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure"
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        run: |
+          curl -fsSL -o allure.tgz \
+            "https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/${ALLURE_RELEASE}/allure-commandline-${ALLURE_RELEASE}.tgz"
+          tar -xzf allure.tgz
+
+          # the trend of the previous reports, from the gh-pages checkout
+          mkdir -p build/allure-results/history
+          cp -r gh-pages/allure/last-history/. build/allure-results/history || echo "No report history on gh-pages"
+          cat > build/allure-results/executor.json <<EOF
+          {"name": "GitHub Actions", "type": "github", "reportName": "Allure Report with history",
+           "url": "${PAGES_URL}", "reportUrl": "${PAGES_URL}/${RUN_NUMBER}",
+           "buildUrl": "${RUN_URL}", "buildName": "GitHub Actions Run #${RUN_NUMBER}", "buildOrder": "${RUN_NUMBER}"}
+          EOF
+
+          "allure-${ALLURE_RELEASE}/bin/allure" generate --clean build/allure-results -o allure-report
+
+          # the layout of gh-pages: allure/<run number>/, allure/last-history/, allure/index.html to the latest
+          mkdir -p allure-history/allure
+          cp -r allure-report/. "allure-history/allure/${RUN_NUMBER}"
+          cp -r allure-report/history/. allure-history/allure/last-history
+          echo "<!DOCTYPE html><meta charset=\"utf-8\"><meta http-equiv=\"refresh\" content=\"0; URL=${PAGES_URL}/${RUN_NUMBER}/index.html\">" \
+            > allure-history/allure/index.html
+          echo "<meta http-equiv=\"Pragma\" content=\"no-cache\"><meta http-equiv=\"Expires\" content=\"0\">" \
+            >> allure-history/allure/index.html
 
       - name: "Publish test report"
         uses: peaceiris/actions-gh-pages@v4
