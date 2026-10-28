@@ -51,6 +51,9 @@
 - Return the paths you wrote; never scan a directory for them (leftover files).
 - Format-only paths must not import KLayout or generated protobuf: import lazily, and put
   type-only imports under `TYPE_CHECKING`.
+- Text I/O names its encoding, as the locale's is `cp1252` on Windows: `open()`,
+  `Path.read_text()`, `logging.FileHandler`, `subprocess` with `text=True`. `utf-8`, also for
+  the output of other tools, with `errors='replace'` where it is only shown.
 - Docs describe contracts, not file layout.
 - Don't duplicate code, test helpers included: share it in a module (e.g. `tests/common/`)
   rather than copying it, and extend the shared code rather than adding a variant.
@@ -70,7 +73,8 @@
   rebuilds all), commit them with the change. Without it (CI), outdated ones fail.
 - CI runs the unit tests with Python 3.12 and the KLayout Python module only (no
   executable), on Linux, macOS and Windows: before handing over a PR, also run them with
-  Python 3.12 (e.g. in IIC-OSIC-TOOLS) and with `KPEX_KLAYOUT_EXE=/nonexistent`.
+  Python 3.12 (e.g. in IIC-OSIC-TOOLS) and with `KPEX_KLAYOUT_EXE=/nonexistent`. CI's
+  `PYTHONWARNDEFAULTENCODING=1` makes text I/O without encoding fail the tests on every platform.
 - Each bug fix gets a test that fails without it. A test that needs a workaround means the
   code is wrong: fix the code.
 - No loosened tolerances or re-baselined numbers without a physical explanation.

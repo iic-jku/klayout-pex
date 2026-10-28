@@ -151,6 +151,8 @@ jobs:
         if-no-files-found: error
 
     - name: "[🐍] Run Unit tests"
+      env:
+        PYTHONWARNDEFAULTENCODING: "1"  # NOTE: see filterwarnings in pyproject.toml
       run: >
         poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "not slow and not smoke"
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}

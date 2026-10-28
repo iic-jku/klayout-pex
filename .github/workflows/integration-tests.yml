@@ -136,6 +136,8 @@ jobs:
         unzip -o dist/klayout_pex*.whl klayout_pex_protobuf/\*   # generated protobuf files
 
     - name: "[🐍] Run Unit tests"
+      env:
+        PYTHONWARNDEFAULTENCODING: "1"  # NOTE: see filterwarnings in pyproject.toml
       run: >
         poetry run coverage run --data-file=${{ env.COVERAGE_DATA_PATH }} -m pytest -m "slow"
         --alluredir ${{ env.ALLURE_RESULTS_PATH }}
