@@ -126,8 +126,11 @@ build-backend = "kpex_build_backend"
 backend-path = ["scripts/build"]
 
 [tool.coverage.run]
-# NOTE: KPEX only, not the tests, the generated protobuf modules or the plugins
-source = ["klayout_pex"]
+# NOTE: KPEX and its plugins (CI's plugin tests), not the tests, the modules they generate (e.g. broken plugins,
+#       whose sources are gone when the report is generated) or the generated protobuf modules
+source_pkgs = ["klayout_pex", "klayout_pex_plugins"]
+# NOTE: the plugins are only installed for the plugin tests
+disable_warnings = ["module-not-imported"]
 
 [tool.coverage.report]
 exclude_also = [
