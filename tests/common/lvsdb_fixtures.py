@@ -102,6 +102,16 @@ def pdk_symlinks() -> Dict[str, str]:
             for link, target in kpex_symlinks().find_symlinks(Path(REPO_DIR), ['pdk'])}
 
 
+def repo_relative_path(path: str) -> str:
+    """
+    The path relative to the checkout, for messages, or as it is on another drive (Windows), e.g. a temporary one
+    """
+    try:
+        return os.path.relpath(path, REPO_DIR)
+    except ValueError:
+        return path
+
+
 @dataclass(frozen=True)
 class LVSDBFixture:
     pdk: PDK
@@ -221,7 +231,7 @@ class LVSDBFixture:
             if exe_path is None:
                 raise AssertionError(
                     f"The LVS database of {self.pdk}/{self.relative_gds_path} "
-                    f"({os.path.relpath(self.lvsdb_path, REPO_DIR)}) is outdated: {'; '.join(outdated_inputs)}. "
+                    f"({repo_relative_path(self.lvsdb_path)}) is outdated: {'; '.join(outdated_inputs)}. "
                     f"Rebuild it with the KLayout executable (KPEX_KLAYOUT_EXE): run the tests, "
                     f"or {REBUILD_COMMAND}, and commit it"
                 )
@@ -249,7 +259,7 @@ def main() -> int:
     for fixture in committed_fixtures():
         outdated_inputs = fixture.outdated_inputs()
         if outdated_inputs:
-            print(f"Rebuilding {os.path.relpath(fixture.lvsdb_path, REPO_DIR)}: {'; '.join(outdated_inputs)}")
+            print(f"Rebuilding {repo_relative_path(fixture.lvsdb_path)}: {'; '.join(outdated_inputs)}")
             fixture.rebuild(exe_path)
     return 0
 
