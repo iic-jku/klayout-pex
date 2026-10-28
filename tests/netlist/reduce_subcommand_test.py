@@ -86,7 +86,7 @@ def test_options_choose_the_passes(line_netlist: str, tmp_path):
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'm1', 'm2']
     assert run(line_netlist, '-o', output, '--ticer-tau', '1p', '--floating-max-degree', '1')[0] == ExitCode.OK
     assert line_node_names(output) == ['A', 'B', 'gnd!', 'plate']
-    with open(output) as f:
+    with open(output, encoding='utf-8') as f:
         assert 'Rtie_1 plate 0 1e+12' in f.read().splitlines()
 
 
@@ -133,7 +133,7 @@ def test_missing_input_and_overwriting_it_are_usage_errors(line_netlist: str, tm
     code, output = run(line_netlist, '-o', line_netlist)
     assert code == ExitCode.USAGE
     assert 'The output would overwrite the input netlist' in output
-    with open(line_netlist) as f:
+    with open(line_netlist, encoding='utf-8') as f:
         assert f.read() == LINE_NETLIST
 
 

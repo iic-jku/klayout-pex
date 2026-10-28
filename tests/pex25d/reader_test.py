@@ -165,9 +165,9 @@ class Pex25DReaderTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             stack_path = os.path.join(directory, 'stack.pex25d')
             top_path = os.path.join(directory, 'top.pex25d')
-            with open(stack_path, 'w') as f:
+            with open(stack_path, 'w', encoding='utf-8') as f:
                 f.write('METAL met3 Z_OFFSETS 3.0 3.4\n')
-            with open(top_path, 'w') as f:
+            with open(top_path, 'w', encoding='utf-8') as f:
                 f.write(f'{STACK_ONLY}\nINCLUDE stack.pex25d\n')
 
             with open(top_path, 'rb') as f:
@@ -179,7 +179,7 @@ class Pex25DReaderTest(unittest.TestCase):
     def test_e0109_include_cycle(self):
         with tempfile.TemporaryDirectory() as directory:
             path = os.path.join(directory, 'loop.pex25d')
-            with open(path, 'w') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 f.write(f'{HEADER}\nINCLUDE loop.pex25d\n')
             report = DiagnosticsReport()
             with open(path, 'rb') as f:

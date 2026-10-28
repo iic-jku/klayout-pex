@@ -383,7 +383,7 @@ def test_imports_and_builtin_discovery_need_no_geometry_or_generated_code():
             raise AssertionError('export should require KLayout')
     '''
     result = subprocess.run([sys.executable, '-c', textwrap.dedent(script)],
-                            cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True)
+                            cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True, encoding='utf-8')
     assert result.returncode == 0, result.stdout + result.stderr
 
 
@@ -629,7 +629,7 @@ def test_cli_emits_collected_diagnostics_when_export_fails(
                          '--out-dir', str(tmp_path / 'deck'), '--diagnostics', 'json',
                          '--out-diagnostics', str(diagnostics)])
     assert completion.value.code == pex25d.ExitCode.USAGE
-    assert 'PEX25D-E0250' in {d['code'] for d in json.loads(diagnostics.read_text())['diagnostics']}
+    assert 'PEX25D-E0250' in {d['code'] for d in json.loads(diagnostics.read_text(encoding='utf-8'))['diagnostics']}
 
 
 def test_unknown_selector_lists_available_identifiers_without_loading_plugins(
@@ -724,7 +724,7 @@ def test_format_import_does_not_load_registry():
         assert not [name for name in sys.modules if name.startswith('klayout_pex.plugin.')]
     """
     result = subprocess.run([sys.executable, '-c', textwrap.dedent(script)],
-                            cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True)
+                            cwd=Path(__file__).resolve().parents[2], capture_output=True, text=True, encoding='utf-8')
     assert result.returncode == 0, result.stdout + result.stderr
 
 

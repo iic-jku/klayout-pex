@@ -61,7 +61,7 @@ CELL_NAME = 'rfnmos_w1u_l0u72'
 
 def write_file(path: str, content: str):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
 
 
@@ -207,7 +207,7 @@ class LVSInputFingerprintTest(TempDirTestCase):
         fingerprint = self.fingerprint()
         write_fingerprint(path, fingerprint)
         self.assertEqual(fingerprint, read_fingerprint(path))
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             self.assertIn('"sha256_by_relative_path"', f.read())
 
     def test_missing_or_unreadable_fingerprint_is_none(self):

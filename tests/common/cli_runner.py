@@ -90,5 +90,6 @@ def assert_netlist_cli_loads_neither_klayout_nor_protobuf(argv: Sequence[str]):
               "    assert exit.code == 0, exit.code\n"
               "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'klayout_pex_protobuf'))\n"
               "assert not loaded, loaded\n")
-    result = subprocess.run([sys.executable, '-c', script], cwd=REPO_DIR, capture_output=True, text=True)
+    result = subprocess.run([sys.executable, '-c', script], cwd=REPO_DIR, capture_output=True,
+                            text=True, encoding='utf-8')
     assert result.returncode == 0, result.stderr

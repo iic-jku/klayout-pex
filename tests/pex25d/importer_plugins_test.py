@@ -158,7 +158,7 @@ def test_cli_writes_invalid_import_and_reports_it(
                     '-o', str(output), '--diagnostics', 'json',
                     '--out-diagnostics', str(diagnostics)]) == pex25d.ExitCode.DIAGNOSTIC_ERRORS
     assert output.exists()
-    assert 'PEX25D-E0201' in {d['code'] for d in json.loads(diagnostics.read_text())['diagnostics']}
+    assert 'PEX25D-E0201' in {d['code'] for d in json.loads(diagnostics.read_text(encoding='utf-8'))['diagnostics']}
 
 
 def test_cli_points_to_invalid_import_after_diagnostics(

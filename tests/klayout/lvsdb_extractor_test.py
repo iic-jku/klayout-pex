@@ -142,7 +142,7 @@ class NetNameTest(unittest.TestCase):
             writer = kdb.NetlistSpiceWriter()
             writer.use_net_names = True
             netlist.write(spice_path, writer)
-            with open(spice_path) as f:
+            with open(spice_path, encoding='utf-8') as f:
                 subckt_line = next(line for line in f if line.startswith('.SUBCKT'))
         spice_names = [name.replace('\\', '') for name in subckt_line.split()[2:]]
 

@@ -53,7 +53,7 @@ def write_vacaskrc(run_dir: str, models_dir: str):
 
     :param models_dir: e.g. the one of PDKTestConfig.simulator_models_dir('vacask')
     """
-    with open(os.path.join(run_dir, '.vacaskrc.toml'), 'w') as f:
+    with open(os.path.join(run_dir, '.vacaskrc.toml'), 'w', encoding='utf-8') as f:
         f.write(f'[Paths]\nmodule_path_prefix = [ "{models_dir}/osdi" ]\n')
 
 
@@ -62,7 +62,7 @@ def run_vacask(deck_path: str):
     Runs the deck in its directory, where the analyses write their results (e.g. op1.raw)
     """
     result = subprocess.run([VACASK_EXE, os.path.basename(deck_path)], cwd=os.path.dirname(deck_path),
-                            capture_output=True, text=True, timeout=600)
+                            capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=600)
     assert result.returncode == 0, f"vacask failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
 
 
@@ -70,7 +70,7 @@ def read_ascii_raw(path: str) -> Dict[str, List[complex]]:
     """
     The vectors of a raw file of VACASK (options rawfile="ascii"), by name (e.g. x1:out)
     """
-    with open(path) as f:
+    with open(path, encoding='utf-8') as f:
         lines = f.read().splitlines()
     names: List[str] = []
     values: List[complex] = []

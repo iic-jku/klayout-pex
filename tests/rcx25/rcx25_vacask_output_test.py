@@ -64,7 +64,7 @@ def assert_vacask_netlist_is_the_spice_netlist(extraction: RCX25Extraction, *pat
     :return: the VACASK netlist
     """
     vacask_path, spice_path = vacask_and_spice_netlists(extraction, *path_components)
-    with open(vacask_path) as f:
+    with open(vacask_path, encoding='utf-8') as f:
         vacask_text = f.read()
     # NOTE: the SPICE netlist has the capacitances with 6 significant digits
     assert_same_nets_and_values(SpiceReader().read(spice_path), vacask_text, rel_tol=5e-6)
@@ -122,7 +122,7 @@ def test_vacask_simulates_the_rc_netlist_of_an_nmos_as_ngspice_ihp_sg13g2():
     ngspice_models = IHP_SG13G2.simulator_models_dir('ngspice')
 
     write_vacaskrc(run_dir, vacask_models)
-    with open(os.path.join(run_dir, 'tb.sim'), 'w') as f:
+    with open(os.path.join(run_dir, 'tb.sim'), 'w', encoding='utf-8') as f:
         f.write(f"""nmos_diode2 in VACASK
 
 include "{vacask_models}/models/sg13g2_vacask_common.lib"
@@ -142,7 +142,7 @@ endc
     run_vacask(os.path.join(run_dir, 'tb.sim'))
 
     write_spiceinit(run_dir, ngspice_models)
-    with open(os.path.join(run_dir, 'tb.cir'), 'w') as f:
+    with open(os.path.join(run_dir, 'tb.cir'), 'w', encoding='utf-8') as f:
         f.write(f"""nmos_diode2 in ngspice
 .lib {ngspice_models}/models/cornerMOSlv.lib mos_tt
 .include {spice_path}

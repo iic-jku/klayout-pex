@@ -75,7 +75,7 @@ def write_tech_def(directory: str, tech: tech_pb2.Technology) -> str:
     :return: the path of the JSON file of the tech definition, as the generator writes it
     """
     path = os.path.join(directory, f"{tech.name}_tech.pb.json")
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(google.protobuf.json_format.MessageToJson(tech))
     return path
 

@@ -292,7 +292,7 @@ def test_comment_lines_go_above_the_elements():
 def test_write_returns_the_path(tmp_path):
     path = str(tmp_path / 'out.spice')
     assert SpiceRCNetlist.parse(KPEX_NETLIST).write(path) == path
-    with open(path) as f:
+    with open(path, encoding='utf-8') as f:
         assert SpiceRCNetlist.parse(f.read()).format() == SpiceRCNetlist.parse(KPEX_NETLIST).format()
 
 

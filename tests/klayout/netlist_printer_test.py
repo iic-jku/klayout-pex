@@ -147,7 +147,7 @@ class Test(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             path = os.path.join(tmp_dir, 'netlist.cir')
             printer.write(netlist, path)
-            with open(path) as f:
+            with open(path, encoding='utf-8') as f:
                 return [l.strip() for l in f if l.strip()]
 
     @classmethod

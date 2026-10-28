@@ -100,7 +100,7 @@ def test_draws_next_to_the_input_with_the_packaged_skin(divider_netlist: str, tm
     monkeypatch.chdir(work_dir)
     code, output = run(divider_netlist, '--exe', fake_netlistsvg(str(tmp_path)))
     assert code == ExitCode.OK, output
-    with open(os.path.splitext(divider_netlist)[0] + '.svg') as f:
+    with open(os.path.splitext(divider_netlist)[0] + '.svg', encoding='utf-8') as f:
         netlistsvg_call = json.load(f)
     package_dir = os.path.dirname(os.path.abspath(klayout_pex.__file__))
     assert os.path.commonpath([netlistsvg_call['skin'], package_dir]) == package_dir
@@ -124,7 +124,7 @@ def test_cell_chooses_the_circuit(tmp_path):
 
     code, output = run(netlist_path, '--exe', exe_path, '--cell', 'other')
     assert code == ExitCode.OK, output
-    with open(os.path.splitext(netlist_path)[0] + '.svg') as f:
+    with open(os.path.splitext(netlist_path)[0] + '.svg', encoding='utf-8') as f:
         assert json.load(f)['modules'] == ['OTHER']
 
 

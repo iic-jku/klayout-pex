@@ -71,14 +71,14 @@ endc
 def test_converted_netlist_simulates_in_vacask():
     with tempfile.TemporaryDirectory() as directory:
         spice_path = os.path.join(directory, 'lowpass.spice')
-        with open(spice_path, 'w') as f:
+        with open(spice_path, 'w', encoding='utf-8') as f:
             f.write(LOWPASS_SPICE)
         with pytest.raises(SystemExit) as exit_info:
             NetlistCLI().main(['netlist', 'convert', '--to', 'vacask', spice_path])
         assert exit_info.value.code == 0
 
         deck_path = os.path.join(directory, 'tb.sim')
-        with open(deck_path, 'w') as f:
+        with open(deck_path, 'w', encoding='utf-8') as f:
             f.write(TESTBENCH)
         run_vacask(deck_path)
 

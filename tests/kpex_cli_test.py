@@ -64,7 +64,7 @@ def test_log_files_hold_their_own_run_only(gds_path: Optional[str], log_dir: str
                                                 '--out-dir', out_dir])
         assert code == 1, output
     for log_name in ('kpex.log', 'kpex_plain.log'):
-        with open(tmp_path / 'first' / log_dir / log_name) as f:
+        with open(tmp_path / 'first' / log_dir / log_name, encoding='utf-8') as f:
             log = f.read()
         assert log.count('GDS input file passed, running in LVS mode') == 1, log
 
@@ -106,7 +106,7 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
     # NOTE: the PEX-LVS compares the layout with a dummy schematic only (#330)
     monkeypatch.setenv('KPEX_KLAYOUT_EXE', str(tmp_path / 'no_klayout'))
     schematic_path = tmp_path / 'nfet_li1.spice'
-    schematic_path.write_text('.subckt nfet_li1 D G S\n.ends\n')
+    schematic_path.write_text('.subckt nfet_li1 D G S\n.ends\n', encoding='utf-8')
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
                                             '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
@@ -130,10 +130,10 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
                                             '--out-dir', str(tmp_path)])
     assert code == 0, output
     run_dir = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell'
-    with open(run_dir / 'nfet_li1_in_subcell_k25d_pex_netlist.spice') as f:
+    with open(run_dir / 'nfet_li1_in_subcell_k25d_pex_netlist.spice', encoding='utf-8') as f:
         netlist = f.read()
     assert 'sky130_fd_pr__nfet_01v8' in netlist and 'SUBNFET' not in netlist, netlist
-    with open(run_dir / 'nfet_li1_in_subcell_lvs.log') as f:
+    with open(run_dir / 'nfet_li1_in_subcell_lvs.log', encoding='utf-8') as f:
         assert "Netlists don't match" not in f.read()
 
 
@@ -141,7 +141,7 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
 @allure.tag("CLI", "Schematic")
 def test_unreadable_schematic_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
-    schematic_path.write_text('.subckt chip a b\n.include models.lib\n.ends chip\n')
+    schematic_path.write_text('.subckt chip a b\n.include models.lib\n.ends chip\n', encoding='utf-8')
     problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
                                                        lvs_netlist=kdb.Netlist(),
                                                        device_models=device_models(NMOS),
@@ -152,7 +152,7 @@ def test_unreadable_schematic_is_a_check_problem(tmp_path):
 
 def test_schematic_without_value_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
-    schematic_path.write_text('.subckt chip a b\nXM1 a b b b sg13_lv_nmos w={w0*2}\n.ends chip\n')
+    schematic_path.write_text('.subckt chip a b\nXM1 a b b b sg13_lv_nmos w={w0*2}\n.ends chip\n', encoding='utf-8')
     problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
                                                        lvs_netlist=kdb.Netlist(),
                                                        device_models=device_models(NMOS),
@@ -164,7 +164,7 @@ def test_schematic_without_value_is_a_check_problem(tmp_path):
 def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
     # NOTE: e.g. a standard cell, which the schematic calls, but doesn't define
     schematic_path = tmp_path / 'chip.spice'
-    schematic_path.write_text('.subckt chip a b\nXinv a b sg13g2_inv_1\n.ends chip\n')
+    schematic_path.write_text('.subckt chip a b\nXinv a b sg13g2_inv_1\n.ends chip\n', encoding='utf-8')
     KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
                                             lvs_netlist=kdb.Netlist(),
                                             device_models=device_models(NMOS),
@@ -181,11 +181,12 @@ def test_device_class_of_the_schematic_missing_in_the_layout_fails_the_rc_run(tm
     # NOTE: e.g. a device the PEX-LVS doesn't recognize, which the extraction then misses (#345)
     config = PDKTestConfig(PDKName.SKY130A)
     gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
-    with open(gds_path.replace('.gds.gz', '.spice')) as f:
+    with open(gds_path.replace('.gds.gz', '.spice'), encoding='utf-8') as f:
         schematic = f.read()
     schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
     schematic_path.write_text(schematic.replace('.ends SUBNFET',
-                                                'XM2 S G D VNB sky130_fd_pr__pfet_01v8 L=0.15 W=0.65\n.ends SUBNFET'))
+                                                'XM2 S G D VNB sky130_fd_pr__pfet_01v8 L=0.15 W=0.65\n.ends SUBNFET'),
+                              encoding='utf-8')
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
@@ -200,10 +201,10 @@ def test_device_totals_of_the_schematic_that_differ_from_the_layout_fail_the_rc_
     # NOTE: e.g. a device the PEX-LVS doesn't recognize in a class it recognizes otherwise (#345)
     config = PDKTestConfig(PDKName.SKY130A)
     gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
-    with open(gds_path.replace('.gds.gz', '.spice')) as f:
+    with open(gds_path.replace('.gds.gz', '.spice'), encoding='utf-8') as f:
         schematic = f.read()
     schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
-    schematic_path.write_text(schematic.replace('W=0.65', 'W=0.65 m=2'))
+    schematic_path.write_text(schematic.replace('W=0.65', 'W=0.65 m=2'), encoding='utf-8')
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
