@@ -1,0 +1,29 @@
+[19:07:35] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/single_plate_100um_x_100um_m1_over_substrate.lvsdb.gz --out-dir               
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:07:35] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:07:35] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:07:35] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;PLATE;VSUBS;308.811;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/single_plate_100um_x
+_100um_m1_over_substrate__single_plate_100um_x_100um_m1_over_substrate/single_pl
+ate_100um_x_100um_m1_over_substrate_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/single_plate_100um_x
+_100um_m1_over_substrate__single_plate_100um_x_100um_m1_over_substrate/single_pl
+ate_100um_x_100um_m1_over_substrate_k25d_pex_netlist.spice                      

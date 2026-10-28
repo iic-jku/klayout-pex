@@ -1,0 +1,32 @@
+[19:08:17] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                      
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\near_body_sh
+ield_li1_m1.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A'  
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[19:08:17] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:08:18] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1587
+[19:08:18] INFO     (68, 20) -> (met1_con)                     kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:08:18] INFO     LVSDB: found 0pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;BOTTOM;TOPA;215.972;                                                        
+C2;BOTTOM;TOPB;215.972;                                                        
+C3;BOTTOM;VSUBS;405.081;                                                       
+C4;TOPA;TOPB;0.251;                                                            
+C5;TOPA;VSUBS;0.299;                                                           
+C6;TOPB;VSUBS;0.299;                                                           
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\near_body_shield_li1_m1__near_body_
+shield_li1_m1\near_body_shield_li1_m1_k25d_pex_netlist.csv                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\near_body_shield_li1_m1__near_body_
+shield_li1_m1\near_body_shield_li1_m1_k25d_pex_netlist.spice                   

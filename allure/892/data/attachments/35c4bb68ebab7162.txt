@@ -1,0 +1,31 @@
+[19:08:22] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                      
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_wire_and_f
+loating_branch_li1.lvsdb.gz' --out-dir                                         
+'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n    
+──────────────────────────────── Input Layout ─────────────────────────────────
+[19:08:22] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:08:22] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1587
+[19:08:22] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:08:22] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;VSUBS;0.475;                                                              
+C2;B;VSUBS;0.494;                                                              
+R1;A;A,B;;0.001                                                                
+R2;A;B;;840.533                                                                
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_wire_and_floating_branch_li1__r_w
+ire_and_floating_branch_li1\r_wire_and_floating_branch_li1_k25d_pex_netlist.csv
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_wire_and_floating_branch_li1__r_w
+ire_and_floating_branch_li1\r_wire_and_floating_branch_li1_k25d_pex_netlist.spi
+ce                                                                             
