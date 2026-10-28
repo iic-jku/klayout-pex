@@ -1,0 +1,28 @@
+[18:45:40] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_single_wir
+e_li1.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpamzvcgor'   
+--2.5D --check n                                                               
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:45:40] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:45:40] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1587
+[18:45:40] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:45:40] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A,B;;0.001                                                                
+R2;A;B;;840.533                                                                
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpamzvcgor\r_single_wire_li1__r_single_wi
+re_li1\r_single_wire_li1_k25d_pex_netlist.csv                                  
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpamzvcgor\r_single_wire_li1__r_single_wi
+re_li1\r_single_wire_li1_k25d_pex_netlist.spice                                

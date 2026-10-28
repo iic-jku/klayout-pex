@@ -1,0 +1,19 @@
+WARNING  __kpex__:kpex_cli.py:1416 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1453 main extract --pdk sky130A --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_nwell_pfet_label_li1.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpk5_9syx2' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:735 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1587 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1587 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:1587 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:1587 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1587 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1587 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1587 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1587 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 4pins
+WARNING  __kpex__:r_extractor.py:610 The resistance network leaves out the wells of these nets, as no contact joins them to the rest of their net (e.g. a label of the net on the well does), so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets: VPWR
+SUBPROCESS __kpex__:kpex_cli.py:1168 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1168 R1;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R2;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1168 R3;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1171 C:\Users\RUNNER~1\AppData\Local\Temp\tmpk5_9syx2\r_nwell_pfet_label_li1__r_nwell_pfet_label_li1\r_nwell_pfet_label_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1187 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpk5_9syx2\r_nwell_pfet_label_li1__r_nwell_pfet_label_li1\r_nwell_pfet_label_li1_k25d_pex_netlist.spice

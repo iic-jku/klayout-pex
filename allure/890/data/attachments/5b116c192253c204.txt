@@ -1,0 +1,193 @@
+[18:53:58] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/n
+fet_li1_redux_orientations.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:53:58] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:53:58] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - licon (licon1): 32 of 40 shapes                         
+                    are not within licon_nsd_con,                               
+                    licon_psd_con, licon_poly_con,                              
+                    licon_ntap_con, licon_ptap_con,                             
+                    licon_vpp                                                   
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:53:58] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1587
+[18:53:58] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1587
+[18:53:58] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[18:53:58] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1587
+[18:53:58] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+[18:53:58] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:53:58] INFO     LVSDB: found 9pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1.G;$I2.$0.li1;0.002;                                                       
+C2;$1.G;VSUBS;0.025;                                                            
+C3;$1.G.$0.li1;$7.G.$0.li1;0.001;                                               
+C4;$1.G.$0.li1;$I3.$0.li1;0.002;                                                
+C5;$1.G.$0.li1;VSUBS;0.044;                                                     
+C6;$1.G.$1.poly;VSUBS;0.08;                                                     
+C7;$1.G.P0.poly;$2.G.$1.poly;0.002;                                             
+C8;$1.G.P0.poly;$I2.$0.li1;0.004;                                               
+C9;$1.G.P0.poly;$I3.$0.li1;0.005;                                               
+C10;$1.G.P0.poly;VSUBS;0.071;                                                   
+C11;$2.G;$6.G;0.0;                                                              
+C12;$2.G;$I5.$0.li1;0.002;                                                      
+C13;$2.G;VSUBS;0.025;                                                           
+C14;$2.G.$0.li1;$I3.$0.li1;0.002;                                               
+C15;$2.G.$0.li1;$I6.$0.li1;0.002;                                               
+C16;$2.G.$0.li1;VSUBS;0.041;                                                    
+C17;$2.G.$1.poly;VSUBS;0.078;                                                   
+C18;$2.G.P0.poly;$I5.$0.li1;0.004;                                              
+C19;$2.G.P0.poly;$I6.$0.li1;0.005;                                              
+C20;$2.G.P0.poly;VSUBS;0.074;                                                   
+C21;$3.G;$5.G;0.002;                                                            
+C22;$3.G;$I8.$0.li1;0.002;                                                      
+C23;$3.G;VSUBS;0.023;                                                           
+C24;$3.G.$0.li1;$I9.$0.li1;0.002;                                               
+C25;$3.G.$0.li1;VSUBS;0.044;                                                    
+C26;$3.G.$1.poly;VSUBS;0.079;                                                   
+C27;$3.G.P0.poly;$4.G.P0.poly;0.0;                                              
+C28;$3.G.P0.poly;$I8.$0.li1;0.004;                                              
+C29;$3.G.P0.poly;$I9.$0.li1;0.005;                                              
+C30;$3.G.P0.poly;VSUBS;0.073;                                                   
+C31;$4.G;$I11.$0.li1;0.002;                                                     
+C32;$4.G;$I8.$0.li1;0.0;                                                        
+C33;$4.G;VSUBS;0.025;                                                           
+C34;$4.G.$0.li1;$8.G.$0.li1;0.0;                                                
+C35;$4.G.$0.li1;$I12.$0.li1;0.002;                                              
+C36;$4.G.$0.li1;$I14.$0.li1;0.001;                                              
+C37;$4.G.$0.li1;VSUBS;0.041;                                                    
+C38;$4.G.$1.poly;$5.G.P0.poly;0.001;                                            
+C39;$4.G.$1.poly;VSUBS;0.079;                                                   
+C40;$4.G.P0.poly;$I11.$0.li1;0.004;                                             
+C41;$4.G.P0.poly;$I12.$0.li1;0.005;                                             
+C42;$4.G.P0.poly;VSUBS;0.074;                                                   
+C43;$5.G;$I14.$0.li1;0.002;                                                     
+C44;$5.G;VSUBS;0.023;                                                           
+C45;$5.G.$0.li1;$I15.$0.li1;0.002;                                              
+C46;$5.G.$0.li1;VSUBS;0.044;                                                    
+C47;$5.G.$1.poly;VSUBS;0.079;                                                   
+C48;$5.G.P0.poly;$8.G.$1.poly;0.0;                                              
+C49;$5.G.P0.poly;$I14.$0.li1;0.004;                                             
+C50;$5.G.P0.poly;$I15.$0.li1;0.005;                                             
+C51;$5.G.P0.poly;VSUBS;0.072;                                                   
+C52;$6.G;$I17.$0.li1;0.002;                                                     
+C53;$6.G;VSUBS;0.025;                                                           
+C54;$6.G.$0.li1;$I18.$0.li1;0.002;                                              
+C55;$6.G.$0.li1;$I21.$0.li1;0.002;                                              
+C56;$6.G.$0.li1;VSUBS;0.041;                                                    
+C57;$6.G.$1.poly;$7.G.P0.poly;0.002;                                            
+C58;$6.G.$1.poly;VSUBS;0.078;                                                   
+C59;$6.G.P0.poly;$I17.$0.li1;0.004;                                             
+C60;$6.G.P0.poly;$I18.$0.li1;0.005;                                             
+C61;$6.G.P0.poly;VSUBS;0.074;                                                   
+C62;$7.G;$I20.$0.li1;0.002;                                                     
+C63;$7.G;VSUBS;0.025;                                                           
+C64;$7.G.$0.li1;$I21.$0.li1;0.002;                                              
+C65;$7.G.$0.li1;VSUBS;0.044;                                                    
+C66;$7.G.$1.poly;VSUBS;0.08;                                                    
+C67;$7.G.P0.poly;$I20.$0.li1;0.004;                                             
+C68;$7.G.P0.poly;$I21.$0.li1;0.005;                                             
+C69;$7.G.P0.poly;VSUBS;0.071;                                                   
+C70;$8.G;$I23.$0.li1;0.002;                                                     
+C71;$8.G;VSUBS;0.025;                                                           
+C72;$8.G.$0.li1;$I15.$0.li1;0.0;                                                
+C73;$8.G.$0.li1;$I24.$0.li1;0.002;                                              
+C74;$8.G.$0.li1;VSUBS;0.043;                                                    
+C75;$8.G.$1.poly;VSUBS;0.08;                                                    
+C76;$8.G.P0.poly;$I23.$0.li1;0.004;                                             
+C77;$8.G.P0.poly;$I24.$0.li1;0.005;                                             
+C78;$8.G.P0.poly;VSUBS;0.074;                                                   
+C79;$I11.$0.li1;$I12.$0.li1;0.011;                                              
+C80;$I11.$0.li1;$I14.$0.li1;0.0;                                                
+C81;$I11.$0.li1;$I8.$0.li1;0.001;                                               
+C82;$I11.$0.li1;VSUBS;0.022;                                                    
+C83;$I12.$0.li1;$I24.$0.li1;0.0;                                                
+C84;$I12.$0.li1;VSUBS;0.025;                                                    
+C85;$I14.$0.li1;$I15.$0.li1;0.011;                                              
+C86;$I14.$0.li1;$I8.$0.li1;0.0;                                                 
+C87;$I14.$0.li1;VSUBS;0.021;                                                    
+C88;$I15.$0.li1;$I23.$0.li1;0.0;                                                
+C89;$I15.$0.li1;VSUBS;0.025;                                                    
+C90;$I17.$0.li1;$I18.$0.li1;0.011;                                              
+C91;$I17.$0.li1;$I21.$0.li1;0.0;                                                
+C92;$I17.$0.li1;$I5.$0.li1;0.0;                                                 
+C93;$I17.$0.li1;VSUBS;0.023;                                                    
+C94;$I18.$0.li1;$I6.$0.li1;0.0;                                                 
+C95;$I18.$0.li1;VSUBS;0.025;                                                    
+C96;$I2.$0.li1;$I3.$0.li1;0.011;                                                
+C97;$I2.$0.li1;VSUBS;0.025;                                                     
+C98;$I20.$0.li1;$I21.$0.li1;0.011;                                              
+C99;$I20.$0.li1;VSUBS;0.025;                                                    
+C100;$I21.$0.li1;$I3.$0.li1;0.0;                                                
+C101;$I21.$0.li1;VSUBS;0.021;                                                   
+C102;$I23.$0.li1;$I24.$0.li1;0.011;                                             
+C103;$I23.$0.li1;VSUBS;0.025;                                                   
+C104;$I24.$0.li1;VSUBS;0.025;                                                   
+C105;$I3.$0.li1;$I5.$0.li1;0.0;                                                 
+C106;$I3.$0.li1;VSUBS;0.021;                                                    
+C107;$I5.$0.li1;$I6.$0.li1;0.011;                                               
+C108;$I5.$0.li1;VSUBS;0.023;                                                    
+C109;$I6.$0.li1;VSUBS;0.025;                                                    
+C110;$I8.$0.li1;$I9.$0.li1;0.011;                                               
+C111;$I8.$0.li1;VSUBS;0.022;                                                    
+C112;$I9.$0.li1;VSUBS;0.025;                                                    
+R1;$1.G;$1.G.$0.li1;;2.418                                                      
+R2;$1.G.$0.li1;$1.G.$1.poly;;152.0                                              
+R3;$1.G.$1.poly;$1.G.P0.poly;;316.321                                           
+R4;$2.G;$2.G.$0.li1;;2.418                                                      
+R5;$2.G.$0.li1;$2.G.$1.poly;;152.0                                              
+R6;$2.G.$1.poly;$2.G.P0.poly;;310.998                                           
+R7;$3.G;$3.G.$0.li1;;2.418                                                      
+R8;$3.G.$0.li1;$3.G.$1.poly;;152.0                                              
+R9;$3.G.$1.poly;$3.G.P0.poly;;316.321                                           
+R10;$4.G;$4.G.$0.li1;;2.418                                                     
+R11;$4.G.$0.li1;$4.G.$1.poly;;152.0                                             
+R12;$4.G.$1.poly;$4.G.P0.poly;;310.998                                          
+R13;$5.G;$5.G.$0.li1;;2.418                                                     
+R14;$5.G.$0.li1;$5.G.$1.poly;;152.0                                             
+R15;$5.G.$1.poly;$5.G.P0.poly;;316.321                                          
+R16;$6.G;$6.G.$0.li1;;2.418                                                     
+R17;$6.G.$0.li1;$6.G.$1.poly;;152.0                                             
+R18;$6.G.$1.poly;$6.G.P0.poly;;310.998                                          
+R19;$7.G;$7.G.$0.li1;;2.418                                                     
+R20;$7.G.$0.li1;$7.G.$1.poly;;152.0                                             
+R21;$7.G.$1.poly;$7.G.P0.poly;;316.321                                          
+R22;$8.G;$8.G.$0.li1;;2.418                                                     
+R23;$8.G.$0.li1;$8.G.$1.poly;;152.0                                             
+R24;$8.G.$1.poly;$8.G.P0.poly;;310.998                                          
+R25;$I11;$I11.$0.li1;;209.667                                                   
+R26;$I12;$I12.$0.li1;;209.667                                                   
+R27;$I14;$I14.$0.li1;;209.667                                                   
+R28;$I15;$I15.$0.li1;;209.667                                                   
+R29;$I17;$I17.$0.li1;;209.667                                                   
+R30;$I18;$I18.$0.li1;;209.667                                                   
+R31;$I2;$I2.$0.li1;;209.667                                                     
+R32;$I20;$I20.$0.li1;;209.667                                                   
+R33;$I21;$I21.$0.li1;;209.667                                                   
+R34;$I23;$I23.$0.li1;;209.667                                                   
+R35;$I24;$I24.$0.li1;;209.667                                                   
+R36;$I3;$I3.$0.li1;;209.667                                                     
+R37;$I5;$I5.$0.li1;;209.667                                                     
+R38;$I6;$I6.$0.li1;;209.667                                                     
+R39;$I8;$I8.$0.li1;;209.667                                                     
+R40;$I9;$I9.$0.li1;;209.667                                                     
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux_orientat
+ions__nfet_li1_redux_orientations/nfet_li1_redux_orientations_k25d_pex_netlist.c
+sv                                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux_orientat
+ions__nfet_li1_redux_orientations/nfet_li1_redux_orientations_k25d_pex_netlist.s
+pice                                                                            

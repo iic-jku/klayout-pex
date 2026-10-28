@@ -1,0 +1,81 @@
+WARNING  __kpex__:kpex_cli.py:1416 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1453 main extract --pdk ihp-sg13g2 --mode R --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/sg13g2_a21o_1/sg13g2_a21o_1.lvsdb.gz --out-dir /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpkbe7qhz_ --2.5D --check n
+INFO     __kpex__:kpex_cli.py:735 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1587 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:1587 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1587 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1587 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1587 (14, 0) -> (psd_fet)
+INFO     __kpex__:kpex_cli.py:1587 (65, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:1587 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4402) -> (cont_psd_con)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4404) -> (cont_ntap_con)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:1587 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1587 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:extractor.py:298 LVSDB: found 6pins
+WARNING  __kpex__:r_extractor.py:302 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+SUBPROCESS __kpex__:kpex_cli.py:1168 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1168 R1;$4;$4.$0.GatPoly;;58.516
+SUBPROCESS __kpex__:kpex_cli.py:1168 R2;$4.$0.GatPoly;$4.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R3;$4.$0.GatPoly;$4.P1.GatPoly;;41.976
+SUBPROCESS __kpex__:kpex_cli.py:1168 R4;$4.$1.Metal1;$4.$2.Metal1;;0.21
+SUBPROCESS __kpex__:kpex_cli.py:1168 R5;$4.$2.Metal1;$4.$3.Metal1;;0.327
+SUBPROCESS __kpex__:kpex_cli.py:1168 R6;$4.$2.Metal1;$4.$6.Metal1;;0.978
+SUBPROCESS __kpex__:kpex_cli.py:1168 R7;$4.$3.Metal1;$4.$4.Metal1;;0.154
+SUBPROCESS __kpex__:kpex_cli.py:1168 R8;$4.$3.Metal1;$4.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R9;$4.$4.Metal1;$4.$5.Metal1;;0.146
+SUBPROCESS __kpex__:kpex_cli.py:1168 R10;$4.$4.Metal1;$4.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R11;$4.$5.Metal1;$4.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R12;$4.$6.Metal1;$4.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R13;$9;$9.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R14;$9;$9.$1.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R15;$9;$9.$2.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R16;$9.$0.Metal1;$9.$1.Metal1;;0.155
+SUBPROCESS __kpex__:kpex_cli.py:1168 R17;$9.$0.Metal1;$9.$3.Metal1;;0.695
+SUBPROCESS __kpex__:kpex_cli.py:1168 R18;$9.$1.Metal1;$9.$2.Metal1;;0.146
+SUBPROCESS __kpex__:kpex_cli.py:1168 R19;$9.$3.Metal1;$9.$4.Metal1;;0.153
+SUBPROCESS __kpex__:kpex_cli.py:1168 R20;$9.$3.Metal1;$9.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R21;$9.$4.Metal1;$9.$5.Metal1;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1168 R22;$9.$4.Metal1;$9.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R23;$9.$5.Metal1;$9.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R24;A1;A1.$1.Metal1;;0.013
+SUBPROCESS __kpex__:kpex_cli.py:1168 R25;A1.$0.GatPoly;A1.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R26;A1.$0.GatPoly;A1.P0.GatPoly;;35.284
+SUBPROCESS __kpex__:kpex_cli.py:1168 R27;A1.$0.GatPoly;A1.P1.GatPoly;;45.587
+SUBPROCESS __kpex__:kpex_cli.py:1168 R28;A2;A2.$1.Metal1;;0.039
+SUBPROCESS __kpex__:kpex_cli.py:1168 R29;A2.$0.GatPoly;A2.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R30;A2.$0.GatPoly;A2.P0.GatPoly;;39.495
+SUBPROCESS __kpex__:kpex_cli.py:1168 R31;A2.P0.GatPoly;A2.P1.GatPoly;;84.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R32;B1;B1.$1.Metal1;;0.026
+SUBPROCESS __kpex__:kpex_cli.py:1168 R33;B1.$0.GatPoly;B1.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R34;B1.$0.GatPoly;B1.P0.GatPoly;;33.228
+SUBPROCESS __kpex__:kpex_cli.py:1168 R35;B1.$0.GatPoly;B1.P1.GatPoly;;48.433
+SUBPROCESS __kpex__:kpex_cli.py:1168 R36;VDD;VDD.$2.Metal1;;0.412
+SUBPROCESS __kpex__:kpex_cli.py:1168 R37;VDD;VDD.$4.Metal1;;0.442
+SUBPROCESS __kpex__:kpex_cli.py:1168 R38;VDD.$0.Metal1;VDD.$1.Metal1;;0.165
+SUBPROCESS __kpex__:kpex_cli.py:1168 R39;VDD.$0.Metal1;VDD.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R40;VDD.$1.Metal1;VDD.$2.Metal1;;0.167
+SUBPROCESS __kpex__:kpex_cli.py:1168 R41;VDD.$1.Metal1;VDD.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R42;VDD.$2.Metal1;VDD.P2.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R43;VDD.$3.Metal1;VDD.$4.Metal1;;0.15
+SUBPROCESS __kpex__:kpex_cli.py:1168 R44;VDD.$3.Metal1;VDD.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R45;VDD.$4.Metal1;VDD.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R46;VSS;VSS.$0.Metal1;;0.286
+SUBPROCESS __kpex__:kpex_cli.py:1168 R47;VSS;VSS.$1.Metal1;;1.361
+SUBPROCESS __kpex__:kpex_cli.py:1168 R48;VSS.$0.Metal1;VSS.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R49;VSS.$1.Metal1;VSS.P2.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R50;X;X.$0.Metal1;;0.007
+SUBPROCESS __kpex__:kpex_cli.py:1168 R51;X;X.$2.Metal1;;0.002
+SUBPROCESS __kpex__:kpex_cli.py:1168 R52;X.$0.Metal1;X.$1.Metal1;;0.217
+SUBPROCESS __kpex__:kpex_cli.py:1168 R53;X.$0.Metal1;X.$4.Metal1;;1.176
+SUBPROCESS __kpex__:kpex_cli.py:1168 R54;X.$1.Metal1;X.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R55;X.$2.Metal1;X.$3.Metal1;;0.153
+SUBPROCESS __kpex__:kpex_cli.py:1168 R56;X.$2.Metal1;X.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R57;X.$3.Metal1;X.P0.pSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R58;X.$4.Metal1;X.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1171 /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpkbe7qhz_/sg13g2_a21o_1__sg13g2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1187 Wrote expanded netlist to: /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpkbe7qhz_/sg13g2_a21o_1__sg13g2_a21o_1/sg13g2_a21o_1_k25d_pex_netlist.spice

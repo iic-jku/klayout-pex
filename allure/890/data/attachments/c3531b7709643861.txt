@@ -1,0 +1,28 @@
+[18:45:05] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                     
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_wire_vol
+tage_divider_m1.lvsdb.gz' --out-dir                                            
+'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:45:05] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:45:05] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:45:05] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A,B,C;;1.912                                                              
+R2;A,B,C;B;;1.912                                                              
+R3;A,B,C;C;;0.346                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_wire_voltage_divider_m1__r_wire
+_voltage_divider_m1\r_wire_voltage_divider_m1_k25d_pex_netlist.csv             
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_wire_voltage_divider_m1__r_wire
+_voltage_divider_m1\r_wire_voltage_divider_m1_k25d_pex_netlist.spice           

@@ -1,0 +1,21 @@
+WARNING  __kpex__:kpex_cli.py:1416 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1453 main extract --pdk ihp-sg13g2 --mode RC --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\single_plate_6um_x_8um_m1_over_isolated_pwell.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpgso1xgjg' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:735 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1587 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:1587 (32, 0) -> (nbulay_drw)
+INFO     __kpex__:kpex_cli.py:1587 (46, 0) -> (pwell iso_pwell)
+INFO     __kpex__:kpex_cli.py:1587 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1587 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1587 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1587 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 2pins
+WARNING  __kpex__:r_extractor.py:302 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+SUBPROCESS __kpex__:kpex_cli.py:1168 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1168 C1;$3;A;0.309;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C2;$3;W;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C3;A;VSUBS;0.157;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C4;A;W;2.318;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C5;VSUBS;W;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1171 C:\Users\RUNNER~1\AppData\Local\Temp\tmpgso1xgjg\single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell\single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1187 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpgso1xgjg\single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell\single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.spice

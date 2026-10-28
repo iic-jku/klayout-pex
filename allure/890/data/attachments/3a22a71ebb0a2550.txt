@@ -1,0 +1,35 @@
+[18:54:00] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r
+_contact_1x1_minsize_mcon.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:54:00] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:54:00] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[18:54:00] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1587
+[18:54:00] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1587
+[18:54:00] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+[18:54:00] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:54:00] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;BOT;VSUBS;0.029;                                                             
+C2;TOP;VSUBS;0.028;                                                             
+R1;BOT;BOT,TOP;;0.001                                                           
+R2;BOT;TOP;;9.3                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_contact_1x1_minsize_m
+con__r_contact_1x1_minsize_mcon/r_contact_1x1_minsize_mcon_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_contact_1x1_minsize_m
+con__r_contact_1x1_minsize_mcon/r_contact_1x1_minsize_mcon_k25d_pex_netlist.spic
+e                                                                               

@@ -1,0 +1,188 @@
+WARNING  __kpex__:kpex_cli.py:1416 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1453 main extract --pdk sky130A --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/single_plate_100um_x_100um_li1_over_substrate.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --fastercap --ooc 0 --diel none
+INFO     __kpex__:kpex_cli.py:735 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool       Found  Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 FasterCap  6.0.9  >=6.0.9
+INFO     __kpex__:kpex_cli.py:1587 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1587 (67, 16) -> (li_pin_con)
+INFO     __kpex__:fastercap_model_generator.py:120 DBU: 0.001
+INFO     __kpex__:fastercap_model_generator.py:121 Delaunay b: 0.5
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay area_max: 50
+INFO     __kpex__:fastercap_input_builder.py:160 Conductor PLATE, metal li1, z=0.9361, height=0.1
+WARNING  __kpex__:fastercap_input_builder.py:80 Can't find GDS pair for layer 
+WARNING  __kpex__:fastercap_input_builder.py:80 Can't find GDS pair for layer 
+INFO     __kpex__:fastercap_input_builder.py:224 Substrate sky130_gnd, z=-0.43000000000000005, height=0.33
+INFO     __kpex__:fastercap_input_builder.py:243 Simple dielectric (field oxide) fox: z=0, height=0.3262
+SUBPROCESS __kpex__:fastercap_model_generator.py:837 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_1_outside=(void)_inside=fox.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:837 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_2_outside=(void)_net=sky130_gnd.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:837 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_3_outside=(void)_net=PLATE.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:824 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_model_generator.py:993 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries/diel_fox.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:993 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries/cond_PLATE.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:993 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries/cond_sky130_gnd.stl
+INFO     __kpex__:kpex_cli.py:901 Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as 16
+INFO     __kpex__:fastercap_runner.py:73 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:74 FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f0.0 -ap /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_.lst, output file: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_plate_100um_x_100um_li1_over_substrate_FasterCap_Output.txt
+SUBPROCESS __kpex__:fastercap_runner.py:92 Running FasterCap version 6.0.9
+SUBPROCESS __kpex__:fastercap_runner.py:92 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:92 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Input file: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:92 Auto calculation with max error: 0.05
+SUBPROCESS __kpex__:fastercap_runner.py:92 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:92 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025
+SUBPROCESS __kpex__:fastercap_runner.py:92 Out-of-core free memory to link memory condition (-f): 0
+SUBPROCESS __kpex__:fastercap_runner.py:92 Potential interaction coefficient to mesh refinement ratio (-d): 0.5
+SUBPROCESS __kpex__:fastercap_runner.py:92 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels to solver engine: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:92 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links to be computed: 14336
+SUBPROCESS __kpex__:fastercap_runner.py:92 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:92 g1_sky130_gnd  7.42793e-08 -5.59982e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:92 g2_PLATE  -6.50185e-08 6.45244e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels: 7168 of which 5376 conductors and 1792 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels to solver engine: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of potential estimates: 14179
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links: 21504 (uncompressed 51380224, compression ratio is 100.0%)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max recursion level: 20
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max Mesh relative refinement value: 0.000522624
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for reading input file: 0.105566s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building super hierarchy: 0.036379s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for discretization: 0.053331s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building potential matrix: 0.018823s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for precond calculation: 0.001120s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for gmres solving: 0.039222s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for panel hierarchy: 2873768 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for links structure: 16834576 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for conductor list: 14760 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for Gmres: 1137848 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration time: 0.428660s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration allocated memory: 20372 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:92 Mesh refinement (-m): 0.000369551
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 9736
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links to be computed: 608110
+SUBPROCESS __kpex__:fastercap_runner.py:92 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:92 g1_sky130_gnd  3.94355e-07 -3.77926e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:92 g2_PLATE  -3.75869e-07 3.77454e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Weighted Frobenius norm of the difference between capacitance (auto option): 0.829622
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels: 7168 of which 5376 conductors and 1792 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels to solver engine: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 9736
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of potential estimates: 549420
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links: 617846 (uncompressed 94789696, compression ratio is 99.3%)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max recursion level: 31
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max Mesh relative refinement value: 0.000369539
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for reading input file: 0.017598s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building super hierarchy: 0.006209s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for discretization: 0.509508s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building potential matrix: 0.570297s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for precond calculation: 0.000511s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for gmres solving: 0.169901s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for panel hierarchy: 3903536 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for links structure: 16855120 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for conductor list: 14760 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for Gmres: 2464232 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration time: 1.874819s (0 days, 0 hours, 0 mins, 1 s)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration allocated memory: 22693 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:92 Mesh refinement (-m): 0.000261304
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 14848
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links to be computed: 1276248
+SUBPROCESS __kpex__:fastercap_runner.py:92 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:92 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:92 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 
+SUBPROCESS __kpex__:fastercap_runner.py:92 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:92 g1_sky130_gnd  4.05414e-07 -3.90448e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:92 g2_PLATE  -3.9121e-07 3.94524e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Weighted Frobenius norm of the difference between capacitance (auto option): 0.0358936
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels: 7168 of which 5376 conductors and 1792 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of input panels to solver engine: 7168
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of panels after refinement: 14848
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of potential estimates: 1077031
+SUBPROCESS __kpex__:fastercap_runner.py:92 Number of links: 1291096 (uncompressed 220463104, compression ratio is 99.4%)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max recursion level: 32
+SUBPROCESS __kpex__:fastercap_runner.py:92 Max Mesh relative refinement value: 0.000261296
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for reading input file: 0.019427s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building super hierarchy: 0.006084s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for discretization: 1.034836s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for building potential matrix: 1.195671s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for precond calculation: 0.013173s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Time for gmres solving: 3.606068s
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for panel hierarchy: 5953448 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for links structure: 33673248 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for conductor list: 14760 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for Gmres: 11002720 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for preconditioner: 268619776 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration time: 17.334854s (0 days, 0 hours, 0 mins, 17 s)
+SUBPROCESS __kpex__:fastercap_runner.py:92 Iteration allocated memory: 311781 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 Total allocated memory: 311781 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:92 Total time: 7.260677s (0 days, 0 hours, 0 mins, 7 s)
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+SUBPROCESS __kpex__:fastercap_runner.py:92 
+INFO     __kpex__:fastercap_runner.py:101 FasterCap succeeded after 7.321s
+SUBPROCESS __kpex__:kpex_cli.py:952 Device;Net1;Net2;Capacitance [fF]
+SUBPROCESS __kpex__:kpex_cli.py:952 Cext_0_1;sky130_gnd;PLATE;390.83
+SUBPROCESS __kpex__:kpex_cli.py:952 Cext_1_1;PLATE;sky130_gnd;3.7
+INFO     __kpex__:kpex_cli.py:955 Wrote expanded netlist CSV to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_plate_100um_x_100um_li1_over_substrate_FasterCap_Expanded_Netlist.csv
+INFO     __kpex__:kpex_cli.py:959 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_plate_100um_x_100um_li1_over_substrate_FasterCap_Expanded_Netlist.cir
+INFO     __kpex__:kpex_cli.py:970 Wrote reduced netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_100um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_plate_100um_x_100um_li1_over_substrate_FasterCap_Reduced_Netlist.cir
