@@ -1,0 +1,53 @@
+[15:11:52] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1425
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --gds                                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz --out-dir              
+/tmp/tmp6sezoo1e --cache-dir                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D  
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:11:52] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:684
+[15:11:52] INFO     No explicit top cell specified, using top    kpex_cli.py:724
+                    cell                                                        
+                    'single_plate_6um_x_8um_m1_over_isolated_pwe                
+                    ll'                                                         
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:11:52] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1360
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13
+g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_pat
+terns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz/single_plate_6um_x_8u
+m_m1_over_isolated_pwell.lvsdb.gz                                               
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:11:52] INFO     (31, 0) -> (nwell_drw)                      kpex_cli.py:1596
+[15:11:52] INFO     (32, 0) -> (nbulay_drw)                     kpex_cli.py:1596
+[15:11:52] INFO     (46, 0) -> (iso_pwell pwell)                kpex_cli.py:1596
+[15:11:52] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1596
+[15:11:52] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1596
+[15:11:52] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1596
+[15:11:52] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1596
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:11:52] INFO     LVSDB: found 2pins                          extractor.py:298
+[15:11:52] WARNING  The resistance network leaves out these   r_extractor.py:302
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp6sezoo1e/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um
+_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d
+_pex_netlist.csv                                                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp6sezoo1e/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um
+_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d
+_pex_netlist.spice                                                              

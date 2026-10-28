@@ -1,0 +1,44 @@
+[15:16:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1425
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --gds                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/r_contact_1x1_minsize_via1.gds.gz --out-dir                                  
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --cache-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache --2.5D   
+--halo 10000 --scale n                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:16:17] INFO     GDS input file passed, running in LVS mode   kpex_cli.py:684
+[15:16:17] INFO     No explicit top cell specified, using top    kpex_cli.py:724
+                    cell 'r_contact_1x1_minsize_via1'                           
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool     Found    Effective range                                               
+KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3                                    
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:16:17] WARNING  Cache hit: Reusing cached LVSDB             kpex_cli.py:1360
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/.kpex_cache/gf180mcuD
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/r_contact_1x1_minsize_via1.gds.gz/r_contact_1x1_minsize_via1.lvsdb.gz        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:16:17] INFO     (35, 0) -> (via1)                           kpex_cli.py:1596
+[15:16:17] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1596
+[15:16:17] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1596
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:16:17] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;BOT;VSUBS;0.064;                                                             
+C2;TOP;VSUBS;0.051;                                                             
+R1;BOT;BOT,TOP;;0.001                                                           
+R2;BOT;TOP;;4.5                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_contact_1x1_minsize
+_via1__r_contact_1x1_minsize_via1/r_contact_1x1_minsize_via1_k25d_pex_netlist.cs
+v                                                                               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_contact_1x1_minsize
+_via1__r_contact_1x1_minsize_via1/r_contact_1x1_minsize_via1_k25d_pex_netlist.sp
+ice                                                                             

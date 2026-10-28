@@ -1,0 +1,26 @@
+WARNING  __kpex__:kpex_cli.py:1425 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1462 main extract --pdk ihp-sg13g2 --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz --out-dir /tmp/tmpnp0vx711 --cache-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache --2.5D --check n
+INFO     __kpex__:kpex_cli.py:684 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:724 No explicit top cell specified, using top cell 'single_plate_6um_x_8um_m1_over_isolated_pwell'
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+WARNING  __kpex__:kpex_cli.py:1360 Cache hit: Reusing cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1361 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/.kpex_cache/ihp-sg13g2/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz/single_plate_6um_x_8um_m1_over_isolated_pwell.lvsdb.gz
+INFO     __kpex__:kpex_cli.py:1596 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:1596 (32, 0) -> (nbulay_drw)
+INFO     __kpex__:kpex_cli.py:1596 (46, 0) -> (iso_pwell pwell)
+INFO     __kpex__:kpex_cli.py:1596 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1596 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1596 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:1596 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 2pins
+WARNING  __kpex__:r_extractor.py:302 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+SUBPROCESS __kpex__:kpex_cli.py:1177 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1177 C1;$3;A;0.309;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C2;$3;W;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C3;A;VSUBS;0.157;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C4;A;W;2.318;
+SUBPROCESS __kpex__:kpex_cli.py:1177 C5;VSUBS;W;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1180 /tmp/tmpnp0vx711/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1196 Wrote expanded netlist to: /tmp/tmpnp0vx711/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.spice
