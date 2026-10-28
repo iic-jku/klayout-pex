@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_0ee952d206d52910_magic_log_analyzer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-10-28 16:57 +0000
+            created at 2026-10-28 18:47 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -167,7 +167,7 @@
     <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="nam">nodes</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">Node</span><span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">    <span class="nam">devices</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">Device</span><span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">    <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">path</span><span class="op">,</span> <span class="str">&#x27;r&#x27;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">    <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">path</span><span class="op">,</span> <span class="str">&#x27;r&#x27;</span><span class="op">,</span> <span class="nam">encoding</span><span class="op">=</span><span class="str">&#x27;utf-8&#x27;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">        <span class="key">for</span> <span class="nam">line</span> <span class="key">in</span> <span class="nam">f</span><span class="op">.</span><span class="nam">readlines</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">            <span class="com"># port &quot;VDD&quot; 2 -600 800 500 1000 m1</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">            <span class="com"># port &quot;VSS&quot; 3 -600 500 500 700 m1</span>&nbsp;</span><span class="r"></span></p>
@@ -214,7 +214,7 @@
     <p class="mis show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">    <span class="nam">rnodes</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">    <span class="nam">resistors</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">    <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">path</span><span class="op">,</span> <span class="str">&#x27;r&#x27;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">    <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">path</span><span class="op">,</span> <span class="str">&#x27;r&#x27;</span><span class="op">,</span> <span class="nam">encoding</span><span class="op">=</span><span class="str">&#x27;utf-8&#x27;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="key">for</span> <span class="nam">line</span> <span class="key">in</span> <span class="nam">f</span><span class="op">.</span><span class="nam">readlines</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="nam">m</span> <span class="op">=</span> <span class="nam">re</span><span class="op">.</span><span class="nam">match</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">                <span class="str">r&#x27;^rnode &quot;(?P&lt;name&gt;[\w\\.]+)&quot; (?P&lt;int_r&gt;-?\d+) (?P&lt;fin_c&gt;-?\d+) (?P&lt;x_bot&gt;-?\d+) (?P&lt;y_bot&gt;-?\d+) 0$&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -244,7 +244,7 @@
             <a class="nav" href="z_0ee952d206d52910_magic_log_analyzer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-10-28 16:57 +0000
+            created at 2026-10-28 18:47 +0000
         </p>
     </div>
 </footer>

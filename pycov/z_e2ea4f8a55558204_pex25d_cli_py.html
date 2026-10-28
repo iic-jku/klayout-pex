@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_e2ea4f8a55558204_protobuf_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-10-28 16:57 +0000
+            created at 2026-10-28 18:47 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -813,8 +813,8 @@
     <p class="pln"><span class="n"><a id="t731" href="#t731">731</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t732" href="#t732">732</a></span><span class="t">        <span class="nam">diagnostics_path</span><span class="op">:</span> <span class="nam">Optional</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span> <span class="op">=</span> <span class="nam">getattr</span><span class="op">(</span><span class="nam">args</span><span class="op">,</span> <span class="str">&#x27;diagnostics_path&#x27;</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t733" href="#t733">733</a></span><span class="t">        <span class="key">if</span> <span class="nam">diagnostics_path</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="nam">diagnostics_path</span> <span class="op">!=</span> <span class="nam">STDIO_PATH</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t734" href="#t734">734</a></span><span class="t">            <span class="nam">mode</span> <span class="op">=</span> <span class="str">&#x27;wb&#x27;</span> <span class="key">if</span> <span class="nam">diagnostics_format</span> <span class="op">==</span> <span class="nam">DiagnosticsFormat</span><span class="op">.</span><span class="nam">PB</span> <span class="key">else</span> <span class="str">&#x27;w&#x27;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t735" href="#t735">735</a></span><span class="t">            <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">diagnostics_path</span><span class="op">,</span> <span class="nam">mode</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t734" href="#t734">734</a></span><span class="t">            <span class="nam">binary</span> <span class="op">=</span> <span class="nam">diagnostics_format</span> <span class="op">==</span> <span class="nam">DiagnosticsFormat</span><span class="op">.</span><span class="nam">PB</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t735" href="#t735">735</a></span><span class="t">            <span class="key">with</span> <span class="nam">open</span><span class="op">(</span><span class="nam">diagnostics_path</span><span class="op">,</span> <span class="str">&#x27;wb&#x27;</span> <span class="key">if</span> <span class="nam">binary</span> <span class="key">else</span> <span class="str">&#x27;w&#x27;</span><span class="op">,</span> <span class="nam">encoding</span><span class="op">=</span><span class="key">None</span> <span class="key">if</span> <span class="nam">binary</span> <span class="key">else</span> <span class="str">&#x27;utf-8&#x27;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">f</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t736" href="#t736">736</a></span><span class="t">                <span class="nam">report</span><span class="op">.</span><span class="nam">render</span><span class="op">(</span><span class="nam">diagnostics_format</span><span class="op">,</span> <span class="nam">stream</span><span class="op">=</span><span class="nam">f</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t737" href="#t737">737</a></span><span class="t">            <span class="key">return</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t738" href="#t738">738</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -836,7 +836,7 @@
             <a class="nav" href="z_e2ea4f8a55558204_protobuf_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
-            created at 2026-10-28 16:57 +0000
+            created at 2026-10-28 18:47 +0000
         </p>
     </div>
 </footer>
