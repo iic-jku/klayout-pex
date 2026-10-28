@@ -1,0 +1,31 @@
+WARNING  __kpex__:kpex_cli.py:1416 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1453 main extract --pdk sky130A --mode RC --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/nfet_li1_redux.lvsdb.gz --out-dir /tmp/tmpm7s7w3gf --2.5D --check n
+INFO     __kpex__:kpex_cli.py:735 LVSDB input file passed, bypassing LVS
+WARNING  __kpex__:lvsdb_extractor.py:424 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - licon (licon1): 4 of 5 shapes are not within licon_nsd_con, licon_psd_con, licon_poly_con, licon_ntap_con, licon_ptap_con, licon_vpp
+INFO     __kpex__:kpex_cli.py:1587 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1587 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1587 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1587 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1587 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1587 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 2pins
+SUBPROCESS __kpex__:kpex_cli.py:1168 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1168 C1;$2.$0.li1;$3.$0.li1;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C2;$2.$0.li1;G;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C3;$2.$0.li1;G.P0.poly;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C4;$2.$0.li1;VSUBS;0.025;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C5;$3.$0.li1;G.$0.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C6;$3.$0.li1;G.P0.poly;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C7;$3.$0.li1;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C8;G;VSUBS;0.025;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C9;G.$0.li1;VSUBS;0.045;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C10;G.$1.poly;VSUBS;0.081;
+SUBPROCESS __kpex__:kpex_cli.py:1168 C11;G.P0.poly;VSUBS;0.074;
+SUBPROCESS __kpex__:kpex_cli.py:1168 R1;$2;$2.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1168 R2;$3;$3.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1168 R3;G;G.$0.li1;;2.418
+SUBPROCESS __kpex__:kpex_cli.py:1168 R4;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1168 R5;G.$1.poly;G.P0.poly;;316.321
+SUBPROCESS __kpex__:kpex_cli.py:1171 /tmp/tmpm7s7w3gf/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1187 Wrote expanded netlist to: /tmp/tmpm7s7w3gf/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.spice
