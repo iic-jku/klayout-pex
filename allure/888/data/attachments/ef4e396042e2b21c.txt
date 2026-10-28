@@ -1,0 +1,190 @@
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 39: character maps to <undefined>
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\a\klayout-pex\klayout-pex\.venv\Scripts\coverage.exe\__main__.py", line 7, in <module>
+    sys.exit(main())
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 1163, in main
+    status = CoverageScript().command_line(argv)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 853, in command_line
+    return self.do_run(options, args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 1042, in do_run
+    runner.run()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\execfile.py", line 213, in run
+    exec(code, main_mod.__dict__)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(_console_main())
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\config\__init__.py", line 253, in _console_main
+    code = _main(prog=_get_prog_name(sys.argv))
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\config\__init__.py", line 229, in _main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 377, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 330, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 384, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 408, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 139, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 249, in call_and_report
+    call = CallInfo.from_call(
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 361, in from_call
+    result: TResult | None = func()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 250, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 184, in pytest_runtest_call
+    item.runtest()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\python.py", line 1707, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\python.py", line 167, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "D:\a\klayout-pex\klayout-pex\tests\netlist\rcx25_reduction_test.py", line 180, in test_kpex_reduce_converts_the_reduced_netlist_to_vacask
+    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
+  File "D:\a\klayout-pex\klayout-pex\tests\rcx25\rcx25_test_helpers.py", line 71, in run_kpex
+    cli.main(['main',
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1473, in main
+    self.run_extraction(args=args, tech_info=tech_info)
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1649, in run_extraction
+    self._rcx25_extraction_results = self.run_kpex_2_5d_engine(  # NOTE: store for test case
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1223, in run_kpex_2_5d_engine
+    subproc(scope.describe())
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\log\logger.py", line 154, in subproc
+    __logger.log(LogLevel.SUBPROCESS, msg, **kwargs)
+Message: '.SUBCKT nfet_li1: 11 R, 18 C, 13 nodes → 3 R, 15 C, 7 nodes (TICER eliminated 6 nodes; 0 floating islands merged, 0 nodes less; 0 capacitor-only nodes eliminated, 0 tied)'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 81: character maps to <undefined>
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\a\klayout-pex\klayout-pex\.venv\Scripts\coverage.exe\__main__.py", line 7, in <module>
+    sys.exit(main())
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 1163, in main
+    status = CoverageScript().command_line(argv)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 853, in command_line
+    return self.do_run(options, args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\cmdline.py", line 1042, in do_run
+    runner.run()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\coverage\execfile.py", line 213, in run
+    exec(code, main_mod.__dict__)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pytest\__main__.py", line 9, in <module>
+    raise SystemExit(_console_main())
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\config\__init__.py", line 253, in _console_main
+    code = _main(prog=_get_prog_name(sys.argv))
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\config\__init__.py", line 229, in _main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 377, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 330, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 384, in _main
+    config.hook.pytest_runtestloop(session=session)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\main.py", line 408, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 118, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 139, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 249, in call_and_report
+    call = CallInfo.from_call(
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 361, in from_call
+    result: TResult | None = func()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 250, in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\runner.py", line 184, in pytest_runtest_call
+    item.runtest()
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\python.py", line 1707, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "D:\a\klayout-pex\klayout-pex\.venv\Lib\site-packages\_pytest\python.py", line 167, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+  File "D:\a\klayout-pex\klayout-pex\tests\netlist\rcx25_reduction_test.py", line 180, in test_kpex_reduce_converts_the_reduced_netlist_to_vacask
+    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
+  File "D:\a\klayout-pex\klayout-pex\tests\rcx25\rcx25_test_helpers.py", line 71, in run_kpex
+    cli.main(['main',
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1473, in main
+    self.run_extraction(args=args, tech_info=tech_info)
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1649, in run_extraction
+    self._rcx25_extraction_results = self.run_kpex_2_5d_engine(  # NOTE: store for test case
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\kpex_cli.py", line 1223, in run_kpex_2_5d_engine
+    subproc(scope.describe())
+  File "D:\a\klayout-pex\klayout-pex\klayout_pex\log\logger.py", line 154, in subproc
+    __logger.log(LogLevel.SUBPROCESS, msg, **kwargs)
+Message: '.SUBCKT nfet_li1: 11 R, 18 C, 13 nodes → 3 R, 15 C, 7 nodes (TICER eliminated 6 nodes; 0 floating islands merged, 0 nodes less; 0 capacitor-only nodes eliminated, 0 tied)'
+Arguments: ()

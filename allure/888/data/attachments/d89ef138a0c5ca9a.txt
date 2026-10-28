@@ -1,0 +1,44 @@
+[16:56:41] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                       
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\sonosfet_sta
+r_w0p45_l0p22.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A'
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:56:41] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:56:41] INFO     (64, 18) -> (dnwell)                       kpex_cli.py:1587
+[16:56:41] INFO     (65, 244) -> (ptap_conn)                   kpex_cli.py:1587
+[16:56:41] INFO     (66, 20) -> (poly_con)                     kpex_cli.py:1587
+[16:56:41] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1587
+[16:56:41] INFO     (66, 4403) -> (licon_poly_con)             kpex_cli.py:1587
+[16:56:41] INFO     (66, 4405) -> (licon_ptap_con)             kpex_cli.py:1587
+[16:56:41] INFO     (67, 44) -> (mcon_con)                     kpex_cli.py:1587
+[16:56:41] INFO     (68, 20) -> (met1_con)                     kpex_cli.py:1587
+[16:56:41] INFO     (93, 44) -> (sonos_nsd)                    kpex_cli.py:1587
+[16:56:41] INFO     (66, 4401) -> (licon_nsd_con)              kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:56:41] INFO     LVSDB: found 4pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Î©]                              
+R1;D;D.$0.li1;;185.0                                                           
+R2;D.$0.li1;D.$2.met1;;9.3                                                     
+R3;G;G.$6.poly;;73.395                                                         
+R4;G;G.$7.poly;;73.395                                                         
+R5;G.$0.li1;G.$4.met1;;9.3                                                     
+R6;G.$0.li1;G.$6.poly;;152.0                                                   
+R7;G.$2.li1;G.$5.met1;;9.3                                                     
+R8;G.$2.li1;G.$7.poly;;152.0                                                   
+R9;S;S.$0.li1;;185.0                                                           
+R10;S.$0.li1;S.$2.met1;;9.3                                                    
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\sonosfet_star_w0p45_l0p22__sonosfet
+_star_w0p45_l0p22\sonosfet_star_w0p45_l0p22_k25d_pex_netlist.csv               
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\sonosfet_star_w0p45_l0p22__sonosfet
+_star_w0p45_l0p22\sonosfet_star_w0p45_l0p22_k25d_pex_netlist.spice             

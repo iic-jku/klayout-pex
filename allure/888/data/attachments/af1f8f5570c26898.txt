@@ -1,0 +1,41 @@
+[16:56:56] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --lvsdb                                 
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\nmos_meta
+l1_redux_two_labels_one_node.lvsdb.gz' --out-dir                               
+'C:\Users\RUNNER~1\AppData\Local\Temp\tmpykiflip7' --2.5D --check n            
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:56:56] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:56:56] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1587
+[16:56:56] INFO     (5, 0) -> (poly_con)                       kpex_cli.py:1587
+[16:56:56] INFO     (7, 0) -> (nsd_fet)                        kpex_cli.py:1587
+[16:56:56] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1587
+[16:56:56] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1587
+[16:56:56] INFO     (5, 2) -> (poly_pin_con)                   kpex_cli.py:1587
+[16:56:56] INFO     (6, 4403) -> (cont_poly_con)               kpex_cli.py:1587
+[16:56:56] INFO     (6, 4401) -> (cont_nsd_con)                kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:56:56] INFO     LVSDB: found 3pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Î©]                              
+R1;$1;$1.$0.GatPoly;;33.654                                                    
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0                                            
+R3;D;D,X.$0.Metal1;;0.488                                                      
+R4;D;X;;0.001                                                                  
+R5;D,X;D,X.$0.Metal1;;17.0                                                     
+R6;S;S.$0.Metal1;;0.598                                                        
+R7;S.$0.Metal1;S.P0.nSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpykiflip7\nmos_metal1_redux_two_labels_o
+ne_node__nmos_metal1_redux_two_labels_one_node\nmos_metal1_redux_two_labels_one
+_node_k25d_pex_netlist.csv                                                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpykiflip7\nmos_metal1_redux_two_labels_o
+ne_node__nmos_metal1_redux_two_labels_one_node\nmos_metal1_redux_two_labels_one
+_node_k25d_pex_netlist.spice                                                   

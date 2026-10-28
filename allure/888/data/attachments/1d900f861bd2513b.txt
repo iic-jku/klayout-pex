@@ -1,0 +1,31 @@
+[16:55:38] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_wire_voltage_divider_li1.lvsdb.gz --out-dir                                   
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:55:38] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:55:38] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[16:55:38] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:55:38] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B,C;;426.667                                                             
+R2;A,B,C;B;;413.867                                                             
+R3;A,B,C;C;;72.533                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.csv
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.spi
+ce                                                                              

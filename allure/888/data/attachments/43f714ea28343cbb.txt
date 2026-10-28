@@ -1,0 +1,59 @@
+[16:56:23] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cap_rfcmi
+m_w7u_l7u_over_m4_wire.lvsdb.gz' --out-dir                                     
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:56:23] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:56:23] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1587
+[16:56:23] INFO     (126, 0) -> (topmetal1_con)                kpex_cli.py:1587
+[16:56:23] INFO     (65, 244) -> (ptap)                        kpex_cli.py:1587
+[16:56:23] INFO     (125, 10) -> (mim_via)                     kpex_cli.py:1587
+[16:56:23] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1587
+[16:56:23] INFO     (36, 0) -> (rfmim_top)                     kpex_cli.py:1587
+[16:56:23] INFO     (126, 2) -> (topmetal1_pin_con)            kpex_cli.py:1587
+[16:56:23] INFO     (67, 2) -> (metal5_pin_con)                kpex_cli.py:1587
+[16:56:23] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1587
+[16:56:23] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1587
+[16:56:23] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1587
+[16:56:23] INFO     (67, 0) -> (metal5_n_cap metal5_rfcap      kpex_cli.py:1587
+                    metal5_rfcap_feed)                                         
+[16:56:23] INFO     (6, 4405) -> (cont_ptap_con)               kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:56:23] INFO     LVSDB: found 4pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Î©]                              
+R1;MINUS;MINUS.P0.Metal5;;0.161                                                
+R2;PLUS;PLUS.$36.TopMetal1;;0.032                                              
+R3;PLUS.$0.MIM;PLUS.$10.MIM;;1.909                                             
+R4;PLUS.$0.MIM;PLUS.$36.TopMetal1;;0.367                                       
+R5;PLUS.$10.MIM;PLUS.$12.MIM;;1.918                                            
+R6;PLUS.$10.MIM;PLUS.$42.TopMetal1;;0.367                                      
+R7;PLUS.$12.MIM;PLUS.$48.TopMetal1;;0.367                                      
+R8;PLUS.$12.MIM;PLUS.P0.MIM;;0.964                                             
+R9;PLUS.$18.MIM;PLUS.$24.MIM;;1.918                                            
+R10;PLUS.$18.MIM;PLUS.$54.TopMetal1;;0.367                                     
+R11;PLUS.$18.MIM;PLUS.P0.MIM;;0.954                                            
+R12;PLUS.$24.MIM;PLUS.$30.MIM;;1.918                                           
+R13;PLUS.$24.MIM;PLUS.$60.TopMetal1;;0.367                                     
+R14;PLUS.$30.MIM;PLUS.$66.TopMetal1;;0.367                                     
+R15;PLUS.$36.TopMetal1;PLUS.$42.TopMetal1;;0.003                               
+R16;PLUS.$42.TopMetal1;PLUS.$48.TopMetal1;;0.003                               
+R17;PLUS.$48.TopMetal1;PLUS.$54.TopMetal1;;0.003                               
+R18;PLUS.$54.TopMetal1;PLUS.$60.TopMetal1;;0.003                               
+R19;PLUS.$60.TopMetal1;PLUS.$66.TopMetal1;;0.003                               
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cap_rfcmim_w7u_l7u_over_m4_wire_
+_cap_rfcmim_w7u_l7u_over_m4_wire\cap_rfcmim_w7u_l7u_over_m4_wire_k25d_pex_netli
+st.csv                                                                         
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cap_rfcmim_w7u_l7u_over_m4_wire_
+_cap_rfcmim_w7u_l7u_over_m4_wire\cap_rfcmim_w7u_l7u_over_m4_wire_k25d_pex_netli
+st.spice                                                                       
