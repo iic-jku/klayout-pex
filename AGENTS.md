@@ -62,7 +62,12 @@
   output. `./run_unit_tests.sh` exits with the status of `open`, not of pytest.
 - Per commit, run the unit tests and the tests of the changed area; run all tests but the
   smoke tests (`poetry run pytest -m "not smoke" -n 3`) once before handing over a PR, as
-  CI runs no slow tests (extraction, simulators).
+  CI's slow tests (integration job) may fail without failing the run.
+- The extraction tests start from the committed LVS databases of their designs
+  (`testdata/lvsdb`, see `tests/common/lvsdb_fixtures.py`), not from LVS. A change of an LVS
+  deck, a test layout or the KLayout version outdates them: running the tests with the
+  KLayout executable rebuilds them (`poetry run python -m tests.common.lvsdb_fixtures`
+  rebuilds all), commit them with the change. Without it (CI), outdated ones fail.
 - CI runs the unit tests with Python 3.12 and the KLayout Python module only (no
   executable), on Linux, macOS and Windows: before handing over a PR, also run them with
   Python 3.12 (e.g. in IIC-OSIC-TOOLS) and with `KPEX_KLAYOUT_EXE=/nonexistent`.

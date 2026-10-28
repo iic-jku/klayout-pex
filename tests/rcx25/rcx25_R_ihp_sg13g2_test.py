@@ -36,7 +36,7 @@ from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
-from tests.rcx25.rcx25_test_helpers import RCX25Extraction, read_lvsdb
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
@@ -63,8 +63,8 @@ def test_rf_mos_keeps_its_layout_geometry():
     # of the base class (sg13_lv_nmos with rfmode=1), which has no layout geometry,
     # so the resistance extraction could not connect it (#211)
     cell_name = 'rfnmos_w1u_l0u72'
-    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('rfnmos', f"{cell_name}.gds.gz")
-    lvsdb = read_lvsdb(csv_path, cell_name)
+    pex_whiteboxed.run_rcx25d_single_cell('rfnmos', f"{cell_name}.gds.gz")
+    lvsdb = pex_whiteboxed.read_lvsdb('rfnmos', f"{cell_name}.gds.gz")
 
     assert [c.name for c in lvsdb.internal_layout().top_cells()] == [cell_name]
 
@@ -83,11 +83,12 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     # an LVS layer the tech info has no layer for (#217), so they are where they overlap the Metal5 of their nets
     cell_name = 'cmomi_w5u_l5u_m1_m5'
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(cell_name, f"{cell_name}.gds.gz")
+        pex_whiteboxed.run_rcx25d_single_cell(cell_name, f"{cell_name}.gds.gz")
 
     assert [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]] == []
 
-    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=True)
+    pex_context = extraction_context(pex_whiteboxed.read_lvsdb(cell_name, f"{cell_name}.gds.gz"), cell_name,
+                                     blackbox_devices=True)
     mom_cap, = [d for d in pex_context.devices_by_name.values() if d.device_class_name == 'cap_cmomi']
     assert {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer] for t in mom_cap.terminals} \
            == {'mim_top': ['Metal5'], 'mim_btm': ['Metal5']}
@@ -103,8 +104,9 @@ def test_device_terminals_without_tech_layer_are_where_they_overlap_their_net():
     ('sg13g2_a21o_1', 'sg13g2_a21o_1', 'VSS'),
 ])
 def test_substrate_net_is_found_by_its_name_or_its_layer(design_dir: str, cell_name: str, substrate_net_name: str):
-    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(design_dir, f"{cell_name}.gds.gz")
-    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=False)
+    pex_whiteboxed.run_rcx25d_single_cell(design_dir, f"{cell_name}.gds.gz")
+    pex_context = extraction_context(pex_whiteboxed.read_lvsdb(design_dir, f"{cell_name}.gds.gz"), cell_name,
+                                     blackbox_devices=False)
     assert pex_context.substrate_net_name == substrate_net_name
 
 
@@ -150,10 +152,11 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
     # so the terminals are on the Metal1 over them, rather than on LVS layers the tech info doesn't know (#350)
     cell_name = 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa'
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
 
-    pex_context = extraction_context(read_lvsdb(csv_path, cell_name), cell_name, blackbox_devices=False)
+    pex_context = extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
+                                     blackbox_devices=False)
     # NOTE: the substrate terminal S stays on its net, as the substrate is no conductor of the resistance network,
     #       and so do the base and collector of the pnpMPA, on the nwell and substrate taps
     npn_terminals = {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1'], 'S': []}

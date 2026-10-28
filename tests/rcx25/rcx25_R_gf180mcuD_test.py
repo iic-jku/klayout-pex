@@ -30,7 +30,7 @@ from unittest import mock
 from typing import *
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
-from tests.rcx25.rcx25_test_helpers import RCX25Extraction, read_lvsdb
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK gf180mcuD | mode R]"
 tags = ("PEX", "2.5D")
@@ -124,7 +124,7 @@ def test_nfet_10v0_asym_pair():
     # the asymmetric device must be extracted with S and D in place, not swapped
     cell_name = 'nfet_10v0_asym_pair'
     _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    lvsdb = read_lvsdb(csv_path, cell_name)
+    lvsdb = pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz")
     devices = list(lvsdb.netlist().circuit_by_name(cell_name).each_device())
     assert [d.device_class().name for d in devices] == ['nfet_10v0_asym'] * 2
     drains = {d.net_for_terminal('D').expanded_name() for d in devices}

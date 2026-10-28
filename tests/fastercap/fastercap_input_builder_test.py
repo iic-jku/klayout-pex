@@ -35,6 +35,7 @@ import klayout.db as kdb
 from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
 from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 from klayout_pex.kpex_cli import KpexCLI
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -51,9 +52,8 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
     with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', autospec=True) as run_kpex_2_5d_engine:
         KpexCLI().main(['main',
                         '--pdk', pdk.name,
-                        '--gds', pdk.gds_path(*path_components),
+                        '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                         '--out-dir', pdk.output_dir,
-                        '--cache-dir', pdk.lvs_cache_dir,
                         '--2.5D',
                         '--blackbox', 'n'])
     pex_context = run_kpex_2_5d_engine.call_args.kwargs['pex_context']

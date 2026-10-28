@@ -32,22 +32,15 @@ import klayout.db as kdb
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
+from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
+from tests.common.lvsdb_fixtures import LVSDBFixture
 from tests.common.pdk_test_config import PDKTestConfig
 
 
 CSVPath = str
-
-
-def read_lvsdb(csv_path: CSVPath, cell_name: str) -> kdb.LayoutVsSchematic:
-    """
-    The LVS database of the extraction that wrote the CSV, which the CLI writes next to it
-    """
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(os.path.join(os.path.dirname(csv_path), f"{cell_name}.lvsdb.gz"))
-    return lvsdb
 
 
 @dataclass
@@ -56,22 +49,31 @@ class RCX25Extraction:
     pex_mode: PEXMode
     blackbox: bool
 
+    def lvsdb_fixture(self, *path_components) -> LVSDBFixture:
+        return LVSDBFixture(pdk=PDK.from_string(self.pdk.name), gds_path=self.pdk.gds_path(*path_components))
+
+    def read_lvsdb(self, *path_components) -> kdb.LayoutVsSchematic:
+        """
+        The LVS database the extraction of the design starts from
+        """
+        lvsdb = kdb.LayoutVsSchematic()
+        lvsdb.read(self.lvsdb_fixture(*path_components).up_to_date_lvsdb_path())
+        return lvsdb
+
     def run_kpex(self, *path_components, extra_args: Sequence[str] = ()) -> KpexCLI:
         """
-        Extracts the single cell with the options of the tests and the extra ones
+        Extracts the single cell with the options of the tests and the extra ones,
+        from the committed LVS database of the design, without running LVS (see LVSDBFixture)
 
         :return: the CLI, e.g. for the paths it wrote
         """
-        gds_path = self.pdk.gds_path(*path_components)
-
         cli = KpexCLI()
         cli.main(['main',
                   '--pdk', self.pdk.name,
                   '--mode', self.pex_mode,
                   '--blackbox', 'y' if self.blackbox else 'n',
-                  '--gds', gds_path,
+                  '--lvsdb', self.lvsdb_fixture(*path_components).up_to_date_lvsdb_path(),
                   '--out-dir', self.pdk.output_dir,
-                  '--cache-dir', self.pdk.lvs_cache_dir,
                   '--2.5D',
                   '--halo', '10000',
                   '--scale', 'n',
