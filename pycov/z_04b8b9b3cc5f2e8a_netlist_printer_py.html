@@ -5,7 +5,7 @@
     <title>Coverage for klayout_pex/klayout/netlist_printer.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
-    <script src="coverage_html_cb_15cffcd0.js" defer></script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_netlist_reducer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 23:32 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-28 16:16 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -117,7 +117,7 @@
     <p class="run run2"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="nam">PARASITIC_DEVICE_CLASS_NAMES</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">    <span class="nam">PARASITIC_RESISTOR_CLASS_NAME</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">util</span><span class="op">.</span><span class="nam">unit_formatter</span> <span class="key">import</span> <span class="nam">format_spice_number</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">util</span><span class="op">.</span><span class="nam">unit_formatter</span> <span class="key">import</span> <span class="nam">format_spice_number</span><span class="op">,</span> <span class="nam">format_spice_resistance</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t"><span class="key">import</span> <span class="nam">klayout_pex_protobuf</span><span class="op">.</span><span class="nam">kpex</span><span class="op">.</span><span class="nam">tech</span><span class="op">.</span><span class="nam">device_models_pb2</span> <span class="key">as</span> <span class="nam">device_models_pb2</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -181,7 +181,7 @@
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">            <span class="nam">r_ohm</span> <span class="op">=</span> <span class="nam">device</span><span class="op">.</span><span class="nam">parameter</span><span class="op">(</span><span class="str">&#x27;R&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">            <span class="nam">net1</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">net_to_string</span><span class="op">(</span><span class="nam">device</span><span class="op">.</span><span class="nam">net_for_terminal</span><span class="op">(</span><span class="num">0</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">            <span class="nam">net2</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">net_to_string</span><span class="op">(</span><span class="nam">device</span><span class="op">.</span><span class="nam">net_for_terminal</span><span class="op">(</span><span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">emit_line</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">R</span><span class="op">{</span><span class="nam">device</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">net1</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">net2</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">r_ohm</span><span class="op">:</span><span class="fst">.12g</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">emit_line</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">R</span><span class="op">{</span><span class="nam">device</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">net1</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">net2</span><span class="op">}</span><span class="fst"> </span><span class="op">{</span><span class="nam">format_spice_resistance</span><span class="op">(</span><span class="nam">r_ohm</span><span class="op">)</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">write_modeled_device</span><span class="op">(</span><span class="nam">device</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">device_models</span><span class="op">.</span><span class="nam">mapping_by_lvs_device_class_name</span><span class="op">[</span><span class="nam">dc</span><span class="op">.</span><span class="nam">name</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -216,8 +216,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_04b8b9b3cc5f2e8a_netlist_reducer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 23:32 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-28 16:16 +0000
         </p>
     </div>
 </footer>

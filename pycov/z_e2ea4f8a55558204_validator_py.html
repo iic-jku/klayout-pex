@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/pex25d/validator.py: 96%</title>
+    <title>Coverage for klayout_pex/pex25d/validator.py: 97%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
-    <script src="coverage_html_cb_15cffcd0.js" defer></script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>pex25d<span class="sep">/</span>validator.py</b>:
-            <span class="pc_cov">96%</span>
+            <span class="pc_cov">97%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">445 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">427<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">18<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">432<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">13<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -64,8 +64,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_e2ea4f8a55558204_writer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 23:32 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-28 16:16 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -969,13 +969,13 @@
     <p class="pln"><span class="n"><a id="t887" href="#t887">887</a></span><span class="t"><span class="str">    shape still carry the SourceRef of the record it came from. Conductor</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t888" href="#t888">888</a></span><span class="t"><span class="str">    overlap runs on the scene, the only form that knows how high a layer is.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t889" href="#t889">889</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t890" href="#t890">890</a></span><span class="t">    <span class="nam">validator</span> <span class="op">=</span> <span class="nam">Validator</span><span class="op">(</span><span class="nam">report</span><span class="op">,</span> <span class="nam">strict</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t891" href="#t891">891</a></span><span class="t">    <span class="key">if</span> <span class="nam">pex25d_file</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t892" href="#t892">892</a></span><span class="t">        <span class="nam">validator</span><span class="op">.</span><span class="nam">check_shapes</span><span class="op">(</span><span class="nam">shapes_of_file</span><span class="op">(</span><span class="nam">pex25d_file</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t890" href="#t890">890</a></span><span class="t">    <span class="nam">validator</span> <span class="op">=</span> <span class="nam">Validator</span><span class="op">(</span><span class="nam">report</span><span class="op">,</span> <span class="nam">strict</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t891" href="#t891">891</a></span><span class="t">    <span class="key">if</span> <span class="nam">pex25d_file</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t892" href="#t892">892</a></span><span class="t">        <span class="nam">validator</span><span class="op">.</span><span class="nam">check_shapes</span><span class="op">(</span><span class="nam">shapes_of_file</span><span class="op">(</span><span class="nam">pex25d_file</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t893" href="#t893">893</a></span><span class="t">    <span class="key">elif</span> <span class="nam">scene</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t894" href="#t894">894</a></span><span class="t">        <span class="nam">validator</span><span class="op">.</span><span class="nam">check_shapes</span><span class="op">(</span><span class="nam">shapes_of_scene</span><span class="op">(</span><span class="nam">scene</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t895" href="#t895">895</a></span><span class="t">    <span class="key">if</span> <span class="nam">scene</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t896" href="#t896">896</a></span><span class="t">        <span class="nam">validator</span><span class="op">.</span><span class="nam">check_conductor_overlap</span><span class="op">(</span><span class="nam">scene</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t895" href="#t895">895</a></span><span class="t">    <span class="key">if</span> <span class="nam">scene</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t896" href="#t896">896</a></span><span class="t">        <span class="nam">validator</span><span class="op">.</span><span class="nam">check_conductor_overlap</span><span class="op">(</span><span class="nam">scene</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t897" href="#t897">897</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t898" href="#t898">898</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t899" href="#t899">899</a></span><span class="t"><span class="key">def</span> <span class="nam">validate</span><span class="op">(</span><span class="nam">message</span><span class="op">:</span> <span class="nam">Any</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -1004,8 +1004,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_e2ea4f8a55558204_writer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.16.2">coverage.py v7.16.2</a>,
-            created at 2026-10-02 23:32 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-28 16:16 +0000
         </p>
     </div>
 </footer>
