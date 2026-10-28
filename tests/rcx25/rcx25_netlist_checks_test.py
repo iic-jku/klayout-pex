@@ -34,7 +34,7 @@ import pytest
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
-from tests.common.pdk_test_config import lvs_cache_dir
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs'))
 
@@ -46,18 +46,21 @@ DESIGNS = [
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_ntap_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/r_nwell_pfet_label_li1.gds.gz'),
     (PDK.SKY130A, 'test_patterns/cap_var_lvt_without_ptap_ring.gds.gz'),
-    (PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz'),
+    pytest.param(PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
+                 marks=pytest.mark.slow),  # NOTE: the MOM caps take 2 s in RC mode
     (PDK.GF180MCUD, 'test_patterns/nfet_m1.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/r_nwell_pfet_ntap_m1.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/plates_m1_over_isolated_pwell_and_dnwell.gds.gz'),
     (PDK.IHP_SG13G2, 'sg13g2_a21o_1/sg13g2_a21o_1.gds.gz'),
     (PDK.IHP_SG13G2, 'rfnmos/rfnmos_w1u_l0u72.gds.gz'),
-    (PDK.IHP_SG13G2, 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin/cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz'),
+    pytest.param(PDK.IHP_SG13G2, 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin/cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz',
+                 marks=pytest.mark.slow),  # NOTE: the MOM caps take 2 s in RC mode
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_twice.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_labels_one_node.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz'),
-    (PDK.IHP_SG13CMOS5L, 'cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz'),
+    pytest.param(PDK.IHP_SG13CMOS5L, 'cap_cmomf_w5u_l5u_m1_m4/cap_cmomf_w5u_l5u_m1_m4.gds.gz',
+                 marks=pytest.mark.slow),  # NOTE: the MOM caps take 2 s in RC mode
     (PDK.IHP_SG13CMOS5L, 'inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns.gds.gz'),
 ]
 
@@ -70,7 +73,6 @@ EXPECTED_FAILURES = {
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 @pytest.mark.parametrize('mode', ['R', 'RC'])
 @pytest.mark.parametrize('pdk,gds', DESIGNS)
 def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest.FixtureRequest):
@@ -83,9 +85,8 @@ def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest
         cli.main(['main',
                   '--pdk', pdk,
                   '--mode', mode,
-                  '--gds', os.path.join(TEST_DESIGNS_DIR, pdk, gds),
+                  '--lvsdb', lvsdb_fixture_path(pdk, os.path.join(TEST_DESIGNS_DIR, pdk, gds)),
                   '--out-dir', out_dir,
-                  '--cache-dir', lvs_cache_dir(pdk),
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
@@ -100,7 +101,6 @@ BLACKBOXED_DESIGNS = [
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 @pytest.mark.parametrize('pdk,gds', BLACKBOXED_DESIGNS)
 def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
     # NOTE: the RC netlist keeps the MOM caps, which white-box mode removes
@@ -110,9 +110,8 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
                   '--pdk', pdk,
                   '--mode', 'RC',
                   '--blackbox', 'y',
-                  '--gds', os.path.join(TEST_DESIGNS_DIR, pdk, gds),
+                  '--lvsdb', lvsdb_fixture_path(pdk, os.path.join(TEST_DESIGNS_DIR, pdk, gds)),
                   '--out-dir', out_dir,
-                  '--cache-dir', lvs_cache_dir(pdk),
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
@@ -124,7 +123,6 @@ PROBLEMS = ['port Y touches nothing']
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
     # NOTE: --check is on by default in RC mode (#215)
     with tempfile.TemporaryDirectory() as out_dir, \
@@ -132,8 +130,8 @@ def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
          mock.patch('klayout_pex.kpex_cli.error') as error_mock, \
          pytest.raises(SystemExit) as exit_info:
         try:
-            KpexCLI().main(['main', '--pdk', PDK.SKY130A, '--mode', 'RC', '--gds', INV_1_GDS,
-                            '--out-dir', out_dir, '--cache-dir', lvs_cache_dir(PDK.SKY130A), '--2.5D'])
+            KpexCLI().main(['main', '--pdk', PDK.SKY130A, '--mode', 'RC',
+                            '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS), '--out-dir', out_dir, '--2.5D'])
         finally:
             netlists = glob.glob(os.path.join(out_dir, '*', '*_k25d_pex_netlist.spice'))
     assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
@@ -146,7 +144,6 @@ def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D")
-@pytest.mark.slow
 @pytest.mark.parametrize('arguments', [['--mode', 'RC', '--check', 'n'],
                                        ['--mode', 'R']])  # NOTE: --check is off by default but in RC mode
 def test_inconsistent_netlist_only_warns_without_check(arguments: list):
@@ -154,7 +151,8 @@ def test_inconsistent_netlist_only_warns_without_check(arguments: list):
          mock.patch('klayout_pex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
          mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', PDK.SKY130A, '--gds', INV_1_GDS, '--out-dir', out_dir, '--2.5D', *arguments])
+        cli.main(['main', '--pdk', PDK.SKY130A, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS),
+                  '--out-dir', out_dir, '--2.5D', *arguments])
     assert cli.rcx25_netlist_problems == PROBLEMS
     assert "The extracted netlist is inconsistent with the LVS netlist:\n  - port Y touches nothing" \
            in [c.args[0] for c in warning_mock.call_args_list]

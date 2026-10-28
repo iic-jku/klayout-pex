@@ -39,7 +39,6 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__whiteboxed():
     # The device model cap_mim_2f0_m4m5_noshield gives c_cox 1.99 fF/µm² * A + c_capsw 0.2383 fF/µm * P:
     #   5 µm x 5 µm:   49.75 fF + 4.77 fF  = 54.52 fF  (TOP1 - BOT1)
@@ -62,7 +61,6 @@ C10;TOP2;VSUBS;1.603;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_cap__blackboxed():
     # The black-box extraction keeps the plates of the MIM caps, FuseTop and the Metal4 under it (LVS layer metal4_cap),
     # as conductors, and leaves the capacitance between them to the device model: the overlap and the fringe
@@ -86,7 +84,6 @@ C10;TOP2;VSUBS;1.603;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_well_diodes__blackboxed():
     # The well diodes of the PDK's KLayout pcells (2 µm x 4 µm, 3.3V), their models are diode_pw2dw, diode_dw2ps
     assert pex_blackboxed.written_device_lines('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz') == [
@@ -97,7 +94,6 @@ def test_well_diodes__blackboxed():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_plates_over_isolated_pwell_and_dnwell():
     # The isolated p-well (LVPWELL within DNWELL) is a net of its own, W by its p-tap, and so is the DNWELL
     # around it, D by its n-tap: the plates couple to the wells below them, their fringes to the other well

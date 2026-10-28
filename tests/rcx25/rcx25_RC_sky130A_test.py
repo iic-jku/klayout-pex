@@ -29,6 +29,7 @@ import allure
 import pytest
 
 from klayout_pex.rcx25.pex_mode import PEXMode
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 from klayout_pex.kpex_cli import KpexCLI
@@ -44,7 +45,6 @@ pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_wire_voltage_divider_li1():
     # NOTE: the capacitance of the wire (0.969 fF in CC mode) goes to the nodes of its resistor network,
     #       each part of it to the node nearest to it (#211 §8): the T junction A,B,C has the middle half
@@ -69,8 +69,9 @@ def capacitances_by_net_pair(pex_mode: PEXMode, *path_components) -> Dict[NetCou
     pdk = PDKTestConfig(PDKName.SKY130A)
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', pdk.name, '--mode', pex_mode, '--gds', pdk.gds_path(*path_components),
-                  '--out-dir', out_dir, '--cache-dir', pdk.lvs_cache_dir, '--2.5D'])
+        cli.main(['main', '--pdk', pdk.name, '--mode', pex_mode,
+                  '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
+                  '--out-dir', out_dir, '--2.5D'])
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
 
     net_by_node: Dict[str, str] = {}

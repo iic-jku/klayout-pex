@@ -125,6 +125,17 @@ requires = ["poetry-core>=2.0.0", "setuptools>=42"]
 build-backend = "kpex_build_backend"
 backend-path = ["scripts/build"]
 
+[tool.coverage.run]
+# NOTE: KPEX only, not the tests, the generated protobuf modules or the plugins
+source = ["klayout_pex"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
 [tool.pytest.ini_options]
 # NOTE: the checkout first, so that the package tests is ours (csv-diff installs one of its own)
 pythonpath = ["."]

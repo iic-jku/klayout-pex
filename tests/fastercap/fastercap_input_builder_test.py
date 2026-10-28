@@ -35,6 +35,7 @@ import klayout.db as kdb
 from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
 from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
 from klayout_pex.kpex_cli import KpexCLI
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -51,9 +52,8 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
     with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', autospec=True) as run_kpex_2_5d_engine:
         KpexCLI().main(['main',
                         '--pdk', pdk.name,
-                        '--gds', pdk.gds_path(*path_components),
+                        '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                         '--out-dir', pdk.output_dir,
-                        '--cache-dir', pdk.lvs_cache_dir,
                         '--2.5D',
                         '--blackbox', 'n'])
     pex_context = run_kpex_2_5d_engine.call_args.kwargs['pex_context']
@@ -82,7 +82,6 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_dielectric_of_ihp_sg13g2():
     # MIM 6.99 µm x 6.99 µm, over Metal5 8.19 µm x 8.19 µm (67.0761 µm²)
     areas = dielectric_areas_um2(PDKName.IHP_SG13G2, 'sg13g2_pr__cmim', 'cmim.gds.gz')
@@ -91,7 +90,6 @@ def test_mim_dielectric_of_ihp_sg13g2():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_dielectric_of_ihp_sg13g2_rfcmim():
     # MIM 7 µm x 7 µm, over Metal5 of 82.24 µm² (with the feed)
     areas = dielectric_areas_um2(PDKName.IHP_SG13G2, 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
@@ -100,7 +98,6 @@ def test_mim_dielectric_of_ihp_sg13g2_rfcmim():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_dielectric_of_sky130A():
     # capm 18.9 µm x 5.1 µm, over met3 of 147.36 µm² (with the interconnect), no capm2 over met4
     areas = dielectric_areas_um2(PDKName.SKY130A, 'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
@@ -110,7 +107,6 @@ def test_mim_dielectric_of_sky130A():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_mim_dielectric_of_gf180mcuD():
     # FuseTop 5 µm x 5 µm and 20 µm x 10 µm, over Metal4 of 275.88 µm²
     areas = dielectric_areas_um2(PDKName.GF180MCUD, 'test_patterns', 'cap_mim_m4m5.gds.gz')

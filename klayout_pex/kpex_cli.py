@@ -762,18 +762,9 @@ class KpexCLI:
                         found_errors = True
                     warning("--schematic is checked for its device classes and their totals only, "
                             "use regular LVS to compare layout against schematic")
-                # NOTE: the PEX-LVS compares the layout with an empty dummy schematic only, as KLayout writes
-                #       the LVS database after a comparison: the alignment flattens every circuit of the layout
-                #       into its top circuit, whose devices and nets the extraction takes, while a schematic with
-                #       subcircuits would keep their circuits (#330)
                 args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                              f"{args.effective_cell_name}_dummy_schematic.spice")
-                with open(args.effective_schematic_path, 'w', encoding='utf-8') as f:
-                    f.writelines([
-                        f".subckt {args.effective_cell_name} VDD VSS\n",
-                        '.ends\n',
-                        '.end\n'
-                    ])
+                LVSRunner.write_dummy_schematic(args.effective_schematic_path, args.effective_cell_name)
 
         try:
             pattern_string: str = args.dielectric_filter

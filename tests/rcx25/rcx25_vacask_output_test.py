@@ -73,7 +73,6 @@ def assert_vacask_netlist_is_the_spice_netlist(extraction: RCX25Extraction, *pat
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rc_netlist_of_wire_with_t_junction_sky130A():
     # NOTE: the node of the T junction of the net A,B,C, which the SPICE netlist (and so the VACASK netlist)
     #       names A|B|C, as KLayout's SPICE writer does
@@ -87,7 +86,6 @@ def test_rc_netlist_of_wire_with_t_junction_sky130A():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rc_netlist_of_nmos_ihp_sg13g2():
     extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=True)
     text = assert_vacask_netlist_is_the_spice_netlist(extraction, 'test_patterns', 'nmos_metal1_redux.gds.gz')
@@ -98,7 +96,6 @@ def test_rc_netlist_of_nmos_ihp_sg13g2():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_rc_netlist_of_rfcmim_ihp_sg13g2():
     # NOTE: the VACASK subcircuit cap_rfcmim of the IHP PDK declares m
     extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=True)

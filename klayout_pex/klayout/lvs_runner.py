@@ -84,6 +84,21 @@ class LVSRunner:
                 if name not in cls.NEUTRAL_SCRIPT_PARAMETERS}
 
     @staticmethod
+    def write_dummy_schematic(path: str, cell_name: str):
+        """
+        The schematic of the PEX-LVS, empty: it compares the layout with a dummy schematic only,
+        as KLayout writes the LVS database after a comparison: the alignment flattens every circuit
+        of the layout into its top circuit, whose devices and nets the extraction takes, while a schematic
+        with subcircuits would keep their circuits (#330)
+        """
+        with open(path, 'w', encoding='utf-8') as f:
+            f.writelines([
+                f".subckt {cell_name} VDD VSS\n",
+                '.ends\n',
+                '.end\n'
+            ])
+
+    @staticmethod
     def run_klayout_lvs(exe_path: str,
                         lvs_script: str,
                         gds_path: str,

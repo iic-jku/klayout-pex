@@ -82,7 +82,6 @@ def extract_and_reduce(gds_name: str, output_dir: str, options: ReductionOptions
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_nfet_keeps_ports_and_device_terminals_dc_and_capacitances_between_nets(tmp_path):
     options = ReductionOptions()
     spice_path, reduced_path, original, reduced = extract_and_reduce('nfet_li1.gds.gz', str(tmp_path), options)
@@ -151,7 +150,6 @@ def read_text(path: str) -> str:
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 @pytest.mark.parametrize('mode, reduce_args, options', [
     (PEXMode.RC, ['--reduce', 'ticer'], ReductionOptions()),
     (PEXMode.RC, ['--reduce', 'ticer', '--reduce-tau', '1f'], ReductionOptions(ticer_tau=1e-15)),
@@ -177,7 +175,6 @@ def test_kpex_reduce_writes_the_reduced_netlist_beside_the_netlist_and_to_out_ne
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
     out_netlist = os.path.join(str(tmp_path), 'out.inc')
     cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
@@ -198,7 +195,6 @@ def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-@pytest.mark.slow
 @pytest.mark.parametrize('out_option', ['--out-netlist', '--out_spice'])  # NOTE: --out_spice is deprecated
 def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: str, tmp_path):
     out_netlist = os.path.join(str(tmp_path), 'out.spice')

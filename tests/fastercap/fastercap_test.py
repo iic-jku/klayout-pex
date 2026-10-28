@@ -30,6 +30,7 @@ from typing import *
 from klayout_pex.kpex_cli import KpexCLI
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -43,7 +44,7 @@ def _extract_single_cell(*path_components) -> str:
     cli = KpexCLI()
     cli.main(['main',
               '--pdk', sky130a.name,
-              '--gds', sky130a.gds_path(*path_components),
+              '--lvsdb', lvsdb_fixture_path(sky130a.name, sky130a.gds_path(*path_components)),
               '--out-dir', sky130a.output_dir,
               '--fastercap',
               '--ooc', '0',

@@ -32,6 +32,7 @@ import klayout.rdb as rdb
 import pytest
 
 from klayout_pex.kpex_cli import KpexCLI
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 
 CELL = 'sideoverlap_simple_plates_li1_m1'
@@ -43,7 +44,7 @@ def report_category_names(*report_caps_args: str) -> List[str]:
     with tempfile.TemporaryDirectory() as out_dir:
         KpexCLI().main(['main',
                         '--pdk', 'sky130A',
-                        '--gds', GDS_PATH,
+                        '--lvsdb', lvsdb_fixture_path('sky130A', GDS_PATH),
                         '--out-dir', out_dir,
                         '--2.5D',
                         '--mode', 'CC',
@@ -55,7 +56,6 @@ def report_category_names(*report_caps_args: str) -> List[str]:
 
 @allure.parent_suite("kpex/2.5D Extraction Tests")
 @allure.tag("PEX", "2.5D", "Report")
-@pytest.mark.slow
 def test_report_has_the_capacitances_only_with_report_caps():
     # NOTE: a category for each capacitance contribution takes much memory and time on large layouts
     names = report_category_names()
