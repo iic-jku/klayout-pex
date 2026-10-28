@@ -117,12 +117,6 @@ jobs:
         sudo apt-get install ./$FASTERCAP_DEB
         popd
 
-    - name: "Restore cached LVSDB results"
-      uses: actions/cache/restore@v6
-      with:
-        path: output_sky130A/.kpex_cache
-        key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache-${{ env.KLAYOUT_DEB }}
-
     - name: "Download and merge Python dist artifacts"
       uses: actions/download-artifact@v8
       with:
@@ -161,13 +155,6 @@ jobs:
         path: ${{ env.ALLURE_RESULTS_PATH }}
         retention-days: 1
         if-no-files-found: error
-
-    - name: "Save cached LVSDB results"
-      if: success() || failure()
-      uses: actions/cache/save@v6
-      with:
-        path: output_sky130A/.kpex_cache
-        key: ${{ matrix.os }}-${{ matrix.python-version }}-kpex_cache-${{ env.KLAYOUT_DEB }}
 
   # NOTE: only when run on its own; ci-cd.yml publishes after all of its suites
   call-publish-reports-github-pages:
