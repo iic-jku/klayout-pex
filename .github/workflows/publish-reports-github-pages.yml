@@ -102,9 +102,10 @@ jobs:
           echo "<meta http-equiv=\"Pragma\" content=\"no-cache\"><meta http-equiv=\"Expires\" content=\"0\">" \
             >> allure-history/allure/index.html
 
+      # NOTE: not for pull requests from forks, whose token can't push to gh-pages
       - name: "Publish test report"
         uses: peaceiris/actions-gh-pages@v4
-        if: always()
+        if: ${{ always() && !github.event.pull_request.head.repo.fork }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
@@ -191,7 +192,8 @@ jobs:
     # NOTE: after the Allure report, as both push to gh-pages, without retrying: the one that pushes second
     #       fails if the other pushed after it cloned gh-pages
     needs: [merge-coverage-reports, allure-report]
-    if: ${{ !cancelled() && needs.merge-coverage-reports.result == 'success' }}
+    # NOTE: not for pull requests from forks, whose token can't push to gh-pages
+    if: ${{ !cancelled() && needs.merge-coverage-reports.result == 'success' && !github.event.pull_request.head.repo.fork }}
     steps:
       - name: "Download merged coverage artifact"
         uses: actions/download-artifact@v8
