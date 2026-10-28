@@ -252,22 +252,29 @@ class PinsTest(unittest.TestCase):
                          sorted((p.property('net'), p.bbox()) for p in pins.each()))
 
 
+def lvsdb_context(cell_name: str, tech_name: str) -> KLayoutExtractionContext:
+    """
+    The extraction context of the LVS database of the cell in testdata/klayout/lvs, with the tech info of the PDK
+    """
+    repo_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..'))
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(os.path.join(repo_dir, 'testdata', 'klayout', 'lvs', f"{cell_name}.lvsdb.gz"))
+    tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.join(
+                        repo_dir, 'klayout_pex_protobuf', f"{tech_name}_tech.pb.json")),
+                    dielectric_filter=None)
+
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
+        return KLayoutExtractionContext.prepare_extraction(top_cell=cell_name,
+                                                           lvsdb=lvsdb,
+                                                           tech=tech,
+                                                           blackbox_devices=False)
+
+
 def nfet_li1_redux_orientations_context() -> KLayoutExtractionContext:
     """
     The nfet of nfet_li1_redux in the 8 orientations (r0 to m135), whose devices share one abstract
     """
-    testdata_dir = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'klayout', 'lvs'))
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(os.path.join(testdata_dir, 'nfet_li1_redux_orientations.lvsdb.gz'))
-    tech = TechInfo(tech=TechInfo.parse_tech_def(jsonpb_path=os.path.realpath(os.path.join(
-                        __file__, '..', '..', '..', 'klayout_pex_protobuf', 'sky130A_tech.pb.json'))),
-                    dielectric_filter=None)
-
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning'):
-        return KLayoutExtractionContext.prepare_extraction(top_cell='nfet_li1_redux_orientations',
-                                                           lvsdb=lvsdb,
-                                                           tech=tech,
-                                                           blackbox_devices=False)
+    return lvsdb_context('nfet_li1_redux_orientations', 'sky130A')
 
 
 @allure.parent_suite("Unit Tests")
@@ -295,6 +302,20 @@ class TerminalShapesTest(unittest.TestCase):
                             terminals_with_shapes.add(td.name)
             self.assertEqual({'S', 'G', 'D'}, terminals_with_shapes)  # NOTE: the bulk B has no shapes of its own
         self.assertEqual(4, len(pex_context.terminal_shapes_by_abstract))  # S, G, D, B of the one abstract
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB", "Devices")
+class TerminalOnNetTest(unittest.TestCase):
+    def test_terminal_abutting_a_conductor_of_its_net_is_on_it(self):
+        # The ports of an IHP inductor are within its marker (IND), where the LVS deck leaves out the TopMetal2
+        # of the winding, and abut their TopMetal2 leads outside it, which LVS joins to them by IND.pin over both,
+        # so they are on the ends of the leads, rather than without a node in the resistance network (#351)
+        pex_context = lvsdb_context('inductor2_w2u_d15u48_1_turn', 'ihp-sg13g2')
+        inductor, = pex_context.devices_by_name.values()
+        self.assertEqual({'inductor_1': ['TopMetal2'], 'inductor_2': ['TopMetal2'], 'inductor_sub': []},
+                         {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
+                          for t in inductor.terminals})
 
 
 @allure.parent_suite("Unit Tests")
