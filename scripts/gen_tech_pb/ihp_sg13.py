@@ -698,6 +698,8 @@ class TechBuilder:
         # NOTE: LVS extracts the area and perimeter, the models take w and l, but depend on w*l and w+l only
         antenna = lvs_area_perimeter_params('w', 'l', 'A', 'P', um) + multiplier
         isolbox = lvs_area_perimeter_params('w', 'l', 'a', 'p', um)
+        inductor = [lvs_param('w', 'w', um), lvs_param('s', 's', um), lvs_param('d', 'd', um),
+                    lvs_param('nr_r', 'nr_r')]
 
         #                              LVS device class    prefix terminals                     parameters  model
         add_device_model_mapping(dmi, "sg13_lv_nmos",     "X",   ["D", "G", "S", "B"],         mos)
@@ -731,6 +733,13 @@ class TechBuilder:
         add_device_model_mapping(dmi, "nmoscl_4",         "X",   ["C", "A"],                   multiplier)
         add_device_model_mapping(dmi, "dantenna",         "X",   ["A", "C"],                   antenna)
         add_device_model_mapping(dmi, "dpantenna",        "X",   ["A", "C"],                   antenna)
+        # NOTE: the PDK has no models of the inductors, but its schematics (xschem) call them as subcircuits
+        #       inductor and inductor3, which the user provides (e.g. from an EM simulation)
+        add_device_model_mapping(dmi, "inductor",         "X",   ["inductor_1", "inductor_2", "inductor_sub"],
+                                 inductor)
+        add_device_model_mapping(dmi, "inductor3",        "X",   ["inductor3_1", "inductor3_2", "inductor3_3",
+                                                                  "inductor3_sub"],
+                                 inductor)
         if self.is_g2:  # sg13cmos5l has no models for these
             add_device_model_mapping(dmi, "cap_cmim",      "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
             add_device_model_mapping(dmi, "rfcmim",        "X",   ["mim_top", "mim_btm", "mim_sub"],
@@ -743,7 +752,7 @@ class TechBuilder:
 
         # NOTE: no device model mapping (yet), a netlist with these devices is an error:
         #       - idiodevdd_2kv, idiodevdd_4kv, idiodevss_2kv, idiodevss_4kv,
-        #         inductor, inductor3, res_metal1..5, res_topmetal1..2: no ngspice models
+        #         res_metal1..5, res_topmetal1..2: no ngspice models
 
         # NOTE: the subcircuits of the VACASK models (libs.tech/vacask, which VACASK's sg13g2tovc.py and
         #       sg13cmos5ltovc.py convert from the ngspice models) that declare the multiplier m,

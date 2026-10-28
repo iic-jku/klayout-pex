@@ -167,6 +167,38 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
     }
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_inductor_is_a_subcircuit_at_the_ends_of_its_leads():
+    # The PDK has no models of the inductors, its schematics call the subcircuit inductor, which the user provides
+    # (e.g. from an EM simulation). Its ports, within its marker, abut the ends of its TopMetal2 leads,
+    # where the wires of 50 µm (25 squares) to the pins LA and LB begin (#351)
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns',
+                                                                  'inductor2_w2u_d15u48_tm2_wires_50u.gds.gz')
+    assert csv_lines == """Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;LA;LA.P0.TopMetal2;;0.275
+R2;LB;LB.P0.TopMetal2;;0.275""".splitlines()
+    assert [line for line in spice_lines if line.startswith('X')] == [
+        'X$1 LA.P0.TopMetal2 LB.P0.TopMetal2 sub! inductor w=2e-06 s=2.1e-06 d=1.548e-05 nr_r=1'
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.slow
+def test_vias_within_an_inductor_are_part_of_it():
+    # The TopVia2 within the marker of the center-tapped inductor join its windings (TopMetal2) to the underpass
+    # crossings (TopMetal1), which LVS leaves out there, so they were floating nets of their own,
+    # which made the operating point of the netlist singular (#351)
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns',
+                                                                  'inductor3_w2u_d25u84_2_turns.gds.gz')
+    assert csv_lines == ['Device;Net1;Net2;Capacitance [fF];Resistance [Ω]']
+    assert [line for line in spice_lines if line.startswith('X')] == [
+        'X$1 LA LC LB sub! inductor3 w=2e-06 s=2.097e-06 d=2.5866e-05 nr_r=2'
+    ]
+
+
 def subckt_ports(spice_lines: List[str]) -> List[str]:
     subckt_line, = [line for line in spice_lines if line.startswith('.SUBCKT ')]
     return [port.replace('\\', '') for port in subckt_line.split()[2:]]

@@ -55,12 +55,15 @@ MIM:          GDSPair = (36, 0)
 VMIM:         GDSPair = (129, 0)
 TOPMETAL1:    GDSPair = (126, 0)
 TOPMETAL1_PIN: GDSPair = (126, 2)
+TOPMETAL2:    GDSPair = (134, 0)
+TOPMETAL2_PIN: GDSPair = (134, 2)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL1: (8, 25),
     METAL4: (50, 25),
     METAL5: (67, 25),
     TOPMETAL1: (126, 25),
+    TOPMETAL2: (134, 25),
 }
 
 
@@ -216,6 +219,45 @@ def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
     return p
 
 
+def inductor2_w2u_d15u48_tm2_wires_50u() -> Pattern:
+    """
+    An inductor (inductor2 pcell of the PDK) of 1 turn of 2 µm width, 15.48 µm inner diameter,
+    whose ports (on IND.pin, within its marker) abut its TopMetal2 leads, which wires of 50 µm
+    continue to the pins LA and LB
+    """
+    technology = load_pdk_pcells()
+    p = pattern('inductor2_w2u_d15u48_tm2_wires_50u')
+    p.layout.technology_name = technology
+    pcell = p.layout.create_cell('inductor2', 'SG13_dev', {'w': '2u', 's': '2.1u', 'd': '15.48u', 'nr_r': 1})
+    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
+    p.top.flatten(-1, True)
+
+    # NOTE: the pcell paints the pins (TopMetal2.pin) on its leads, LA left and LB right, move them to the wires
+    pin_layer = p.layout.layer(*TOPMETAL2_PIN)
+    pins = sorted(kdb.Region(p.top.begin_shapes_rec(pin_layer)).merged().each(), key=lambda pin: pin.bbox().left)
+    p.top.shapes(pin_layer).clear()
+    for text, pin in zip(('LA', 'LB'), pins):
+        box = pin.bbox()
+        p.box(TOPMETAL2, box.left, box.bottom - 50000, box.right, box.bottom)
+        p.box(TOPMETAL2_PIN, box.left, box.bottom - 50000, box.right, box.bottom - 48000)
+        p.label(TOPMETAL2, text, box.center().x, box.bottom - 49000)
+    return p
+
+
+def inductor3_w2u_d25u84_2_turns() -> Pattern:
+    """
+    A center-tapped inductor (inductor3 pcell of the PDK) of 2 turns of 2 µm width, 25.84 µm inner diameter,
+    whose TopVia2 within its marker join the windings (TopMetal2) to the underpass crossings (TopMetal1)
+    """
+    technology = load_pdk_pcells()
+    p = pattern('inductor3_w2u_d25u84_2_turns')
+    p.layout.technology_name = technology
+    pcell = p.layout.create_cell('inductor3', 'SG13_dev', {'w': '2u', 's': '2.1u', 'd': '25.84u', 'nr_r': 2})
+    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
+    p.top.flatten(-1, True)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmim_20um_x_20um_over_m4_wire':
@@ -224,6 +266,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,
+    'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,
+    'inductor3_w2u_d25u84_2_turns': inductor3_w2u_d25u84_2_turns,
 }
 
 

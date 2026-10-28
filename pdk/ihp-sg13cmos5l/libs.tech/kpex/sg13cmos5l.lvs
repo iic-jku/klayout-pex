@@ -419,6 +419,11 @@ else
   metal4_n_mom = metal4_con.not(mom_mk)
   metal4_mom   = metal4_con.and(mom_mk)
 
+  # [PEX] the vias within the inductors (IND), which join the metals of their coils, left out like the
+  #       TopMetal1 there (topmetal1_con), as the model of the inductor has them,
+  #       rather than nets of their own (NOTE: a regular LVS would not do this, we need it for PEX)
+  topvia1_n_cap = topvia1_n_cap.not(ind_drw)
+
   # [PEX] Explicitly splitting Cont for device terminals (NOTE: a regular LVS would not do this, we need it for PEX),
   #       the ties of the ntap1/ptap1 tap devices are the same n+/p+ Activ as the source/drain of the FETs
   cont_poly_con = cont_drw.and(poly_con)
