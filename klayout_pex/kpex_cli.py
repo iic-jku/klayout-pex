@@ -350,21 +350,21 @@ class KpexCLI:
                                       help="Threshold (in fF) for ignored parasitic capacitances "
                                            "(default is %(default)s). (MAGIC command: ext2spice cthresh <value>)")
         add_argument_with_former_name(group_magic, "--magic-rthresh", "--magic_rthresh", dest="magic_rthresh",
-                                      type=int, default=100,
+                                      type=float, default=100,
                                       help="Threshold (in Ω) for ignored parasitic resistances "
                                            "(default is %(default)s). (MAGIC command: ext2spice rthresh <value>)")
         add_argument_with_former_name(group_magic, "--magic-thresh", "--magic_thresh", dest="magic_thresh",
-                                      type=int, default=None,
+                                      type=float, default=None,
                                       help="Lumped resistance threshold (in mΩ) to trigger network extraction. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist threshold <value>)")
         add_argument_with_former_name(group_magic, "--magic-minres", "--magic_minres", dest="magic_minres",
-                                      type=int, default=None,
+                                      type=float, default=None,
                                       help="Threshold (in mΩ) for removing individual resistors during network simplification. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist minres <value>)")
         add_argument_with_former_name(group_magic, "--magic-mindel", "--magic_mindel", dest="magic_mindel",
-                                      type=int, default=None,
+                                      type=float, default=None,
                                       help="Minimum delay threshold (in ps) to trigger network extraction. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist mindelay <value>)")
