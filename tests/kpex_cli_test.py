@@ -41,6 +41,7 @@ from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
 from tests.common.device_model_mappings import NMOS, device_models
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
@@ -66,6 +67,23 @@ def test_log_files_hold_their_own_run_only(gds_path: Optional[str], log_dir: str
         with open(tmp_path / 'first' / log_dir / log_name) as f:
             log = f.read()
         assert log.count('GDS input file passed, running in LVS mode') == 1, log
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Logging")
+def test_written_netlist_csv_is_logged_as_written(tmp_path):
+    # NOTE: read as UTF-8, which it is written in, and so are the log files,
+    #       also where the platform's encoding differs (cp1252 on Windows, which has no Ω)
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    header = 'Device;Net1;Net2;Capacitance [fF];Resistance [Ω]'
+    assert header in output.splitlines(), output
+    for log_name in ('kpex.log', 'kpex_plain.log'):
+        with open(tmp_path / 'nfet_li1__nfet_li1' / log_name, encoding='utf-8') as f:
+            log_lines = f.read().splitlines()
+        assert any(line.endswith(header) for line in log_lines), log_lines
 
 
 @allure.parent_suite("Unit Tests")

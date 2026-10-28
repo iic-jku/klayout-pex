@@ -85,7 +85,7 @@ def parse_magic_ext_file(path: Path) -> ExtData:
     nodes: List[Node] = []
     devices: List[Device] = []
 
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             # port "VDD" 2 -600 800 500 1000 m1
             # port "VSS" 3 -600 500 500 700 m1
@@ -132,7 +132,7 @@ def parse_magic_res_ext_file(path: Path) -> ResExtData:
     rnodes = []
     resistors = []
 
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         for line in f.readlines():
             m = re.match(
                 r'^rnode "(?P<name>[\w\\.]+)" (?P<int_r>-?\d+) (?P<fin_c>-?\d+) (?P<x_bot>-?\d+) (?P<y_bot>-?\d+) 0$',

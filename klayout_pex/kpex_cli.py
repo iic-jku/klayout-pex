@@ -947,7 +947,7 @@ class KpexCLI:
                                      output_path=expanded_netlist_csv_path)
 
         rule("Extended netlist (CSV format):")
-        with open(expanded_netlist_csv_path, 'r') as f:
+        with open(expanded_netlist_csv_path, 'r', encoding='utf-8') as f:
             for line in f.readlines():
                 subproc(line[:-1])  # abusing subproc, simply want verbatim
         rule()
@@ -1046,7 +1046,7 @@ class KpexCLI:
                 info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
 
             rule("MAGIC PEX SPICE netlist")
-            with open(output_netlist_path, 'r') as f:
+            with open(output_netlist_path, 'r', encoding='utf-8', errors='replace') as f:
                 subproc(f.read())
             rule()
 
@@ -1163,7 +1163,7 @@ class KpexCLI:
                     f.write(f"R{idx + 1};{key.net1};{key.net2};;{round(res_value, 3)}\n")
 
             rule('kpex/2.5D extracted netlist (CSV format)')
-            with open(netlist_csv_path, 'r') as f:
+            with open(netlist_csv_path, 'r', encoding='utf-8') as f:
                 for line in f.readlines():
                     subproc(line[:-1])  # abusing subproc, simply want verbatim
 
@@ -1267,7 +1267,7 @@ class KpexCLI:
         """
         def register_log_file_handler(log_path: str,
                                       formatter: Optional[logging.Formatter]) -> logging.Handler:
-            handler = logging.FileHandler(log_path)
+            handler = logging.FileHandler(log_path, encoding='utf-8')
             handler.setLevel(LogLevel.SUBPROCESS)
             if formatter:
                 handler.setFormatter(formatter)

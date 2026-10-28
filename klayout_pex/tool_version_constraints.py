@@ -95,7 +95,7 @@ class Tool(StrEnum):
         """
         try:
             proc = subprocess.run([exe_path, self.version_argument],
-                                  capture_output=True, text=True, timeout=30)
+                                  capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30)
         except (OSError, subprocess.SubprocessError) as e:
             debug(f"Could not run '{exe_path} {self.version_argument}': {e}")
             return None

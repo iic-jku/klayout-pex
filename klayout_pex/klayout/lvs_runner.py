@@ -141,7 +141,9 @@ class LVSRunner:
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True,
-                                text=True)
+                                text=True,
+                                encoding='utf-8',
+                                errors='replace')
         with open(log_path, 'w', encoding='utf-8') as f:
             while True:
                 line = proc.stdout.readline()
