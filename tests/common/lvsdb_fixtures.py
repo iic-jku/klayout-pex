@@ -41,7 +41,9 @@ from dataclasses import dataclass
 import functools
 import glob
 import importlib.metadata
+import importlib.util
 import os
+from pathlib import Path
 import shutil
 import sys
 import tempfile
@@ -52,6 +54,7 @@ import klayout.db as kdb
 from klayout_pex.env import Env, EnvVar
 from klayout_pex.klayout.lvs_cache import (
     LVSInputFingerprint,
+    file_sha256,
     fingerprint_differences,
     lvs_input_fingerprint,
     read_fingerprint,
@@ -87,6 +90,20 @@ def klayout_version() -> str:
     if exe_path is not None:
         return str(Tool.KLAYOUT.detect_version(exe_path))
     return importlib.metadata.version('klayout')
+
+
+@functools.lru_cache(maxsize=None)
+def pdk_symlinks() -> Dict[str, str]:
+    """
+    The targets of the symlinks within pdk/ (absolute paths), also of those that git checked out as text files
+    with the target path (on Windows, see scripts/build/kpex_symlinks.py)
+    """
+    spec = importlib.util.spec_from_file_location('kpex_symlinks',
+                                                  os.path.join(REPO_DIR, 'scripts', 'build', 'kpex_symlinks.py'))
+    kpex_symlinks = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(kpex_symlinks)
+    return {os.path.join(REPO_DIR, link): os.path.join(REPO_DIR, target)
+            for link, target in kpex_symlinks.find_symlinks(Path(REPO_DIR), ['pdk'])}
 
 
 @dataclass(frozen=True)
@@ -144,6 +161,13 @@ class LVSDBFixture:
                                             gds_path=self.gds_path,
                                             cell_name=self.cell_name,
                                             schematic_path=schematic_path)
+
+        # NOTE: a symlinked deck file by the content of its target, also where it's a text file with the target path
+        deck_dir_path = os.path.dirname(lvs_script_path)
+        for link_path, target_path in pdk_symlinks().items():
+            if os.path.commonpath([link_path, deck_dir_path]) == deck_dir_path:
+                relative_path = Path(os.path.relpath(link_path, deck_dir_path)).as_posix()
+                fingerprint.deck.sha256_by_relative_path[relative_path] = file_sha256(target_path)
 
         # NOTE: without the paths of this machine, which differ from those of others (and of CI)
         fingerprint.deck.script_path = os.path.relpath(lvs_script_path, REPO_DIR)
