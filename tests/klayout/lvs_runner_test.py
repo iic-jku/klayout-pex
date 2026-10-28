@@ -139,6 +139,14 @@ class LVSRunnerFailureTest(unittest.TestCase):
         for name in ('thr', 'spice_net_names', 'spice_comments', 'verbose'):
             self.assertNotIn(name, parameters)
 
+    def test_dummy_schematic_has_the_same_bytes_on_every_platform(self):
+        # NOTE: the fingerprints of the LVS inputs hash it, which CRLF on Windows made differ
+        #       from the ones of the LVS databases in testdata/lvsdb
+        path = os.path.join(self.tmp_dir, 'cell_dummy_schematic.spice')
+        LVSRunner.write_dummy_schematic(path, 'cell')
+        with open(path, 'rb') as f:
+            self.assertEqual(b'.subckt cell VDD VSS\n.ends\n.end\n', f.read())
+
     def test_cli_exits_with_error_instead_of_failing_to_cache_missing_lvsdb(self):
         deck_dir_path = os.path.join(self.tmp_dir, 'deck')
         os.makedirs(deck_dir_path)

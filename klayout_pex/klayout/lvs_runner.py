@@ -91,7 +91,9 @@ class LVSRunner:
         of the layout into its top circuit, whose devices and nets the extraction takes, while a schematic
         with subcircuits would keep their circuits (#330)
         """
-        with open(path, 'w', encoding='utf-8') as f:
+        # NOTE: the same bytes on every platform (no CRLF on Windows),
+        #       as the fingerprints of the LVS inputs hash it (LVS cache, testdata/lvsdb)
+        with open(path, 'w', encoding='utf-8', newline='\n') as f:
             f.writelines([
                 f".subckt {cell_name} VDD VSS\n",
                 '.ends\n',
