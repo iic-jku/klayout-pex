@@ -1,0 +1,55 @@
+[19:08:41] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                      
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_nwell_pfet
+_ntap_li1.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A'    
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[19:08:41] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:08:41] INFO     (64, 20) -> (nwell)                        kpex_cli.py:1587
+[19:08:41] INFO     (94, 20) -> (psd)                          kpex_cli.py:1587
+[19:08:41] INFO     (65, 144) -> (ntap_conn)                   kpex_cli.py:1587
+[19:08:41] INFO     (66, 20) -> (poly_con)                     kpex_cli.py:1587
+[19:08:41] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1587
+[19:08:41] INFO     (66, 4404) -> (licon_ntap_con)             kpex_cli.py:1587
+[19:08:41] INFO     (66, 16) -> (poly_pin_con)                 kpex_cli.py:1587
+[19:08:41] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1587
+[19:08:41] INFO     (66, 4402) -> (licon_psd_con)              kpex_cli.py:1587
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:08:41] INFO     LVSDB: found 4pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;D;G.P0.poly;0.004;                                                          
+C2;D;S;0.006;                                                                  
+C3;D;S.P0.psdm;0.002;                                                          
+C4;D;VPWR.$1.nwell;0.012;                                                      
+C5;D;VPWR.P0.nwell;0.004;                                                      
+C6;D;VSUBS;0.014;                                                              
+C7;D.P0.psdm;S;0.002;                                                          
+C8;G;VPWR.$1.nwell;0.021;                                                      
+C9;G;VPWR.P0.nwell;0.042;                                                      
+C10;G;VSUBS;0.031;                                                             
+C11;G.P0.poly;S;0.004;                                                         
+C12;G.P0.poly;VPWR.$1.nwell;0.007;                                             
+C13;G.P0.poly;VPWR.P0.nwell;0.012;                                             
+C14;G.P0.poly;VSUBS;0.006;                                                     
+C15;S;VPWR.P0.nwell;0.009;                                                     
+C16;S;VSUBS;0.021;                                                             
+C17;VPWR;VSUBS;0.022;                                                          
+R1;D;D.P0.psdm;;585.0                                                          
+R2;G;G.P0.poly;;363.107                                                        
+R3;S;S.P0.psdm;;585.0                                                          
+R4;VPWR;VPWR.$1.nwell;;185.0                                                   
+R5;VPWR.$1.nwell;VPWR.P0.nwell;;5241.667                                       
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_nwell_pfet_ntap_li1__r_nwell_pfet
+_ntap_li1\r_nwell_pfet_ntap_li1_k25d_pex_netlist.csv                           
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_nwell_pfet_ntap_li1__r_nwell_pfet
+_ntap_li1\r_nwell_pfet_ntap_li1_k25d_pex_netlist.spice                         

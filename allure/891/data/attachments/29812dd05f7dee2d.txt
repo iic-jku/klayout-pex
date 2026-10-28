@@ -1,0 +1,36 @@
+[19:07:37] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/sideoverlap_shielding_simple_plates_m1_m2_m3.lvsdb.gz --out-dir                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:07:37] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:07:37] INFO     (42, 0) -> (metal3_con)                     kpex_cli.py:1587
+[19:07:37] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1587
+[19:07:37] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:07:37] INFO     LVSDB: found 3pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;met1;met2;9.255;                                                             
+C2;met1;met3;0.19;                                                              
+C3;met2;met3;114.276;                                                           
+C4;VSUBS;met1;10.119;                                                           
+C5;VSUBS;met2;35.584;                                                           
+C6;VSUBS;met3;4.44;                                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/sideoverlap_shielding
+_simple_plates_m1_m2_m3__sideoverlap_shielding_simple_plates_m1_m2_m3/sideoverla
+p_shielding_simple_plates_m1_m2_m3_k25d_pex_netlist.csv                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/sideoverlap_shielding
+_simple_plates_m1_m2_m3__sideoverlap_shielding_simple_plates_m1_m2_m3/sideoverla
+p_shielding_simple_plates_m1_m2_m3_k25d_pex_netlist.spice                       

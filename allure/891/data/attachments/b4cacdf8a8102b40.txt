@@ -1,0 +1,43 @@
+[19:17:32] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+nfet_li1_redux.lvsdb.gz --out-dir                                               
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpdaoe3zwz --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:17:32] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[19:17:32] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - licon (licon1): 4 of 5 shapes are                       
+                    not within licon_nsd_con,                                   
+                    licon_psd_con, licon_poly_con,                              
+                    licon_ntap_con, licon_ptap_con,                             
+                    licon_vpp                                                   
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:17:32] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1587
+[19:17:32] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1587
+[19:17:32] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[19:17:32] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1587
+[19:17:32] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+[19:17:32] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[19:17:32] INFO     LVSDB: found 2pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$2;$2.$0.li1;;209.667                                                        
+R2;$3;$3.$0.li1;;209.667                                                        
+R3;G;G.$0.li1;;2.418                                                            
+R4;G.$0.li1;G.$1.poly;;152.0                                                    
+R5;G.$1.poly;G.P0.poly;;316.321                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpdaoe3zwz/nfet_li1_redux__nfe
+t_li1_redux/nfet_li1_redux_k25d_pex_netlist.csv                                 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpdaoe3zwz/nfet_li1_redux__nfe
+t_li1_redux/nfet_li1_redux_k25d_pex_netlist.spice                               

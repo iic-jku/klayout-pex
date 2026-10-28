@@ -1,0 +1,32 @@
+[19:06:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/p
+late_20um_x_20um_li1_over_ntap.lvsdb.gz --out-dir                               
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:06:14] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:06:14] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1587
+[19:06:14] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1587
+[19:06:14] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[19:06:14] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.232;                                                               
+C2;A;W;25.504;                                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/plate_20um_x_20um_li1_o
+ver_ntap__plate_20um_x_20um_li1_over_ntap/plate_20um_x_20um_li1_over_ntap_k25d_p
+ex_netlist.csv                                                                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/plate_20um_x_20um_li1_o
+ver_ntap__plate_20um_x_20um_li1_over_ntap/plate_20um_x_20um_li1_over_ntap_k25d_p
+ex_netlist.spice                                                                

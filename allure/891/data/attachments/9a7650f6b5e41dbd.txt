@@ -1,0 +1,41 @@
+[19:06:09] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode CC --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/plates_m1_over_isolated_pwell_and_dnwell.lvsdb.gz --out-dir                    
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:06:09] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:06:09] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1587
+[19:06:09] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1587
+[19:06:09] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1587
+[19:06:09] INFO     (33, 4407) -> (contact_ptap_dw_con)         kpex_cli.py:1587
+[19:06:09] INFO     (204, 0) -> (lvpwell_dw_con)                kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;0.055;                                                                   
+C2;A;D;0.204;                                                                   
+C3;A;VSUBS;0.086;                                                               
+C4;A;W;2.114;                                                                   
+C5;B;D;1.707;                                                                   
+C6;B;VSUBS;0.313;                                                               
+C7;B;W;0.152;                                                                   
+C8;D;VSUBS;0.013;                                                               
+C9;D;W;0.014;                                                                   
+C10;VSUBS;W;0.004;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/plates_m1_over_isolat
+ed_pwell_and_dnwell__plates_m1_over_isolated_pwell_and_dnwell/plates_m1_over_iso
+lated_pwell_and_dnwell_k25d_pex_netlist.csv                                     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/plates_m1_over_isolat
+ed_pwell_and_dnwell__plates_m1_over_isolated_pwell_and_dnwell/plates_m1_over_iso
+lated_pwell_and_dnwell_k25d_pex_netlist.spice                                   

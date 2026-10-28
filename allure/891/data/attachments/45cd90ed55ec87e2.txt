@@ -1,0 +1,29 @@
+[19:16:52] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+single_plate_100um_x_100um_li1_over_substrate.lvsdb.gz --out-dir                
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:16:52] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:16:52] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1587
+[19:16:52] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;PLATE;VSUBS;386.179;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_1
+00um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pl
+ate_100um_x_100um_li1_over_substrate_k25d_pex_netlist.csv                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_1
+00um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pl
+ate_100um_x_100um_li1_over_substrate_k25d_pex_netlist.spice                     

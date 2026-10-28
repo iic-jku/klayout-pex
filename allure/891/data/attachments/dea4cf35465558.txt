@@ -1,0 +1,41 @@
+[19:06:11] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1416
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox y --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz --out-dir                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[19:06:11] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:735
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[19:06:11] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1587
+[19:06:11] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1587
+[19:06:11] INFO     (36, 0) -> (cmim_top)                       kpex_cli.py:1587
+[19:06:11] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1587
+[19:06:11] INFO     (67, 0) -> (metal5_cap metal5_n_cap)        kpex_cli.py:1587
+[19:06:11] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1587
+[19:06:11] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1587
+[19:06:11] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1587
+[19:06:11] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1587
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;2.659;                                                                   
+C2;A;D;5.343;                                                                   
+C3;A;VSUBS;6.342;                                                               
+C4;B;D;0.084;                                                                   
+C5;B;VSUBS;2.344;                                                               
+C6;D;VSUBS;3.462;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um
+_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wi
+re_k25d_pex_netlist.csv                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um
+_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wi
+re_k25d_pex_netlist.spice                                                       
