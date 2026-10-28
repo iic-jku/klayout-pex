@@ -103,7 +103,9 @@
 - In commit bodies, PR texts, issues, comments and docs, prefer bullet lists to long
   sentences chained with semicolons: one fact per bullet, under a short lead-in such as
   `New commands:`. No period at the end of a bullet.
-- Mark files, code, command line tools and their arguments as code with backticks, e.g.
-  `tests/common/ngspice.py`, `convert_to_vacask`, `kpex --netlist-format vacask`.
+- Mark identifiers as code with backticks: files, code, command line tools and their
+  arguments, and the names of layers, device classes and models, PDKs and their variants,
+  e.g. `tests/common/ngspice.py`, `convert_to_vacask`, `kpex --netlist-format vacask`,
+  `TopMetal1`, `inductor3`, `sg13cmos5l`. Tick every mention, not only the first.
 - No AI attribution: no `Co-Authored-By` trailer, no "Generated with …" line.
 - Before handing over, re-read your diff against `main` and check it against this file.
