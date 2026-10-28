@@ -255,7 +255,8 @@ def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_onc
     messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
     assert messages == [
         "The resistance network has no nodes for these device terminals, "
-        "as the tech info has no layer for their LVS layer, and they overlap no conductor of their net "
+        "as the tech info has no layer for their LVS layer, "
+        "and they neither overlap nor abut a conductor of their net "
         "(e.g. a terminal on the substrate or a well):\n"
         "  - sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5 terminal B on LVS layer vpp_sub: $1"
     ]

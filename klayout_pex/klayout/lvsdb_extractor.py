@@ -742,7 +742,7 @@ class KLayoutExtractionContext:
                         if lyr_idx is None:
                             # NOTE: the tech info has no layer for the LVS layer of the terminal
                             #       (e.g. the ports of a MOM cap, the metal pins within its marker),
-                            #       so the terminal is where it overlaps a conductor of its net,
+                            #       so the terminal is where it overlaps or abuts a conductor of its net,
                             #       which LVS connected it to (e.g. the metal of the pins)
                             gds_pair_and_region = self.terminal_region_on_net(shapes, net_name)
                             if gds_pair_and_region is None:
@@ -768,7 +768,8 @@ class KLayoutExtractionContext:
         #       (#211 §6), so it misses only the resistance to where it is
         if devices_by_unknown_terminal_layer:
             warning("The resistance network has no nodes for these device terminals, "
-                    "as the tech info has no layer for their LVS layer, and they overlap no conductor of their net "
+                    "as the tech info has no layer for their LVS layer, "
+                    "and they neither overlap nor abut a conductor of their net "
                     "(e.g. a terminal on the substrate or a well):\n" +
                     '\n'.join(f"  - {device_class} terminal {terminal} on LVS layer {lvs_layer}: "
                               f"{device_list(device_names)}"
@@ -782,14 +783,17 @@ class KLayoutExtractionContext:
                                net_name: str) -> Optional[Tuple[GDSPair, kdb.Region]]:
         """
         :return: the part of the terminal shapes on the conductor of its net they overlap most,
-                 the lowest of equals, or None if they overlap no conductor of their net
+                 the lowest of equals, else the strip of 1 dbu of the conductor of its net they abut most
+                 (e.g. the ports of an IHP inductor, within its marker, at the ends of their leads outside it,
+                 which LVS joins by a pin layer over both), or None if they neither overlap nor abut
+                 a conductor of their net
 
         NOTE: one conductor, as the ports of a terminal are one node, which would short the resistance
               between the conductors (e.g. a pin on the top metal of a MOM cap, over the fingers below)
         """
         lvsdb_layer_indexes = self.lvsdb.layer_indexes()
         bbox = terminal_shapes.bbox()
-        best: Optional[Tuple[float, GDSPair, kdb.Region]] = None
+        net_shapes_by_gds_pair: Dict[GDSPair, kdb.Region] = {}
         for gds_pair in self.tech.process_conductor_gds_pairs:
             lyr = self.extracted_layers.get(gds_pair, None)
             if lyr is None:
@@ -807,11 +811,18 @@ class KLayoutExtractionContext:
                     if shape.property('net') == net_name and not shape.is_text():
                         net_shapes.insert(iter.trans() * shape.polygon)
                     iter.next()
-            overlap = terminal_shapes & net_shapes
-            area = overlap.area()
-            if area > 0 and (best is None or area > best[0]):
-                best = (area, gds_pair, overlap)
-        return None if best is None else (best[1], best[2])
+            net_shapes_by_gds_pair[gds_pair] = net_shapes
+
+        def largest_overlap(shapes: kdb.Region) -> Optional[Tuple[GDSPair, kdb.Region]]:
+            best: Optional[Tuple[float, GDSPair, kdb.Region]] = None
+            for gds_pair, net_shapes in net_shapes_by_gds_pair.items():
+                overlap = shapes & net_shapes
+                area = overlap.area()
+                if area > 0 and (best is None or area > best[0]):
+                    best = (area, gds_pair, overlap)
+            return None if best is None else (best[1], best[2])
+
+        return largest_overlap(terminal_shapes) or largest_overlap(terminal_shapes.sized(1))
 
     @cached_property
     def pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:
