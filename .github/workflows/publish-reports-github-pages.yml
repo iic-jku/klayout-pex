@@ -188,7 +188,10 @@ jobs:
   publish-coverage-reports:
     name: "Publish Coverage Report (Aggregated Suites)"
     runs-on: ubuntu-latest
-    needs: merge-coverage-reports
+    # NOTE: after the Allure report, as both push to gh-pages, without retrying: the one that pushes second
+    #       fails if the other pushed after it cloned gh-pages
+    needs: [merge-coverage-reports, allure-report]
+    if: ${{ !cancelled() && needs.merge-coverage-reports.result == 'success' }}
     steps:
       - name: "Download merged coverage artifact"
         uses: actions/download-artifact@v8
