@@ -60,6 +60,7 @@ from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_printer import NetlistHeader, NetlistPrinter
 from .klayout.netlist_reducer import NetlistReducer
+from .klayout.output_files import write_output_file
 from .klayout.repair_rdb import repair_rdb
 from .log import (
     LogLevel,
@@ -717,7 +718,7 @@ class KpexCLI:
                              f"but it is not the only top cell, "
                              f"so layout is exported to: {args.effective_gds_path}")
 
-                        found_cell.write(args.effective_gds_path)
+                        write_output_file(found_cell.write, args.effective_gds_path)
                 else:  # find top cell
                     if len(top_cells) == 1:
                         args.effective_cell_name = top_cells[0].name
@@ -1033,7 +1034,7 @@ class KpexCLI:
                                                   report=report,
                                                   dbu=layout.dbu)
             magic_log_analyzer.analyze()
-            report.save(report_db_path)
+            write_output_file(report.save, report_db_path)
 
         rule("Paths")
         if args.magic_analyze:
@@ -1605,7 +1606,7 @@ class KpexCLI:
                 layer = layout.insert_layer(li)
                 layout.insert(top_cell.cell_index(), layer, ulyr.region.dup())
 
-            layout.write(layout_dump_path)
+            write_output_file(layout.write, layout_dump_path)
 
         if len(pex_context.unnamed_layers) >= 1:
             layout_dump_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_unnamed_LVS_layers.gds.gz")

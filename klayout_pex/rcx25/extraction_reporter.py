@@ -31,6 +31,7 @@ from .extraction_results import *
 from .types import EdgeNeighborhood
 from ..types import LayerName
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
+from klayout_pex.klayout.output_files import write_output_file
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
@@ -132,7 +133,7 @@ class ExtractionReporter:
         return self.report.create_category("[C] Edge Neighborhood Visitor")
 
     def save(self, path: str):
-        self.report.save(path)
+        write_output_file(self.report.save, path)
 
     def output_shapes(self,
                       parent_category: rdb.RdbCategory,
