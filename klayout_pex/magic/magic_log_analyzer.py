@@ -35,6 +35,7 @@ from rich_argparse import RichHelpFormatter
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from klayout_pex.klayout.output_files import write_output_file
 from klayout_pex.log import debug
 from klayout_pex.magic.magic_ext_file_parser import parse_magic_pex_run
 from klayout_pex.magic.magic_ext_data_structures import MagicPEXRun, CellExtData
@@ -213,7 +214,7 @@ def main():
                          report=report,
                          dbu=1e-3)
     c.analyze()
-    report.save(args.output_rdb_path)
+    write_output_file(report.save, args.output_rdb_path)
 
 
 if __name__ == "__main__":

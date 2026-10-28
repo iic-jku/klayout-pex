@@ -31,11 +31,13 @@ from __future__ import annotations
 import logging
 import os
 from typing import *
+from unittest import mock
 
 import allure
 import pytest
 
 import klayout.db as kdb
+import klayout.rdb as rdb
 
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
@@ -84,6 +86,32 @@ def test_written_netlist_csv_is_logged_as_written(tmp_path):
         with open(tmp_path / 'nfet_li1__nfet_li1' / log_name, encoding='utf-8') as f:
             log_lines = f.read().splitlines()
         assert any(line.endswith(header) for line in log_lines), log_lines
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Windows")
+def test_klayout_writes_no_gzip_files(tmp_path):
+    # NOTE: on Windows, KLayout leaks a C runtime stream with each gzip file it writes, of which a process has 512,
+    #       so that the extractions after the first 250 or so failed (#361)
+    written_paths: List[str] = []
+
+    def recording(write: Callable[..., object]) -> Callable[..., object]:
+        def record(self, path: str, *args) -> object:
+            written_paths.append(path)
+            return write(self, path, *args)
+        return record
+
+    with mock.patch.object(kdb.Layout, 'write', recording(kdb.Layout.write)), \
+         mock.patch.object(rdb.ReportDatabase, 'save', recording(rdb.ReportDatabase.save)):
+        code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                                '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                                '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert [p for p in written_paths if p.endswith('.gz')] == []
+    # NOTE: compressed by Python instead
+    assert sorted(p.name for p in (tmp_path / 'nfet_li1__nfet_li1').glob('*.gz')) == \
+           ['nfet_li1_k25d_pex_report.rdb.gz', 'nfet_li1_nonempty_LVS_layers.gds.gz',
+            'nfet_li1_unnamed_LVS_layers.gds.gz']
 
 
 @allure.parent_suite("Unit Tests")
