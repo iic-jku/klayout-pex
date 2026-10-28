@@ -23,6 +23,7 @@
 #
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
 import os
 from typing import *
@@ -102,11 +103,19 @@ class RCX25Extraction:
         the latter with their continuation lines joined
         """
         _, csv_path = self.run_rcx25d_single_cell(*path_components)
-        with open(csv_path) as f:
+        with open(csv_path, encoding='utf-8') as f:
             csv_lines = f.read().splitlines()
-        with open(f"{os.path.splitext(csv_path)[0]}.spice") as f:
+        with open(f"{os.path.splitext(csv_path)[0]}.spice", encoding='utf-8') as f:
             spice_lines = f.read().replace('\n+', '').splitlines()
         return csv_lines, spice_lines
+
+    def written_netlist_rows(self, *path_components) -> List[Dict[str, str]]:
+        """
+        Extracts the single cell and returns the rows of the written CSV netlist, by column
+        """
+        _, csv_path = self.run_rcx25d_single_cell(*path_components)
+        with open(csv_path, encoding='utf-8') as f:
+            return list(csv.DictReader(f, delimiter=';'))
 
     def written_device_lines(self, *path_components, prefixes: str = 'XDMQ') -> List[str]:
         """

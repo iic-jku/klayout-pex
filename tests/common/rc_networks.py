@@ -70,7 +70,7 @@ LINE_NETLIST = textwrap.dedent("""\
 def write(directory: str, name: str, text: str) -> str:
     """Write a text file, return its path"""
     path = os.path.join(directory, name)
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(text)
     return path
 

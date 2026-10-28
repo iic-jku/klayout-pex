@@ -85,7 +85,7 @@ def test_kpex_extract(pdk: PDK, installed_wheel: InstalledWheel, tmp_path: Path)
 
     diagnostics = f"--- kpex output (tail):\n{_tail(proc.stdout + proc.stderr)}"
     for lvs_log in lvs_logs:
-        lvs_log_text = lvs_log.read_text(errors='replace')
+        lvs_log_text = lvs_log.read_text(errors='replace', encoding='utf-8')
         allure.attach(lvs_log_text, name=lvs_log.name, attachment_type=allure.attachment_type.TEXT)
         errors = [line for line in lvs_log_text.splitlines() if 'ERROR' in line]
         diagnostics += f"\n--- ERROR lines of {lvs_log}:\n" + '\n'.join(errors[:20])

@@ -45,7 +45,7 @@ class CapacitanceMatrix:
 
     @classmethod
     def parse_csv(cls, path: str, separator: str = ';'):
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
             if len(lines) < 2:
                 raise Exception(f"Capacitance Matrix CSV must at least have 2 lines: "

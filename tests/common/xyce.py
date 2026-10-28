@@ -50,7 +50,8 @@ def run_xyce(deck_path: str):
     Runs the deck in its directory, where its .print writes <deck>.prn
     """
     result = subprocess.run([xyce_executable(), os.path.basename(deck_path)],
-                            cwd=os.path.dirname(deck_path), capture_output=True, text=True, timeout=600)
+                            cwd=os.path.dirname(deck_path), capture_output=True, text=True, encoding='utf-8',
+                            errors='replace', timeout=600)
     assert result.returncode == 0, f"Xyce failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
 
 
@@ -58,7 +59,7 @@ def read_prn(path: str) -> Dict[str, List[float]]:
     """
     The columns of a .prn file of Xyce's .print, by name (e.g. I(V1)), without the closing line
     """
-    with open(path) as f:
+    with open(path, encoding='utf-8') as f:
         lines = [line.split() for line in f.read().splitlines()]
     names = lines[0]
     rows = [row for row in lines[1:] if len(row) == len(names)]
@@ -84,7 +85,7 @@ def xyce_port_admittance(netlist_path: str,
     lines += [f".ac dec 1 1e{decades[0]} 1e{decades[1]}",
               ".print ac " + ' '.join(f"IR({source}) II({source})" for source in sources),
               ".end"]
-    with open(bench_path, 'w') as f:
+    with open(bench_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines) + '\n')
 
     run_xyce(bench_path)

@@ -80,7 +80,7 @@ def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(
     cli = extraction.run_kpex('test_patterns', gds_name, extra_args=reduce_args)
     netlist_path = cli.rcx25_reduced_netlist_path or f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
     scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.network.nodes())
-    with open(netlist_path) as f:
+    with open(netlist_path, encoding='utf-8') as f:
         # NOTE: capacitances below 1 fF, which Xyce read as F when they were written in a (atto)
         assert any(line.startswith('C') and line.endswith('f') and ' 0.' in line for line in f.read().splitlines())
 
@@ -154,7 +154,7 @@ def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: 
 
     cli = RCX25Extraction(pdk=pdk, pex_mode=PEXMode.RC, blackbox=False).run_kpex('test_patterns', gds_name)
     assert cli.rcx25_netlist_problems == []
-    with open(f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice") as f:
+    with open(f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice", encoding='utf-8') as f:
         lines = f.read().replace('\n+', '').splitlines()
     ports = next(line for line in lines if line.startswith('.SUBCKT ')).split()[2:]
 

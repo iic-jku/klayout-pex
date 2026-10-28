@@ -59,7 +59,7 @@ class FakeKLayoutProcess:
     def __call__(self, args: List[str], **kwargs):
         if self.writes_report:
             report_path = next(a.removeprefix('report=') for a in args if a.startswith('report='))
-            with open(report_path, 'w') as f:
+            with open(report_path, 'w', encoding='utf-8') as f:
                 f.write('#%lvsdb-klayout\n')
         proc = mock.Mock()
         proc.stdout = io.StringIO(self.output)
@@ -97,7 +97,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.assertIn('ERROR: In /pdk/sg13cmos5l.lvs: Unable to open file: '
                       '/pdk/rule_decks//sram_integration.lvs', msg)
         self.assertIn(self.log_path, msg)
-        with open(self.log_path) as f:
+        with open(self.log_path, encoding='utf-8') as f:
             self.assertEqual(KLAYOUT_INCLUDE_ERROR_OUTPUT, f.read())
 
     def test_missing_lvsdb_raises_even_on_status_code_zero(self):
@@ -106,7 +106,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.assertIn(self.log_path, str(ctx.exception))
 
     def test_stale_lvsdb_from_earlier_run_is_not_mistaken_for_result(self):
-        with open(self.lvsdb_path, 'w') as f:
+        with open(self.lvsdb_path, 'w', encoding='utf-8') as f:
             f.write('stale')
         with self.assertRaises(LVSError):
             self.run_lvs(FakeKLayoutProcess(output=KLAYOUT_INCLUDE_ERROR_OUTPUT,
@@ -154,7 +154,7 @@ class LVSRunnerFailureTest(unittest.TestCase):
         for path in (lvs_script_path,
                      os.path.join(self.tmp_dir, 'cell.gds'),
                      os.path.join(self.tmp_dir, 'cell.spice')):
-            with open(path, 'w') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 f.write(os.path.basename(path))
         args = argparse.Namespace(
             input_mode=InputMode.GDS,

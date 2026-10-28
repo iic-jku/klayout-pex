@@ -96,7 +96,7 @@ class TechInfo:
 
     @staticmethod
     def parse_tech_def(jsonpb_path: str) -> tech_pb2.Technology:
-        with open(jsonpb_path, 'r') as f:
+        with open(jsonpb_path, 'r', encoding='utf-8') as f:
             contents = f.read()
             tech = google.protobuf.json_format.Parse(contents, tech_pb2.Technology())
 

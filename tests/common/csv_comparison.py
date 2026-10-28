@@ -38,7 +38,7 @@ def assert_csv_matches_expected(csv_path: str, expected_csv_content: str):
     allure.attach(expected_csv_content, name='pex_expected.csv', attachment_type=allure.attachment_type.CSV)
 
     expected_csv = csv_diff.load_csv(io.StringIO(expected_csv_content), key='Device')
-    with open(csv_path, 'r') as f:
+    with open(csv_path, 'r', encoding='utf-8') as f:
         obtained_csv = csv_diff.load_csv(f, key='Device')
     diff = csv_diff.compare(expected_csv, obtained_csv, show_unchanged=False)
     human_diff = csv_diff.human_text(

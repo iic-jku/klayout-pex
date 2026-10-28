@@ -83,7 +83,7 @@ class Workspace:
     def __init__(self, directory: str, text: str = EXTRACTED_SPICE):
         self.directory = directory
         self.input_path = self.path('divider.spice')
-        with open(self.input_path, 'w') as f:
+        with open(self.input_path, 'w', encoding='utf-8') as f:
             f.write(text)
 
     def path(self, name: str) -> str:
@@ -96,7 +96,7 @@ class Workspace:
         return run_cli(NetlistCLI().main, ['netlist', *arguments])
 
     def read(self, name: str) -> str:
-        with open(self.path(name)) as f:
+        with open(self.path(name), encoding='utf-8') as f:
             return f.read()
 
 

@@ -687,7 +687,7 @@ def test_mom_cap_with_4_terminals__whiteboxed():
     # whose capacitance is extracted from its fingers: counted twice
     _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
                                                            'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
-    with open(csv_path[:-len('.csv')] + '.spice') as f:
+    with open(csv_path[:-len('.csv')] + '.spice', encoding='utf-8') as f:
         assert [line for line in f if line.startswith('X')] == []
 
 

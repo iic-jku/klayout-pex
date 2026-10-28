@@ -68,7 +68,7 @@ def test_reduces_writes_and_returns_the_path(tmp_path):
     # NOTE: τ(m1) = τ(m2) = 1 fF / 20 mS = 50 fs, the plate becomes 1.2 fF between A and B
     assert scope.after == NetworkSize(resistors=1, capacitors=3, nodes=3)
     assert scope.statistics == ReductionStatistics(quick_nodes=2, capacitor_only_nodes=1)
-    with open(output_path) as f:
+    with open(output_path, encoding='utf-8') as f:
         text = f.read()
     assert textwrap.dedent("""\
         .SUBCKT line A B gnd!

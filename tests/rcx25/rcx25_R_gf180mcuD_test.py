@@ -23,7 +23,6 @@
 #
 
 import allure
-import csv
 import pytest
 from unittest import mock
 
@@ -131,10 +130,8 @@ def obtained_resistances(*path_components) -> List[float]:
     """
     The resistances, sorted (for patterns with many internal nodes, whose names are not stable)
     """
-    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell(*path_components)
-    with open(csv_path) as f:
-        return sorted(float(row['Resistance [Ω]']) for row in csv.DictReader(f, delimiter=';')
-                      if row['Resistance [Ω]'])
+    return sorted(float(row['Resistance [Ω]']) for row in pex_whiteboxed.written_netlist_rows(*path_components)
+                  if row['Resistance [Ω]'])
 
 
 @allure.parent_suite(parent_suite)

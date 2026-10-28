@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
     @staticmethod
     def analyze(ext_file_content: str) -> rdb.ReportDatabase:
         with tempfile.TemporaryDirectory() as run_dir:
-            with open(os.path.join(run_dir, f"{CELL}.ext"), 'w') as f:
+            with open(os.path.join(run_dir, f"{CELL}.ext"), 'w', encoding='utf-8') as f:
                 f.write(ext_file_content)
             report = rdb.ReportDatabase('')
             MagicLogAnalyzer(magic_pex_run=parse_magic_pex_run(Path(run_dir)),

@@ -81,7 +81,9 @@ def run_fastcap(exe_path: str,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True,
-                            text=True)
+                            text=True,
+                            encoding='utf-8',
+                            errors='replace')
     with open(log_path, 'w', encoding='utf-8') as f:
         while True:
             line = proc.stdout.readline()
@@ -109,7 +111,7 @@ def run_fastcap(exe_path: str,
 # $2%GROUP3 3      -2115      130.9       6792      -5388
 # $2%GROUP3 4      54.97 -3.682e+05      -5388  3.753e+05
 def fastcap_parse_capacitance_matrix(log_path: str) -> CapacitanceMatrix:
-    with open(log_path, 'r') as f:
+    with open(log_path, 'r', encoding='utf-8') as f:
         rlines = f.readlines()
         rlines.reverse()
 

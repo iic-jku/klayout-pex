@@ -45,6 +45,9 @@ function run_tests() {
     rm -rf "$ALLURE_REPORT_PATH"
     rm -rf "$COVERAGE_PATH"
 
+    # NOTE: as in CI, see filterwarnings in pyproject.toml
+    export PYTHONWARNDEFAULTENCODING=1
+
     set -x
 
     if [[ $WITH_COVERAGE -eq 1 ]]

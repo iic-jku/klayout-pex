@@ -731,8 +731,8 @@ class Pex25DCLI:
 
         diagnostics_path: Optional[str] = getattr(args, 'diagnostics_path', None)
         if diagnostics_path is not None and diagnostics_path != STDIO_PATH:
-            mode = 'wb' if diagnostics_format == DiagnosticsFormat.PB else 'w'
-            with open(diagnostics_path, mode) as f:
+            binary = diagnostics_format == DiagnosticsFormat.PB
+            with open(diagnostics_path, 'wb' if binary else 'w', encoding=None if binary else 'utf-8') as f:
                 report.render(diagnostics_format, stream=f)
             return
 

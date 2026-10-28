@@ -93,9 +93,9 @@ def test_nfet_keeps_ports_and_device_terminals_dc_and_capacitances_between_nets(
     assert reduced.connected_node_count() < original.connected_node_count()
     assert reduced.resistor_count() < original.resistor_count()
 
-    with open(spice_path) as f:
+    with open(spice_path, encoding='utf-8') as f:
         device_lines = [line for line in f.read().splitlines() if line.startswith(('X', '+'))]
-    with open(reduced_path) as f:
+    with open(reduced_path, encoding='utf-8') as f:
         reduced_lines = f.read().splitlines()
     assert device_lines and all(line in reduced_lines for line in device_lines)
 

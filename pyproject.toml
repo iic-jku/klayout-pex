@@ -149,6 +149,12 @@ markers = [
     "fastercap: mark tests running FasterCap (deselect with '-m \"not fastercap\"')",
     "smoke: tests of the installed wheel, see tests/smoke/conftest.py (select with '-m smoke')",
 ]
+# NOTE: text I/O names its encoding, as the locale's is cp1252 on Windows: Python warns where it doesn't,
+#       on every platform, with PYTHONWARNDEFAULTENCODING=1 (CI, _run_tests.sh); those of other packages stay warnings
+filterwarnings = [
+    'error::EncodingWarning:klayout_pex\b',
+    'error::EncodingWarning:tests\b',
+]
 
 [tool.poetry_bumpversion.file."klayout_pex/version.py"]
 

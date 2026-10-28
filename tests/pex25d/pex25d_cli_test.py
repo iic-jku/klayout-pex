@@ -45,7 +45,7 @@ class Workspace:
     def __init__(self, directory: str, text: str = MINIMAL):
         self.directory = directory
         self.input_path = self.path('tiny.pex25d')
-        with open(self.input_path, 'w') as f:
+        with open(self.input_path, 'w', encoding='utf-8') as f:
             f.write(text)
 
     def path(self, name: str) -> str:
@@ -121,7 +121,7 @@ class Pex25DCLITest(unittest.TestCase):
         workspace = self.workspace()
         output = workspace.path('out.pex25d.scene.textpb')
         assert workspace.run('resolve', workspace.input_path, '-o', output) == ExitCode.OK
-        with open(output) as f:
+        with open(output, encoding='utf-8') as f:
             assert 'wrap_depth' in f.read()
 
     def test_resolve_refuses_to_write_half_a_scene(self):
@@ -161,7 +161,7 @@ class Pex25DCLITest(unittest.TestCase):
                              '--out-diagnostics', report_path) \
             == ExitCode.DIAGNOSTIC_ERRORS
 
-        with open(report_path) as f:
+        with open(report_path, encoding='utf-8') as f:
             rendered = json.load(f)
         codes = [d['code'] for d in rendered['diagnostics']]
         assert 'PEX25D-E0260' in codes

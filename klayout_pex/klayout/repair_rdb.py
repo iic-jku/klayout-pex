@@ -117,7 +117,7 @@ def repair_rdb(rdb_path: str):
         with gzip.open(rdb_path, 'r') as f:
             repair_rdb_xml(f, new_xml_path)
     else:
-        with open(rdb_path, 'r') as f:
+        with open(rdb_path, 'rb') as f:  # NOTE: the XML parser takes the encoding its declaration names
             repair_rdb_xml(f, new_xml_path)
 
     report = rdb.ReportDatabase('')

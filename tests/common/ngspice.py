@@ -55,9 +55,9 @@ def write_spiceinit(run_dir: str, models_dir: str):
     :param models_dir: e.g. the one of PDKTestConfig.simulator_models_dir('ngspice')
     """
     pdk_dir = os.path.dirname(os.path.dirname(models_dir))  # NOTE: <PDK>/libs.tech/ngspice
-    with open(os.path.join(models_dir, '.spiceinit')) as f:
+    with open(os.path.join(models_dir, '.spiceinit'), encoding='utf-8') as f:
         spiceinit = f.read().replace('$PDK_ROOT/$PDK', pdk_dir)
-    with open(os.path.join(run_dir, '.spiceinit'), 'w') as f:
+    with open(os.path.join(run_dir, '.spiceinit'), 'w', encoding='utf-8') as f:
         f.write(spiceinit)
 
 
@@ -68,7 +68,8 @@ def run_ngspice(deck_path: str) -> str:
     :return: what ngspice printed
     """
     result = subprocess.run([ngspice_executable(), '-b', os.path.basename(deck_path)],
-                            cwd=os.path.dirname(deck_path), capture_output=True, text=True, timeout=600)
+                            cwd=os.path.dirname(deck_path), capture_output=True, text=True, encoding='utf-8',
+                            timeout=600)
     assert result.returncode == 0, f"ngspice failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
     return result.stdout
 
@@ -83,7 +84,7 @@ def ngspice_operating_point(netlist: str,
     :param vectors: e.g. v(n1), @r.x1.r1[resistance]
     """
     deck_path = os.path.join(work_dir, 'operating_point.cir')
-    with open(deck_path, 'w') as f:
+    with open(deck_path, 'w', encoding='utf-8') as f:
         f.write('* operating point\n' + netlist +
                 '.control\nop\n' + ''.join(f"print {v}\n" for v in vectors) + '.endc\n.end\n')
     output = run_ngspice(deck_path)
@@ -98,7 +99,7 @@ def read_wrdata(path: str) -> List[List[float]]:
     The rows of a file of ngspice's wrdata (with set wr_singlescale and wr_vecnames):
     the scale, then the vectors, a complex one as its real and imaginary part
     """
-    with open(path) as f:
+    with open(path, encoding='utf-8') as f:
         lines = f.read().splitlines()
     return [[float(v) for v in line.split()] for line in lines[1:]]
 
@@ -126,13 +127,13 @@ def ngspice_port_admittance(netlist_path: str,
               f"wrdata {data_path} {' '.join(f'{source}#branch' for source in sources)}",
               ".endc",
               ".end"]
-    with open(bench_path, 'w') as f:
+    with open(bench_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines) + '\n')
 
     run_ngspice(bench_path)
     assert os.path.exists(data_path), f"ngspice wrote no {data_path}"
 
-    data = np.loadtxt(data_path, ndmin=2)
+    data = np.loadtxt(data_path, ndmin=2, encoding='utf-8')
     frequencies = data[:, 0]
     # NOTE: with wr_singlescale, the columns are the frequency, then real and imaginary part of each vector
     currents = data[:, 1::2] + 1j * data[:, 2::2]

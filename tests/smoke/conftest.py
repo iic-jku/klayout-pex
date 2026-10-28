@@ -88,7 +88,7 @@ class InstalledWheel:
         """Runs a console script (or 'python') of the venv, the caller checks the return code"""
         return subprocess.run([str(self.executable(name)), *(str(a) for a in args)],
                               cwd=cwd, env=_isolated_env(), stdin=subprocess.DEVNULL,
-                              capture_output=True, text=True, timeout=timeout)
+                              capture_output=True, text=True, encoding='utf-8', timeout=timeout)
 
     def check_run(self, name: str, *args: Any, cwd: Path) -> subprocess.CompletedProcess:
         proc = self.run(name, *args, cwd=cwd)

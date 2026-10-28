@@ -295,7 +295,7 @@ class SpiceReaderTest(unittest.TestCase):
         import tempfile, os
         with tempfile.TemporaryDirectory() as directory:
             path = os.path.join(directory, 'bad.spice')
-            with open(path, 'w') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 f.write('B1 a 0 v=1\n')
             with self.assertRaises(SpiceReaderError) as ctx:
                 SpiceReader().read(path)
