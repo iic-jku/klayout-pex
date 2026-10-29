@@ -96,6 +96,8 @@ class TechBuilder:
             # NOTE: no conductor of the resistance network, as the deep nwell of the other PDKs (#292)
             add_computed_layer(tech, DNWELL, KREG, "nbulay_drw",    (32, 0),      "nBuLay",    None,            "Computed layer for nBuLay (deep n-well)")
             add_computed_layer(tech, PWELL, KREG, "iso_pwell",      (46, 0),      "PWell",     None,            "Computed layer for the isolated PWell (the holes of NWell over nBuLay)")
+            # NOTE: the substrate of the npn HBTs, their terminal S, which the deck connects to the pwell
+            add_computed_layer(tech, PWELL, KREG, "npn_sub",        (46, 0),      "PWell",     None,            "Computed layer for the substrate of the npn HBTs")
 
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
