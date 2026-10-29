@@ -1,0 +1,43 @@
+[01:44:56] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                     
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_via_stac
+k_1x1_minsize_poly_to_metal5.lvsdb.gz' --out-dir                               
+'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[01:44:56] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[01:44:56] INFO     (35, 0) -> (via1)                          kpex_cli.py:1588
+[01:44:56] INFO     (30, 0) -> (poly2_con)                     kpex_cli.py:1588
+[01:44:56] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1588
+[01:44:56] INFO     (36, 0) -> (metal2_con)                    kpex_cli.py:1588
+[01:44:56] INFO     (42, 0) -> (metal3_con)                    kpex_cli.py:1588
+[01:44:56] INFO     (38, 144) -> (via2_n_cap)                  kpex_cli.py:1588
+[01:44:56] INFO     (40, 144) -> (via3_n_cap)                  kpex_cli.py:1588
+[01:44:56] INFO     (81, 0) -> (metal5_con)                    kpex_cli.py:1588
+[01:44:56] INFO     (41, 144) -> (via4_n_cap)                  kpex_cli.py:1588
+[01:44:56] INFO     (46, 0) -> (metal4_n_cap)                  kpex_cli.py:1588
+[01:44:56] INFO     (33, 4403) -> (contact_poly_con)           kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[01:44:56] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;met1;met1,met2,met3,met4,met5,poly;;0.001                                   
+R2;met1;met2;;4.5                                                              
+R3;met1;poly;;5.9                                                              
+R4;met2;met3;;4.5                                                              
+R5;met3;met4;;4.5                                                              
+R6;met4;met5;;4.5                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_via_stack_1x1_minsize_poly_to_m
+etal5__r_via_stack_1x1_minsize_poly_to_metal5\r_via_stack_1x1_minsize_poly_to_m
+etal5_k25d_pex_netlist.csv                                                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_via_stack_1x1_minsize_poly_to_m
+etal5__r_via_stack_1x1_minsize_poly_to_metal5\r_via_stack_1x1_minsize_poly_to_m
+etal5_k25d_pex_netlist.spice                                                   

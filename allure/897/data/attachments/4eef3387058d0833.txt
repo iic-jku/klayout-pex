@@ -1,0 +1,33 @@
+[01:44:37] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_comb_li1.lvsdb.gz --out-dir                                                   
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[01:44:37] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[01:44:37] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[01:44:37] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[01:44:37] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.269;                                                               
+C2;B;VSUBS;0.399;                                                               
+C3;C;VSUBS;0.103;                                                               
+R1;A;A,B,C;;0.001                                                               
+R2;A;B;;510.545                                                                 
+R3;B;C;;169.211                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_comb_li1__r_comb_li1
+/r_comb_li1_k25d_pex_netlist.csv                                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_comb_li1__r_comb_li1
+/r_comb_li1_k25d_pex_netlist.spice                                              

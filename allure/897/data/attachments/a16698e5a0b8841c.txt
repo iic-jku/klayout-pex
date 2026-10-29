@@ -1,0 +1,45 @@
+[01:46:02] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\overlap_p
+lates_100um_x_100um_m1_m2_m3_m4.lvsdb.gz' --out-dir                            
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[01:46:02] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[01:46:02] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1588
+[01:46:02] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1588
+[01:46:02] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1588
+[01:46:02] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1588
+[01:46:02] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1588
+[01:46:02] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1588
+[01:46:02] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1588
+[01:46:02] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1588
+[01:46:02] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[01:46:02] INFO     LVSDB: found 4pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;met1;met2;176.048;                                                          
+C2;met1;met3;62.248;                                                           
+C3;met1;met4;4.281;                                                            
+C4;met2;met3;344.688;                                                          
+C5;met2;met4;0.02;                                                             
+C6;met3;met4;0.057;                                                            
+C7;VSUBS;met1;365.983;                                                         
+C8;VSUBS;met2;146.909;                                                         
+C9;VSUBS;met3;36.584;                                                          
+C10;VSUBS;met4;98.27;                                                          
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\overlap_plates_100um_x_100um_m1_
+m2_m3_m4__overlap_plates_100um_x_100um_m1_m2_m3_m4\overlap_plates_100um_x_100um
+_m1_m2_m3_m4_k25d_pex_netlist.csv                                              
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\overlap_plates_100um_x_100um_m1_
+m2_m3_m4__overlap_plates_100um_x_100um_m1_m2_m3_m4\overlap_plates_100um_x_100um
+_m1_m2_m3_m4_k25d_pex_netlist.spice                                            

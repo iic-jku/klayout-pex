@@ -1,0 +1,31 @@
+[01:43:56] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+sidewall_100um_x_100um_distance_200nm_li1.lvsdb.gz --out-dir                    
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[01:43:56] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[01:43:56] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[01:43:56] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;3.75;                                                                    
+C2;A;VSUBS;8.231;                                                               
+C3;B;VSUBS;8.231;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um
+_distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_
+100um_distance_200nm_li1_k25d_pex_netlist.csv                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um
+_distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_
+100um_distance_200nm_li1_k25d_pex_netlist.spice                                 

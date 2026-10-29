@@ -1,0 +1,45 @@
+[01:44:50] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/nmos_metal1_redux_twice.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[01:44:50] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[01:44:50] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[01:44:50] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1588
+[01:44:50] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1588
+[01:44:50] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[01:44:50] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[01:44:50] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1588
+[01:44:50] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1588
+[01:44:50] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[01:44:50] INFO     LVSDB: found 5pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$1;$1.$0.GatPoly;;33.654                                                     
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0                                             
+R3;$4;$4.$0.GatPoly;;33.654                                                     
+R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0                                             
+R5;D;D.$0.Metal1;;0.488                                                         
+R6;D$1;D$1.$0.Metal1;;0.488                                                     
+R7;D$1.$0.Metal1;D$1.P0.nSD;;17.0                                               
+R8;D.$0.Metal1;D.P0.nSD;;17.0                                                   
+R9;S;S.$0.Metal1;;0.598                                                         
+R10;S$1;S$1.$0.Metal1;;0.598                                                    
+R11;S$1.$0.Metal1;S$1.P0.nSD;;17.0                                              
+R12;S.$0.Metal1;S.P0.nSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/nmos_metal1_redux_tw
+ice__nmos_metal1_redux_twice/nmos_metal1_redux_twice_k25d_pex_netlist.csv       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/nmos_metal1_redux_tw
+ice__nmos_metal1_redux_twice/nmos_metal1_redux_twice_k25d_pex_netlist.spice     
