@@ -150,6 +150,13 @@ jobs:
         retention-days: 7
         if-no-files-found: error
 
+    # NOTE: for the tests that simulate with ngspice, skipped without it
+    - name: "Install ngspice 📦"
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install ngspice
+
     - name: "[🐍] Run Unit tests"
       env:
         PYTHONWARNDEFAULTENCODING: "1"  # NOTE: see filterwarnings in pyproject.toml

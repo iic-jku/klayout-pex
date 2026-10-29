@@ -115,6 +115,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install ./$KLAYOUT_DEB
         sudo apt-get install ./$FASTERCAP_DEB
+        sudo apt-get install ngspice   # NOTE: for the tests that simulate with ngspice, skipped without it
         popd
 
     - name: "Download and merge Python dist artifacts"
