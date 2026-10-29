@@ -1,0 +1,37 @@
+[15:15:21] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\sideoverl
+ap_complex_m1_m2.lvsdb.gz' --out-dir                                           
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[15:15:21] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:15:21] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1588
+[15:15:21] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1588
+[15:15:21] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1588
+[15:15:21] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:15:21] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;Complex_Shape_B;UPPER;0.966;                                                
+C2;Complex_Shape_B;VSUBS;3.064;                                                
+C3;Complex_Shape_L;UPPER;0.22;                                                 
+C4;Complex_Shape_L;VSUBS;3.064;                                                
+C5;Complex_Shape_R;UPPER;0.1;                                                  
+C6;Complex_Shape_R;VSUBS;3.064;                                                
+C7;Complex_Shape_T;UPPER;0.089;                                                
+C8;Complex_Shape_T;VSUBS;3.064;                                                
+C9;UPPER;VSUBS;9.625;                                                          
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\sideoverlap_complex_m1_m2__sideo
+verlap_complex_m1_m2\sideoverlap_complex_m1_m2_k25d_pex_netlist.csv            
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\sideoverlap_complex_m1_m2__sideo
+verlap_complex_m1_m2\sideoverlap_complex_m1_m2_k25d_pex_netlist.spice          

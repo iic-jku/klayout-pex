@@ -1,0 +1,89 @@
+[15:11:45] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --lvsdb                                            
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/cap_mim_m4m5.lvsdb.gz --out-dir                                               
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --blackbox n 
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:11:45] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:11:45] INFO     (81, 0) -> (metal5_con)                     kpex_cli.py:1588
+[15:11:45] INFO     (41, 244) -> (top_via_cap)                  kpex_cli.py:1588
+[15:11:45] INFO     (75, 0) -> (fuse_cap)                       kpex_cli.py:1588
+[15:11:45] INFO     (46, 0) -> (metal4_n_cap metal4_cap)        kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:11:45] INFO     DBU: 0.001                  fastercap_model_generator.py:120
+[15:11:45] INFO     Delaunay b: 1               fastercap_model_generator.py:121
+[15:11:45] INFO     Delaunay area_max: 0        fastercap_model_generator.py:122
+[15:11:45] INFO     Conductor BOT1, metal         fastercap_input_builder.py:160
+                    metal4_n_cap, z=4.68,                                       
+                    height=0.55                                                 
+[15:11:45] INFO     Conductor BOT1, metal         fastercap_input_builder.py:160
+                    metal4_cap, z=4.68,                                         
+                    height=0.55                                                 
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] INFO     Conductor BOT2, metal         fastercap_input_builder.py:160
+                    metal4_n_cap, z=4.68,                                       
+                    height=0.55                                                 
+[15:11:45] INFO     Conductor BOT2, metal         fastercap_input_builder.py:160
+                    metal4_cap, z=4.68,                                         
+                    height=0.55                                                 
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] INFO     Conductor TOP1, metal         fastercap_input_builder.py:160
+                    FuseTop, z=5.272,                                           
+                    height=0.295                                                
+[15:11:45] INFO     Conductor TOP1, via           fastercap_input_builder.py:171
+                    top_via_cap, z=5.567,                                       
+                    height=0.563                                                
+[15:11:45] INFO     Conductor TOP1, metal Metal5, fastercap_input_builder.py:160
+                    z=6.13, height=1.1925                                       
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] INFO     Conductor TOP2, metal         fastercap_input_builder.py:160
+                    FuseTop, z=5.272,                                           
+                    height=0.295                                                
+[15:11:45] INFO     Conductor TOP2, via           fastercap_input_builder.py:171
+                    top_via_cap, z=5.567,                                       
+                    height=0.563                                                
+[15:11:45] INFO     Conductor TOP2, metal Metal5, fastercap_input_builder.py:160
+                    z=6.13, height=1.1925                                       
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:11:45] INFO     Substrate SUB, z=-0.33,       fastercap_input_builder.py:224
+                    height=0.33                                                 
+[15:11:45] INFO     Simple dielectric (field      fastercap_input_builder.py:243
+                    oxide) fox: z=0, height=0.32                                
+[15:11:45] INFO     Simple dielectric ild:        fastercap_input_builder.py:330
+                    z=0.32,                                                     
+                    height=0.9099999999999999                                   
+[15:11:45] INFO     Simple dielectric imd1:       fastercap_input_builder.py:330
+                    z=1.23, height=1.15                                         
+[15:11:45] INFO     Simple dielectric imd2:       fastercap_input_builder.py:330
+                    z=2.38, height=1.15                                         
+[15:11:45] INFO     Simple dielectric imd3:       fastercap_input_builder.py:330
+                    z=3.53, height=1.15                                         
+[15:11:45] INFO     Conformal dielectric          fastercap_input_builder.py:284
+                    (sidewall) capild: z=4.68,                                  
+                    height=0.5920000000000001                                   
+[15:11:45] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:316
+                    imd4: z=5.272,                                              
+                    height=4.440892098500626e-16                                
+[15:11:45] INFO     Simple dielectric imd4:       fastercap_input_builder.py:330
+                    z=4.68,                                                     
+                    height=0.5920000000000005                                   
+[15:11:45] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:316
+                    imd4b: z=5.567,                                             
+                    height=0.5629999999999997                                   
+[15:11:45] INFO     Simple dielectric imd4b:      fastercap_input_builder.py:330
+                    z=5.272,                                                    
+                    height=0.8579999999999997                                   
+[15:11:45] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:316
+                    pass: z=7.3225, height=3.8075                               
+[15:11:45] INFO     Simple dielectric pass:       fastercap_input_builder.py:330
+                    z=6.13, height=5.0                                          

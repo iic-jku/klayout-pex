@@ -1,0 +1,41 @@
+[15:14:31] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/o
+verlap_shield_same_net_half_100um_x_100um_li1_m1_m2.lvsdb.gz --out-dir          
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:14:31] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:14:32] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[15:14:32] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1588
+[15:14:32] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1588
+[15:14:32] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1588
+[15:14:32] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+[15:14:32] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:14:32] INFO     LVSDB: found 2pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.135;                                                               
+C2;A.$0.li1;B;187.8;                                                            
+C3;A.$0.li1;VSUBS;386.043;                                                      
+C4;A.$1.met1;B;674.096;                                                         
+C5;A.$1.met1;VSUBS;8.213;                                                       
+C6;B;VSUBS;15.101;                                                              
+R1;A;A.$0.li1;;0.113                                                            
+R2;A.$0.li1;A.$1.met1;;9.3                                                      
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net
+_half_100um_x_100um_li1_m1_m2__overlap_shield_same_net_half_100um_x_100um_li1_m1
+_m2/overlap_shield_same_net_half_100um_x_100um_li1_m1_m2_k25d_pex_netlist.csv   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net
+_half_100um_x_100um_li1_m1_m2__overlap_shield_same_net_half_100um_x_100um_li1_m1
+_m2/overlap_shield_same_net_half_100um_x_100um_li1_m1_m2_k25d_pex_netlist.spice 

@@ -1,0 +1,76 @@
+[15:14:04] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/nmos_metal1_redux_twice.lvsdb.gz --out-dir                                   
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:14:04] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:14:04] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[15:14:04] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1588
+[15:14:04] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1588
+[15:14:04] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[15:14:04] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[15:14:04] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1588
+[15:14:04] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1588
+[15:14:04] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:14:04] INFO     LVSDB: found 5pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;$4;0.002;                                                                 
+C2;$1;D.$0.Metal1;0.004;                                                        
+C3;$1;S.$0.Metal1;0.004;                                                        
+C4;$1;VSUBS;0.045;                                                              
+C5;$1.$0.GatPoly;D;0.003;                                                       
+C6;$1.$0.GatPoly;VSUBS;0.05;                                                    
+C7;$1.$1.Metal1;D;0.034;                                                        
+C8;$1.$1.Metal1;VSUBS;0.017;                                                    
+C9;$4;D$1.$0.Metal1;0.004;                                                      
+C10;$4;S$1.$0.Metal1;0.003;                                                     
+C11;$4;VSUBS;0.045;                                                             
+C12;$4.$0.GatPoly;D$1;0.003;                                                    
+C13;$4.$0.GatPoly;VSUBS;0.05;                                                   
+C14;$4.$1.Metal1;D;0.001;                                                       
+C15;$4.$1.Metal1;D$1;0.034;                                                     
+C16;$4.$1.Metal1;VSUBS;0.015;                                                   
+C17;D;D$1;0.002;                                                                
+C18;D;VSUBS;0.037;                                                              
+C19;D$1;VSUBS;0.039;                                                            
+C20;D$1.$0.Metal1;D.$0.Metal1;0.001;                                            
+C21;D$1.$0.Metal1;S$1.$0.Metal1;0.013;                                          
+C22;D$1.$0.Metal1;VSUBS;0.032;                                                  
+C23;D.$0.Metal1;S$1.$0.Metal1;0.002;                                            
+C24;D.$0.Metal1;S.$0.Metal1;0.013;                                              
+C25;D.$0.Metal1;VSUBS;0.028;                                                    
+C26;S;S$1;0.002;                                                                
+C27;S;VSUBS;0.038;                                                              
+C28;S$1;VSUBS;0.038;                                                            
+C29;S$1.$0.Metal1;S.$0.Metal1;0.002;                                            
+C30;S$1.$0.Metal1;VSUBS;0.034;                                                  
+C31;S.$0.Metal1;VSUBS;0.038;                                                    
+R1;$1;$1.$0.GatPoly;;33.654                                                     
+R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0                                             
+R3;$4;$4.$0.GatPoly;;33.654                                                     
+R4;$4.$0.GatPoly;$4.$1.Metal1;;15.0                                             
+R5;D;D.$0.Metal1;;0.488                                                         
+R6;D$1;D$1.$0.Metal1;;0.488                                                     
+R7;D$1.$0.Metal1;D$1.P0.nSD;;17.0                                               
+R8;D.$0.Metal1;D.P0.nSD;;17.0                                                   
+R9;S;S.$0.Metal1;;0.598                                                         
+R10;S$1;S$1.$0.Metal1;;0.598                                                    
+R11;S$1.$0.Metal1;S$1.P0.nSD;;17.0                                              
+R12;S.$0.Metal1;S.P0.nSD;;17.0                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/nmos_metal1_redux_t
+wice__nmos_metal1_redux_twice/nmos_metal1_redux_twice_k25d_pex_netlist.csv      
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/nmos_metal1_redux_t
+wice__nmos_metal1_redux_twice/nmos_metal1_redux_twice_k25d_pex_netlist.spice    

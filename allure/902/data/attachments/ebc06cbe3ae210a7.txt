@@ -1,0 +1,61 @@
+[15:14:33] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r
+_via_stack_1x1_minsize_poly_to_met5.lvsdb.gz --out-dir                          
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:14:33] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:14:33] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[15:14:33] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1588
+[15:14:33] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (68, 44) -> (via1_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (69, 44) -> (via2_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (70, 20) -> (met3_ncap)                     kpex_cli.py:1588
+[15:14:33] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (71, 20) -> (met4_ncap)                     kpex_cli.py:1588
+[15:14:33] INFO     (70, 144) -> (via3_ncap)                    kpex_cli.py:1588
+[15:14:33] INFO     (72, 20) -> (met5_con)                      kpex_cli.py:1588
+[15:14:33] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+[15:14:33] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (71, 16) -> (met4_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (72, 16) -> (met5_pin_con)                  kpex_cli.py:1588
+[15:14:33] INFO     (71, 144) -> (via4_ncap)                    kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:14:33] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;VSUBS;li1;0.04;                                                              
+C2;VSUBS;met1;0.052;                                                            
+C3;VSUBS;met2;0.056;                                                            
+C4;VSUBS;met3;0.054;                                                            
+C5;VSUBS;met4;0.184;                                                            
+C6;VSUBS;met5;0.256;                                                            
+C7;VSUBS;poly;0.085;                                                            
+R1;li1;li1,met1,met2,met3,met4,met5,poly;;0.001                                 
+R2;li1;met1;;9.3                                                                
+R3;li1;poly;;152.0                                                              
+R4;met1;met2;;4.5                                                               
+R5;met2;met3;;3.41                                                              
+R6;met3;met4;;3.41                                                              
+R7;met4;met5;;0.38                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize
+_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly
+_to_met5_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_via_stack_1x1_minsize
+_poly_to_met5__r_via_stack_1x1_minsize_poly_to_met5/r_via_stack_1x1_minsize_poly
+_to_met5_k25d_pex_netlist.spice                                                 
