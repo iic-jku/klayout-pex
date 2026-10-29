@@ -1,0 +1,49 @@
+[13:00:40] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/sideoverlap_plates_m1_m2.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:00:40] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:00:40] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[13:00:40] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[13:00:40] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1588
+[13:00:40] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[13:00:40] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:00:40] INFO     LVSDB: found 7pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.072;                   
+C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.058;                               
+C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.0;  
+C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.145;          
+C5;LOWER_FullHaloOverlap;UPPER;156.277;                                         
+C6;LOWER_FullHaloOverlap;VSUBS;168.373;                                         
+C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.036;                       
+C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.036;   
+C9;LOWER_NoHaloOverlap_InsideTop;UPPER;87.768;                                  
+C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;49.349;                                 
+C11;LOWER_OutsideHalo;UPPER;0.109;                                              
+C12;LOWER_OutsideHalo;VSUBS;69.524;                                             
+C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.379;               
+C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.617;               
+C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.209;                         
+C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;85.954;                        
+C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;20.016;                         
+C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.018;                         
+C19;UPPER;VSUBS;153.988;                                                        
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_plates_m
+1_m2__sideoverlap_plates_m1_m2/sideoverlap_plates_m1_m2_k25d_pex_netlist.csv    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_plates_m
+1_m2__sideoverlap_plates_m1_m2/sideoverlap_plates_m1_m2_k25d_pex_netlist.spice  

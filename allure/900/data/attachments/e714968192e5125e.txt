@@ -1,0 +1,51 @@
+[12:59:45] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cap_rfcmim_w7u_l7u_over_m4_wire.lvsdb.gz --out-dir                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[12:59:45] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[12:59:45] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[12:59:45] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1588
+[12:59:45] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1588
+[12:59:45] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1588
+[12:59:45] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[12:59:45] INFO     (36, 0) -> (rfmim_top)                      kpex_cli.py:1588
+[12:59:45] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1588
+[12:59:45] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1588
+[12:59:45] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1588
+[12:59:45] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[12:59:45] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1588
+[12:59:45] INFO     (67, 0) -> (metal5_n_cap metal5_rfcap       kpex_cli.py:1588
+                    metal5_rfcap_feed)                                          
+[12:59:45] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;MINUS;1.252;                                                               
+C2;D;PLUS;0.077;                                                                
+C3;D;sub!;0.343;                                                                
+C4;D;VSUBS;1.359;                                                               
+C5;MINUS;PLUS;75.262;                                                           
+C6;MINUS;sub!;0.345;                                                            
+C7;MINUS;VSUBS;1.499;                                                           
+C8;PLUS;sub!;0.254;                                                             
+C9;PLUS;VSUBS;1.134;                                                            
+C10;VSUBS;sub!;4.878;                                                           
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_rfcmim_w7u_l7u_o
+ver_m4_wire__cap_rfcmim_w7u_l7u_over_m4_wire/cap_rfcmim_w7u_l7u_over_m4_wire_k25
+d_pex_netlist.csv                                                               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[12:59:45] INFO     Removing whiteboxed device $1         netlist_expander.py:78
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_rfcmim_w7u_l7u_o
+ver_m4_wire__cap_rfcmim_w7u_l7u_over_m4_wire/cap_rfcmim_w7u_l7u_over_m4_wire_k25
+d_pex_netlist.spice                                                             
