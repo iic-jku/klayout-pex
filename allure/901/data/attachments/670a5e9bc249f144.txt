@@ -1,0 +1,56 @@
+[15:03:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox y --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+cap_var_lvt_w1_l2_hvt_w2_l0p5.lvsdb.gz --out-dir                                
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:03:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:03:49] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1588
+[15:03:49] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1588
+[15:03:49] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1588
+[15:03:49] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1588
+[15:03:49] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[15:03:49] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1588
+[15:03:49] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1588
+[15:03:49] INFO     (66, 4405) -> (licon_ptap_con)              kpex_cli.py:1588
+[15:03:49] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1588
+[15:03:49] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;HVT_B;HVT_C0;0.07;                                                           
+C2;HVT_B;HVT_C1;0.24;                                                           
+C3;HVT_B;LVT_B;0.016;                                                           
+C4;HVT_B;LVT_C1;0.0;                                                            
+C5;HVT_B;VSUBS;0.552;                                                           
+C6;HVT_C0;HVT_C1;0.336;                                                         
+C7;HVT_C0;LVT_B;0.0;                                                            
+C8;HVT_C0;LVT_C0;0.005;                                                         
+C9;HVT_C0;LVT_C1;0.001;                                                         
+C10;HVT_C0;VSUBS;0.209;                                                         
+C11;HVT_C1;LVT_B;0.001;                                                         
+C12;HVT_C1;LVT_C0;0.003;                                                        
+C13;HVT_C1;LVT_C1;0.008;                                                        
+C14;HVT_C1;VSUBS;0.188;                                                         
+C15;LVT_B;LVT_C0;0.219;                                                         
+C16;LVT_B;LVT_C1;0.159;                                                         
+C17;LVT_B;VSUBS;0.598;                                                          
+C18;LVT_C0;LVT_C1;0.661;                                                        
+C19;LVT_C0;VSUBS;0.428;                                                         
+C20;LVT_C1;VSUBS;0.117;                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_var_lvt_w1_l2_hvt_
+w2_l0p5__cap_var_lvt_w1_l2_hvt_w2_l0p5/cap_var_lvt_w1_l2_hvt_w2_l0p5_k25d_pex_ne
+tlist.csv                                                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_var_lvt_w1_l2_hvt_
+w2_l0p5__cap_var_lvt_w1_l2_hvt_w2_l0p5/cap_var_lvt_w1_l2_hvt_w2_l0p5_k25d_pex_ne
+tlist.spice                                                                     

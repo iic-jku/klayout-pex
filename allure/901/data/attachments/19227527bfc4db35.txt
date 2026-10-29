@@ -1,0 +1,52 @@
+[14:59:25] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/n
+fet_li1_met1_over_drain.lvsdb.gz --out-dir                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:59:25] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:59:25] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1588
+[14:59:25] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1588
+[14:59:25] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[14:59:25] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1588
+[14:59:25] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1588
+[14:59:25] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+[14:59:25] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1588
+[14:59:25] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:59:25] INFO     LVSDB: found 5pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;VSUBS;0.029;                                                               
+C2;D;W;0.002;                                                                   
+C3;D.P0.nsdm;G;0.002;                                                           
+C4;D.P0.nsdm;S;0.006;                                                           
+C5;D.P0.nsdm;W;0.374;                                                           
+C6;G;S.P0.nsdm;0.002;                                                           
+C7;G;VSUBS;0.046;                                                               
+C8;G.$1.poly;VSUBS;0.107;                                                       
+C9;G.$1.poly;W;0.001;                                                           
+C10;G.P0.poly;S;0.001;                                                          
+C11;G.P0.poly;VSUBS;0.025;                                                      
+C12;G.P0.poly;W;0.006;                                                          
+C13;S;VSUBS;0.029;                                                              
+C14;S.P0.nsdm;W;0.01;                                                           
+C15;VSUBS;W;0.388;                                                              
+R1;D;D.P0.nsdm;;185.0                                                           
+R2;G;G.$1.poly;;152.0                                                           
+R3;G.$1.poly;G.P0.poly;;403.51                                                  
+R4;S;S.P0.nsdm;;185.0                                                           
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_met1_over_drai
+n__nfet_li1_met1_over_drain/nfet_li1_met1_over_drain_k25d_pex_netlist.csv       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_met1_over_drai
+n__nfet_li1_met1_over_drain/nfet_li1_met1_over_drain_k25d_pex_netlist.spice     

@@ -1,0 +1,34 @@
+[14:59:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/near_body_shield_m1_m2.lvsdb.gz --out-dir                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:59:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:59:29] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[14:59:29] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[14:59:29] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:59:29] INFO     LVSDB: found 0pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;BOTTOM;TOPA;129.503;                                                         
+C2;BOTTOM;TOPB;129.503;                                                         
+C3;BOTTOM;VSUBS;383.886;                                                        
+C4;TOPA;TOPB;0.248;                                                             
+C5;TOPA;VSUBS;0.363;                                                            
+C6;TOPB;VSUBS;0.363;                                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/near_body_shield_m1_
+m2__near_body_shield_m1_m2/near_body_shield_m1_m2_k25d_pex_netlist.csv          
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/near_body_shield_m1_
+m2__near_body_shield_m1_m2/near_body_shield_m1_m2_k25d_pex_netlist.spice        

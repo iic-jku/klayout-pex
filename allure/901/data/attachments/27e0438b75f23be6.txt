@@ -1,0 +1,295 @@
+[15:05:44] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --lvsdb                                              
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/s
+ingle_plate_100um_x_100um_li1_over_substrate.lvsdb.gz --out-dir                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --fastercap --ooc 0    
+--diel none                                                                     
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:05:45] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool       Found  Effective range                                               
+FasterCap  6.2.1  >=6.0.9                                                       
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:05:45] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[15:05:45] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+─────────────────────────────── Process stackup ────────────────────────────────
+[15:05:45] INFO     DBU: 0.001                  fastercap_model_generator.py:120
+[15:05:45] INFO     Delaunay b: 0.5             fastercap_model_generator.py:121
+[15:05:45] INFO     Delaunay area_max: 50       fastercap_model_generator.py:122
+[15:05:45] INFO     Conductor PLATE, metal li1,   fastercap_input_builder.py:160
+                    z=0.9361, height=0.1                                        
+[15:05:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:05:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:80
+[15:05:45] INFO     Substrate sky130_gnd,         fastercap_input_builder.py:224
+                    z=-0.43000000000000005,                                     
+                    height=0.33                                                 
+[15:05:45] INFO     Simple dielectric (field      fastercap_input_builder.py:243
+                    oxide) fox: z=0,                                            
+                    height=0.3262                                               
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_1_outside=(void)_inside=fox.geo                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_2_outside=(void)_net=sky130_gnd.geo                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_3_outside=(void)_net=PLATE.geo                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst                                                
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/diel_fox.stl                                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/cond_PLATE.stl                                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/Geometries
+/cond_sky130_gnd.stl                                                            
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[15:05:45] INFO     Configure number of OpenMP threads           kpex_cli.py:902
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[15:05:45] INFO     Calling FasterCap                     fastercap_runner.py:73
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f0.0 -ap                                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst, output file:                                  
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/single_pla
+te_100um_x_100um_li1_over_substrate_FasterCap_Output.txt                        
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.2.1                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/single_plate_100um_x_10
+0um_li1_over_substrate__single_plate_100um_x_100um_li1_over_substrate/FasterCap_
+Input_Files/FasterCap_Input_.lst                                                
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 0                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 7168                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 7168                                         
+Number of links to be computed: 1354250                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_sky130_gnd  7.44804e-08 -5.6558e-08                                          
+g2_PLATE  -6.55899e-08 6.49334e-08                                              
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 7168                                         
+Number of potential estimates: 1156446                                          
+Number of links: 1361418 (uncompressed 51380224, compression ratio is 97.4%)    
+Max recursion level: 33                                                         
+Max Mesh relative refinement value: 0.000522624                                 
+Time for reading input file: 0.109873s                                          
+Time for building super hierarchy: 0.010679s                                    
+Time for discretization: 0.333046s                                              
+Time for building potential matrix: 0.185678s                                   
+Time for precond calculation: 0.000107s                                         
+Time for gmres solving: 0.036936s                                               
+Memory allocated for panel hierarchy: 2873768 bytes                             
+Memory allocated for links structure: 33611808 bytes                            
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 1137848 bytes                                       
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.972894s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 36756 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Refinement completed                                                            
+Mesh refinement (-m): 0.000369551                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 9736                                         
+Number of links to be computed: 2855064                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+78 79 80                                                                        
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76   
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_sky130_gnd  4.06757e-07 -3.91469e-07                                         
+g2_PLATE  -3.92028e-07 3.95091e-07                                              
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.834948                                                                        
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 9736                                         
+Number of potential estimates: 2410437                                          
+Number of links: 2864800 (uncompressed 94789696, compression ratio is 97.0%)    
+Max recursion level: 34                                                         
+Max Mesh relative refinement value: 0.000369539                                 
+Time for reading input file: 0.011070s                                          
+Time for building super hierarchy: 0.001139s                                    
+Time for discretization: 0.226865s                                              
+Time for building potential matrix: 0.389750s                                   
+Time for precond calculation: 0.003049s                                         
+Time for gmres solving: 0.700669s                                               
+Memory allocated for panel hierarchy: 3903536 bytes                             
+Memory allocated for links structure: 50409584 bytes                            
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 7318832 bytes                                       
+Memory allocated for preconditioner: 268578880 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 3.041254s (0 days, 0 hours, 0 mins, 3 s)                        
+Iteration allocated memory: 322485 kilobytes                                    
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Refinement completed                                                            
+Mesh refinement (-m): 0.000261304                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 14848                                        
+Number of links to be computed: 5576902                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps):    
+1024                                                                            
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102   
+103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 
+123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 
+143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 
+163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 
+183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 
+203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 
+223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 
+243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 
+263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 
+283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 
+303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 
+323 324 325 326 327                                                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23  
+24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50
+51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77
+78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102   
+103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 
+123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 
+143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 
+163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 
+183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 
+203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 
+223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 
+243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 
+263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 
+283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 
+303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 
+323 324 325                                                                     
+Capacitance matrix is:                                                          
+Dimension 2 x 2                                                                 
+g1_sky130_gnd  4.07307e-07 -3.92936e-07                                         
+g2_PLATE  -3.93137e-07 3.97024e-07                                              
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.00342602                                                                      
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 7168 of which 5376 conductors and 1792 dielectric       
+Number of input panels to solver engine: 7168                                   
+Number of panels after refinement: 14848                                        
+Number of potential estimates: 4636663                                          
+Number of links: 5591750 (uncompressed 220463104, compression ratio is 97.5%)   
+Max recursion level: 35                                                         
+Max Mesh relative refinement value: 0.000261296                                 
+Time for reading input file: 0.010963s                                          
+Time for building super hierarchy: 0.001149s                                    
+Time for discretization: 0.445578s                                              
+Time for building potential matrix: 0.698441s                                   
+Time for precond calculation: 0.068956s                                         
+Time for gmres solving: 8.223310s                                               
+Memory allocated for panel hierarchy: 5953448 bytes                             
+Memory allocated for links structure: 100782176 bytes                           
+Memory allocated for conductor list: 14760 bytes                                
+Memory allocated for Gmres: 40868864 bytes                                      
+Memory allocated for preconditioner: 268619776 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 34.392921s (0 days, 0 hours, 0 mins, 34 s)                      
+Iteration allocated memory: 406483 kilobytes                                    
+                                                                                
+Total allocated memory: 406483 kilobytes                                        
+Total time: 11.176643s (0 days, 0 hours, 0 mins, 11 s)                          
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[15:05:56] INFO     FasterCap succeeded after 11.22s     fastercap_runner.py:101
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_1;sky130_gnd;PLATE;393.04                                                
+Cext_1_1;PLATE;sky130_gnd;3.99                                                  
+────────────────────────────────────────────────────────────────────────────────
+[15:05:56] INFO     Wrote expanded netlist CSV to:               kpex_cli.py:956
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Expanded_Netli                
+                    st.csv                                                      
+[15:05:56] INFO     Wrote expanded netlist to:                   kpex_cli.py:960
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Expanded_Netli                
+                    st.cir                                                      
+[15:05:56] INFO     Wrote reduced netlist to:                    kpex_cli.py:971
+                    /home/runner/work/klayout-pex/klayout-pex/ou                
+                    tput_sky130A/single_plate_100um_x_100um_li1_                
+                    over_substrate__single_plate_100um_x_100um_l                
+                    i1_over_substrate/single_plate_100um_x_100um                
+                    _li1_over_substrate_FasterCap_Reduced_Netlis                
+                    t.cir                                                       

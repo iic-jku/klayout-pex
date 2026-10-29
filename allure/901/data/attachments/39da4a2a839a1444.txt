@@ -1,0 +1,29 @@
+──────────────────────────── Command line arguments ────────────────────────────
+kpex pex25d --pdk gf180mcuD --lvsdb                                             
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/pfet_06v0_dn.lvsdb.gz --out-dir                                               
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --blackbox n        
+--out-file                                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_06v0_dn.pex25d 
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:03:31] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:03:31] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1510
+[15:03:31] INFO     (31, 0) -> (psd_dw)                         kpex_cli.py:1510
+[15:03:31] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1510
+[15:03:31] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1510
+[15:03:31] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:1510
+────────────────────────────── PEX25D Generation ───────────────────────────────
+[15:03:31] INFO     GROUND_PLANE subs: z -3300 … 0         pex25d_builder.py:322
+[15:03:31] INFO     DIELECTRIC_BACKGROUND pass: k=4.0      pex25d_builder.py:480
+[15:03:31] INFO     DIELECTRIC_BACKGROUND sin: k=8.5225    pex25d_builder.py:480
+[15:03:31] INFO     DIELECTRIC_BACKGROUND air: k=1.0       pex25d_builder.py:480
+[15:03:31] INFO     3 conductor(s), 5 shape record(s)      pex25d_builder.py:601
+[15:03:31] INFO     3 terminal record(s)                   pex25d_builder.py:779
+[15:03:31] INFO     8 metal and 8 via resistance record(s) pex25d_builder.py:841
+[15:03:31] INFO     Wrote                                       kpex_cli.py:1527
+                    /Users/runner/work/klayout-pex/klayout-pex/                 
+                    output_gf180mcuD/pfet_06v0_dn.pex25d (file,                 
+                    text)                                                       
+[15:03:31] INFO     No diagnostics.                           diagnostics.py:234

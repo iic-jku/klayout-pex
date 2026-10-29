@@ -1,0 +1,28 @@
+[15:04:06] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_single_wire_li1.lvsdb.gz --out-dir                                            
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpxu9t6v1w --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:04:06] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:04:06] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1588
+[15:04:06] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:04:06] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;840.533                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpxu9t6v1w/r_single_wire_li1__
+r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpxu9t6v1w/r_single_wire_li1__
+r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.spice                      
