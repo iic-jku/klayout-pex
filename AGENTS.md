@@ -66,6 +66,9 @@
 - Per commit, run the unit tests and the tests of the changed area; run all tests but the
   smoke tests (`poetry run pytest -m "not smoke" -n 3`) once before handing over a PR, as
   CI's slow tests (integration job) may fail without failing the run.
+- Tests that simulate skip without `ngspice`, `Xyce` or `VACASK` on `PATH`, and CI has only
+  `ngspice`, on Linux. IIC-OSIC-TOOLS has all three: run the skipped ones there before
+  opening or merging a PR.
 - The extraction tests start from the committed LVS databases of their designs
   (`testdata/lvsdb`, see `tests/common/lvsdb_fixtures.py`), not from LVS. A change of an LVS
   deck, a test layout or the KLayout version outdates them: running the tests with the
