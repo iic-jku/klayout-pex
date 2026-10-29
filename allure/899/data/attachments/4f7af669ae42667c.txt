@@ -1,0 +1,33 @@
+[12:16:47] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                     
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_contact_
+2x2_minsize_via1.lvsdb.gz' --out-dir                                           
+'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[12:16:47] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[12:16:47] INFO     (35, 0) -> (via1)                          kpex_cli.py:1588
+[12:16:47] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1588
+[12:16:47] INFO     (36, 0) -> (metal2_con)                    kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[12:16:47] INFO     LVSDB: found 1pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;BOT;BOT,TOP;;0.026                                                          
+R2;BOT;BOT,TOP.$2.Metal1;;0.026                                                
+R3;BOT,TOP;BOT,TOP.$4.Metal2;;2.25                                             
+R4;BOT,TOP.$2.Metal1;BOT,TOP.$6.Metal2;;2.25                                   
+R5;BOT,TOP.$4.Metal2;TOP;;0.026                                                
+R6;BOT,TOP.$6.Metal2;TOP;;0.026                                                
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_contact_2x2_minsize_via1__r_con
+tact_2x2_minsize_via1\r_contact_2x2_minsize_via1_k25d_pex_netlist.csv          
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_contact_2x2_minsize_via1__r_con
+tact_2x2_minsize_via1\r_contact_2x2_minsize_via1_k25d_pex_netlist.spice        

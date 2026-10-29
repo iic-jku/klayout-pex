@@ -1,0 +1,35 @@
+[12:17:32] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/sideoverlap_simple_plates_m1_m2.lvsdb.gz --out-dir                           
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[12:17:32] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[12:17:32] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[12:17:32] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[12:17:32] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1588
+[12:17:32] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[12:17:32] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[12:17:32] INFO     LVSDB: found 2pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;met1;met2;0.227;                                                             
+C2;VSUBS;met1;7.618;                                                            
+C3;VSUBS;met2;178.074;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_simple_
+plates_m1_m2__sideoverlap_simple_plates_m1_m2/sideoverlap_simple_plates_m1_m2_k2
+5d_pex_netlist.csv                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_simple_
+plates_m1_m2__sideoverlap_simple_plates_m1_m2/sideoverlap_simple_plates_m1_m2_k2
+5d_pex_netlist.spice                                                            
