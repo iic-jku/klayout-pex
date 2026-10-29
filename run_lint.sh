@@ -32,7 +32,7 @@ REPORT_PATH=$DIR/build/pylint-report.html
 pylint --rcfile $DIR/.pylintrc \
        --output-format json2 \
        --ignore build \
-	$DIR/kpex > $RESULTS_PATH
+	$DIR/klayout_pex > $RESULTS_PATH
 
 pylint-json2html -f jsonextended $RESULTS_PATH -o $REPORT_PATH
 
