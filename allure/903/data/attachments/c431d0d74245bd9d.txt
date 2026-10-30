@@ -1,0 +1,16 @@
+WARNING  __kpex__:kpex_cli.py:1417 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1454 main extract --pdk ihp-sg13cmos5l --mode R --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13cmos5l/inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns.lvsdb.gz --out-dir /tmp/tmpc2swfzrw --2.5D --check n
+INFO     __kpex__:kpex_cli.py:736 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1588 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:1588 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1588 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:1588 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 4pins
+WARNING  __kpex__:lvsdb_extractor.py:770 The resistance network has no nodes for these device terminals, as the tech info has no layer for their LVS layer, and they neither overlap nor abut a conductor of their net (e.g. a terminal on the substrate or a well):
+  - inductor3 terminal inductor3_1 on LVS layer ind3_ports: $1
+  - inductor3 terminal inductor3_2 on LVS layer ind3_ports: $1
+  - inductor3 terminal inductor3_3 on LVS layer ind3_ports: $1
+  - inductor3 terminal inductor3_sub on LVS layer ind3_sub: $1
+SUBPROCESS __kpex__:kpex_cli.py:1169 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1172 /tmp/tmpc2swfzrw/inductor3_w2u_d25u85_2_turns__inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1188 Wrote expanded netlist to: /tmp/tmpc2swfzrw/inductor3_w2u_d25u85_2_turns__inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns_k25d_pex_netlist.spice

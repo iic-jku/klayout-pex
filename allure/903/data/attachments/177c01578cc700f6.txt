@@ -1,0 +1,56 @@
+[10:49:26] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                      
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_nwell_pfet
+_label_li1.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A'   
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[10:49:26] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[10:49:26] INFO     (64, 20) -> (nwell)                        kpex_cli.py:1588
+[10:49:26] INFO     (94, 20) -> (psd)                          kpex_cli.py:1588
+[10:49:26] INFO     (65, 144) -> (ntap_conn)                   kpex_cli.py:1588
+[10:49:26] INFO     (66, 20) -> (poly_con)                     kpex_cli.py:1588
+[10:49:26] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1588
+[10:49:26] INFO     (66, 16) -> (poly_pin_con)                 kpex_cli.py:1588
+[10:49:26] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1588
+[10:49:26] INFO     (66, 4402) -> (licon_psd_con)              kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[10:49:26] INFO     LVSDB: found 4pins                         extractor.py:298
+[10:49:27] WARNING  The resistance network leaves out the    r_extractor.py:610
+                    wells of these nets, as no contact joins                   
+                    them to the rest of their net (e.g. a                      
+                    label of the net on the well does), so                     
+                    the device terminals on them (e.g. the                     
+                    PMOS bulks) are ideally on their nets:                     
+                    VPWR                                                       
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;D;G.P0.poly;0.004;                                                          
+C2;D;S;0.006;                                                                  
+C3;D;S.P0.psdm;0.002;                                                          
+C4;D;VPWR;0.016;                                                               
+C5;D;VSUBS;0.014;                                                              
+C6;D.P0.psdm;S;0.002;                                                          
+C7;G;VPWR;0.063;                                                               
+C8;G;VSUBS;0.031;                                                              
+C9;G.P0.poly;S;0.004;                                                          
+C10;G.P0.poly;VPWR;0.018;                                                      
+C11;G.P0.poly;VSUBS;0.006;                                                     
+C12;S;VPWR;0.009;                                                              
+C13;S;VSUBS;0.021;                                                             
+C14;VPWR;VSUBS;0.022;                                                          
+R1;D;D.P0.psdm;;585.0                                                          
+R2;G;G.P0.poly;;363.107                                                        
+R3;S;S.P0.psdm;;585.0                                                          
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_nwell_pfet_label_li1__r_nwell_pfe
+t_label_li1\r_nwell_pfet_label_li1_k25d_pex_netlist.csv                        
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\r_nwell_pfet_label_li1__r_nwell_pfe
+t_label_li1\r_nwell_pfet_label_li1_k25d_pex_netlist.spice                      

@@ -1,0 +1,79 @@
+[10:49:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox y --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/sg13g2_pr__r
+fcmim/rfcmim.lvsdb.gz --out-dir                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n --netlist-format vacask                                               
+───────────────────────────────── Input Layout ─────────────────────────────────
+[10:49:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[10:49:15] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1588
+[10:49:15] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1588
+[10:49:15] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1588
+[10:49:15] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1588
+[10:49:15] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1588
+[10:49:15] INFO     (36, 0) -> (rfmim_top)                      kpex_cli.py:1588
+[10:49:15] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1588
+[10:49:15] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1588
+[10:49:15] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1588
+[10:49:15] INFO     (67, 0) -> (metal5_n_cap metal5_rfcap       kpex_cli.py:1588
+                    metal5_rfcap_feed)                                          
+[10:49:15] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[10:49:15] INFO     LVSDB: found 1pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$4;$5.$36.TopMetal1;0.228;                                                   
+C2;$4;$5.$42.TopMetal1;0.033;                                                   
+C3;$4;$5.$48.TopMetal1;0.033;                                                   
+C4;$4;$5.$54.TopMetal1;0.033;                                                   
+C5;$4;$5.$60.TopMetal1;0.033;                                                   
+C6;$4;$5.$66.TopMetal1;0.226;                                                   
+C7;$4;sub!;0.215;                                                               
+C8;$4;VSUBS;0.22;                                                               
+C9;$5.$36.TopMetal1;sub!;0.198;                                                 
+C10;$5.$36.TopMetal1;VSUBS;0.67;                                                
+C11;$5.$42.TopMetal1;sub!;0.01;                                                 
+C12;$5.$42.TopMetal1;VSUBS;0.062;                                               
+C13;$5.$48.TopMetal1;sub!;0.01;                                                 
+C14;$5.$48.TopMetal1;VSUBS;0.062;                                               
+C15;$5.$54.TopMetal1;sub!;0.01;                                                 
+C16;$5.$54.TopMetal1;VSUBS;0.062;                                               
+C17;$5.$60.TopMetal1;sub!;0.01;                                                 
+C18;$5.$60.TopMetal1;VSUBS;0.062;                                               
+C19;$5.$66.TopMetal1;sub!;0.027;                                                
+C20;$5.$66.TopMetal1;VSUBS;0.24;                                                
+C21;VSUBS;sub!;4.878;                                                           
+R1;$5;$5.$12.MIM;;0.964                                                         
+R2;$5;$5.$18.MIM;;0.954                                                         
+R3;$5.$0.MIM;$5.$10.MIM;;1.909                                                  
+R4;$5.$0.MIM;$5.$36.TopMetal1;;0.367                                            
+R5;$5.$10.MIM;$5.$12.MIM;;1.918                                                 
+R6;$5.$10.MIM;$5.$42.TopMetal1;;0.367                                           
+R7;$5.$12.MIM;$5.$48.TopMetal1;;0.367                                           
+R8;$5.$18.MIM;$5.$24.MIM;;1.918                                                 
+R9;$5.$18.MIM;$5.$54.TopMetal1;;0.367                                           
+R10;$5.$24.MIM;$5.$30.MIM;;1.918                                                
+R11;$5.$24.MIM;$5.$60.TopMetal1;;0.367                                          
+R12;$5.$30.MIM;$5.$66.TopMetal1;;0.367                                          
+R13;$5.$36.TopMetal1;$5.$42.TopMetal1;;0.003                                    
+R14;$5.$42.TopMetal1;$5.$48.TopMetal1;;0.003                                    
+R15;$5.$48.TopMetal1;$5.$54.TopMetal1;;0.003                                    
+R16;$5.$54.TopMetal1;$5.$60.TopMetal1;;0.003                                    
+R17;$5.$60.TopMetal1;$5.$66.TopMetal1;;0.003                                    
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/rfcmim__rfcmim/rfcmi
+m_k25d_pex_netlist.csv                                                          
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/rfcmim__rfcmim/rfcmi
+m_k25d_pex_netlist.spice                                                        
+[10:49:16] INFO     Wrote expanded VACASK netlist to:           kpex_cli.py:1237
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/rfcmim__rfcmim/rfcmim_k25d                 
+                    _pex_netlist.inc                                            

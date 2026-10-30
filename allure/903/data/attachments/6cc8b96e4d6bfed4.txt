@@ -1,0 +1,37 @@
+[10:49:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/sidewall_non_parallel_m1.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[10:49:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[10:49:15] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1588
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[10:49:15] WARNING  Side overlap, outside polygon            polygon_utils.py:41
+                    (0,2000;0,12000;5000,7000;5000,2000)                        
+                    props={'net'=>'A'} is not a box.                            
+                    Currently, only boxes are supported,                        
+                    will be using bounding box                                  
+                    (0,2000;5000,12000)                                         
+[10:49:15] INFO     LVSDB: found 3pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;0.104;                                                                   
+C2;A;VSUBS;2.733;                                                               
+C3;B;C;0.107;                                                                   
+C4;B;VSUBS;2.049;                                                               
+C5;C;VSUBS;1.165;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/sidewall_non_parallel
+_m1__sidewall_non_parallel_m1/sidewall_non_parallel_m1_k25d_pex_netlist.csv     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/sidewall_non_parallel
+_m1__sidewall_non_parallel_m1/sidewall_non_parallel_m1_k25d_pex_netlist.spice   

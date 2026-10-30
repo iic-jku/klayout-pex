@@ -1,0 +1,207 @@
+[10:49:30] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1417
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\bjt_npn13
+g2_nx4_npn13g2l_npn13g2v_pnpmpa.lvsdb.gz' --out-dir                            
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[10:49:30] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:736
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[10:49:31] INFO     (19, 0) -> (via1_drw)                      kpex_cli.py:1588
+[10:49:31] INFO     (31, 0) -> (nwell_drw)                     kpex_cli.py:1588
+[10:49:31] INFO     (32, 0) -> (nbulay_drw)                    kpex_cli.py:1588
+[10:49:31] INFO     (46, 0) -> (pwell pwell_sub npn_sub)       kpex_cli.py:1588
+[10:49:31] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1588
+[10:49:31] INFO     (65, 144) -> (ntap)                        kpex_cli.py:1588
+[10:49:31] INFO     (65, 244) -> (ptap)                        kpex_cli.py:1588
+[10:49:31] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1588
+[10:49:31] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1588
+[10:49:31] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1588
+[10:49:31] INFO     (6, 4404) -> (cont_ntap_con)               kpex_cli.py:1588
+[10:49:31] INFO     (6, 4405) -> (cont_ptap_con)               kpex_cli.py:1588
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[10:49:31] INFO     LVSDB: found 1pins                         extractor.py:298
+[10:49:31] WARNING  The resistance network leaves out these  r_extractor.py:302
+                    wells, as the tech info has no sheet                       
+                    resistance for them, so the device                         
+                    terminals on them (e.g. the PMOS bulks)                    
+                    are ideally on their nets:                                 
+                      - NWell (LVS nwell_drw)                                  
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;$13;$14;0.0;                                                                
+C2;$13;$5;0.033;                                                               
+C3;$13;$7.$11.Metal1;0.052;                                                    
+C4;$13;$7.$19.Metal1;0.052;                                                    
+C5;$13;$7.$27.Metal1;0.052;                                                    
+C6;$13;$7.$3.Metal1;0.052;                                                     
+C7;$13;$7.$32.Metal2;0.022;                                                    
+C8;$13;$7.$36.Metal2;0.022;                                                    
+C9;$13;$7.$40.Metal2;0.022;                                                    
+C10;$13;$7.$44.Metal2;0.022;                                                   
+C11;$13;$7.$48.Metal2;0.022;                                                   
+C12;$13;$7.$52.Metal2;0.022;                                                   
+C13;$13;$7.$56.Metal2;0.022;                                                   
+C14;$13;$7.$60.Metal2;0.022;                                                   
+C15;$13;sub!;0.024;                                                            
+C16;$13;VSUBS;0.538;                                                           
+C17;$14;$15;0.002;                                                             
+C18;$14;$25;0.113;                                                             
+C19;$14;$26;0.244;                                                             
+C20;$14;$26.$1.Metal2;0.101;                                                   
+C21;$14;sub!;0.011;                                                            
+C22;$14;VSUBS;0.262;                                                           
+C23;$15;$27;0.035;                                                             
+C24;$15;$27.$0.Metal1;0.065;                                                   
+C25;$15;$27.$1.Metal1;0.054;                                                   
+C26;$15;$27.$2.Metal1;0.051;                                                   
+C27;$15;$27.$3.Metal1;0.067;                                                   
+C28;$15;$27.$4.Metal2;0.102;                                                   
+C29;$15;$28;0.177;                                                             
+C30;$15;sub!;0.013;                                                            
+C31;$15;VSUBS;0.25;                                                            
+C32;$2;$9;0.291;                                                               
+C33;$2;sub!;0.262;                                                             
+C34;$2;VSUBS;0.108;                                                            
+C35;$25;$26;0.005;                                                             
+C36;$25;$26.$1.Metal2;0.165;                                                   
+C37;$25;$28;0.003;                                                             
+C38;$25;sub!;0.037;                                                            
+C39;$25;VSUBS;0.575;                                                           
+C40;$26;VSUBS;0.03;                                                            
+C41;$26.$1.Metal2;$27.$4.Metal2;0.002;                                         
+C42;$26.$1.Metal2;sub!;0.023;                                                  
+C43;$26.$1.Metal2;VSUBS;0.277;                                                 
+C44;$27;VSUBS;0.003;                                                           
+C45;$27.$0.Metal1;VSUBS;0.009;                                                 
+C46;$27.$1.Metal1;VSUBS;0.005;                                                 
+C47;$27.$2.Metal1;VSUBS;0.005;                                                 
+C48;$27.$3.Metal1;$28;0.006;                                                   
+C49;$27.$3.Metal1;VSUBS;0.01;                                                  
+C50;$27.$4.Metal2;$28;0.141;                                                   
+C51;$27.$4.Metal2;sub!;0.02;                                                   
+C52;$27.$4.Metal2;VSUBS;0.257;                                                 
+C53;$28;sub!;0.031;                                                            
+C54;$28;VSUBS;0.51;                                                            
+C55;$5;$7.$0.Metal1;0.057;                                                     
+C56;$5;$7.$12.Metal1;0.057;                                                    
+C57;$5;$7.$16.Metal1;0.057;                                                    
+C58;$5;$7.$24.Metal1;0.057;                                                    
+C59;$5;$7.$32.Metal2;0.018;                                                    
+C60;$5;$7.$36.Metal2;0.018;                                                    
+C61;$5;$7.$40.Metal2;0.018;                                                    
+C62;$5;$7.$44.Metal2;0.018;                                                    
+C63;$5;$7.$48.Metal2;0.018;                                                    
+C64;$5;$7.$52.Metal2;0.018;                                                    
+C65;$5;$7.$56.Metal2;0.018;                                                    
+C66;$5;$7.$60.Metal2;0.018;                                                    
+C67;$5;sub!;0.029;                                                             
+C68;$5;VSUBS;0.475;                                                            
+C69;$7;VSUBS;0.003;                                                            
+C70;$7.$0.Metal1;VSUBS;0.032;                                                  
+C71;$7.$1.Metal1;VSUBS;0.031;                                                  
+C72;$7.$10.Metal1;VSUBS;0.024;                                                 
+C73;$7.$11.Metal1;VSUBS;0.025;                                                 
+C74;$7.$12.Metal1;VSUBS;0.024;                                                 
+C75;$7.$13.Metal1;VSUBS;0.024;                                                 
+C76;$7.$16.Metal1;VSUBS;0.024;                                                 
+C77;$7.$17.Metal1;VSUBS;0.024;                                                 
+C78;$7.$18.Metal1;VSUBS;0.024;                                                 
+C79;$7.$19.Metal1;VSUBS;0.025;                                                 
+C80;$7.$2.Metal1;VSUBS;0.031;                                                  
+C81;$7.$24.Metal1;VSUBS;0.031;                                                 
+C82;$7.$25.Metal1;VSUBS;0.032;                                                 
+C83;$7.$26.Metal1;VSUBS;0.032;                                                 
+C84;$7.$27.Metal1;VSUBS;0.032;                                                 
+C85;$7.$3.Metal1;VSUBS;0.032;                                                  
+C86;$7.$32.Metal2;sub!;0.009;                                                  
+C87;$7.$32.Metal2;VSUBS;0.121;                                                 
+C88;$7.$36.Metal2;sub!;0.005;                                                  
+C89;$7.$36.Metal2;VSUBS;0.071;                                                 
+C90;$7.$40.Metal2;sub!;0.005;                                                  
+C91;$7.$40.Metal2;VSUBS;0.071;                                                 
+C92;$7.$44.Metal2;sub!;0.005;                                                  
+C93;$7.$44.Metal2;VSUBS;0.071;                                                 
+C94;$7.$48.Metal2;sub!;0.005;                                                  
+C95;$7.$48.Metal2;VSUBS;0.071;                                                 
+C96;$7.$52.Metal2;sub!;0.005;                                                  
+C97;$7.$52.Metal2;VSUBS;0.071;                                                 
+C98;$7.$56.Metal2;sub!;0.005;                                                  
+C99;$7.$56.Metal2;VSUBS;0.071;                                                 
+C100;$7.$60.Metal2;sub!;0.016;                                                 
+C101;$7.$60.Metal2;VSUBS;0.12;                                                 
+C102;VSUBS;sub!;1.194;                                                         
+R1;$26;$26.$1.Metal2;;1.425                                                    
+R2;$27;$27.$1.Metal1;;0.095                                                    
+R3;$27;$27.$2.Metal1;;0.078                                                    
+R4;$27.$0.Metal1;$27.$1.Metal1;;0.173                                          
+R5;$27.$0.Metal1;$27.$4.Metal2;;9.0                                            
+R6;$27.$1.Metal1;$27.$4.Metal2;;9.0                                            
+R7;$27.$2.Metal1;$27.$3.Metal1;;0.173                                          
+R8;$27.$2.Metal1;$27.$4.Metal2;;9.0                                            
+R9;$27.$3.Metal1;$27.$4.Metal2;;9.0                                            
+R10;$7;$7.$1.Metal1;;0.034                                                     
+R11;$7;$7.$2.Metal1;;0.031                                                     
+R12;$7.$0.Metal1;$7.$1.Metal1;;0.064                                           
+R13;$7.$0.Metal1;$7.$32.Metal2;;9.0                                            
+R14;$7.$0.Metal1;$7.$36.Metal2;;9.0                                            
+R15;$7.$1.Metal1;$7.$32.Metal2;;9.0                                            
+R16;$7.$1.Metal1;$7.$36.Metal2;;9.0                                            
+R17;$7.$10.Metal1;$7.$11.Metal1;;0.064                                         
+R18;$7.$10.Metal1;$7.$13.Metal1;;0.064                                         
+R19;$7.$10.Metal1;$7.$40.Metal2;;9.0                                           
+R20;$7.$10.Metal1;$7.$44.Metal2;;9.0                                           
+R21;$7.$11.Metal1;$7.$40.Metal2;;9.0                                           
+R22;$7.$11.Metal1;$7.$44.Metal2;;9.0                                           
+R23;$7.$12.Metal1;$7.$13.Metal1;;0.064                                         
+R24;$7.$12.Metal1;$7.$40.Metal2;;9.0                                           
+R25;$7.$12.Metal1;$7.$44.Metal2;;9.0                                           
+R26;$7.$13.Metal1;$7.$40.Metal2;;9.0                                           
+R27;$7.$13.Metal1;$7.$44.Metal2;;9.0                                           
+R28;$7.$16.Metal1;$7.$17.Metal1;;0.064                                         
+R29;$7.$16.Metal1;$7.$48.Metal2;;9.0                                           
+R30;$7.$16.Metal1;$7.$52.Metal2;;9.0                                           
+R31;$7.$17.Metal1;$7.$18.Metal1;;0.064                                         
+R32;$7.$17.Metal1;$7.$48.Metal2;;9.0                                           
+R33;$7.$17.Metal1;$7.$52.Metal2;;9.0                                           
+R34;$7.$18.Metal1;$7.$19.Metal1;;0.064                                         
+R35;$7.$18.Metal1;$7.$48.Metal2;;9.0                                           
+R36;$7.$18.Metal1;$7.$52.Metal2;;9.0                                           
+R37;$7.$19.Metal1;$7.$48.Metal2;;9.0                                           
+R38;$7.$19.Metal1;$7.$52.Metal2;;9.0                                           
+R39;$7.$2.Metal1;$7.$3.Metal1;;0.064                                           
+R40;$7.$2.Metal1;$7.$32.Metal2;;9.0                                            
+R41;$7.$2.Metal1;$7.$36.Metal2;;9.0                                            
+R42;$7.$24.Metal1;$7.$25.Metal1;;0.064                                         
+R43;$7.$24.Metal1;$7.$56.Metal2;;9.0                                           
+R44;$7.$24.Metal1;$7.$60.Metal2;;9.0                                           
+R45;$7.$25.Metal1;$7.$26.Metal1;;0.064                                         
+R46;$7.$25.Metal1;$7.$56.Metal2;;9.0                                           
+R47;$7.$25.Metal1;$7.$60.Metal2;;9.0                                           
+R48;$7.$26.Metal1;$7.$27.Metal1;;0.064                                         
+R49;$7.$26.Metal1;$7.$56.Metal2;;9.0                                           
+R50;$7.$26.Metal1;$7.$60.Metal2;;9.0                                           
+R51;$7.$27.Metal1;$7.$56.Metal2;;9.0                                           
+R52;$7.$27.Metal1;$7.$60.Metal2;;9.0                                           
+R53;$7.$3.Metal1;$7.$32.Metal2;;9.0                                            
+R54;$7.$3.Metal1;$7.$36.Metal2;;9.0                                            
+R55;$7.$32.Metal2;$7.$36.Metal2;;0.023                                         
+R56;$7.$36.Metal2;$7.$40.Metal2;;0.081                                         
+R57;$7.$40.Metal2;$7.$44.Metal2;;0.023                                         
+R58;$7.$44.Metal2;$7.$48.Metal2;;0.081                                         
+R59;$7.$48.Metal2;$7.$52.Metal2;;0.023                                         
+R60;$7.$52.Metal2;$7.$56.Metal2;;0.081                                         
+R61;$7.$56.Metal2;$7.$60.Metal2;;0.023                                         
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\bjt_npn13g2_nx4_npn13g2l_npn13g2
+v_pnpmpa__bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa\bjt_npn13g2_nx4_npn13g2l_npn
+13g2v_pnpmpa_k25d_pex_netlist.csv                                              
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\bjt_npn13g2_nx4_npn13g2l_npn13g2
+v_pnpmpa__bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa\bjt_npn13g2_nx4_npn13g2l_npn
+13g2v_pnpmpa_k25d_pex_netlist.spice                                            
