@@ -178,14 +178,73 @@ _GRID_PER_UM = 1000  # 1 nm grid, as in placeholder_file()
 # A zero-thickness UF ground plane is moved to -0.1 … 0.0 µm (as uth-pexconv does)
 _ZERO_THICKNESS_GROUND_PLANE_UM = 0.1
 
-
-def _to_grid(value_um: float, where: str) -> int:
-    """µm → integer grid units; ImporterError if the value is not on the grid."""
+def _to_grid(value_um: float) -> int:
+    """µm → integer grid units"""
     scaled = value_um * _GRID_PER_UM
     grid = round(scaled)
-    if abs(scaled - grid) > 1e-6:
-        raise pex25d.ImporterError(f"{where}: {value_um} µm is not on the 1 nm grid")
     return grid
+
+# Name prefix of the shape-less METAL profiles that anchor UF dielectrics
+_ANCHOR_PREFIX = 'uf_anchor_'
+
+def _build_dielectric_stack(pex25d_file: PEX25DFile, pattern: _UFPattern, input_file_path: str):
+    """
+    UF dielectrics lie at absolute heights, but a DIELECTRIC_SIMPLE spans from the bottom
+    face of one profile to the bottom face of another. The ground plane anchors the lowest
+    dielectric, as it occupies everything below its own top. A metal anchors the height of
+    its bottom face. Every other height gets a shape-less 1-grid-unit METAL 'uf_anchor_<i>'.
+    The topmost UF dielectric becomes the background.
+    """
+    if not pattern.dielectrics:
+        raise pex25d.ImporterError(f"{input_file_path}: no DIELECTRIC")
+
+    ground_plane = pex25d_file.ground_plane
+    heights: List[Tuple[int, int]] = []
+    previous_zhigh = ground_plane.zhigh
+
+    for uf_dielectric in pattern.dielectrics:
+        zlow = _to_grid(uf_dielectric.zlow)
+        zhigh = _to_grid(uf_dielectric.zhigh)
+        if zlow != previous_zhigh:
+            raise pex25d.ImporterError(
+                f"dielectric {uf_dielectric.name} starts at {uf_dielectric.zlow} µm, "
+                f"not at {previous_zhigh / _GRID_PER_UM} µm where the ground plane or the "
+                f"dielectric below it ends")
+        if zhigh <= zlow:
+            raise pex25d.ImporterError(
+                f"dielectric {uf_dielectric.name} has no thickness")
+        heights.append((zlow, zhigh))
+        previous_zhigh = zhigh
+
+    top = pattern.dielectrics[-1]
+    background = pex25d_file.background
+    background.name = top.name
+    background.permittivity = top.epsilon
+
+    anchors: Dict[int, str] = {ground_plane.zhigh: ground_plane.name}
+    anchors.update({metal.zlow: metal.name for metal in pex25d_file.metals})
+    anchor_names: List[str] = []
+    for uf_dielectric, (zlow, zhigh) in zip(pattern.dielectrics[:-1], heights):
+        for z in (zlow, zhigh):
+            if z not in anchors:
+                metal = pex25d_file.metals.add()
+                metal.name = f'{_ANCHOR_PREFIX}{len(anchor_names)}'
+                metal.zlow, metal.zhigh = z, z + 1
+                anchors[z] = metal.name
+                anchor_names.append(metal.name)
+        below, above = anchors[zlow], anchors[zhigh]
+        dielectric = pex25d_file.dielectrics.add()
+        dielectric.name = uf_dielectric.name
+        dielectric.kind = pex25d.proto.dielectric.DIELECTRIC_KIND_SIMPLE
+        dielectric.permittivity = uf_dielectric.epsilon
+        dielectric.wraps = below  # UF has no conformal dielectrics
+        dielectric.simple.between_below = below
+        dielectric.simple.between_above = above
+        dielectric.source.line = uf_dielectric.line
+
+    if anchor_names:
+        meta = pex25d_file.metadata.add()
+        meta.key, meta.value = 'uf_anchors', ' '.join(anchor_names)
 
 
 class OpenRCXUFImporter(PEX25DImporter):
@@ -204,9 +263,6 @@ class OpenRCXUFImporter(PEX25DImporter):
                     report: Optional[pex25d.DiagnosticsReport] = None) -> PEX25DFile:
 
         pattern = _parse_uf(input_file_path)
-
-        def where(line: int) -> str:
-            return f"{input_file_path}:{line}"
 
         if pattern.window is None:
             raise pex25d.ImporterError(f"{input_file_path}: no WINDOW_BBOX")
@@ -239,10 +295,10 @@ class OpenRCXUFImporter(PEX25DImporter):
         uf_ground_plane = pattern.ground_planes[0]
         ground_plane = pex25d_file.ground_plane
         ground_plane.name = uf_ground_plane.name
-        zlow = _to_grid(uf_ground_plane.zlow, where(uf_ground_plane.line))
-        thickness = _to_grid(uf_ground_plane.thickness, where(uf_ground_plane.line))
+        zlow = _to_grid(uf_ground_plane.zlow)
+        thickness = _to_grid(uf_ground_plane.thickness)
         if thickness == 0:
-            thickness = _to_grid(_ZERO_THICKNESS_GROUND_PLANE_UM, where(uf_ground_plane.line))
+            thickness = _to_grid(_ZERO_THICKNESS_GROUND_PLANE_UM)
             zlow -= thickness
         ground_plane.zlow, ground_plane.zhigh = zlow, zlow + thickness
         ground_plane.source.line = uf_ground_plane.line
@@ -251,11 +307,10 @@ class OpenRCXUFImporter(PEX25DImporter):
         metal_z: Dict[str, Tuple[int, int]] = {}
         for wire in pattern.wires:
             layer = wire.name.split('_')[0]
-            z = (_to_grid(wire.corners['LL'][1], where(wire.line)),
-                 _to_grid(wire.corners['UR'][1], where(wire.line)))
+            z = (_to_grid(wire.corners['LL'][1]), _to_grid(wire.corners['UR'][1]))
             if metal_z.setdefault(layer, z) != z:
                 raise pex25d.ImporterError(
-                    f"{where(wire.line)}: wire {wire.name} spans z {z} on layer {layer}, "
+                    f"wire {wire.name} spans z {z} on layer {layer}, "
                     f"other wires of {layer} span {metal_z[layer]}")
         for layer, (zlow, zhigh) in metal_z.items():
             metal = pex25d_file.metals.add()
@@ -263,28 +318,22 @@ class OpenRCXUFImporter(PEX25DImporter):
             metal.zlow, metal.zhigh = zlow, zhigh
 
         # ----------------------------------------------------------- dielectrics
-        # The topmost UF dielectric fills the rest of the domain, so it becomes the background.
-        # TODO(UF): implement the dielectrics below it
-        top = pattern.dielectrics[-1]
-        background = pex25d_file.background
-        background.name = top.name
-        background.permittivity = top.epsilon
+        _build_dielectric_stack(pex25d_file, pattern, input_file_path)
 
         # ------------------------------------------------------ conductors, shapes
         for wire in pattern.wires:
             if wire.length is None:
-                raise pex25d.ImporterError(
-                    f"{where(wire.line)}: 2D UF input (WIRE without LENGTH)")
+                raise pex25d.ImporterError(f"wire {wire.name}: 2D UF input (WIRE without LENGTH)")
             conductor = pex25d_file.conductors.add()
             conductor.name, conductor.net = wire.name, wire.name
 
             shape = pex25d_file.shapes.add()
             shape.conductor, shape.layer = wire.name, wire.name.split('_')[0]
             shape.kind = shape.SHAPE_KIND_BOX
-            shape.box.lower_left.x = _to_grid(wire.corners['LL'][0], where(wire.line))
+            shape.box.lower_left.x = _to_grid(wire.corners['LL'][0])
             shape.box.lower_left.y = 0
-            shape.box.upper_right.x = _to_grid(wire.corners['UR'][0], where(wire.line))
-            shape.box.upper_right.y = _to_grid(wire.length, where(wire.line))
+            shape.box.upper_right.x = _to_grid(wire.corners['UR'][0])
+            shape.box.upper_right.y = _to_grid(wire.length)
             shape.source.file, shape.source.line = input_file_path, wire.line
 
         # ----------------------------------------------------------------- domain
@@ -297,12 +346,12 @@ class OpenRCXUFImporter(PEX25DImporter):
             x1, x2, z2 = x1 + ext.x1, x2 + ext.x2, z2 + ext.z2
             y1, y2 = y1 + ext.min_y, y2 + ext.max_y
         box = pex25d_file.domain_box.box
-        box.lower_left.x = _to_grid(x1, where(window.line))
-        box.lower_left.y = _to_grid(y1, where(window.line))
+        box.lower_left.x = _to_grid(x1)
+        box.lower_left.y = _to_grid(y1)
         box.lower_left.z = ground_plane.zhigh
-        box.upper_right.x = _to_grid(x2, where(window.line))
-        box.upper_right.y = _to_grid(y2, where(window.line))
-        box.upper_right.z = _to_grid(z2, where(window.line))
+        box.upper_right.x = _to_grid(x2)
+        box.upper_right.y = _to_grid(y2)
+        box.upper_right.z = _to_grid(z2)
         pex25d_file.domain_box.source.line = window.line
 
         return pex25d_file
