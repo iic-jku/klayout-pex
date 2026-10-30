@@ -147,13 +147,16 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
     cell_name = 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa'
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
 
     pex_context = extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
                                      blackbox_devices=False)
-    # NOTE: the substrate terminal S stays on its net, as the substrate is no conductor of the resistance network,
-    #       and so do the base and collector of the pnpMPA, on the nwell and substrate taps
-    npn_terminals = {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1'], 'S': []}
+    # NOTE: the substrate terminal S is on the PWell (npn_sub), which is no conductor of the resistance network,
+    #       so it stays on its net without a warning (#365), and so do the base and collector of the pnpMPA,
+    #       on the nwell and substrate taps
+    npn_terminals = {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1'], 'S': ['PWell']}
     assert {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
                                   for t in d.terminals}
             for d in pex_context.devices_by_name.values()} == {
