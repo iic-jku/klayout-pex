@@ -557,6 +557,15 @@ class BResistor < RBA::DeviceClassResistorWithBulk
   end
 end
 
+class BResistorFixedWidth < RBA::DeviceClassResistorWithBulk
+  def initialize
+    super
+    enable_parameter("R", false)
+    enable_parameter("W", false)
+    enable_parameter("L", true)
+  end
+end
+
 class NResistor < RBA::DeviceClassResistor
   def initialize
     super
@@ -2470,43 +2479,53 @@ extract_devices(resistor("sky130_fd_pr__res_generic_po", 48.2, NResistor), { "R"
 
 # sky130_fd_pr__res_high_po_0p35
 logger.info("Extracting sky130_fd_pr__res_high_po_0p35 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p35", 319.8, BResistor), { "R" => poly_high_0p35, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p35", 319.8, BResistorFixedWidth), { "R" => poly_high_0p35, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_high_po_0p35", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_high_po_0p69
 logger.info("Extracting sky130_fd_pr__res_high_po_0p69 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p69", 319.8, BResistor), { "R" => poly_high_0p69, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_0p69", 319.8, BResistorFixedWidth), { "R" => poly_high_0p69, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_high_po_0p69", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_high_po_1p41
 logger.info("Extracting sky130_fd_pr__res_high_po_1p41 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_1p41", 319.8, BResistor), { "R" => poly_high_1p41, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_1p41", 319.8, BResistorFixedWidth), { "R" => poly_high_1p41, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_high_po_1p41", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_high_po_2p85
 logger.info("Extracting sky130_fd_pr__res_high_po_2p85 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_2p85", 319.8, BResistor), { "R" => poly_high_2p85, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_2p85", 319.8, BResistorFixedWidth), { "R" => poly_high_2p85, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_high_po_2p85", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_high_po_5p73
 logger.info("Extracting sky130_fd_pr__res_high_po_5p73 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_5p73", 319.8, BResistor), { "R" => poly_high_5p73, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_high_po_5p73", 319.8, BResistorFixedWidth), { "R" => poly_high_5p73, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_high_po_5p73", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_xhigh_po_0p35
 logger.info("Extracting sky130_fd_pr__res_xhigh_po_0p35 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p35", 2000, BResistor), { "R" => poly_xhigh_0p35, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p35", 2000, BResistorFixedWidth), { "R" => poly_xhigh_0p35, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_xhigh_po_0p35", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_xhigh_po_0p69
 logger.info("Extracting sky130_fd_pr__res_xhigh_po_0p69 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p69", 2000, BResistor), { "R" => poly_xhigh_0p69, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_0p69", 2000, BResistorFixedWidth), { "R" => poly_xhigh_0p69, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_xhigh_po_0p69", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_xhigh_po_1p41
 logger.info("Extracting sky130_fd_pr__res_xhigh_po_1p41 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_1p41", 2000, BResistor), { "R" => poly_xhigh_1p41, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_1p41", 2000, BResistorFixedWidth), { "R" => poly_xhigh_1p41, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_xhigh_po_1p41", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_xhigh_po_2p85
 logger.info("Extracting sky130_fd_pr__res_xhigh_po_2p85 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_2p85", 2000, BResistor), { "R" => poly_xhigh_2p85, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_2p85", 2000, BResistorFixedWidth), { "R" => poly_xhigh_2p85, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_xhigh_po_2p85", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # sky130_fd_pr__res_xhigh_po_5p73
 logger.info("Extracting sky130_fd_pr__res_xhigh_po_5p73 device")
-extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_5p73", 2000, BResistor), { "R" => poly_xhigh_5p73, "C" => poly_con, "W" => sub})
+extract_devices(resistor_with_bulk("sky130_fd_pr__res_xhigh_po_5p73", 2000, BResistorFixedWidth), { "R" => poly_xhigh_5p73, "C" => poly_con, "W" => sub})
+tolerance("sky130_fd_pr__res_xhigh_po_5p73", "L", :relative => 0.005) # 0.5% tolerance on length
 
 # ===============
 # ---- METAL ----
