@@ -34,6 +34,7 @@ def build_layers(tech: Technology):
     #               purpose, name,     drw_gds,  pin_gds,  label_gds, description
     add_layer(tech, DNWELL,  "dnwell", (64, 18), None,     None,      "Deep N-well")
     add_layer(tech, NWELL,   "nwell",  (64, 20), (64, 16), (64, 5),   "N-well region")
+    add_layer(tech, PWELL,   "pwell",  (64, 44), None,     None,      "P-well region")
     add_layer(tech, DIFF,    "diff",   (65, 20), (65, 16), (65, 5),   "Active (diffusion) area")
     add_layer(tech, N_P_TAP, "tap",    (65, 44), None,     None,      "Active (diffusion) area (type equal to the well/substrate underneath) (i.e., N+ and P+)")
     add_layer(tech, PIMP,    "psdm",   (94, 20), None,     None,      "P+ source/drain implant")
@@ -59,6 +60,11 @@ def build_lvs_computed_layers(tech: Technology):
     #                        purpose  kind  lvs_name     lvs_gds_pair orig. layer  process layer     description
     add_computed_layer(tech, DNWELL,  KREG, "dnwell",    (64, 18),    "dnwell",    None,             "Deep NWell")
     add_computed_layer(tech, NWELL,   KREG, "nwell",     (64, 20),    "nwell",     None,             "NWell")
+    # NOTE: the layers of the substrate terminals of the VPP caps and the RF inductors. The substrate
+    #       (their GDS pair, by vpp_sub in build_substrate_info) is no conductor of the resistance network,
+    #       so these terminals stay on their nets
+    add_computed_layer(tech, PWELL,   KREG, "vpp_sub",   (64, 44),    "pwell",     None,             "Substrate under a VPP cap, its substrate terminal")
+    add_computed_layer(tech, PWELL,   KREG, "inductor_sub", (64, 44), "pwell",     None,             "Substrate under an RF inductor, its substrate terminal")
     add_computed_layer(tech, NIMP,    KREG, "nsd",       (93, 44),    "nsdm",      "nsd",            "borrow from nsdm")
     add_computed_layer(tech, NIMP,    KREG, "sonos_nsd", (93, 44),    "nsdm",      "nsd",            "SONOS source/drain, the same n+ diffusion as nsd")
     add_computed_layer(tech, PIMP,    KREG, "psd",       (94, 20),    "psdm",      "psd",            "borrow from psdm")
