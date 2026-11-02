@@ -132,6 +132,10 @@ class TechBuilder:
         add_computed_layer(tech, CONT,  KDEV, "cont_bjt_con",   (6, 4406),    "Cont",      None,            "Computed layer for contact from the terminals of the bipolar transistors to Metal1")
         if self.is_g2:
             add_computed_layer(tech, CONT,  KDEV, "emwind_drw",     (33, 0),      "EmWind",    None,            "Computed layer for EmWind, joining the npn emitters to Metal1")
+            # NOTE: within the schottky_nbl1 (the Schottky contact of its anode, the contacts of its cathode),
+            #       whose model has the series resistance (rsmain), so its terminals are on the Metal1 over them
+            add_computed_layer(tech, CONT,  KDEV, "schottcky_p",    (6, 4407),    "Cont",      None,            "Computed layer for the Schottky contact of the anode of schottky_nbl1 to Metal1")
+            add_computed_layer(tech, CONT,  KDEV, "schottcky_n_con", (6, 4408),   "Cont",      None,            "Computed layer for contact from the cathode of schottky_nbl1 to Metal1")
 
         add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "via1_drw",      "Computed layer for Via1")
         add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "via2_drw",      "Computed layer for Via2")

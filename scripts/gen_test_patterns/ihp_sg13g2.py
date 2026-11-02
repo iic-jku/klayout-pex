@@ -47,6 +47,7 @@ NWELL:        GDSPair = (31, 0)
 NBULAY:       GDSPair = (32, 0)
 METAL1:       GDSPair = (8, 0)
 METAL1_PIN:   GDSPair = (8, 2)
+METAL2:       GDSPair = (10, 0)
 METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
 METAL5:       GDSPair = (67, 0)
@@ -60,6 +61,7 @@ TOPMETAL2_PIN: GDSPair = (134, 2)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL1: (8, 25),
+    METAL2: (10, 25),
     METAL4: (50, 25),
     METAL5: (67, 25),
     TOPMETAL1: (126, 25),
@@ -219,6 +221,23 @@ def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
     return p
 
 
+def diode_schottky_nbl1() -> Pattern:
+    """
+    A Schottky diode schottky_nbl1 (schottky pcell of the PDK), its anode labelled A on the Metal2 over it
+    and its cathode K on the Metal1 ring around the anode, both joined to the device by contacts within it
+    """
+    technology = load_pdk_pcells()
+    p = pattern('diode_schottky_nbl1')
+    p.layout.technology_name = technology
+    pcell = p.layout.create_cell('schottky', 'SG13_dev', {})
+    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
+    p.top.flatten(-1, True)
+    # NOTE: on the pins of the pcell, the anode's at the bottom of its Metal2, the cathode's at the top of its ring
+    p.label(METAL2, 'A', 600, -1255)
+    p.label(METAL1, 'K', 600, 2830)
+    return p
+
+
 def inductor2_w2u_d15u48_tm2_wires_50u() -> Pattern:
     """
     An inductor (inductor2 pcell of the PDK) of 1 turn of 2 µm width, 15.48 µm inner diameter,
@@ -266,6 +285,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,
+    'diode_schottky_nbl1': diode_schottky_nbl1,
     'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,
     'inductor3_w2u_d25u84_2_turns': inductor3_w2u_d25u84_2_turns,
 }
