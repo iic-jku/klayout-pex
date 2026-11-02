@@ -69,9 +69,13 @@ def test_single_plate_100um_x_100um_li1_over_substrate():
     # C0 PLATE VSUBS 0.38618p
     #
     # NOTE: the substrate is the port sky130_gnd, as the pattern has no substrate net (no transistor)
+    #
+    # NOTE: the values of FasterCap 6.2.1, on x86-64 and arm64 alike: it builds without FMA, which made arm64
+    #       builds differ (396.78, 3.33 vs. 390.83 on x86-64), and refines the links of dielectric interfaces
+    #       near super panels
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-Cext_0_1;sky130_gnd;PLATE;396.78
-Cext_1_1;PLATE;sky130_gnd;3.33"""
+Cext_0_1;sky130_gnd;PLATE;393.04
+Cext_1_1;PLATE;sky130_gnd;3.99"""
         )
