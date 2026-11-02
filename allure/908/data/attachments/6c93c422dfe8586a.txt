@@ -1,0 +1,35 @@
+WARNING  __kpex__:kpex_cli.py:1417 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1454 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cap_mim_m3_20um_x_20um_over_m2_wire.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --reduce ticer
+INFO     __kpex__:kpex_cli.py:736 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1588 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:1588 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:1588 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1588 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:1588 (71, 20) -> (met4_ncap)
+INFO     __kpex__:kpex_cli.py:1588 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 3pins
+SUBPROCESS __kpex__:kpex_cli.py:1169 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1169 C1;A;B.$1.met4;1.059;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C2;A;B.P0.capm;70.708;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C3;A;D;0.43;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C4;A;VSUBS;1.874;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C5;A.P0.met3;B;1.358;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C6;A.P0.met3;B.$1.met4;2.186;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C7;A.P0.met3;B.P0.capm;744.371;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C8;A.P0.met3;D;6.037;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C9;A.P0.met3;VSUBS;8.467;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C10;B;D;0.041;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C11;B;VSUBS;0.65;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C12;B.$1.met4;D;0.041;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C13;B.$1.met4;VSUBS;1.603;
+SUBPROCESS __kpex__:kpex_cli.py:1169 C14;D;VSUBS;5.013;
+SUBPROCESS __kpex__:kpex_cli.py:1169 R1;A;A.P0.met3;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1169 R2;B;B.$1.met4;;0.019
+SUBPROCESS __kpex__:kpex_cli.py:1169 R3;B.$1.met4;B.P0.capm;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1172 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1188 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.spice
+SUBPROCESS __kpex__:kpex_cli.py:1224 .SUBCKT cap_mim_m3_20um_x_20um_over_m2_wire: 3 R, 14 C, 7 nodes → 1 R, 9 C, 5 nodes (TICER eliminated 2 nodes; 0 floating islands merged, 0 nodes less; 0 capacitor-only nodes eliminated, 0 tied)
+INFO     __kpex__:kpex_cli.py:1225 Wrote reduced netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist_reduced.spice

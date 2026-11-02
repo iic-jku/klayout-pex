@@ -1,0 +1,38 @@
+WARNING  __kpex__:kpex_cli.py:1417 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1454 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\sg13g2_pr__rfcmim\rfcmim.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:736 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1588 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1588 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1588 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1588 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1588 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1588 (36, 0) -> (rfmim_top)
+INFO     __kpex__:kpex_cli.py:1588 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1588 (67, 0) -> (metal5_n_cap metal5_rfcap metal5_rfcap_feed)
+INFO     __kpex__:kpex_cli.py:1588 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1169 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1169 R1;$5;$5.$12.MIM;;0.964
+SUBPROCESS __kpex__:kpex_cli.py:1169 R2;$5;$5.$18.MIM;;0.954
+SUBPROCESS __kpex__:kpex_cli.py:1169 R3;$5.$0.MIM;$5.$10.MIM;;1.909
+SUBPROCESS __kpex__:kpex_cli.py:1169 R4;$5.$0.MIM;$5.$36.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R5;$5.$10.MIM;$5.$12.MIM;;1.918
+SUBPROCESS __kpex__:kpex_cli.py:1169 R6;$5.$10.MIM;$5.$42.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R7;$5.$12.MIM;$5.$48.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R8;$5.$18.MIM;$5.$24.MIM;;1.918
+SUBPROCESS __kpex__:kpex_cli.py:1169 R9;$5.$18.MIM;$5.$54.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R10;$5.$24.MIM;$5.$30.MIM;;1.918
+SUBPROCESS __kpex__:kpex_cli.py:1169 R11;$5.$24.MIM;$5.$60.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R12;$5.$30.MIM;$5.$66.TopMetal1;;0.367
+SUBPROCESS __kpex__:kpex_cli.py:1169 R13;$5.$36.TopMetal1;$5.$42.TopMetal1;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1169 R14;$5.$42.TopMetal1;$5.$48.TopMetal1;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1169 R15;$5.$48.TopMetal1;$5.$54.TopMetal1;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1169 R16;$5.$54.TopMetal1;$5.$60.TopMetal1;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1169 R17;$5.$60.TopMetal1;$5.$66.TopMetal1;;0.003
+SUBPROCESS __kpex__:kpex_cli.py:1172 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\rfcmim__rfcmim\rfcmim_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:78 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1188 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\rfcmim__rfcmim\rfcmim_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1212 The extracted netlist is inconsistent with the LVS netlist:
+  - port sub! touches nothing
