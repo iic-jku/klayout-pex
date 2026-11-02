@@ -22,11 +22,13 @@
 # --------------------------------------------------------------------------------
 #
 import allure
+import io
 import os
 import tempfile
 import unittest
+from unittest import mock
 
-from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
+from klayout_pex.fastercap.fastercap_runner import FasterCapError, fastercap_parse_capacitance_matrix, run_fastercap
 
 
 @allure.parent_suite("Unit Tests")
@@ -52,3 +54,20 @@ class Test(unittest.TestCase):
         output_path = os.path.join(tmp_dir, 'nmos_diode2_FasterCap_Result_Matrix.csv')
         obtained_matrix.write_csv(output_path=output_path, separator=';')
         allure.attach.file(output_path, attachment_type=allure.attachment_type.CSV)
+
+    def test_failed_run_is_an_error_named_by_its_exit_code(self):
+        # NOTE: FasterCap 6.2 exits 75 when GMRES doesn't converge, though it prints the matrix of the last iteration,
+        #       earlier versions exited 0 then
+        for exit_code, expected_message in (
+            (75, "FasterCap failed with exit code 75 (GMRES didn't converge) after"),
+            (3, "FasterCap failed with exit code 3 after"),
+        ):
+            with self.subTest(exit_code=exit_code), tempfile.TemporaryDirectory() as tmp_dir:
+                process = mock.Mock(returncode=exit_code, stdout=io.StringIO("Capacitance matrix is:\n"))
+                with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', return_value=process), \
+                     self.assertRaises(FasterCapError) as cm:
+                    run_fastercap(exe_path='FasterCap', lst_file_path='plate.lst',
+                                  log_path=os.path.join(tmp_dir, 'FasterCap_Output.txt'),
+                                  tolerance=0.01, d_coeff=0.5, mesh_refinement_value=0.5, ooc_condition=None,
+                                  auto_preconditioner=False, galerkin_scheme=False, jacobi_preconditioner=False)
+                self.assertIn(expected_message, str(cm.exception))

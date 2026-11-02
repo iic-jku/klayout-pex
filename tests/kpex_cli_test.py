@@ -39,6 +39,7 @@ import pytest
 import klayout.db as kdb
 import klayout.rdb as rdb
 
+from klayout_pex.fastercap.fastercap_runner import FasterCapError
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
@@ -112,6 +113,19 @@ def test_klayout_writes_no_gzip_files(tmp_path):
     assert sorted(p.name for p in (tmp_path / 'nfet_li1__nfet_li1').glob('*.gz')) == \
            ['nfet_li1_k25d_pex_report.rdb.gz', 'nfet_li1_nonempty_LVS_layers.gds.gz',
             'nfet_li1_unnamed_LVS_layers.gds.gz']
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "FasterCap")
+def test_fastercap_failure_is_an_error_not_a_traceback(tmp_path):
+    failure = FasterCapError("FasterCap failed with exit code 75 (GMRES didn't converge) after 1s, see log file: x")
+    with mock.patch.object(KpexCLI, 'run_extraction', side_effect=failure):
+        code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                                '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                                '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert str(failure) in output
+    assert 'Traceback' not in output
 
 
 @allure.parent_suite("Unit Tests")
