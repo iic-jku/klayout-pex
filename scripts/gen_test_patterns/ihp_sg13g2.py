@@ -32,6 +32,7 @@ Usage:
 """
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 from typing import *
@@ -48,6 +49,9 @@ NBULAY:       GDSPair = (32, 0)
 METAL1:       GDSPair = (8, 0)
 METAL1_PIN:   GDSPair = (8, 2)
 METAL2:       GDSPair = (10, 0)
+VIA1:         GDSPair = (19, 0)
+METAL3:       GDSPair = (30, 0)
+METAL3_PIN:   GDSPair = (30, 2)
 METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
 METAL5:       GDSPair = (67, 0)
@@ -62,6 +66,7 @@ TOPMETAL2_PIN: GDSPair = (134, 2)
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL1: (8, 25),
     METAL2: (10, 25),
+    METAL3: (30, 25),
     METAL4: (50, 25),
     METAL5: (67, 25),
     TOPMETAL1: (126, 25),
@@ -73,45 +78,95 @@ def pattern(name: str) -> Pattern:
     return Pattern(name, label_layer_by_layer=LABEL_BY_LAYER)
 
 
-def load_pdk_pcells() -> str:
+def load_pdk_pcells(technology: str = 'sg13g2') -> str:
     """
+    :param technology: of the PDK, e.g. sg13cmos5l of ihp-sg13cmos5l
     :return: the technology of the pcell library SG13_dev
     """
-    if kdb.Library.library_by_name('SG13_dev', 'sg13g2') is None:
-        klayout_dir = os.path.join(pdk_root(), 'ihp-sg13g2', 'libs.tech', 'klayout')
+    if kdb.Library.library_by_name('SG13_dev', technology) is None:
+        klayout_dir = os.path.join(pdk_root(), f"ihp-{technology}", 'libs.tech', 'klayout')
         sys.path.insert(0, os.path.join(klayout_dir, 'python'))
         sys.path.insert(0, os.path.join(klayout_dir, 'python', 'pycell4klayout-api', 'source', 'python'))
-        import sg13g2_pycell_lib  # noqa: F401, registers the library SG13_dev
-    return 'sg13g2'
+        importlib.import_module(f"{technology}_pycell_lib")  # NOTE: registers the library SG13_dev
+    return technology
 
 
 #
 # Capacitance patterns
 #
 
+def mom_cap(name: str, pcell_name: str, parameters: Dict[str, Any], technology: str = 'sg13g2') -> Pattern:
+    """
+    A pattern of a MOM cap of the pcells of the PDK, flattened
+    """
+    p = pattern(name)
+    p.layout.technology_name = load_pdk_pcells(technology)
+    pcell = p.layout.create_cell(pcell_name, 'SG13_dev', parameters)
+    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
+    p.top.flatten(-1, True)
+    return p
+
+
+def label_terminals_from_left(p: Pattern, metal: GDSPair, metal_pin: GDSPair):
+    """
+    The MOM caps of the pcells whose pins are on one metal, the left one is PLUS, e.g. of cmomf, at its left edge,
+    and MINUS at its top edge
+    """
+    pins = sorted(kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*metal_pin))).merged().each(),
+                  key=lambda pin: pin.bbox().left)
+    for text, pin in zip(('PLUS', 'MINUS'), pins):
+        center = pin.bbox().center()
+        p.label(metal, text, center.x, center.y)
+
+
+def wire_across(p: Pattern, metal: GDSPair, metal_pin: GDSPair, half_width: int = 500):
+    """
+    A wire X across the layout so far, with its pin beside it
+    """
+    bbox = p.top.bbox()
+    y = bbox.center().y
+    p.box(metal, bbox.left - 2000, y - half_width, bbox.right + 2000, y + half_width)
+    p.box(metal_pin, bbox.left - 2000, y - half_width, bbox.left - 1000, y + half_width)
+    p.label(metal, 'X', bbox.left - 1500, y)
+
+
 def cap_cmomf_w10u_l25u_m2_m4_m5_wire() -> Pattern:
     # a MOM cap (cmomf pcell of the PDK) of 10 µm x 25 µm, with fingers on Metal2 … Metal4
     # (the model gives 0.915 fF/µm², 228.75 fF), its terminals labelled PLUS (left) and MINUS (top),
     # and a Metal5 wire X across it
-    technology = load_pdk_pcells()
-    p = pattern('cap_cmomf_w10u_l25u_m2_m4_m5_wire')
-    p.layout.technology_name = technology
-    pcell = p.layout.create_cell('cmomf', 'SG13_dev', {'w': '10u', 'l': '25u', 'mmin': 2, 'mmax': 4})
-    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
-    p.top.flatten(-1, True)
+    p = mom_cap('cap_cmomf_w10u_l25u_m2_m4_m5_wire', 'cmomf', {'w': '10u', 'l': '25u', 'mmin': 2, 'mmax': 4})
+    label_terminals_from_left(p, METAL4, METAL4_PIN)
+    wire_across(p, METAL5, METAL5_PIN)
+    return p
 
-    # NOTE: the pcell paints the pins (Metal4.pin) at the left (PLUS) and the top edge (MINUS)
-    pins = sorted(kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*METAL4_PIN))).merged().each(),
-                  key=lambda pin: pin.bbox().left)
-    for text, pin in zip(('PLUS', 'MINUS'), pins):
-        center = pin.bbox().center()
-        p.label(METAL4, text, center.x, center.y)
 
+def cap_cmomf_w5u_l5u_m2_m4_plus_from_m1() -> Pattern:
+    # a MOM cap (cmomf pcell of the PDK) with fingers on Metal2 … Metal4, its terminal PLUS also connected
+    # from below: a Metal1 wire through a Via1 within the marker onto the left bar of its Metal2,
+    # so there are vias under the fingers, but no fingers on Metal1
+    p = mom_cap('cap_cmomf_w5u_l5u_m2_m4_plus_from_m1', 'cmomf', {'w': '5u', 'l': '5u', 'mmin': 2, 'mmax': 4})
+    label_terminals_from_left(p, METAL4, METAL4_PIN)
     bbox = p.top.bbox()
     y = bbox.center().y
-    p.box(METAL5, bbox.left - 2000, y - 500, bbox.right + 2000, y + 500)
-    p.box(METAL5_PIN, bbox.left - 2000, y - 500, bbox.left - 1000, y + 500)
-    p.label(METAL5, 'X', bbox.left - 1500, y)
+    p.box(VIA1, bbox.left + 5, y - 95, bbox.left + 195, y + 95)
+    p.box(METAL1, bbox.left - 2000, y - 150, bbox.left + 200, y + 150)
+    return p
+
+
+def cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire() -> Pattern:
+    # a MOM cap (cmomi pcell of the PDK) with fingers on Metal3 … Metal5 and its terminals on stacked pads
+    # (feed same): PLUS on Metal5, MINUS on Metal4, and under it a wire X across it on Metal1 and Metal2,
+    # both joined by a Via1 within the marker, so there are vias under the fingers, which don't belong to them
+    p = mom_cap('cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire', 'cmomi',
+                {'w': '5u', 'l': '5u', 'mmin': 3, 'mmax': 5, 'feed': 'same'})
+    for text, metal, metal_pin in (('PLUS', METAL5, METAL5_PIN), ('MINUS', METAL4, METAL4_PIN)):
+        pin = kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*metal_pin))).bbox()
+        p.label(metal, text, pin.center().x, pin.center().y)
+    bbox = p.top.bbox()
+    center = bbox.center()
+    p.box(METAL2, bbox.left - 500, center.y - 150, bbox.right + 500, center.y + 150)
+    p.box(VIA1, center.x - 95, center.y - 95, center.x + 95, center.y + 95)
+    wire_across(p, METAL1, METAL1_PIN, half_width=150)
     return p
 
 
@@ -279,6 +334,8 @@ def inductor3_w2u_d25u84_2_turns() -> Pattern:
 
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
+    'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
+    'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire': cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,

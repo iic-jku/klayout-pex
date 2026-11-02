@@ -30,6 +30,8 @@ import allure
 import klayout.db as kdb
 
 from klayout_pex.device_totals import DeviceTotalParameters
+from klayout_pex.pdk_config import PDK
+from klayout_pex.tech_info import TechInfo
 from tests.common.device_model_mappings import MIM, NMOS, NPN, device_models
 
 
@@ -69,6 +71,16 @@ class DeviceTotalParametersTest(unittest.TestCase):
                                   {'name': 'm', 'lvs_parameter_name': 'm'}]}
         parameters = total_parameters(mapping, kdb.DeviceClassResistor())
         self.assertEqual({'w·l': 2.0, 'm': 2.0}, parameters.quantities({'w': 1.0, 'l': 1.0, 'm': 2.0}))
+
+    def test_metal_range_of_the_ihp_mom_caps_is_no_total(self):
+        for pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L):
+            models = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None).device_models
+            for name in ('cap_cmomf', 'cap_cmomi'):
+                with self.subTest(pdk=pdk, name=name):
+                    parameters = DeviceTotalParameters.of(kdb.DeviceClassCapacitor(),
+                                                          models.mapping_by_lvs_device_class_name[name])
+                    self.assertEqual({'w·l': 50.0, 'm': 2.0},
+                                     parameters.quantities({'w': 5.0, 'l': 5.0, 'm': 2.0, 'mmin': 2.0, 'mmax': 4.0}))
 
     def test_quantities_without_value(self):
         parameters = total_parameters(NMOS, kdb.DeviceClassMOS4Transistor())

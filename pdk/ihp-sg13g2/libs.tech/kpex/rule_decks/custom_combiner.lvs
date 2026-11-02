@@ -101,6 +101,9 @@ class MIMCAPNDeviceCombiner < RBA::GenericDeviceCombiner
     # Check if parameters are the same
     return false unless same_parameter(a, b, 'w') && same_parameter(a, b, 'l')
     return false if a.device_class.name.downcase.include?('rfcmim') && !same_parameter(a, b, 'wfeed')
+    # MoM capacitors of different metal ranges have different capacitances
+    return false if a.device_class.name.downcase.include?('cmom') &&
+                    !(same_parameter(a, b, 'mmin') && same_parameter(a, b, 'mmax'))
 
     # Combine by summing up 'm' parameter
     a.set_parameter('m', a.parameter('m') + b.parameter('m'))

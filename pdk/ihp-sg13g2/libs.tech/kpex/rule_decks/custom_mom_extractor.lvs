@@ -52,7 +52,8 @@ $unit = dbu
 #
 # Capacitance value: the LVS extractor does NOT compute C. LVS matches devices on
 # topology; the value C_total = density[N]*active_area + Cfeed is supplied by the
-# SPICE / Verilog-A model, not by extraction.
+# SPICE / Verilog-A model, not by extraction. The model depends on the metal range,
+# so the extractor gives it as the parameters mmin and mmax, see metal_range.
 class CapMomExtractor < RBA::GenericDeviceExtractor
   def initialize(name)
     self.name = name
@@ -74,6 +75,7 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
     conn.connect(core, core)
     conn.connect(core, dev_mk)
     m_ports.each { |mp| conn.connect(mp, dev_mk) }
+    layers[7..14].each { |via_or_metal| conn.connect(via_or_metal, dev_mk) }   # Via1..Via4, Metal2..Metal5
     conn
   end
 
@@ -84,6 +86,8 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
                     3 => layer_geometry[3], 4 => layer_geometry[4],
                     5 => layer_geometry[5] }
     dev_mk = layer_geometry[6]
+    vias = layer_geometry[7..10]            # Via1..Via4
+    metals_above = layer_geometry[11..14]   # Metal2..Metal5, the metal over each of them
 
     dev_mk.merged.each do |region|
       # Collect each port polygon together with the layer index that carries its
@@ -125,6 +129,10 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
       device.set_parameter('l', bbox.width * $unit)
       device.set_parameter('w', bbox.height * $unit)
 
+      mmin, mmax = metal_range(ports.map(&:last).max, vias, metals_above)
+      device.set_parameter('mmin', mmin)
+      device.set_parameter('mmax', mmax)
+
       # Deterministic pick of two ports (by x, then y, then metal index). Which
       # of the two ends up on mim_top is arbitrary, which is why the terminals
       # are declared equivalent; what matters is that each terminal is defined on
@@ -142,6 +150,22 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
 
   private
 
+  # The metal range of the device, which the model takes as mmin and mmax:
+  # from the highest metal with a port, where the PCell puts its pins, down the
+  # via levels that join the fingers of both terminals: the vias of each level
+  # reach at least two polygons of the metal over them, the two combs.
+  #
+  # So metal within the marker doesn't count by itself, as a wire may cross the
+  # device on any metal. Neither do vias that stop short of the stack, e.g. between
+  # two wires under it, or a via of a wire that connects one terminal from below.
+  # A layout that connects both terminals from below within the marker is taken
+  # for one more level of fingers.
+  def metal_range(mmax, vias, metals_above)
+    mmin = mmax
+    mmin -= 1 while mmin > 1 && metals_above[mmin - 2].interacting(vias[mmin - 2]).count >= 2
+    [mmin, mmax]
+  end
+
   def define_layers
     define_layer('core', "#{@name} recognition marker")
     define_layer('m1p', 'Metal1 pin ports within the marker')
@@ -150,5 +174,7 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
     define_layer('m4p', 'Metal4 pin ports within the marker')
     define_layer('m5p', 'Metal5 pin ports within the marker')
     define_layer('dev_mk', 'Device marker')
+    (1..4).each { |i| define_layer("via#{i}", "Via#{i} within the marker") }
+    (2..5).each { |i| define_layer("metal#{i}", "Metal#{i} within the marker") }
   end
 end

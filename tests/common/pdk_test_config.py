@@ -40,6 +40,7 @@ import pytest
 class PDKName(StrEnum):
     SKY130A = 'sky130A'
     IHP_SG13G2 = 'ihp-sg13g2'
+    IHP_SG13CMOS5L = 'ihp-sg13cmos5l'
     GF180MCUD = 'gf180mcuD'
 
 

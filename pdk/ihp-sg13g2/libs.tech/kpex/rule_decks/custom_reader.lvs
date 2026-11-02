@@ -632,6 +632,10 @@ class CustomReader < RBA::NetlistSpiceReaderDelegate
       device.set_parameter('A', (params['A'] || ((params['W'] || 0.0) * (params['L'] || 0.0))) * 1e12)
       device.set_parameter('P', (params['P'] || (((params['W'] || 0.0) + (params['L'] || 0.0)) * 2)) * 1e6)
     end
+    if model.downcase.include?('cmom')
+      device.set_parameter('mmin', params['MMIN'] || 0.0)
+      device.set_parameter('mmax', params['MMAX'] || 0.0)
+    end
     return unless model.downcase.include?('rfcmim')
 
     device.set_parameter('wfeed', (params['WFEED'] || 0.0) * 1e6)

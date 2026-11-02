@@ -75,6 +75,15 @@ class DeviceCustomMIM < RBA::DeviceClassCapacitor
     # not catch cap_cmim or rfcmim, which keep their asymmetry.
     equivalent_terminal_id(terminal_id('mim_btm'), terminal_id('mim_top')) if name.downcase.include?('cmom')
 
+    # The metal range of the MoM capacitors, which their models take as mmin and
+    # mmax (1 = Metal1, ...), as it sets their capacitance. 0 is a device that
+    # gives none, e.g. of a schematic that leaves it to the model's default. Not
+    # primary, as w and l: LVS still matches these devices topologically.
+    if name.downcase.include?('cmom')
+      add_parameter(RBA::DeviceParameterDefinition.new('mmin', 'lowest metal', 0, false))
+      add_parameter(RBA::DeviceParameterDefinition.new('mmax', 'highest metal', 0, false))
+    end
+
     # Adding extra param & terminal for rfcmim
     return unless name.downcase.include?('rfcmim')
 
