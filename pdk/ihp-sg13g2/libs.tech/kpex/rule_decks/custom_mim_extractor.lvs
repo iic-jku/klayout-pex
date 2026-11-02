@@ -83,6 +83,10 @@ class DeviceCustomMIM < RBA::DeviceClassCapacitor
       add_parameter(RBA::DeviceParameterDefinition.new('mmin', 'lowest metal', 0, false))
       add_parameter(RBA::DeviceParameterDefinition.new('mmax', 'highest metal', 0, false))
     end
+    # And the feed of cap_cmomi, as the number its model takes, with the same default
+    if name.downcase.include?('cmomi')
+      add_parameter(RBA::DeviceParameterDefinition.new('feed', '0 = none, 1 = same, 2 = double', 2, false))
+    end
 
     # Adding extra param & terminal for rfcmim
     return unless name.downcase.include?('rfcmim')

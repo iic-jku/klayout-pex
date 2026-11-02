@@ -356,6 +356,18 @@ def test_mom_cap_is_written_with_its_metal_range(path_components: Tuple[str, str
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('path_components, feed', [
+    (('test_patterns', 'cap_cmomi_w5u_l5u_m4_m5_none.gds.gz'), 'feed=0'),
+    (('test_patterns', 'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire.gds.gz'), 'feed=1'),
+    (('cmomi_w5u_l5u_m1_m5', 'cmomi_w5u_l5u_m1_m5.gds.gz'), 'feed=2'),
+])
+def test_cmomi_is_written_with_its_feed(path_components: Tuple[str, str], feed: str):
+    line, = pex_blackboxed.written_device_lines(*path_components)
+    assert ' cap_cmomi ' in line and line.endswith(f" {feed}")
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
 def test_rf_mim_cap__blackboxed():
     # The black-box extraction keeps the plates of the rfcmim, so its terminals are on their nodes.
     # The plates (rfmim_top, metal5_rfcap) were left out, so the bottom terminal was on the pin node of MINUS,

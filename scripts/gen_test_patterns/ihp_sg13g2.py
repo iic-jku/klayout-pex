@@ -170,6 +170,14 @@ def cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire() -> Pattern:
     return p
 
 
+def cap_cmomi_w5u_l5u_m4_m5_none() -> Pattern:
+    # a MOM cap (cmomi pcell of the PDK) without feeds: its pins are on opposite corners of the array,
+    # for the caller to connect the rows
+    p = mom_cap('cap_cmomi_w5u_l5u_m4_m5_none', 'cmomi', {'w': '5u', 'l': '5u', 'mmin': 4, 'mmax': 5, 'feed': 'none'})
+    label_terminals_from_left(p, METAL5, METAL5_PIN)
+    return p
+
+
 def cap_cmim_over_m4_wire(name: str) -> Pattern:
     """
     A MIM cap of 20 µm x 20 µm: the MIM top plate on a Metal5 bottom plate of net A, which encloses it by 2 µm,
@@ -336,6 +344,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
     'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire': cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire,
+    'cap_cmomi_w5u_l5u_m4_m5_none': cap_cmomi_w5u_l5u_m4_m5_none,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,

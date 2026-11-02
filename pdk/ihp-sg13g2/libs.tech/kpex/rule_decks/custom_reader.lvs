@@ -636,6 +636,11 @@ class CustomReader < RBA::NetlistSpiceReaderDelegate
       device.set_parameter('mmin', params['MMIN'] || 0.0)
       device.set_parameter('mmax', params['MMAX'] || 0.0)
     end
+    if model.downcase.include?('cmomi') && params['FEED']
+      # feed=double as xschem writes it, a name of the model library, or the number
+      feed_by_name = { 'NONE' => 0.0, 'SAME' => 1.0, 'DOUBLE' => 2.0 }
+      device.set_parameter('feed', feed_by_name.fetch(params['FEED'], params['FEED']))
+    end
     return unless model.downcase.include?('rfcmim')
 
     device.set_parameter('wfeed', (params['WFEED'] || 0.0) * 1e6)

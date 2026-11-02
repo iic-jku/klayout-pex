@@ -132,6 +132,7 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
       mmin, mmax = metal_range(ports.map(&:last).max, vias, metals_above)
       device.set_parameter('mmin', mmin)
       device.set_parameter('mmax', mmax)
+      device.set_parameter('feed', feed_of_ports(ports)) if @reg_dev.has_parameter?('feed')
 
       # Deterministic pick of two ports (by x, then y, then metal index). Which
       # of the two ends up on mim_top is arbitrary, which is why the terminals
@@ -164,6 +165,19 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
     mmin = mmax
     mmin -= 1 while mmin > 1 && metals_above[mmin - 2].interacting(vias[mmin - 2]).count >= 2
     [mmin, mmax]
+  end
+
+  # The feed of a cap_cmomi, as the number its model takes (none = 0, same = 1,
+  # double = 2), by where the PCell puts its two pins: 'same' on two metals,
+  # 'double' on the pads at both sides of the device, in one row (one column, if
+  # rotated), 'none' at opposite corners of the array.
+  def feed_of_ports(ports)
+    (a_poly, a_lidx), (b_poly, b_lidx) = ports
+    return 1 if a_lidx != b_lidx
+
+    a = a_poly.bbox.center
+    b = b_poly.bbox.center
+    a.x == b.x || a.y == b.y ? 2 : 0
   end
 
   def define_layers

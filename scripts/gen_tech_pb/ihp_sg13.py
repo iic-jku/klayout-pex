@@ -723,7 +723,8 @@ class TechBuilder:
         add_device_model_mapping(dmi, "ntap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
         add_device_model_mapping(dmi, "ptap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
         add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       mom_cap,    kind=METAL_CAP)
-        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       mom_cap,    kind=METAL_CAP)
+        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],
+                                 mom_cap + [lvs_param('feed', 'feed')], kind=METAL_CAP)
         add_device_model_mapping(dmi, "sg13_hv_svaricap", "X",   ["G1", "W", "G2", "SUB"],
                                  [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('Nx', 'Nx')])
         add_device_model_mapping(dmi, "sg13_moscap_n",    "X",   ["G", "SUB"],
