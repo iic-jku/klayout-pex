@@ -33,7 +33,7 @@ drawn to the gf180mcu DRC rules (variant D: 5 metals, 11K top metal):
   MIM (option B):    FuseTop area >= 25, enclosed by the bottom plate (Metal4) and CAP_MK by 0.6,
                      Via4 on FuseTop spacing 0.5, FuseTop enclosure 0.4, bottom plates 1.2 apart
 
-The nfet patterns use the nfet pcell of the PDK, so the gf180mcuD PDK must be installed
+The nfet and diffusion resistor patterns use the pcells of the PDK, so the gf180mcuD PDK must be installed
 (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/gf180mcuD).
 
 Usage:
@@ -243,6 +243,33 @@ def ldmos_pair_m1(name: str, implant: GDSPair, drift: GDSPair, dnwell: bool) -> 
     return p
 
 
+def res_diffusion_w1_l4() -> Pattern:
+    """
+    The diffusion resistors of 1 µm x 4 µm side by side (pcells of the PDK, without substrate taps),
+    a p+ one also within a DNWELL, as its terminals are another LVS layer (pplus_dw_cont),
+    each terminal labelled on the Metal1 over its contact
+    """
+    load_pdk_pcells()
+    p = pattern('res_diffusion_w1_l4')
+    for i, (name, resistor, contact_x, deepnwell) in enumerate((('nplus_u', 'nplus_u', 260, False),
+                                                                ('nplus_s', 'nplus_s', 110, False),
+                                                                ('pplus_u', 'pplus_u', 260, False),
+                                                                ('pplus_s', 'pplus_s', 110, False),
+                                                                ('pplus_u_dn', 'pplus_u', 260, True))):
+        pcell = p.layout.create_cell(f"{resistor}_resistor", 'gf180mcu', {
+            'w_res': 1.0, 'l_res': 4.0, 'sub': False, 'deepnwell': deepnwell
+        })
+        device = p.layout.cell(p.layout.convert_cell_to_static(pcell.cell_index()))
+        device.name = name
+        p.layout.delete_cell(pcell.cell_index())
+        y = i * 8000
+        p.top.insert(kdb.CellInstArray(device.cell_index(), kdb.Trans(0, y)))
+        p.label(METAL1, f"{name}_A", -contact_x, y + 500)
+        p.label(METAL1, f"{name}_B", 4000 + contact_x, y + 500)
+    p.top.flatten(-1, True)
+    return p
+
+
 #
 # Capacitance patterns
 #
@@ -365,6 +392,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'pfet_06v0_dn': pfet_06v0_dn,
     'nfet_10v0_asym_pair_m1': lambda: ldmos_pair_m1('nfet_10v0_asym_pair_m1', NPLUS, MVSD, dnwell=False),
     'pfet_10v0_asym_pair_m1': lambda: ldmos_pair_m1('pfet_10v0_asym_pair_m1', PPLUS, MVPSD, dnwell=True),
+    'res_diffusion_w1_l4': res_diffusion_w1_l4,
     'sidewall_cap_vpp_04p4x04p6_m1_redux': sidewall_cap_vpp_04p4x04p6_m1_redux,
     'sidewall_non_parallel_m1': sidewall_non_parallel_m1,
     'sideoverlap_complex_m1_m2': sideoverlap_complex_m1_m2,

@@ -123,6 +123,14 @@ def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], laye
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_diffusion_resistor_terminals_of_gf180mcuD():
+    # NOTE: the models of the resistors have the contacts below the Metal1 (rt1, rt2)
+    assert device_terminal_layers(PDKName.GF180MCUD, 'test_patterns', 'res_diffusion_w1_l4.gds.gz') == \
+           [('A', 'Metal1')] * 5 + [('B', 'Metal1')] * 5
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_diffusion_resistor_terminals_of_sky130A():
     # NOTE: the terminals of the n+ and p+ diffusion resistors (HV here) are diffusion as the source/drain of a MOS,
     #       at the lower face of their licons

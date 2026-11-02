@@ -172,6 +172,31 @@ def test_ldmos_drain_is_under_its_contacts(cell_name: str,
     assert ladder_resistance(contact_resistance, 0.09 * 520 / 380, 8) == pytest.approx(drain_resistance, abs=1e-3)
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_diffusion_resistors_have_their_contacts_in_their_models():
+    # The models of the resistors have terminal resistors (rt1, rt2, of 18.5, 6, 50 and 6.5 Ω·µm over the width) up to
+    # their terminals, and the contacts of the salicided ones abut their bodies: the contacts are within the devices,
+    # rather than contact shapes the tech info doesn't know, and no resistors here. Those are the Metal1 from the labels
+    # to the terminals of the salicided ones, and the nwell taps of the p+ ones, with their contacts
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.assert_expected_matches_obtained(
+            'test_patterns', 'res_diffusion_w1_l4.gds.gz',
+            expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$6;$6.$1.Nwell;;1295.455
+R2;$6.$0.Metal1;$6.$1.Nwell;;6.3
+R3;$9;$9.$1.Nwell;;1265.873
+R4;$9.$0.Metal1;$9.$1.Nwell;;6.3
+R5;nplus_s_A;nplus_s_A.P0.Metal1;;0.008
+R6;nplus_s_B;nplus_s_B.P0.Metal1;;0.008
+R7;pplus_s_A;pplus_s_A.P0.Metal1;;0.008
+R8;pplus_s_B;pplus_s_B.P0.Metal1;;0.008"""
+        )
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+
+
 def obtained_resistances(*path_components) -> List[float]:
     """
     The resistances, sorted (for patterns with many internal nodes, whose names are not stable)

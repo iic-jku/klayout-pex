@@ -385,6 +385,10 @@ contact_ptap_con    = contact.and(ptap)
 contact_ntap_dw_con = contact.and(ntap_dw)
 contact_ptap_dw_con = contact.and(pcomp.and(lvpwell_con).and(dnwell))
 
+# [PEX] the contacts over the terminals of the diffusion resistors, which their models have (rt1, rt2),
+#       so that PEX knows all of the contacts (NOTE: a regular LVS would not do this, we need it for PEX)
+contact_res_con = contact.and(nplus_cont.or(pplus_cont).or(pplus_dw_cont))
+
 # [PEX] the isolated p-wells, the LVPWELL within the deep nwell (outside of it, an LVPWELL is the substrate),
 #       on the net of their LVPWELL, as the capacitances above them go to it
 #       (NOTE: a regular LVS would not do this, we need it for PEX)
@@ -409,6 +413,7 @@ connect(contact_ntap_con, contact)
 connect(contact_ptap_con,    contact)
 connect(contact_ntap_dw_con, contact)
 connect(contact_ptap_dw_con, contact)
+connect(contact_res_con,     contact)
 
 # [PEX] the isolated p-wells
 connect(lvpwell_dw_con, lvpwell_con)
