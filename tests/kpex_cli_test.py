@@ -39,7 +39,7 @@ import pytest
 import klayout.db as kdb
 import klayout.rdb as rdb
 
-from klayout_pex.fastercap.fastercap_runner import FasterCapError
+from klayout_pex.fastercap.fastercap_error import FasterCapError
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli

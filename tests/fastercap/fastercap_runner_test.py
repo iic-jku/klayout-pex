@@ -28,7 +28,8 @@ import tempfile
 import unittest
 from unittest import mock
 
-from klayout_pex.fastercap.fastercap_runner import FasterCapError, fastercap_parse_capacitance_matrix, run_fastercap
+from klayout_pex.fastercap.fastercap_error import FasterCapError
+from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix, run_fastercap
 
 
 @allure.parent_suite("Unit Tests")

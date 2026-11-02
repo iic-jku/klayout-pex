@@ -49,7 +49,8 @@ from .env import EnvVar, Env
 from .extraction_engine import ExtractionEngine
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
-from .fastercap.fastercap_runner import FasterCapError, run_fastercap, fastercap_parse_capacitance_matrix
+from .fastercap.fastercap_error import FasterCapError
+from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
 from .fastcap.output_interpreter import FastCapOutputInterpreter

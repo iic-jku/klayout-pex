@@ -33,13 +33,7 @@ from ..log import (
     subproc,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
-
-
-class FasterCapError(Exception):
-    """
-    FasterCap failed, or its log has no capacitance matrix
-    """
-    pass
+from .fastercap_error import FasterCapError
 
 
 # NOTE: the exit codes of FasterCap 6.2 (see the README of iic-jku/FasterCap), earlier versions exit 0 or 1.
