@@ -315,7 +315,7 @@ class TerminalOnNetTest(unittest.TestCase):
         # so they are on the ends of the leads, rather than without a node in the resistance network (#351)
         pex_context = lvsdb_context('inductor2_w2u_d15u48_1_turn', 'ihp-sg13g2')
         inductor, = pex_context.devices_by_name.values()
-        self.assertEqual({'inductor_1': ['TopMetal2'], 'inductor_2': ['TopMetal2'], 'inductor_sub': []},
+        self.assertEqual({'inductor_1': ['TopMetal2'], 'inductor_2': ['TopMetal2'], 'inductor_sub': ['PWell']},
                          {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
                           for t in inductor.terminals})
 
