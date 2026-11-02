@@ -183,7 +183,7 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
-        specifier='>= 6.0.9',
+        specifier='>= 6.2.1',
         reason="the version the integration tests are run against",
         severity=Severity.WARNING,
     ),
