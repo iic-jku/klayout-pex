@@ -31,10 +31,13 @@ Usage:
 """
 from __future__ import annotations
 
+import os
 import sys
 from typing import *
 
-from pattern_builder import GDSPair, Pattern, main
+import klayout.db as kdb
+
+from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 NWELL:    GDSPair = (64, 20)
 TAP:      GDSPair = (65, 44)
@@ -53,6 +56,7 @@ CAPM:     GDSPair = (89, 44)
 VIA3:     GDSPair = (70, 44)
 MET4:     GDSPair = (71, 20)
 MET4_PIN: GDSPair = (71, 16)
+INDUCTOR: GDSPair = (82, 24)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     NWELL: (64, 5),
@@ -183,6 +187,44 @@ def nfet_li1_in_subcell() -> Pattern:
     return p
 
 
+#
+# Device patterns
+#
+
+def rf_inductors_03_90_05_125_05_220() -> Pattern:
+    """
+    The RF inductors of the PDK (its cells sky130_fd_pr__rf_test_coil1, 2 and 3, of the models
+    sky130_fd_pr__ind_03_90, _05_125 and _05_220) side by side, 10 µm apart, the leads of each coil
+    outside its marker as pins: its ends (met3) A1, B1, A2, …, from the bottom, and its center tap (met2) CT1, …
+
+    Needs the sky130A PDK (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/sky130A)
+    """
+    library = kdb.Layout()
+    library.read(os.path.join(pdk_root(), 'sky130A', 'libs.ref', 'sky130_fd_pr', 'gds', 'sky130_fd_pr.gds'))
+    p = pattern('rf_inductors_03_90_05_125_05_220')
+    x = 0
+    for i in (1, 2, 3):
+        coil = library.cell(f"sky130_fd_pr__rf_test_coil{i}")
+        cell = p.layout.create_cell(coil.name)
+        cell.copy_tree(coil)
+        trans = kdb.Trans(x - cell.bbox().left, 0)
+        p.top.insert(kdb.CellInstArray(cell.cell_index(), trans))
+        x += cell.bbox().width() + 10000
+
+        def leads(layer: GDSPair) -> List[kdb.Box]:
+            def region(gds_pair: GDSPair) -> kdb.Region:
+                return kdb.Region(cell.begin_shapes_rec(p.layout.layer(*gds_pair))).transformed(trans)
+            return sorted((polygon.bbox() for polygon in (region(layer) - region(INDUCTOR)).merged().each()),
+                          key=lambda box: box.bottom)
+
+        for (layer, pin_layer), names in (((MET3, MET3_PIN), (f"A{i}", f"B{i}")), ((MET2, MET2_PIN), (f"CT{i}",))):
+            for box, name in zip(leads(layer), names, strict=True):
+                p.box(pin_layer, box.left, box.bottom, box.right, box.top)
+                p.label(layer, name, box.center().x, box.center().y)
+    p.top.flatten(-1, True)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
@@ -197,6 +239,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
     'net_names_A_and_a_m2': net_names_A_and_a_m2,
     'nfet_li1_in_subcell': nfet_li1_in_subcell,
+    'rf_inductors_03_90_05_125_05_220': rf_inductors_03_90_05_125_05_220,
 }
 
 
