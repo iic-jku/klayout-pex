@@ -193,7 +193,8 @@ jobs:
   # the Allure and coverage pages.
   plugin-tests:
     name: Plugin Tests ${{ matrix.plugin }}
-    runs-on: ubuntu-latest
+    # NOTE: not ubuntu-latest (26.04), for which the Elmer PPA has no release yet
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
