@@ -1157,7 +1157,10 @@ licon_ptap_con = licon.and(ptap_conn)
 
 mcon_con  = mcon.not(vpp)
 via1_con  = via1.not(vpp)
-via2_con  = via2.not(vpp)
+# [PEX] the via2 within the RF inductors, which join the met2 and met3 of their coils, left out like these
+#       (met2_con, met3_con), as the model of the inductor has them, rather than nets of their own
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+via2_con  = via2.not(vpp).not(inductor)
 via3_con  = via3.not(vpp)
 via4_con  = via4.not(vpp)
 
@@ -1516,6 +1519,10 @@ logger.info("Starting INDUCTOR DERIVATIONS")
 
 # General Inductor derivation
 inductor_sub = inductor.and(extent)
+
+# [PEX] the via2 within the RF inductors, part of them (see via2_con), so that PEX knows all of via2
+#       (NOTE: a regular LVS would not do this, we need it for PEX)
+via2_ind = via2.and(inductor)
 
 # RF Inductor with 3 turns and internal diameter of 90um
 coil_1 = inductor.interacting(met3.or(met2).and(inductor.covering(met2.and(inductor), 3, 3)).holes.width(100.um, projection).with_distance(89.um, 91.um).polygons)
@@ -2039,6 +2046,9 @@ connect(inductor_sub      , pwell_label)
 #       we need it for PEX, as the capacitances to the substrate go to it)
 connect_global(inductor_sub, substrate_name)
 
+# [PEX] the via2 within the RF inductors (NOTE: a regular LVS would not do this, we need it for PEX)
+connect(via2_ind, via2)
+
 
 #================================
 # ------- VPP CONNECTIONS -------
@@ -2416,19 +2426,19 @@ extract_devices(VaractorExtractor::new("sky130_fd_pr__cap_var_hvt", 4.4e-15), { 
 # ------ INDUCTOR EXTRACTION ------
 #==================================
 
-# logger.info("Starting INDUCTOR EXTRACTION")
+logger.info("Starting INDUCTOR EXTRACTION")
 
-# # RF Inductor with 3 turns and internal diameter of 90um
-# logger.info("Extracting RF Inductor with 3 turns and internal diameter of 90um")
-# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_03_90"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_1, "B" => inductor_sub })
+# RF Inductor with 3 turns and internal diameter of 90um
+logger.info("Extracting RF Inductor with 3 turns and internal diameter of 90um")
+extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_03_90"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_1, "B" => inductor_sub })
 
-# # RF Inductor with 5 turns and internal diameter of 125um
-# logger.info("Extracting RF Inductor with 5 turns and internal diameter of 125um")
-# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_125"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_2, "B" => inductor_sub })
+# RF Inductor with 5 turns and internal diameter of 125um
+logger.info("Extracting RF Inductor with 5 turns and internal diameter of 125um")
+extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_125"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_2, "B" => inductor_sub })
 
-# # RF Inductor with 5 turns and internal diameter of 220um
-# logger.info("Extracting RF Inductor with 5 turns and internal diameter of 220um")
-# extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_220"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_3, "B" => inductor_sub })
+# RF Inductor with 5 turns and internal diameter of 220um
+logger.info("Extracting RF Inductor with 5 turns and internal diameter of 220um")
+extract_devices(InductorExtractor::new("sky130_fd_pr__rf_ind_05_220"), {"C1" => met3_ncap, "C2" => met2_con, "M" => coil_3, "B" => inductor_sub })
 
 
 #==================================

@@ -84,6 +84,8 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, VIA,     KREG, "mcon_con",  (67, 44),    "mcon",      "mcon_con",       "Computed layer for contact between li1 and met1")
     add_computed_layer(tech, VIA,     KREG, "via1_con",  (68, 44),    "via",       "via1_con",       "Computed layer for contact between met1 and met2")
     add_computed_layer(tech, VIA,     KREG, "via2_con",  (69, 44),    "via2",      "via2_con",       "Computed layer for contact between met2 and met3")
+    # NOTE: within the RF inductors, whose models have their coils (see sky130.lvs, via2_con)
+    add_computed_layer(tech, VIA,     KDEV, "via2_ind",  (69, 4401),  "via2",      None,             "Computed layer for via2 within the RF inductors, joining the met2 and met3 of their coils")
     add_computed_layer(tech, VIA,     KREG, "via3_ncap", (70, 144),   "via3",      "via3_ncap",      "Computed layer for via3 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via4_ncap", (71, 144),   "via4",      "via4_ncap",      "Computed layer for via4 (no MIM cap)")
 
@@ -633,6 +635,15 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #           as their models depend on w and l, not only on w*l and w+l
     for var in ('cap_var_lvt', 'cap_var_hvt'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__{var}", "X", ["A", "B", "W"], w_l)
+
+    # RF inductors of a fixed size, read as MOS4 (see sky130.lvs, InductorExtractor):
+    # the ends of the coil (S, G, on met3), its center tap (D, on met2) and the substrate (B)
+    #
+    #     NOTE: sky130.lib.spice doesn't include their models, a simulation needs to include them
+    #           (libs.tech/ngspice/sky130_fd_pr__model__inductors.model.spice) itself
+    for ind in ('03_90', '05_125', '05_220'):
+        add_device_model_mapping(dmi, f"sky130_fd_pr__rf_ind_{ind}", "X", ["S", "G", "D", "B"], [],
+                                 f"sky130_fd_pr__ind_{ind}")
 
     # NOTE: no device model mapping (yet), a netlist with these devices is an error:
     #       - cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv: the model has 4 terminals, LVS extracts 3

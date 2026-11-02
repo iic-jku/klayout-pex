@@ -355,3 +355,20 @@ R8;G.$2.li1;G.$7.poly;;152.0
 R9;S;S.$0.li1;;185.0
 R10;S.$0.li1;S.$2.met1;;9.3"""
     )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_rf_inductors_are_subcircuits_at_the_ends_of_their_leads():
+    # The PEX-LVS extracts the RF inductors of the PDK (its cells sky130_fd_pr__rf_test_coil1, 2 and 3)
+    # as their models, which have their coils, so the met2, met3 and via2 within their markers are left out.
+    # They used to vanish: LVS cut their coils out of the metal, but didn't extract them,
+    # so the ends of their leads were nets of their own, and so were the vias within their markers
+    csv_lines, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns',
+                                                                  'rf_inductors_03_90_05_125_05_220.gds.gz')
+    assert csv_lines == ['Device;Net1;Net2;Capacitance [fF];Resistance [Ω]']
+    assert [line for line in spice_lines if line.startswith('X')] == [
+        'X$1 A1 B1 CT1 sky130_gnd sky130_fd_pr__ind_03_90',
+        'X$2 A2 B2 CT2 sky130_gnd sky130_fd_pr__ind_05_125',
+        'X$3 A3 B3 CT3 sky130_gnd sky130_fd_pr__ind_05_220',
+    ]
