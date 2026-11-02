@@ -49,6 +49,7 @@ from .env import EnvVar, Env
 from .extraction_engine import ExtractionEngine
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
 from .fastercap.fastercap_model_generator import FasterCapModelGenerator
+from .fastercap.fastercap_error import FasterCapError
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastercap.output_interpreter import FasterCapOutputInterpreter
 from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matrix
@@ -1473,7 +1474,7 @@ class KpexCLI:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
                     except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
-                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError) as e:
+                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 

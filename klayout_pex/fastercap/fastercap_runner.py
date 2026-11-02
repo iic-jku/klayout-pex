@@ -33,6 +33,23 @@ from ..log import (
     subproc,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
+from .fastercap_error import FasterCapError
+
+
+# NOTE: the exit codes of FasterCap 6.2 (see the README of iic-jku/FasterCap), earlier versions exit 0 or 1.
+#       75 fails the run too, as the matrix it prints, the one of the last iteration, misses the tolerance
+FASTERCAP_EXIT_CODE_MEANINGS: Dict[int, str] = {
+    1: "other error",
+    64: "wrong command line",
+    65: "the matrix has NaN or infinite entries",
+    66: "the input file can't be opened",
+    71: "out of memory",
+    74: "the input can't be read",
+    75: "GMRES didn't converge",
+    97: "the run can't go out-of-core",
+    98: "unexpected exception",
+    125: "stopped, e.g. by Ctrl-C or SIGTERM",
+}
 
 
 def run_fastercap(exe_path: str,
@@ -100,8 +117,10 @@ def run_fastercap(exe_path: str,
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
     else:
-        raise Exception(f"FasterCap failed with status code {proc.returncode} after {'%.4g' % duration}s, "
-                        f"see log file: {log_path}")
+        meaning = FASTERCAP_EXIT_CODE_MEANINGS.get(proc.returncode, None)
+        raise FasterCapError(f"FasterCap failed with exit code {proc.returncode}"
+                             f"{f' ({meaning})' if meaning else ''} after {'%.4g' % duration}s, "
+                             f"see log file: {log_path}")
 
 
 def fastercap_parse_capacitance_matrix(log_path: str) -> CapacitanceMatrix:
@@ -114,7 +133,7 @@ def fastercap_parse_capacitance_matrix(log_path: str) -> CapacitanceMatrix:
             if line.strip() == "Capacitance matrix is:":
                 m = re.match(r'^Dimension (\d+) x (\d+)$', rlines[idx-1])
                 if not m:
-                    raise Exception(f"Could not parse capacitor matrix dimensions")
+                    raise FasterCapError(f"Could not parse capacitor matrix dimensions")
                 dim = int(m.group(1))
                 conductor_names: List[str] = []
                 rows: List[List[float]] = []
@@ -128,4 +147,4 @@ def fastercap_parse_capacitance_matrix(log_path: str) -> CapacitanceMatrix:
                 cm = CapacitanceMatrix(conductor_names=conductor_names, rows=rows)
                 return cm
 
-        raise Exception(f"Could not extract capacitance matrix from FasterCap log file {log_path}")
+        raise FasterCapError(f"Could not extract capacitance matrix from FasterCap log file {log_path}")
