@@ -27,6 +27,7 @@ import csv
 from dataclasses import dataclass
 import os
 from typing import *
+from unittest import mock
 
 import klayout.db as kdb
 
@@ -88,6 +89,16 @@ class RCX25Extraction:
         results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]
         assert results.cell_name == path_components[-1][:-len('.gds.gz')]
         return results, cli.rcx25_extracted_csv_path
+
+    def device_layer_warnings(self, *path_components) -> List[str]:
+        """
+        Extracts the single cell and returns the warnings about the LVS layers it leaves out
+        and the device terminals the resistance network has no nodes for
+        """
+        with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+            self.run_rcx25d_single_cell(*path_components)
+        return [c.args[0] for c in warning_mock.call_args_list
+                if 'leaves out these LVS layers' in c.args[0] or 'has no nodes for these device terminals' in c.args[0]]
 
     def written_netlist_paths(self,
                               *path_components,
