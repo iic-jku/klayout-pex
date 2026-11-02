@@ -112,11 +112,16 @@ R5;VDD.$1.Nwell;VDD.P0.Nwell;;3083.333"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_nfet_10v0_asym_pair():
+@pytest.mark.parametrize('cell_name', [
+    'nfet_10v0_asym_pair',
+    # NOTE: MVSD also over a part of the source of one device, next to its gate: it stays one source,
+    #       as only a diffusion fully within MVSD is a drain (split at the MVSD edge, that device was lost)
+    'nfet_10v0_asym_pair_mvsd_over_source',
+])
+def test_nfet_10v0_asym_pair(cell_name: str):
     # 2 mirrored LDMOS sharing their drain (the MVSD side), each with its own source:
     # the asymmetric device must be extracted with S and D in place, not swapped
-    cell_name = 'nfet_10v0_asym_pair'
-    _, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+    device_lines = pex_whiteboxed.written_device_lines('test_patterns', f"{cell_name}.gds.gz")
     lvsdb = pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz")
     devices = list(lvsdb.netlist().circuit_by_name(cell_name).each_device())
     assert [d.device_class().name for d in devices] == ['nfet_10v0_asym'] * 2
@@ -124,6 +129,11 @@ def test_nfet_10v0_asym_pair():
     sources = {d.net_for_terminal('S').expanded_name() for d in devices}
     assert len(drains) == 1
     assert len(sources) == 2
+
+    # NOTE: the terminal order of the model, D G S B
+    assert len(device_lines) == 2
+    assert {line.split()[1] for line in device_lines} == {name.replace('$', r'\$') for name in drains}
+    assert {line.split()[3] for line in device_lines} == {name.replace('$', r'\$') for name in sources}
 
 
 def obtained_resistances(*path_components) -> List[float]:

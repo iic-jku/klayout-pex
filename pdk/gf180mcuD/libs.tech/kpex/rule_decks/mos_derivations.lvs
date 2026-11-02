@@ -68,9 +68,10 @@ ps_ldmos    = pd_sd_ldmos.not(mvpsd)
 psd_ldmos   = pcomp.not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell)
                    .interacting(mvpsd).sized(0.29.um).sized(-0.29.um).extents.not(pgate_ldmos)
 # LDPMOS is asymmetric: source and drain recognition regions are derived from the gap-filled
-# S/D region, split at the MVPSD edge (the drain COMP is separated from the gate by a gap)
-ps_dev_ldmos = psd_ldmos.not(mvpsd)
-pd_dev_ldmos = psd_ldmos.and(mvpsd)
+# S/D region (the drain COMP is separated from the gate by a gap). A region counts as drain
+# only if it is fully enclosed by MVPSD, as MVPSD may partially cover the source too.
+ps_dev_ldmos = psd_ldmos.not_inside(mvpsd)
+pd_dev_ldmos = psd_ldmos.inside(mvpsd)
 
 # ==============
 # ---- NMOS ----
@@ -116,6 +117,7 @@ ns_ldmos    = nsd.not(v5_xtor).and(dualgate).and(ldmos_xtor).not(dnwell).not(mvs
 nsd_ldmos   = ncomp.not(v5_xtor).and(dualgate).and(ldmos_xtor).not(dnwell)
                    .interacting(mvsd).sized(0.37.um).sized(-0.37.um).extents.not(ngate_ldmos)
 # LDNMOS is asymmetric: source and drain recognition regions are derived from the gap-filled
-# S/D region, split at the MVSD edge (the drain COMP is separated from the gate by a gap)
-ns_dev_ldmos = nsd_ldmos.not(mvsd)
-nd_dev_ldmos = nsd_ldmos.and(mvsd)
+# S/D region (the drain COMP is separated from the gate by a gap). A region counts as drain
+# only if it is fully enclosed by MVSD, as MVSD may partially cover the source too.
+ns_dev_ldmos = nsd_ldmos.not_inside(mvsd)
+nd_dev_ldmos = nsd_ldmos.inside(mvsd)
