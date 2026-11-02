@@ -55,6 +55,9 @@ PPLUS:  GDSPair = (31, 0)
 NPLUS:  GDSPair = (32, 0)
 LVPWELL: GDSPair = (204, 0)
 DUALGATE: GDSPair = (55, 0)
+MVPSD:  GDSPair = (11, 39)
+MVSD:   GDSPair = (210, 0)
+LDMOS_XTOR: GDSPair = (226, 0)
 POLY2:  GDSPair = (30, 0)
 CONT:   GDSPair = (33, 0)
 METAL1: GDSPair = (34, 0)
@@ -210,6 +213,36 @@ def pfet_06v0_dn() -> Pattern:
     return p
 
 
+def ldmos_pair_m1(name: str, implant: GDSPair, drift: GDSPair, dnwell: bool) -> Pattern:
+    """
+    2 mirrored 10V LDMOS of 4 µm x 0.6 µm sharing their drain, as the cell of the PDK's LVS test layout of the LDPMOS,
+    without its guard rings and Metal2, the same for both devices, so that they compare: the drain is a COMP of its own
+    within the drift implant, apart from the gates, with 8 contacts under a Metal1 strip, labelled at the first of them
+    """
+    p = pattern(name)
+    p.box(DUALGATE, -5220, -6180, 8160, 10180)
+    p.box(LDMOS_XTOR, -5220, -6180, 8160, 10180)
+    if dnwell:
+        p.box(DNWELL, -1860, -2820, 4800, 6820)
+    p.box(implant, -600, -230, 3540, 4230)
+    p.box(drift, 600, -800, 2340, 4800)
+    p.box(COMP, -440, 0, 1000, 4000)
+    p.box(COMP, 1360, 0, 1580, 4000)
+    p.box(COMP, 1940, 0, 3380, 4000)
+    for text, metal_x, contact_x in (('S1', -440, -370), ('D', 1280, 1360), ('S2', 3000, 3090)):
+        p.box(METAL1, metal_x, 0, metal_x + 380, 4000)
+        for y in range(70, 4000, 520):
+            p.box(CONT, contact_x, y, contact_x + 220, y + 220)
+        p.label(METAL1, text, contact_x + 110, 180)
+    for text, x in (('G1', 0), ('G2', 1740)):
+        p.box(POLY2, x, -660, x + 1200, 5280)
+        p.box(METAL1, x, 4900, x + 1200, 5280)
+        for contact_x in (x + 70, x + 910):
+            p.box(CONT, contact_x, 4980, contact_x + 220, 5200)
+        p.label(METAL1, text, x + 600, 5090)
+    return p
+
+
 #
 # Capacitance patterns
 #
@@ -330,6 +363,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'nfet_m1_redux': lambda: nfet_m1('nfet_m1_redux', 'DS'),
     'nfet_m1_redux_only_G': lambda: nfet_m1('nfet_m1_redux_only_G', 'G'),
     'pfet_06v0_dn': pfet_06v0_dn,
+    'nfet_10v0_asym_pair_m1': lambda: ldmos_pair_m1('nfet_10v0_asym_pair_m1', NPLUS, MVSD, dnwell=False),
+    'pfet_10v0_asym_pair_m1': lambda: ldmos_pair_m1('pfet_10v0_asym_pair_m1', PPLUS, MVPSD, dnwell=True),
     'sidewall_cap_vpp_04p4x04p6_m1_redux': sidewall_cap_vpp_04p4x04p6_m1_redux,
     'sidewall_non_parallel_m1': sidewall_non_parallel_m1,
     'sideoverlap_complex_m1_m2': sideoverlap_complex_m1_m2,

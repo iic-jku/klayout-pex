@@ -108,13 +108,15 @@ def test_mim_cap_terminals_of_gf180mcuD():
      [('D', 'licon_nsd_con'), ('G', 'poly'), ('S', 'licon_nsd_con')]),
     (PDKName.GF180MCUD, ('test_patterns', 'nfet_m1.gds.gz'),
      [('D', 'contact_nsd_con'), ('G', 'Poly2'), ('S', 'contact_nsd_con')]),
-    # NOTE: the drain of the LDMOS is a diffusion of its own (nd_ldmos), apart from the gate
+    # NOTE: the drain of the LDMOS is a diffusion of its own (nd_ldmos, pd_ldmos), apart from the gate
     (PDKName.GF180MCUD, ('test_patterns', 'nfet_10v0_asym_pair.gds.gz'),
      [('D', 'contact_nsd_con')] * 2 + [('G', 'Poly2')] * 2 + [('S', 'contact_nsd_con')] * 2),
+    (PDKName.GF180MCUD, ('test_patterns', 'pfet_10v0_asym_pair_m1.gds.gz'),
+     [('D', 'contact_psd_con')] * 2 + [('G', 'Poly2')] * 2 + [('S', 'contact_psd_con')] * 2),
     # NOTE: the source/drain of a PMOS within a DNWELL without Nwell is psd_dw, not psd
     (PDKName.GF180MCUD, ('test_patterns', 'pfet_06v0_dn.gds.gz'),
      [('D', 'contact_psd_con'), ('G', 'Poly2'), ('S', 'contact_psd_con')]),
-], ids=['ihp_sg13g2', 'sky130A', 'gf180mcuD', 'gf180mcuD LDMOS', 'gf180mcuD PMOS in DNWELL'])
+], ids=['ihp_sg13g2', 'sky130A', 'gf180mcuD', 'gf180mcuD LDNMOS', 'gf180mcuD LDPMOS', 'gf180mcuD PMOS in DNWELL'])
 def test_mos_terminals(pdk_name: PDKName, path_components: Tuple[str, ...], layers: List[Tuple[str, str]]):
     assert device_terminal_layers(pdk_name, *path_components) == layers
 

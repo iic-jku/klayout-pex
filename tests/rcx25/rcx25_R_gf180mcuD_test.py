@@ -29,6 +29,7 @@ from unittest import mock
 from typing import *
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.common.rc_networks import build_network, port_admittance
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK gf180mcuD | mode R]"
@@ -124,6 +125,51 @@ def test_nfet_10v0_asym_pair():
     sources = {d.net_for_terminal('S').expanded_name() for d in devices}
     assert len(drains) == 1
     assert len(sources) == 2
+
+
+def ladder_resistance(rung: float, series: float, rungs: int) -> float:
+    """
+    The resistance into one end of a ladder of equal rungs: from its far end, a series and a parallel resistor in turn
+    """
+    resistance = rung
+    for _ in range(rungs - 1):
+        resistance = 1 / (1 / rung + 1 / (series + resistance))
+    return resistance
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name, diffusion, contact_resistance, drain_resistance', [
+    ('nfet_10v0_asym_pair_m1', 'Nplus', 6.3, 1.033),  # NOTE: M1-N+
+    ('pfet_10v0_asym_pair_m1', 'Pplus', 5.2, 0.891),  # NOTE: M1-P+
+], ids=['LDNMOS', 'LDPMOS'])
+def test_ldmos_drain_is_under_its_contacts(cell_name: str,
+                                           diffusion: str,
+                                           contact_resistance: float,
+                                           drain_resistance: float):
+    # The drain COMP of the LDMOS is apart from its gates, which left the one of the LDPMOS out of pd_ldmos,
+    # derived from the source/drain interacting with a gate, so its terminal was on Metal1, without its contacts.
+    # Both drains are the same stack, which differs in the resistance per contact only: 8 contacts under a Metal1 strip
+    # 0.38 µm wide, 0.52 µm from contact to contact at 90 mΩ/sq, a ladder from the pin D at the first contact
+    terminal = f"D.P0.{diffusion}"
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        rows = pex_whiteboxed.written_netlist_rows('test_patterns', f"{cell_name}.gds.gz")
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+
+    device_lines = pex_whiteboxed.written_device_lines('test_patterns', f"{cell_name}.gds.gz")
+    assert sorted((line.split()[1], line.split()[3]) for line in device_lines) == \
+           [(terminal, f"S1.P0.{diffusion}"), (terminal, f"S2.P0.{diffusion}")]
+
+    resistances = {tuple(sorted((row['Net1'], row['Net2']))): float(row['Resistance [Ω]'])
+                   for row in rows if row['Resistance [Ω]'] and row['Net1'].split('.')[0] == 'D'}
+    assert sorted(resistances.values()) == [0.123] * 7 + [contact_resistance] * 8
+    assert [r for nets, r in resistances.items() if terminal in nets] == [contact_resistance] * 8
+
+    network = build_network([(net1, net2, 1 / r, 0.0) for (net1, net2), r in resistances.items()])
+    assert 1 / port_admittance(network, ['D', terminal], 0.0)[0, 0].real == pytest.approx(drain_resistance, abs=1e-3)
+    assert ladder_resistance(contact_resistance, 0.09 * 520 / 380, 8) == pytest.approx(drain_resistance, abs=1e-3)
 
 
 def obtained_resistances(*path_components) -> List[float]:
