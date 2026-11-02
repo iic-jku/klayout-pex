@@ -28,6 +28,8 @@ Reads a SPICE netlist (e.g. an extracted netlist, or a simple testbench) as ngsp
 Reads:
     - the elements R, C, L, K, D, M, V, I, E, F, G, H and X, the subcircuits (.subckt, .ends),
       .global, .param and .end
+    - diodes with a third node (e.g. a substrate), told from the area of a two-terminal diode by it being no value:
+      D1 a k sub dmod is a diode with three nodes, D1 a k dmod 2 (or {...}, '...') one with an area
     - the lines as ngspice reads them (see spice_syntax): continuation lines, also across comment lines,
       comments, the title of a deck
     - numbers with SI suffix: T, G, MEG, K, M (milli), MIL (25.4 µ), U, N, P, F, A,
@@ -91,6 +93,11 @@ def _optional_number(text: str) -> Optional[float]:
         return parse_spice_number(text)
     except ValueError:
         return None
+
+
+def _is_value(token: str) -> bool:
+    """A number, or an expression in {...} or '...' (a word without them is a name, e.g. of a node or model)"""
+    return token[:1] in ('{', "'") or _optional_number(token) is not None
 
 
 @dataclass
@@ -319,8 +326,7 @@ class SpiceReader:
                 element = SpiceElement(name=name, nodes=nodes(2))
                 rest = tokens[3:]
                 while rest and '=' not in rest[0]:
-                    is_value = rest[0][:1] in ('{', "'") or _optional_number(rest[0]) is not None
-                    if is_value and element.value is None and element.model is None:
+                    if _is_value(rest[0]) and element.value is None and element.model is None:
                         element.value = self._value(rest[0], f"value of {name}")
                     elif element.model is None:
                         element.model = rest[0]
@@ -341,6 +347,10 @@ class SpiceReader:
                                     value=self._value(tokens[3], f"coupling factor of {name}"))
             case 'D' | 'M':
                 count = 2 if kind == 'D' else 4
+                # NOTE: a diode with a third node (e.g. a substrate), D1 a k sub dmod, has a name where the area
+                #       of a two-terminal diode, D1 a k dmod 2, has a value
+                if kind == 'D' and len(tokens) > 4 and '=' not in tokens[4] and not _is_value(tokens[4]):
+                    count = 3
                 element = SpiceElement(name=name, nodes=nodes(count))
                 if len(tokens) < 2 + count:
                     raise SpiceReaderError(f"the element {name} has no model")
