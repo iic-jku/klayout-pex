@@ -88,7 +88,8 @@ class Test(unittest.TestCase):
         with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
             pex_context = self.prepare_extraction()
         self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
-                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con",
+                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, "
+                      "schottcky_p, schottcky_n_con",
                       [call.args[0] for call in warning.call_args_list])
         self.assertEqual([], pex_context.unmodeled_layers)
 
@@ -108,7 +109,8 @@ class Test(unittest.TestCase):
         self.assertEqual([], pex_context.unmodeled_layers)
         # NOTE: they still cover the shapes of the layer they are derived from
         self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
-                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con",
+                      "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, "
+                      "schottcky_p, schottcky_n_con",
                       [call.args[0] for call in warning.call_args_list])
 
     def test_leftover_top_cells_are_ignored_with_a_warning(self):

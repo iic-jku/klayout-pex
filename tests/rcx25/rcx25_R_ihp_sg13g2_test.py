@@ -169,6 +169,28 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
+def test_schottky_diode_is_on_the_metal1_over_its_contacts():
+    # The Schottky contact of the anode and the contacts of the cathode are within the device, whose model has
+    # the series resistance (rsmain), so the anode E and the cathode B are on the Metal1 over them,
+    # without a warning about the contacts (#370)
+    cell_name = 'diode_schottky_nbl1'
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+
+    pex_context = extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
+                                     blackbox_devices=False)
+    assert {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
+                                  for t in d.terminals}
+            for d in pex_context.devices_by_name.values()} == {
+        'schottky_nbl1': {'C': ['Activ'], 'B': ['Metal1'], 'E': ['Metal1']},
+    }
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
 def test_inductor_is_a_subcircuit_at_the_ends_of_its_leads():
     # The PDK has no models of the inductors, its schematics call the subcircuit inductor, which the user provides
     # (e.g. from an EM simulation). Its ports, within its marker, abut the ends of its TopMetal2 leads,
