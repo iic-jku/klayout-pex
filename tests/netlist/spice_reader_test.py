@@ -181,6 +181,23 @@ class SpiceReaderTest(unittest.TestCase):
                           SpiceElement('M1', ['d', 'g', 's', 'b'], model='nmos', parameters={'w': 1e-6, 'l': 1.3e-7})],
                          netlist.elements)
 
+    def test_diode_with_three_nodes(self):
+        # NOTE: a name after the model of a two-terminal diode, where its area is, is the model of one
+        #       with three nodes, e.g. IHP's schottky_nbl1 as its CDL has it (#368)
+        netlist = parse('DD1 rfin_int bb_int vss schottky_nbl1\n'
+                        'D2 a k sub dmod 2 m=2\n'
+                        'D3 a k dmod 2\n'
+                        'D4 a k dmod {a0}\n'
+                        "D5 a k dmod 'a0'\n"
+                        'D6 a k dmod area=3p\n')
+        self.assertEqual([SpiceElement('DD1', ['rfin_int', 'bb_int', 'vss'], model='schottky_nbl1'),
+                          SpiceElement('D2', ['a', 'k', 'sub'], model='dmod', parameters={'area': 2.0, 'm': 2.0}),
+                          SpiceElement('D3', ['a', 'k'], model='dmod', parameters={'area': 2.0}),
+                          SpiceElement('D4', ['a', 'k'], model='dmod', parameters={'area': expression('a0')}),
+                          SpiceElement('D5', ['a', 'k'], model='dmod', parameters={'area': expression('a0')}),
+                          SpiceElement('D6', ['a', 'k'], model='dmod', parameters={'area': 3e-12})],
+                         netlist.elements)
+
     def test_subcircuit_with_parameters(self):
         netlist = parse('.subckt res a b params: W=1u L=2u\n'
                         '.ends\n'

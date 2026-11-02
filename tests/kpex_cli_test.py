@@ -189,6 +189,17 @@ def test_schematic_without_value_is_a_check_problem(tmp_path):
                         f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
 
 
+def test_schematic_with_diode_of_three_nodes_is_no_check_problem(tmp_path):
+    # NOTE: the reader took the third node as the model and the model as the area, which it couldn't evaluate (#368)
+    schematic_path = tmp_path / 'chip.spice'
+    schematic_path.write_text('.subckt chip a b vss\nDD1 a b vss schottky_nbl1\n.ends chip\n', encoding='utf-8')
+    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
+                                                       lvs_netlist=kdb.Netlist(),
+                                                       device_models=device_models(NMOS),
+                                                       top_cell_name='chip')
+    assert problems == []
+
+
 def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
     # NOTE: e.g. a standard cell, which the schematic calls, but doesn't define
     schematic_path = tmp_path / 'chip.spice'
