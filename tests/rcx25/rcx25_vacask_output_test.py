@@ -180,25 +180,43 @@ wrdata ac_ngspice.txt i(vdd)
 @pytest.mark.slow
 @requires_vacask
 @requires_ngspice
-@pytest.mark.parametrize('pdk, common_lib, gds_name, capacitance_femto', [
+@pytest.mark.parametrize('pdk, common_lib, gds_name, driven_port, capacitance_femto', [
     # NOTE: the models give 0.915 fF/µm² of Metal2 … Metal4, 398 fF by their default of Metal1 … Metal5
-    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz', 228.75,
+    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
+                 'PLUS', 228.75,
                  marks=IHP_SG13G2.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13g2'),
     # NOTE: the models give 0.61 fF/µm² of Metal2 and Metal3, 32.175 fF by their default of Metal1 … Metal4
-    pytest.param(IHP_SG13CMOS5L, 'sg13cmos5l_vacask_common.lib', 'cap_cmomf_w5u_l5u_m2_m3_m4_wire.gds.gz', 15.25,
+    pytest.param(IHP_SG13CMOS5L, 'sg13cmos5l_vacask_common.lib', 'cap_cmomf_w5u_l5u_m2_m3_m4_wire.gds.gz',
+                 'PLUS', 15.25,
                  marks=IHP_SG13CMOS5L.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13cmos5l'),
+    # NOTE: of cap_cmomi, the C label of the pcell. Driven at the terminal that the netlist has as PLUS of the model,
+    #       whose MINUS also has a shunt to the substrate (Cox): the MINUS of the pcell, on the lower metal, of 'same'
+    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire.gds.gz',
+                 'MINUS', 16.209,
+                 marks=IHP_SG13G2.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13g2-cmomi-same'),
+    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomi_w5u_l5u_m4_m5_none.gds.gz',
+                 'PLUS', 10.28,
+                 marks=IHP_SG13G2.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13g2-cmomi-none'),
+    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomi_w8u9_l3u36_m1_m5_r90.gds.gz',
+                 'PLUS', 42.086,
+                 marks=IHP_SG13G2.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13g2-cmomi-double-r90'),
+    pytest.param(IHP_SG13CMOS5L, 'sg13cmos5l_vacask_common.lib', 'cap_cmomi_w8u9_l3u36_m2_m4_m45.gds.gz',
+                 'PLUS', 25.938,
+                 marks=IHP_SG13CMOS5L.requires_simulator_models('vacask', 'ngspice'),
+                 id='ihp-sg13cmos5l-cmomi-double-m45'),
 ])
-def test_mom_cap_simulates_to_the_capacitance_of_its_metal_range(pdk: PDKTestConfig,
-                                                                 common_lib: str,
-                                                                 gds_name: str,
-                                                                 capacitance_femto: float):
+def test_mom_cap_simulates_to_the_capacitance_of_the_pcell(pdk: PDKTestConfig,
+                                                           common_lib: str,
+                                                           gds_name: str,
+                                                           driven_port: str,
+                                                           capacitance_femto: float):
     # NOTE: mode R, so the netlist has no other capacitance than the one of the model, between PLUS and MINUS
     extraction = RCX25Extraction(pdk=pdk, pex_mode=PEXMode.R, blackbox=True)
     vacask_path, spice_path = vacask_and_spice_netlists(extraction, 'test_patterns', gds_name)
     cell_name = gds_name.removesuffix('.gds.gz')
     with open(spice_path, encoding='utf-8') as f:
         ports = next(line for line in f.read().splitlines() if line.startswith('.SUBCKT ')).split()[2:]
-    nodes = ' '.join('plus' if port == 'PLUS' else '0' for port in ports)
+    nodes = ' '.join('plus' if port == driven_port else '0' for port in ports)
     run_dir = os.path.join(os.path.dirname(vacask_path), 'simulation')
     os.makedirs(run_dir, exist_ok=True)
     vacask_models = pdk.simulator_models_dir('vacask')

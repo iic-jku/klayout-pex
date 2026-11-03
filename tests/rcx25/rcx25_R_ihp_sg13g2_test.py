@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import os
 from pathlib import Path
 from typing import *
@@ -450,6 +451,37 @@ def test_mom_cap_is_written_with_its_metal_range(path_components: Tuple[str, str
 def test_cmomi_is_written_with_its_feed(path_components: Tuple[str, str], feed: str):
     line, = pex_blackboxed.written_device_lines(*path_components)
     assert ' cap_cmomi ' in line and line.endswith(f" {feed}")
+
+
+def cmomi_sizes(lines: List[str]) -> List[str]:
+    return [' '.join(t for t in line.split() if t.startswith(('w=', 'l=')))
+            for line in lines if ' cap_cmomi ' in line]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('path_components, size', [
+    # NOTE: the array of w = l = 5 µm has 5 rows and 5 columns, its marker also covers the feed pads:
+    #       as of the marker, l and w gave 36.33 fF instead of 26.16 fF, and 31.39 fF instead of 26.30 fF of 'same'
+    (('cmomi_w5u_l5u_m1_m5', 'cmomi_w5u_l5u_m1_m5.gds.gz'), 'w=4.45e-06 l=4.2e-06'),
+    (('test_patterns', 'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire.gds.gz'), 'w=4.45e-06 l=4.2e-06'),
+    (('test_patterns', 'cap_cmomi_w5u_l5u_m4_m5_none.gds.gz'), 'w=4.45e-06 l=4.2e-06'),
+    # NOTE: its rows run along y
+    (('test_patterns', 'cap_cmomi_w8u9_l3u36_m1_m5_r90.gds.gz'), 'w=8.9e-06 l=3.36e-06'),
+    # NOTE: not of the pcell, so its marker is taken for the array
+    (('cap_vpp_04p4x04p6_m1m2m3_substrate_pin', 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz'),
+     'w=4.25e-06 l=4.04e-06'),
+])
+def test_cmomi_is_written_with_the_size_of_its_array(path_components: Tuple[str, str], size: str):
+    assert cmomi_sizes(pex_blackboxed.written_device_lines(*path_components)) == [size]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_cmomi_is_written_with_the_size_of_its_array_in_all_orientations():
+    lines = pex_blackboxed.written_device_lines('test_patterns', 'cap_cmomi_w3u_l2u_m4_m5_orientations.gds.gz')
+    assert Counter(cmomi_sizes(lines)) == {'w=2.67e-06 l=1.68e-06': 24}
+    assert Counter(line.split()[-1] for line in lines) == {'feed=0': 8, 'feed=1': 8, 'feed=2': 8}
 
 
 @allure.parent_suite(parent_suite)

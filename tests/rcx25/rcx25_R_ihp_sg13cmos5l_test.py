@@ -49,3 +49,11 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13CMOS5L), pex_
 def test_mom_cap_is_written_with_its_metal_range(path_components: Tuple[str, str], metal_range: str):
     line, = pex_blackboxed.written_device_lines(*path_components)
     assert ' cap_cmomf ' in line and f" {metal_range}" in line
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cmomi_is_written_with_the_size_of_its_array():
+    # NOTE: not of its marker, which also covers the feed pads, and its rows run along y
+    line, = pex_blackboxed.written_device_lines('test_patterns', 'cap_cmomi_w8u9_l3u36_m2_m4_m45.gds.gz')
+    assert ' cap_cmomi w=8.9e-06 l=3.36e-06 ' in line and line.endswith(' mmin=2 mmax=4 feed=2')
