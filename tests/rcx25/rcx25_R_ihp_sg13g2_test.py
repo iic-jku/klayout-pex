@@ -196,6 +196,7 @@ def test_schottky_diode_is_on_the_metal1_over_its_contacts():
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
 @pytest.mark.parametrize('cell_name', ['device_pcells',
+                                       'cap_moscap_n_moscap_p',
                                        'esd_diodevdd_2kv',
                                        'esd_diodevss_2kv',
                                        'inductor2_w2u_d15u48_tm2_wires_50u',
@@ -203,6 +204,23 @@ def test_schottky_diode_is_on_the_metal1_over_its_contacts():
 def test_device_pcells_raise_no_warnings_about_layers_and_terminals(cell_name: str):
     # A warning on every use of a device, although nothing is wrong, trains users to ignore the real ones
     assert pex_whiteboxed.device_layer_warnings('test_patterns', f"{cell_name}.gds.gz") == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_mos_cap_bulk_terminals_are_on_their_guard_rings():
+    # The LVS deck left them on nets of their own, with nothing else on them
+    cell_name = 'cap_moscap_n_moscap_p'
+    assert terminal_layers_of_test_pattern(cell_name) == {
+        'sg13_moscap_n': {'G': ['GatPoly'], 'SUB': ['Metal1']},
+        'sg13_moscap_p': {'G': ['GatPoly'], 'NW': ['Metal1']},
+    }
+    lvsdb = pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz")
+    metal1 = lvsdb.layer_by_name('metal1_con')
+    bulk_nets = {device.device_class().name: device.net_for_terminal(1)
+                 for device in lvsdb.netlist().circuit_by_name(cell_name).each_device()}
+    assert bulk_nets['sg13_moscap_n'].expanded_name() == 'sub!'
+    assert not lvsdb.shapes_of_net(bulk_nets['sg13_moscap_p'], metal1, True).is_empty()
 
 
 @allure.parent_suite(parent_suite)

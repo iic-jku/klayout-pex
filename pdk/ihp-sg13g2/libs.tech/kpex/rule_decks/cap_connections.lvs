@@ -43,6 +43,9 @@ connect(nmoscap_ports, cont_drw)
 connect(nmoscap_ports, moscap_gate_text)
 connect(nmoscap_bulk_port, nmoscap_diff_port)
 connect(nmoscap_diff_port, nmoscap_sub_text)
+# [PEX] nmoscap_ports connects the joined layer only, so nothing but the label reached the bulk terminal,
+#       which is the Metal1 of the guard ring (NOTE: a regular LVS matches the net by that label)
+connect(nmoscap_bulk_port, metal1_con)
 
 # === moscap_p ===
 connect(pmoscap_poly_port, poly_con)
@@ -50,3 +53,5 @@ connect(pmoscap_ports, cont_drw)
 connect(pmoscap_ports, moscap_gate_text)
 connect(pmoscap_bulk_port, pmoscap_diff_port)
 connect(pmoscap_diff_port, pmoscap_nw_text)
+# [PEX] see nmoscap_bulk_port
+connect(pmoscap_bulk_port, metal1_con)

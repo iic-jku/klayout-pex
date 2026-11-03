@@ -342,10 +342,9 @@ def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
 def device_pcells() -> Pattern:
     """
     One each of the device pcells of the PDK, with their default parameters and no wires, but not
-      - the ones with patterns of their own: the MOM caps, the inductors, the ESD diodes, the antenna diodes
+      - the ones with patterns of their own: the MOM caps, the MOS caps, the inductors, the ESD diodes,
+        the antenna diodes
       - the ESD clamps nmoscl_2 and nmoscl_4, which take long
-      - the MOS caps sg13_moscap_n and sg13_moscap_p, whose warning is real, as the LVS deck leaves their
-        bulk terminals on nets of their own
       - the npn13G2 with 1 emitter, whose collector overlaps no conductor without a wire (with 4 emitters, it does)
     """
     return pcells_side_by_side('device_pcells', [
@@ -354,6 +353,14 @@ def device_pcells() -> Pattern:
         ('rfnmos', {}), ('rfnmosHV', {}), ('rfpmos', {}), ('rfpmosHV', {}), ('rhigh', {}), ('rppd', {}), ('rsil', {}),
         ('schottky', {}),
     ])
+
+
+def cap_moscap_n_moscap_p() -> Pattern:
+    """
+    The MOS caps sg13_moscap_n and sg13_moscap_p (moscap_n and moscap_p pcells of the PDK), side by side,
+    with their default parameters and no wires
+    """
+    return pcells_side_by_side('cap_moscap_n_moscap_p', [('moscap_n', {}), ('moscap_p', {})])
 
 
 def esd_diode(model: str) -> Pattern:
@@ -436,6 +443,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_cmim_20um_x_20um_metal5_routes_in_cells': cap_cmim_20um_x_20um_metal5_routes_in_cells,
+    'cap_moscap_n_moscap_p': cap_moscap_n_moscap_p,
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
     'cap_rfcmim_w7u_l7u_metal5_routes_in_cells': cap_rfcmim_w7u_l7u_metal5_routes_in_cells,
     'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,
