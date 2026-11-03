@@ -199,12 +199,31 @@ def cap_cmim_over_m4_wire(name: str) -> Pattern:
     return p
 
 
-def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
+def metal5_routes_in_cells(p: Pattern, left: int, right: int, *bottoms: int):
     """
-    The rfcmim of the test data (sg13g2_pr__rfcmim, 7 µm x 7 µm, wfeed 3 µm, its terminals PLUS and MINUS),
-    with a Metal4 wire D of 1 µm width under it, across the cap, which the bottom plate shields from the top plate
+    Metal5 routes of 1 µm width from left to right, each in a cell of its own, as generated layouts have them,
+    over the bottom plate of a MIM cap: it stays apart from the Metal5 of the top cell in the LVS layers
     """
-    p = pattern('cap_rfcmim_w7u_l7u_over_m4_wire')
+    for idx, bottom in enumerate(bottoms):
+        cell = p.layout.create_cell(f"ROUTE{idx}")
+        cell.shapes(p.layout.layer(*METAL5)).insert(kdb.Box(left, bottom, right, bottom + 1000))
+        p.top.insert(kdb.CellInstArray(cell.cell_index(), kdb.Trans()))
+
+
+def cap_cmim_20um_x_20um_metal5_routes_in_cells() -> Pattern:
+    """
+    The MIM cap of cap_cmim_20um_x_20um_over_m4_wire, with Metal5 routes across its top plate, within its bottom plate
+    """
+    p = cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_metal5_routes_in_cells')
+    metal5_routes_in_cells(p, 1000, 23000, 10000, 14000)
+    return p
+
+
+def rfcmim_w7u_l7u(name: str) -> Pattern:
+    """
+    The rfcmim of the test data (sg13g2_pr__rfcmim, 7 µm x 7 µm, wfeed 3 µm, its terminals PLUS and MINUS)
+    """
+    p = pattern(name)
     p.copy_design('ihp-sg13g2', 'sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
 
     # NOTE: the cell labels its pins on the text layer only, label them as the terminals of the model
@@ -212,10 +231,38 @@ def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
         pin, = kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*pin_layer))).merged().each()
         center = pin.bbox().center()
         p.label(layer, text, center.x, center.y)
+    return p
 
+
+def cap_rfcmim_w7u_l7u_over_m4_wire() -> Pattern:
+    """
+    The rfcmim of rfcmim_w7u_l7u, with a Metal4 wire D of 1 µm width under it, across the cap,
+    which the bottom plate shields from the top plate
+    """
+    p = rfcmim_w7u_l7u('cap_rfcmim_w7u_l7u_over_m4_wire')
     p.box(METAL4, 3000, -8000, 4000, 15000)
     p.box(METAL4_PIN, 3000, -8000, 4000, -7000)
     p.label(METAL4, 'D', 3200, -7800)
+    return p
+
+
+def cap_rfcmim_w7u_l7u_metal5_routes_in_cells() -> Pattern:
+    """
+    The rfcmim of rfcmim_w7u_l7u, with Metal5 routes across its top plate, one of them over the start of its feed,
+    both within its PWellBlock
+    """
+    p = rfcmim_w7u_l7u('cap_rfcmim_w7u_l7u_metal5_routes_in_cells')
+    metal5_routes_in_cells(p, -1000, 8000, 1500, 5500)
+    return p
+
+
+def cap_rfcmim_w7u_l7u_two_feeds() -> Pattern:
+    """
+    The rfcmim of rfcmim_w7u_l7u, with a second Metal5 feed of 1 µm width out of its PWellBlock,
+    so it has no single wfeed
+    """
+    p = rfcmim_w7u_l7u('cap_rfcmim_w7u_l7u_two_feeds')
+    p.box(METAL5, -5000, 3000, 0, 4000)
     return p
 
 
@@ -388,7 +435,10 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomi_w5u_l5u_m4_m5_none': cap_cmomi_w5u_l5u_m4_m5_none,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
+    'cap_cmim_20um_x_20um_metal5_routes_in_cells': cap_cmim_20um_x_20um_metal5_routes_in_cells,
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
+    'cap_rfcmim_w7u_l7u_metal5_routes_in_cells': cap_rfcmim_w7u_l7u_metal5_routes_in_cells,
+    'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,

@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import *
 from unittest import mock
 
@@ -33,10 +34,12 @@ import klayout.db as kdb
 import pytest
 
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
+from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
-from tests.common.lvsdb_fixtures import DESIGNS_DIR, lvsdb_fixture_path
+from tests.common.lvsdb_fixtures import DESIGNS_DIR, klayout_exe_path, lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
@@ -429,6 +432,35 @@ def test_mom_cap_is_written_with_its_metal_range(path_components: Tuple[str, str
 def test_cmomi_is_written_with_its_feed(path_components: Tuple[str, str], feed: str):
     line, = pex_blackboxed.written_device_lines(*path_components)
     assert ' cap_cmomi ' in line and line.endswith(f" {feed}")
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('gds_name, device_line', [
+    # NOTE: the Metal5 of each cell was a bottom plate of its own, which left the cap out of the netlist,
+    #       and its capacitance to the parasitic one of the plates, without a message
+    ('cap_cmim_20um_x_20um_metal5_routes_in_cells.gds.gz',
+     'X$1 B.P0.MIM A.P0.Metal5 cap_cmim w=2e-05 l=2e-05 m=1'),
+    # NOTE: the route over the feed also split it off the measured metal, for wfeed=0, which the model can't take
+    ('cap_rfcmim_w7u_l7u_metal5_routes_in_cells.gds.gz',
+     'X$1 PLUS.P0.MIM MINUS.P0.Metal5 sub! cap_rfcmim w=7e-06 l=7e-06 m=1 wfeed=3e-06'),
+])
+def test_mim_cap_is_extracted_with_metal5_of_other_cells_over_its_plate(gds_name: str, device_line: str):
+    assert pex_blackboxed.written_device_lines('test_patterns', gds_name) == [device_line]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_rf_mim_cap_of_no_single_feed_width_stops_the_lvs(tmp_path: Path):
+    # NOTE: it was written with wfeed=0, which its model can't take
+    if klayout_exe_path() is None:
+        pytest.skip("needs the KLayout executable (KPEX_KLAYOUT_EXE)")
+    gds_path = pex_blackboxed.pdk.gds_path('test_patterns', 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz')
+    with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit) as exit_info:
+        KpexCLI().main(['main', '--pdk', pex_blackboxed.pdk.name, '--mode', 'R', '--blackbox', 'y',
+                        '--gds', gds_path, '--out-dir', str(tmp_path), '--2.5D'])
+    assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
+    assert 'rfcmim has no single feed width' in error_mock.call_args.args[0]
 
 
 @allure.parent_suite(parent_suite)

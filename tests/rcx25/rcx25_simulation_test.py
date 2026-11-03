@@ -138,7 +138,8 @@ TEST_PATTERNS = [(pdk_name, name)
                  if name.endswith('.gds.gz')]
 
 # NOTE: the patterns of extraction errors, e.g. vias without a conductor below (see rcx25_R_sky130A_test)
-ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz')}
+ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz'),
+                  (PDKName.IHP_SG13G2, 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz')}
 
 # NOTE: the MOM caps, the ESD diodes and the device pcells, which take 1 to 22 s in RC mode, the others 0.1 s
 SLOW_PATTERNS = {(PDKName.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz'),
