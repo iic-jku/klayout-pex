@@ -22,6 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 import cmath
+import math
 import os
 from typing import *
 
@@ -48,6 +49,7 @@ parent_suite = "kpex/2.5D Extraction Tests [VACASK netlist]"
 tags = ("PEX", "2.5D", "VACASK")
 
 IHP_SG13G2 = PDKTestConfig(PDKName.IHP_SG13G2)
+IHP_SG13CMOS5L = PDKTestConfig(PDKName.IHP_SG13CMOS5L)
 
 
 def vacask_and_spice_netlists(extraction: RCX25Extraction, *path_components) -> Tuple[str, str]:
@@ -171,3 +173,77 @@ wrdata ac_ngspice.txt i(vdd)
     for frequency, vacask_current, (_, real, imag) in zip(vacask_ac['frequency'], vacask_ac['vdd:flow(br)'],
                                                           ngspice_ac):
         assert cmath.isclose(vacask_current, complex(real, imag), rel_tol=1e-3), f"{frequency.real:g} Hz"
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@requires_vacask
+@requires_ngspice
+@pytest.mark.parametrize('pdk, common_lib, gds_name, capacitance_femto', [
+    # NOTE: the models give 0.915 fF/µm² of Metal2 … Metal4, 398 fF by their default of Metal1 … Metal5
+    pytest.param(IHP_SG13G2, 'sg13g2_vacask_common.lib', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz', 228.75,
+                 marks=IHP_SG13G2.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13g2'),
+    # NOTE: the models give 0.61 fF/µm² of Metal2 and Metal3, 32.175 fF by their default of Metal1 … Metal4
+    pytest.param(IHP_SG13CMOS5L, 'sg13cmos5l_vacask_common.lib', 'cap_cmomf_w5u_l5u_m2_m3_m4_wire.gds.gz', 15.25,
+                 marks=IHP_SG13CMOS5L.requires_simulator_models('vacask', 'ngspice'), id='ihp-sg13cmos5l'),
+])
+def test_mom_cap_simulates_to_the_capacitance_of_its_metal_range(pdk: PDKTestConfig,
+                                                                 common_lib: str,
+                                                                 gds_name: str,
+                                                                 capacitance_femto: float):
+    # NOTE: mode R, so the netlist has no other capacitance than the one of the model, between PLUS and MINUS
+    extraction = RCX25Extraction(pdk=pdk, pex_mode=PEXMode.R, blackbox=True)
+    vacask_path, spice_path = vacask_and_spice_netlists(extraction, 'test_patterns', gds_name)
+    cell_name = gds_name.removesuffix('.gds.gz')
+    with open(spice_path, encoding='utf-8') as f:
+        ports = next(line for line in f.read().splitlines() if line.startswith('.SUBCKT ')).split()[2:]
+    nodes = ' '.join('plus' if port == 'PLUS' else '0' for port in ports)
+    run_dir = os.path.join(os.path.dirname(vacask_path), 'simulation')
+    os.makedirs(run_dir, exist_ok=True)
+    vacask_models = pdk.simulator_models_dir('vacask')
+    ngspice_models = pdk.simulator_models_dir('ngspice')
+
+    write_vacaskrc(run_dir, vacask_models)
+    with open(os.path.join(run_dir, 'tb.sim'), 'w', encoding='utf-8') as f:
+        f.write(f"""{cell_name} in VACASK
+
+include "{vacask_models}/models/{common_lib}"
+include "{vacask_models}/models/cornerCAP.lib" section=cap_typ
+include "{vacask_path}"
+
+model vsource vsource
+vplus (plus 0) vsource dc=0 mag=1
+x1 ({nodes}) {cell_name}
+
+control
+  options rawfile="ascii"
+  analysis ac1 ac from=1e6 to=1e6 mode="lin" points=1
+endc
+""")
+    run_vacask(os.path.join(run_dir, 'tb.sim'))
+
+    write_spiceinit(run_dir, ngspice_models)
+    with open(os.path.join(run_dir, 'tb.cir'), 'w', encoding='utf-8') as f:
+        f.write(f"""{cell_name} in ngspice
+.lib {ngspice_models}/models/cornerCAP.lib cap_typ
+.include {spice_path}
+Vplus plus 0 dc 0 ac 1
+X1 {nodes} {cell_name}
+.control
+set wr_singlescale
+set wr_vecnames
+ac lin 1 1e6 1e6
+wrdata ac_ngspice.txt i(vplus)
+.endc
+.end
+""")
+    run_ngspice(os.path.join(run_dir, 'tb.cir'))
+
+    def capacitance_femto_of(current: complex) -> float:
+        return abs(current.imag) / (2 * math.pi * 1e6) * 1e15
+
+    vacask_current = read_ascii_raw(os.path.join(run_dir, 'ac1.raw'))['vplus:flow(br)'][0]
+    (_, real, imag), = read_wrdata(os.path.join(run_dir, 'ac_ngspice.txt'))
+    assert capacitance_femto_of(vacask_current) == pytest.approx(capacitance_femto, rel=1e-3)
+    assert capacitance_femto_of(complex(real, imag)) == pytest.approx(capacitance_femto, rel=1e-3)

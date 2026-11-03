@@ -720,6 +720,7 @@ class TechBuilder:
                     lvs_param('b', 'b'), lvs_param('m', 'm')]
         rsil = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('m', 'm')]  # no bends
         cap = [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('m', 'm')]
+        mom_cap = cap + [lvs_param('mmin', 'mmin'), lvs_param('mmax', 'mmax')]
         multiplier = [lvs_param('m', 'm')]
         hbt = [lvs_param('le', 'le', um), lvs_param('we', 'we', um), lvs_param('Nx', 'Nx'), lvs_param('m', 'm')]
         # NOTE: LVS extracts the area and perimeter, the models take w and l, but depend on w*l and w+l only
@@ -742,8 +743,9 @@ class TechBuilder:
         add_device_model_mapping(dmi, "rhigh",            "X",   ["rhigh_1", "rhigh_2", "rhigh_sub"], poly_res)
         add_device_model_mapping(dmi, "ntap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
         add_device_model_mapping(dmi, "ptap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
-        add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
-        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       cap,        kind=METAL_CAP)
+        add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       mom_cap,    kind=METAL_CAP)
+        add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],
+                                 mom_cap + [lvs_param('feed', 'feed')], kind=METAL_CAP)
         add_device_model_mapping(dmi, "sg13_hv_svaricap", "X",   ["G1", "W", "G2", "SUB"],
                                  [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('Nx', 'Nx')])
         add_device_model_mapping(dmi, "sg13_moscap_n",    "X",   ["G", "SUB"],

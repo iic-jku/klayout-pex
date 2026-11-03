@@ -29,6 +29,7 @@ from unittest import mock
 from typing import *
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.common.rc_networks import build_network, port_admittance
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK gf180mcuD | mode R]"
@@ -124,6 +125,76 @@ def test_nfet_10v0_asym_pair():
     sources = {d.net_for_terminal('S').expanded_name() for d in devices}
     assert len(drains) == 1
     assert len(sources) == 2
+
+
+def ladder_resistance(rung: float, series: float, rungs: int) -> float:
+    """
+    The resistance into one end of a ladder of equal rungs: from its far end, a series and a parallel resistor in turn
+    """
+    resistance = rung
+    for _ in range(rungs - 1):
+        resistance = 1 / (1 / rung + 1 / (series + resistance))
+    return resistance
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name, diffusion, contact_resistance, drain_resistance', [
+    ('nfet_10v0_asym_pair_m1', 'Nplus', 6.3, 1.033),  # NOTE: M1-N+
+    ('pfet_10v0_asym_pair_m1', 'Pplus', 5.2, 0.891),  # NOTE: M1-P+
+], ids=['LDNMOS', 'LDPMOS'])
+def test_ldmos_drain_is_under_its_contacts(cell_name: str,
+                                           diffusion: str,
+                                           contact_resistance: float,
+                                           drain_resistance: float):
+    # The drain COMP of the LDMOS is apart from its gates, which left the one of the LDPMOS out of pd_ldmos,
+    # derived from the source/drain interacting with a gate, so its terminal was on Metal1, without its contacts.
+    # Both drains are the same stack, which differs in the resistance per contact only: 8 contacts under a Metal1 strip
+    # 0.38 µm wide, 0.52 µm from contact to contact at 90 mΩ/sq, a ladder from the pin D at the first contact
+    terminal = f"D.P0.{diffusion}"
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        rows = pex_whiteboxed.written_netlist_rows('test_patterns', f"{cell_name}.gds.gz")
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+
+    device_lines = pex_whiteboxed.written_device_lines('test_patterns', f"{cell_name}.gds.gz")
+    assert sorted((line.split()[1], line.split()[3]) for line in device_lines) == \
+           [(terminal, f"S1.P0.{diffusion}"), (terminal, f"S2.P0.{diffusion}")]
+
+    resistances = {tuple(sorted((row['Net1'], row['Net2']))): float(row['Resistance [Ω]'])
+                   for row in rows if row['Resistance [Ω]'] and row['Net1'].split('.')[0] == 'D'}
+    assert sorted(resistances.values()) == [0.123] * 7 + [contact_resistance] * 8
+    assert [r for nets, r in resistances.items() if terminal in nets] == [contact_resistance] * 8
+
+    network = build_network([(net1, net2, 1 / r, 0.0) for (net1, net2), r in resistances.items()])
+    assert 1 / port_admittance(network, ['D', terminal], 0.0)[0, 0].real == pytest.approx(drain_resistance, abs=1e-3)
+    assert ladder_resistance(contact_resistance, 0.09 * 520 / 380, 8) == pytest.approx(drain_resistance, abs=1e-3)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_diffusion_resistors_have_their_contacts_in_their_models():
+    # The models of the resistors have terminal resistors (rt1, rt2, of 18.5, 6, 50 and 6.5 Ω·µm over the width) up to
+    # their terminals, and the contacts of the salicided ones abut their bodies: the contacts are within the devices,
+    # rather than contact shapes the tech info doesn't know, and no resistors here. Those are the Metal1 from the labels
+    # to the terminals of the salicided ones, and the nwell taps of the p+ ones, with their contacts
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
+        pex_whiteboxed.assert_expected_matches_obtained(
+            'test_patterns', 'res_diffusion_w1_l4.gds.gz',
+            expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$6;$6.$1.Nwell;;1295.455
+R2;$6.$0.Metal1;$6.$1.Nwell;;6.3
+R3;$9;$9.$1.Nwell;;1265.873
+R4;$9.$0.Metal1;$9.$1.Nwell;;6.3
+R5;nplus_s_A;nplus_s_A.P0.Metal1;;0.008
+R6;nplus_s_B;nplus_s_B.P0.Metal1;;0.008
+R7;pplus_s_A;pplus_s_A.P0.Metal1;;0.008
+R8;pplus_s_B;pplus_s_B.P0.Metal1;;0.008"""
+        )
+    messages = [c.args[0] for c in warning_mock.call_args_list]
+    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
 
 
 def obtained_resistances(*path_components) -> List[float]:
