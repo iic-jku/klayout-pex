@@ -688,10 +688,23 @@ def test_mom_cap_model_is_not_changed_by_routing_across__blackboxed():
     device_lines = pex_blackboxed.written_device_lines('test_patterns', 'cap_vpp_routing_across.gds.gz')
     assert sorted(line.split()[-1] for line in device_lines) == [
         'sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield',
+        'sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield',
+        'sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield',
         'sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4',
         'sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x',
         'sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5',
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('net_name, layer_name', [('X10', 'li_vpp'), ('X11', 'poly_vpp')])
+def test_mom_cap_li1_and_poly_wires_across_are_one_net(net_name: str, layer_name: str):
+    # The LVS deck connected the wires only outside the marker of the cap, so their pieces were 3 nets,
+    # and the extraction stopped with a ZeroDivisionError on the poly wire, as shapes of different nets touched
+    lvsdb = pex_whiteboxed.read_lvsdb('test_patterns', 'cap_vpp_routing_across.gds.gz')
+    net = lvsdb.netlist().circuit_by_name('cap_vpp_routing_across').net_by_name(net_name)
+    assert not lvsdb.shapes_of_net(net, lvsdb.layer_by_name(layer_name), True).is_empty()
 
 
 @allure.parent_suite(parent_suite)

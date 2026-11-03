@@ -44,6 +44,7 @@ TAP:      GDSPair = (65, 44)
 NSDM:     GDSPair = (93, 44)
 PSDM:     GDSPair = (94, 20)
 POLY:     GDSPair = (66, 20)
+POLY_PIN: GDSPair = (66, 16)
 LICON:    GDSPair = (66, 44)
 LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
@@ -64,6 +65,7 @@ VPP:      GDSPair = (82, 64)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     NWELL: (64, 5),
+    POLY: (66, 5),
     LI1: (67, 5),
     MET1: (68, 5),
     MET2: (69, 5),
@@ -187,6 +189,7 @@ def cap_vpp_routing_across() -> Pattern:
     - cap_vpp_04p4x04p6_l1m1m2_noshield, fingers on li1, met1 and met2:
       a straight met3 wire, an L of met4, and a straight met5 wire
     - cap_vpp_06p8x06p1_m1m2m3_shieldl1m4, with plates on li1 and met4: a met5 wire
+    - cap_vpp_04p4x04p6_m1m2_noshield twice, with fingers on met1 and met2: a li1 wire, and a poly wire
 
     Drawn flat, with only what the LVS deck looks at, as the cells of this size take minutes to extract,
     their terminals met2 leads, also X…:
@@ -242,6 +245,10 @@ def cap_vpp_routing_across() -> Pattern:
     p.box(POLY, marker.left, marker.bottom, marker.right, marker.top)
     p.top.shapes(p.layout.layer(*MET5)).insert(marker.enlarged(-230))
     wire(MET5, MET5_PIN, [(marker.center().x, marker.bottom - 2000), (marker.center().x, marker.bottom + 1000)], 1600)
+
+    for layer, pin_layer in ((LI1, LI1_PIN), (POLY, POLY_PIN)):
+        marker = place_cap('04p4x04p6_m1m2_noshield', marker.right + 15000)
+        wire(layer, pin_layer, across(marker, 2000), 400)
     return p
 
 
