@@ -142,6 +142,7 @@ ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz')}
 
 # NOTE: the MOM caps, which take 1.5 to 22 s in RC mode, the others 0.1 s
 SLOW_PATTERNS = {(PDKName.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz'),
+                 (PDKName.SKY130A, 'cap_vpp_routing_across.gds.gz'),
                  (PDKName.SKY130A, 'sidewall_cap_vpp_04p4x04p6_l1_redux_all_layers.gds.gz'),
                  (PDKName.IHP_SG13G2, 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz'),
                  (PDKName.IHP_SG13G2, 'sidewall_cap_vpp_04p4x04p6_m1_redux_all_layers.gds.gz')}
