@@ -98,6 +98,22 @@ class TechBuilder:
             add_computed_layer(tech, PWELL, KREG, "iso_pwell",      (46, 0),      "PWell",     None,            "Computed layer for the isolated PWell (the holes of NWell over nBuLay)")
             # NOTE: the substrate of the npn HBTs, their terminal S, which the deck connects to the pwell
             add_computed_layer(tech, PWELL, KREG, "npn_sub",        (46, 0),      "PWell",     None,            "Computed layer for the substrate of the npn HBTs")
+            add_computed_layer(tech, PWELL, KREG, "isolbox_s",      (46, 0),      "PWell",     None,            "Computed layer for the isolated PWell of an isolbox, its terminal S")
+            add_computed_layer(tech, DNWELL, KREG, "isolbox_i",     (32, 0),      "nBuLay",    None,            "Computed layer for the nBuLay of an isolbox, its terminal I")
+            add_computed_layer(tech, PWELL, KREG, "isolbox_bn",     (46, 0),      "PWell",     None,            "Computed layer for the substrate around an isolbox, its terminal Bn")
+
+        # NOTE: device terminals on the substrate and the wells, which are no conductors of the resistance network,
+        #       so these terminals stay on their nets. The deck connects the layers below a resistor or an inductor
+        #       to the pwell and the nwell, whichever is there, which makes no difference to the extraction
+        add_computed_layer(tech, PWELL, KREG, "dantenna_p",     (46, 0),      "PWell",     None,            "Computed layer for the PWell of a dantenna, its terminal A")
+        add_computed_layer(tech, NWELL, KREG, "dpantenna_n",    (31, 0),      "NWell",     None,            "Computed layer for the NWell of a dpantenna, its terminal C")
+        add_computed_layer(tech, NWELL, KREG, "ntap1_well",     (31, 0),      "NWell",     None,            "Computed layer for the NWell of an ntap1, its terminal WELL")
+        add_computed_layer(tech, PWELL, KREG, "ptap1_sub",      (46, 0),      "PWell",     None,            "Computed layer for the substrate of a ptap1, its terminal WELL")
+        add_computed_layer(tech, PWELL, KREG, "rhigh_sub",      (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an rhigh, its terminal rhigh_sub")
+        add_computed_layer(tech, PWELL, KREG, "rppd_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an rppd, its terminal rppd_sub")
+        add_computed_layer(tech, PWELL, KREG, "rsil_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an rsil, its terminal rsil_sub")
+        add_computed_layer(tech, PWELL, KREG, "ind2_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an inductor2, its terminal inductor_sub")
+        add_computed_layer(tech, PWELL, KREG, "ind3_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an inductor3, its terminal inductor3_sub")
 
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
@@ -136,6 +152,11 @@ class TechBuilder:
             #       whose model has the series resistance (rsmain), so its terminals are on the Metal1 over them
             add_computed_layer(tech, CONT,  KDEV, "schottcky_p",    (6, 4407),    "Cont",      None,            "Computed layer for the Schottky contact of the anode of schottky_nbl1 to Metal1")
             add_computed_layer(tech, CONT,  KDEV, "schottcky_n_con", (6, 4408),   "Cont",      None,            "Computed layer for contact from the cathode of schottky_nbl1 to Metal1")
+        # NOTE: within the ESD diodes, the contacts of their emitters (of the 2 kV ones too, despite the name):
+        #       their models have the series resistance (rs), so the emitter terminals are on the Metal1 over them.
+        #       The contacts of their other terminals are the ones over the taps
+        add_computed_layer(tech, CONT,  KDEV, "diodevdd_4kv_te", (6, 4409),   "Cont",      None,            "Computed layer for contact from the emitter of the diodevdd ESD diodes to Metal1")
+        add_computed_layer(tech, CONT,  KDEV, "diodevss_4kv_te", (6, 4410),   "Cont",      None,            "Computed layer for contact from the emitter of the diodevss ESD diodes to Metal1")
 
         add_computed_layer(tech, VIA,   KREG, "via1_drw",       (19, 0),      "Via1",      "via1_drw",      "Computed layer for Via1")
         add_computed_layer(tech, VIA,   KREG, "via2_drw",       (29, 0),      "Via2",      "via2_drw",      "Computed layer for Via2")

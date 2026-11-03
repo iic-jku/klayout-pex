@@ -266,22 +266,63 @@ def r_wire_over_nbulay_m1() -> Pattern:
 # Device patterns
 #
 
-def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
+def pcells_side_by_side(name: str, pcells: List[Tuple[str, Dict[str, Any]]]) -> Pattern:
     """
-    The bipolar transistors (pcells of the PDK) side by side, 10 µm apart: an npn13G2 with 4 emitters,
-    an npn13G2L, an npn13G2V and a pnpMPA, whose terminals are joined to the Metal1 over them by contacts
-    (and the emitters of the npn13G2 and the npn13G2L by their emitter windows) within the devices
+    Pcells of the PDK, by name and parameters, side by side, 10 µm apart
     """
     technology = load_pdk_pcells()
-    p = pattern('bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa')
+    p = pattern(name)
     p.layout.technology_name = technology
     x = 0
-    for pcell_name, parameters in (('npn13G2', {'Nx': 4}), ('npn13G2L', {}), ('npn13G2V', {}), ('pnpMPA', {})):
+    for pcell_name, parameters in pcells:
         pcell = p.layout.create_cell(pcell_name, 'SG13_dev', parameters)
         p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans(x - pcell.bbox().left, 0)))
         x += pcell.bbox().width() + 10000
     p.top.flatten(-1, True)
     return p
+
+
+def bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa() -> Pattern:
+    """
+    The bipolar transistors (pcells of the PDK): an npn13G2 with 4 emitters, an npn13G2L, an npn13G2V and a pnpMPA,
+    whose terminals are joined to the Metal1 over them by contacts (and the emitters of the npn13G2 and the npn13G2L
+    by their emitter windows) within the devices
+    """
+    return pcells_side_by_side('bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa',
+                               [('npn13G2', {'Nx': 4}), ('npn13G2L', {}), ('npn13G2V', {}), ('pnpMPA', {})])
+
+
+def device_pcells() -> Pattern:
+    """
+    One each of the device pcells of the PDK, with their default parameters and no wires, but not
+      - the ones with patterns of their own: the MOM caps, the inductors, the ESD diodes, the antenna diodes
+      - the ESD clamps nmoscl_2 and nmoscl_4, which take long
+      - the MOS caps sg13_moscap_n and sg13_moscap_p, whose warning is real, as the LVS deck leaves their
+        bulk terminals on nets of their own
+      - the npn13G2 with 1 emitter, whose collector overlaps no conductor without a wire (with 4 emitters, it does)
+    """
+    return pcells_side_by_side('device_pcells', [
+        ('SVaricap', {}), ('cmim', {}), ('isolbox', {}), ('nmos', {}), ('nmosHV', {}), ('npn13G2L', {}),
+        ('npn13G2V', {}), ('ntap1', {}), ('pmos', {}), ('pmosHV', {}), ('pnpMPA', {}), ('ptap1', {}), ('rfcmim', {}),
+        ('rfnmos', {}), ('rfnmosHV', {}), ('rfpmos', {}), ('rfpmosHV', {}), ('rhigh', {}), ('rppd', {}), ('rsil', {}),
+        ('schottky', {}),
+    ])
+
+
+def esd_diode(model: str) -> Pattern:
+    """
+    An ESD diode (esd pcell of the PDK), alone, as only the substrate would join the Metal1 on the substrate net
+    of two of them, which is no conductor of the resistance network
+    """
+    return pcells_side_by_side(f"esd_{model}", [('esd', {'model': model})])
+
+
+def diode_dantenna_dpantenna() -> Pattern:
+    """
+    The antenna diodes (pcells of the PDK): the anode of the dantenna is on the substrate, the cathode of the dpantenna
+    on an nwell, and the other terminals on the Metal1 over them
+    """
+    return pcells_side_by_side('diode_dantenna_dpantenna', [('dantenna', {}), ('dpantenna', {})])
 
 
 def diode_schottky_nbl1() -> Pattern:
@@ -351,6 +392,10 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,
+    'device_pcells': device_pcells,
+    'esd_diodevdd_2kv': lambda: esd_diode('diodevdd_2kv'),
+    'esd_diodevss_2kv': lambda: esd_diode('diodevss_2kv'),
+    'diode_dantenna_dpantenna': diode_dantenna_dpantenna,
     'diode_schottky_nbl1': diode_schottky_nbl1,
     'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,
     'inductor3_w2u_d25u84_2_turns': inductor3_w2u_d25u84_2_turns,

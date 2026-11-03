@@ -26,7 +26,10 @@ import allure
 import pytest
 from unittest import mock
 
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
+from klayout_pex.tech_info import TechInfo
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
@@ -234,19 +237,37 @@ def test_vias_within_mom_cap_l1m1m2():
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_device_terminals_overlapping_no_conductor_of_their_net_are_reported_once():
-    # The substrate terminal B of the MOM capacitor (vpp_sub, the marker of the capacitor) is on an LVS layer
-    # the tech info has no layer for, and it overlaps no conductor of its net, as the substrate is none (#217)
+    # Without its layer in the tech info, the substrate terminal B of the MOM capacitor (vpp_sub, the marker
+    # of the capacitor) is on an unknown LVS layer, and it overlaps no conductor of its net,
+    # as the substrate is none (#217)
+    cell_name = 'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5'
+    tech = TechInfo.parse_tech_def(PDK.SKY130A.config.tech_pb_json_path)
+    tech.lvs_computed_layers.remove(next(l for l in tech.lvs_computed_layers if l.layer_info.name == 'vpp_sub'))
+    pex_context = KLayoutExtractionContext.prepare_extraction(lvsdb=pex_whiteboxed.read_lvsdb(cell_name,
+                                                                                              f"{cell_name}.gds.gz"),
+                                                              top_cell=cell_name,
+                                                              tech=TechInfo(tech=tech, dielectric_filter=None),
+                                                              blackbox_devices=False)
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        pex_whiteboxed.run_rcx25d_single_cell('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5',
-                                              'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz')
-    messages = [c.args[0] for c in warning_mock.call_args_list if 'device terminals' in c.args[0]]
-    assert messages == [
+        assert pex_context.devices_by_name
+    assert [c.args[0] for c in warning_mock.call_args_list] == [
         "The resistance network has no nodes for these device terminals, "
         "as the tech info has no layer for their LVS layer, "
         "and they neither overlap nor abut a conductor of their net "
         "(e.g. a terminal on the substrate or a well):\n"
         "  - sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5 terminal B on LVS layer vpp_sub: $1"
     ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('design_dir, gds_name', [
+    ('cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5', 'cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5.gds.gz'),
+    ('test_patterns', 'rf_inductors_03_90_05_125_05_220.gds.gz'),
+])
+def test_substrate_terminals_of_vpp_caps_and_rf_inductors_have_no_warnings(design_dir: str, gds_name: str):
+    # The substrate is no conductor of the resistance network, so these terminals rightly stay on their nets
+    assert pex_whiteboxed.device_layer_warnings(design_dir, gds_name) == []
 
 
 @allure.parent_suite(parent_suite)

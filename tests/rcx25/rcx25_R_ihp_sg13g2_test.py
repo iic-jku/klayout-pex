@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import *
 from unittest import mock
 
@@ -35,6 +36,7 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
+from tests.common.lvsdb_fixtures import DESIGNS_DIR, lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 
@@ -47,12 +49,28 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode
 
 def extraction_context(lvsdb: kdb.LayoutVsSchematic,
                        cell_name: str,
-                       blackbox_devices: bool) -> KLayoutExtractionContext:
-    tech = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None)
+                       blackbox_devices: bool,
+                       pdk: PDK = PDK.IHP_SG13G2) -> KLayoutExtractionContext:
+    tech = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None)
     return KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb,
                                                        top_cell=cell_name,
                                                        tech=tech,
                                                        blackbox_devices=blackbox_devices)
+
+
+def terminal_layers_by_device_class(pex_context: KLayoutExtractionContext) -> Dict[str, Dict[str, List[str]]]:
+    """
+    The layers of the terminals of the devices, by device class and terminal
+    """
+    return {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
+                                  for t in d.terminals}
+            for d in pex_context.devices_by_name.values()}
+
+
+def terminal_layers_of_test_pattern(cell_name: str) -> Dict[str, Dict[str, List[str]]]:
+    return terminal_layers_by_device_class(
+        extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
+                           blackbox_devices=False))
 
 
 @allure.parent_suite(parent_suite)
@@ -145,21 +163,13 @@ def test_bipolar_transistors_are_on_the_metal1_over_their_contacts():
     # and the npn13G2L) are within the devices, whose models have their resistances (e.g. re, rbx, rcx),
     # so the terminals are on the Metal1 over them, rather than on LVS layers the tech info doesn't know (#350)
     cell_name = 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa'
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    messages = [c.args[0] for c in warning_mock.call_args_list]
-    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
-    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+    assert pex_whiteboxed.device_layer_warnings('test_patterns', f"{cell_name}.gds.gz") == []
 
-    pex_context = extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
-                                     blackbox_devices=False)
     # NOTE: the substrate terminal S is on the PWell (npn_sub), which is no conductor of the resistance network,
     #       so it stays on its net without a warning (#365), and so do the base and collector of the pnpMPA,
     #       on the nwell and substrate taps
     npn_terminals = {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1'], 'S': ['PWell']}
-    assert {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
-                                  for t in d.terminals}
-            for d in pex_context.devices_by_name.values()} == {
+    assert terminal_layers_of_test_pattern(cell_name) == {
         'npn13G2': npn_terminals,
         'npn13G2l': npn_terminals,
         'npn13G2v': npn_terminals,
@@ -174,18 +184,74 @@ def test_schottky_diode_is_on_the_metal1_over_its_contacts():
     # the series resistance (rsmain), so the anode E and the cathode B are on the Metal1 over them,
     # without a warning about the contacts (#370)
     cell_name = 'diode_schottky_nbl1'
-    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
-        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', f"{cell_name}.gds.gz")
-    messages = [c.args[0] for c in warning_mock.call_args_list]
-    assert [m for m in messages if 'leaves out these LVS layers' in m] == []
-    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
-
-    pex_context = extraction_context(pex_whiteboxed.read_lvsdb('test_patterns', f"{cell_name}.gds.gz"), cell_name,
-                                     blackbox_devices=False)
-    assert {d.device_class_name: {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
-                                  for t in d.terminals}
-            for d in pex_context.devices_by_name.values()} == {
+    assert pex_whiteboxed.device_layer_warnings('test_patterns', f"{cell_name}.gds.gz") == []
+    assert terminal_layers_of_test_pattern(cell_name) == {
         'schottky_nbl1': {'C': ['Activ'], 'B': ['Metal1'], 'E': ['Metal1']},
+    }
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('cell_name', ['device_pcells',
+                                       'esd_diodevdd_2kv',
+                                       'esd_diodevss_2kv',
+                                       'inductor2_w2u_d15u48_tm2_wires_50u',
+                                       'inductor3_w2u_d25u84_2_turns'])
+def test_device_pcells_raise_no_warnings_about_layers_and_terminals(cell_name: str):
+    # A warning on every use of a device, although nothing is wrong, trains users to ignore the real ones
+    assert pex_whiteboxed.device_layer_warnings('test_patterns', f"{cell_name}.gds.gz") == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_device_terminals_on_the_substrate_and_wells_stay_on_their_nets():
+    # The substrate and the wells are no conductors of the resistance network
+    terminal_layers = terminal_layers_of_test_pattern('device_pcells')
+    assert {device_class: terminal_layers[device_class]
+            for device_class in ('isolbox', 'ntap1', 'ptap1', 'rhigh', 'rppd', 'rsil')} == {
+        'isolbox': {'S': ['PWell'], 'I': ['nBuLay'], 'Bn': ['PWell']},
+        'ntap1': {'TIE': ['nSD'], 'WELL': ['NWell']},
+        'ptap1': {'TIE': ['pSD'], 'WELL': ['PWell']},
+        'rhigh': {'rhigh_1': ['GatPoly'], 'rhigh_2': ['GatPoly'], 'rhigh_sub': ['PWell']},
+        'rppd': {'rppd_1': ['GatPoly'], 'rppd_2': ['GatPoly'], 'rppd_sub': ['PWell']},
+        'rsil': {'rsil_1': ['GatPoly'], 'rsil_2': ['GatPoly'], 'rsil_sub': ['PWell']},
+    }
+    device_lines = pex_whiteboxed.written_device_lines('test_patterns', 'device_pcells.gds.gz')
+    assert [line for line in device_lines if any(f".{layer}" in line for layer in ('PWell', 'NWell', 'nBuLay'))] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('device_class', ['diodevdd_2kv', 'diodevss_2kv'])
+def test_esd_diodes_are_on_the_metal1_over_their_contacts(device_class: str):
+    # The contacts of the emitter are within the device, whose model has the series resistance (rs)
+    assert terminal_layers_of_test_pattern(f"esd_{device_class}") == {
+        device_class: {'C': ['Metal1'], 'B': ['Metal1'], 'E': ['Metal1']}
+    }
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_substrate_terminal_of_inductor_of_sg13cmos5l_stays_on_its_net():
+    # NOTE: the variant of the tech info without the layers of sg13g2 only
+    cell_name = 'inductor3_w2u_d25u85_2_turns'
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(PDK.IHP_SG13CMOS5L, os.path.join(DESIGNS_DIR, PDK.IHP_SG13CMOS5L, cell_name,
+                                                                   f"{cell_name}.gds.gz")))
+    pex_context = extraction_context(lvsdb, cell_name, blackbox_devices=False, pdk=PDK.IHP_SG13CMOS5L)
+    assert terminal_layers_by_device_class(pex_context)['inductor3']['inductor3_sub'] == ['PWell']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_terminals_of_antenna_diodes_on_the_substrate_and_nwell_stay_on_their_nets():
+    cell_name = 'diode_dantenna_dpantenna'
+    # NOTE: the warning about their contacts stays, as the LVS deck has no layer for them
+    messages = pex_whiteboxed.device_layer_warnings('test_patterns', f"{cell_name}.gds.gz")
+    assert [m for m in messages if 'has no nodes for these device terminals' in m] == []
+    assert terminal_layers_of_test_pattern(cell_name) == {
+        'dantenna': {'A': ['PWell'], 'C': ['Metal1']},
+        'dpantenna': {'A': ['Metal1'], 'C': ['NWell']},
     }
 
 

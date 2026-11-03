@@ -89,7 +89,7 @@ class Test(unittest.TestCase):
             pex_context = self.prepare_extraction()
         self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
                       "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, "
-                      "schottcky_p, schottcky_n_con",
+                      "schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te",
                       [call.args[0] for call in warning.call_args_list])
         self.assertEqual([], pex_context.unmodeled_layers)
 
@@ -110,7 +110,7 @@ class Test(unittest.TestCase):
         # NOTE: they still cover the shapes of the layer they are derived from
         self.assertIn("The extraction leaves out these LVS layers, as the tech info doesn't know them:\n"
                       "  - cont_drw (Cont): 36 of 46 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, "
-                      "schottcky_p, schottcky_n_con",
+                      "schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te",
                       [call.args[0] for call in warning.call_args_list])
 
     def test_leftover_top_cells_are_ignored_with_a_warning(self):
@@ -315,7 +315,7 @@ class TerminalOnNetTest(unittest.TestCase):
         # so they are on the ends of the leads, rather than without a node in the resistance network (#351)
         pex_context = lvsdb_context('inductor2_w2u_d15u48_1_turn', 'ihp-sg13g2')
         inductor, = pex_context.devices_by_name.values()
-        self.assertEqual({'inductor_1': ['TopMetal2'], 'inductor_2': ['TopMetal2'], 'inductor_sub': []},
+        self.assertEqual({'inductor_1': ['TopMetal2'], 'inductor_2': ['TopMetal2'], 'inductor_sub': ['PWell']},
                          {t.name: [r.layer.canonical_layer_name for r in t.region_by_layer]
                           for t in inductor.terminals})
 
