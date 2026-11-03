@@ -140,6 +140,9 @@ class MIMCAPExtractor < RBA::GenericDeviceExtractor
     conn.connect(dev, meas_mk)
     conn.connect(top_mim, dev_mk)
     conn.connect(btm_mim, dev_mk)
+    # [PEX] Metal5 of other cells over the feed of an rfcmim splits the measured metal, so the feed is a polygon
+    #       of its own, which doesn't touch dev (NOTE: a regular LVS would not do this, we need it for PEX)
+    conn.connect(meas_mk, meas_mk)
 
     # Sub connection for rfcmim
     if name.downcase.include?('rfcmim')
@@ -156,12 +159,17 @@ class MIMCAPExtractor < RBA::GenericDeviceExtractor
     # Args:
     #   layer_geometry (Array): Array of layer geometries.
     dev, top_mim, btm_mim, dev_mk, meas_mk, sub_mk = layer_geometry
+    # [PEX] btm_mim is on metal5_cap or metal5_rfcap, where Metal5 of other cells over the plate (e.g. a route) stays
+    #       a polygon of its own, so merge it into the plate (NOTE: the PDK deck selects the plate by covering instead)
+    btm_mim = btm_mim.merged
 
-    dev_mk.merged.each do |_region|
+    dev_mk.merged.each do |region|
       if top_mim.size != 1
-        $logger.info("No. of ports exist for #{@name} topmetal is #{top_mim.size}, should be 1")
+        report_not_extracted("No. of ports exist for #{@name} topmetal is #{top_mim.size}, should be 1", region)
       elsif btm_mim.size != 1
-        $logger.info("No. of ports exist for #{@name} btmmetal is #{btm_mim.size}, should be 1")
+        report_not_extracted("No. of ports exist for #{@name} btmmetal is #{btm_mim.size}, should be 1", region)
+      elsif name.downcase.include?('rfcmim') && calc_cmim_params(dev, dev_mk, meas_mk).last.zero?
+        report_not_extracted("#{@name} has no single feed width, of its Metal5 on the edge of its PWellBlock", region)
       else
         device = create_device
         set_device_parameters(device, dev, dev_mk, meas_mk)
@@ -171,6 +179,15 @@ class MIMCAPExtractor < RBA::GenericDeviceExtractor
   end
 
   private
+
+  def report_not_extracted(reason, region)
+    # [PEX] Reported through error() rather than a log line, which stops the LVS as in CapMomExtractor: with the device
+    #       left out, PEX has its capacitance from the plates, not from its model, without a message
+    #       (NOTE: a regular LVS would not do this, there the comparison with the schematic fails)
+    msg = "#{reason}. The device is not extracted."
+    $logger.error(msg)
+    error(msg, region)
+  end
 
   def define_layers
     # Define layers for extraction.
