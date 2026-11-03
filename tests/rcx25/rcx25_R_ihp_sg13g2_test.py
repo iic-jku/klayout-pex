@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import re
 from typing import *
 from unittest import mock
 
@@ -197,6 +198,9 @@ def test_schottky_diode_is_on_the_metal1_over_its_contacts():
 @allure.tag("PEX", "2.5D")
 @pytest.mark.parametrize('cell_name', ['device_pcells',
                                        'cap_moscap_n_moscap_p',
+                                       'cap_moscap_n_x2_gatpoly_wire',
+                                       'cap_moscap_p_x2_wells_apart',
+                                       'cap_svaricap_nwell_guard_ring',
                                        'esd_diodevdd_2kv',
                                        'esd_diodevss_2kv',
                                        'inductor2_w2u_d15u48_tm2_wires_50u',
@@ -469,16 +473,51 @@ def test_mim_cap_is_extracted_with_metal5_of_other_cells_over_its_plate(gds_name
 
 @allure.parent_suite(parent_suite)
 @allure.tag("PEX", "2.5D")
-def test_rf_mim_cap_of_no_single_feed_width_stops_the_lvs(tmp_path: Path):
+@pytest.mark.parametrize('gds_name, device_lines', [
+    # NOTE: their markers merged into one with 2 cores, and the wire was a second gate port within the marker,
+    #       which left out both of them, with an info line
+    ('cap_moscap_n_x2_gatpoly_wire.gds.gz', ['X$1 $1 sub! sg13_moscap_n w=5e-06 l=5e-06',
+                                             'X$2 $2 sub! sg13_moscap_n w=5e-06 l=5e-06']),
+    # NOTE: the guard ring of the other one is near its core too, but of another net, as they have an NWell each
+    ('cap_moscap_p_x2_wells_apart.gds.gz', ['X$1 $1 $2 sg13_moscap_p w=5e-06 l=5e-06',
+                                            'X$2 $3 $4 sg13_moscap_p w=5e-06 l=5e-06']),
+    # NOTE: its substrate terminal looked for a ptap, of which it has none in the well, and left it without terminals
+    ('cap_svaricap_nwell_guard_ring.gds.gz', ['X$1 G1 W G2 sub! sg13_hv_svaricap w=3.74e-06 l=3e-07 Nx=1',
+                                              'X$2 W $1 ntap1',
+                                              'X$3 $2 $1 ntap1']),
+])
+def test_devices_are_extracted_close_to_others_and_in_a_guard_ring(gds_name: str, device_lines: List[str]):
+    # NOTE: the unnamed nets by their order in the netlist, as their numbers aren't stable
+    numbers: Dict[str, str] = {}
+
+    def by_order(match: re.Match) -> str:
+        return numbers.setdefault(match.group(0), f"${len(numbers) + 1}")
+
+    assert [re.sub(r'\\\$\d+', by_order, line)
+            for line in pex_blackboxed.written_device_lines('test_patterns', gds_name)] == device_lines
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('gds_name, message', [
     # NOTE: it was written with wfeed=0, which its model can't take
+    ('cap_rfcmim_w7u_l7u_two_feeds.gds.gz', 'rfcmim has no single feed width'),
+    # NOTE: these were left out with an info line, and the deck cuts the metal of a device from its nets
+    ('res_rppd_x2_one_marker.gds.gz', 'No. of ports exist for rppd is 4, should be 2'),
+    ('inductor2_x2_markers_touching.gds.gz', 'No. of ports exist for inductor is 4, should be 2'),
+    ('cap_moscap_n_no_guard_ring.gds.gz', 'No bulk port exists for sg13_moscap_n'),
+    # NOTE: it was left without terminals, which only the resistance extraction noticed, as a device of the LVS script
+    ('cap_svaricap_nwell_guard_ring_digisub.gds.gz', "Sub terminal for sg13_hv_svaricap device doesn't exist"),
+])
+def test_device_the_deck_cannot_extract_stops_the_lvs(tmp_path: Path, gds_name: str, message: str):
     if klayout_exe_path() is None:
         pytest.skip("needs the KLayout executable (KPEX_KLAYOUT_EXE)")
-    gds_path = pex_blackboxed.pdk.gds_path('test_patterns', 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz')
+    gds_path = pex_blackboxed.pdk.gds_path('test_patterns', gds_name)
     with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit) as exit_info:
         KpexCLI().main(['main', '--pdk', pex_blackboxed.pdk.name, '--mode', 'R', '--blackbox', 'y',
                         '--gds', gds_path, '--out-dir', str(tmp_path), '--2.5D'])
     assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
-    assert 'rfcmim has no single feed width' in error_mock.call_args.args[0]
+    assert message in error_mock.call_args.args[0]
 
 
 @allure.parent_suite(parent_suite)

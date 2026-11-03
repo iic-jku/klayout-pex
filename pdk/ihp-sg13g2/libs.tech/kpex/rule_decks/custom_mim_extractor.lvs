@@ -99,6 +99,8 @@ end
 
 # === MIMCAPExtractor ===
 class MIMCAPExtractor < RBA::GenericDeviceExtractor
+  include DeviceExtractorMethods
+
   # Extraction of N terminal devices - General Class
 
   def initialize(name)
@@ -180,15 +182,6 @@ class MIMCAPExtractor < RBA::GenericDeviceExtractor
 
   private
 
-  def report_not_extracted(reason, region)
-    # [PEX] Reported through error() rather than a log line, which stops the LVS as in CapMomExtractor: with the device
-    #       left out, PEX has its capacitance from the plates, not from its model, without a message
-    #       (NOTE: a regular LVS would not do this, there the comparison with the schematic fails)
-    msg = "#{reason}. The device is not extracted."
-    $logger.error(msg)
-    error(msg, region)
-  end
-
   def define_layers
     # Define layers for extraction.
     define_layer('core', 'core Layer')
@@ -263,14 +256,8 @@ class MIMCAPExtractor < RBA::GenericDeviceExtractor
     #   None
 
     # Define sub if exist (should be defined before other terminals)
-    if name.downcase.include?('rfcmim')
-      if sub_mk.is_empty?
-        $logger.info("Sub terminal for #{@name} device doesn't exist, please recheck")
-        return nil
-      else
-        define_terminal(device, @reg_dev.terminal_id("mim_sub"), 5, sub_mk[0])
-      end
-    end
+    # [PEX] It's always there, rfmim_sub is the marker sized
+    define_terminal(device, @reg_dev.terminal_id("mim_sub"), 5, sub_mk[0]) if name.downcase.include?('rfcmim')
 
     # Defination main terminals
     define_terminal(device, @reg_dev.terminal_id("mim_top"), 1, top_mim[0])

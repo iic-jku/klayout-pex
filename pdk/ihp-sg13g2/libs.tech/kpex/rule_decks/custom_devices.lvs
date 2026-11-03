@@ -46,6 +46,20 @@ module DeviceClassMethods
   end
 end
 
+# common methods of the device extractors
+module DeviceExtractorMethods
+  private
+
+  def report_not_extracted(reason, region)
+    # [PEX] Reported through error() rather than a log line, which stops the LVS as in CapMomExtractor: with the device
+    #       left out, PEX misses its model and, where the deck cuts its metal, its connection, without a message
+    #       (NOTE: a regular LVS would not do this, there the comparison with the schematic fails)
+    msg = "#{reason}. The device is not extracted."
+    $logger.error(msg)
+    error(msg, region)
+  end
+end
+
 # res-custom device calss
 class DeviceCustomRes < RBA::DeviceClassResistor
   include DeviceClassMethods

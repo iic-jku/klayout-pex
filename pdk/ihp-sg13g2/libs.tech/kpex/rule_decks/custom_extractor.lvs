@@ -26,6 +26,8 @@ $unit = dbu
 
 # === GeneralNTerminalExtractor ===
 class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
+  include DeviceExtractorMethods
+
   # Extraction of N terminal devices - General Class
 
   def initialize(name, num)
@@ -82,6 +84,7 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
       sub_mk = layers[4]
       conn.connect(sub_mk, dev_mk)
     end
+    conn.connect(layers[5], dev_mk) if name.downcase.include?('varicap')
 
     conn
   end
@@ -91,7 +94,7 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
     #
     # Args:
     #   layer_geometry (Array): Array of layer geometries.
-    dev, ports, meas_mk, dev_mk, sub_mk = layer_geometry
+    dev, ports, meas_mk, dev_mk, sub_mk, sub_below = layer_geometry
 
     varicap = name.downcase.include?('varicap')
     mk_regions = varicap ? meas_mk.merged : dev_mk.merged
@@ -101,17 +104,26 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
       marker_scope = varicap ? dev_mk.interacting(region_sel) : region_sel
       region_ports = ports.interacting(region_sel)
       region_sub_mk = sub_mk.nil? ? nil : sub_mk.interacting(marker_scope)
+      sub_layer = 4
+      # [PEX] A varicap all in a well (guardRingType nwell of the pcell) has no ptap within its marker, the terminal is
+      #       on the substrate below (NOTE: a regular LVS would not do this, it leaves the device without terminals)
+      if varicap && region_sub_mk.is_empty?
+        region_sub_mk = sub_below.interacting(marker_scope)
+        sub_layer = 5
+      end
 
       if region_ports.size != @num
-        $logger.info("#{@name} device terminals (#{@num}) don't touch device marker correctly")
-        $logger.info("No. of ports exist for #{@name} is #{region_ports.size}, should be #{@num}")
+        report_not_extracted("No. of ports exist for #{@name} is #{region_ports.size}, should be #{@num}, " \
+                             'check for markers of adjacent devices touching, and terminals off the marker', region)
+      elsif !region_sub_mk.nil? && region_sub_mk.is_empty?
+        report_not_extracted("Sub terminal for #{@name} device doesn't exist", region)
       else
         device = create_device
         local_dev = varicap ? dev.interacting(region_sel) : dev
         local_meas_mk = varicap ? meas_mk.interacting(region_sel) : meas_mk
         local_dev_mk = varicap ? marker_scope : dev_mk
         set_device_parameters(device, region, local_dev, region_ports, local_meas_mk, local_dev_mk)
-        define_and_sort_terminals(device, region_ports, region_sub_mk, local_dev)
+        define_and_sort_terminals(device, region_ports, region_sub_mk, sub_layer, local_dev)
       end
     end
   end
@@ -128,6 +140,7 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
     if RES_DEV.include?(name.downcase) || name.downcase.start_with?('ind') || name.downcase.include?('varicap')
       define_layer('sub_mk', 'Substrate Marker')
     end
+    define_layer('sub_below', 'Substrate below a device without a sub_mk') if name.downcase.include?('varicap')
   end
 
   def set_device_parameters(device, region, dev, ports, meas_mk, dev_mk)
@@ -265,13 +278,14 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
     [width, space, diameter, no_turns]
   end
 
-  def define_and_sort_terminals(device, ports, sub_mk, core_region = nil)
+  def define_and_sort_terminals(device, ports, sub_mk, sub_layer, core_region = nil)
     # Define and sort terminals based on location.
     #
     # Args:
     #   device: Device object to define terminals for.
     #   ports: Contact layer object containing terminals.
     #   sub_mk: substrate marker layer object.
+    #   sub_layer: index of the layer of sub_mk.
     #
     # Returns:
     #   None
@@ -295,18 +309,8 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
 
     if name.downcase.include?('varicap')
       # Varicap terminals are fixed: G1, W, G2, SUB
-      if sub_mk.is_empty?
-        $logger.info("Sub terminal for #{@name} device doesn't exist, please recheck")
-        return nil
-      end
-
       varicap_ports = []
       ports.merged.each { |p| varicap_ports << p }
-
-      if varicap_ports.size != 3
-        $logger.info("Varicap terminals for #{@name} are invalid (ports=#{varicap_ports.size})")
-        return nil
-      end
 
       core_sel = core_region || RBA::Region.new
       overlaps = varicap_ports.map { |p| RBA::Region.new(p).and(core_sel).area }
@@ -315,7 +319,7 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
       poly_ports = varicap_ports.each_with_index.reject { |_, idx| idx == w_idx }.map(&:first)
       sorted_poly = poly_ports.sort_by { |poly| [poly.bbox.center.x, poly.bbox.center.y] }
 
-      define_terminal(device, @reg_dev.terminal_id('SUB'), 4, sub_mk[0])
+      define_terminal(device, @reg_dev.terminal_id('SUB'), sub_layer, sub_mk[0])
       define_terminal(device, @reg_dev.terminal_id('G1'), 1, sorted_poly[0])
       define_terminal(device, @reg_dev.terminal_id('W'), 1, w_port)
       define_terminal(device, @reg_dev.terminal_id('G2'), 1, sorted_poly[1])
@@ -324,21 +328,11 @@ class GeneralNTerminalExtractor < RBA::GenericDeviceExtractor
 
     # Define sub if exist (should be defined before other terminals)
     if name.downcase.start_with?('ind')
-      if sub_mk.is_empty?
-        $logger.info("Sub terminal for #{@name} device doesn't exist, please recheck")
-        return nil
-      else
-        define_terminal(device, @reg_dev.terminal_id("#{name}_sub"), 4, sub_mk[0])
-      end
+      define_terminal(device, @reg_dev.terminal_id("#{name}_sub"), 4, sub_mk[0])
     end
 
     # Poly resistors are 3-terminal devices: two ports + substrate.
     if RES_DEV.include?(name.downcase)
-      if sub_mk.is_empty?
-        $logger.info("Sub terminal for #{@name} device doesn't exist, please recheck")
-        return nil
-      end
-
       define_terminal(device, @reg_dev.terminal_id("#{name}_sub"), 4, sub_mk[0])
     end
 

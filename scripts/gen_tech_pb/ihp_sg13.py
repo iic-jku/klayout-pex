@@ -114,6 +114,7 @@ class TechBuilder:
         add_computed_layer(tech, PWELL, KREG, "rsil_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an rsil, its terminal rsil_sub")
         add_computed_layer(tech, PWELL, KREG, "ind2_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an inductor2, its terminal inductor_sub")
         add_computed_layer(tech, PWELL, KREG, "ind3_sub",       (46, 0),      "PWell",     None,            "Computed layer for the substrate or well below an inductor3, its terminal inductor3_sub")
+        add_computed_layer(tech, PWELL, KREG, "varicap_sub_below", (46, 0),   "PWell",     None,            "Computed layer for the substrate below an sg13_hv_svaricap without a ptap, its terminal SUB")
 
         add_computed_layer(tech, NIMP,  KREG, "nsd_fet",        (7, 0),       "nSD",       "nSD",           "Computed layer for nSD")
         add_computed_layer(tech, PIMP,  KREG, "psd_fet",        (14, 0),      "pSD",       "pSD",           "Computed layer for pSD")
