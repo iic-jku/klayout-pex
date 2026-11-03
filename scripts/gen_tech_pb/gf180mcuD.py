@@ -69,6 +69,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, PIMP,    KREG, "psd",         (31, 0),     "Pplus",     "Pplus",            "P+ source/drain")
     add_computed_layer(tech, NIMP,    KREG, "nd_ldmos",    (32, 0),     "Nplus",     "Nplus",            "N+ drain of the LDNMOS, the same n+ diffusion as nsd")
     add_computed_layer(tech, PIMP,    KREG, "psd_dw",      (31, 0),     "Pplus",     "Pplus",            "P+ source/drain within DNWELL, the same p+ diffusion as psd")
+    add_computed_layer(tech, PIMP,    KREG, "pd_ldmos",    (31, 0),     "Pplus",     "Pplus",            "P+ drain of the LDPMOS, the same p+ diffusion as psd")
     add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "ntap",             "N+ tap (COMP within nwell)")
     add_computed_layer(tech, PTAP,    KREG, "ptap",        (22, 244),   "COMP",      "ptap",             "P+ tap (COMP outside nwell)")
     add_computed_layer(tech, METAL,   KREG, "poly2_con",   (30, 0),     "Poly2",     "Poly2",            "Computed layer for poly")
@@ -86,6 +87,10 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, PTAP,    KREG, "contact_ptap_con",    (33, 4405), "Contact", None,               "Computed layer for contact from ptap (the substrate below) to Metal1")
     add_computed_layer(tech, NTAP,    KREG, "contact_ntap_dw_con", (33, 4406), "Contact", None,               "Computed layer for contact from ntap_dw (the deep nwell below) to Metal1")
     add_computed_layer(tech, PTAP,    KREG, "contact_ptap_dw_con", (33, 4407), "Contact", None,               "Computed layer for contact from the p-diffusion of an isolated p-well to Metal1")
+    # NOTE: within the diffusion resistors (nplus_u, nplus_s, pplus_u, pplus_s), whose models have terminal resistors
+    #       (rt1, rt2: e.g. 6 Ω·µm over the width of nplus_s, whose contact abuts its body),
+    #       so their terminals are on the Metal1 over them
+    add_computed_layer(tech, CONT,    KDEV, "contact_res_con",     (33, 4408), "Contact", None,               "Computed layer for contact from the terminals of the diffusion resistors to Metal1")
     add_computed_layer(tech, VIA,     KREG, "via1",        (35, 0),     "Via1",      "via1",             "Computed layer for via1")
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "via2_n_cap",       "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "via3_n_cap",       "Computed layer for via3 (no MIM cap)")

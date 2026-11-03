@@ -51,3 +51,14 @@ cap_cmomf_m2_ports = metal2_pin.and(cap_cmomf_marker)
 cap_cmomf_m3_ports = metal3_pin.and(cap_cmomf_marker)
 cap_cmomf_m4_ports = metal4_pin.and(cap_cmomf_marker)
 cap_cmomf_m5_ports = metal5_pin.and(cap_cmomf_marker)
+
+# The vias within the marker and the metal over them, for the metal range of the
+# device (see CapMomExtractor#metal_range).
+cap_cmomf_via1 = via1_drw.inside(cap_cmomf_marker)
+cap_cmomf_via2 = via2_drw.inside(cap_cmomf_marker)
+cap_cmomf_via3 = via3_drw.inside(cap_cmomf_marker)
+cap_cmomf_via4 = via4_drw.inside(cap_cmomf_marker)
+cap_cmomf_metal2 = metal2_con.and(cap_cmomf_marker)
+cap_cmomf_metal3 = metal3_con.and(cap_cmomf_marker)
+cap_cmomf_metal4 = metal4_con.and(cap_cmomf_marker)
+cap_cmomf_metal5 = metal5_con.and(cap_cmomf_marker)

@@ -1799,17 +1799,32 @@ vpp_11p5x11p7 = vpp.interacting(vpp_11_07).interacting(vpp_11_35)
 # ---- STACK ----
 # ===============
 
-vpp_m1m2            = vpp.not_interacting(poly).not_interacting(li).not_interacting(met3).not_interacting(met4).not_interacting(met5)
-vpp_m1m2m3          = vpp.not_interacting(poly).not_interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
-vpp_m1m2m3m4        = vpp.not_interacting(poly).not_interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
-vpp_m1m2m3m4m5      = vpp.not_interacting(poly).not_interacting(li).interacting(met3).interacting(met4).interacting(met5)
-vpp_l1m1m2          = vpp.not_interacting(poly).interacting(li).not_interacting(met3).not_interacting(met4).not_interacting(met5)
-vpp_l1m1m2m3        = vpp.not_interacting(poly).interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
-vpp_l1m1m2m3m4      = vpp.not_interacting(poly).interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
-vpp_l1m1m2m3m4m5    = vpp.not_interacting(poly).interacting(li).interacting(met3).interacting(met4).interacting(met5)
-vpp_pol1m1m2m3      = vpp.interacting(poly).interacting(li).interacting(met3).not_interacting(met4).not_interacting(met5)
-vpp_pol1m1m2m3m4    = vpp.interacting(poly).interacting(li).interacting(met3).interacting(met4).not_interacting(met5)
-vpp_pol1m1m2m3m4m5  = vpp.interacting(poly).interacting(li).interacting(met3).interacting(met4).interacting(met5)
+# [PEX] The stack is the metal of the cap, not what touches its marker: routing across the cap must not change
+#       its model (NOTE: a regular LVS would not do this, we need it for PEX). A wire leaves the marker, or is
+#       the landing pad of a via, while the metal of the PDK's cells is a plate over the marker or, within it,
+#       inner fingers (their outer ones enclose them, which keeps leads out) or floating plates (from 2.25 um2).
+#       On met5, it may also cover just most of the 125.6 um2 of the marker: m1m2m3m4_shieldm5 has holes (104.5 um2),
+#       shieldpom5_x is within the marker (115.5 um2), with a lead, as it has no via4
+vpp_with = lambda do |layer|
+  vpp.inside(layer).or(vpp.interacting(layer.inside(vpp).with_area(2.um2, nil)))
+end
+vpp_with_poly = vpp_with.call(poly)
+vpp_with_li   = vpp_with.call(li)
+vpp_with_met3 = vpp_with.call(met3)
+vpp_with_met4 = vpp_with.call(met4)
+vpp_with_met5 = vpp.inside(met5).or(vpp.interacting(met5.and(vpp).with_area(104.um2, nil)))
+
+vpp_m1m2            = vpp.not_interacting(vpp_with_poly).not_interacting(vpp_with_li).not_interacting(vpp_with_met3).not_interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_m1m2m3          = vpp.not_interacting(vpp_with_poly).not_interacting(vpp_with_li).interacting(vpp_with_met3).not_interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_m1m2m3m4        = vpp.not_interacting(vpp_with_poly).not_interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_m1m2m3m4m5      = vpp.not_interacting(vpp_with_poly).not_interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).interacting(vpp_with_met5)
+vpp_l1m1m2          = vpp.not_interacting(vpp_with_poly).interacting(vpp_with_li).not_interacting(vpp_with_met3).not_interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_l1m1m2m3        = vpp.not_interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).not_interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_l1m1m2m3m4      = vpp.not_interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_l1m1m2m3m4m5    = vpp.not_interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).interacting(vpp_with_met5)
+vpp_pol1m1m2m3      = vpp.interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).not_interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_pol1m1m2m3m4    = vpp.interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).not_interacting(vpp_with_met5)
+vpp_pol1m1m2m3m4m5  = vpp.interacting(vpp_with_poly).interacting(vpp_with_li).interacting(vpp_with_met3).interacting(vpp_with_met4).interacting(vpp_with_met5)
 
 # ===============
 # --- DEVICES ---

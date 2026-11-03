@@ -63,7 +63,9 @@ ldpmos_exclude = nwell.join(lvpwell).join(diode_mk)
 
 pgate_ldmos = pgate_6v_dw_base.interacting(mvpsd).and(ldmos_xtor).not(mvpsd).not(ldpmos_exclude)
 pd_sd_ldmos = psd_dw.not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell)
-pd_ldmos    = pd_sd_ldmos.and(mvpsd)
+# [PEX] the drain from the COMP, like nd_ldmos, as psd_dw leaves it out: it is separated from the gate by a gap
+#       (NOTE: a regular LVS would not do this, its terminal joins the contacts, we need it for PEX)
+pd_ldmos    = pcomp.not(pgate).not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell).and(mvpsd)
 ps_ldmos    = pd_sd_ldmos.not(mvpsd)
 psd_ldmos   = pcomp.not(v5_xtor).and(dualgate).and(ldmos_xtor).and(dnwell)
                    .interacting(mvpsd).sized(0.29.um).sized(-0.29.um).extents.not(pgate_ldmos)

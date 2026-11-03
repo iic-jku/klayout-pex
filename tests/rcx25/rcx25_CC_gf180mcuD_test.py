@@ -22,6 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 
+from typing import *
+
 import allure
 import pytest
 
@@ -112,3 +114,23 @@ C8;D;VSUBS;0.013;
 C9;D;W;0.014;
 C10;VSUBS;W;0.004;"""
     )
+
+
+def ldmos_pair_capacitances(device: str) -> Dict[Tuple[str, str], float]:
+    rows = pex_blackboxed.written_netlist_rows('test_patterns', f"{device}_10v0_asym_pair_m1.gds.gz")
+    return {(row['Net1'], row['Net2']): float(row['Capacitance [fF]']) for row in rows}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_ldpmos_has_the_capacitances_of_the_ldnmos_of_the_same_stack():
+    # The same drawn pair, the LDPMOS within a DNWELL: the capacitances between their nets are the same, and the ones
+    # of a net to the DNWELL ($6) and, beyond it, to the substrate add up to the ones of the LDNMOS to the substrate.
+    # Without its drain COMP, the LDPMOS had gate–DNWELL 0.931 fF, not 0.548 fF, and D–S 0.066 fF, not 0.07 fF
+    ldnmos = ldmos_pair_capacitances('nfet')
+    ldpmos = ldmos_pair_capacitances('pfet')
+    dnwell = '$6'
+    for net in ('D', 'G1', 'G2', 'S1', 'S2'):
+        assert ldpmos.pop((dnwell, net)) + ldpmos.pop((net, 'VSUBS')) == \
+               pytest.approx(ldnmos.pop((net, 'VSUBS')), abs=0.002)
+    assert ldpmos == ldnmos
