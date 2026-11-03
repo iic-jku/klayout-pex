@@ -98,11 +98,18 @@ end
 
 logger.info('Loading database to memory is complete.')
 
+if $input
+  layout_dir = (Pathname.new($input).parent.realpath if $input)
+elsif !RBA::CellView.active.filename.nil?
+  layout_dir = Pathname.new(RBA::CellView.active.filename).parent.realpath
+else
+  raise StandardError, 'input must be specified outside of graphical sessions'
+end
+
 if $report
   logger.info("GF180MCU Klayout LVS runset output at: #{$report}")
   report_lvs($report)
 else
-  layout_dir = Pathname.new(RBA::CellView.active.filename).parent.realpath
   report_path = layout_dir.join("#{source.cell_name}.lvsdb").to_s
   logger.info("GF180MCU Klayout LVS runset output at default location: #{report_path}")
   report_lvs(report_path)
@@ -145,7 +152,6 @@ if $target_netlist
   target_netlist($target_netlist, write_spice(SPICE_WITH_NET_NAMES, SPICE_WITH_COMMENTS),
                  "Extracted by KLayout with GF180MCU LVS runset on : #{Time.now.strftime('%d/%m/%Y %H:%M')}")
 else
-  layout_dir = Pathname.new(RBA::CellView.active.filename).parent.realpath
   netlist_path = layout_dir.join("#{source.cell_name}_extracted.cir")
   target_netlist(netlist_path.to_s, write_spice(SPICE_WITH_NET_NAMES, SPICE_WITH_COMMENTS),
                  "Extracted by KLayout with GF180MCU LVS runset on : #{Time.now.strftime('%d/%m/%Y %H:%M')}")
