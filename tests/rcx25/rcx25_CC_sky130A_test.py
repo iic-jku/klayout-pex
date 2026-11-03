@@ -681,6 +681,21 @@ C6;VSUBS;X;0.385;"""
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_mom_cap_model_is_not_changed_by_routing_across__blackboxed():
+    # The LVS deck told the VPP caps apart by the layers that touch their markers, so the wires across the first
+    # cap made it sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4, and the wire across the second one
+    # left it without a model. The metal of a cap does count: its plates, also the ones on met5 with holes or a lead
+    device_lines = pex_blackboxed.written_device_lines('test_patterns', 'cap_vpp_routing_across.gds.gz')
+    assert sorted(line.split()[-1] for line in device_lines) == [
+        'sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield',
+        'sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4',
+        'sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x',
+        'sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5',
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 @pytest.mark.slow
 def test_mom_cap_with_4_terminals__whiteboxed():
     # The LVS script reads VPP caps with 4 terminals as MOS4, so white-box mode kept the device,

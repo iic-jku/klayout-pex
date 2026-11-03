@@ -43,6 +43,7 @@ NWELL:    GDSPair = (64, 20)
 TAP:      GDSPair = (65, 44)
 NSDM:     GDSPair = (93, 44)
 PSDM:     GDSPair = (94, 20)
+POLY:     GDSPair = (66, 20)
 LICON:    GDSPair = (66, 44)
 LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
@@ -56,7 +57,10 @@ CAPM:     GDSPair = (89, 44)
 VIA3:     GDSPair = (70, 44)
 MET4:     GDSPair = (71, 20)
 MET4_PIN: GDSPair = (71, 16)
+MET5:     GDSPair = (72, 20)
+MET5_PIN: GDSPair = (72, 16)
 INDUCTOR: GDSPair = (82, 24)
+VPP:      GDSPair = (82, 64)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     NWELL: (64, 5),
@@ -65,11 +69,34 @@ LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     MET2: (69, 5),
     MET3: (70, 5),
     MET4: (71, 5),
+    MET5: (72, 5),
 }
 
 
 def pattern(name: str) -> Pattern:
     return Pattern(name, label_layer_by_layer=LABEL_BY_LAYER)
+
+
+def pdk_library() -> kdb.Layout:
+    """
+    The cells of the PDK's primitives, needs the sky130A PDK (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/sky130A)
+    """
+    library = kdb.Layout()
+    library.read(os.path.join(pdk_root(), 'sky130A', 'libs.ref', 'sky130_fd_pr', 'gds', 'sky130_fd_pr.gds'))
+    return library
+
+
+def place_pdk_cell(p: Pattern, library: kdb.Layout, name: str, x: int) -> Tuple[kdb.Cell, kdb.Trans]:
+    """
+    An instance of a cell of the PDK in the top cell, with the left of its bounding box at x
+
+    :return: the cell, and the transformation of its instance
+    """
+    cell = p.layout.create_cell(name)
+    cell.copy_tree(library.cell(name))
+    trans = kdb.Trans(x - cell.bbox().left, 0)
+    p.top.insert(kdb.CellInstArray(cell.cell_index(), trans))
+    return cell, trans
 
 
 #
@@ -141,9 +168,6 @@ def cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire() -> Pattern:
     """
     The VPP cap of the test data (cap_vpp_04p4x04p6_l1m1m2_noshield, fingers on li1, met1 and met2,
     its terminals C0 and C1), with a met2 wire X of 1 µm width beside it, 0.3 µm away
-
-    NOTE: the wire stays outside the marker of the cap, as the LVS deck tells the VPP caps apart
-          by the layers that touch their marker (a wire across would make it another device)
     """
     p = pattern('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire')
     p.copy_design('sky130A', 'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
@@ -151,6 +175,73 @@ def cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire() -> Pattern:
     p.box(MET2, 4680, -615, 5680, 4590)
     p.box(MET2_PIN, 4680, -615, 5680, 385)
     p.label(MET2, 'X', 4880, -415)
+    return p
+
+
+def cap_vpp_routing_across() -> Pattern:
+    """
+    VPP caps, 15 µm apart, with metal across their markers that is no part of them, each wire and lead
+    with a label and a pin outside the marker: X1, …
+
+    Instances of the PDK's cells:
+    - cap_vpp_04p4x04p6_l1m1m2_noshield, fingers on li1, met1 and met2:
+      a straight met3 wire, an L of met4, and a straight met5 wire
+    - cap_vpp_06p8x06p1_m1m2m3_shieldl1m4, with plates on li1 and met4: a met5 wire
+
+    Drawn flat, with only what the LVS deck looks at, as the cells of this size take minutes to extract,
+    their terminals met2 leads, also X…:
+    - cap_vpp_11p5x11p7_m1m2m3m4_shieldm5, with holes in its met5 plate
+    - cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x, its met5 plate within the marker, with a met5 lead
+    """
+    p = pattern('cap_vpp_routing_across')
+    library = pdk_library()
+    wires = 0
+
+    def wire(layer: GDSPair, pin_layer: GDSPair, points: List[Tuple[int, int]], width: int):
+        nonlocal wires
+        wires += 1
+        p.path(layer, points, width)
+        x, y = points[0]
+        for pin_or_wire in (layer, pin_layer):
+            p.box(pin_or_wire, x - width // 2, y - width // 2, x + width // 2, y + width // 2)
+        p.label(layer, f"X{wires}", x, y)
+
+    def place_cap(name: str, x: int) -> kdb.Box:
+        cell, trans = place_pdk_cell(p, library, f"sky130_fd_pr__cap_vpp_{name}", x)
+        return kdb.Region(cell.begin_shapes_rec(p.layout.layer(*VPP))).merged().bbox().transformed(trans)
+
+    def across(marker: kdb.Box, x: int) -> List[Tuple[int, int]]:
+        return [(marker.left + x, marker.bottom - 2000), (marker.left + x, marker.top + 2000)]
+
+    marker = place_cap('04p4x04p6_l1m1m2_noshield', 0)
+    wire(MET3, MET3_PIN, across(marker, 1000), 400)
+    wire(MET4, MET4_PIN, [(marker.left + 3000, marker.bottom - 2000),
+                          (marker.left + 3000, marker.center().y),
+                          (marker.right + 2000, marker.center().y)], 400)
+    wire(MET5, MET5_PIN, across(marker, 2000), 1600)
+
+    marker = place_cap('06p8x06p1_m1m2m3_shieldl1m4', marker.right + 15000)
+    wire(MET5, MET5_PIN, across(marker, 2000), 1600)
+
+    def draw_cap_11p5x11p7(x: int, *inner_layers: GDSPair) -> kdb.Box:
+        marker = kdb.Box(x, 0, x + 11070, 11350)
+        p.box(VPP, marker.left, marker.bottom, marker.right, marker.top)
+        for layer in inner_layers:
+            p.box(layer, x + 4000, 4000, x + 7000, 7000)
+        wire(MET2, MET2_PIN, [(x - 2000, 1500), (x + 1000, 1500)], 1000)
+        wire(MET2, MET2_PIN, [(x + 13070, 1500), (x + 10070, 1500)], 1000)
+        return marker
+
+    marker = draw_cap_11p5x11p7(marker.right + 15000, MET3, MET4)
+    plate = kdb.Region(marker.enlarged(170))
+    for hole_x, hole_y in ((1935, 2075), (6835, 2075), (1935, 6975), (6835, 6975)):
+        plate -= kdb.Region(kdb.Box(0, 0, 2300, 2300).moved(marker.left + hole_x, marker.bottom + hole_y))
+    p.top.shapes(p.layout.layer(*MET5)).insert(plate)
+
+    marker = draw_cap_11p5x11p7(marker.right + 15000, LI1, MET3, MET4)
+    p.box(POLY, marker.left, marker.bottom, marker.right, marker.top)
+    p.top.shapes(p.layout.layer(*MET5)).insert(marker.enlarged(-230))
+    wire(MET5, MET5_PIN, [(marker.center().x, marker.bottom - 2000), (marker.center().x, marker.bottom + 1000)], 1600)
     return p
 
 
@@ -196,19 +287,12 @@ def rf_inductors_03_90_05_125_05_220() -> Pattern:
     The RF inductors of the PDK (its cells sky130_fd_pr__rf_test_coil1, 2 and 3, of the models
     sky130_fd_pr__ind_03_90, _05_125 and _05_220) side by side, 10 µm apart, the leads of each coil
     outside its marker as pins: its ends (met3) A1, B1, A2, …, from the bottom, and its center tap (met2) CT1, …
-
-    Needs the sky130A PDK (e.g. IIC-OSIC-TOOLS, with $PDK_ROOT/sky130A)
     """
-    library = kdb.Layout()
-    library.read(os.path.join(pdk_root(), 'sky130A', 'libs.ref', 'sky130_fd_pr', 'gds', 'sky130_fd_pr.gds'))
+    library = pdk_library()
     p = pattern('rf_inductors_03_90_05_125_05_220')
     x = 0
     for i in (1, 2, 3):
-        coil = library.cell(f"sky130_fd_pr__rf_test_coil{i}")
-        cell = p.layout.create_cell(coil.name)
-        cell.copy_tree(coil)
-        trans = kdb.Trans(x - cell.bbox().left, 0)
-        p.top.insert(kdb.CellInstArray(cell.cell_index(), trans))
+        cell, trans = place_pdk_cell(p, library, f"sky130_fd_pr__rf_test_coil{i}", x)
         x += cell.bbox().width() + 10000
 
         def leads(layer: GDSPair) -> List[kdb.Box]:
@@ -237,6 +321,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_mim_m3_20um_x_20um_over_m2_wire':
         lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
     'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
+    'cap_vpp_routing_across': cap_vpp_routing_across,
     'net_names_A_and_a_m2': net_names_A_and_a_m2,
     'nfet_li1_in_subcell': nfet_li1_in_subcell,
     'rf_inductors_03_90_05_125_05_220': rf_inductors_03_90_05_125_05_220,
