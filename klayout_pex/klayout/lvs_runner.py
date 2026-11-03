@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import time
 from typing import *
@@ -151,7 +152,8 @@ class LVSRunner:
                     break
                 subproc(line[:-1])  # remove newline
                 f.writelines([line])
-                if line.startswith('ERROR:'):
+                # NOTE: the log entries behind an error of the LVS have its reason, e.g. "[device-extract] In cell ..."
+                if line.startswith('ERROR:') or re.match(r'\[[\w-]+] ', line):
                     klayout_errors.append(line.rstrip())
         proc.wait()
 

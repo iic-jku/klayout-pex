@@ -47,6 +47,14 @@ ERROR: RuntimeError: Unable to open file: /pdk/rule_decks//sram_integration.lvs 
 """
 
 
+KLAYOUT_EXTRACTION_ERROR_OUTPUT = """\
+2026-11-03 14:04:50 +0100: Memory Usage (349088K) : Extracting cap_cmom device
+ERROR: In /pdk/sg13g2.lvs: 'netlist': Errors encountered during netlist extraction:
+[device-extract] In cell cell: cap_cmom: expected exactly 2 port regions, shape: (0,0;0,1;1,1;1,0) in LayoutToNetlist::check_extraction_errors
+  /pdk/sg13g2.lvs:636:in 'LVS::LVSExecutable#execute'
+"""
+
+
 class FakeKLayoutProcess:
     """
     Stands in for subprocess.Popen, emulating a KLayout LVS run
@@ -99,6 +107,15 @@ class LVSRunnerFailureTest(unittest.TestCase):
         self.assertIn(self.log_path, msg)
         with open(self.log_path, encoding='utf-8') as f:
             self.assertEqual(KLAYOUT_INCLUDE_ERROR_OUTPUT, f.read())
+
+    def test_missing_lvsdb_raises_with_the_reason_of_an_extraction_error(self):
+        with self.assertRaises(LVSError) as ctx:
+            self.run_lvs(FakeKLayoutProcess(output=KLAYOUT_EXTRACTION_ERROR_OUTPUT,
+                                            returncode=1,
+                                            writes_report=False))
+        msg = str(ctx.exception)
+        self.assertIn('[device-extract] In cell cell: cap_cmom: expected exactly 2 port regions', msg)
+        self.assertNotIn('Memory Usage', msg)
 
     def test_missing_lvsdb_raises_even_on_status_code_zero(self):
         with self.assertRaises(LVSError) as ctx:
