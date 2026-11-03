@@ -41,6 +41,7 @@ tags = ("PEX", "2.5D")
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.RC, blackbox=False)
+pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.RC, blackbox=True)
 
 
 @allure.parent_suite(parent_suite)
@@ -86,6 +87,17 @@ def capacitances_by_net_pair(pex_mode: PEXMode, *path_components) -> Dict[NetCou
         capacitances[NetCoupleKey(net_by_node.get(key.net1, key.net1),
                                   net_by_node.get(key.net2, key.net2)).normed()] += capacitance
     return capacitances
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('gds_name', [
+    'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap.gds.gz',
+    'cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3.gds.gz',
+])
+def test_mom_caps_with_licons__blackboxed(gds_name: str):
+    # NOTE: their licons stopped the extraction, see rcx25_R_sky130A_test. White-boxed: see rcx25_simulation_test
+    assert pex_blackboxed.run_kpex('test_patterns', gds_name).rcx25_netlist_problems == []
 
 
 @allure.parent_suite(parent_suite)
