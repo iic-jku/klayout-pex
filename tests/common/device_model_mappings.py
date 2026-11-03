@@ -50,6 +50,10 @@ NMOS = {'lvs_device_class_name': 'nmos', 'spice_prefix': 'X', 'terminal_names': 
         'parameters': W_L}
 RPPD = {'lvs_device_class_name': 'rppd', 'spice_prefix': 'X', 'terminal_names': ['A', 'B'], 'parameters': W_L}
 
+# a MOM cap, whose model floors w and l to whole unit cells
+MOM = {'lvs_device_class_name': 'mom', 'spice_prefix': 'X', 'terminal_names': ['A', 'B'],
+       'parameters': [{**parameter, 'lvs_parameter_floor_pitch': pitch} for parameter, pitch in zip(W_L, (0.89, 0.84))]}
+
 # a BJT of a fixed size, whose model's m is the number of emitters NE
 NPN = {'lvs_device_class_name': 'npn', 'spice_prefix': 'X', 'terminal_names': ['C', 'B', 'E'],
        'parameters': [{'name': 'm', 'lvs_parameter_name': 'NE'}]}

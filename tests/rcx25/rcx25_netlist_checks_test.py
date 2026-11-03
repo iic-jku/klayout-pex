@@ -26,14 +26,20 @@ from __future__ import annotations
 import glob
 import os
 import tempfile
+from typing import *
 from unittest import mock
 
 import allure
+import klayout.db as kdb
 import pytest
 
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
+from klayout_pex.rcx25.netlist_checks import check_schematic_device_totals
+from klayout_pex.schematic_devices import schematic_devices
+from klayout_pex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 
 TEST_DESIGNS_DIR = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata', 'designs'))
@@ -115,6 +121,31 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.parametrize('w, l, problems', [
+    # NOTE: the pcell and the model floor them to 4.45 µm and 4.2 µm, the array, which is what the layout has
+    ('5u', '5u', []),
+    ('4.45u', '4.2u', []),
+    ('4.4u', '4.2u', ['the schematic has Σ w·l = 14.952 of class cap_cmomi, the LVS netlist 18.69']),
+])
+def test_device_totals_of_a_cmomi_are_those_of_its_array(w: str, l: str, problems: List[str]):
+    cell_name = 'cmomi_w5u_l5u_m1_m5'
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(PDK.IHP_SG13G2, os.path.join(TEST_DESIGNS_DIR, PDK.IHP_SG13G2, cell_name,
+                                                               f"{cell_name}.gds.gz")))
+    device_models = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None).device_models
+    schematic = schematic_devices(netlist=SpiceReader().parse(f"""\
+* {cell_name}
+.subckt {cell_name} PLUS MINUS
+XC1 PLUS MINUS cap_cmomi w={w} l={l} mmin=1 mmax=5 feed=2
+.ends
+"""), device_models=device_models, top_cell_name=cell_name)
+    assert check_schematic_device_totals(lvs_netlist=lvsdb.netlist(),
+                                         schematic=schematic,
+                                         device_models=device_models) == problems
 
 
 INV_1_GDS =os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
