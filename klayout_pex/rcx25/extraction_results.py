@@ -33,6 +33,7 @@ from .capacitance_distributor import CapacitanceDistributor, NodePair
 from ..types import CellName, LayerName, NetName
 from ..klayout.lvsdb_extractor import unique_name
 from ..log import debug, error
+from ..util.disjoint_sets import DisjointSets
 
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
@@ -261,9 +262,12 @@ class NetworkNodeNames:
     # the IDs of the nodes of each device terminal (its ports)
     terminal_node_ids: Dict[DeviceTerminalKey, List[int]]
 
-    # the ID of the node tied to the net, if every node is a pin's, so that none carries its name
-    # (e.g. a wire between the labels A and B of the net A,B)
-    net_tie_node_id: Optional[int] = None
+    # the IDs of the nodes tied to the net, one per piece of the network if every node of the piece is a pin's,
+    # so that none carries its name (e.g. a wire between the labels A and B of the net A,B)
+    net_tie_node_ids: List[int] = field(default_factory=list)
+
+    # whether only the substrate, a well or a tap joins pieces of the network to the net (see from_network)
+    joined_by_substrate: bool = False
 
     @classmethod
     def from_network(cls,
@@ -304,24 +308,16 @@ class NetworkNodeNames:
                 key = DeviceTerminalKey(n.device_terminal.device_id, n.device_terminal.terminal_id)
                 terminal_node_ids[key].append(n.node_id)
 
-        # groups of nodes that are one electrical node (union-find, by node ID)
-        parent: Dict[int, int] = {n.node_id: n.node_id for n in nodes}
-
-        def find(node_id: int) -> int:
-            while parent[node_id] != node_id:
-                parent[node_id] = parent[parent[node_id]]
-                node_id = parent[node_id]
-            return node_id
-
-        def union(node_id_a: int, node_id_b: int):
-            parent[find(node_id_a)] = find(node_id_b)
+        # groups of nodes that are one electrical node (by node ID)
+        electrical_nodes = DisjointSets(n.node_id for n in nodes)
+        find = electrical_nodes.find
 
         for node_ids in terminal_node_ids.values():
             for node_id in node_ids[1:]:
-                union(node_id, node_ids[0])
+                electrical_nodes.union(node_id, node_ids[0])
         for element in network.elements:
             if element.resistance == 0.0:
-                union(element.node_a.node_id, element.node_b.node_id)
+                electrical_nodes.union(element.node_a.node_id, element.node_b.node_id)
 
         groups: Dict[int, List[r_network_pb2.RNode]] = defaultdict(list)  # by root node ID
         for n in nodes:
@@ -347,19 +343,55 @@ class NetworkNodeNames:
         #       a pin of that name, otherwise the first device terminal, otherwise the first node (but a pin)
         #       or, if every node is a pin's, the first node is tied to the net (see summarize),
         #       rather than leaving the net off the resistor network
-        net_tie_node_id: Optional[int] = None
-        if network.net_name not in name_by_root.values():
-            candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
-                              [find(n.node_id) for n in nodes]
+        net_tie_node_ids: List[int] = []
+
+        def put_on_net(candidate_roots: List[int]):
             root = next((r for r in candidate_roots if not has_pin(r)), None)
             if root is not None:
                 name_by_root[root] = network.net_name
             elif candidate_roots:
-                net_tie_node_id = candidate_roots[0]
+                net_tie_node_ids.append(candidate_roots[0])
+
+        candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
+                          [find(n.node_id) for n in nodes]
+
+        # NOTE: the taps, the substrate and the wells joining pieces of the network are no conductors of it, they are
+        #       ideal, like for the device terminals on them, so all that lands on them is one node, the net's.
+        #       Each such piece gets one node on the net, by the rule above, among its nodes at the tap or on the well:
+        #         - no resistor, as the resistance through the substrate is unknown, and any value would be made up
+        #         - one node per piece, so no parallel path shunts the resistances within the piece
+        #       The other pieces have no path to their net, which check_rc_netlist reports
+        joined_by_substrate = False
+        if network.substrate_joined_node_ids:
+            pieces = DisjointSets(n.node_id for n in nodes)
+            for element in network.elements:
+                pieces.union(element.node_a.node_id, element.node_b.node_id)
+            # NOTE: nodes of the same name are one node in the netlist, e.g. the pins of one label on 2 pieces
+            first_node_id_by_name: Dict[NetName, int] = {}
+            for n in nodes:
+                name = name_by_root[find(n.node_id)]
+                pieces.union(n.node_id, first_node_id_by_name.setdefault(name, n.node_id))
+
+            pieces_on_net = {pieces.find(n.node_id) for n in nodes if name_by_root[find(n.node_id)] == network.net_name}
+            joined_pieces = {pieces.find(node_id) for node_id in network.substrate_joined_node_ids}
+            joined_by_substrate = len(pieces_on_net | joined_pieces) > 1 and not joined_pieces <= pieces_on_net
+
+            joined_roots = {find(node_id) for node_id in network.substrate_joined_node_ids}
+            candidate_roots_by_piece: Dict[int, List[int]] = defaultdict(list)
+            for root in candidate_roots:
+                if root in joined_roots:
+                    candidate_roots_by_piece[pieces.find(root)].append(root)
+            for piece, piece_candidate_roots in candidate_roots_by_piece.items():
+                if piece not in pieces_on_net:
+                    put_on_net(piece_candidate_roots)
+
+        if network.net_name not in name_by_root.values() and not net_tie_node_ids:
+            put_on_net(candidate_roots)
 
         return cls(by_node_id={n.node_id: name_by_root[find(n.node_id)] for n in nodes},
                    terminal_node_ids=terminal_node_ids,
-                   net_tie_node_id=net_tie_node_id)
+                   net_tie_node_ids=net_tie_node_ids,
+                   joined_by_substrate=joined_by_substrate)
 
 
 @dataclass
@@ -418,6 +450,17 @@ class CellExtractionResults:
                 taken_names.add(port_names[label].casefold())
             port_names_by_net[network.net_name] = port_names
         return port_names_by_net
+
+    def nets_joined_by_substrate(self) -> List[NetName]:
+        """
+        :return: the nets with pieces of their resistor networks that only the substrate, a well or a tap joins
+        """
+        port_names_by_net = self.label_port_names()
+        return sorted(network.net_name
+                      for network in self.r_extraction_result.networks
+                      if network.substrate_joined_node_ids
+                      and NetworkNodeNames.from_network(network,
+                                                        port_names_by_net.get(network.net_name, {})).joined_by_substrate)
 
     def summarize(self) -> ExtractionSummary:
         port_names_by_net = self.label_port_names()
@@ -492,8 +535,8 @@ class CellExtractionResults:
                     if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN
                     and n.node_name in port_names
                     and port_names[n.node_name] != node_names.by_node_id[n.node_id]}
-            if node_names.net_tie_node_id is not None:
-                ties.add(NetCoupleKey(network.net_name, node_names.by_node_id[node_names.net_tie_node_id]).normed())
+            ties.update(NetCoupleKey(network.net_name, node_names.by_node_id[node_id]).normed()
+                        for node_id in node_names.net_tie_node_ids)
             for key in sorted(ties):
                 add_resistance(normalized_resistance_table, key, LABEL_TIE_RESISTANCE)
 

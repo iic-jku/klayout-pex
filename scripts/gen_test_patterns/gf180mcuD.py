@@ -50,6 +50,7 @@ import klayout.db as kdb
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 DNWELL: GDSPair = (12, 0)
+NWELL:  GDSPair = (21, 0)
 COMP:   GDSPair = (22, 0)
 PPLUS:  GDSPair = (31, 0)
 NPLUS:  GDSPair = (32, 0)
@@ -348,15 +349,16 @@ def cap_mim_m4m5() -> Pattern:
     return p
 
 
-def tap(p: Pattern, implant: GDSPair, net: str, x: int, y: int):
+def tap(p: Pattern, implant: GDSPair, net: Optional[str], x: int, y: int):
     """
-    A tap of 2 µm x 2 µm at (x, y) with one contact, its Metal1 labelled with the net
+    A tap of 2 µm x 2 µm at (x, y) with one contact, its Metal1 labelled with the net, if any
     """
     p.box(COMP, x - 1000, y - 1000, x + 1000, y + 1000)
     p.box(implant, x - 1200, y - 1200, x + 1200, y + 1200)
     p.box(CONT, x - 110, y - 110, x + 110, y + 110)
     p.box(METAL1, x - 300, y - 300, x + 300, y + 300)
-    p.label(METAL1, net, x, y)
+    if net is not None:
+        p.label(METAL1, net, x, y)
 
 
 def plates_m1_over_isolated_pwell_and_dnwell() -> Pattern:
@@ -378,6 +380,56 @@ def plates_m1_over_isolated_pwell_and_dnwell() -> Pattern:
     return p
 
 
+def tap_pair_m1_m2(name: str, implant: GDSPair) -> Pattern:
+    """
+    Two taps 10 µm apart (see tap), each with a via from its Metal1 to a Metal2 wire of 4 µm,
+    which only what's below the taps joins
+    """
+    p = pattern(name)
+    for x in (0, 10000):
+        tap(p, implant, None, x, 0)
+        p.box(VIA1, x - 130, -130, x + 130, 130)
+        p.box(METAL2, x - 300, -300, x + 300, 3700)
+    return p
+
+
+def r_ptap_pair_m1_m2() -> Pattern:
+    """
+    Two p-taps, which only the substrate joins
+    """
+    return tap_pair_m1_m2('r_ptap_pair_m1_m2', PPLUS)
+
+
+def r_ptap_pair_isolated_pwell_m1_m2() -> Pattern:
+    """
+    Two p-taps in an isolated p-well (LVPWELL within a DNWELL), which only the p-well joins
+    """
+    p = tap_pair_m1_m2('r_ptap_pair_isolated_pwell_m1_m2', PPLUS)
+    p.box(DNWELL, -6000, -6000, 16000, 6000)
+    p.box(LVPWELL, -2000, -2000, 12000, 2000)
+    return p
+
+
+def r_ntap_pair_dnwell_m1_m2() -> Pattern:
+    """
+    Two n-taps in a DNWELL, which only the DNWELL joins
+    """
+    p = tap_pair_m1_m2('r_ntap_pair_dnwell_m1_m2', NPLUS)
+    p.box(DNWELL, -3000, -3000, 13000, 3000)
+    return p
+
+
+def r_ntap_pair_two_nwells_over_dnwell_m1_m2() -> Pattern:
+    """
+    Two n-taps, each in an Nwell of its own, which only the DNWELL below both Nwells joins
+    """
+    p = tap_pair_m1_m2('r_ntap_pair_two_nwells_over_dnwell_m1_m2', NPLUS)
+    p.box(DNWELL, -3000, -3000, 13000, 3000)
+    p.box(NWELL, -1500, -1500, 1500, 1500)
+    p.box(NWELL, 8500, -1500, 11500, 1500)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'r_single_wire_m1': r_single_wire_m1,
     'r_wire_voltage_divider_m1': r_wire_voltage_divider_m1,
@@ -386,6 +438,10 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'r_contact_1x1_minsize_via1': r_contact_1x1_minsize_via1,
     'r_contact_2x2_minsize_via1': r_contact_2x2_minsize_via1,
     'r_via_stack_1x1_minsize_poly_to_metal5': r_via_stack_1x1_minsize_poly_to_metal5,
+    'r_ptap_pair_m1_m2': r_ptap_pair_m1_m2,
+    'r_ptap_pair_isolated_pwell_m1_m2': r_ptap_pair_isolated_pwell_m1_m2,
+    'r_ntap_pair_dnwell_m1_m2': r_ntap_pair_dnwell_m1_m2,
+    'r_ntap_pair_two_nwells_over_dnwell_m1_m2': r_ntap_pair_two_nwells_over_dnwell_m1_m2,
     'nfet_m1': lambda: nfet_m1('nfet_m1', 'DGS'),
     'nfet_m1_redux': lambda: nfet_m1('nfet_m1_redux', 'DS'),
     'nfet_m1_redux_only_G': lambda: nfet_m1('nfet_m1_redux_only_G', 'G'),

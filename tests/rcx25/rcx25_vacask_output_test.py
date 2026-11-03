@@ -247,3 +247,64 @@ wrdata ac_ngspice.txt i(vplus)
     (_, real, imag), = read_wrdata(os.path.join(run_dir, 'ac_ngspice.txt'))
     assert capacitance_femto_of(vacask_current) == pytest.approx(capacitance_femto, rel=1e-3)
     assert capacitance_femto_of(complex(real, imag)) == pytest.approx(capacitance_femto, rel=1e-3)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_rc_netlist_of_ports_that_only_the_substrate_joins_ihp_sg13g2():
+    extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=False)
+    text = assert_vacask_netlist_is_the_spice_netlist(extraction, 'test_patterns', 'r_ptap_pair_m1_m2_pins_A_B.gds.gz')
+    assert read_vacask_subcircuits(text)['r_ptap_pair_m1_m2_pins_A_B'].ports == ['A', 'B']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@requires_vacask
+@requires_ngspice
+@IHP_SG13G2.requires_simulator_models('vacask', 'ngspice')
+def test_vacask_simulates_ports_that_only_the_substrate_joins_as_ngspice_ihp_sg13g2():
+    cell_name = 'r_ptap_pair_m1_m2_pins_A_B'
+    extraction = RCX25Extraction(pdk=IHP_SG13G2, pex_mode=PEXMode.RC, blackbox=False)
+    vacask_path, spice_path = vacask_and_spice_netlists(extraction, 'test_patterns', f"{cell_name}.gds.gz")
+    run_dir = os.path.join(os.path.dirname(vacask_path), 'simulation')
+    os.makedirs(run_dir, exist_ok=True)
+    vacask_models = IHP_SG13G2.simulator_models_dir('vacask')
+
+    write_vacaskrc(run_dir, vacask_models)
+    with open(os.path.join(run_dir, 'tb.sim'), 'w', encoding='utf-8') as f:
+        f.write(f"""{cell_name} in VACASK
+
+include "{vacask_models}/models/sg13g2_vacask_common.lib"
+include "{vacask_path}"
+
+model vsource vsource
+va (a 0) vsource dc=0 mag=1
+x1 (a 0) {cell_name}
+
+control
+  options rawfile="ascii"
+  analysis ac1 ac from=1e9 to=1e9 mode="lin" points=1
+endc
+""")
+    run_vacask(os.path.join(run_dir, 'tb.sim'))
+
+    with open(os.path.join(run_dir, 'tb.cir'), 'w', encoding='utf-8') as f:
+        f.write(f"""{cell_name} in ngspice
+.include {spice_path}
+Va a 0 dc 0 ac 1
+X1 a 0 {cell_name}
+.control
+set wr_singlescale
+set wr_vecnames
+ac lin 1 1e9 1e9
+wrdata ac_ngspice.txt i(va)
+.endc
+.end
+""")
+    run_ngspice(os.path.join(run_dir, 'tb.cir'))
+
+    vacask_current = read_ascii_raw(os.path.join(run_dir, 'ac1.raw'))['va:flow(br)'][0]
+    (_, real, imag), = read_wrdata(os.path.join(run_dir, 'ac_ngspice.txt'))
+    # NOTE: within the tolerance of the simulators (reltol 1e-3)
+    assert cmath.isclose(vacask_current, complex(real, imag), rel_tol=1e-3)

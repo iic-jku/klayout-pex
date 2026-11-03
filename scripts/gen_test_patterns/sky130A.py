@@ -39,6 +39,7 @@ import klayout.db as kdb
 
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
+DNWELL:   GDSPair = (64, 18)
 NWELL:    GDSPair = (64, 20)
 TAP:      GDSPair = (65, 44)
 NSDM:     GDSPair = (93, 44)
@@ -50,6 +51,7 @@ LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
 MCON:     GDSPair = (67, 44)
 MET1:     GDSPair = (68, 20)
+VIA1:     GDSPair = (68, 44)
 MET2:     GDSPair = (69, 20)
 MET2_PIN: GDSPair = (69, 16)
 MET3:     GDSPair = (70, 20)
@@ -253,6 +255,89 @@ def cap_vpp_routing_across() -> Pattern:
 
 
 #
+# Resistance patterns
+#
+
+def tap_li1_m1(p: Pattern, x: int, ptap: bool, y: int = 0):
+    """
+    A tap of 0.5 µm x 5 µm at (x, y), under li1 and met1 wires of 0.34 µm width, joined by 5 licons and 5 mcons
+
+    :param ptap: a p-tap, otherwise an n-tap (for an nwell around it)
+    """
+    p.box(PSDM if ptap else NSDM, x - 130, y - 130, x + 630, y + 5130)
+    p.box(TAP, x, y, x + 500, y + 5000)
+    for contact_y in range(y + 500, y + 5000, 1000):
+        p.box(LICON, x + 165, contact_y - 85, x + 335, contact_y + 85)
+        p.box(MCON, x + 165, contact_y - 85, x + 335, contact_y + 85)
+    p.box(LI1, x + 80, y, x + 420, y + 5000)
+    p.box(MET1, x + 80, y, x + 420, y + 5000)
+
+
+def r_ptap_pair_li1_m1() -> Pattern:
+    """
+    Two p-taps 10 µm apart, with li1 and met1 wires over them, which are nets of their own,
+    as the deck has no substrate around the p-taps that would join them
+    """
+    p = pattern('r_ptap_pair_li1_m1')
+    tap_li1_m1(p, 0, ptap=True)
+    tap_li1_m1(p, 10000, ptap=True)
+    return p
+
+
+def r_ptap_li1_m1_two_wires() -> Pattern:
+    """
+    A p-tap of 0.5 µm x 12 µm with two li1 and met1 wires over it, 2 µm apart, which only the tap joins
+    """
+    p = pattern('r_ptap_li1_m1_two_wires')
+    tap_li1_m1(p, 0, ptap=True)
+    tap_li1_m1(p, 0, ptap=True, y=7000)
+    p.box(TAP, 0, 5000, 500, 7000)
+    p.box(PSDM, -130, 5000, 630, 7000)
+    return p
+
+
+def r_ntap_pair_nwell_li1_m1() -> Pattern:
+    """
+    Two n-taps 10 µm apart in one nwell, with li1 and met1 wires over them, which the nwell joins,
+    a conductor of the resistance network
+    """
+    p = pattern('r_ntap_pair_nwell_li1_m1')
+    p.box(NWELL, -1000, -1000, 11500, 6000)
+    tap_li1_m1(p, 0, ptap=False)
+    tap_li1_m1(p, 10000, ptap=False)
+    return p
+
+
+def r_ntap_pair_two_nwells_over_dnwell_li1_m1() -> Pattern:
+    """
+    Two n-taps 10 µm apart, each in an nwell of its own, with li1 and met1 wires over them,
+    which only the deep nwell below both nwells joins, no conductor of the resistance network
+    """
+    p = pattern('r_ntap_pair_two_nwells_over_dnwell_li1_m1')
+    p.box(DNWELL, -3000, -3000, 13500, 8000)
+    p.box(NWELL, -1000, -1000, 1500, 6000)
+    p.box(NWELL, 9000, -1000, 11500, 6000)
+    tap_li1_m1(p, 0, ptap=False)
+    tap_li1_m1(p, 10000, ptap=False)
+    return p
+
+
+def r_ptap_li1_m1_and_floating_m1_m2() -> Pattern:
+    """
+    Wires of the net A that the resistance network can't join: li1 and met1 wires over a p-tap, and, 10 µm apart
+    and on no tap, met1 and met2 wires joined by a via, which only the labels A (without pins) join in the deck
+    """
+    p = pattern('r_ptap_li1_m1_and_floating_m1_m2')
+    tap_li1_m1(p, 10000, ptap=True)
+    p.label(LI1, 'A', 10250, 2500)
+    p.box(MET1, 0, 0, 340, 5000)
+    p.box(VIA1, 90, 2420, 250, 2580)
+    p.box(MET2, 0, 0, 340, 5000)
+    p.label(MET2, 'A', 170, 2500)
+    return p
+
+
+#
 # Net name patterns
 #
 
@@ -329,6 +414,11 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
         lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
     'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
     'cap_vpp_routing_across': cap_vpp_routing_across,
+    'r_ptap_pair_li1_m1': r_ptap_pair_li1_m1,
+    'r_ptap_li1_m1_two_wires': r_ptap_li1_m1_two_wires,
+    'r_ntap_pair_nwell_li1_m1': r_ntap_pair_nwell_li1_m1,
+    'r_ntap_pair_two_nwells_over_dnwell_li1_m1': r_ntap_pair_two_nwells_over_dnwell_li1_m1,
+    'r_ptap_li1_m1_and_floating_m1_m2': r_ptap_li1_m1_and_floating_m1_m2,
     'net_names_A_and_a_m2': net_names_A_and_a_m2,
     'nfet_li1_in_subcell': nfet_li1_in_subcell,
     'rf_inductors_03_90_05_125_05_220': rf_inductors_03_90_05_125_05_220,

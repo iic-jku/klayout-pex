@@ -392,11 +392,13 @@ class CellExtractionResultsTest(unittest.TestCase):
     def add_network(results: CellExtractionResults,
                     net_name: str,
                     nodes: List[Tuple],
-                    elements: List[Tuple[int, int, float]]):
+                    elements: List[Tuple[int, int, float]],
+                    substrate_joined_node_ids: Sequence[int] = ()):
         """
         :param nodes: (node ID, kind, node name[, (device ID, terminal ID)])
         """
-        network = results.r_extraction_result.networks.add(net_name=net_name)
+        network = results.r_extraction_result.networks.add(net_name=net_name,
+                                                           substrate_joined_node_ids=substrate_joined_node_ids)
         for node_id, kind, node_name, *terminal in nodes:
             node = network.nodes.add(node_id=node_id, node_kind=kind, node_name=node_name)
             if kind != r_network_pb2.RNode.Kind.KIND_PIN:
@@ -572,6 +574,134 @@ class CellExtractionResultsTest(unittest.TestCase):
         self.assertEqual({NetCoupleKey('$2', '$2.$1.17'): 209.667,
                           NetCoupleKey('$2.$1.17', '$2.P1.12'): 100.0,
                           NetCoupleKey('VGND', 'VGND.$4.18'): 9.3}, summary.resistances)
+
+    def test_summarize_each_piece_joined_by_the_substrate_is_on_the_net(self):
+        # 2 Metal1 rings on taps, with a device terminal each, and no metal between them
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'sub!',
+                         nodes=[(1, K.KIND_DEVICE_TERMINAL, 'P0.Metal1', (1, 2)),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (3, K.KIND_DEVICE_TERMINAL, 'P1.Metal1', (2, 2)),
+                                (4, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 10.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[1, 2, 3, 4])
+
+        summary = results.summarize()
+
+        # NOTE: no resistor between them, the resistors within each stay
+        self.assertEqual({DeviceTerminalKey(1, 2): 'sub!',
+                          DeviceTerminalKey(2, 2): 'sub!'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('sub!', 'sub!.$0.Metal1'): 10.0,
+                          NetCoupleKey('sub!', 'sub!.$1.Metal1'): 20.0}, summary.resistances)
+        self.assertEqual(['sub!'], results.nets_joined_by_substrate())
+
+    def test_summarize_a_piece_is_on_the_net_at_its_node_on_the_tap(self):
+        # NOTE: the first device terminal of the piece is on the Metal2, the contacts over the tap under the Metal1,
+        #       so the resistance between them stays
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'sub!',
+                         nodes=[(1, K.KIND_DEVICE_TERMINAL, 'P0.Metal2', (1, 2)),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (3, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (4, K.KIND_WIRE_JUNCTION, '$2.Metal1')],
+                         elements=[(1, 2, 9.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[2, 3, 4])
+
+        summary = results.summarize()
+
+        self.assertEqual({DeviceTerminalKey(1, 2): 'sub!.P0.Metal2'}, summary.device_terminal_nodes)
+        self.assertEqual({NetCoupleKey('sub!', 'sub!.P0.Metal2'): 9.0,
+                          NetCoupleKey('sub!', 'sub!.$2.Metal1'): 20.0}, summary.resistances)
+
+    def test_summarize_a_piece_the_substrate_does_not_join_has_no_path_to_the_net(self):
+        # NOTE: the piece that is first by its node names stays off the net, for check_rc_netlist to report it,
+        #       rather than carrying its name, which would report the piece on the taps instead
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'sub!',
+                         nodes=[(1, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (2, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (3, K.KIND_WIRE_JUNCTION, '$2.Metal1'),
+                                (4, K.KIND_WIRE_JUNCTION, '$3.Metal1')],
+                         elements=[(1, 2, 10.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[3, 4])
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('sub!.$0.Metal1', 'sub!.$1.Metal1'): 10.0,
+                          NetCoupleKey('sub!', 'sub!.$3.Metal1'): 20.0}, summary.resistances)
+        self.assertEqual([], results.nets_joined_by_substrate())
+
+    def test_summarize_a_piece_with_the_pin_of_the_net_keeps_it_as_its_only_node_on_the_net(self):
+        # NOTE: a second node of that name would short the resistance between them
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'VSS',
+                         nodes=[(1, K.KIND_PIN, 'VSS'),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (3, K.KIND_WIRE_JUNCTION, '$1.Metal1'),
+                                (4, K.KIND_WIRE_JUNCTION, '$2.Metal1')],
+                         elements=[(1, 2, 10.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[2, 3, 4])
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('VSS', 'VSS.$0.Metal1'): 10.0,
+                          NetCoupleKey('VSS', 'VSS.$2.Metal1'): 20.0}, summary.resistances)
+        self.assertEqual(['VSS'], results.nets_joined_by_substrate())
+
+    def test_summarize_pieces_with_pins_of_one_label_are_joined_by_their_name(self):
+        # NOTE: nothing is left to the substrate, e.g. the rails of a block of standard cells, joined by their labels
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'VSS',
+                         nodes=[(1, K.KIND_PIN, 'VSS'),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (3, K.KIND_PIN, 'VSS'),
+                                (4, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 10.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[2, 4])
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('VSS', 'VSS.$0.Metal1'): 10.0,
+                          NetCoupleKey('VSS', 'VSS.$1.Metal1'): 20.0}, summary.resistances)
+        self.assertEqual([], results.nets_joined_by_substrate())
+
+    def test_summarize_pieces_of_different_labels_joined_by_the_substrate_are_on_the_net(self):
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'A,B',
+                         nodes=[(1, K.KIND_PIN, 'A'),
+                                (2, K.KIND_WIRE_JUNCTION, '$0.Metal1'),
+                                (3, K.KIND_PIN, 'B'),
+                                (4, K.KIND_WIRE_JUNCTION, '$1.Metal1')],
+                         elements=[(1, 2, 10.0), (3, 4, 20.0)],
+                         substrate_joined_node_ids=[2, 4])
+
+        summary = results.summarize()
+
+        self.assertEqual({'A,B': ['A', 'B']}, summary.label_ports)
+        self.assertEqual({NetCoupleKey('A', 'A,B'): 10.0,
+                          NetCoupleKey('A,B', 'B'): 20.0}, summary.resistances)
+
+    def test_summarize_pins_alone_on_their_pieces_are_tied_to_the_net(self):
+        # NOTE: Metal1 with a label only, on a tap: the pin B was left floating, without a resistor to report
+        K = r_network_pb2.RNode.Kind
+        results = CellExtractionResults(cell_name='Cell')
+        self.add_network(results, 'A,B',
+                         nodes=[(1, K.KIND_PIN, 'A'),
+                                (2, K.KIND_PIN, 'B')],
+                         elements=[],
+                         substrate_joined_node_ids=[1, 2])
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('A', 'A,B'): LABEL_TIE_RESISTANCE,
+                          NetCoupleKey('A,B', 'B'): LABEL_TIE_RESISTANCE}, summary.resistances)
+        self.assertEqual(['A,B'], results.nets_joined_by_substrate())
 
 
 @allure.parent_suite("Unit Tests")

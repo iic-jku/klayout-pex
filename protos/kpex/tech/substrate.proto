@@ -35,6 +35,17 @@ package kpex.tech;
 //
 // The wells within the substrate are nets of their own, which the capacitances above them go to.
 message SubstrateInfo {
+    // What joins a conductor of the resistance network to a tap, which is none (nor is what the tap lands on),
+    // so that LVS has the conductor on the net of the tap, but the resistance network has no path to it
+    message TapConnection {
+        // LVS layer on the net of the tap, e.g. "cont_ptap_con" (IHP, the contacts over the taps),
+        // "ptap" (IHP, the tap itself, which the salicide joins to the source/drain abutting it)
+        string tap_lvs_layer_name = 1;
+
+        // layer of the conductor, e.g. "metal1_n_mom" (the metal above the contact), "nsd_fet" (the source/drain)
+        string conductor_layer_name = 2;
+    }
+
     // names of the substrate net, if no label names it (the global net of the LVS deck),
     // e.g. "sky130_gnd" (sky130A), "SUB" (gf180mcuD), "sub!" (IHP)
     repeated string net_names = 10;
@@ -49,4 +60,7 @@ message SubstrateInfo {
     // the capacitances of the shapes above a well go to the net of the well (e.g. VDD), rather than
     // to the substrate net, with the coefficients of the substrate (where wells overlap, to the first one's)
     repeated string well_lvs_layer_names = 30;
+
+    // the pieces of the resistance network of a net that only the taps join, see RNetwork.substrate_joined_node_ids
+    repeated TapConnection tap_connections = 40;
 }

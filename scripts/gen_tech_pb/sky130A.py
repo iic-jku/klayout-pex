@@ -671,6 +671,9 @@ def build_substrate_info(si: SubstrateInfo):
     #       is the substrate (sub), so they are the substrate here too
     si.well_lvs_layer_names.append("nwell")
 
+    # NOTE: not licon_ntap_con, which lands on the nwell, a conductor of the resistance network
+    add_tap_connection(si, "licon_ptap_con", "li_con")
+
 
 def build_tech() -> Technology:
     tech = Technology(name="sky130A")

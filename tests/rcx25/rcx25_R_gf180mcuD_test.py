@@ -268,3 +268,36 @@ def test_contacts_over_the_taps_are_known():
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning_mock:
         pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz')
     assert [c.args[0] for c in warning_mock.call_args_list if 'leaves out these LVS layers' in c.args[0]] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name, net_name', [
+    ('r_ptap_pair_m1_m2', 'SUB'),
+    ('r_ptap_pair_isolated_pwell_m1_m2', '$1'),
+    ('r_ntap_pair_dnwell_m1_m2', '$1'),
+])
+def test_metal_on_taps_that_only_what_is_below_them_joins_is_on_its_net(cell_name: str, net_name: str):
+    # Via1: 4500 mΩ per cut
+    # NOTE: the Metal1 over the taps is on the net, as the substrate, isolated p-wells and deep nwell are ideal
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', f"{cell_name}.gds.gz",
+        expected_csv_content=f"""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;{net_name};{net_name}.$2.Metal2;;4.5
+R2;{net_name};{net_name}.$3.Metal2;;4.5"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_nwells_that_only_a_deep_nwell_joins_are_on_their_net():
+    # NOTE: the contacts are over taps of the nwell and the deep nwell alike (contact_ntap_con, contact_ntap_dw_con),
+    #       so the Metal1 is on the net, and the Nwell 6.3 Ω away (the contact resistance)
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_ntap_pair_two_nwells_over_dnwell_m1_m2.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$4.Metal2;;4.5
+R2;$1;$1.$5.Metal2;;4.5
+R3;$1;$1.$6.Nwell;;6.3
+R4;$1;$1.$7.Nwell;;6.3"""
+    )
