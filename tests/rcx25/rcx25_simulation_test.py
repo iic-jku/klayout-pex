@@ -64,20 +64,24 @@ SIMULATORS = [
 @allure.tag(*tags)
 @pytest.mark.slow
 @pytest.mark.parametrize('simulated_port_admittance', SIMULATORS)
-@pytest.mark.parametrize('gds_name, reduce_args', [
-    ('r_wire_voltage_divider_li1.gds.gz', []),
-    ('r_wire_voltage_divider_li1.gds.gz', ['--reduce', 'ticer']),
-    ('cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', []),
-    ('cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', ['--reduce', 'ticer']),
+@pytest.mark.parametrize('pdk_name, gds_name, reduce_args', [
+    (PDKName.SKY130A, 'r_wire_voltage_divider_li1.gds.gz', []),
+    (PDKName.SKY130A, 'r_wire_voltage_divider_li1.gds.gz', ['--reduce', 'ticer']),
+    (PDKName.SKY130A, 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', []),
+    (PDKName.SKY130A, 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', ['--reduce', 'ticer']),
     # NOTE: the ports A and a$1, which would be one node if they were A and a
-    ('net_names_A_and_a_m2.gds.gz', []),
-    ('cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz', ['--reduce', 'floating']),
+    (PDKName.SKY130A, 'net_names_A_and_a_m2.gds.gz', []),
+    (PDKName.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz', ['--reduce', 'floating']),
+    # NOTE: the ports A and B, which only the substrate joins
+    (PDKName.IHP_SG13G2, 'r_ptap_pair_m1_m2_pins_A_B.gds.gz', []),
+    (PDKName.IHP_SG13G2, 'r_ptap_pair_m1_m2_pins_A_B.gds.gz', ['--reduce', 'ticer']),
 ])
 def test_rc_netlist_simulates_to_the_port_admittance_of_its_elements(
-        simulated_port_admittance: Callable[..., Tuple[np.ndarray, np.ndarray]], gds_name: str,
+        simulated_port_admittance: Callable[..., Tuple[np.ndarray, np.ndarray]], pdk_name: PDKName, gds_name: str,
         reduce_args: List[str], tmp_path):
 
-    cli = extraction.run_kpex('test_patterns', gds_name, extra_args=reduce_args)
+    cli = RCX25Extraction(pdk=PDKTestConfig(pdk_name), pex_mode=PEXMode.RC, blackbox=False) \
+        .run_kpex('test_patterns', gds_name, extra_args=reduce_args)
     netlist_path = cli.rcx25_reduced_netlist_path or f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
     scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.network.nodes())
     with open(netlist_path, encoding='utf-8') as f:
@@ -139,6 +143,7 @@ TEST_PATTERNS = [(pdk_name, name)
 
 # NOTE: the patterns of extraction errors, e.g. vias without a conductor below (see rcx25_R_sky130A_test)
 ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz'),
+                  (PDKName.SKY130A, 'r_ptap_li1_m1_and_floating_m1_m2.gds.gz'),
                   (PDKName.IHP_SG13G2, 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz')}
 
 # NOTE: the MOM caps, the ESD diodes and the device pcells, which take 1 to 22 s in RC mode, the others 0.1 s
@@ -154,6 +159,7 @@ SLOW_PATTERNS = {(PDKName.SKY130A, 'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingerca
                  (PDKName.IHP_SG13G2, 'device_pcells.gds.gz'),
                  (PDKName.IHP_SG13G2, 'esd_diodevdd_2kv.gds.gz'),
                  (PDKName.IHP_SG13G2, 'esd_diodevss_2kv.gds.gz'),
+                 (PDKName.IHP_SG13G2, 'esd_diodevss_2kv_pair.gds.gz'),
                  (PDKName.IHP_SG13G2, 'sidewall_cap_vpp_04p4x04p6_m1_redux_all_layers.gds.gz')}
 
 
@@ -185,3 +191,25 @@ def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: 
 
     # NOTE: Xyce reads the scale factor a (atto) as a unit (#313)
     assert [tokens for tokens in rc_elements if re.fullmatch(r'.*[0-9.][aA]', tokens[3])] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('simulated_port_admittance', SIMULATORS)
+def test_ports_that_only_the_substrate_joins_are_in_series_at_dc(
+        simulated_port_admittance: Callable[..., Tuple[np.ndarray, np.ndarray]], tmp_path):
+    # From a port (in the middle of its Metal2 wire) to the Metal1 over its tap, on the net:
+    #   via 1: 2 µm / 0.3 µm · 88 mΩ/sq + 9 Ω = 9.587 Ω, then to the net directly
+    #   via 2: 9.587 Ω, then 4 µm / 0.3 µm · 110 mΩ/sq = 1.467 Ω along the Metal1
+    extraction_ihp = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.RC, blackbox=False)
+    cli = extraction_ihp.run_kpex('test_patterns', 'r_ptap_pair_m1_m2_pins_A_B.gds.gz')
+    netlist_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
+    scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.network.nodes())
+    assert scope.ports == ['A', 'B']
+
+    # NOTE: from 1 Hz, where the capacitances (below 1 fF) don't count
+    _, y = simulated_port_admittance(netlist_path, scope.name, scope.ports, (0, 1), str(tmp_path))
+    resistance_to_the_net = 1.0 / (1.0 / (2.0 / 0.3 * 0.088 + 9.0) + 1.0 / (2.0 / 0.3 * 0.088 + 9.0 + 4.0 / 0.3 * 0.11))
+    assert 1.0 / y[0][0, 0].real == pytest.approx(2.0 * resistance_to_the_net, rel=1e-6)
+    assert y[0][0, 1].real == pytest.approx(-y[0][0, 0].real, rel=1e-6)

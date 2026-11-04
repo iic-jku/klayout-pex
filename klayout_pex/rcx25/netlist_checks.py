@@ -45,6 +45,7 @@ from ..schematic_devices import SchematicDevices
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
 from ..types import NetName
+from ..util.disjoint_sets import DisjointSets
 from ..klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_DEVICE_CLASS_NAMES,
@@ -120,14 +121,9 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
 
     problems: List[str] = []
 
-    # the pieces of the netlist, DC-connected by the parasitic resistors (union-find by net ID)
-    parent = list(range(len(nets)))
-
-    def piece_of(net_id: int) -> int:
-        while parent[net_id] != net_id:
-            parent[net_id] = parent[parent[net_id]]
-            net_id = parent[net_id]
-        return net_id
+    # the pieces of the netlist, DC-connected by the parasitic resistors, by net ID
+    pieces = DisjointSets(range(len(nets)))
+    piece_of = pieces.find
 
     has_resistor: Set[int] = set()
     for device in rc_circuit.each_device():
@@ -135,7 +131,7 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
             continue
         net_a, net_b = device.net_for_terminal('A'), device.net_for_terminal('B')
         has_resistor.update((id_of(net_a), id_of(net_b)))
-        parent[piece_of(id_of(net_a))] = piece_of(id_of(net_b))
+        pieces.union(id_of(net_a), id_of(net_b))
 
     # NOTE: each LVS net keeps its net in the RC netlist, which its resistor network hangs off
     lvs_net_by_piece: Dict[int, NetName] = {}
