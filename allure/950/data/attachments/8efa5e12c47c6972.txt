@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1418 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1455 main extract --pdk ihp-sg13g2 --mode R --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/r_ptap_pair_m1_m2_pins_A_B.lvsdb.gz --out-dir /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpc81y1fcc --2.5D --check n
+INFO     __kpex__:kpex_cli.py:737 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1589 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1589 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1589 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1589 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:1589 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1589 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:1589 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+WARNING  __kpex__:extractor.py:351 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: A,B
+SUBPROCESS __kpex__:kpex_cli.py:1170 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1170 R1;A;A,B.$4.Metal2;;0.587
+SUBPROCESS __kpex__:kpex_cli.py:1170 R2;A;A,B.$5.Metal2;;0.587
+SUBPROCESS __kpex__:kpex_cli.py:1170 R3;A,B;A,B.$1.Metal1;;1.467
+SUBPROCESS __kpex__:kpex_cli.py:1170 R4;A,B;A,B.$3.Metal1;;1.467
+SUBPROCESS __kpex__:kpex_cli.py:1170 R5;A,B;A,B.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R6;A,B;A,B.$6.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R7;A,B.$1.Metal1;A,B.$5.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R8;A,B.$3.Metal1;A,B.$7.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R9;A,B.$6.Metal2;B;;0.587
+SUBPROCESS __kpex__:kpex_cli.py:1170 R10;A,B.$7.Metal2;B;;0.587
+SUBPROCESS __kpex__:kpex_cli.py:1173 /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpc81y1fcc/r_ptap_pair_m1_m2_pins_A_B__r_ptap_pair_m1_m2_pins_A_B/r_ptap_pair_m1_m2_pins_A_B_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1189 Wrote expanded netlist to: /var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpc81y1fcc/r_ptap_pair_m1_m2_pins_A_B__r_ptap_pair_m1_m2_pins_A_B/r_ptap_pair_m1_m2_pins_A_B_k25d_pex_netlist.spice
