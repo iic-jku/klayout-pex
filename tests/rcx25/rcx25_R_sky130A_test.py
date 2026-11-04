@@ -324,6 +324,42 @@ def test_vias_within_mom_cap_l1m1m2m3m4():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licons_between_li1_and_poly_shield_of_mom_cap(pex: RCX25Extraction):
+    # The part of a licon within the marker (licon_vpp) is no contact of its own, it stopped the extraction with
+    # "licon1 (LVS licon_vpp): no contact". The licons across the edge of the marker are whole contacts over poly,
+    # as many as nlicon in the model of the cap (its rlicon = rcp1 / nlicon)
+    rows = pex.written_netlist_rows('test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3.gds.gz')
+    assert [row['Resistance [Ω]'] for row in rows
+            if {row['Net1'].split('.')[-1], row['Net2'].split('.')[-1]} == {'li1', 'poly'}] == ['152.0'] * 44
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licon_within_marker_of_mom_cap(pex: RCX25Extraction):
+    # The whole licon, which has the resistance, isn't on the net of its part licon_vpp unless the LVS connects them:
+    # it was on a net of its own, with its 152 Ω between no ports, and with a tie of 1 mΩ between L and P instead
+    rows = pex.written_netlist_rows('test_patterns', 'cap_vpp_licon_within_marker.gds.gz')
+    assert [(row['Net1'], row['Net2'], row['Resistance [Ω]']) for row in rows] == [
+        ('L', 'L,P', '90.08'),
+        ('L,P', 'L,P.$1.poly', '152.0'),
+        ('L,P.$1.poly', 'P', '359.693'),
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licons_over_taps_of_mom_cap_without_poly(pex: RCX25Extraction):
+    # The licons join the li1 shields to the taps below, no conductors of the resistance network, like the p-taps
+    # (the cell has no implants, so these are none). As contacts over poly, they would have no conductor below
+    results, _ = pex.run_rcx25d_single_cell('test_patterns', 'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap.gds.gz')
+    assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (capm) is a conductor of its net,
     # joined to met4 by the vias on it (via3_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
