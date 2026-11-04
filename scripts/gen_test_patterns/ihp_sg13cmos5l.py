@@ -35,6 +35,8 @@ from __future__ import annotations
 import sys
 from typing import *
 
+import klayout.db as kdb
+
 from ihp_sg13g2 import (
     METAL3,
     METAL3_PIN,
@@ -62,8 +64,18 @@ def cap_cmomf_w5u_l5u_m2_m3_m4_wire() -> Pattern:
     return p
 
 
+def cap_cmomi_w8u9_l3u36_m2_m4_m45() -> Pattern:
+    # a MOM cap (cap_cmomi pcell of the PDK) of 10 rows and 4 columns, mirrored at the diagonal, with opposite feeds,
+    # so its rows run along y (the model gives 0.82 fF/µm² of 3.36 µm x 8.9 µm and 0.152 fF/µm of its pads, 25.938 fF)
+    p = mom_cap('cap_cmomi_w8u9_l3u36_m2_m4_m45', 'cap_cmomi', {'w': '8.9u', 'l': '3.36u', 'mmin': 2, 'mmax': 4},
+                technology='sg13cmos5l', trans=kdb.Trans.M45)
+    label_terminals_from_left(p, METAL4, METAL4_PIN)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w5u_l5u_m2_m3_m4_wire': cap_cmomf_w5u_l5u_m2_m3_m4_wire,
+    'cap_cmomi_w8u9_l3u36_m2_m4_m45': cap_cmomi_w8u9_l3u36_m2_m4_m45,
 }
 
 

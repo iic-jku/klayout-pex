@@ -103,6 +103,12 @@ message DeviceModelParameter {
     //
     // e.g. IHP w (µm) to SI (m): 1e-6, sky130A W (µm) to µm: 1
     optional double lvs_parameter_factor = 20;
+
+    // pitch that the model floors the value to, in the unit of the LVS parameter, not set if it doesn't:
+    // a device of a schematic may give any value, the layout has the floored one.
+    //
+    // e.g. IHP cap_cmomi, whose array has whole unit cells: w = 5 µm is 5 rows of 0.89 µm, so 4.45 µm
+    optional double lvs_parameter_floor_pitch = 21;
 }
 
 // A side of the rectangle with the area and perimeter of a device,

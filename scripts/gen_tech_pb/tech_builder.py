@@ -390,13 +390,17 @@ def split_layer_capacitances(ci: CapacitanceInfo,
 
 def lvs_param(name: str,
               lvs_parameter_name: str,
-              factor: Optional[float] = None) -> DeviceModelParameter:
+              factor: Optional[float] = None,
+              floor_pitch: Optional[float] = None) -> DeviceModelParameter:
     """
-    Model parameter from an LVS parameter (times factor, e.g. 1e-6 from µm to m)
+    Model parameter from an LVS parameter (times factor, e.g. 1e-6 from µm to m),
+    which the model floors to multiples of floor_pitch, if given (in the unit of the LVS parameter)
     """
     parameter = DeviceModelParameter(name=name, lvs_parameter_name=lvs_parameter_name)
     if factor is not None:
         parameter.lvs_parameter_factor = factor
+    if floor_pitch is not None:
+        parameter.lvs_parameter_floor_pitch = floor_pitch
     return parameter
 
 
