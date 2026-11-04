@@ -61,8 +61,11 @@ class DeviceTotalParameters:
     mos: bool = False
 
     @staticmethod
-    def of(device_class: kdb.DeviceClass,
+    def of(device_class: Optional[kdb.DeviceClass],
            mapping: device_models_pb2.DeviceModelMapping) -> DeviceTotalParameters:
+        """
+        :param device_class: None if only the names of the LVS parameters matter
+        """
         names: Dict[str, str] = {}
         area: Optional[str] = None
         for p in mapping.parameters:
@@ -76,6 +79,23 @@ class DeviceTotalParameters:
                                      area=area or names.get('A'),
                                      multiplier=DeviceModels.multiplier_lvs_parameter_name(mapping),
                                      mos=isinstance(device_class, kdb.DeviceClassMOS3Transistor))
+
+    @staticmethod
+    def model_parameter_names(mapping: device_models_pb2.DeviceModelMapping) -> Set[str]:
+        """
+        The parameters of a device of a schematic that its totals depend on, in lowercase, with the m of SPICE,
+        e.g. {'w', 'l', 'm'} of a MOS, but not the feed of an IHP MOM cap
+        """
+        totals = DeviceTotalParameters.of(None, mapping)
+        lvs_parameter_names = {totals.width, totals.length, totals.area, totals.multiplier}
+        names = {'m'}
+        for p in mapping.parameters:
+            match p.WhichOneof('value'):
+                case 'lvs_parameter_name' if p.lvs_parameter_name in lvs_parameter_names:
+                    names.add(p.name.lower())
+                case 'lvs_area_perimeter_side':
+                    names.add(p.name.lower())
+        return names
 
     @property
     def quantity_names(self) -> List[str]:

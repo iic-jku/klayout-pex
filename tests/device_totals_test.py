@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+from typing import *
 import unittest
 
 import allure
@@ -81,6 +82,22 @@ class DeviceTotalParametersTest(unittest.TestCase):
                                                           models.mapping_by_lvs_device_class_name[name])
                     values = {'w': 5.0, 'l': 5.0, 'm': 2.0, 'mmin': 2.0, 'mmax': 4.0, 'feed': 2.0}
                     self.assertEqual({'w·l': 50.0, 'm': 2.0}, parameters.quantities(values))
+
+    def test_model_parameters_of_the_totals(self):
+        def names(mapping: dict) -> Set[str]:
+            return DeviceTotalParameters.model_parameter_names(
+                device_models(mapping).mapping_by_lvs_device_class_name[mapping['lvs_device_class_name']])
+
+        self.assertEqual({'w', 'l', 'm'}, names(NMOS))
+        self.assertEqual({'m'}, names(NPN))
+        self.assertEqual({'w', 'l', 'm'}, names(MIM))
+
+    def test_metal_range_and_feed_of_the_ihp_mom_caps_are_no_model_parameters_of_the_totals(self):
+        for pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L):
+            with self.subTest(pdk):
+                mappings = TechInfo.from_json(pdk.config.tech_pb_json_path,
+                                              dielectric_filter=None).device_models.mapping_by_lvs_device_class_name
+                self.assertEqual({'w', 'l', 'm'}, DeviceTotalParameters.model_parameter_names(mappings['cap_cmomi']))
 
     def test_quantities_without_value(self):
         parameters = total_parameters(NMOS, kdb.DeviceClassMOS4Transistor())

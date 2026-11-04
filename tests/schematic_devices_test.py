@@ -32,9 +32,10 @@ import unittest
 
 import allure
 
+from klayout_pex.netlist.spice_hierarchy import SpiceEvaluationError
 from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.schematic_devices import schematic_devices
-from tests.common.device_model_mappings import NMOS, RPPD, device_models
+from tests.common.device_model_mappings import NMOS, RPPD, W_L, device_models
 
 DEVICE_MODELS = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'}, RPPD)
 
@@ -121,6 +122,36 @@ XM1 a g b b sg13_lv_nmos L=0.13 W=1 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' m=1
 """)
         schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='chip')
         self.assertEqual({'nmos': ['XM1']}, schematic.device_names_by_class_name)
+
+    def test_values_that_neither_device_class_nor_totals_depend_on_may_have_no_number(self):
+        # NOTE: e.g. feed=double as xschem writes a cap_cmomi, whose double is a .param of the model library (#399),
+        #       also through a subcircuit call, of a model without mapping, and as a value
+        netlist = SpiceReader().parse("""\
+.subckt half a b feed=1
+XR1 a b rppd w=0.5u l=2u feed=feed
+.ends half
+.subckt chip a b
+X1 a b half feed=double
+XR2 a b rppd w=0.5u l=2u m=2 feed=double
+Xinv a b sg13g2_inv_1 size=big
+R1 a b {rval}
+.ends chip
+""")
+        schematic = schematic_devices(netlist=netlist, device_models=DEVICE_MODELS, top_cell_name='chip')
+        devices = schematic.devices_by_class_name['rppd']
+        self.assertEqual([('X1.XR1', ['L', 'W'], 1.0), ('XR2', ['L', 'W'], 2.0)],
+                         [(d.name, sorted(d.lvs_parameters), d.m) for d in devices])
+        self.assertEqual({'sg13g2_inv_1': ['Xinv']}, schematic.device_names_by_unknown_model)
+
+    def test_values_that_device_class_or_totals_depend_on_need_a_number(self):
+        rfnmos = {**NMOS, 'lvs_device_class_name': 'rfnmos', 'model_name': 'sg13_lv_nmos',
+                  'parameters': [*W_L, {'name': 'rfmode', 'constant': 1.0}]}
+        models = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'}, rfnmos)
+        for parameter in ('w=none l=0.13u', 'w=1u l=none', 'w=1u l=0.13u m=none', 'w=1u l=0.13u rfmode=none'):
+            with self.subTest(parameter):
+                netlist = SpiceReader().parse(f".subckt chip a g\nXM1 a g a a sg13_lv_nmos {parameter}\n.ends\n")
+                with self.assertRaisesRegex(SpiceEvaluationError, 'the parameter none is not defined'):
+                    schematic_devices(netlist=netlist, device_models=models, top_cell_name='chip')
 
     def test_cell_called_outside_of_subcircuits_counts_once(self):
         # NOTE: e.g. by a testbench, without subcircuit of the layout's cell

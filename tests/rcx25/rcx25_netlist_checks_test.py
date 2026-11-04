@@ -137,6 +137,23 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
     assert cli.rcx25_netlist_problems == []
 
 
+def cmomi_device_totals_problems(device_parameters: str) -> List[str]:
+    cell_name = 'cmomi_w5u_l5u_m1_m5'
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(PDK.IHP_SG13G2, os.path.join(TEST_DESIGNS_DIR, PDK.IHP_SG13G2, cell_name,
+                                                               f"{cell_name}.gds.gz")))
+    device_models = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None).device_models
+    schematic = schematic_devices(netlist=SpiceReader().parse(f"""\
+* {cell_name}
+.subckt {cell_name} PLUS MINUS
+XC1 PLUS MINUS cap_cmomi {device_parameters}
+.ends
+"""), device_models=device_models, top_cell_name=cell_name)
+    return check_schematic_device_totals(lvs_netlist=lvsdb.netlist(),
+                                         schematic=schematic,
+                                         device_models=device_models)
+
+
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D", "Schematic")
 @pytest.mark.parametrize('w, l, problems', [
@@ -146,20 +163,14 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
     ('4.4u', '4.2u', ['the schematic has Σ w·l = 14.952 of class cap_cmomi, the LVS netlist 18.69']),
 ])
 def test_device_totals_of_a_cmomi_are_those_of_its_array(w: str, l: str, problems: List[str]):
-    cell_name = 'cmomi_w5u_l5u_m1_m5'
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(lvsdb_fixture_path(PDK.IHP_SG13G2, os.path.join(TEST_DESIGNS_DIR, PDK.IHP_SG13G2, cell_name,
-                                                               f"{cell_name}.gds.gz")))
-    device_models = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None).device_models
-    schematic = schematic_devices(netlist=SpiceReader().parse(f"""\
-* {cell_name}
-.subckt {cell_name} PLUS MINUS
-XC1 PLUS MINUS cap_cmomi w={w} l={l} mmin=1 mmax=5 feed=2
-.ends
-"""), device_models=device_models, top_cell_name=cell_name)
-    assert check_schematic_device_totals(lvs_netlist=lvsdb.netlist(),
-                                         schematic=schematic,
-                                         device_models=device_models) == problems
+    assert cmomi_device_totals_problems(f"w={w} l={l} mmin=1 mmax=5 feed=2") == problems
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D", "Schematic")
+def test_device_totals_of_a_cmomi_as_xschem_writes_it():
+    # NOTE: double is a .param of the model library, which the schematic doesn't include (#399)
+    assert cmomi_device_totals_problems('w=5e-6 l=5e-6 mmin=1 mmax=5 feed=double subblock=0 m=1 mm_ok=1') == []
 
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
