@@ -1,0 +1,55 @@
+[18:39:36] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1418
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_ptap_pair_
+li1_m1.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmp6i3irmuv'  
+--2.5D --check n                                                               
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:39:36] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:737
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:39:36] INFO     (65, 244) -> (ptap_conn)                   kpex_cli.py:1589
+[18:39:36] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1589
+[18:39:36] INFO     (66, 4405) -> (licon_ptap_con)             kpex_cli.py:1589
+[18:39:36] INFO     (67, 44) -> (mcon_con)                     kpex_cli.py:1589
+[18:39:36] INFO     (68, 20) -> (met1_con)                     kpex_cli.py:1589
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:39:36] INFO     LVSDB: found 0pins                         extractor.py:298
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;$1;$1.$1.li1;;37.647                                                        
+R2;$1;$1.$5.met1;;9.3                                                          
+R3;$1.$1.li1;$1.$2.li1;;37.647                                                 
+R4;$1.$1.li1;$1.$6.met1;;9.3                                                   
+R5;$1.$2.li1;$1.$3.li1;;37.647                                                 
+R6;$1.$2.li1;$1.$7.met1;;9.3                                                   
+R7;$1.$3.li1;$1.$4.li1;;37.647                                                 
+R8;$1.$3.li1;$1.$8.met1;;9.3                                                   
+R9;$1.$4.li1;$1.$9.met1;;9.3                                                   
+R10;$1.$5.met1;$1.$6.met1;;0.368                                               
+R11;$1.$6.met1;$1.$7.met1;;0.368                                               
+R12;$1.$7.met1;$1.$8.met1;;0.368                                               
+R13;$1.$8.met1;$1.$9.met1;;0.368                                               
+R14;$2;$2.$1.li1;;37.647                                                       
+R15;$2;$2.$5.met1;;9.3                                                         
+R16;$2.$1.li1;$2.$2.li1;;37.647                                                
+R17;$2.$1.li1;$2.$6.met1;;9.3                                                  
+R18;$2.$2.li1;$2.$3.li1;;37.647                                                
+R19;$2.$2.li1;$2.$7.met1;;9.3                                                  
+R20;$2.$3.li1;$2.$4.li1;;37.647                                                
+R21;$2.$3.li1;$2.$8.met1;;9.3                                                  
+R22;$2.$4.li1;$2.$9.met1;;9.3                                                  
+R23;$2.$5.met1;$2.$6.met1;;0.368                                               
+R24;$2.$6.met1;$2.$7.met1;;0.368                                               
+R25;$2.$7.met1;$2.$8.met1;;0.368                                               
+R26;$2.$8.met1;$2.$9.met1;;0.368                                               
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+C:\Users\RUNNER~1\AppData\Local\Temp\tmp6i3irmuv\r_ptap_pair_li1_m1__r_ptap_pai
+r_li1_m1\r_ptap_pair_li1_m1_k25d_pex_netlist.csv                               
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+C:\Users\RUNNER~1\AppData\Local\Temp\tmp6i3irmuv\r_ptap_pair_li1_m1__r_ptap_pai
+r_li1_m1\r_ptap_pair_li1_m1_k25d_pex_netlist.spice                             
