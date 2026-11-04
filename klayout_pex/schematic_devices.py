@@ -34,8 +34,9 @@ from itertools import chain
 from typing import *
 
 from .device_models import DeviceModels
+from .device_totals import DeviceTotalParameters
 from .netlist.spice_hierarchy import SpiceHierarchy
-from .netlist.spice_netlist import SpiceNetlist
+from .netlist.spice_netlist import SpiceElement, SpiceNetlist
 from .types import LVSDeviceClassName
 
 
@@ -69,15 +70,22 @@ def schematic_devices(netlist: SpiceNetlist,
     """
     :param top_cell_name: the cell of the layout, whose subcircuit in the schematic has the devices,
                           else those of the subcircuits that no element calls, and the elements outside of them
-    :raises SpiceEvaluationError: if a value of the schematic has no number
+    :raises SpiceEvaluationError: if a value has no number that a device class or the totals of a device depend on
     """
+    def parameter_names(element: SpiceElement) -> Set[str]:
+        # NOTE: the others may have no number here, e.g. feed=double of an IHP MOM cap as xschem writes it,
+        #       whose double is a .param of the model library, which the schematic doesn't include
+        return {name for mapping in device_models.mappings_of_model(element)
+                for name in (*device_models.constant_parameters(mapping),
+                             *DeviceTotalParameters.model_parameter_names(mapping))}
+
     hierarchy = SpiceHierarchy(netlist)
     top = hierarchy.subcircuit(top_cell_name)
     if top is not None:
-        elements = hierarchy.flat_elements(top)
+        elements = hierarchy.flat_elements(top, parameter_names)
     else:
-        elements = chain(*(hierarchy.flat_elements(s) for s in hierarchy.uncalled_subcircuits()),
-                         hierarchy.flat_elements())
+        elements = chain(*(hierarchy.flat_elements(s, parameter_names) for s in hierarchy.uncalled_subcircuits()),
+                         hierarchy.flat_elements(parameter_names=parameter_names))
 
     devices_by_class_name: Dict[LVSDeviceClassName, List[SchematicDevice]] = defaultdict(list)
     device_names_by_unknown_model: Dict[str, List[str]] = defaultdict(list)

@@ -56,7 +56,7 @@ class SpiceEvaluationError(Exception):
 @dataclass(frozen=True)
 class HierarchyElement:
     path: str  # the names of the subcircuit calls and of the element, e.g. X1.XM2
-    element: SpiceElement  # with its value and parameters as numbers
+    element: SpiceElement  # with its value and parameters as numbers (see SpiceHierarchy.flat_elements)
 
 
 class SpiceHierarchy:
@@ -79,18 +79,24 @@ class SpiceHierarchy:
         called = {e.model.casefold() for e in elements if e.kind == 'X' and e.model is not None}
         return [s for s in self.netlist.subcircuits if s.name.casefold() not in called]
 
-    def flat_elements(self, subcircuit: Optional[SpiceSubcircuit] = None) -> Iterator[HierarchyElement]:
+    def flat_elements(self,
+                      subcircuit: Optional[SpiceSubcircuit] = None,
+                      parameter_names: Optional[Callable[[SpiceElement], Collection[str]]] = None
+                      ) -> Iterator[HierarchyElement]:
         """
         The elements of the subcircuit (with the defaults of its parameters), or else of the top level,
         with the calls of the subcircuits of the netlist as their elements, recursively
 
+        :param parameter_names: the parameters to evaluate of an element, which then has only those, and no value,
+                                as the others may have no number here (e.g. of a .param of a model library
+                                the netlist doesn't include); by default all of them, and its value
         :raises SpiceEvaluationError: if a value has no number (e.g. of a parameter that is not defined),
                                       or a subcircuit calls itself
         """
         if subcircuit is None:
-            return self._flat_elements(self.netlist.elements, self._top_scope, '', ())
+            return self._flat_elements(self.netlist.elements, self._top_scope, '', (), parameter_names)
         return self._flat_elements(subcircuit.elements, self._call_scope(None, subcircuit, self._top_scope),
-                                   '', (subcircuit.name.casefold(),))
+                                   '', (subcircuit.name.casefold(),), parameter_names)
 
     # --------------------------------------------------------------------------------
 
@@ -115,27 +121,34 @@ class SpiceHierarchy:
                        elements: List[SpiceElement],
                        scope: ParameterScope,
                        path: str,
-                       calls: Tuple[str, ...]) -> Iterator[HierarchyElement]:
+                       calls: Tuple[str, ...],
+                       parameter_names: Optional[Callable[[SpiceElement], Collection[str]]]
+                       ) -> Iterator[HierarchyElement]:
         for element in elements:
             name = f"{path}{element.name}"
             if element.kind != 'X':
-                yield HierarchyElement(path=name, element=self._evaluated(element, scope, name))
+                yield HierarchyElement(path=name, element=self._evaluated(element, scope, name, parameter_names))
                 continue
             subcircuit = self.subcircuit(element.model) if element.model is not None else None
             call_scope = self._call_scope(element, subcircuit, scope)
-            evaluated = self._evaluated(element, call_scope, name)
+            evaluated = self._evaluated(element, call_scope, name, parameter_names)
             if subcircuit is None:
                 yield HierarchyElement(path=name, element=evaluated)
                 continue
             key = subcircuit.name.casefold()
             if key in calls:
                 raise SpiceEvaluationError(f"{name} calls the subcircuit {subcircuit.name} within itself")
-            yield from self._flat_elements(subcircuit.elements, call_scope, f"{name}.", calls + (key,))
+            yield from self._flat_elements(subcircuit.elements, call_scope, f"{name}.", calls + (key,),
+                                           parameter_names)
 
     @staticmethod
-    def _evaluated(element: SpiceElement, scope: ParameterScope, path: str) -> SpiceElement:
+    def _evaluated(element: SpiceElement,
+                   scope: ParameterScope,
+                   path: str,
+                   parameter_names: Optional[Callable[[SpiceElement], Collection[str]]]) -> SpiceElement:
         """
         :param scope: of the element, or of the call for a subcircuit call (which has its parameters)
+        :param parameter_names: see flat_elements
         """
         def evaluate(what: str, value: NumberOrExpression, evaluation: Callable[[], float]) -> float:
             try:
@@ -143,13 +156,15 @@ class SpiceHierarchy:
             except ExpressionError as e:
                 raise SpiceEvaluationError(f"the {what} {value} of {path}: {e}") from None
 
+        names = element.parameters if parameter_names is None else parameter_names(element)
+        to_evaluate = {n: v for n, v in element.parameters.items() if n in names}
         if element.kind == 'X':
             parameters = {n: evaluate(f"parameter {n} =", v, partial(scope.value, n))
-                          for n, v in element.parameters.items()}
+                          for n, v in to_evaluate.items()}
         else:
             parameters = {n: evaluate(f"parameter {n} =", v, partial(scope.evaluate, v))
-                          for n, v in element.parameters.items()}
+                          for n, v in to_evaluate.items()}
         value = None
-        if element.value is not None:
+        if parameter_names is None and element.value is not None:
             value = evaluate('value', element.value, partial(scope.evaluate, element.value))
         return replace(element, value=value, parameters=parameters)

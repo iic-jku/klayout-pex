@@ -93,18 +93,35 @@ class DeviceModels:
         if element.model is None:
             return None
 
-        def constants(mapping: device_models_pb2.DeviceModelMapping) -> Dict[str, float]:
-            return {p.name.lower(): p.constant for p in mapping.parameters if p.WhichOneof('value') == 'constant'}
-
         candidates = [m for m in self.mappings_by_spice_model.get((element.kind, element.model.upper()), [])
-                      if all(element.parameters.get(name) == value for name, value in constants(m).items())]
+                      if all(element.parameters.get(name) == value
+                             for name, value in self.constant_parameters(m).items())]
         if candidates:
             # NOTE: the one with the most constants, e.g. rfnmos, which an sg13_lv_nmos with rfmode=1 matches too
-            return max(candidates, key=lambda m: len(constants(m))).lvs_device_class_name
+            return max(candidates, key=lambda m: len(self.constant_parameters(m))).lvs_device_class_name
         for name in self.mapping_by_lvs_device_class_name:
             if name.upper() == element.model.upper():
                 return name
         return None
+
+    def mappings_of_model(self, element: SpiceElement) -> List[device_models_pb2.DeviceModelMapping]:
+        """
+        The mappings a device of a schematic may be of, by its model alone (see lvs_device_class_name)
+
+        :param element: whose parameters may be expressions yet
+        """
+        if element.model is None:
+            return []
+        model = element.model.upper()
+        return [*self.mappings_by_spice_model.get((element.kind, model), []),
+                *(m for name, m in self.mapping_by_lvs_device_class_name.items() if name.upper() == model)]
+
+    @staticmethod
+    def constant_parameters(mapping: device_models_pb2.DeviceModelMapping) -> Dict[str, float]:
+        """
+        The parameters the mapping writes as constants, in lowercase, e.g. {'rfmode': 1.0} of an rfnmos
+        """
+        return {p.name.lower(): p.constant for p in mapping.parameters if p.WhichOneof('value') == 'constant'}
 
     @staticmethod
     def lvs_parameter_values(mapping: device_models_pb2.DeviceModelMapping,

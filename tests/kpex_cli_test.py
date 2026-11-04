@@ -194,7 +194,7 @@ def test_unreadable_schematic_is_a_check_problem(tmp_path):
 
 def test_schematic_without_value_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
-    schematic_path.write_text('.subckt chip a b\nXM1 a b b b sg13_lv_nmos w={w0*2}\n.ends chip\n', encoding='utf-8')
+    schematic_path.write_text('.subckt chip a b\nXM1 a b b b nmos w={w0*2}\n.ends chip\n', encoding='utf-8')
     problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
                                                        lvs_netlist=kdb.Netlist(),
                                                        device_models=device_models(NMOS),

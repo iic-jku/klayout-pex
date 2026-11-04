@@ -133,6 +133,14 @@ MM1 D G S B sg13_lv_nmos w=w*nf l=l ng=nf
         hierarchy = SpiceHierarchy(SpiceReader().parse('.subckt a x\nXb x b\n.ends\n.subckt b x\n.ends\n'))
         self.assertEqual(['a'], [s.name for s in hierarchy.uncalled_subcircuits()])
 
+    def test_only_the_parameters_asked_for_are_evaluated(self):
+        # NOTE: the others, and the value, may have no number, also those of a call that the elements don't refer to
+        hierarchy = SpiceHierarchy(SpiceReader().parse(
+            '.subckt sub a\nXC1 a a cap w=w0 feed=double\nR1 a 0 {rval}\n.ends\nX1 a sub w0=1u unused=none\n'))
+        elements = {e.path: e.element for e in hierarchy.flat_elements(parameter_names=lambda element: ['w'])}
+        self.assertEqual({'X1.XC1': {'w': 1e-6}, 'X1.R1': {}}, {p: e.parameters for p, e in elements.items()})
+        self.assertIsNone(elements['X1.R1'].value)
+
     def test_errors_name_the_element_and_its_value(self):
         self.assertEqual('the parameter w = w0*2 of X1.M1: the parameter w0 is not defined',
                          evaluation_error('.subckt sub a\nM1 a a a a nmos w={w0*2}\n.ends\nX1 a sub\n'))
