@@ -123,4 +123,6 @@
   e.g. `tests/common/ngspice.py`, `convert_to_vacask`, `kpex --netlist-format vacask`,
   `TopMetal1`, `inductor3`, `sg13cmos5l`. Tick every mention, not only the first.
 - No AI attribution: no `Co-Authored-By` trailer, no "Generated with …" line.
+- Don't name proprietary solvers or protected company and product names, in code, docs,
+  commit, PR and issue texts or comments: write "commercial tool A", "commercial tool B".
 - Before handing over, re-read your diff against `main` and check it against this file.
