@@ -252,6 +252,36 @@ def cap_vpp_routing_across() -> Pattern:
     return p
 
 
+def cap_vpp_licon_within_marker() -> Pattern:
+    """
+    A licon all within the marker of a VPP cap, like those of the nhv cells of the PDK, between poly P going
+    out to the left and li1 L going out to the right
+    """
+    p = pattern('cap_vpp_licon_within_marker')
+    p.box(VPP, 0, 0, 2000, 2000)
+    p.box(POLY, -2000, 800, 1270, 1200)
+    p.box(POLY_PIN, -2000, 800, -1800, 1200)
+    p.label(POLY, 'P', -1900, 1000)
+    p.box(LICON, 1000, 915, 1170, 1085)
+    p.box(LI1, 900, 800, 4000, 1200)
+    p.box(LI1_PIN, 3800, 800, 4000, 1200)
+    p.label(LI1, 'L', 3900, 1000)
+    return p
+
+
+def cap_vpp_of_pdk(name: str) -> Pattern:
+    """
+    The cell of a VPP cap of the PDK, e.g. the smallest ones with licon within their markers:
+    - cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3: 44 licons between its li1 fingers and its poly shield
+    - cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap: 28 licons between its li1 shields and the taps below,
+      no poly
+    """
+    p = pattern(name)
+    place_pdk_cell(p, pdk_library(), f"sky130_fd_pr__{name}", 0)
+    p.top.flatten(-1, True)
+    return p
+
+
 #
 # Net name patterns
 #
@@ -328,6 +358,11 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_mim_m3_20um_x_20um_over_m2_wire':
         lambda: cap_mim_m3_over_m2_wire('cap_mim_m3_20um_x_20um_over_m2_wire'),
     'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire': cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire,
+    'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap':
+        lambda: cap_vpp_of_pdk('cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap'),
+    'cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3':
+        lambda: cap_vpp_of_pdk('cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3'),
+    'cap_vpp_licon_within_marker': cap_vpp_licon_within_marker,
     'cap_vpp_routing_across': cap_vpp_routing_across,
     'net_names_A_and_a_m2': net_names_A_and_a_m2,
     'nfet_li1_in_subcell': nfet_li1_in_subcell,

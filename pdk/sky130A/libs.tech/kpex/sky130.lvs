@@ -2285,6 +2285,9 @@ connect(met5_vpp     , met5_label)
 
 connect(poly_vpp     ,  licon_vpp)
 connect(licon_vpp    ,     li_vpp)
+# [PEX] The contact of the resistance extraction is the whole licon (e.g. licon_poly_con), and one within
+#       the marker has no poly_con and li_con there, so it joins its net through its part licon_vpp
+connect(licon_vpp    ,      licon)
 connect(li_vpp       ,   mcon_vpp)
 connect(mcon_vpp     ,   met1_vpp)
 connect(met1_vpp     ,   via1_vpp)

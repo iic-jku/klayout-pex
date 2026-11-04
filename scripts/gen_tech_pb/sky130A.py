@@ -122,7 +122,9 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, METAL,   KPLT, "met3_vpp",  (70, 20),    "met3",      "met3_ncap",      "Capacitor device metal (MOM cap)")
     add_computed_layer(tech, METAL,   KPLT, "met4_vpp",  (71, 20),    "met4",      "met4_ncap",      "Capacitor device metal (MOM cap)")
     add_computed_layer(tech, METAL,   KPLT, "met5_vpp",  (72, 20),    "met5",      "met5",           "Capacitor device metal (MOM cap)")
-    add_computed_layer(tech, CONT,    KPLT, "licon_vpp", (66, 44),    "licon1",    None,             "Capacitor device contact (MOM cap)")
+    # NOTE: no licon_vpp, the part of a licon within a marker, as it's no contact of its own. The contacts have
+    #       the whole cuts, by what they land on: licon_poly_con on the poly shields (nlicon of the models),
+    #       and those on taps (e.g. the li1 shields of the fingercaps) join no conductor of the resistance network
     add_computed_layer(tech, VIA,     KPLT, "mcon_vpp",  (67, 44),    "mcon",      "mcon_con",       "Capacitor device contact (MOM cap)")
     add_computed_layer(tech, VIA,     KPLT, "via1_vpp",  (68, 44),    "via",       "via1_con",       "Capacitor device contact (MOM cap)")
     add_computed_layer(tech, VIA,     KPLT, "via2_vpp",  (69, 44),    "via2",      "via2_con",       "Capacitor device contact (MOM cap)")
