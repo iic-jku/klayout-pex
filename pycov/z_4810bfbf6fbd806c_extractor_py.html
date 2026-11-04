@@ -54,8 +54,8 @@
             </div>
         </aside>
         <h2>
-            <span class="text">140 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">133<span class="text"> run</span></button>
+            <span class="text">143 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">136<span class="text"> run</span></button>
             <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">7<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
@@ -428,7 +428,13 @@
     <p class="pln"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t">            <span class="nam">results</span><span class="op">.</span><span class="nam">r_extraction_result</span> <span class="op">=</span> <span class="nam">rex_result</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">        <span class="key">return</span> <span class="nam">results</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">            <span class="nam">nets_joined_by_substrate</span> <span class="op">=</span> <span class="nam">results</span><span class="op">.</span><span class="nam">nets_joined_by_substrate</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">            <span class="key">if</span> <span class="nam">nets_joined_by_substrate</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">                <span class="nam">warning</span><span class="op">(</span><span class="str">&quot;Only the substrate, a well or a tap joins pieces of the metal of these nets, which the &quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t352" href="#t352">352</a></span><span class="t">                        <span class="str">&quot;resistance network has no resistance for, so the pieces are ideally on their nets: &quot;</span> <span class="op">+</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">                        <span class="str">&#x27;, &#x27;</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">nets_joined_by_substrate</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t">        <span class="key">return</span> <span class="nam">results</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
