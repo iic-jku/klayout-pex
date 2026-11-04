@@ -335,6 +335,20 @@ def test_licons_between_li1_and_poly_shield_of_mom_cap(pex: RCX25Extraction):
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licon_within_marker_of_mom_cap(pex: RCX25Extraction):
+    # The whole licon, which has the resistance, isn't on the net of its part licon_vpp unless the LVS connects them:
+    # it was on a net of its own, with its 152 Ω between no ports, and with a tie of 1 mΩ between L and P instead
+    rows = pex.written_netlist_rows('test_patterns', 'cap_vpp_licon_within_marker.gds.gz')
+    assert [(row['Net1'], row['Net2'], row['Resistance [Ω]']) for row in rows] == [
+        ('L', 'L,P', '90.08'),
+        ('L,P', 'L,P.$1.poly', '152.0'),
+        ('L,P.$1.poly', 'P', '359.693'),
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
 def test_licons_over_taps_of_mom_cap_without_poly(pex: RCX25Extraction):
     # The licons join the li1 shields to the taps below, no conductors of the resistance network, like the p-taps
     # (the cell has no implants, so these are none). As contacts over poly, they would have no conductor below
