@@ -1,0 +1,194 @@
+[16:15:26] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1418
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox y --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/c
+ap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap.lvsdb.gz --out-dir                 
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:15:26] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:737
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:15:26] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - tap (tap): 2 of 2 shapes are not                        
+                    within ntap_conn, ptap_conn                                 
+                      - licon (licon1): 28 of 28 shapes                         
+                    are not within licon_nsd_con,                               
+                    licon_psd_con, licon_poly_con,                              
+                    licon_ntap_con, licon_ptap_con                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:15:26] INFO     (64, 44) -> (vpp_sub)                       kpex_cli.py:1589
+[16:15:26] INFO     (67, 20) -> (li_con li_vpp)                 kpex_cli.py:1589
+[16:15:26] INFO     (68, 44) -> (via1_con via1_vpp)             kpex_cli.py:1589
+[16:15:26] INFO     (69, 44) -> (via2_con via2_vpp)             kpex_cli.py:1589
+[16:15:26] INFO     (68, 20) -> (met1_con met1_vpp)             kpex_cli.py:1589
+[16:15:26] INFO     (69, 20) -> (met2_con met2_vpp)             kpex_cli.py:1589
+[16:15:26] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1589
+[16:15:26] INFO     (70, 20) -> (met3_vpp met3_ncap)            kpex_cli.py:1589
+[16:15:26] INFO     (71, 20) -> (met4_vpp met4_ncap)            kpex_cli.py:1589
+[16:15:26] INFO     (70, 144) -> (via3_vpp via3_ncap)           kpex_cli.py:1589
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:15:26] INFO     LVSDB: found 3pins                          extractor.py:298
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;$3;0.033;                                                                 
+C2;$2;C0;0.003;                                                                 
+C3;$2;C0.$0.met1;0.13;                                                          
+C4;$2;C0.$2.met1;0.016;                                                         
+C5;$2;C0.$24.met3;0.005;                                                        
+C6;$2;C0.$30.met3;0.001;                                                        
+C7;$2;C0.$32.met3;0.001;                                                        
+C8;$2;C0.$4.met1;0.003;                                                         
+C9;$2;C1.$0.met1;0.045;                                                         
+C10;$2;C1.$10.met2;0.002;                                                       
+C11;$2;C1.$2.met1;0.009;                                                        
+C12;$2;C1.$31.met3;0.003;                                                       
+C13;$2;C1.$35.met3;0.001;                                                       
+C14;$2;C1.$4.met1;0.009;                                                        
+C15;$2;C1.$43.met3;0.001;                                                       
+C16;$2;C1.$6.met1;0.004;                                                        
+C17;$2;C1.$8.met1;0.002;                                                        
+C18;$2;VSUBS;0.463;                                                             
+C19;$3;C0;0.003;                                                                
+C20;$3;C0.$0.met1;0.003;                                                        
+C21;$3;C0.$2.met1;0.016;                                                        
+C22;$3;C0.$30.met3;0.001;                                                       
+C23;$3;C0.$32.met3;0.001;                                                       
+C24;$3;C0.$4.met1;0.018;                                                        
+C25;$3;C0.$40.met3;0.005;                                                       
+C26;$3;C0.$6.met1;0.113;                                                        
+C27;$3;C1.$0.met1;0.002;                                                        
+C28;$3;C1.$2.met1;0.004;                                                        
+C29;$3;C1.$27.met2;0.002;                                                       
+C30;$3;C1.$31.met3;0.001;                                                       
+C31;$3;C1.$4.met1;0.009;                                                        
+C32;$3;C1.$43.met3;0.002;                                                       
+C33;$3;C1.$47.met3;0.003;                                                       
+C34;$3;C1.$6.met1;0.009;                                                        
+C35;$3;C1.$8.met1;0.045;                                                        
+C36;$3;VSUBS;0.463;                                                             
+C37;C0;VSUBS;0.28;                                                              
+C38;C0.$0.met1;C1;0.003;                                                        
+C39;C0.$0.met1;VSUBS;0.264;                                                     
+C40;C0.$10.met2;C1;0.01;                                                        
+C41;C0.$10.met2;VSUBS;0.108;                                                    
+C42;C0.$12.met2;C1;0.01;                                                        
+C43;C0.$12.met2;VSUBS;0.018;                                                    
+C44;C0.$16.met2;VSUBS;0.015;                                                    
+C45;C0.$2.met1;C1;0.006;                                                        
+C46;C0.$2.met1;VSUBS;0.036;                                                     
+C47;C0.$20.met2;VSUBS;0.078;                                                    
+C48;C0.$24.met3;VSUBS;0.258;                                                    
+C49;C0.$28.met3;C1;0.001;                                                       
+C50;C0.$28.met3;VSUBS;0.016;                                                    
+C51;C0.$30.met3;C1;0.003;                                                       
+C52;C0.$30.met3;VSUBS;0.016;                                                    
+C53;C0.$32.met3;VSUBS;0.016;                                                    
+C54;C0.$36.met3;VSUBS;0.016;                                                    
+C55;C0.$4.met1;VSUBS;0.018;                                                     
+C56;C0.$40.met3;VSUBS;0.258;                                                    
+C57;C0.$44.met4;VSUBS;0.227;                                                    
+C58;C0.$46.met4;VSUBS;0.015;                                                    
+C59;C0.$48.met4;VSUBS;0.015;                                                    
+C60;C0.$50.met4;VSUBS;0.015;                                                    
+C61;C0.$52.met4;VSUBS;0.015;                                                    
+C62;C0.$54.met4;VSUBS;0.227;                                                    
+C63;C0.$6.met1;VSUBS;0.246;                                                     
+C64;C1;VSUBS;0.021;                                                             
+C65;C1.$0.met1;VSUBS;0.027;                                                     
+C66;C1.$10.met2;VSUBS;0.023;                                                    
+C67;C1.$14.met2;VSUBS;0.015;                                                    
+C68;C1.$2.met1;VSUBS;0.018;                                                     
+C69;C1.$23.met2;VSUBS;0.015;                                                    
+C70;C1.$27.met2;VSUBS;0.023;                                                    
+C71;C1.$31.met3;VSUBS;0.025;                                                    
+C72;C1.$35.met3;VSUBS;0.016;                                                    
+C73;C1.$39.met3;VSUBS;0.016;                                                    
+C74;C1.$4.met1;VSUBS;0.018;                                                     
+C75;C1.$43.met3;VSUBS;0.016;                                                    
+C76;C1.$47.met3;VSUBS;0.025;                                                    
+C77;C1.$51.met4;VSUBS;0.023;                                                    
+C78;C1.$53.met4;VSUBS;0.015;                                                    
+C79;C1.$55.met4;VSUBS;0.015;                                                    
+C80;C1.$57.met4;VSUBS;0.015;                                                    
+C81;C1.$59.met4;VSUBS;0.023;                                                    
+C82;C1.$6.met1;VSUBS;0.018;                                                     
+C83;C1.$8.met1;VSUBS;0.027;                                                     
+R1;C0;C0.$12.met2;;0.125                                                        
+R2;C0;C0.$16.met2;;0.019                                                        
+R3;C0;C0.$20.met2;;2.211                                                        
+R4;C0.$0.met1;C0.$10.met2;;2.25                                                 
+R5;C0.$0.met1;C0.$2.met1;;0.455                                                 
+R6;C0.$10.met2;C0.$24.met3;;1.705                                               
+R7;C0.$12.met2;C0.$2.met1;;2.25                                                 
+R8;C0.$12.met2;C0.$32.met3;;1.705                                               
+R9;C0.$16.met2;C0.$20.met2;;0.152                                               
+R10;C0.$16.met2;C0.$36.met3;;1.705                                              
+R11;C0.$16.met2;C0.$4.met1;;2.25                                                
+R12;C0.$2.met1;C0.$4.met1;;0.152                                                
+R13;C0.$20.met2;C0.$40.met3;;1.705                                              
+R14;C0.$20.met2;C0.$6.met1;;2.25                                                
+R15;C0.$24.met3;C0.$28.met3;;0.057                                              
+R16;C0.$24.met3;C0.$44.met4;;1.705                                              
+R17;C0.$28.met3;C0.$30.met3;;0.057                                              
+R18;C0.$28.met3;C0.$46.met4;;1.705                                              
+R19;C0.$30.met3;C0.$32.met3;;0.057                                              
+R20;C0.$30.met3;C0.$48.met4;;1.705                                              
+R21;C0.$32.met3;C0.$36.met3;;0.057                                              
+R22;C0.$32.met3;C0.$50.met4;;1.705                                              
+R23;C0.$36.met3;C0.$40.met3;;0.057                                              
+R24;C0.$36.met3;C0.$52.met4;;1.705                                              
+R25;C0.$4.met1;C0.$6.met1;;0.152                                                
+R26;C0.$40.met3;C0.$54.met4;;1.705                                              
+R27;C0.$44.met4;C0.$46.met4;;0.057                                              
+R28;C0.$46.met4;C0.$48.met4;;0.057                                              
+R29;C0.$48.met4;C0.$50.met4;;0.057                                              
+R30;C0.$50.met4;C0.$52.met4;;0.057                                              
+R31;C0.$52.met4;C0.$54.met4;;0.057                                              
+R32;C1;C1.$10.met2;;2.163                                                       
+R33;C1;C1.$18.met2;;0.108                                                       
+R34;C1;C1.$23.met2;;0.146                                                       
+R35;C1;C1.$27.met2;;2.163                                                       
+R36;C1;C1.$39.met3;;1.705                                                       
+R37;C1;C1.$4.met1;;2.25                                                         
+R38;C1.$0.met1;C1.$10.met2;;2.25                                                
+R39;C1.$0.met1;C1.$2.met1;;0.152                                                
+R40;C1.$10.met2;C1.$14.met2;;0.152                                              
+R41;C1.$10.met2;C1.$31.met3;;1.705                                              
+R42;C1.$14.met2;C1.$18.met2;;0.038                                              
+R43;C1.$14.met2;C1.$2.met1;;2.25                                                
+R44;C1.$14.met2;C1.$35.met3;;1.705                                              
+R45;C1.$2.met1;C1.$4.met1;;0.152                                                
+R46;C1.$23.met2;C1.$27.met2;;0.152                                              
+R47;C1.$23.met2;C1.$43.met3;;1.705                                              
+R48;C1.$23.met2;C1.$6.met1;;2.25                                                
+R49;C1.$27.met2;C1.$47.met3;;1.705                                              
+R50;C1.$27.met2;C1.$8.met1;;2.25                                                
+R51;C1.$31.met3;C1.$35.met3;;0.057                                              
+R52;C1.$31.met3;C1.$51.met4;;1.705                                              
+R53;C1.$35.met3;C1.$39.met3;;0.057                                              
+R54;C1.$35.met3;C1.$53.met4;;1.705                                              
+R55;C1.$39.met3;C1.$43.met3;;0.057                                              
+R56;C1.$39.met3;C1.$55.met4;;1.705                                              
+R57;C1.$4.met1;C1.$6.met1;;0.152                                                
+R58;C1.$43.met3;C1.$47.met3;;0.057                                              
+R59;C1.$43.met3;C1.$57.met4;;1.705                                              
+R60;C1.$47.met3;C1.$59.met4;;1.705                                              
+R61;C1.$51.met4;C1.$53.met4;;0.057                                              
+R62;C1.$53.met4;C1.$55.met4;;0.057                                              
+R63;C1.$55.met4;C1.$57.met4;;0.057                                              
+R64;C1.$57.met4;C1.$59.met4;;0.057                                              
+R65;C1.$6.met1;C1.$8.met1;;0.152                                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_02p7x06p1_m1m2m
+3m4_shieldl1_fingercap__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap/cap_vpp_02
+p7x06p1_m1m2m3m4_shieldl1_fingercap_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cap_vpp_02p7x06p1_m1m2m
+3m4_shieldl1_fingercap__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap/cap_vpp_02
+p7x06p1_m1m2m3m4_shieldl1_fingercap_k25d_pex_netlist.spice                      

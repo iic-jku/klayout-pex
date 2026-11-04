@@ -1,0 +1,23 @@
+WARNING  __kpex__:kpex_cli.py:1418 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1455 main extract --pdk gf180mcuD --mode RC --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_ntap_pair_two_nwells_over_dnwell_m1_m2.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpnmoaysv_' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:737 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1589 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1589 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1589 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:1589 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:1589 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1589 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:1589 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:kpex_cli.py:1589 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:351 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: $1
+SUBPROCESS __kpex__:kpex_cli.py:1170 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1170 C1;$1;VSUBS;0.037;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C2;$1.$4.Metal2;VSUBS;0.128;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C3;$1.$5.Metal2;VSUBS;0.128;
+SUBPROCESS __kpex__:kpex_cli.py:1170 R1;$1;$1.$4.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1170 R2;$1;$1.$5.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1170 R3;$1;$1.$6.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1170 R4;$1;$1.$7.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1173 C:\Users\RUNNER~1\AppData\Local\Temp\tmpnmoaysv_\r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwells_over_dnwell_m1_m2\r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1189 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpnmoaysv_\r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwells_over_dnwell_m1_m2\r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.spice

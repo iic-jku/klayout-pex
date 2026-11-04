@@ -1,0 +1,32 @@
+WARNING  __kpex__:kpex_cli.py:1418 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1455 main extract --pdk ihp-sg13g2 --mode RC --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\nmos_pair_abutting_ptaps.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmp13ed_6y6' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:737 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1589 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1589 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1589 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1589 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1589 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1589 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1589 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1589 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:extractor.py:298 LVSDB: found 1pins
+WARNING  __kpex__:extractor.py:351 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: sub!
+SUBPROCESS __kpex__:kpex_cli.py:1170 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1170 C1;$1.$0.Metal1;$4;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C2;$1.$0.Metal1;sub!.$0.Metal1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C3;$1.$0.Metal1;VSUBS;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C4;$3.$0.Metal1;$5;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C5;$3.$0.Metal1;sub!.$1.Metal1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C6;$3.$0.Metal1;VSUBS;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C7;$4;sub!.$0.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C8;$4;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C9;$5;sub!.$1.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C10;$5;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C11;VSUBS;sub!.$0.Metal1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1170 C12;VSUBS;sub!.$1.Metal1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1170 R1;$1;$1.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R2;$3;$3.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R3;sub!;sub!.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1170 R4;sub!;sub!.$1.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1173 C:\Users\RUNNER~1\AppData\Local\Temp\tmp13ed_6y6\nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1189 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmp13ed_6y6\nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.spice
