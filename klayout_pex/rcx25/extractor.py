@@ -346,4 +346,10 @@ class RCX25Extractor:
 
             results.r_extraction_result = rex_result
 
+            nets_joined_by_substrate = results.nets_joined_by_substrate()
+            if nets_joined_by_substrate:
+                warning("Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
+                        "resistance network has no resistance for, so the pieces are ideally on their nets: " +
+                        ', '.join(nets_joined_by_substrate))
+
         return results

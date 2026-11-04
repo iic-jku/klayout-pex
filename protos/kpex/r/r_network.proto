@@ -69,4 +69,9 @@ message RNetwork {
     string net_name = 1;
     repeated RNode nodes = 20;
     repeated RElement elements = 30;
+
+    // Of a network of several pieces (nodes no resistors join), the nodes at what joins their piece to the taps,
+    // the substrate or a well: LVS has them on one net, and these are no conductors of the network.
+    // A piece without such a node has no path to its net
+    repeated uint64 substrate_joined_node_ids = 40;
 }

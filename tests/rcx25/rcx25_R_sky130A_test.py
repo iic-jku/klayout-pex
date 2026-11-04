@@ -22,6 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 
+from collections import Counter
+
 import allure
 import pytest
 from unittest import mock
@@ -322,6 +324,42 @@ def test_vias_within_mom_cap_l1m1m2m3m4():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licons_between_li1_and_poly_shield_of_mom_cap(pex: RCX25Extraction):
+    # The part of a licon within the marker (licon_vpp) is no contact of its own, it stopped the extraction with
+    # "licon1 (LVS licon_vpp): no contact". The licons across the edge of the marker are whole contacts over poly,
+    # as many as nlicon in the model of the cap (its rlicon = rcp1 / nlicon)
+    rows = pex.written_netlist_rows('test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3.gds.gz')
+    assert [row['Resistance [Ω]'] for row in rows
+            if {row['Net1'].split('.')[-1], row['Net2'].split('.')[-1]} == {'li1', 'poly'}] == ['152.0'] * 44
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licon_within_marker_of_mom_cap(pex: RCX25Extraction):
+    # The whole licon, which has the resistance, isn't on the net of its part licon_vpp unless the LVS connects them:
+    # it was on a net of its own, with its 152 Ω between no ports, and with a tie of 1 mΩ between L and P instead
+    rows = pex.written_netlist_rows('test_patterns', 'cap_vpp_licon_within_marker.gds.gz')
+    assert [(row['Net1'], row['Net2'], row['Resistance [Ω]']) for row in rows] == [
+        ('L', 'L,P', '90.08'),
+        ('L,P', 'L,P.$1.poly', '152.0'),
+        ('L,P.$1.poly', 'P', '359.693'),
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pex', [pex_whiteboxed, pex_blackboxed], ids=['whiteboxed', 'blackboxed'])
+def test_licons_over_taps_of_mom_cap_without_poly(pex: RCX25Extraction):
+    # The licons join the li1 shields to the taps below, no conductors of the resistance network, like the p-taps
+    # (the cell has no implants, so these are none). As contacts over poly, they would have no conductor below
+    results, _ = pex.run_rcx25d_single_cell('test_patterns', 'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap.gds.gz')
+    assert {n.net_name for n in results.r_extraction_result.networks} >= {'C0', 'C1'}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_mim_cap__whiteboxed():
     # The white-box extraction keeps the MIM cap layers, so the top plate (capm) is a conductor of its net,
     # joined to met4 by the vias on it (via3_cap). It stopped with "unhandled layer purpose PURPOSE_MIM_CAP"
@@ -392,4 +430,48 @@ def test_rf_inductors_are_subcircuits_at_the_ends_of_their_leads():
         'X$1 A1 B1 CT1 sky130_gnd sky130_fd_pr__ind_03_90',
         'X$2 A2 B2 CT2 sky130_gnd sky130_fd_pr__ind_05_125',
         'X$3 A3 B3 CT3 sky130_gnd sky130_fd_pr__ind_05_220',
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_p_taps_are_nets_of_their_own():
+    # NOTE: the deck has no substrate around the p-taps, so the substrate doesn't join them, unlike in other PDKs
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_ptap_pair_li1_m1.gds.gz')
+    assert sorted(network.net_name for network in results.r_extraction_result.networks) == ['$1', '$2']
+    assert results.nets_joined_by_substrate() == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_wires_on_one_p_tap_are_on_their_net():
+    # NOTE: only the p-tap joins them, which is no conductor of the resistance network, its resistance is neglected
+    rows = pex_whiteboxed.written_netlist_rows('test_patterns', 'r_ptap_li1_m1_two_wires.gds.gz')
+    assert sorted(row['Net2'] for row in rows if row['Net1'] == '$2') == ['$2.$1.li1', '$2.$10.met1',
+                                                                          '$2.$15.met1', '$2.$6.li1']
+    # li1: 12.8 Ω/sq, met1: 125 mΩ/sq, 1 µm / 0.34 µm = 2.94 sq, mcon: 9.3 Ω: the same for both wires
+    assert Counter(row['Resistance [Ω]'] for row in rows) == {'37.647': 8, '0.368': 8, '9.3': 10}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_n_taps_in_one_nwell_are_joined_by_its_sheet_resistance():
+    # nwell: 1700 Ω/sq, 10 µm / 7 µm = 1.43 sq between the n-taps
+    # NOTE: the nwell is a conductor of the resistance network, so nothing is left to join ideally
+    results, csv_path = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'r_ntap_pair_nwell_li1_m1.gds.gz')
+    assert results.nets_joined_by_substrate() == []
+    with open(csv_path, encoding='utf-8') as f:
+        assert 'R32;$1.$30.nwell;$1.$35.nwell;;2428.571' in f.read().splitlines()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_nwells_that_only_a_deep_nwell_joins_are_on_their_net():
+    # NOTE: at a node of each nwell, so the licons (185 Ω) and the nwell stay between the wires and the net
+    rows = pex_whiteboxed.written_netlist_rows('test_patterns', 'r_ntap_pair_two_nwells_over_dnwell_li1_m1.gds.gz')
+    assert [(row['Net2'], row['Resistance [Ω]']) for row in rows if row['Net1'] == '$1'] == [
+        ('$1.$0.li1', '185.0'),
+        ('$1.$10.li1', '185.0'),
+        ('$1.$31.nwell', '680.0'),
+        ('$1.$36.nwell', '680.0'),
     ]

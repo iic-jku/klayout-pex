@@ -36,6 +36,7 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError, RExtractor
 from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
@@ -212,20 +213,55 @@ def network_of_metal_and_well(joined_by_via: bool, with_metal: bool = True) -> k
 @allure.parent_suite("Unit Tests")
 @allure.tag("R", "Wells")
 class RExtractorIsolatedWellTest(unittest.TestCase):
+    @staticmethod
+    def isolated_well_node_ids(network: klp.RNetwork) -> Set[int]:
+        return RExtractor.isolated_well_node_ids(RExtractor.network_pieces(network), well_layer_ids={1})
+
     def test_well_joined_by_no_contact_is_isolated(self):
         # NOTE: e.g. a well joined to its net by a label, its piece of the network would join nothing
         network = network_of_metal_and_well(joined_by_via=False)
         self.assertEqual({n.object_id() for n in network.each_node() if n.layer() == 1},
-                         RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
+                         self.isolated_well_node_ids(network))
 
     def test_well_joined_by_contact_is_not_isolated(self):
         network = network_of_metal_and_well(joined_by_via=True)
-        self.assertEqual(set(), RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
+        self.assertEqual(set(), self.isolated_well_node_ids(network))
 
     def test_network_of_a_well_only_is_not_isolated(self):
         # NOTE: e.g. the well of a standard cell, without taps (sky130_fd_sc_hd__inv_1, VPB)
         network = network_of_metal_and_well(joined_by_via=False, with_metal=False)
-        self.assertEqual(set(), RExtractor.isolated_well_node_ids(network, well_layer_ids={1}))
+        self.assertEqual(set(), self.isolated_well_node_ids(network))
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "Wells")
+class RExtractorNodesAtPolygonsTest(unittest.TestCase):
+    @staticmethod
+    def network() -> r_network_pb2.RNetwork:
+        network = r_network_pb2.RNetwork()
+        K = location_pb2.Location.Kind
+
+        def add_box_node(node_id: int, x1: int, y1: int, x2: int, y2: int):
+            location = network.nodes.add(node_id=node_id).location
+            location.kind = K.LOCATION_KIND_BOX
+            location.box.lower_left.x, location.box.lower_left.y = x1, y1
+            location.box.upper_right.x, location.box.upper_right.y = x2, y2
+
+        add_box_node(1, 100, 100, 200, 200)    # within the polygon
+        add_box_node(2, 100, 100, 200, 200)    # at the same location
+        add_box_node(3, 300, 100, 300, 200)    # a junction across the wire, without area
+        add_box_node(4, 5000, 100, 5100, 200)  # on another polygon
+        location = network.nodes.add(node_id=5).location  # a pin, at its label
+        location.kind = K.LOCATION_KIND_POINT
+        location.point.x, location.point.y = 400, 150
+        return network
+
+    def test_nodes_at_a_polygon(self):
+        self.assertEqual({1, 2, 3, 5},
+                         RExtractor.node_ids_at(list(self.network().nodes), kdb.Region(kdb.Box(0, 0, 1000, 300))))
+
+    def test_nodes_at_no_polygon(self):
+        self.assertEqual(set(), RExtractor.node_ids_at(list(self.network().nodes), kdb.Region()))
 
 
 def nfet_li1_redux_networks() -> Dict[str, r_network_pb2.RNetwork]:

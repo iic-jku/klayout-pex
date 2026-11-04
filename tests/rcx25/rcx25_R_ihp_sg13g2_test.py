@@ -536,3 +536,88 @@ def test_wire_over_deep_nwell():
 R1;A;A,B;;0.001
 R2;A;B;;2.09"""
     )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_metal_on_p_taps_that_only_the_substrate_joins_is_on_its_net():
+    # Metal1: 110 mΩ/sq, Metal2: 88 mΩ/sq, 4 µm / 0.3 µm = 13.33 sq between the 2 vias of each wire (9 Ω)
+    # NOTE: identical wires, so identical resistors, and none between them, as the substrate is ideal
+    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+        pex_whiteboxed.assert_expected_matches_obtained(
+            'test_patterns', 'r_ptap_pair_m1_m2.gds.gz',
+            expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;sub!;sub!.$1.Metal1;;1.467
+R2;sub!;sub!.$3.Metal1;;1.467
+R3;sub!;sub!.$4.Metal2;;9.0
+R4;sub!;sub!.$6.Metal2;;9.0
+R5;sub!.$1.Metal1;sub!.$5.Metal2;;9.0
+R6;sub!.$3.Metal1;sub!.$7.Metal2;;9.0
+R7;sub!.$4.Metal2;sub!.$5.Metal2;;1.173
+R8;sub!.$6.Metal2;sub!.$7.Metal2;;1.173"""
+        )
+    assert [c.args[0] for c in warning_mock.call_args_list] == [
+        "Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
+        "resistance network has no resistance for, so the pieces are ideally on their nets: sub!"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_metal_on_n_taps_that_only_a_well_without_sheet_resistance_joins_is_on_its_net():
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_ntap_pair_nwell_m1_m2.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;$1;$1.$1.Metal1;;1.467
+R2;$1;$1.$3.Metal1;;1.467
+R3;$1;$1.$4.Metal2;;9.0
+R4;$1;$1.$6.Metal2;;9.0
+R5;$1.$1.Metal1;$1.$5.Metal2;;9.0
+R6;$1.$3.Metal1;$1.$7.Metal2;;9.0
+R7;$1.$4.Metal2;$1.$5.Metal2;;1.173
+R8;$1.$6.Metal2;$1.$7.Metal2;;1.173"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_ports_of_metal_that_only_the_substrate_joins_are_on_its_net():
+    # NOTE: the ports are in the middle of their Metal2 wires, the net A,B on the Metal1 over the taps
+    pex_whiteboxed.assert_expected_matches_obtained(
+        'test_patterns', 'r_ptap_pair_m1_m2_pins_A_B.gds.gz',
+        expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+R1;A;A,B.$4.Metal2;;0.587
+R2;A;A,B.$5.Metal2;;0.587
+R3;A,B;A,B.$1.Metal1;;1.467
+R4;A,B;A,B.$3.Metal1;;1.467
+R5;A,B;A,B.$4.Metal2;;9.0
+R6;A,B;A,B.$6.Metal2;;9.0
+R7;A,B.$1.Metal1;A,B.$5.Metal2;;9.0
+R8;A,B.$3.Metal1;A,B.$7.Metal2;;9.0
+R9;A,B.$6.Metal2;B;;0.587
+R10;A,B.$7.Metal2;B;;0.587"""
+    )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_sources_joined_to_the_substrate_by_abutting_p_taps_are_on_its_net():
+    # NOTE: no contact over the p-taps, the salicide joins them to the sources (nsd_ptap_abutt of the deck)
+    _, spice_lines = pex_whiteboxed.written_netlist_lines('test_patterns', 'nmos_pair_abutting_ptaps.gds.gz')
+    assert [line.split()[:5] for line in spice_lines if line.startswith('X')] == [
+        ['X$1', '\\$3', '\\$5', 'sub!', 'sub!'],
+        ['X$2', '\\$1', '\\$4', 'sub!', 'sub!'],
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_esd_diodes_that_only_the_substrate_joins_are_like_one_diode_each():
+    def resistances(cell_name: str) -> Counter:
+        rows = pex_whiteboxed.written_netlist_rows('test_patterns', f"{cell_name}.gds.gz")
+        return Counter(row['Resistance [Ω]'] for row in rows)
+
+    assert resistances('esd_diodevss_2kv_pair') == Counter({resistance: 2 * count for resistance, count
+                                                            in resistances('esd_diodevss_2kv').items()})
+    device_lines = pex_whiteboxed.written_device_lines('test_patterns', 'esd_diodevss_2kv_pair.gds.gz')
+    assert [line.split()[3] for line in device_lines] == ['sub!', 'sub!']

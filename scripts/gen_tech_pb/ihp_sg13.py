@@ -814,6 +814,13 @@ class TechBuilder:
             #       which the PEX-LVS script connects iso_pwell to
             si.well_lvs_layer_names.append("iso_pwell")
 
+        # NOTE: the contacts over the taps, and the taps abutting a source/drain, which the deck joins
+        #       (nsd_ptap_abutt, psd_ntap_abutt)
+        add_tap_connection(si, "cont_ptap_con", "metal1_n_mom")
+        add_tap_connection(si, "cont_ntap_con", "metal1_n_mom")
+        add_tap_connection(si, "ptap", "nsd_fet")
+        add_tap_connection(si, "ntap", "psd_fet")
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
