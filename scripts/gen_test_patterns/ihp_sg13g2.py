@@ -50,6 +50,7 @@ NBULAY:       GDSPair = (32, 0)
 METAL1:       GDSPair = (8, 0)
 METAL1_PIN:   GDSPair = (8, 2)
 METAL2:       GDSPair = (10, 0)
+METAL2_PIN:   GDSPair = (10, 2)
 VIA1:         GDSPair = (19, 0)
 METAL3:       GDSPair = (30, 0)
 METAL3_PIN:   GDSPair = (30, 2)
@@ -445,10 +446,16 @@ def inductor2_x2_markers_touching() -> Pattern:
 
 def esd_diode(model: str) -> Pattern:
     """
-    An ESD diode (esd pcell of the PDK), alone, as only the substrate would join the Metal1 on the substrate net
-    of two of them, which is no conductor of the resistance network
+    An ESD diode (esd pcell of the PDK)
     """
     return pcells_side_by_side(f"esd_{model}", [('esd', {'model': model})])
+
+
+def esd_diode_pair(model: str) -> Pattern:
+    """
+    Two ESD diodes (esd pcells of the PDK), unwired, so that only the substrate joins the Metal1 on their substrate net
+    """
+    return pcells_side_by_side(f"esd_{model}_pair", [('esd', {'model': model}), ('esd', {'model': model})])
 
 
 def diode_dantenna_dpantenna() -> Pattern:
@@ -515,6 +522,63 @@ def inductor3_w2u_d25u84_2_turns() -> Pattern:
     return p
 
 
+def tap_m1_m2(p: Pattern, x: int, ptap: bool, label: Optional[str] = None):
+    """
+    A tap of 0.5 µm x 5 µm at x, under a Metal1 wire of 0.3 µm width, joined by 5 contacts,
+    and a Metal2 wire over that, joined by 2 vias, 4 µm apart
+
+    :param ptap: a p-tap, otherwise an n-tap (for an NWell around it)
+    :param label: of a pin in the middle of the Metal2 wire
+    """
+    if ptap:
+        p.box(PSD, x - 180, -180, x + 680, 5180)
+    p.box(ACTIV, x, 0, x + 500, 5000)
+    for y in range(500, 5000, 1000):
+        p.box(CONT, x + 170, y - 80, x + 330, y + 80)
+    p.box(METAL1, x + 100, 0, x + 400, 5000)
+    for y in (500, 4500):
+        p.box(VIA1, x + 155, y - 95, x + 345, y + 95)
+    p.box(METAL2, x + 100, 0, x + 400, 5000)
+    if label is not None:
+        p.box(METAL2_PIN, x + 100, 2350, x + 400, 2650)
+        p.label(METAL2, label, x + 250, 2500)
+
+
+def r_ptap_pair_m1_m2(name: str, labels: Tuple[Optional[str], Optional[str]]) -> Pattern:
+    """
+    Two p-taps 10 µm apart, with Metal1 and Metal2 wires over them (see tap_m1_m2), which only the substrate joins
+    """
+    p = pattern(name)
+    tap_m1_m2(p, 0, ptap=True, label=labels[0])
+    tap_m1_m2(p, 10000, ptap=True, label=labels[1])
+    return p
+
+
+def r_ntap_pair_nwell_m1_m2() -> Pattern:
+    """
+    Two n-taps 10 µm apart in one NWell, with Metal1 and Metal2 wires over them (see tap_m1_m2),
+    which only the NWell joins, as it has no sheet resistance in the tech info
+    """
+    p = pattern('r_ntap_pair_nwell_m1_m2')
+    p.box(NWELL, -1000, -1000, 11500, 6000)
+    tap_m1_m2(p, 0, ptap=False)
+    tap_m1_m2(p, 10000, ptap=False)
+    return p
+
+
+def nmos_pair_abutting_ptaps() -> Pattern:
+    """
+    Two nmos (pcells of the PDK) with their sources on the substrate net, as the salicide joins each source
+    to a p-tap abutting it, so that only the substrate joins the Metal1 over the sources
+    """
+    p = pcells_side_by_side('nmos_pair_abutting_ptaps', [('nmos', {}), ('nmos', {})])
+    for activ in kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*ACTIV))).merged().each():
+        box = activ.bbox()
+        p.box(ACTIV, box.left - 500, box.bottom, box.left, box.top)
+        p.box(PSD, box.left - 680, box.bottom - 180, box.left, box.top + 180)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
@@ -536,10 +600,15 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
+    'r_ptap_pair_m1_m2': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2', (None, None)),
+    'r_ptap_pair_m1_m2_pins_A_B': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2_pins_A_B', ('A', 'B')),
+    'r_ntap_pair_nwell_m1_m2': r_ntap_pair_nwell_m1_m2,
+    'nmos_pair_abutting_ptaps': nmos_pair_abutting_ptaps,
     'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa': bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa,
     'device_pcells': device_pcells,
     'esd_diodevdd_2kv': lambda: esd_diode('diodevdd_2kv'),
     'esd_diodevss_2kv': lambda: esd_diode('diodevss_2kv'),
+    'esd_diodevss_2kv_pair': lambda: esd_diode_pair('diodevss_2kv'),
     'diode_dantenna_dpantenna': diode_dantenna_dpantenna,
     'diode_schottky_nbl1': diode_schottky_nbl1,
     'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,

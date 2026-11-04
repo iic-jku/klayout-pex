@@ -492,6 +492,11 @@ def build_substrate_info(si: SubstrateInfo):
     #       where its n-taps are) are nets of their own; the deep nwell is below the others, so it comes last
     si.well_lvs_layer_names.extend(["nwell_con", "lvpwell_dw_con", "dnwell"])
 
+    # NOTE: not contact_ntap_con, which lands on the nwell, a conductor of the resistance network
+    add_tap_connection(si, "contact_ptap_con", "metal1_con")
+    add_tap_connection(si, "contact_ntap_dw_con", "metal1_con")
+    add_tap_connection(si, "contact_ptap_dw_con", "metal1_con")
+
 
 def build_tech() -> Technology:
     tech = Technology(name="gf180mcuD")

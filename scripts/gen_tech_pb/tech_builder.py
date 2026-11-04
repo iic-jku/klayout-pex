@@ -120,6 +120,10 @@ def add_computed_layer(tech: Technology,
                                                       description=description,
                                                       drw_gds_pair=_gds_pair(gds)))
 
+
+def add_tap_connection(si: SubstrateInfo, tap_lvs_layer_name: str, conductor_layer_name: str):
+    si.tap_connections.add(tap_lvs_layer_name=tap_lvs_layer_name, conductor_layer_name=conductor_layer_name)
+
 #-------------------------------------------------------------------------
 
 

@@ -127,6 +127,21 @@ class Test(unittest.TestCase):
                     self.assertNotEqual('', layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
+    def test_shipped_tech_definitions_have_tap_connections_of_their_layers(self):
+        # NOTE: a tap on a layer of another name would leave its metal off its net, as the LVS layers are not checked
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            tech = TechInfo.from_json(path, dielectric_filter=None)
+            connections = tech.tech.substrate.tap_connections
+            with self.subTest(tech=os.path.basename(path)):
+                self.assertNotEqual([], list(connections))
+                for connection in connections:
+                    purpose = tech.computed_layer_info_by_name[connection.tap_lvs_layer_name].layer_info.purpose
+                    self.assertIn(purpose, (tech_pb2.LayerInfo.PURPOSE_NTAP, tech_pb2.LayerInfo.PURPOSE_PTAP))
+                    self.assertIn(connection.conductor_layer_name, tech.computed_layer_info_by_name)
+
     def test_shipped_tech_definitions_name_the_substrate(self):
         paths = tech_pbjson_paths()
         self.assertNotEqual([], paths, "No generated tech definition to check, "

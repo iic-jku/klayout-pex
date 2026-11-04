@@ -35,6 +35,7 @@ from klayout_pex.types import DeviceID, GDSPair, Label, LayerName, NetName, Term
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
+from klayout_pex.util.disjoint_sets import DisjointSets
 
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
@@ -509,10 +510,12 @@ class RExtractor:
             result_network = rex_result.networks.add()
             result_network.net_name = net_extraction_request.net_name
 
+            pieces = self.network_pieces(resistor_network)
+
             # NOTE: LVS may join a well to its net other than by the contacts over its taps,
             #       e.g. by a label of the net on the well, so it's a piece of the network that joins nothing else.
             #       It's left out, so that the device terminals on it stay on the node of their net, ideally
-            isolated_well_node_ids = self.isolated_well_node_ids(resistor_network, well_layer_ids)
+            isolated_well_node_ids = self.isolated_well_node_ids(pieces, well_layer_ids)
             if isolated_well_node_ids:
                 nets_with_isolated_wells.append(result_network.net_name)
 
@@ -606,6 +609,10 @@ class RExtractor:
                 r_element.node_b.node_id = el.b().object_id()
                 r_element.resistance = el.resistance()
 
+            if len(pieces) > 1 + sum(p[0].object_id() in isolated_well_node_ids for p in pieces):
+                node_ids = self.substrate_joined_node_ids(result_network, regions, layer_names, well_layer_ids)
+                result_network.substrate_joined_node_ids.extend(sorted(node_ids))
+
         if nets_with_isolated_wells:
             warning("The resistance network leaves out the wells of these nets, as no contact joins them "
                     "to the rest of their net (e.g. a label of the net on the well does), "
@@ -615,35 +622,79 @@ class RExtractor:
         return rex_result
 
     @staticmethod
-    def isolated_well_node_ids(resistor_network: klp.RNetwork, well_layer_ids: Set[int]) -> Set[int]:
+    def network_pieces(resistor_network: klp.RNetwork) -> List[List[klp.RNode]]:
+        """
+        :return: the nodes of each piece of the network, which no resistor joins to the others
+        """
+        nodes = list(resistor_network.each_node())
+        node_sets = DisjointSets(n.object_id() for n in nodes)
+        for el in resistor_network.each_element():
+            node_sets.union(el.a().object_id(), el.b().object_id())
+
+        pieces: Dict[int, List[klp.RNode]] = defaultdict(list)
+        for n in nodes:
+            pieces[node_sets.find(n.object_id())].append(n)
+        return list(pieces.values())
+
+    @staticmethod
+    def isolated_well_node_ids(pieces: List[List[klp.RNode]], well_layer_ids: Set[int]) -> Set[int]:
         """
         :return: the nodes of the pieces of the network that are wells only, without a pin,
                  i.e. the wells no contact joins to the rest of their net
                  (none if the network is one piece, e.g. a well with the bulks of transistors only)
         """
-        nodes = list(resistor_network.each_node())
-        if not any(n.layer() in well_layer_ids for n in nodes):
-            return set()
-
-        # the pieces of the network (union-find by node ID)
-        parent: Dict[int, int] = {n.object_id(): n.object_id() for n in nodes}
-
-        def find(node_id: int) -> int:
-            while parent[node_id] != node_id:
-                parent[node_id] = parent[parent[node_id]]
-                node_id = parent[node_id]
-            return node_id
-
-        for el in resistor_network.each_element():
-            parent[find(el.a().object_id())] = find(el.b().object_id())
-
-        pieces: Dict[int, List[klp.RNode]] = defaultdict(list)
-        for n in nodes:
-            pieces[find(n.object_id())].append(n)
         if len(pieces) < 2:
             return set()
 
         return {n.object_id()
-                for piece in pieces.values()
+                for piece in pieces
                 if all(n.layer() in well_layer_ids and n.type() != klp.RNodeType.VertexPort for n in piece)
                 for n in piece}
+
+    def substrate_joined_node_ids(self,
+                                  network: r_network_pb2.RNetwork,
+                                  regions: Dict[int, kdb.Region],
+                                  layer_names: Dict[int, LayerName],
+                                  well_layer_ids: Set[int]) -> Set[int]:
+        """
+        :param regions: the shapes of the net, by layer ID
+        :param layer_names: the canonical names of the conductors and vias, by layer ID
+        :return: the nodes that the substrate or a well joins to the net of the network, as LVS does:
+                 the nodes on a well, and on the conductors joined to a tap (see SubstrateInfo.tap_connections)
+        """
+        well_layer_names = {layer_names[layer_id] for layer_id in well_layer_ids}
+        node_ids = {n.node_id for n in network.nodes if n.layer_name in well_layer_names}
+
+        tech = self.pex_context.tech
+        layout = self.pex_context.annotated_layout
+        for connection in tech.tech.substrate.tap_connections:
+            conductor_layer_id = layout.layer(*tech.gds_pair(connection.conductor_layer_name))
+            tap_layer_id = layout.layer(*tech.gds_pair(connection.tap_lvs_layer_name))
+            if conductor_layer_id not in layer_names or conductor_layer_id not in regions or tap_layer_id not in regions:
+                continue
+            node_ids |= self.node_ids_at(nodes=[n for n in network.nodes if n.layer_name == layer_names[conductor_layer_id]],
+                                         polygons=regions[conductor_layer_id].interacting(regions[tap_layer_id]))
+        return node_ids
+
+    @staticmethod
+    def node_ids_at(nodes: List[r_network_pb2.RNode], polygons: kdb.Region) -> Set[int]:
+        """
+        :return: the nodes at the polygons, by their location
+        """
+        node_ids_by_box: Dict[kdb.Box, List[int]] = defaultdict(list)
+        for node in nodes:
+            match node.location.kind:
+                case location_pb2.Location.Kind.LOCATION_KIND_POINT:
+                    point = kdb.Point(node.location.point.x, node.location.point.y)
+                    box = kdb.Box(point, point)
+                case _:
+                    box = kdb.Box(node.location.box.lower_left.x, node.location.box.lower_left.y,
+                                  node.location.box.upper_right.x, node.location.box.upper_right.y)
+            # NOTE: enlarged, as a region drops a box without area (the location of a pin, or a junction across a wire)
+            node_ids_by_box[box.enlarged(1)].append(node.node_id)
+
+        boxes = kdb.Region()
+        boxes.merged_semantics = False  # NOTE: each box on its own, rather than the polygon of those overlapping
+        for box in node_ids_by_box:
+            boxes.insert(box)
+        return {node_id for polygon in boxes.interacting(polygons).each() for node_id in node_ids_by_box[polygon.bbox()]}

@@ -48,7 +48,15 @@ DESIGNS = [
     (PDK.SKY130A, 'test_patterns/cap_var_lvt_without_ptap_ring.gds.gz'),
     pytest.param(PDK.SKY130A, 'cap_vpp_04p4x04p6_l1m1m2_noshield/cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
                  marks=pytest.mark.slow),  # NOTE: the MOM caps take 2 s in RC mode
+    (PDK.SKY130A, 'test_patterns/r_ptap_pair_li1_m1.gds.gz'),
+    (PDK.SKY130A, 'test_patterns/r_ptap_li1_m1_two_wires.gds.gz'),
+    (PDK.SKY130A, 'test_patterns/r_ntap_pair_nwell_li1_m1.gds.gz'),
+    (PDK.SKY130A, 'test_patterns/r_ntap_pair_two_nwells_over_dnwell_li1_m1.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/nfet_m1.gds.gz'),
+    (PDK.GF180MCUD, 'test_patterns/r_ptap_pair_m1_m2.gds.gz'),
+    (PDK.GF180MCUD, 'test_patterns/r_ptap_pair_isolated_pwell_m1_m2.gds.gz'),
+    (PDK.GF180MCUD, 'test_patterns/r_ntap_pair_dnwell_m1_m2.gds.gz'),
+    (PDK.GF180MCUD, 'test_patterns/r_ntap_pair_two_nwells_over_dnwell_m1_m2.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/r_nwell_pfet_ntap_m1.gds.gz'),
     (PDK.GF180MCUD, 'test_patterns/plates_m1_over_isolated_pwell_and_dnwell.gds.gz'),
     (PDK.IHP_SG13G2, 'sg13g2_a21o_1/sg13g2_a21o_1.gds.gz'),
@@ -56,6 +64,12 @@ DESIGNS = [
     pytest.param(PDK.IHP_SG13G2, 'cap_vpp_04p4x04p6_m1m2m3_substrate_pin/cap_vpp_04p4x04p6_m1m2m3_substrate_pin.gds.gz',
                  marks=pytest.mark.slow),  # NOTE: the MOM caps take 2 s in RC mode
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_twice.gds.gz'),
+    (PDK.IHP_SG13G2, 'test_patterns/r_ptap_pair_m1_m2.gds.gz'),
+    (PDK.IHP_SG13G2, 'test_patterns/r_ptap_pair_m1_m2_pins_A_B.gds.gz'),
+    (PDK.IHP_SG13G2, 'test_patterns/r_ntap_pair_nwell_m1_m2.gds.gz'),
+    (PDK.IHP_SG13G2, 'test_patterns/nmos_pair_abutting_ptaps.gds.gz'),
+    pytest.param(PDK.IHP_SG13G2, 'test_patterns/esd_diodevss_2kv_pair.gds.gz',
+                 marks=pytest.mark.slow),  # NOTE: the ESD diodes take up to 22 s in RC mode
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_drain_labels.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/nmos_metal1_redux_two_labels_one_node.gds.gz'),
     (PDK.IHP_SG13G2, 'test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.gds.gz'),
@@ -115,6 +129,20 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
                   '--2.5D',
                   '--check', 'n'])  # NOTE: the problems, rather than a failed run
     assert cli.rcx25_netlist_problems == []
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('mode', ['R', 'RC'])
+def test_resistor_network_cut_off_from_its_net_is_reported(mode: str):
+    # NOTE: only the labels A join the met1 and met2 to the net of the li1 and met1 over a p-tap, in LVS,
+    #       the substrate doesn't, as they are on no tap
+    gds = os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'test_patterns', 'r_ptap_li1_m1_and_floating_m1_m2.gds.gz')
+    with tempfile.TemporaryDirectory() as out_dir:
+        cli = KpexCLI()
+        cli.main(['main', '--pdk', PDK.SKY130A, '--mode', mode, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, gds),
+                  '--out-dir', out_dir, '--2.5D', '--check', 'n'])
+    assert cli.rcx25_netlist_problems == ['resistors of the nodes A.$11.met2, A.$5.met1 touch no net']
 
 
 INV_1_GDS =os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz')
