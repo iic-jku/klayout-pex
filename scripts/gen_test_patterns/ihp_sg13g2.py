@@ -42,6 +42,7 @@ import klayout.db as kdb
 from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 ACTIV:        GDSPair = (1, 0)
+GATPOLY:      GDSPair = (5, 0)
 CONT:         GDSPair = (6, 0)
 PSD:          GDSPair = (14, 0)
 NWELL:        GDSPair = (31, 0)
@@ -63,6 +64,8 @@ TOPMETAL1:    GDSPair = (126, 0)
 TOPMETAL1_PIN: GDSPair = (126, 2)
 TOPMETAL2:    GDSPair = (134, 0)
 TOPMETAL2_PIN: GDSPair = (134, 2)
+DIGISUB:      GDSPair = (60, 0)
+POLYRES:      GDSPair = (128, 0)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL1: (8, 25),
@@ -340,9 +343,11 @@ def r_wire_over_nbulay_m1() -> Pattern:
 # Device patterns
 #
 
-def pcells_side_by_side(name: str, pcells: List[Tuple[str, Dict[str, Any]]]) -> Pattern:
+def pcells_side_by_side(name: str, pcells: List[Tuple[str, Dict[str, Any]]], space: int = 10000) -> Pattern:
     """
-    Pcells of the PDK, by name and parameters, side by side, 10 µm apart
+    Pcells of the PDK, by name and parameters, side by side
+
+    :param space: between their bounding boxes, in nm
     """
     technology = load_pdk_pcells()
     p = pattern(name)
@@ -351,7 +356,7 @@ def pcells_side_by_side(name: str, pcells: List[Tuple[str, Dict[str, Any]]]) -> 
     for pcell_name, parameters in pcells:
         pcell = p.layout.create_cell(pcell_name, 'SG13_dev', parameters)
         p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans(x - pcell.bbox().left, 0)))
-        x += pcell.bbox().width() + 10000
+        x += pcell.bbox().width() + space
     p.top.flatten(-1, True)
     return p
 
@@ -388,6 +393,81 @@ def cap_moscap_n_moscap_p() -> Pattern:
     with their default parameters and no wires
     """
     return pcells_side_by_side('cap_moscap_n_moscap_p', [('moscap_n', {}), ('moscap_p', {})])
+
+
+def merged_shapes(p: Pattern, layer: GDSPair) -> kdb.Region:
+    return kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*layer))).merged()
+
+
+def cap_moscap_n_x2_gatpoly_wire() -> Pattern:
+    """
+    Two MOS caps sg13_moscap_n of 5 µm x 5 µm (moscap_n pcells of the PDK), 0.5 µm apart, as in an array,
+    with a Metal1 wire between their guard rings, as only the substrate would join them otherwise,
+    which is no conductor of the resistance network,
+    and a GatPoly wire outside the guard ring of the left one, 1.2 µm from its core
+    """
+    p = pcells_side_by_side('cap_moscap_n_x2_gatpoly_wire', [('moscap_n', {'w': '5u', 'l': '5u'})] * 2, space=500)
+    cores = merged_shapes(p, ACTIV) & merged_shapes(p, GATPOLY)
+    left_core = min(cores.each(), key=lambda core: core.bbox().left).bbox()
+    guard_rings = sorted(merged_shapes(p, METAL1).each(), key=lambda metal: metal.bbox().height())[-2:]
+    left_ring, right_ring = sorted((ring.bbox() for ring in guard_rings), key=lambda box: box.left)
+    p.box(METAL1, left_ring.right - 100, left_core.center().y - 150, right_ring.left + 100, left_core.center().y + 150)
+    p.box(GATPOLY, left_core.left - 1330, left_core.bottom, left_core.left - 1200, left_core.top)
+    return p
+
+
+def cap_moscap_p_x2_wells_apart() -> Pattern:
+    """
+    Two MOS caps sg13_moscap_p of 5 µm x 5 µm (moscap_p pcells of the PDK), each in an NWell of its own, 0.7 µm apart
+    (NW.b1 wants 1.8 µm between wells of different nets), so each one's guard ring is within reach of the other's core
+    """
+    return pcells_side_by_side('cap_moscap_p_x2_wells_apart', [('moscap_p', {'w': '5u', 'l': '5u'})] * 2, space=700)
+
+
+def cap_moscap_n_no_guard_ring() -> Pattern:
+    """
+    A MOS cap sg13_moscap_n (moscap_n pcell of the PDK) without the Metal1 of its guard ring, so it has no bulk port
+    """
+    p = pcells_side_by_side('cap_moscap_n_no_guard_ring', [('moscap_n', {})])
+    metal1 = merged_shapes(p, METAL1)
+    guard_ring = max(metal1.each(), key=lambda metal: metal.bbox().height())
+    p.top.shapes(p.layout.layer(*METAL1)).clear()
+    p.top.shapes(p.layout.layer(*METAL1)).insert(metal1 - kdb.Region(guard_ring))
+    return p
+
+
+def cap_svaricap_nwell_guard_ring() -> Pattern:
+    """
+    A varicap sg13_hv_svaricap (SVaricap pcell of the PDK) with its guard ring of NWell, so it's all in that well
+    """
+    return pcells_side_by_side('cap_svaricap_nwell_guard_ring', [('SVaricap', {'guardRingType': 'nwell'})])
+
+
+def cap_svaricap_nwell_guard_ring_digisub() -> Pattern:
+    """
+    The varicap of cap_svaricap_nwell_guard_ring on a DigiSub, so it has no substrate below it for its terminal SUB
+    """
+    p = pcells_side_by_side('cap_svaricap_nwell_guard_ring_digisub', [('SVaricap', {'guardRingType': 'nwell'})])
+    bbox = p.top.bbox().enlarged(2000, 2000)
+    p.box(DIGISUB, bbox.left, bbox.bottom, bbox.right, bbox.top)
+    return p
+
+
+def res_rppd_x2_one_marker() -> Pattern:
+    """
+    Two rppd of 1 µm x 5 µm (pcells of the PDK), 0.18 µm apart, with a PolyRes bar that merges their markers
+    """
+    p = pcells_side_by_side('res_rppd_x2_one_marker', [('rppd', {'w': '1u', 'l': '5u'})] * 2, space=180)
+    bbox = merged_shapes(p, POLYRES).bbox()
+    p.box(POLYRES, bbox.left, bbox.center().y - 100, bbox.right, bbox.center().y + 100)
+    return p
+
+
+def inductor2_x2_markers_touching() -> Pattern:
+    """
+    Two inductors (inductor2 pcells of the PDK, 1 turn), whose markers touch
+    """
+    return pcells_side_by_side('inductor2_x2_markers_touching', [('inductor2', {})] * 2, space=0)
 
 
 def esd_diode(model: str) -> Pattern:
@@ -536,6 +616,13 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_cmim_20um_x_20um_metal5_routes_in_cells': cap_cmim_20um_x_20um_metal5_routes_in_cells,
     'cap_moscap_n_moscap_p': cap_moscap_n_moscap_p,
+    'cap_moscap_n_x2_gatpoly_wire': cap_moscap_n_x2_gatpoly_wire,
+    'cap_moscap_p_x2_wells_apart': cap_moscap_p_x2_wells_apart,
+    'cap_moscap_n_no_guard_ring': cap_moscap_n_no_guard_ring,
+    'cap_svaricap_nwell_guard_ring': cap_svaricap_nwell_guard_ring,
+    'cap_svaricap_nwell_guard_ring_digisub': cap_svaricap_nwell_guard_ring_digisub,
+    'res_rppd_x2_one_marker': res_rppd_x2_one_marker,
+    'inductor2_x2_markers_touching': inductor2_x2_markers_touching,
     'cap_rfcmim_w7u_l7u_over_m4_wire': cap_rfcmim_w7u_l7u_over_m4_wire,
     'cap_rfcmim_w7u_l7u_metal5_routes_in_cells': cap_rfcmim_w7u_l7u_metal5_routes_in_cells,
     'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,

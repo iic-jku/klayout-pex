@@ -70,6 +70,8 @@ varicap_diff_port = nactiv.interacting(varicap_core).not(varicap_core)
 varicap_poly_port = gatpoly.interacting(varicap_core)
 varicap_ports = varicap_poly_port.join(varicap_diff_port)
 varicap_dev_mk = nwell_drw.sized(1.um).covering(varicap_core).interacting(varicap_ports)
+# [PEX] The substrate terminal of a varicap without a ptap in its marker, e.g. in a guard ring of NWell
+varicap_sub_below = pwell_sub.and(varicap_dev_mk.not_interacting(ptap))
 
 # === moscap ===
 nmoscap_cap_exc = emwind_drw.join(emwihv_drw)

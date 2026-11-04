@@ -144,7 +144,11 @@ TEST_PATTERNS = [(pdk_name, name)
 # NOTE: the patterns of extraction errors, e.g. vias without a conductor below (see rcx25_R_sky130A_test)
 ERROR_PATTERNS = {(PDKName.SKY130A, 'r_via1_without_met1.gds.gz'),
                   (PDKName.SKY130A, 'r_ptap_li1_m1_and_floating_m1_m2.gds.gz'),
-                  (PDKName.IHP_SG13G2, 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz')}
+                  (PDKName.IHP_SG13G2, 'cap_rfcmim_w7u_l7u_two_feeds.gds.gz'),
+                  (PDKName.IHP_SG13G2, 'cap_moscap_n_no_guard_ring.gds.gz'),
+                  (PDKName.IHP_SG13G2, 'cap_svaricap_nwell_guard_ring_digisub.gds.gz'),
+                  (PDKName.IHP_SG13G2, 'inductor2_x2_markers_touching.gds.gz'),
+                  (PDKName.IHP_SG13G2, 'res_rppd_x2_one_marker.gds.gz')}
 
 # NOTE: the MOM caps, the ESD diodes and the device pcells, which take 1 to 22 s in RC mode, the others 0.1 s
 SLOW_PATTERNS = {(PDKName.SKY130A, 'cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap.gds.gz'),
