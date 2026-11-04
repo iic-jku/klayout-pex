@@ -99,25 +99,29 @@ def load_pdk_pcells(technology: str = 'sg13g2') -> str:
 # Capacitance patterns
 #
 
-def mom_cap(name: str, pcell_name: str, parameters: Dict[str, Any], technology: str = 'sg13g2') -> Pattern:
+def mom_cap(name: str,
+            pcell_name: str,
+            parameters: Dict[str, Any],
+            technology: str = 'sg13g2',
+            trans: kdb.Trans = kdb.Trans()) -> Pattern:
     """
     A pattern of a MOM cap of the pcells of the PDK, flattened
     """
     p = pattern(name)
     p.layout.technology_name = load_pdk_pcells(technology)
     pcell = p.layout.create_cell(pcell_name, 'SG13_dev', parameters)
-    p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans()))
+    p.top.insert(kdb.CellInstArray(pcell.cell_index(), trans))
     p.top.flatten(-1, True)
     return p
 
 
 def label_terminals_from_left(p: Pattern, metal: GDSPair, metal_pin: GDSPair):
     """
-    The MOM caps of the pcells whose pins are on one metal, the left one is PLUS, e.g. of cmomf, at its left edge,
-    and MINUS at its top edge
+    The MOM caps of the pcells whose pins are on one metal, the left one is PLUS (the lower one, of two in a column),
+    e.g. of cmomf, at its left edge, and MINUS at its top edge
     """
     pins = sorted(kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*metal_pin))).merged().each(),
-                  key=lambda pin: pin.bbox().left)
+                  key=lambda pin: (pin.bbox().left, pin.bbox().bottom))
     for text, pin in zip(('PLUS', 'MINUS'), pins):
         center = pin.bbox().center()
         p.label(metal, text, center.x, center.y)
@@ -179,6 +183,28 @@ def cap_cmomi_w5u_l5u_m4_m5_none() -> Pattern:
     # for the caller to connect the rows
     p = mom_cap('cap_cmomi_w5u_l5u_m4_m5_none', 'cmomi', {'w': '5u', 'l': '5u', 'mmin': 4, 'mmax': 5, 'feed': 'none'})
     label_terminals_from_left(p, METAL5, METAL5_PIN)
+    return p
+
+
+def cap_cmomi_w8u9_l3u36_m1_m5_r90() -> Pattern:
+    # a MOM cap (cmomi pcell of the PDK) of 10 rows and 4 columns, turned by 90°, with opposite feeds, so its rows run
+    # along y (the model gives 1.36 fF/µm² of 3.36 µm x 8.9 µm and 0.152 fF/µm of its pads, 42.086 fF)
+    p = mom_cap('cap_cmomi_w8u9_l3u36_m1_m5_r90', 'cmomi', {'w': '8.9u', 'l': '3.36u', 'mmin': 1, 'mmax': 5},
+                trans=kdb.Trans.R90)
+    label_terminals_from_left(p, METAL5, METAL5_PIN)
+    return p
+
+
+def cap_cmomi_w3u_l2u_m4_m5_orientations() -> Pattern:
+    # the MOM caps (cmomi pcell of the PDK) of the feeds, each in all 8 orientations, of 3 rows and 2 columns
+    p = pattern('cap_cmomi_w3u_l2u_m4_m5_orientations')
+    p.layout.technology_name = load_pdk_pcells()
+    for row, feed in enumerate(('none', 'same', 'double')):
+        pcell = p.layout.create_cell('cmomi', 'SG13_dev', {'w': '3u', 'l': '2u', 'mmin': 4, 'mmax': 5, 'feed': feed})
+        for column, orientation in enumerate((kdb.Trans.R0, kdb.Trans.R90, kdb.Trans.R180, kdb.Trans.R270,
+                                              kdb.Trans.M0, kdb.Trans.M45, kdb.Trans.M90, kdb.Trans.M135)):
+            p.top.insert(kdb.CellInstArray(pcell.cell_index(), kdb.Trans(orientation, column * 10000, row * 10000)))
+    p.top.flatten(-1, True)
     return p
 
 
@@ -584,6 +610,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
     'cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire': cap_cmomi_w5u_l5u_m3_m5_same_m1_m2_wire,
     'cap_cmomi_w5u_l5u_m4_m5_none': cap_cmomi_w5u_l5u_m4_m5_none,
+    'cap_cmomi_w8u9_l3u36_m1_m5_r90': cap_cmomi_w8u9_l3u36_m1_m5_r90,
+    'cap_cmomi_w3u_l2u_m4_m5_orientations': cap_cmomi_w3u_l2u_m4_m5_orientations,
     'cap_cmim_20um_x_20um_over_m4_wire':
         lambda: cap_cmim_over_m4_wire('cap_cmim_20um_x_20um_over_m4_wire'),
     'cap_cmim_20um_x_20um_metal5_routes_in_cells': cap_cmim_20um_x_20um_metal5_routes_in_cells,

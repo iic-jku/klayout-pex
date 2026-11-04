@@ -29,7 +29,7 @@ import klayout.db as kdb
 
 from klayout_pex.device_models import DeviceModelError, DeviceModels, rectangle_sides
 from klayout_pex.netlist.spice_netlist import SpiceElement
-from tests.common.device_model_mappings import MIM, NMOS, NPN, RPPD, device_models
+from tests.common.device_model_mappings import MIM, MOM, NMOS, NPN, RPPD, device_models
 
 
 def netlist() -> kdb.Netlist:
@@ -159,6 +159,17 @@ class Test(unittest.TestCase):
         self.assertEqual(['L', 'W'], sorted(values))
         self.assertAlmostEqual(2.0, values['W'], places=12)
         self.assertAlmostEqual(0.13, values['L'], places=12)
+
+    def test_lvs_parameters_of_a_schematic_device_are_floored_as_by_its_model(self):
+        mapping = device_models(MOM).mapping_by_lvs_device_class_name['mom']
+        for w, l, floored_w, floored_l in ((5e-6, 5e-6, 4.45, 4.2),
+                                           (4.45e-6, 4.2e-6, 4.45, 4.2),  # NOTE: multiples remain, also as 4.199…
+                                           (4.449e-6, 4.199e-6, 3.56, 3.36)):
+            with self.subTest(w=w, l=l):
+                values = DeviceModels.lvs_parameter_values(mapping, SpiceElement(name='XC1', model='mom',
+                                                                                 parameters={'w': w, 'l': l}))
+                self.assertAlmostEqual(floored_w, values['W'], places=12)
+                self.assertAlmostEqual(floored_l, values['L'], places=12)
 
     def test_lvs_parameters_the_schematic_device_doesnt_give_are_missing(self):
         # NOTE: e.g. left to the model's default

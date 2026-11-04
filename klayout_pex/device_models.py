@@ -111,7 +111,8 @@ class DeviceModels:
                              element: SpiceElement) -> Dict[str, float]:
         """
         The LVS parameters of a device of a schematic, the reverse of the mapping's parameters
-        (e.g. W = 1, in µm, of w=1u of an IHP MOS), and the area and perimeter of the rectangle of a model's sides
+        (e.g. W = 1, in µm, of w=1u of an IHP MOS), floored as by its model (see lvs_parameter_floor_pitch),
+        and the area and perimeter of the rectangle of a model's sides
 
         :param element: with its parameters as numbers (e.g. of SpiceHierarchy)
         :return: by LVS parameter name, without those whose model parameters the device doesn't give
@@ -126,7 +127,11 @@ class DeviceModels:
             factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
             match p.WhichOneof('value'):
                 case 'lvs_parameter_name':
-                    values[p.lvs_parameter_name] = value / factor
+                    value /= factor
+                    if p.HasField('lvs_parameter_floor_pitch'):
+                        # NOTE: with the epsilon of such a model, so that a multiple stays one
+                        value = math.floor(value / p.lvs_parameter_floor_pitch + 1e-6) * p.lvs_parameter_floor_pitch
+                    values[p.lvs_parameter_name] = value
                 case 'lvs_area_perimeter_side':
                     sides.append((p.lvs_area_perimeter_side, value / factor))
         if len(sides) == 2:

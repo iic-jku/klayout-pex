@@ -49,12 +49,22 @@ $unit = dbu
 # Parameter/axis mapping (PDF geometry):
 #   l MAPS TO X (finger length) -> read from marker bounding-box WIDTH
 #   w MAPS TO Y (row stacking)  -> read from marker bounding-box HEIGHT
+# for cap_cmomf, whose model depends on w*l only. The marker of cap_cmomi also
+# covers its feed pads, and its model takes the array: see array_size.
 #
 # Capacitance value: the LVS extractor does NOT compute C. LVS matches devices on
 # topology; the value C_total = density[N]*active_area + Cfeed is supplied by the
 # SPICE / Verilog-A model, not by extraction. The model depends on the metal range,
 # so the extractor gives it as the parameters mmin and mmax, see metal_range.
 class CapMomExtractor < RBA::GenericDeviceExtractor
+  # The unit cell of the array of a cap_cmomi, in um: l and w are whole multiples.
+  CMOMI_CELL_L = 0.84
+  CMOMI_CELL_W = 0.89
+  # How far the marker of the PCell extends over the array of a cap_cmomi, in um,
+  # along l and along w, by feed (none = 0, same = 1, double = 2): Fx and Fy of its
+  # parameters, its _footprint_um.
+  CMOMI_MARKER_OVER_ARRAY = { 0 => [0.1, 0.0], 1 => [1.25, 0.42], 2 => [1.8, 0.64] }.freeze
+
   def initialize(name)
     self.name = name
     @name = name
@@ -126,13 +136,19 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
       # Measure L and W from the marker bounding box:
       #   l -> X extent (finger length), w -> Y extent (row stacking).
       bbox = core.merged.bbox
-      device.set_parameter('l', bbox.width * $unit)
-      device.set_parameter('w', bbox.height * $unit)
+      l = bbox.width * $unit
+      w = bbox.height * $unit
+      if @reg_dev.has_parameter?('feed')
+        feed = feed_of_ports(ports)
+        device.set_parameter('feed', feed)
+        l, w = array_size(bbox, ports, feed)
+      end
+      device.set_parameter('l', l)
+      device.set_parameter('w', w)
 
       mmin, mmax = metal_range(ports.map(&:last).max, vias, metals_above)
       device.set_parameter('mmin', mmin)
       device.set_parameter('mmax', mmax)
-      device.set_parameter('feed', feed_of_ports(ports)) if @reg_dev.has_parameter?('feed')
 
       # Deterministic pick of two ports (by x, then y, then metal index). Which
       # of the two ends up on mim_top is arbitrary, which is why the terminals
@@ -178,6 +194,40 @@ class CapMomExtractor < RBA::GenericDeviceExtractor
     a = a_poly.bbox.center
     b = b_poly.bbox.center
     a.x == b.x || a.y == b.y ? 2 : 0
+  end
+
+  # The l and w of a cap_cmomi as its model takes them, in um: the size of its array,
+  # in whole unit cells, to which the PCell floors the l and w it gets (and the model
+  # as well), along its rows and across them, however the instance is turned.
+  #
+  # A marker that leaves no such array isn't one of the PCell, whose pads this relies
+  # on: it is taken for the array itself, which its model floors alike.
+  def array_size(marker, ports, feed)
+    x = marker.width * $unit
+    y = marker.height * $unit
+    along_l, along_w = rows_along_x?(marker, ports[0][0].bbox, feed) ? [x, y] : [y, x]
+    over_l, over_w = CMOMI_MARKER_OVER_ARRAY[feed]
+    l = along_l - over_l
+    w = along_w - over_w
+    return [l, w] if multiple_of?(l, CMOMI_CELL_L) && multiple_of?(w, CMOMI_CELL_W)
+
+    $logger.warn("#{@name}: the marker of #{x} x #{y} um isn't one of the PCell (feed #{feed}), " \
+                 'so its model gets the l and w of the marker, which may not be the size of its array.')
+    [x, y]
+  end
+
+  # Whether the rows of the array, the direction of l, run along x. The pins of
+  # 'double' and 'same' are on the pads at the ends of the rows, in the middle of
+  # their height. Those of 'none' are on the first and last row, which the marker cuts.
+  def rows_along_x?(marker, pin, feed)
+    return pin.bottom == marker.bottom || pin.top == marker.top if feed == 0
+
+    (pin.center.x - marker.center.x).abs > (pin.center.y - marker.center.y).abs
+  end
+
+  def multiple_of?(size, pitch)
+    count = (size / pitch).round
+    count >= 1 && (count * pitch - size).abs < $unit / 2
   end
 
   def define_layers
