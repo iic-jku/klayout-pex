@@ -1,0 +1,86 @@
+##
+## --------------------------------------------------------------------------------
+## SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+## Johannes Kepler University, Institute for Integrated Circuits.
+##
+## This file is part of KPEX 
+## (see https://github.com/iic-jku/klayout-pex).
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
+## SPDX-License-Identifier: GPL-3.0-or-later
+## --------------------------------------------------------------------------------
+##
+# A label for a PR that changes the deck, tech info, test patterns or fixtures of one PDK only, for the
+# categories of the release notes (.github/release.yml), which a label such as bug takes precedence over.
+# Any other PR has no label of a PDK and goes under "All PDKs"
+pdk-ihp:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'pdk/ihp-*/**'
+              - 'scripts/gen_tech_pb/ihp_*.py'
+              - 'scripts/gen_test_patterns/ihp_*.py'
+              - 'testdata/designs/ihp-*/**'
+              - 'testdata/lvsdb/ihp-*/**'
+          - all-globs-to-all-files:
+              - '!pdk/sky130A/**'
+              - '!scripts/gen_tech_pb/sky130A.py'
+              - '!scripts/gen_test_patterns/sky130A.py'
+              - '!testdata/designs/sky130A/**'
+              - '!testdata/lvsdb/sky130A/**'
+              - '!pdk/gf180mcuD/**'
+              - '!scripts/gen_tech_pb/gf180mcuD.py'
+              - '!scripts/gen_test_patterns/gf180mcuD.py'
+              - '!testdata/designs/gf180mcuD/**'
+              - '!testdata/lvsdb/gf180mcuD/**'
+pdk-sky130a:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'pdk/sky130A/**'
+              - 'scripts/gen_tech_pb/sky130A.py'
+              - 'scripts/gen_test_patterns/sky130A.py'
+              - 'testdata/designs/sky130A/**'
+              - 'testdata/lvsdb/sky130A/**'
+          - all-globs-to-all-files:
+              - '!pdk/ihp-*/**'
+              - '!scripts/gen_tech_pb/ihp_*.py'
+              - '!scripts/gen_test_patterns/ihp_*.py'
+              - '!testdata/designs/ihp-*/**'
+              - '!testdata/lvsdb/ihp-*/**'
+              - '!pdk/gf180mcuD/**'
+              - '!scripts/gen_tech_pb/gf180mcuD.py'
+              - '!scripts/gen_test_patterns/gf180mcuD.py'
+              - '!testdata/designs/gf180mcuD/**'
+              - '!testdata/lvsdb/gf180mcuD/**'
+pdk-gf180mcud:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - 'pdk/gf180mcuD/**'
+              - 'scripts/gen_tech_pb/gf180mcuD.py'
+              - 'scripts/gen_test_patterns/gf180mcuD.py'
+              - 'testdata/designs/gf180mcuD/**'
+              - 'testdata/lvsdb/gf180mcuD/**'
+          - all-globs-to-all-files:
+              - '!pdk/ihp-*/**'
+              - '!scripts/gen_tech_pb/ihp_*.py'
+              - '!scripts/gen_test_patterns/ihp_*.py'
+              - '!testdata/designs/ihp-*/**'
+              - '!testdata/lvsdb/ihp-*/**'
+              - '!pdk/sky130A/**'
+              - '!scripts/gen_tech_pb/sky130A.py'
+              - '!scripts/gen_test_patterns/sky130A.py'
+              - '!testdata/designs/sky130A/**'
+              - '!testdata/lvsdb/sky130A/**'

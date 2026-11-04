@@ -98,8 +98,11 @@
 - Commit and PR texts contain only what the reader can't get from the issue, diff or CI:
   the non-obvious why, rejected alternatives, behavior changes, risks. PR: issue reference
   plus 1–4 sentences, no Summary/Changes/Testing headings.
-- Propose a PR title with every PR text, in the style of the commit subjects; for several
+- Propose a PR title with every PR text, in the style of the commit subjects, but with
+  identifiers in backticks, as the generated release notes copy it verbatim; for several
   commits, name what they have in common rather than repeating the first subject.
+- Propose a label with every PR text, for its category in the generated release notes:
+  `bug`, `enhancement`, `documentation` or `breaking-change`. The labeler adds the PDK.
 - Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
   merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
 - A PR is ready when its CI is green on its final commits: after each push, check the CI
