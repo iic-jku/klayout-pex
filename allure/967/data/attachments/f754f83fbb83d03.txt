@@ -1,0 +1,75 @@
+[21:29:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1609
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cut_strip_along_wire.lvsdb.gz --out-dir                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/cut_strip_along_wire.gds.gz --exclusion-markers ignore                      
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:29:29] INFO     No explicit top cell specified, using top    kpex_cli.py:829
+                    cell 'cut_strip_along_wire'                                 
+[21:29:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:840
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:29:29] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1790
+[21:29:29] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1790
+[21:29:29] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1790
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:29:29] INFO     LVSDB: found 1pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;8.782                                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_strip_along_wire
+__cut_strip_along_wire/cut_strip_along_wire_k25d_pex_netlist.csv                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_strip_along_wire
+__cut_strip_along_wire/cut_strip_along_wire_k25d_pex_netlist.spice              
+[21:29:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1609
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cut_strip_along_wire.lvsdb.gz --out-dir                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/cut_strip_along_wire.gds.gz --exclusion-markers ignore --cut block=X        
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:29:30] INFO     No explicit top cell specified, using top    kpex_cli.py:829
+                    cell 'cut_strip_along_wire'                                 
+[21:29:30] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:840
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:29:30] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1790
+[21:29:30] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1790
+[21:29:30] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1790
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:29:30] INFO     LVSDB: found 1pins                          extractor.py:481
+[21:29:30] INFO     The metal of these nets goes on beside   r_extractor.py:1315
+                    exclusion blocks, along their cuts, so                      
+                    it carries the current alone, with a                        
+                    short port for each model, as a port                        
+                    can't connect a model in parallel to it:                    
+                    A,B                                                         
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;X__A_B_0;;8.707                                                            
+R3;B;X__A_B_0;;8.707                                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_strip_along_wire
+__cut_strip_along_wire/cut_strip_along_wire_k25d_pex_netlist.csv                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_strip_along_wire
+__cut_strip_along_wire/cut_strip_along_wire_k25d_pex_netlist.spice              

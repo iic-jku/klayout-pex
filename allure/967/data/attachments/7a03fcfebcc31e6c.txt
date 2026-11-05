@@ -1,0 +1,42 @@
+WARNING  __kpex__:kpex_cli.py:1609 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1646 main extract --pdk sky130A --mode RC --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r_ptap_li1_m1_and_floating_m1_m2.lvsdb.gz --out-dir /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpig8rnsz5 --2.5D --check n
+INFO     __kpex__:kpex_cli.py:840 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1790 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:1790 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1790 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:1790 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1790 (68, 44) -> (via1_con)
+INFO     __kpex__:kpex_cli.py:1790 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1790 (69, 20) -> (met2_con)
+INFO     __kpex__:extractor.py:481 LVSDB: found 0pins
+SUBPROCESS __kpex__:kpex_cli.py:1353 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1353 C1;A;VSUBS;0.092;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C2;A.$1.li1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C3;A.$10.met1;VSUBS;0.092;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C4;A.$11.met2;VSUBS;0.403;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C5;A.$2.li1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C6;A.$3.li1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C7;A.$4.li1;VSUBS;0.092;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C8;A.$5.met1;VSUBS;0.477;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C9;A.$6.met1;VSUBS;0.092;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C10;A.$7.met1;VSUBS;0.079;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C11;A.$8.met1;VSUBS;0.079;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C12;A.$9.met1;VSUBS;0.079;
+SUBPROCESS __kpex__:kpex_cli.py:1353 R1;A;A.$1.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1353 R2;A;A.$6.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1353 R3;A.$1.li1;A.$2.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1353 R4;A.$1.li1;A.$7.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1353 R5;A.$10.met1;A.$4.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1353 R6;A.$10.met1;A.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1353 R7;A.$11.met2;A.$5.met1;;3.955
+SUBPROCESS __kpex__:kpex_cli.py:1353 R8;A.$2.li1;A.$3.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1353 R9;A.$2.li1;A.$8.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1353 R10;A.$3.li1;A.$4.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1353 R11;A.$3.li1;A.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1353 R12;A.$6.met1;A.$7.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1353 R13;A.$7.met1;A.$8.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1353 R14;A.$8.met1;A.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1356 /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpig8rnsz5/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1373 Wrote expanded netlist to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpig8rnsz5/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1404 The extracted netlist is inconsistent with the LVS netlist:
+  - resistors of the nodes A.$11.met2, A.$5.met1 touch no net

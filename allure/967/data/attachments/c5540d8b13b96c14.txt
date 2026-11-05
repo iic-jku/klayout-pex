@@ -1,0 +1,22 @@
+WARNING  __kpex__:kpex_cli.py:1609 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1646 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/cut_ldmos_pair.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/cut_ldmos_pair.gds.gz --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:829 No explicit top cell specified, using top cell 'cut_ldmos_pair'
+INFO     __kpex__:kpex_cli.py:840 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1790 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1790 (32, 0) -> (nsd nd_ldmos)
+INFO     __kpex__:kpex_cli.py:1790 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1790 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:1790 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1790 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:1790 (42, 0) -> (metal3_con)
+INFO     __kpex__:kpex_cli.py:1790 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:kpex_cli.py:1790 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:1790 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:extractor.py:179 The netlist leaves out the 2 devices of the cut cells
+INFO     __kpex__:extractor.py:240 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I1, $I2, $I3, $I4
+INFO     __kpex__:extractor.py:481 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1353 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1353 C1;$1;SUB;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1353 C2;$1;VSUBS;0.403;
+SUBPROCESS __kpex__:kpex_cli.py:1356 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_ldmos_pair__cut_ldmos_pair/cut_ldmos_pair_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1373 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_ldmos_pair__cut_ldmos_pair/cut_ldmos_pair_k25d_pex_netlist.spice

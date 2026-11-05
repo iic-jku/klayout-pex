@@ -1,0 +1,41 @@
+[21:31:01] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1609
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_plate
+_with_fill.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2'
+--2.5D --halo 10000 --scale n --gds                                            
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_pla
+te_with_fill.gds.gz' --exclusion-markers ignore --cut block=X                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[21:31:01] INFO     No explicit top cell specified, using top   kpex_cli.py:829
+                    cell 'cut_plate_with_fill'                                 
+[21:31:01] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:840
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:31:01] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1790
+[21:31:01] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1790
+[21:31:01] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1790
+[21:31:01] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1790
+[21:31:01] INFO     Nothing connects these nets within         extractor.py:240
+                    exclusion markers to the netlist, so their                 
+                    capacitances to the rest of the layout go                  
+                    to the substrate: $I1, $I10, $I2, $I3,                     
+                    $I4, $I5, $I6, $I7, $I8, $I9                               
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:31:01] WARNING  --mode CC has one node per net, so the     extractor.py:286
+                    netlist has no ports where nets enter what                 
+                    is left out, use --mode R or RC of the                     
+                    2.5D engine to connect a model                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;VSUBS;W;2.634;                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_plate_with_fill__cut_plate_w
+ith_fill\cut_plate_with_fill_k25d_pex_netlist.csv                              
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_plate_with_fill__cut_plate_w
+ith_fill\cut_plate_with_fill_k25d_pex_netlist.spice                            

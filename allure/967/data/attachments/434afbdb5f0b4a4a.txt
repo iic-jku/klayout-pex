@@ -1,0 +1,40 @@
+[21:29:28] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1609
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_slanted_wire.lvsdb.gz --out-dir                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/exclusion_slanted_wire.gds.gz --exclusion-markers tie                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:29:29] INFO     No explicit top cell specified, using top    kpex_cli.py:829
+                    cell 'exclusion_slanted_wire'                               
+[21:29:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:840
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:29:29] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1790
+[21:29:29] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1790
+[21:29:29] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1790
+[21:29:29] WARNING  These nets are partly within exclusion      extractor.py:234
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A,B: Metal3                                             
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:29:29] INFO     LVSDB: found 1pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.555                                                                 
+R2;A,B;B;;0.555                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_slanted_wi
+re__exclusion_slanted_wire/exclusion_slanted_wire_k25d_pex_netlist.csv          
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_slanted_wi
+re__exclusion_slanted_wire/exclusion_slanted_wire_k25d_pex_netlist.spice        
