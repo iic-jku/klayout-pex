@@ -34,6 +34,10 @@ message RNode {
         KIND_DEVICE_TERMINAL = 2;
         KIND_WIRE_JUNCTION = 3;
         KIND_VIA_JUNCTION = 4;
+
+        // a port of the netlist where a net enters an exclusion block, or a device terminal within it,
+        // for the model of the block
+        KIND_EXCLUSION_PORT = 5;
     }
 
     message Via {}
@@ -45,6 +49,11 @@ message RNode {
     string layer_name = 40;
     string net_name = 50;
     kpex.layout.Location location = 60;
+
+    // Of a net that only the model of an exclusion block joins:
+    // the parts of the net this node stands for, whose capacitances go to their nodes (see NetPiece).
+    // A node at a cut has the conductor on each side of it
+    repeated string piece_names = 70;
 
     oneof parameters {
         kpex.layout.Pin pin = 90;
@@ -74,4 +83,11 @@ message RNetwork {
     // the substrate or a well: LVS has them on one net, and these are no conductors of the network.
     // A piece without such a node has no path to its net
     repeated uint64 substrate_joined_node_ids = 40;
+
+    // The nodes at the cuts of an exclusion block that the shapes within it join, so that the model of the block does:
+    // each list is one of these, the taps and wells don't join them then
+    message ModelJoin {
+        repeated uint64 node_ids = 1;
+    }
+    repeated ModelJoin model_joins = 50;
 }

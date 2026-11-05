@@ -86,6 +86,11 @@ class TechBuilder:
             add_layer(tech, VIA,      "TopVia2",   (133, 0),  None,      None,       "Defines via between TopMetal1 and TopMetal2")
             add_layer(tech, METAL,    "TopMetal2", (134, 0),  (134, 2),  (134, 25),  "Defines 2-nd thick TopMetal layer")
 
+        set_fill_layers(tech, {"Activ": (1, 22), "GatPoly": (5, 22), "Metal1": (8, 22), "Metal2": (10, 22),
+                               "Metal3": (30, 22), "Metal4": (50, 22), "TopMetal1": (126, 22)})
+        if self.is_g2:
+            set_fill_layers(tech, {"Metal5": (67, 22), "TopMetal2": (134, 22)})
+
     def build_lvs_computed_layers(self, tech: Technology):
         #                        purpose kind  lvs_name         lvs_gds_pair  orig. layer  process layer    description
         add_computed_layer(tech, PWELL, KREG, "pwell",          (46, 0),      "PWell",     None,            "Computed layer for PWell")
@@ -822,6 +827,64 @@ class TechBuilder:
         add_tap_connection(si, "ptap", "nsd_fet")
         add_tap_connection(si, "ntap", "psd_fet")
 
+    def build_exclusion_markers(self, tech: Technology):
+        # NOTE: of the layer rules, "no parasitics extraction", which the pcells of the inductors draw (blockqrc)
+        add_exclusion_marker(tech, "NoRCX.drawing", (148, 0))
+
+        metals = {"m2": "Metal2", "m3": "Metal3", "m4": "Metal4", "tm1": "TopMetal1"}
+        if self.is_g2:
+            metals |= {"m5": "Metal5", "tm2": "TopMetal2"}
+
+        # NOTE: each marks a pair of layers in its name, so a filter of the capacitances between them
+        #       (the layer rules have just the name, e.g. "Metal1 and Substrate")
+        for datatype, top, bottom in ((41, "m2", "m3"), (42, "m2", "m4"), (43, "m2", "m5"), (44, "m2", "tm1"),
+                                      (45, "m2", "tm2"), (46, "m3", "m4"), (47, "m3", "m5"), (48, "m3", "tm1"),
+                                      (49, "m3", "tm2"), (50, "m4", "m5"), (51, "m4", "tm1"), (52, "m4", "tm2"),
+                                      (53, "m5", "tm1"), (54, "m5", "tm2"), (55, "tm1", "tm2")):
+            if top in metals and bottom in metals:
+                add_exclusion_marker(tech, f"NoRCX.{top}{bottom}", (148, datatype),
+                                     layer_names=[metals[top], metals[bottom]], is_capacitance_pair=True)
+        for datatype, metal in ((123, "m1"), (124, "m2"), (125, "m3"), (126, "m4"), (127, "m5"),
+                                (300, "tm1"), (301, "tm2")):
+            layer_name = "Metal1" if metal == "m1" else metals.get(metal, None)
+            if layer_name is not None:
+                add_exclusion_marker(tech, f"NoRCX.{metal}sub", (148, datatype),
+                                     layer_names=[layer_name, "VSUBS"], is_capacitance_pair=True)
+
+        # NOTE: only on request, as the pcell of the rfcmim draws them around a device the extraction knows anyway,
+        #       and they also cover other metal there
+        add_exclusion_marker(tech, "Activ.noqrc", (1, 28), layer_names=["Activ", "nSD", "pSD"], on_request=True)
+        add_exclusion_marker(tech, "GatPoly.noqrc", (5, 28), layer_names=["GatPoly"], on_request=True)
+        for layer_name, layer in (("Metal1", 8), ("Metal2", 10), ("Metal3", 30), ("Metal4", 50), ("TopMetal1", 126)):
+            add_exclusion_marker(tech, f"{layer_name}.noqrc", (layer, 28), layer_names=[layer_name], on_request=True)
+        if self.is_g2:
+            add_exclusion_marker(tech, "Metal5.noqrc", (67, 28), layer_names=["Metal5"], on_request=True)
+            add_exclusion_marker(tech, "TopMetal2.noqrc", (134, 28), layer_names=["TopMetal2"], on_request=True)
+
+    def build_device_layers(self, tech: Technology):
+        activ, gatpoly = (1, 0), (5, 0)
+        recog_esd, recog_diode, recog_mom, recog_momf = (99, 30), (99, 31), (99, 39), (99, 40)
+        extblock, polyres, nbulay, trans = (111, 0), (128, 0), (32, 0), (26, 0)
+        ind, mim, substrate = (27, 0), (36, 0), (40, 0)
+
+        #                       LVS device classes                                             layers
+        add_device_layers(tech, ["sg13_lv_*", "sg13_hv_nmos", "sg13_hv_pmos", "rf?mos*"],      [activ, gatpoly])
+        add_device_layers(tech, ["sg13_hv_svaricap", "sg13_moscap_*"],                         [activ, gatpoly])
+        add_device_layers(tech, ["rsil", "rppd", "rhigh"],                                     [polyres, extblock])
+        add_device_layers(tech, ["ntap1", "pnpMPA"],                                           [activ])
+        add_device_layers(tech, ["ptap1"],                                                     [substrate])
+        add_device_layers(tech, ["npn13G2*"],                                                  [trans])
+        add_device_layers(tech, ["diodev*", "idiodev*", "nmoscl_*"],                           [recog_esd])
+        add_device_layers(tech, ["dantenna", "dpantenna", "schottky_nbl1"],                    [recog_diode])
+        add_device_layers(tech, ["isolbox"],                                                   [nbulay, recog_diode])
+        add_device_layers(tech, ["inductor", "inductor3"],                                     [ind])
+        add_device_layers(tech, ["cap_cmim", "rfcmim"],                                        [mim])
+        add_device_layers(tech, ["cap_cmomi"],                                                 [recog_mom])
+        add_device_layers(tech, ["cap_cmomf"],                                                 [recog_momf])
+        for device_class, layer in (("res_metal1", 8), ("res_metal2", 10), ("res_metal3", 30), ("res_metal4", 50),
+                                    ("res_metal5", 67), ("res_topmetal1", 126), ("res_topmetal2", 134)):
+            add_device_layers(tech, [device_class], [(layer, 29)])
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
@@ -834,8 +897,11 @@ class TechBuilder:
         self.build_process_parasitics_info(tech.process_parasitics)
 
         self.build_device_models_info(tech.device_models)
+        self.build_device_layers(tech)
 
         self.build_substrate_info(tech.substrate)
+
+        self.build_exclusion_markers(tech)
 
         return tech
 

@@ -41,16 +41,20 @@ from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 DNWELL:   GDSPair = (64, 18)
 NWELL:    GDSPair = (64, 20)
+DIFF:     GDSPair = (65, 20)
 TAP:      GDSPair = (65, 44)
 NSDM:     GDSPair = (93, 44)
 PSDM:     GDSPair = (94, 20)
 POLY:     GDSPair = (66, 20)
 POLY_PIN: GDSPair = (66, 16)
+NPC:      GDSPair = (95, 20)
 LICON:    GDSPair = (66, 44)
 LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
 MCON:     GDSPair = (67, 44)
 MET1:     GDSPair = (68, 20)
+MET1_PIN: GDSPair = (68, 16)
+MET1_RES: GDSPair = (68, 13)
 VIA1:     GDSPair = (68, 44)
 MET2:     GDSPair = (69, 20)
 MET2_PIN: GDSPair = (69, 16)
@@ -431,7 +435,390 @@ def rf_inductors_03_90_05_125_05_220() -> Pattern:
     return p
 
 
+def exclusion_user_marker_wire() -> Pattern:
+    """
+    A met2 wire of 60 µm x 2 µm from A to B, with its middle third within a layer no PDK layer is on,
+    for a marker given by the user, as the PDK has none
+    """
+    p = pattern('exclusion_user_marker_wire')
+    p.box(MET2, -20000, 0, 40000, 2000)
+    p.box(MET2_PIN, -20000, 0, -19000, 2000)
+    p.label(MET2, 'A', -19500, 1000)
+    p.box(MET2_PIN, 39000, 0, 40000, 2000)
+    p.label(MET2, 'B', 39500, 1000)
+    p.box((200, 0), 0, -5000, 20000, 7000)
+    return p
+
+
+def exclusion_nwell_between_pfet_and_tap(name: str = 'exclusion_nwell_between_pfet_and_tap') -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_li1, in one nwell, with the middle of the nwell within a layer
+    no PDK layer is on, for a marker given by the user, so that nothing but a model joins the part with the pfet
+    """
+    p = pattern(name)
+    p.copy_design('sky130A', 'test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    p.box((200, 0), 5000, -1000, 7000, 4000)
+    return p
+
+
+def exclusion_wire_beside_marker_over_nwell() -> Pattern:
+    """
+    exclusion_nwell_between_pfet_and_tap with a met1 wire N over the nwell beside the marker, on the side of the n-tap
+    """
+    p = exclusion_nwell_between_pfet_and_tap('exclusion_wire_beside_marker_over_nwell')
+    p.box(MET1, 7200, 500, 9000, 2500)
+    p.box(MET1_PIN, 7200, 500, 7400, 700)
+    p.label(MET1, 'N', 7300, 600)
+    return p
+
+
+def exclusion_pfet_between_taps() -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_li1, with another n-tap on the other side of the pfet, labelled A,
+    all in one nwell, with the pfet within a layer no PDK layer is on, for a marker given by the user,
+    so that only a model joins the taps and the bulk of the pfet
+    """
+    p = pattern('exclusion_pfet_between_taps')
+    p.copy_design('sky130A', 'test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    p.box(NWELL, -6000, 0, 0, 3000)
+    p.box(TAP, -4500, 1000, -3500, 2000)
+    p.box(NSDM, -4625, 875, -3375, 2125)
+    p.box(LICON, -4085, 1415, -3915, 1585)
+    p.box(LI1, -4165, 1335, -3835, 1665)
+    p.box(LI1_PIN, -4165, 1335, -3835, 1665)
+    p.label(LI1, 'A', -4000, 1500)
+    p.box((200, 0), 500, -1000, 3000, 4000)
+    return p
+
+
+def cut_ntaps_in_one_nwell() -> Pattern:
+    """
+    The n-taps of r_ntap_pair_nwell_li1_m1 with their nwell in a child cell, with the pins VL and VR in the top cell,
+    like a guard ring within a cell
+    """
+    p = pattern('cut_ntaps_in_one_nwell')
+    block = p.layout.create_cell('block')
+    source = r_ntap_pair_nwell_li1_m1()
+    block.copy_tree(source.top)
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    for x, text in ((0, 'VL'), (10000, 'VR')):
+        p.box(MET1_PIN, x + 100, 2350, x + 400, 2650)
+        p.label(MET1, text, x + 250, 2500)
+    return p
+
+
+def exclusion_rail_between_taps() -> Pattern:
+    """
+    A met1 rail of 300 µm x 0.4 µm between two n-taps, in a nwell each, with the pins A and B on them,
+    with 20 µm of it within a layer no PDK layer is on, for a marker given by the user
+    """
+    p = pattern('exclusion_rail_between_taps')
+    for x, text in ((0, 'A'), (300000, 'B')):
+        p.box(NWELL, x - 1000, -1000, x + 1500, 6000)
+        tap_li1_m1(p, x, ptap=False)
+        p.box(MET1_PIN, x + 100, 2350, x + 400, 2650)
+        p.label(MET1, text, x + 250, 2500)
+    p.box(MET1, 80, 2300, 300420, 2700)
+    p.box((200, 0), 140000, 0, 160000, 5000)
+    return p
+
+
+def pfet_in_child_cell(p: Pattern, x_end: int):
+    """
+    A child cell of a pfet in an nwell, with its source on li1 and its gate on poly, labelled S and G,
+    and its diffusion and nwell up to x_end. In the top cell, the source goes on as the pin ST, on li1
+    """
+    block = p.layout.create_cell('block')
+
+    def draw(layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
+        block.shapes(p.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
+
+    draw(NWELL, 0, 0, x_end, 3000)
+    draw(DIFF, 1000, 500, x_end, 2500)
+    draw(PSDM, 875, 375, x_end, 2625)
+    draw(POLY, 1675, 370, 1825, 2630)
+    draw(POLY, 1500, 2630, 1900, 2900)
+    draw(POLY_PIN, 1500, 2630, 1900, 2900)
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[POLY])).insert(kdb.Text('G', kdb.Trans(1750, 2750)))
+    draw(LICON, 1200, 1415, 1370, 1585)
+    draw(LI1, 1120, 1335, 1450, 1665)
+    draw(LI1_PIN, 1120, 1335, 1450, 1665)
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[LI1])).insert(kdb.Text('S', kdb.Trans(1285, 1500)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(LI1, 1120, 1665, 1450, 3500)
+    p.box(LI1_PIN, 1120, 3300, 1450, 3500)
+    p.label(LI1, 'ST', 1285, 3400)
+
+
+def ntap_with_pin_vpwr(p: Pattern, x: int):
+    """
+    An n-tap with a contact and the pin VPWR on li1, for an nwell around it
+    """
+    p.box(TAP, x, 1000, x + 1000, 2000)
+    p.box(NSDM, x - 125, 875, x + 1125, 2125)
+    p.box(LICON, x + 415, 1415, x + 585, 1585)
+    p.box(LI1, x + 335, 1335, x + 665, 1665)
+    p.box(LI1_PIN, x + 335, 1335, x + 665, 1665)
+    p.label(LI1, 'VPWR', x + 500, 1500)
+
+
+def cut_pfets_sharing_diffusion() -> Pattern:
+    """
+    Two pfets on one diffusion: the left one in a child cell, which ends on the diffusion that they share,
+    the rest of it, its contact with the pin D, and the right pfet in the top cell
+    """
+    p = pattern('cut_pfets_sharing_diffusion')
+    pfet_in_child_cell(p, x_end=1900)
+    p.box(NWELL, 1900, 0, 12000, 3000)
+    p.box(DIFF, 1900, 500, 4000, 2500)
+    p.box(PSDM, 1900, 375, 4125, 2625)
+    p.box(POLY, 2675, 370, 2825, 2630)
+    p.box(POLY, 2500, 2630, 3000, 2900)
+    p.box(POLY_PIN, 2500, 2630, 3000, 2900)
+    p.label(POLY, 'G2', 2750, 2750)
+    p.box(LICON, 2130, 1415, 2300, 1585)
+    p.box(LI1, 2050, 1335, 2380, 3500)
+    p.box(LI1_PIN, 2050, 3300, 2380, 3500)
+    p.label(LI1, 'D', 2215, 3400)
+    p.box(LICON, 3200, 1415, 3370, 1585)
+    p.box(LI1, 3120, 1335, 3450, 1665)
+    p.box(LI1_PIN, 3120, 1335, 3450, 1665)
+    p.label(LI1, 'S2', 3285, 1500)
+    ntap_with_pin_vpwr(p, 10500)
+    return p
+
+
+def cut_pfet_drain_with_contacts_in_top() -> Pattern:
+    """
+    A pfet in a child cell, whose drain goes on in the top cell, beyond the box of the cell, to the pin D,
+    with a contact beside the cell, and a contact there
+    """
+    p = pattern('cut_pfet_drain_with_contacts_in_top')
+    pfet_in_child_cell(p, x_end=2300)
+    p.box(NWELL, 2300, 0, 12000, 3000)
+    p.box(DIFF, 2300, 500, 6000, 2500)
+    p.box(PSDM, 2300, 375, 6125, 2625)
+    for x in (2500, 5500):
+        p.box(LICON, x, 1415, x + 170, 1585)
+    p.box(LI1, 2420, 1335, 5750, 1665)
+    p.box(LI1_PIN, 5420, 1335, 5750, 1665)
+    p.label(LI1, 'D', 5585, 1500)
+    ntap_with_pin_vpwr(p, 10500)
+    return p
+
+
+def cut_well_under_wire() -> Pattern:
+    """
+    An n-tap with its nwell in a child cell, with no node on the nwell, as the net VDD enters the cell on met1,
+    and a met3 wire W over the nwell, in the top cell
+    """
+    p = pattern('cut_well_under_wire')
+    source = pattern('nwell_and_tap')
+    source.box(NWELL, -1000, -1000, 1500, 6000)
+    tap_li1_m1(source, 0, ptap=False)
+    block = p.layout.create_cell('block')
+    block.copy_tree(source.top)
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 80, 5000, 420, 12000)
+    p.box(MET1_PIN, 100, 11000, 400, 11900)
+    p.label(MET1, 'VDD', 250, 11500)
+    p.box(MET3, -5000, 2000, 5000, 3000)
+    p.box(MET3_PIN, -5000, 2000, -4000, 3000)
+    p.label(MET3, 'W', -4500, 2500)
+    return p
+
+
+def cut_nfets_wired_in_top() -> Pattern:
+    """
+    Two nfets 60 µm apart in a child cell, whose contacts and wiring are all in the top cell:
+    the sources on one long li1 wire with the pin VSS, near the left one, the drains and gates on pins of their own
+    """
+    p = pattern('cut_nfets_wired_in_top')
+    block = p.layout.create_cell('block')
+
+    def draw(layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
+        block.shapes(p.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
+
+    for x, drain, gate in ((0, 'D1', 'G1'), (60000, 'D2', 'G2')):
+        draw(DIFF, x, 0, x + 1500, 2000)
+        draw(NSDM, x - 125, -125, x + 1625, 2125)
+        draw(POLY, x + 675, -130, x + 825, 2130)
+        draw(POLY, x + 500, 2130, x + 1000, 2400)
+        p.box(LICON, x + 200, 915, x + 370, 1085)
+        p.box(LI1, x + 120, 835, x + 450, 1165)
+        p.box(LICON, x + 1130, 915, x + 1300, 1085)
+        p.box(LI1, x + 1050, 835, x + 1380, 1165)
+        p.box(LI1_PIN, x + 1050, 835, x + 1380, 1165)
+        p.label(LI1, drain, x + 1215, 1000)
+        p.box(POLY_PIN, x + 500, 2130, x + 1000, 2400)
+        p.label(POLY, gate, x + 750, 2250)
+        p.box(LI1, x + 120, -500, x + 450, 835)
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(LI1, 120, -800, 60450, -500)
+    p.box(LI1, 120, -3000, 450, -800)
+    p.box(LI1_PIN, 120, -3000, 450, -2800)
+    p.label(LI1, 'VSS', 285, -2900)
+    return p
+
+
+def cut_resistors_in_series() -> Pattern:
+    """
+    Three met1 resistors in series between the pins A and B: the first and the last one in a child cell,
+    the middle one and the wires between them in the top cell
+    """
+    p = pattern('cut_resistors_in_series')
+    block = p.layout.create_cell('block')
+    for x in (2000, 12000):
+        block.shapes(p.layout.layer(*MET1)).insert(kdb.Box(x, 0, x + 2000, 500))
+        block.shapes(p.layout.layer(*MET1_RES)).insert(kdb.Box(x, 0, x + 2000, 500))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1_RES, 7000, 0, 9000, 500)
+    p.box(MET1, 0, 0, 2000, 500)
+    p.box(MET1, 4000, 0, 12000, 500)
+    p.box(MET1, 14000, 0, 16000, 500)
+    for x, text in ((0, 'A'), (15800, 'B')):
+        p.box(MET1_PIN, x, 0, x + 200, 500)
+        p.label(MET1, text, x + 100, 250)
+    return p
+
+
+def cut_nfet_fingers(name: str, in_sibling: bool) -> Pattern:
+    """
+    Two nfet fingers on one diffusion, sharing the pin S, and one gate pin G: each is a polygon of poly with its half
+    of the strap over them, as tools write merged polygons, one in a child cell, the other in the top cell or a sibling
+    """
+    p = pattern(name)
+    block = p.layout.create_cell('block')
+    other = p.layout.create_cell('sibling') if in_sibling else p.top
+
+    def finger(cell: kdb.Cell, x: int):
+        cell.shapes(p.layout.layer(*DIFF)).insert(kdb.Box(x, 0, x + 1000, 800))
+        cell.shapes(p.layout.layer(*NSDM)).insert(kdb.Box(x, -200, x + 1000, 1000))
+        cell.shapes(p.layout.layer(*POLY)).insert(kdb.Polygon([
+            kdb.Point(x + px, py) for px, py in ((350, -300), (350, 1100), (0, 1100), (0, 1400), (1000, 1400),
+                                                 (1000, 1100), (650, 1100), (650, -300))]))
+
+    finger(block, 0)
+    finger(other, 1000)
+    for cell in {block.cell_index(), other.cell_index()} - {p.top.cell_index()}:
+        p.top.insert(kdb.CellInstArray(cell, kdb.Trans()))
+    for x, y, text in ((150, 400, 'D1'), (1000, 400, 'S'), (1850, 400, 'D2'), (1000, 1250, 'G')):
+        p.box(LICON, x - 85, y - 85, x + 85, y + 85)
+        p.box(LI1, x - 150, y - 150, x + 150, y + 150)
+        p.box(LI1_PIN, x - 150, y - 150, x + 150, y + 150)
+        p.label(LI1, text, x, y)
+    p.box(NPC, 900, 1100, 1100, 1400)
+    return p
+
+
+def cut_instances_sharing_diffusion_in_top() -> Pattern:
+    """
+    Three instances of a child cell of an nfet, with the diffusion between them and the contacts in the top cell,
+    with the pins L, M0, M1 and R
+    """
+    p = pattern('cut_instances_sharing_diffusion_in_top')
+    unit = p.layout.create_cell('unit')
+
+    def draw(cell: kdb.Cell, layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
+        cell.shapes(p.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
+
+    def pin(x: int, text: str):
+        p.box(LICON, x - 85, 315, x + 85, 485)
+        p.box(LI1, x - 150, 250, x + 150, 550)
+        p.box(LI1_PIN, x - 50, 350, x + 50, 450)
+        p.label(LI1, text, x, 400)
+
+    draw(unit, DIFF, 0, 0, 1000, 800)
+    draw(unit, NSDM, 0, -200, 1000, 1000)
+    draw(unit, POLY, 350, -300, 650, 1100)
+    for index in range(3):
+        p.top.insert(kdb.CellInstArray(unit.cell_index(), kdb.Trans(index * 2000, 0)))
+    for index in range(2):
+        x = 1000 + 2000 * index
+        draw(p.top, DIFF, x, 0, x + 1000, 800)
+        draw(p.top, NSDM, x, -200, x + 1000, 1000)
+        pin(x + 500, f"M{index}")
+    pin(150, 'L')
+    pin(4850, 'R')
+    return p
+
+
+def cut_wires_with_label_like_numbered_port() -> Pattern:
+    """
+    Two met1 wires of a child cell, one with the label VDD_0, the other without a label, which the top cell joins
+    to the pin VDD
+    """
+    p = pattern('cut_wires_with_label_like_numbered_port')
+    block = p.layout.create_cell('block')
+    for y in (0, 2000):
+        block.shapes(p.layout.layer(*MET1)).insert(kdb.Box(0, y, 3000, y + 500))
+        p.box(MET1, 3000, y, 5000, y + 500)
+    block.shapes(p.layout.layer(*MET1_PIN)).insert(kdb.Box(500, 100, 700, 300))
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[MET1])).insert(kdb.Text('VDD_0', kdb.Trans(600, 200)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 5000, 0, 5500, 2500)
+    p.box(MET1_PIN, 5100, 1000, 5400, 1200)
+    p.label(MET1, 'VDD', 5250, 1100)
+    return p
+
+
+def cut_wire_with_label_without_pin() -> Pattern:
+    """
+    A met1 wire with its start in a child cell and the label A in the top cell, without a pin shape,
+    and an nfet of the top cell on it
+    """
+    p = pattern('cut_wire_with_label_without_pin')
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*MET1)).insert(kdb.Box(0, 0, 3000, 1000))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 3000, 0, 10000, 1000)
+    p.label(MET1, 'A', 9500, 500)
+    p.box(DIFF, 12000, 0, 13500, 800)
+    p.box(NSDM, 11800, -200, 13700, 1000)
+    p.box(POLY, 12600, -300, 12900, 1100)
+    for x in (12150, 13350):
+        p.box(LICON, x - 85, 315, x + 85, 485)
+        p.box(LI1, x - 150, 250, x + 150, 550)
+    p.box(MCON, 12065, 315, 12235, 485)
+    p.box(MET1, 10000, 200, 12300, 600)
+    return p
+
+
+def cut_half_of_gate() -> Pattern:
+    """
+    An nfet of the top cell, whose gate is half of a child cell, with the pin G on the poly of the top cell
+    """
+    p = pattern('cut_half_of_gate')
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*POLY)).insert(kdb.Box(675, -130, 825, 400))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(DIFF, 0, 0, 1500, 800)
+    p.box(NSDM, -125, -125, 1625, 925)
+    p.box(POLY, 675, 400, 825, 3000)
+    p.box(POLY, 500, 3000, 1000, 3400)
+    p.box(POLY_PIN, 500, 3000, 1000, 3400)
+    p.label(POLY, 'G', 750, 3200)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'cut_half_of_gate': cut_half_of_gate,
+    'cut_nfet_finger_beside_top': lambda: cut_nfet_fingers('cut_nfet_finger_beside_top', in_sibling=False),
+    'cut_nfet_finger_beside_sibling': lambda: cut_nfet_fingers('cut_nfet_finger_beside_sibling', in_sibling=True),
+    'cut_instances_sharing_diffusion_in_top': cut_instances_sharing_diffusion_in_top,
+    'cut_wires_with_label_like_numbered_port': cut_wires_with_label_like_numbered_port,
+    'cut_wire_with_label_without_pin': cut_wire_with_label_without_pin,
+    'cut_resistors_in_series': cut_resistors_in_series,
+    'cut_pfets_sharing_diffusion': cut_pfets_sharing_diffusion,
+    'cut_pfet_drain_with_contacts_in_top': cut_pfet_drain_with_contacts_in_top,
+    'cut_well_under_wire': cut_well_under_wire,
+    'cut_nfets_wired_in_top': cut_nfets_wired_in_top,
+    'cut_ntaps_in_one_nwell': cut_ntaps_in_one_nwell,
+    'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
+    'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
+    'exclusion_wire_beside_marker_over_nwell': exclusion_wire_beside_marker_over_nwell,
+    'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_user_marker_wire': exclusion_user_marker_wire,
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
     'overlap_shield_same_net_half_100um_x_100um_li1_m1_m2':

@@ -34,6 +34,7 @@ from ..log import (
 )
 from .extraction_results import ExtractionResults
 from ..device_models import DeviceModels
+from ..klayout.netlist_expander import remove_devices
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
 
@@ -61,14 +62,18 @@ class RCX25NetlistExpander:
                extraction_results: ExtractionResults,
                blackbox_devices: bool,
                device_models: DeviceModels,
-               substrate_net_name: Optional[str] = None) -> kdb.Netlist:
+               substrate_net_name: Optional[str] = None,
+               removed_device_ids: Collection[int] = ()) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, which tell the whiteboxed devices
         :param substrate_net_name: the net the capacitances to the substrate go to (VSUBS if not given),
                                    created if the netlist has none, and a port if it has no pin
+        :param removed_device_ids: the devices to leave out, as a model has them (of cut cells)
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
+
+        remove_devices(extracted_netlist.circuit_by_name(top_cell_name), top_circuit, removed_device_ids)
 
         if not blackbox_devices:
             # NOTE: removing a device ends the iteration over the circuit's devices,
@@ -140,15 +145,33 @@ class RCX25NetlistExpander:
         # the pin of a net of several labels (e.g. A,B) becomes a port per label, in its place (#211 §11)
         if summary.label_ports:
             ports: List[Tuple[str, Optional[kdb.Net]]] = []
+            nets_with_pin: Set[str] = set()
             for pin in top_circuit.each_pin():
                 net = top_circuit.net_for_pin(pin.id())
                 port_names = summary.label_ports.get(net.expanded_name(), None) if net else None
                 if port_names is None:
                     ports.append((pin.name(), net))
                     continue
+                nets_with_pin.add(net.expanded_name())
+                # NOTE: a net that only exclusion blocks give other ports stays a port, as what instantiates this
+                #       connects it, also if its label has no pin shape, unless only a cut cell names it,
+                #       and the substrate net also if no label names it, as its node has its capacitances
+                if pin.name() not in port_names and \
+                        set(port_names) <= set(summary.exclusion_ports.get(net.expanded_name(), ())) and \
+                        (net.expanded_name() == substrate_net_name
+                         or not any(results.exclusions is not None
+                                    and results.exclusions.is_only_named_by_cut_cells(net.expanded_name())
+                                    for results in extraction_results.cell_extraction_results.values())):
+                    ports.append((pin.name(), net))
                 for port_name in port_names:
                     add_net_if_needed(port_name)
                     ports.append((port_name, name2net[port_name]))
+            # NOTE: a net without a label has its ports at exclusion markers only
+            for net_name, port_names in sorted(summary.exclusion_ports.items()):
+                if net_name not in nets_with_pin:
+                    for port_name in summary.label_ports[net_name]:
+                        add_net_if_needed(port_name)
+                        ports.append((port_name, name2net[port_name]))
             for pin in list(top_circuit.each_pin()):
                 top_circuit.remove_pin(pin.id())
             for port_name, net in ports:

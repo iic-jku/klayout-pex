@@ -35,9 +35,11 @@ from ..log import (
     rule
 )
 from ..tech_info import TechInfo
-from ..types import GDSPair
+from ..types import GDSPair, LVSLayerName
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .exclusion import BlockKind, CutLayers, ExcludedBlock, Exclusions, listed_names
+from .netlist_expander import RCX25NetlistExpander
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
@@ -49,6 +51,7 @@ import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as rex_tech_pb2
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech as pb_RExtractorTech
 
 
@@ -57,6 +60,231 @@ class CExtractionTechError(Exception):
     The tech info can't model the capacitances of the layout
     """
     pass
+
+
+def is_on_tap(lvs_layer_name: LVSLayerName, tech_info: TechInfo) -> bool:
+    LP = tech_pb2.LayerInfo.Purpose
+    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+    return computed_layer_info is not None and \
+        computed_layer_info.layer_info.purpose in (LP.PURPOSE_NTAP, LP.PURPOSE_PTAP, LP.PURPOSE_NTAP_OR_PTAP)
+
+
+def is_on_well(lvs_layer_name: LVSLayerName, tech_info: TechInfo) -> bool:
+    LP = tech_pb2.LayerInfo.Purpose
+    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+    return computed_layer_info is not None and \
+        computed_layer_info.layer_info.purpose in (LP.PURPOSE_NWELL, LP.PURPOSE_PWELL, LP.PURPOSE_DNWELL)
+
+
+def devices_of_cut_cells(exclusions: Exclusions,
+                         pex_context: KLayoutExtractionContext,
+                         tech_info: TechInfo) -> Dict[int, int]:
+    """
+    :return: the devices within the cut cells by their IDs, with the indexes of their blocks: those that a cell draws,
+             by the layers that LVS makes them from (see TechInfo.device_gds_pairs), at their terminals, but those
+             on the substrate, and on a tap, which goes on beyond the cell, unless the device is a tap
+             (see CutCellInstance.draws_device)
+
+    NOTE: by geometry, as the LVS netlist is flat
+    """
+    cut_block_indexes = {index for index, block in enumerate(exclusions.blocks) if block.kind == BlockKind.CUT}
+    if not cut_block_indexes:
+        return {}
+
+    lvsdb = pex_context.lvsdb
+    substrate_lvs_layer_names = set(tech_info.tech.substrate.lvs_layer_names)
+    gds_pairs_by_class: Dict[str, Optional[Set[GDSPair]]] = {}
+    blocks: Dict[int, int] = {}
+    for device in pex_context.top_circuit.each_device():
+        class_name = device.device_class().name
+        if class_name not in gds_pairs_by_class:
+            gds_pairs_by_class[class_name] = tech_info.device_gds_pairs(class_name)
+        gds_pairs = gds_pairs_by_class[class_name]
+        if gds_pairs is None:
+            continue
+
+        terminals: List[kdb.Region] = []
+        on_taps: List[kdb.Region] = []
+        is_a_tap = True
+        bbox = kdb.Box()
+        for terminal_definition in device.device_class().terminal_definitions():
+            for reference in pex_context.terminal_refs[(device.id(), terminal_definition.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = lvsdb.layer_name(index)
+                    if shapes.is_empty() or lvs_layer_name in substrate_lvs_layer_names:
+                        continue
+                    if is_on_tap(lvs_layer_name, tech_info):
+                        on_taps.append(shapes)
+                        continue
+                    terminals.append(shapes)
+                    bbox += shapes.bbox()
+                    is_a_tap &= is_on_well(lvs_layer_name, tech_info)
+        if is_a_tap:
+            terminals += on_taps
+            for shapes in on_taps:
+                bbox += shapes.bbox()
+
+        block_index = next((index for index in exclusions.block_indexes_touching(bbox)
+                            if index in cut_block_indexes
+                            and exclusions.blocks[index].cell_instance.draws_device(gds_pairs, terminals)), None)
+        if block_index is not None:
+            blocks[device.id()] = block_index
+
+    unknown_classes = sorted(name for name, gds_pairs in gds_pairs_by_class.items() if gds_pairs is None)
+    if unknown_classes:
+        warning(f"The tech info doesn't tell what LVS makes these device classes from, so the netlist keeps "
+                f"their devices, also of the cut cells: {', '.join(unknown_classes)}")
+    return blocks
+
+
+def add_filled_diffusion_to_cut_cells(exclusions: Exclusions,
+                                      pex_context: KLayoutExtractionContext,
+                                      tech_info: TechInfo):
+    """
+    The cut cells stand for what LVS computes of their devices where the layout draws no diffusion,
+    e.g. the drain of an LDMOS, across the gap to its gate
+    """
+    diffusion_layer_names = set(tech_info.process_diffusion_layer_names)
+    diffusion_gds_pairs = CutLayers.of_tech(tech_info).diffusion_gds_pairs
+    for device in pex_context.top_circuit.each_device():
+        block_index = exclusions.removed_device_blocks.get(device.id(), None)
+        if block_index is None:
+            continue
+        instance = exclusions.blocks[block_index].cell_instance
+        for terminal_definition in device.device_class().terminal_definitions():
+            for reference in pex_context.terminal_refs[(device.id(), terminal_definition.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = pex_context.lvsdb.layer_name(index)
+                    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+                    layer_name = computed_layer_info.original_layer_name if computed_layer_info is not None else None
+                    # NOTE: not the box of a ring (e.g. the collector of a Schottky diode), which is no gap of a device
+                    if layer_name in diffusion_layer_names and not is_on_tap(lvs_layer_name, tech_info):
+                        filled = shapes - instance.shapes_of_layout(diffusion_gds_pairs, shapes.bbox())
+                        if not filled.is_empty():
+                            exclusions.add_to_cut_cell(block_index, layer_name, filled)
+
+
+def prepare_exclusions(exclusions: Exclusions,
+                       pex_context: KLayoutExtractionContext,
+                       tech_info: TechInfo):
+    """
+    Finds the nets within the exclusion blocks that nothing connects to the netlist,
+    and warns of what the extraction leaves out with the markers beyond what they stand for
+    """
+    if not exclusions.blocks:
+        return
+
+    exclusions.removed_device_blocks = devices_of_cut_cells(exclusions, pex_context, tech_info)
+    if exclusions.removed_device_blocks:
+        info(f"The netlist leaves out the {len(exclusions.removed_device_blocks)} devices of the cut cells")
+        add_filled_diffusion_to_cut_cells(exclusions, pex_context, tech_info)
+
+    K = tech_pb2.ComputedLayerInfo.Kind
+    layers_within: Dict[NetName, Set[LayerName]] = defaultdict(set)
+    layers_within_markers: Dict[NetName, Set[LayerName]] = defaultdict(set)
+    nets_outside: Set[NetName] = set()
+    nets_outside_markers: Set[NetName] = set()
+    # NOTE: not the wells and the substrate below the markers, which are in the models of what they stand for
+    for gds_pair in tech_info.process_conductor_gds_pairs:
+        extracted_layer = pex_context.extracted_layers.get(gds_pair, None)
+        if extracted_layer is None:
+            continue
+        layer_name = tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+        mask = exclusions.mask(layer_name)
+        marker_mask = exclusions.mask(layer_name, kind=BlockKind.MARKER)
+        for source_layer in extracted_layer.source_layers:
+            kind = tech_info.computed_layer_info_by_name[source_layer.lvs_layer_name].kind
+            if kind in (K.KIND_PIN, K.KIND_LABEL):
+                continue
+            shapes_by_net = pex_context.shapes_by_net_name_by_lvs_layer[source_layer.lvs_layer_name]
+            for net_name, shapes in shapes_by_net.items():
+                for region, within, outside in ((mask, layers_within, nets_outside),
+                                                (marker_mask, layers_within_markers, nets_outside_markers)):
+                    box = shapes.bbox()
+                    if not box.touches(region.bbox()):
+                        outside.add(net_name)
+                        continue
+                    near = exclusions.regions.near(region, box)
+                    if not (shapes & near).is_empty():
+                        within[net_name].add(layer_name)
+                    if not (shapes - near).is_empty():
+                        outside.add(net_name)
+
+    circuit = pex_context.top_circuit
+    blackbox_devices = pex_context.blackbox_devices
+    device_models = tech_info.device_models
+
+    def is_whiteboxed(device: kdb.Device) -> bool:
+        return not blackbox_devices and RCX25NetlistExpander.is_whiteboxed(device.device_class(), device_models)
+
+    def is_removed(device: kdb.Device) -> bool:
+        return device.id() in exclusions.removed_device_blocks or is_whiteboxed(device)
+
+    def is_connected(net_name: NetName) -> bool:
+        net = circuit.net_by_name(net_name)
+        return net is None or net.pin_count() + net.subcircuit_pin_count() > 0 or \
+            any(not is_removed(terminal.device()) for terminal in net.each_terminal())
+
+    exclusions.floating_net_names = {net_name for net_name in layers_within
+                                     if net_name not in nets_outside and not is_connected(net_name)}
+
+    nets_across = sorted(net_name for net_name in layers_within_markers if net_name in nets_outside_markers)
+    if nets_across:
+        listed_count = 20
+        warning("These nets are partly within exclusion markers, so the extraction leaves out their parasitics "
+                "there, for the model of what the markers stand for (a wire across a marker loses them too):\n" +
+                '\n'.join(f"  - {net_name}: {', '.join(sorted(layers_within_markers[net_name]))}"
+                           for net_name in nets_across[:listed_count]) +
+                (f"\n  - and {len(nets_across) - listed_count} more" if len(nets_across) > listed_count else ''))
+    if exclusions.floating_net_names:
+        info(f"Nothing connects these nets within exclusion markers to the netlist, "
+             f"so their capacitances to the rest of the layout go to the substrate: "
+             f"{listed_names(sorted(exclusions.floating_net_names))}")
+
+    substrate_lvs_layer_names = set(tech_info.tech.substrate.lvs_layer_names)
+
+    def is_plate_within(block: ExcludedBlock, lvs_layer_name: LVSLayerName, shapes: kdb.Region) -> bool:
+        computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+        region = block.region if computed_layer_info is None \
+            else block.region_of(computed_layer_info.original_layer_name)
+        return region is not None and not (shapes & exclusions.regions.near(region, shapes.bbox())).is_empty()
+
+    def has_plates_within_a_block(device: kdb.Device) -> bool:
+        """
+        NOTE: all of them, as what a capacitance is left out by has both of its plates within one block
+        """
+        plates: List[List[Tuple[LVSLayerName, kdb.Region]]] = []
+        box = kdb.Box()
+        for terminal in device.device_class().terminal_definitions():
+            plate: List[Tuple[LVSLayerName, kdb.Region]] = []
+            for reference in pex_context.terminal_refs[(device.id(), terminal.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = pex_context.lvsdb.layer_name(index)
+                    if not shapes.is_empty() and lvs_layer_name not in substrate_lvs_layer_names:
+                        plate.append((lvs_layer_name, shapes))
+                        box += shapes.bbox()
+            if plate:
+                plates.append(plate)
+        return any(block.capacitance_pair is None and
+                   all(any(is_plate_within(block, *part) for part in plate) for plate in plates)
+                   for block in exclusions.blocks_touching(box))
+
+    lost_devices = [d.expanded_name() for d in circuit.each_device()
+                    if is_whiteboxed(d) and d.id() not in exclusions.removed_device_blocks
+                    and has_plates_within_a_block(d)]
+    if lost_devices:
+        warning(f"The netlist loses these devices within exclusion markers, as white-box mode (--blackbox n) "
+                f"removes them, and the capacitances of their plates are left out, use --blackbox y to keep them: "
+                f"{listed_names(sorted(lost_devices))}")
+
+
+def warn_of_ports_without_nodes(exclusions: Exclusions, netlist_description: str):
+    """
+    :param netlist_description: of a netlist with one node per net
+    """
+    if any(block.ports for block in exclusions.blocks):
+        warning(f"{netlist_description} has one node per net, so the netlist has no ports where nets enter "
+                f"what is left out, use --mode R or RC of the 2.5D engine to connect a model")
 
 
 class RCX25Extractor:
@@ -68,9 +296,11 @@ class RCX25Extractor:
                  delaunay_b: float,
                  tech_info: TechInfo,
                  report_path: str,
-                 report_caps: bool):
+                 report_caps: bool,
+                 exclusions: Optional[Exclusions] = None):
         """
         :param report_caps: the report has each capacitance contribution with its shapes (see ExtractionReporter)
+        :param exclusions: what a model has the parasitics of (see exclusion.py), after prepare_exclusions
         """
         self.pex_context = pex_context
         self.pex_mode = pex_mode
@@ -80,6 +310,7 @@ class RCX25Extractor:
         self.tech_info = tech_info
         self.report_path = report_path
         self.report_caps = report_caps
+        self.exclusions = exclusions
 
         if "PolygonWithProperties" not in kdb.__all__:
             raise Exception("KLayout version does not support properties (needs 0.30 at least)")
@@ -156,7 +387,8 @@ class RCX25Extractor:
             cell_name=cell_name,
             keep_capacitance_geometry=self.pex_mode == PEXMode.RC,
             substrate_layer_name=self.tech_info.internal_substrate_layer_name,
-            substrate_well_layer_names=self.tech_info.substrate_well_layer_names
+            substrate_well_layer_names=self.tech_info.substrate_well_layer_names,
+            exclusions=self.exclusions
         )
 
         # Explicitly log the stacktrace here, because otherwise Exceptions 
@@ -182,6 +414,9 @@ class RCX25Extractor:
                      report: ExtractionReporter):
         netlist: kdb.Netlist = self.pex_context.lvsdb.netlist()
         dbu = self.pex_context.dbu
+
+        if self.exclusions is not None and not self.pex_mode.need_resistance():
+            warn_of_ports_without_nodes(self.exclusions, f"--mode {self.pex_mode}")
         # ------------------------------------------------------------------------
 
         layer_regions_by_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
@@ -240,6 +475,68 @@ class RCX25Extractor:
         all_layer_names = list(layer_regions_by_name.keys())
 
         # ------------------------------------------------------------------------
+        # NOTE: before the capacitances, which go by the pieces of the nets with ports at exclusion markers (NetPiece)
+        if self.pex_mode.need_resistance():
+            c: kdb.Circuit = netlist.top_circuit()
+            info(f"LVSDB: found {c.pin_count()}pins")
+
+            # FIXME:
+            #   currenly, tesselation does not work:
+            #   https://github.com/KLayout/klayout/issues/2100
+            r_extractor = RExtractor(pex_context=self.pex_context,
+                                     substrate_algorithm=pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     #substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
+                                     wire_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
+                                     delaunay_b = self.delaunay_b,
+                                     delaunay_amax = self.delaunay_amax,
+                                     via_merge_distance = 0,
+                                     skip_simplify = True,
+                                     exclusions = self.exclusions)
+            rex_request = r_extractor.prepare_request()
+            report.output_rex_request(request=rex_request)
+
+            rex_result = r_extractor.extract(rex_request)
+            report.output_rex_result(result=rex_result)
+
+            #
+            # node_by_id: Dict[int, r_network_pb2.RNode] = {}
+            # subproc("\tNodes:")
+            # for node in rex_result.nodes:
+            #     node_by_id[node.node_id] = node
+            #
+            #     msg = f"\t\tNode #{hex(node.node_id)} '{node.node_name}' " \
+            #           f"of net '{node.net_name}' " \
+            #           f"on layer '{node.layer_name}' "
+            #     match node.location.kind:
+            #         case location_pb2.Location.Kind.LOCATION_KIND_POINT:
+            #             p = node.location.point
+            #             msg += f"at {p.x},{p.y} ({p.x * dbu} µm, {p.y * dbu} µm)"
+            #         case location_pb2.Location.Kind.LOCATION_KIND_BOX:
+            #             b = node.location.box
+            #             msg += f"at {b.lower_left.x},{b.lower_left.y};{b.upper_right.x},{b.upper_right.y} (" \
+            #                    f"B/L {round(b.lower_left.x * dbu, 3)},"\
+            #                    f"{round(b.lower_left.y * dbu, 3)} µm, " \
+            #                    f"T/R {round(b.upper_right.x * dbu, 3)},"\
+            #                    f"{round(b.upper_right.y * dbu)} µm)"
+            #     subproc(msg)
+            #
+            # subproc("\tElements:")
+            # for element in rex_result.elements:
+            #     node_a = node_by_id[element.node_a.node_id]
+            #     node_b = node_by_id[element.node_b.node_id]
+            #     subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
+            #             f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
+            #             f"{round(element.resistance, 3)} Ω")
+
+            results.r_extraction_result = rex_result
+
+            nets_joined_by_substrate = results.nets_joined_by_substrate()
+            if nets_joined_by_substrate:
+                warning("Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
+                        "resistance network has no resistance for, so the pieces are ideally on their nets: " +
+                        ', '.join(nets_joined_by_substrate))
+
+        # ------------------------------------------------------------------------
         if self.pex_mode.need_capacitance():
             # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
             #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode,
@@ -291,65 +588,5 @@ class RCX25Extractor:
                 report=report
             )
             sidewall_and_fringe_extractor.extract()
-
-        # ------------------------------------------------------------------------
-        if self.pex_mode.need_resistance():
-            c: kdb.Circuit = netlist.top_circuit()
-            info(f"LVSDB: found {c.pin_count()}pins")
-
-            # FIXME:
-            #   currenly, tesselation does not work:
-            #   https://github.com/KLayout/klayout/issues/2100
-            r_extractor = RExtractor(pex_context=self.pex_context,
-                                     substrate_algorithm=pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
-                                     #substrate_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_TESSELATION,
-                                     wire_algorithm = pb_RExtractorTech.Algorithm.ALGORITHM_SQUARE_COUNTING,
-                                     delaunay_b = self.delaunay_b,
-                                     delaunay_amax = self.delaunay_amax,
-                                     via_merge_distance = 0,
-                                     skip_simplify = True)
-            rex_request = r_extractor.prepare_request()
-            report.output_rex_request(request=rex_request)
-
-            rex_result = r_extractor.extract(rex_request)
-            report.output_rex_result(result=rex_result)
-
-            #
-            # node_by_id: Dict[int, r_network_pb2.RNode] = {}
-            # subproc("\tNodes:")
-            # for node in rex_result.nodes:
-            #     node_by_id[node.node_id] = node
-            #
-            #     msg = f"\t\tNode #{hex(node.node_id)} '{node.node_name}' " \
-            #           f"of net '{node.net_name}' " \
-            #           f"on layer '{node.layer_name}' "
-            #     match node.location.kind:
-            #         case location_pb2.Location.Kind.LOCATION_KIND_POINT:
-            #             p = node.location.point
-            #             msg += f"at {p.x},{p.y} ({p.x * dbu} µm, {p.y * dbu} µm)"
-            #         case location_pb2.Location.Kind.LOCATION_KIND_BOX:
-            #             b = node.location.box
-            #             msg += f"at {b.lower_left.x},{b.lower_left.y};{b.upper_right.x},{b.upper_right.y} (" \
-            #                    f"B/L {round(b.lower_left.x * dbu, 3)},"\
-            #                    f"{round(b.lower_left.y * dbu, 3)} µm, " \
-            #                    f"T/R {round(b.upper_right.x * dbu, 3)},"\
-            #                    f"{round(b.upper_right.y * dbu)} µm)"
-            #     subproc(msg)
-            #
-            # subproc("\tElements:")
-            # for element in rex_result.elements:
-            #     node_a = node_by_id[element.node_a.node_id]
-            #     node_b = node_by_id[element.node_b.node_id]
-            #     subproc(f"\t\t{node_a.node_name} (port net '{node_a.net_name}') "
-            #             f"↔︎ {node_b.node_name} (port net '{node_b.net_name}') "
-            #             f"{round(element.resistance, 3)} Ω")
-
-            results.r_extraction_result = rex_result
-
-            nets_joined_by_substrate = results.nets_joined_by_substrate()
-            if nets_joined_by_substrate:
-                warning("Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
-                        "resistance network has no resistance for, so the pieces are ideally on their nets: " +
-                        ', '.join(nets_joined_by_substrate))
 
         return results

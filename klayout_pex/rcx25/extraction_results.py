@@ -24,12 +24,13 @@
 
 from __future__ import annotations
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import *
 
 import klayout.db as kdb
 
 from .capacitance_distributor import CapacitanceDistributor, NodePair
+from .exclusion import Exclusions, edge_part
 from ..types import CellName, LayerName, NetName
 from ..klayout.lvsdb_extractor import unique_name
 from ..log import debug, error
@@ -121,6 +122,10 @@ class SideOverlapCap:
     inside_edge: Optional[kdb.Edge] = None
     outside_edge: Optional[kdb.Edge] = None
 
+    # the near side of that polygon along it, which tells the part of the outside net at exclusion blocks,
+    # as the fringe mostly ends there, also of a polygon that goes on across a block (see kept_edge_caps)
+    near_edge: Optional[kdb.Edge] = None
+
     def __str__(self) -> str:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
 
@@ -172,9 +177,11 @@ def add_resistance(resistance_table: Dict[NetCoupleKey, float],
 def add_distributed_capacitance(capacitance_table: Dict[NetCoupleKey, float],
                                 cap_value: float,
                                 fractions: Dict[NodePair, float]):
-    # NOTE: capacitances between the same pair of nodes are in parallel
+    # NOTE: capacitances between the same pair of nodes are in parallel,
+    #       and the ones between parts of a net with ports at exclusion markers can end on one node (e.g. at a cut)
     for (node_a, node_b), fraction in fractions.items():
-        capacitance_table[NetCoupleKey(node_a, node_b).normed()] += cap_value * fraction
+        if node_a != node_b:
+            capacitance_table[NetCoupleKey(node_a, node_b).normed()] += cap_value * fraction
 
 
 # NOTE: a capacitance between nodes of resistor networks below this goes to a larger one between the same nets,
@@ -230,8 +237,12 @@ class ExtractionSummary:
     # node of the resistor network each device terminal connects to
     device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = field(default_factory=dict)
 
-    # the ports of each net of several labels, a node per label (#211 §11)
+    # the ports of each net of several labels, a node per label (#211 §11),
+    # or with ports at exclusion markers, which are among them
     label_ports: Dict[NetName, List[NetName]] = field(default_factory=dict)
+
+    # the ports of each net at exclusion markers, for a model that joins the pieces of the net
+    exclusion_ports: Dict[NetName, List[NetName]] = field(default_factory=dict)
 
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
@@ -239,6 +250,7 @@ class ExtractionSummary:
         merged_resistances: Dict[NetCoupleKey, float] = {}
         merged_device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
         merged_label_ports: Dict[NetName, List[NetName]] = {}
+        merged_exclusion_ports: Dict[NetName, List[NetName]] = {}
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
@@ -246,10 +258,12 @@ class ExtractionSummary:
                 add_resistance(merged_resistances, couple_key.normed(), res)
             merged_device_terminal_nodes.update(s.device_terminal_nodes)
             merged_label_ports.update(s.label_ports)
+            merged_exclusion_ports.update(s.exclusion_ports)
         return ExtractionSummary(capacitances=merged_capacitances,
                                  resistances=merged_resistances,
                                  device_terminal_nodes=merged_device_terminal_nodes,
-                                 label_ports=merged_label_ports)
+                                 label_ports=merged_label_ports,
+                                 exclusion_ports=merged_exclusion_ports)
 
 
 @dataclass
@@ -283,11 +297,17 @@ class NetworkNodeNames:
 
         pin_labels = {n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN}
 
+        def is_port(node: r_network_pb2.RNode) -> bool:
+            return node.node_kind in (K.KIND_PIN, K.KIND_EXCLUSION_PORT)
+
         def default_name(node: r_network_pb2.RNode) -> NetName:
+            if node.node_kind == K.KIND_EXCLUSION_PORT:
+                return (port_names or {}).get(node.node_name, node.node_name)
             if node.node_kind == K.KIND_PIN:
                 # NOTE: the pins of a net with one label are the node of the net,
-                #       which is named after the label, unless other nets are too (e.g. vss$1, #211 §10)
-                if len(pin_labels) == 1:
+                #       which is named after the label, unless other nets are too (e.g. vss$1, #211 §10),
+                #       or it has ports at exclusion blocks as well, whose labels may be in its name
+                if len(pin_labels) == 1 and node.node_name not in (port_names or {}):
                     return network.net_name
                 # NOTE: if we have an electrical short between 2 pins A and B
                 #       and a parasitic resistance between the two,
@@ -324,10 +344,10 @@ class NetworkNodeNames:
             groups[find(n.node_id)].append(n)
 
         def has_pin(root: int) -> bool:
-            return any(n.node_kind == K.KIND_PIN for n in groups[root])
+            return any(is_port(n) for n in groups[root])
 
         def group_name(root: int) -> NetName:
-            pin_names = sorted({default_name(n) for n in groups[root] if n.node_kind == K.KIND_PIN})
+            pin_names = sorted({default_name(n) for n in groups[root] if is_port(n)})
             if network.net_name in pin_names:
                 return network.net_name
             if pin_names:
@@ -350,7 +370,10 @@ class NetworkNodeNames:
             if root is not None:
                 name_by_root[root] = network.net_name
             elif candidate_roots:
-                net_tie_node_ids.append(candidate_roots[0])
+                # NOTE: a pin of the top cell rather than a port for a model, which a model may leave open
+                net_tie_node_ids.append(next((root for root in candidate_roots
+                                              if any(n.node_kind == K.KIND_PIN for n in groups[root])),
+                                             candidate_roots[0]))
 
         candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
                           [find(n.node_id) for n in nodes]
@@ -371,6 +394,10 @@ class NetworkNodeNames:
             for n in nodes:
                 name = name_by_root[find(n.node_id)]
                 pieces.union(n.node_id, first_node_id_by_name.setdefault(name, n.node_id))
+            # NOTE: so does the model of an exclusion block, which an ideal node of each side would bypass
+            for join in network.model_joins:
+                for node_id in join.node_ids[1:]:
+                    pieces.union(join.node_ids[0], node_id)
 
             pieces_on_net = {pieces.find(n.node_id) for n in nodes if name_by_root[find(n.node_id)] == network.net_name}
             joined_pieces = {pieces.find(node_id) for node_id in network.substrate_joined_node_ids}
@@ -407,26 +434,130 @@ class CellExtractionResults:
     substrate_layer_name: Optional[LayerName] = None
     substrate_well_layer_names: Set[LayerName] = field(default_factory=set)
 
+    # NOTE: the capacitances that a model of what they mark has are left out (see exclusion.py)
+    exclusions: Optional[Exclusions] = None
+
     overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
     sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
     sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
 
     r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
 
+    def net_of_capacitance(self, net_name: NetName) -> NetName:
+        return self.exclusions.net_of_capacitance(net_name, self.substrate_layer_name)
+
+    def has_net_pieces(self, net_name: NetName) -> bool:
+        """
+        :return: whether the capacitances within the net count, as parts of it are apart in the netlist (see NetPiece)
+        """
+        return self.exclusions is not None and self.exclusions.has_pieces(net_name)
+
+    @staticmethod
+    def are_apart(net_a: NetName, part_a: NetName, net_b: NetName, part_b: NetName) -> bool:
+        """
+        :param net_a: the net of a plate
+        :param part_a: its part of the net, a piece or the net itself
+        :param net_b: the net of the other plate
+        :param part_b: its part of the net, a piece or the net itself
+        :return: whether the netlist has the plates apart
+        """
+        return net_a != net_b or (part_a != net_a and part_b != net_b and part_a != part_b)
+
+    def kept_overlap_caps(self, cap: OverlapCap) -> List[OverlapCap]:
+        """
+        :return: the parts of the overlap capacitance that the exclusion markers don't leave out, by their nets
+        """
+        exclusions = self.exclusions
+        if exclusions is None:
+            return [cap]
+
+        key = cap.key
+        if exclusions.leaves_out_capacitance_of_net(key.net_top, key.net_bot):
+            cap.cap_value = 0.0
+            return []
+
+        capacitance_per_area = cap.cap_value / cap.area.area()
+        kept_area = cap.area - exclusions.excluded_area(cap.area, key.layer_top, key.layer_bot)
+
+        parts: List[OverlapCap] = []
+        top_areas = [] if kept_area.is_empty() else exclusions.area_parts(kept_area, key.net_top, key.layer_top)
+        for top_area, part_top in top_areas:
+            for area, part_bot in exclusions.area_parts(top_area, key.net_bot, key.layer_bot):
+                net_top, net_bot = self.net_of_capacitance(part_top), self.net_of_capacitance(part_bot)
+                if net_top != net_bot and self.are_apart(key.net_top, part_top, key.net_bot, part_bot):
+                    parts.append(replace(cap,
+                                         key=replace(key, net_top=net_top, net_bot=net_bot),
+                                         cap_value=capacitance_per_area * area.area(),
+                                         area=area))
+        cap.cap_value = sum(part.cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
+        return parts
+
     def add_overlap_cap(self, cap: OverlapCap):
-        if not self.keep_capacitance_geometry:
-            cap.area = None
-        self.overlap_table[cap.key].append(cap)
+        for part in self.kept_overlap_caps(cap):
+            if not self.keep_capacitance_geometry:
+                part.area = None
+            self.overlap_table[part.key].append(part)
+
+    def kept_edge_caps(self,
+                       cap: SidewallCap | SideOverlapCap,
+                       inside_net_name: NetName,
+                       inside_layer_name: LayerName,
+                       outside_net_name: NetName,
+                       outside_layer_name: LayerName,
+                       facing_edge: kdb.Edge) -> List[Tuple[SidewallCap | SideOverlapCap, NetName, NetName]]:
+        """
+        :param facing_edge: of the outside net, facing the inside edge (same direction), which tells its part
+        :return: the parts of the capacitance between two edges that the exclusion markers don't leave out,
+                 with their nets at the inside edge and at the outside edge
+        """
+        exclusions = self.exclusions
+        if exclusions is None:
+            return [(cap, inside_net_name, outside_net_name)]
+
+        if exclusions.leaves_out_capacitance_of_net(inside_net_name, outside_net_name):
+            cap.cap_value = 0.0
+            return []
+
+        inside_parts = exclusions.edge_parts(cap.inside_edge, -1, inside_net_name, inside_layer_name)
+        outside_parts = exclusions.edge_parts(facing_edge, 1, outside_net_name, outside_layer_name)
+
+        parts: List[Tuple[SidewallCap | SideOverlapCap, NetName, NetName]] = []
+        for kept in exclusions.kept_edge_parts(cap.inside_edge, inside_layer_name, facing_edge, outside_layer_name):
+            for inside, part_inside in inside_parts:
+                for outside, part_outside in outside_parts:
+                    interval = max(kept[0], inside[0], outside[0]), min(kept[1], inside[1], outside[1])
+                    net_inside = self.net_of_capacitance(part_inside)
+                    net_outside = self.net_of_capacitance(part_outside)
+                    if interval[0] < interval[1] and net_inside != net_outside and \
+                            self.are_apart(inside_net_name, part_inside, outside_net_name, part_outside):
+                        parts.append((replace(cap,
+                                              cap_value=cap.cap_value * (interval[1] - interval[0]),
+                                              inside_edge=edge_part(cap.inside_edge, interval),
+                                              outside_edge=edge_part(cap.outside_edge, interval)),
+                                      net_inside, net_outside))
+        cap.cap_value = sum(part[0].cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
+        return parts
 
     def add_sidewall_cap(self, cap: SidewallCap):
-        if not self.keep_capacitance_geometry:
-            cap.inside_edge = cap.outside_edge = None
-        self.sidewall_table[cap.key].append(cap)
+        for part, net1, net2 in self.kept_edge_caps(cap, cap.key.net1, cap.key.layer, cap.key.net2, cap.key.layer,
+                                                    cap.outside_edge):
+            if self.exclusions is not None:
+                part.key = replace(part.key, net1=net1, net2=net2)
+            if not self.keep_capacitance_geometry:
+                part.inside_edge = part.outside_edge = None
+            self.sidewall_table[part.key].append(part)
 
     def add_sideoverlap_cap(self, cap: SideOverlapCap):
-        if not self.keep_capacitance_geometry:
-            cap.inside_edge = cap.outside_edge = None
-        self.sideoverlap_table[cap.key].append(cap)
+        for part, net_inside, net_outside in self.kept_edge_caps(cap,
+                                                                 cap.key.net_inside, cap.key.layer_inside,
+                                                                 cap.key.net_outside, cap.key.layer_outside,
+                                                                 cap.near_edge):
+            if self.exclusions is not None:
+                part.key = replace(part.key, net_inside=net_inside, net_outside=net_outside)
+            part.near_edge = None
+            if not self.keep_capacitance_geometry:
+                part.inside_edge = part.outside_edge = None
+            self.sideoverlap_table[part.key].append(part)
 
     def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:
         """
@@ -441,11 +572,16 @@ class CellExtractionResults:
         taken_names: Set[NetName] = {network.net_name.casefold() for network in networks}  # NOTE: case-folded
         port_names_by_net: Dict[NetName, Dict[str, NetName]] = {}
         for network in networks:
-            labels = sorted({n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN})
-            if len(labels) < 2:
+            labels = {n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN}
+            exclusion_ports = {n.node_name for n in network.nodes if n.node_kind == K.KIND_EXCLUSION_PORT}
+            if len(labels) < 2 and not exclusion_ports:
                 continue
             port_names: Dict[str, NetName] = {}
-            for label in labels:
+            for label in sorted(labels | exclusion_ports):
+                # NOTE: the one label of a net with ports at exclusion markers names the net too
+                if label == network.net_name:
+                    port_names[label] = label
+                    continue
                 port_names[label] = unique_name(label, taken_names)
                 taken_names.add(port_names[label].casefold())
             port_names_by_net[network.net_name] = port_names
@@ -522,6 +658,7 @@ class CellExtractionResults:
 
         normalized_resistance_table: Dict[NetCoupleKey, float] = {}
         device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
+        exclusion_ports: Dict[NetName, List[NetName]] = {}
 
         for network in self.r_extraction_result.networks:
             port_names = port_names_by_net.get(network.net_name, {})
@@ -529,10 +666,16 @@ class CellExtractionResults:
             for terminal_key, node_ids in node_names.terminal_node_ids.items():
                 device_terminal_nodes[terminal_key] = node_names.by_node_id[node_ids[0]]
 
+            K = r_network_pb2.RNode.Kind
+            net_exclusion_ports = sorted({port_names[n.node_name] for n in network.nodes
+                                          if n.node_kind == K.KIND_EXCLUSION_PORT})
+            if net_exclusion_ports:
+                exclusion_ports[network.net_name] = net_exclusion_ports
+
             # NOTE: the port of a label on the node of another label (e.g. both on one via) is tied to it
             ties = {NetCoupleKey(port_names[n.node_name], node_names.by_node_id[n.node_id]).normed()
                     for n in network.nodes
-                    if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN
+                    if n.node_kind in (K.KIND_PIN, K.KIND_EXCLUSION_PORT)
                     and n.node_name in port_names
                     and port_names[n.node_name] != node_names.by_node_id[n.node_id]}
             ties.update(NetCoupleKey(network.net_name, node_names.by_node_id[node_id]).normed()
@@ -557,7 +700,8 @@ class CellExtractionResults:
                                                resistances=normalized_resistance_table,
                                                device_terminal_nodes=device_terminal_nodes,
                                                label_ports={net_name: [port_names[label] for label in sorted(port_names)]
-                                                            for net_name, port_names in port_names_by_net.items()})
+                                                            for net_name, port_names in port_names_by_net.items()},
+                                               exclusion_ports=exclusion_ports)
 
         summary = ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary,

@@ -112,6 +112,7 @@ class FasterCapModelBuilder:
 
         self.materials: Dict[str, float] = {}
         self.net_names: List[str] = []
+        self.group_by_conductor: Dict[str, str] = {}
 
         #                           layer,            zstart, zstop
         self.clayers: Dict[str, List[Tuple[kdb.Region, float, float]]] = {}
@@ -137,9 +138,16 @@ class FasterCapModelBuilder:
                       net_name: str,
                       layer: kdb.Region,
                       z: float,
-                      height: float):
+                      height: float,
+                      group_name: Optional[str] = None):
+        """
+        :param net_name: the name of the conductor
+        :param group_name: of the conductors that touch, as they are parts of one net, which have no surfaces
+                           between them (see FasterCapModelGenerator), by default the conductor is on its own
+        """
         if hasattr(layer, 'data'):
             layer = layer.data
+        self.group_by_conductor[net_name] = group_name or net_name
         self._add_layer(name=net_name, layer=layer, is_dielectric=False, z=z, height=height)
 
     def _norm2z(self, z: float) -> float:
@@ -184,7 +192,8 @@ class FasterCapModelBuilder:
                                       delaunay_amax=self.delaunay_amax,
                                       delaunay_b=self.delaunay_b,
                                       materials=self.materials,
-                                      net_names=list(self.clayers.keys()))
+                                      net_names=list(self.clayers.keys()),
+                                      group_by_conductor=self.group_by_conductor)
         for zcurr in z:
             gen.next_z(self._norm2z(zcurr))
 
@@ -348,19 +357,31 @@ class FasterCapModelGenerator:
 
     net_names: List[str]
 
+    group_by_conductor: Dict[str, str]
+    """The conductors that are parts of a net by the name of the net, the others are on their own"""
+
     def __init__(self,
                  dbu: float,
                  k_void: float,
                  delaunay_amax: float,
                  delaunay_b: float,
                  materials: Dict[str, float],
-                 net_names: List[str]):
+                 net_names: List[str],
+                 group_by_conductor: Optional[Dict[str, str]] = None):
         self.k_void = k_void
         self.delaunay_amax = delaunay_amax
         self.delaunay_b = delaunay_b
         self.dbu = dbu
         self.materials = materials
         self.net_names = net_names
+        self.group_by_conductor = group_by_conductor or {}
+
+        # NOTE: without surfaces between the conductors of a group, whose coincident panels would be singular.
+        #       The charge they'd have is the one between the parts of a net, which no netlist has
+        conductors_by_group: Dict[str, List[str]] = defaultdict(list)
+        for conductor_name, group_name in self.group_by_conductor.items():
+            conductors_by_group[group_name].append(conductor_name)
+        self.conductors_by_group = conductors_by_group
 
         self.z: Optional[float] = None
         self.zz: Optional[float] = None
@@ -376,6 +397,10 @@ class FasterCapModelGenerator:
     def reset(self):
         self.layers_in = {}
         self.layers_out = {}
+
+    def other_conductors_of_group(self, conductor_name: str) -> List[str]:
+        group_name = self.group_by_conductor.get(conductor_name, conductor_name)
+        return [name for name in self.conductors_by_group.get(group_name, ()) if name != conductor_name]
 
     def add_in(self, name: str, layer: kdb.Region):
         debug(f"add_in: {name} -> {layer}")
@@ -499,6 +524,10 @@ class FasterCapModelGenerator:
             lin = din.get(f"+{nn}", None)
             if lin:
                 lin = lin.dup()
+                for other in self.other_conductors_of_group(nn):
+                    lout = dout.get(f"+{other}", None)
+                    if lout:
+                        lin -= lout
                 for mno in self.materials.keys():
                     lout = dout.get(f"-{mno}", None)
                     if lout:
@@ -567,6 +596,10 @@ class FasterCapModelGenerator:
             linside = self.state.get(mk, None)
             if linside:
                 linside = linside.edges()
+                for other in self.other_conductors_of_group(nn):
+                    other_state = self.state.get(f"+{other}", None)
+                    if other_state:
+                        linside -= other_state.edges()
                 for mno in self.materials:
                     loutside = self.state.get(f"-{mno}", None)
                     if loutside:
@@ -858,10 +891,12 @@ class FasterCapModelGenerator:
             info(f"Material {mn} -> {len(tris)} triangles")
             errors += self._check_tris(f"Material '{mn}'", tris)
 
-        for nn in self.net_names:
-            tris = self._collect_cond_tris(nn)
-            info(f"Net '{nn}' -> {len(tris)} triangles")
-            errors += self._check_tris(f"Net '{nn}'", tris)
+        # NOTE: the surface of a net is closed, not the ones of its parts
+        for group_name in dict.fromkeys(self.group_by_conductor.get(nn, nn) for nn in self.net_names):
+            tris = [t for nn in self.net_names if self.group_by_conductor.get(nn, nn) == group_name
+                    for t in self._collect_cond_tris(nn)]
+            info(f"Net '{group_name}' -> {len(tris)} triangles")
+            errors += self._check_tris(f"Net '{group_name}'", tris)
 
         if errors == 0:
             info("  No errors found")

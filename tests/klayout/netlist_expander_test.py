@@ -33,7 +33,9 @@ import klayout.db as kdb
 from klayout_pex.device_models import DeviceModels
 from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.netlist_expander import NetlistExpander
+from klayout_pex.fastcap.output_interpreter import FastCapOutputInterpreter
+from klayout_pex.klayout.netlist_expander import NetlistExpander, remove_devices
+from klayout_pex.rcx25.exclusion import ConductorPart, ExcludedBlock, Exclusions
 from klayout_pex.log import (
     debug,
 )
@@ -195,3 +197,51 @@ class WhiteboxTest(unittest.TestCase):
                                           device_models=device_models('mim'), substrate_net_name='B')
         self.assertEqual(['M1'], [d.name for d in expanded.circuit_by_name('chip').each_device()
                                   if d.device_class().name in ('mim', 'nmos')])
+
+    def test_remove_devices_goes_by_the_ids_of_the_extracted_circuit(self):
+        # NOTE: the copy numbers its devices anew, which closes the gaps of the IDs
+        netlist = substrate_test_netlist()
+        circuit = netlist.circuit_by_name('chip')
+        device_class = kdb.DeviceClassMOS4Transistor()
+        device_class.name = 'nmos'
+        netlist.add(device_class)
+        devices = [circuit.create_device(device_class, name) for name in ('M1', 'M2', 'M3')]
+        device_ids = [device.id() for device in devices]
+        circuit.remove_device(devices[0])
+
+        copy = netlist.dup()
+        copied_circuit = copy.circuit_by_name('chip')
+        remove_devices(circuit, copied_circuit, {device_ids[2]})
+        self.assertEqual(['M2'], [d.name for d in copied_circuit.each_device()])
+
+    def expanded_with_exclusions(self, interpreter, conductor_name_format: str) -> kdb.Netlist:
+        netlist = substrate_test_netlist()
+        region = kdb.Region(kdb.Box(0, 0, 100, 100))
+        exclusions = Exclusions([ExcludedBlock('m0', region)])
+        parts = [ConductorPart('B', is_substrate=True), ConductorPart('D'), ConductorPart('D', frozenset({0}))]
+        names = [exclusions.conductor_name(part) for part in parts]
+        self.assertEqual(['B#substrate', 'D', 'D#x0'], names)
+        matrix = CapacitanceMatrix(
+            conductor_names=[conductor_name_format.format(index=index + 1, name=name)
+                             for index, name in enumerate(names)],
+            rows=[[3e-15, -2e-15, -1e-15],
+                  [-2e-15, 100.5e-15, -98e-15],
+                  [-1e-15, -98e-15, 99.25e-15]])
+        return NetlistExpander.expand(netlist, 'chip', matrix, interpreter, blackbox_devices=True,
+                                      device_models=device_models('mim'), substrate_net_name='B',
+                                      exclusions=exclusions)
+
+    def assert_capacitance_of_part_outside_only(self, expanded: kdb.Netlist):
+        # NOTE: 2 fF to the substrate, and the capacitance to infinity, without the ones of the part within the block
+        capacitances = [(sorted((d.net_for_terminal('A').name, d.net_for_terminal('B').name)), d.parameter('C'))
+                        for d in expanded.circuit_by_name('chip').each_device()]
+        self.assertEqual([['B', 'D'], ['B', 'D']], [nets for nets, _ in capacitances])
+        self.assertAlmostEqual(2.5e-15, sum(value for _, value in capacitances), delta=1e-20)
+
+    def test_conductors_of_fastercap_within_a_block_are_on_their_nets(self):
+        self.assert_capacitance_of_part_outside_only(
+            self.expanded_with_exclusions(FasterCapOutputInterpreter(), "g{index}_{name}"))
+
+    def test_conductors_of_fastcap_within_a_block_are_on_their_nets(self):
+        self.assert_capacitance_of_part_outside_only(
+            self.expanded_with_exclusions(FastCapOutputInterpreter(), "{name}%GROUP{index}"))

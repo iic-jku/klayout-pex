@@ -45,7 +45,7 @@ from ..log import (
 from .shapes_pb2_converter import ShapesConverter
 
 from ..tech_info import TechInfo
-from ..types import GDSPair, LVSLayerName, NetName
+from ..types import GDSPair, LayerName, LVSLayerName, NetName
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
@@ -505,6 +505,28 @@ class KLayoutExtractionContext:
             if net_shapes is not None:
                 shapes += net_shapes
         return shapes
+
+    def net_shapes_by_conductor_layer(self, net_name: NetName) -> Dict[LayerName, kdb.Region]:
+        """
+        :return: the shapes of the net by layer of the process stack (its diffusion and metal layers),
+                 and by layer of its wells
+        """
+        LP = tech_pb2.LayerInfo.Purpose
+
+        def is_well(layer_info: KLayoutExtractedLayerInfo) -> bool:
+            return any(self.tech.computed_layer_info_by_name[source_layer.lvs_layer_name].layer_info.purpose
+                       in (LP.PURPOSE_NWELL, LP.PURPOSE_PWELL, LP.PURPOSE_DNWELL)
+                       for source_layer in layer_info.source_layers
+                       if source_layer.lvs_layer_name in self.tech.computed_layer_info_by_name)
+
+        well_gds_pairs = [gds_pair for gds_pair, layer_info in self.extracted_layers.items() if is_well(layer_info)]
+
+        shapes_by_layer: Dict[LayerName, kdb.Region] = {}
+        for gds_pair in [*self.tech.process_conductor_gds_pairs, *well_gds_pairs]:
+            shapes = self.shapes_of_net(gds_pair, net_name)
+            if shapes is not None and not shapes.is_empty():
+                shapes_by_layer[self.tech.canonical_layer_name_by_gds_pair[gds_pair]] = shapes
+        return shapes_by_layer
 
     def shapes_of_layer(self,
                         gds_pair: GDSPair,

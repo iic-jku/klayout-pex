@@ -38,6 +38,22 @@ from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrix
 from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
 
+if TYPE_CHECKING:
+    from ..rcx25.exclusion import Exclusions
+
+
+def remove_devices(extracted_circuit: kdb.Circuit, copied_circuit: kdb.Circuit, device_ids: Collection[int]):
+    """
+    :param extracted_circuit: the circuit with the IDs of the devices
+    :param copied_circuit: its copy, which leaves out the devices of the IDs after this
+
+    NOTE: by their order, as the copy numbers its devices anew, which closes the gaps of the IDs
+    """
+    if device_ids:
+        for original, device in list(zip(extracted_circuit.each_device(), copied_circuit.each_device())):
+            if original.id() in device_ids:
+                copied_circuit.remove_device(device)
+
 
 class NetlistExpander:
     @staticmethod
@@ -47,14 +63,20 @@ class NetlistExpander:
                cap_matrix_interpreter: CapacitanceMatrixInterpreter,
                blackbox_devices: bool,
                device_models: DeviceModels,
-               substrate_net_name: str) -> kdb.Netlist:
+               substrate_net_name: str,
+               exclusions: Optional[Exclusions] = None) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, whose metal capacitors white-box mode removes
         :param substrate_net_name: the conductor of the substrate (see FasterCapInputBuilder),
                                    created if the netlist has no such net, and a port if it has no pin
+        :param exclusions: what a model has the parasitics of, whose conductors the matrix has per block
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
+
+        if exclusions is not None:
+            remove_devices(extracted_netlist.circuit_by_name(top_cell_name), top_circuit,
+                           exclusions.removed_device_blocks)
 
         if not blackbox_devices:
             # NOTE: only the metal capacitors (e.g. MIM and MOM caps), whose capacitance is extracted
@@ -81,6 +103,10 @@ class NetlistExpander:
 
         signal_names = [cap_matrix_interpreter.signal_name_from_conductor_name(nc)
                         for nc in cap_matrix.conductor_names]
+
+        if exclusions is not None:
+            cap_matrix = exclusions.capacitance_matrix_of_nets(cap_matrix, signal_names, substrate_net_name)
+            signal_names = cap_matrix.conductor_names
 
         # NOTE: the substrate conductor is the substrate net, or a net of its own (e.g. a metal test pattern),
         #       and the substrate net is a port, also if the LVS netlist has it without pin
@@ -115,7 +141,7 @@ class NetlistExpander:
                 if net1 == net2:
                     raise Exception(f"Invalid attempt to create cap {c.name} between "
                                     f"same net {net1} with value format_capacitance(cap_value)")
-            else:
+            elif cap_value != 0.0:  # NOTE: e.g. left out, see Exclusions.capacitance_matrix_of_nets
                 warning(f"Ignoring capacitance matrix cell [{i},{j}], "
                         f"{format_spice_number(cap_value)} is below threshold {format_spice_number(cap_threshold)}")
 

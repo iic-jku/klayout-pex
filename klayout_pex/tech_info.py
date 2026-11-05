@@ -26,6 +26,7 @@
 from __future__ import annotations  # allow class type hints within same class
 from typing import *
 from collections import Counter
+from fnmatch import fnmatchcase
 from functools import cached_property
 import google.protobuf.json_format
 
@@ -149,6 +150,16 @@ class TechInfo:
     @cached_property
     def device_models(self) -> DeviceModels:
         return DeviceModels(self.tech.device_models)
+
+    def device_gds_pairs(self, device_class_name: str) -> Optional[Set[GDSPair]]:
+        """
+        :return: the layers of the layout that LVS makes the devices of the class from (see DeviceLayers),
+                 None if the tech info doesn't tell
+        """
+        for device_layers in self.tech.device_layers:
+            if any(fnmatchcase(device_class_name, pattern) for pattern in device_layers.lvs_device_class_patterns):
+                return {(gds_pair.layer, gds_pair.datatype) for gds_pair in device_layers.gds_pairs}
+        return None
 
     @cached_property
     def computed_layer_info_by_gds_pair(self) -> Dict[GDSPair, tech_pb2.ComputedLayerInfo]:
