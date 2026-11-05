@@ -38,7 +38,7 @@ from ..tech_info import TechInfo
 from ..types import GDSPair, LVSLayerName
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
-from .exclusion import ExcludedBlock, Exclusions, listed_names
+from .exclusion import BlockKind, ExcludedBlock, Exclusions, listed_names
 from .netlist_expander import RCX25NetlistExpander
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
@@ -74,7 +74,9 @@ def prepare_exclusions(exclusions: Exclusions,
 
     K = tech_pb2.ComputedLayerInfo.Kind
     layers_within: Dict[NetName, Set[LayerName]] = defaultdict(set)
+    layers_within_markers: Dict[NetName, Set[LayerName]] = defaultdict(set)
     nets_outside: Set[NetName] = set()
+    nets_outside_markers: Set[NetName] = set()
     # NOTE: not the wells and the substrate below the markers, which are in the models of what they stand for
     for gds_pair in tech_info.process_conductor_gds_pairs:
         extracted_layer = pex_context.extracted_layers.get(gds_pair, None)
@@ -82,21 +84,24 @@ def prepare_exclusions(exclusions: Exclusions,
             continue
         layer_name = tech_info.canonical_layer_name_by_gds_pair[gds_pair]
         mask = exclusions.mask(layer_name)
+        marker_mask = exclusions.mask(layer_name, kind=BlockKind.MARKER)
         for source_layer in extracted_layer.source_layers:
             kind = tech_info.computed_layer_info_by_name[source_layer.lvs_layer_name].kind
             if kind in (K.KIND_PIN, K.KIND_LABEL):
                 continue
             shapes_by_net = pex_context.shapes_by_net_name_by_lvs_layer[source_layer.lvs_layer_name]
             for net_name, shapes in shapes_by_net.items():
-                box = shapes.bbox()
-                if not box.touches(mask.bbox()):
-                    nets_outside.add(net_name)
-                    continue
-                near = exclusions.regions.near(mask, box)
-                if not (shapes & near).is_empty():
-                    layers_within[net_name].add(layer_name)
-                if not (shapes - near).is_empty():
-                    nets_outside.add(net_name)
+                for region, within, outside in ((mask, layers_within, nets_outside),
+                                                (marker_mask, layers_within_markers, nets_outside_markers)):
+                    box = shapes.bbox()
+                    if not box.touches(region.bbox()):
+                        outside.add(net_name)
+                        continue
+                    near = exclusions.regions.near(region, box)
+                    if not (shapes & near).is_empty():
+                        within[net_name].add(layer_name)
+                    if not (shapes - near).is_empty():
+                        outside.add(net_name)
 
     circuit = pex_context.top_circuit
     blackbox_devices = pex_context.blackbox_devices
@@ -113,12 +118,12 @@ def prepare_exclusions(exclusions: Exclusions,
     exclusions.floating_net_names = {net_name for net_name in layers_within
                                      if net_name not in nets_outside and not is_connected(net_name)}
 
-    nets_across = sorted(net_name for net_name in layers_within if net_name in nets_outside)
+    nets_across = sorted(net_name for net_name in layers_within_markers if net_name in nets_outside_markers)
     if nets_across:
         listed_count = 20
         warning("These nets are partly within exclusion markers, so the extraction leaves out their parasitics "
                 "there, for the model of what the markers stand for (a wire across a marker loses them too):\n" +
-                '\n'.join(f"  - {net_name}: {', '.join(sorted(layers_within[net_name]))}"
+                '\n'.join(f"  - {net_name}: {', '.join(sorted(layers_within_markers[net_name]))}"
                            for net_name in nets_across[:listed_count]) +
                 (f"\n  - and {len(nets_across) - listed_count} more" if len(nets_across) > listed_count else ''))
     if exclusions.floating_net_names:

@@ -106,9 +106,15 @@ from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, redu
 from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
 from .rcx25.exclusion import (
+    BlockKind,
+    CutLayers,
     ExclusionError,
     ExclusionMarkerMode,
     Exclusions,
+    cells_called_by,
+    check_instances_of_cut_cells,
+    matches_name,
+    parsed_cut_requests,
     selected_marker_layers,
 )
 from .rcx25.extractor import (
@@ -130,6 +136,7 @@ from .rcx25.r.r_extractor import RExtractionTechError
 from .schematic_devices import schematic_devices
 from .device_models import DeviceModelError, DeviceModels
 from .tech_info import TechDefError, TechInfo
+from .types import NetName
 from .tool_version_constraints import (
     Tool,
     VersionCheckMode,
@@ -471,6 +478,18 @@ class KpexCLI:
                                 "these (e.g. 235/5:met2,met3), which also is how a PDK without exclusion markers "
                                 "(sky130A, gf180mcuD) gets them. Repeatable, it replaces the markers "
                                 "the PDK has on by default, e.g. NoRCX.drawing")
+        group.add_argument("--cut", dest='cut_specifications', action='append', default=None,
+                           metavar='CELL[=PREFIX]',
+                           help="Leave the instances of the cell (a name, or a glob pattern) to a model, "
+                                "like what an exclusion marker marks, but only on the shapes of the cell, so that "
+                                "routing over it stays extracted. Where a net enters "
+                                "it is a port of the netlist: PREFIX__PIN by a label of the cell on the net, "
+                                "otherwise PREFIX__NET_NUMBER, the prefix "
+                                "by default the name of the cell and a number. Needs --gds. Repeatable")
+        group.add_argument("--cut-keep-net", dest='cut_kept_net_patterns', action='append', default=None,
+                           metavar='NET',
+                           help="Extract the shapes of the net (a name, or a glob pattern) within the cells "
+                                "of --cut like the rest of the layout, e.g. a guard ring. Repeatable")
 
     @staticmethod
     def _add_pex25d_output_arguments(parser: argparse.ArgumentParser) -> None:
@@ -689,12 +708,19 @@ class KpexCLI:
                       f"{ExclusionMarkerMode.TIE} or {ExclusionMarkerMode.PORTS}")
                 found_errors = True
 
-            if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE:
-                exclusion_option = f"--exclusion-markers {args.exclusion_marker_mode}"
+            if args.cut_kept_net_patterns and not args.cut_specifications:
+                error(f"--cut-keep-net {args.cut_kept_net_patterns[0]} needs --cut")
+                found_errors = True
+
+            layout_options = [f"--exclusion-markers {args.exclusion_marker_mode}"
+                              if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE else None,
+                              f"--cut {args.cut_specifications[0]}" if args.cut_specifications else None]
+            for exclusion_option in filter(None, layout_options):
                 # NOTE: MAGIC would extract what is left out
                 if args.run_magic:
                     error(f"{exclusion_option} applies to the 2.5D engine, not to MAGIC")
                     found_errors = True
+            for exclusion_option in filter(None, layout_options):
                 # NOTE: the LVS database only has the shapes of nets
                 if args.gds_path is None:
                     error(f"{exclusion_option} reads its shapes from the layout, so it needs --gds, also with --lvsdb")
@@ -735,6 +761,14 @@ class KpexCLI:
                 for f in result.failures:
                     error(f"Invalid magicrc: {f.reason} at {str(f.path)}")
                     found_errors = True
+
+        args.cut_requests = []
+        if args.command == 'extract':
+            try:
+                args.cut_requests = parsed_cut_requests(args.cut_specifications or [])
+            except ExclusionError as e:
+                error(str(e))
+                found_errors = True
 
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
@@ -804,6 +838,22 @@ class KpexCLI:
                           f"not of the cell {args.effective_cell_name} of the GDS {args.gds_path}")
                     found_errors = True
                 args.effective_cell_name = top_cell.name
+
+        if args.cut_requests and getattr(args, 'layout', None) is not None and hasattr(args, 'effective_cell_name') \
+                and args.layout.cell(args.effective_cell_name) is not None:
+            cell_names = cells_called_by(args.layout, args.layout.cell(args.effective_cell_name))
+            for cut_request in args.cut_requests:
+                if not any(matches_name(name, cut_request.cell_pattern) for name in cell_names):
+                    error(f"--cut {cut_request.cell_pattern}: no such cell below {args.effective_cell_name}, "
+                          f"which has: {', '.join(cell_names) or 'none'}")
+                    found_errors = True
+            if not found_errors:
+                try:
+                    check_instances_of_cut_cells(args.layout, args.layout.cell(args.effective_cell_name),
+                                                 args.cut_requests)
+                except ExclusionError as e:
+                    error(str(e))
+                    found_errors = True
 
         if hasattr(args, 'effective_cell_name'):
             run_dir_id: str
@@ -1198,21 +1248,35 @@ class KpexCLI:
         :return: what is left out of the extraction, None if nothing is
         """
         marker_mode = args.exclusion_marker_mode
-        if marker_mode == ExclusionMarkerMode.IGNORE:
+        honors_markers = marker_mode != ExclusionMarkerMode.IGNORE
+        if not honors_markers and not args.cut_requests:
             return None
 
         substrate_layer_name = tech_info.internal_substrate_layer_name
         exclusions = Exclusions.from_layout(
             layout=args.layout,
             cell_name=args.effective_cell_name,
-            marker_layers=args.selected_marker_layers,
+            marker_layers=args.selected_marker_layers if honors_markers else [],
             dbu=pex_context.dbu,
             ports=marker_mode == ExclusionMarkerMode.PORTS,
-            substrate_layer_name=substrate_layer_name
+            substrate_layer_name=substrate_layer_name,
+            cut_requests=args.cut_requests,
+            cut_layers=CutLayers.of_tech(tech_info) if args.cut_requests else None
         )
-        if not exclusions.blocks:
+        if honors_markers and not any(block.kind == BlockKind.MARKER for block in exclusions.blocks):
             warning("The layout has no shapes on the exclusion markers, so the extraction leaves nothing out of them")
 
+        net_names = sorted(net.expanded_name() for net in pex_context.top_circuit.each_net())
+
+        def names_of_nets(option: str, pattern: str) -> List[NetName]:
+            matching_names = [name for name in net_names if matches_name(name, pattern)]
+            if not matching_names:
+                raise ExclusionError(f"{option} {pattern}: no such net, the nets are: {', '.join(net_names)}")
+            return matching_names
+
+        for pattern in args.cut_kept_net_patterns or []:
+            for net_name in names_of_nets('--cut-keep-net', pattern):
+                exclusions.without_shapes(pex_context.net_shapes_by_conductor_layer(net_name))
         prepare_exclusions(exclusions, pex_context, tech_info)
         return exclusions
 

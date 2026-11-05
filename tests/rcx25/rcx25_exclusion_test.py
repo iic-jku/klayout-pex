@@ -427,6 +427,7 @@ def test_model_between_the_ports_gives_the_flat_extraction(mode: PEXMode, tmp_pa
 @allure.tag(*tags)
 @pytest.mark.parametrize('cell_name, marker_mode, arguments', [
     ('exclusion_wire_through', ExclusionMarkerMode.PORTS, ()),
+    ('cut_coil', ExclusionMarkerMode.IGNORE, ('--cut', 'coil')),
 ])
 def test_warns_of_ports_that_a_netlist_without_nodes_cannot_have(cell_name: str,
                                                                  marker_mode: ExclusionMarkerMode,
@@ -545,6 +546,149 @@ def test_invalid_marker_layer_is_an_error_listing_the_valid_ones(tmp_path):
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
+def test_cut_cell_has_ports_named_after_its_labels(mode: PEXMode):
+    cli = Extraction('cut_coil', mode).run(ExclusionMarkerMode.IGNORE, '--cut', 'coil=xind', '--cut-keep-net', 'VDD')
+    assert cli.rcx25_netlist_problems == []
+    assert {'OSCP', 'OSCN', 'VCT', 'xind__LA', 'xind__LB', 'xind__CT', 'VC', 'VDD'} <= set(netlist_ports(cli))
+    values = resistances(cli)
+    assert all(key in values for key in (pair('OSCP', 'xind__LA'), pair('OSCN', 'xind__LB'), pair('VCT', 'xind__CT')))
+    # NOTE: the coil is left to the model
+    assert not {key for key in values if len(key & {'xind__LA', 'xind__LB', 'xind__CT'}) == 2}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_routing_over_a_cut_cell_stays_extracted():
+    # NOTE: what isn't a shape of the cell, unlike with a marker over all layers, so the Metal5 wire VC under the coil,
+    #       and the net VDD of its guard ring, keep all of their capacitances, also to the coil, which is on its ports
+    extraction = Extraction('cut_coil', PEXMode.CC)
+    ignored = capacitances(extraction.run(ExclusionMarkerMode.IGNORE))
+    cut = capacitances(extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'coil', '--cut-keep-net', 'VDD'))
+    coil = 'OSCN,OSCP,VCT'
+    assert set(ignored) == set(cut)
+    for key, value in ignored.items():
+        if key == pair(coil, 'VSUBS'):
+            assert cut[key] < value / 2.0
+        else:
+            assert cut[key] == value, key
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_shapes_of_a_kept_net_are_no_shapes_of_the_cut_cell():
+    extraction = Extraction('cut_coil', PEXMode.RC)
+    without_keep = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'coil=xind')
+    assert without_keep.rcx25_netlist_problems == []
+    # NOTE: the guard ring is left to the model, where the net enters the cell there is a port
+    assert 'xind__VDD_0' in netlist_ports(without_keep)
+    ring_left_out = capacitances(without_keep)[pair('VDD', 'VSUBS')]
+
+    with_keep = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'coil=xind', '--cut-keep-net', 'V?D')
+    assert with_keep.rcx25_netlist_problems == []
+    assert 'xind__VDD_0' not in netlist_ports(with_keep)
+    assert capacitances(with_keep)[pair('VDD', 'VSUBS')] > ring_left_out * 5.0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('specification, expected', [
+    ('coil', ['coil_0__LA', 'coil_1__LA']),
+    ('c?il', ['coil_0__LA', 'coil_1__LA']),
+    ('coil=x', ['x_0__LA', 'x_1__LA']),
+])
+def test_instances_of_a_cut_cell_have_ports_of_their_own(specification: str, expected: List[str]):
+    cut = Extraction('cut_coil_x2', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', specification)
+    assert cut.rcx25_netlist_problems == []
+    assert set(expected) <= set(netlist_ports(cut))
+
+
+def flat_and_composite_of_coil(mode: PEXMode, work_dir: str) -> Tuple[List[str], np.ndarray, np.ndarray]:
+    """
+    :return: the ports, and Y of the flat extraction of cut_coil, and of the one with the coil cut,
+             with the coil on its own as its model, at 1 GHz
+    """
+    def extracted_copy(name: str, cli: KpexCLI) -> Tuple[str, List[str]]:
+        path = os.path.join(work_dir, f"{name}.spice")
+        shutil.copyfile(netlist_path_of(cli), path)
+        return path, netlist_ports(cli)
+
+    flat_path, ports = extracted_copy('flat', Extraction('cut_coil', mode).run(ExclusionMarkerMode.IGNORE))
+    cut_path, cut_ports = extracted_copy('cut', Extraction('cut_coil', mode).run(ExclusionMarkerMode.IGNORE,
+                                                                                 '--cut', 'coil=xind',
+                                                                                 '--cut-keep-net', 'VDD'))
+    model = Extraction('cut_coil_model', mode).run(ExclusionMarkerMode.IGNORE)
+    model_path, model_ports = extracted_copy('model', model)
+
+    composite_path = os.path.join(work_dir, 'composite.spice')
+    connections_of_model = ' '.join(f"xind__{port}" if port != 'sub!' else port for port in model_ports)
+    with open(composite_path, 'w', encoding='utf-8') as f:
+        f.write(f".include {cut_path}\n"
+                f".include {model_path}\n"
+                f".SUBCKT composite {' '.join(ports)}\n"
+                f"Xoutside {' '.join(cut_ports)} cut_coil\n"
+                f"Xmodel {connections_of_model} cut_coil_model\n"
+                f".ENDS composite\n")
+
+    _, flat = ngspice_port_admittance(flat_path, 'cut_coil', ports, (9, 9), work_dir)
+    _, composite = ngspice_port_admittance(composite_path, 'composite', ports, (9, 9), work_dir)
+    return ports, flat[0], composite[0]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@requires_ngspice
+def test_model_of_a_cut_cell_gives_the_resistances_of_the_flat_extraction(tmp_path):
+    # The coil, extracted on its own, stands for its model
+    _, flat, composite = flat_and_composite_of_coil(PEXMode.R, str(tmp_path))
+    assert np.abs(flat).max() > 0.1
+    assert np.abs(composite) == pytest.approx(np.abs(flat), rel=1e-3)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@requires_ngspice
+def test_model_of_a_cut_cell_gives_the_capacitances_of_the_flat_extraction(tmp_path):
+    ports, flat, composite = flat_and_composite_of_coil(PEXMode.RC, str(tmp_path))
+    coil = [ports.index(name) for name in ('OSCP', 'OSCN', 'VCT')]
+    around = [ports.index(name) for name in ('VC', 'VDD')]
+    substrate = ports.index('sub!')
+
+    # NOTE: what is outside of the cell is what it was, so the resistances of the coil
+    assert np.abs(composite[np.ix_(coil, coil)]) == pytest.approx(np.abs(flat[np.ix_(coil, coil)]), rel=1e-3)
+    assert np.abs(composite[np.ix_(around, around)]) == pytest.approx(np.abs(flat[np.ix_(around, around)]), rel=1e-3)
+    assert np.abs(composite[np.ix_(around, [substrate])]) == pytest.approx(np.abs(flat[np.ix_(around, [substrate])]),
+                                                                           rel=1e-3)
+
+    # NOTE: the wires around the coil couple to the same metal, in sum over the coil,
+    #       at the ports of the cut instead of along the coil, which the coil's low resistance hides
+    assert np.abs(composite[np.ix_(coil, around)].sum(axis=0)) == \
+           pytest.approx(np.abs(flat[np.ix_(coil, around)].sum(axis=0)), rel=1e-3)
+
+    # NOTE: the model on its own has no shielding by these wires, which is the error of such a model
+    composite_to_substrate = np.abs(composite[np.ix_(coil, [substrate])].sum())
+    flat_to_substrate = np.abs(flat[np.ix_(coil, [substrate])].sum())
+    assert composite_to_substrate == pytest.approx(flat_to_substrate * 1.1, rel=0.03)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cut_of_a_cell_beside_a_marker_without_ports_is_a_port():
+    # NOTE: the lead LA goes on from the marker into the cell, without metal outside both between them
+    extraction = Extraction('cut_coil_beside_marker', PEXMode.R)
+    without_marker = resistances(extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'coil=xind',
+                                                '--cut-keep-net', 'VDD'))
+    cli = extraction.run(ExclusionMarkerMode.TIE, '--cut', 'coil=xind', '--cut-keep-net', 'VDD')
+    assert cli.rcx25_netlist_problems == []
+    assert 'xind__LA' in netlist_ports(cli)
+    # NOTE: half of the wire from OSCP to the cell is within the marker
+    assert resistances(cli)[pair('OSCP', 'xind__LA')] == pytest.approx(without_marker[pair('OSCP', 'xind__LA')] / 2.0,
+                                                                       rel=0.05)
+    assert resistances(cli)[pair('OSCN', 'xind__LB')] == without_marker[pair('OSCN', 'xind__LB')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_wire_between_parts_of_a_net_shields_them_from_each_other():
     # NOTE: the wire M ends in front of the bridge of the wires, or its gap, which changes the capacitances of M,
     #       but the wires only see each other beyond its end, as two nets do
@@ -553,6 +697,19 @@ def test_wire_between_parts_of_a_net_shields_them_from_each_other():
     assert pair('A', 'M') in joined and pair('A', 'M') in apart
     assert pair('A', 'B') not in joined and pair('A', 'B') not in apart
     assert joined[pair('A_B__m0_0', 'A_B__m0_1')] == pytest.approx(apart[pair('A__m0_0', 'B__m0_0')], abs=0.001)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_label_names_the_port_of_the_shapes_it_is_on_only():
+    # NOTE: the strips of the cell are joined only by a wire of the top cell, so one port would short that wire
+    cli = Extraction('cut_two_strips', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'blk')
+    assert cli.rcx25_netlist_problems == []
+    ports = netlist_ports(cli)
+    assert 'blk_0__X' in ports and 'blk_0__T_0' in ports, ports
+    values = resistances(cli)
+    assert values[pair('T', 'blk_0__X')] == pytest.approx(values[pair('T', 'blk_0__T_0')], rel=0.05)
+    assert values[pair('T', 'blk_0__X')] > 2.0
 
 
 @allure.parent_suite(parent_suite)
@@ -577,6 +734,24 @@ def test_substrate_net_stays_a_port_with_ports_at_markers():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_marker_without_ports_beside_a_cut_cell_keeps_the_capacitances_of_the_parts_of_the_net():
+    # NOTE: the wires are one net only by the cell, and the wire from B has nothing to do with the marker on the other
+    extraction = Extraction('cut_bend_beside_marker', PEXMode.RC)
+    cut = capacitances(extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'bend'))
+    with_marker_cli = extraction.run(ExclusionMarkerMode.TIE, '--cut', 'bend')
+    assert with_marker_cli.rcx25_netlist_problems == []
+    with_marker = capacitances(with_marker_cli)
+
+    def total_of(values: Values, nets: Set[str]) -> float:
+        return sum(value for key, value in values.items() if 'VSUBS' in key and key & nets)
+
+    assert pair('A', 'B') in cut and pair('A', 'B') in with_marker
+    b_nodes = {'B', 'bend_0__B_0'}
+    assert total_of(with_marker, b_nodes) == pytest.approx(total_of(cut, b_nodes), rel=1e-3)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 @pytest.mark.parametrize('marker_mode', [ExclusionMarkerMode.TIE, ExclusionMarkerMode.PORTS])
 def test_any_angle_wire_is_cut_at_a_marker(marker_mode: ExclusionMarkerMode):
     # NOTE: rounded differently, slivers along the cuts would join what is on both sides of the marker
@@ -586,6 +761,19 @@ def test_any_angle_wire_is_cut_at_a_marker(marker_mode: ExclusionMarkerMode):
     assert max(values.values()) < 10.0, values
     # NOTE: the capacitances of each side of the cut are on its side, not of the whole net
     assert len(values) >= 2
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name, cut', [('cut_rotated_cell', 'seg'), ('cut_rotated_child', 'block')])
+def test_cell_at_any_angle_is_an_error(cell_name: str, cut: str, tmp_path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', f"{cell_name}.gds.gz")
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--gds', gds_path,
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
+                                                    '--cut', cut))
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert 'an instance of the cell seg has an angle of 30' in ' '.join(output.split()), output
 
 
 @allure.parent_suite(parent_suite)
@@ -609,11 +797,57 @@ def test_capacitances_of_a_wire_over_a_well_stay_on_its_side_of_a_marker():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('marker_mode, arguments', [
+    (ExclusionMarkerMode.IGNORE, ('--cut', 'block=X')),
+    (ExclusionMarkerMode.PORTS, ()),
+])
+def test_port_along_a_wire_does_not_short_it(marker_mode: ExclusionMarkerMode, arguments: Tuple[str, ...]):
+    extraction = Extraction('cut_strip_along_wire', PEXMode.R)
+    flat = effective_resistance(resistances(extraction.run(ExclusionMarkerMode.IGNORE)), 'A', 'B')
+    cut = extraction.run(marker_mode, *arguments)
+    assert cut.rcx25_netlist_problems == []
+    assert len([port for port in netlist_ports(cut) if '__' in port]) == 1, netlist_ports(cut)
+    # NOTE: half the width along half the length
+    assert effective_resistance(resistances(cut), 'A', 'B') >= flat * 1.45
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_pin_of_the_substrate_within_a_marker_is_one_port_of_the_netlist():
     ported = Extraction('exclusion_substrate_pin_within', PEXMode.R).run(ExclusionMarkerMode.PORTS)
     ports = netlist_ports(ported)
     assert 'VSS' in ports
     assert len(set(ports)) == len(ports), ports
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_net_kept_out_of_a_cut_cell_keeps_its_well():
+    extraction = Extraction('cut_ntaps_in_one_nwell', PEXMode.R, pdk_name=PDKName.SKY130A)
+    flat = resistances(extraction.run(ExclusionMarkerMode.IGNORE))
+    assert effective_resistance(flat, 'VL', 'VR') > 2000.0
+
+    kept = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X', '--cut-keep-net', 'VL,VR')
+    assert not [port for port in netlist_ports(kept) if port.startswith('X__')]
+    assert resistances(kept) == flat
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
+def test_label_of_a_cut_cell_and_the_top_cell_stays_a_pin(mode: PEXMode):
+    cut = Extraction('cut_pad_with_same_label_in_top', mode).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert set(netlist_ports(cut)) - {'sub!'} == {'W', 'P', 'X__P'}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_no_warning_of_lost_plates_if_a_cut_cell_only_draws_wires_on_one():
+    extraction = Extraction('cap_cmim_20um_x_20um_metal5_routes_in_cells', PEXMode.RC)
+    with mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+        extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'ROUTE*')
+    assert not [c.args[0] for c in warning_mock.call_args_list if 'capacitances of their plates' in c.args[0]]
 
 
 @allure.parent_suite(parent_suite)
@@ -625,6 +859,67 @@ def test_net_labelled_like_a_piece_stays_apart_from_it():
 
     assert values('exclusion_wire_beside_label_of_piece') == \
         pytest.approx(values('exclusion_wire_beside_label_of_other_net'), rel=1e-3)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitances_of_a_well_within_a_cut_cell_go_to_the_ports_of_its_net():
+    extraction = Extraction('cut_well_under_wire', PEXMode.RC, pdk_name=PDKName.SKY130A)
+    flat = capacitances(extraction.run(ExclusionMarkerMode.IGNORE))
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    values = capacitances(cut)
+    assert not [nodes for nodes in values if any('#' in node for node in nodes)], values
+    assert values[pair('W', 'X__VDD_0')] == pytest.approx(sum(value for nodes, value in flat.items()
+                                                              if 'W' in nodes and 'VSUBS' not in nodes
+                                                              and 'sky130_gnd' not in nodes), rel=0.05)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_fill_of_a_cut_cell_is_left_out_with_it():
+    cut = Extraction('cut_plate_with_fill', PEXMode.CC).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert list(capacitances(cut)) == [pair('VSUBS', 'W')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_instances_of_cut_cells_are_checked_before_lvs(tmp_path):
+    gds_path = PDKTestConfig(PDKName.IHP_SG13G2).gds_path('test_patterns', 'cut_rotated_cell.gds.gz')
+    with mock.patch.object(KpexCLI, 'create_lvsdb', side_effect=AssertionError('LVS runs')):
+        code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--gds', gds_path, '--cut', 'seg'))
+    assert code != 0, output
+    assert 'has an angle of 30' in ' '.join(output.split()), output
+    assert 'LVS runs' not in output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_numbered_port_stays_apart_from_a_label_of_its_name():
+    cut = Extraction('cut_wires_with_label_like_numbered_port', PEXMode.R, pdk_name=PDKName.SKY130A) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    values = resistances(cut)
+    # NOTE: 2 wires, of 2 µm each with a part of the wire that joins them
+    assert values[pair('VDD', 'X__VDD_0')] == pytest.approx(values[pair('VDD', 'X__VDD_1')], rel=0.2)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_label_without_a_pin_shape_stays_a_port_beside_those_of_a_cut():
+    cut = Extraction('cut_wire_with_label_without_pin', PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert {'A', 'X__A_0'} <= set(netlist_ports(cut))
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name', ['cut_taps_with_labels_a_b', 'cut_taps_with_labels_b_a'])
+def test_net_of_a_pin_and_a_port_only_the_substrate_joins_stays_on_the_pin(cell_name: str):
+    cut = Extraction(cell_name, PEXMode.R, blackbox=True, pdk_name=PDKName.GF180MCUD) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
 
 
 @allure.parent_suite(parent_suite)
@@ -646,6 +941,24 @@ def test_net_entirely_within_a_marker_has_a_port_at_its_pin():
     cli = Extraction('exclusion_nmos_diode2_all', PEXMode.RC).run(ExclusionMarkerMode.PORTS)
     assert cli.rcx25_netlist_problems == []
     assert {'VDD', 'VSS'} <= set(netlist_ports(cli)), netlist_ports(cli)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_warns_of_a_net_through_abutting_cut_cells():
+    with mock.patch('klayout_pex.rcx25.r.r_extractor.warning') as warning_mock:
+        cli = Extraction('cut_abutting_wires', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'seg')
+    assert cli.rcx25_netlist_problems == []
+    assert any('seg_0, seg_1, where they abut' in c.args[0] for c in warning_mock.call_args_list)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
+def test_label_of_a_cut_cell_under_a_via_from_above_names_the_port(mode: PEXMode):
+    cut = Extraction('cut_pad_via_on_label', mode).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert set(netlist_ports(cut)) - {'sub!'} == {'W', 'X__P'}
 
 
 @allure.parent_suite(parent_suite)
@@ -702,6 +1015,51 @@ def test_taps_and_wells_do_not_bypass_the_model_of_a_rail(pdk_name: PDKName, arg
     assert len(ports) == 2, netlist_ports(ported)
     assert effective_resistance(resistances(ported), 'A', 'B', joined=ports) == pytest.approx(tied, rel=1e-6)
     assert effective_resistance(resistances(ported), 'A', 'B') == float('inf')
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('arguments, message', [
+    (('--cut', 'nope'), 'no such cell below cut_coil, which has: coil'),
+    (('--cut', '=x'), 'expected CELL or CELL=PREFIX'),
+    (('--cut', 'coil='), 'expected CELL or CELL=PREFIX'),
+    (('--cut', 'coil=x y'), 'may only have letters, digits and _'),
+    (('--cut', 'coil=x', '--cut', 'other=x'), 'given several times: x'),
+    (('--cut-keep-net', 'VDD'), '--cut-keep-net VDD needs --cut'),
+    (('--cut', 'coil=a', '--cut', 'coil=b'), '--cut coil=b: all instances of its cells are of another --cut'),
+    (('--cut', 'coil', '--magic'), 'applies to the 2.5D engine, not to MAGIC'),
+])
+def test_invalid_cut_is_an_error_listing_the_valid_values(tmp_path, arguments: Tuple[str, ...], message: str):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', 'cut_coil.gds.gz')
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--gds', gds_path,
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path), *arguments))
+    assert code != 0, output
+    assert message in ' '.join(output.split()), output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cut_needs_the_layout(tmp_path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', 'cut_coil.gds.gz')
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D',
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
+                                                    '--cut', 'coil'))
+    assert code != 0, output
+    assert 'needs --gds' in ' '.join(output.split()), output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_unknown_kept_net_is_an_error_listing_the_nets(tmp_path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', 'cut_coil.gds.gz')
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--gds', gds_path,
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
+                                                    '--cut', 'coil', '--cut-keep-net', 'nope'))
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert 'no such net' in ' '.join(output.split()) and 'VDD' in output, output
 
 
 @allure.parent_suite(parent_suite)

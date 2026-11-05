@@ -41,15 +41,18 @@ NOTE: with ports at the cuts, the parts of a net that only a model joins are apa
 
 from __future__ import annotations
 
-from collections import defaultdict
-from dataclasses import dataclass
+from collections import Counter, defaultdict
+from dataclasses import dataclass, field
 from enum import StrEnum
+from fnmatch import fnmatchcase
 import re
 from typing import *
 
 import klayout.db as kdb
 
 from ..types import GDSPair, LayerName, NetName
+
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 
 Interval = Tuple[float, float]  # a part of an edge, by the parameter t ∈ [0, 1] along it
@@ -246,6 +249,98 @@ def selected_marker_layers(tech_markers: Iterable[Any],
     return [MarkerLayer.parse(specification, marker_layers, stack_layer_names) for specification in specifications]
 
 
+@dataclass(frozen=True)
+class CutRequest:
+    """
+    The instances of the cells to leave out of the extraction, for models of them (kpex --cut)
+    """
+    cell_pattern: str  # a name of a cell, or a glob pattern of names
+    prefix: Optional[str] = None  # of the names of the ports, by default the name of the cell and a number
+
+    @property
+    def specification(self) -> str:
+        return self.cell_pattern if self.prefix is None else f"{self.cell_pattern}={self.prefix}"
+
+    @classmethod
+    def parse(cls, specification: str) -> CutRequest:
+        """
+        :param specification: CELL or CELL=PREFIX
+        """
+        cell_pattern, separator, prefix = specification.partition('=')
+        if not cell_pattern or (separator and not prefix):
+            raise ExclusionError(f"--cut {specification}: expected CELL or CELL=PREFIX")
+        if prefix and re.fullmatch(r'[A-Za-z0-9_]+', prefix) is None:
+            raise ExclusionError(f"--cut {specification}: the prefix names ports of the netlist, "
+                                 f"so it may only have letters, digits and _")
+        return cls(cell_pattern, prefix or None)
+
+
+def parsed_cut_requests(specifications: Iterable[str]) -> List[CutRequest]:
+    """
+    :raises ExclusionError: if one is invalid, or two have the same prefix, whose ports would be one node
+    """
+    requests = [CutRequest.parse(specification) for specification in specifications]
+    prefixes = Counter(request.prefix for request in requests if request.prefix is not None)
+    duplicates = sorted(prefix for prefix, count in prefixes.items() if count > 1)
+    if duplicates:
+        raise ExclusionError(f"--cut: each one needs a prefix of its own, given several times: {', '.join(duplicates)}")
+    return requests
+
+
+@dataclass(frozen=True)
+class CutLayers:
+    """
+    Which shapes of a cell are on which layers of the stack
+    """
+    # the drawn layers of the conductors with their fill, by layer of the stack: the own one (metal, wells),
+    # or the diffusion for what LVS computes from it (e.g. the source/drain), as its implants overhang
+    gds_pairs_by_layer: Mapping[LayerName, Collection[GDSPair]]
+    # the labels of the metal, by layer of the stack
+    label_gds_pairs: Mapping[LayerName, GDSPair]
+    diffusion_gds_pairs: Collection[GDSPair]
+
+    @classmethod
+    def of_tech(cls, tech_info: Any) -> CutLayers:
+        """
+        :param tech_info: the TechInfo
+        """
+        def pair(gds_pair: Any) -> GDSPair:
+            return gds_pair.layer, gds_pair.datatype
+
+        def drawn_gds_pairs(layer: Any) -> Tuple[GDSPair, ...]:
+            return (pair(layer.drw_gds_pair), pair(layer.fill_gds_pair)) if layer.HasField('fill_gds_pair') \
+                else (pair(layer.drw_gds_pair),)
+
+        LP = tech_pb2.LayerInfo.Purpose
+        layers = list(tech_info.tech.layers)
+        diffusion_gds_pairs = {gds_pair for layer in layers
+                               if layer.purpose in (LP.PURPOSE_DIFF, LP.PURPOSE_NTAP_OR_PTAP)
+                               for gds_pair in drawn_gds_pairs(layer)}
+        gds_pairs_by_layer: Dict[LayerName, Collection[GDSPair]] = {
+            layer_name: diffusion_gds_pairs for layer_name in tech_info.process_diffusion_layer_names
+        }
+        gds_pairs_by_layer.update({layer.name: drawn_gds_pairs(layer) for layer in layers
+                                   if layer.purpose in (LP.PURPOSE_METAL, LP.PURPOSE_MIM_CAP, LP.PURPOSE_NWELL,
+                                                        LP.PURPOSE_PWELL, LP.PURPOSE_DNWELL)})
+        return cls(gds_pairs_by_layer=gds_pairs_by_layer,
+                   label_gds_pairs={layer.name: pair(layer.label_gds_pair) for layer in layers
+                                    if layer.purpose in (LP.PURPOSE_METAL, LP.PURPOSE_MIM_CAP)
+                                    and layer.HasField('label_gds_pair')},
+                   diffusion_gds_pairs=diffusion_gds_pairs)
+
+
+@dataclass(frozen=True)
+class BlockLabel:
+    text: str
+    position: kdb.Point
+    layer_name: LayerName
+
+
+class BlockKind(StrEnum):
+    MARKER = 'marker'
+    CUT = 'cut'
+
+
 @dataclass
 class ExcludedBlock:
     """
@@ -256,6 +351,8 @@ class ExcludedBlock:
     layer_regions: Optional[Dict[LayerName, kdb.Region]] = None  # its shapes by layer, it isn't on other layers
     capacitance_pair: Optional[FrozenSet[LayerName]] = None  # it only leaves out the capacitances between these layers
     ports: bool = False  # where a net enters it is a port, otherwise it stays connected across it
+    kind: BlockKind = BlockKind.MARKER
+    labels: List[BlockLabel] = field(default_factory=list)  # of a cut cell, which name the ports
 
     def region_of(self, layer_name: LayerName) -> Optional[kdb.Region]:
         return self.region if self.layer_regions is None else self.layer_regions.get(layer_name, None)
@@ -283,6 +380,187 @@ def polygons_by_center_inside(shapes: kdb.Region, mask: kdb.Region) -> kdb.Regio
     return within
 
 
+def cells_called_by(layout: kdb.Layout, cell: kdb.Cell) -> List[str]:
+    """
+    :return: the names of the cells below the cell, sorted
+    """
+    return sorted(layout.cell(index).name for index in cell.called_cells())
+
+
+def matches_name(name: str, pattern: str) -> bool:
+    """
+    :return: whether the name is the pattern (e.g. data[1], whose brackets a pattern takes as a set), or matches it
+    """
+    return name == pattern or fnmatchcase(name, pattern)
+
+
+def instances_of_cut_cells(layout: kdb.Layout,
+                           top_cell: kdb.Cell,
+                           cut_requests: Sequence[CutRequest],
+                           label_gds_pairs: Iterable[GDSPair],
+                           scale: kdb.ICplxTrans) -> Tuple[Dict[CutRequest, List[Tuple[kdb.Cell, kdb.ICplxTrans]]],
+                                                           Set[Tuple[str, kdb.Point]]]:
+    """
+    :param label_gds_pairs: of the labels of the metal
+    :param scale: to the coordinates of the blocks
+    :return: the instances of the cells of each request, sorted, but those within another one of them,
+             and the labels of the rest of the layout on the metal, by their texts and positions
+    :raises ExclusionError: if one isn't at a multiple of 90°, or something below it
+    """
+    instances_by_request: Dict[CutRequest, List[Tuple[kdb.Cell, kdb.ICplxTrans]]] = {r: [] for r in cut_requests}
+    label_layer_indexes = [layer_index for layer_index in (layout.find_layer(*gds_pair) for gds_pair in label_gds_pairs)
+                           if layer_index is not None]
+    own_labels_by_cell: Dict[int, List[Tuple[str, kdb.Point]]] = {}
+    labels_of_rest: Set[Tuple[str, kdb.Point]] = set()
+    orientations_checked: Set[Tuple[int, float]] = set()
+
+    def any_angle_instance_at(cell: kdb.Cell, trans: kdb.ICplxTrans) -> Optional[Tuple[kdb.Cell, float]]:
+        """
+        :return: the cell of an instance at or below this one that isn't at a multiple of 90°, with its angle
+        """
+        if not trans.is_ortho():
+            return cell, trans.angle
+        if (cell.cell_index(), trans.angle) not in orientations_checked:
+            orientations_checked.add((cell.cell_index(), trans.angle))
+            for instance in cell.each_inst():
+                found = any_angle_instance_at(layout.cell(instance.cell_index), trans * instance.cplx_trans)
+                if found is not None:
+                    return found
+        return None
+
+    def own_labels(cell: kdb.Cell) -> List[Tuple[str, kdb.Point]]:
+        labels = own_labels_by_cell.get(cell.cell_index(), None)
+        if labels is None:
+            labels = [(shape.text.string, kdb.Point(shape.text.x, shape.text.y))
+                      for layer_index in label_layer_indexes
+                      for shape in cell.shapes(layer_index).each(kdb.Shapes.STexts)]
+            own_labels_by_cell[cell.cell_index()] = labels
+        return labels
+
+    def visit(cell: kdb.Cell, trans: kdb.ICplxTrans):
+        labels_of_rest.update((text, trans * position) for text, position in own_labels(cell))
+        for instance in cell.each_inst():
+            child = layout.cell(instance.cell_index)
+            request = next((r for r in cut_requests if matches_name(child.name, r.cell_pattern)), None)
+            for instance_trans in instance.cell_inst.each_cplx_trans():
+                child_trans = trans * instance_trans
+                if request is not None:
+                    # NOTE: of such an instance, LVS only has the bounding boxes of the shapes
+                    any_angle_instance = any_angle_instance_at(child, child_trans)
+                    if any_angle_instance is not None:
+                        raise ExclusionError(f"--cut {request.cell_pattern}: an instance of the cell "
+                                             f"{any_angle_instance[0].name} has an angle of "
+                                             f"{any_angle_instance[1]:.6g}°, not a multiple of 90°")
+                    instances_by_request[request].append((child, child_trans))
+                else:
+                    visit(child, child_trans)
+
+    visit(top_cell, scale)
+    for instances in instances_by_request.values():
+        instances.sort(key=lambda i: (i[0].name, (i[1] * i[0].bbox()).bottom, (i[1] * i[0].bbox()).left))
+    return instances_by_request, labels_of_rest
+
+
+def names_of_blocks_of_cut_cells(instances_by_request: Mapping[CutRequest, Sequence[Tuple[kdb.Cell, kdb.ICplxTrans]]]) \
+        -> Dict[CutRequest, List[str]]:
+    """
+    :param instances_by_request: see instances_of_cut_cells
+    :return: the names of the blocks of the instances, in their order
+    :raises ExclusionError: if several instances would have one name
+    """
+    names_by_request: Dict[CutRequest, List[str]] = {}
+    instance_counts: Counter[str] = Counter()
+    for request, instances in instances_by_request.items():
+        names_by_request[request] = []
+        for index, (cell, _) in enumerate(instances):
+            if request.prefix is None:
+                # NOTE: per cell, so that another cell of a pattern doesn't rename its ports
+                safe_cell_name = re.sub(r'[^A-Za-z0-9_]', '_', cell.name)
+                name = f"{safe_cell_name}_{instance_counts[safe_cell_name]}"
+                instance_counts[safe_cell_name] += 1
+            else:
+                name = request.prefix if len(instances) == 1 else f"{request.prefix}_{index}"
+            names_by_request[request].append(name)
+
+    names = Counter(name for request_names in names_by_request.values() for name in request_names)
+    duplicates = sorted(name for name, count in names.items() if count > 1)
+    if duplicates:
+        raise ExclusionError(f"--cut: several instances would have these names, whose ports would be one node, "
+                             f"as the numbers of the instances of a cell follow its prefix: {', '.join(duplicates)}")
+    return names_by_request
+
+
+def check_instances_of_cut_cells(layout: kdb.Layout, top_cell: kdb.Cell, cut_requests: Sequence[CutRequest]):
+    """
+    :raises ExclusionError: see instances_of_cut_cells, names_of_blocks_of_cut_cells,
+                            or if a request has no instances, as those of its cells are of another request,
+                            or within another cut cell
+    """
+    instances_by_request, _ = instances_of_cut_cells(layout, top_cell, cut_requests, (), kdb.ICplxTrans())
+    names_of_blocks_of_cut_cells(instances_by_request)
+    for request, instances in instances_by_request.items():
+        if not instances:
+            raise ExclusionError(f"--cut {request.specification}: all instances of its cells are of another --cut "
+                                 f"before it, or within a cell of one")
+
+
+def blocks_of_cut_cells(layout: kdb.Layout,
+                        top_cell: kdb.Cell,
+                        cut_requests: Sequence[CutRequest],
+                        cut_layers: CutLayers,
+                        scale: kdb.ICplxTrans) -> Tuple[List[ExcludedBlock], Set[Tuple[str, kdb.Point]]]:
+    """
+    :return: a block of each instance of the cells, but those within another one of them,
+             and the labels of the rest of the layout on the metal, by their texts and positions
+    """
+    instances_by_request, labels_of_rest = instances_of_cut_cells(layout, top_cell, cut_requests,
+                                                                  cut_layers.label_gds_pairs.values(), scale)
+    names_by_request = names_of_blocks_of_cut_cells(instances_by_request)
+
+    def shapes_of(cell: kdb.Cell, gds_pairs: Iterable[GDSPair]) -> kdb.Region:
+        shapes = kdb.Region()
+        for gds_pair in gds_pairs:
+            layer_index = layout.find_layer(*gds_pair)
+            if layer_index is not None:
+                shapes += kdb.Region(cell.begin_shapes_rec(layer_index))
+        return shapes.merged()
+
+    def labels_of(cell: kdb.Cell) -> List[BlockLabel]:
+        labels: List[BlockLabel] = []
+        for layer_name, gds_pair in cut_layers.label_gds_pairs.items():
+            layer_index = layout.find_layer(*gds_pair)
+            if layer_index is None:
+                continue
+            shape_iterator = cell.begin_shapes_rec(layer_index)
+            while not shape_iterator.at_end():
+                shape = shape_iterator.shape()
+                if shape.is_text():
+                    text = shape.text.transformed(shape_iterator.trans())
+                    labels.append(BlockLabel(text.string, kdb.Point(text.x, text.y), layer_name))
+                shape_iterator.next()
+        return labels
+
+    blocks: List[ExcludedBlock] = []
+    for request, instances in instances_by_request.items():
+        for name, (cell, trans) in zip(names_by_request[request], instances):
+            # NOTE: one region for the layers of the same shapes, as a region of a layer goes by its identity
+            regions_by_gds_pairs: Dict[FrozenSet[GDSPair], kdb.Region] = {}
+            layer_regions: Dict[LayerName, kdb.Region] = {}
+            for layer_name, gds_pairs in cut_layers.gds_pairs_by_layer.items():
+                key = frozenset(gds_pairs)
+                if key not in regions_by_gds_pairs:
+                    regions_by_gds_pairs[key] = shapes_of(cell, gds_pairs).transformed(trans)
+                layer_regions[layer_name] = regions_by_gds_pairs[key]
+            region = kdb.Region()
+            for layer_region in regions_by_gds_pairs.values():
+                region += layer_region
+
+            labels = [BlockLabel(label.text, trans * label.position, label.layer_name) for label in labels_of(cell)]
+            blocks.append(ExcludedBlock(name=name, region=region.merged(), layer_regions=layer_regions, ports=True,
+                                        kind=BlockKind.CUT, labels=labels))
+    return blocks, labels_of_rest
+
+
 class Exclusions:
     """
     What the extraction leaves out of a layout, as blocks that models stand for
@@ -304,7 +582,8 @@ class Exclusions:
         for index, block in enumerate(blocks):
             self.block_boxes.insert(kdb.BoxWithProperties(block.region.bbox(), {'block': index}))
 
-        self._masks: Dict[Tuple[LayerName, Optional[bool]], kdb.Region] = {}
+        self._masks: Dict[Tuple[LayerName, Optional[bool], Optional[BlockKind]], kdb.Region] = {}
+        self._label_positions: Dict[Tuple[int, LayerName], kdb.Shapes] = {}  # see labels_at
         self.regions = RegionIndex()
 
         # the nets within the blocks that nothing connects to the netlist (see net_of_capacitance)
@@ -312,6 +591,11 @@ class Exclusions:
 
         # the pieces of the nets with ports at the blocks, by the resistance extraction
         self.pieces_by_net: Dict[NetName, List[NetPiece]] = {}
+
+        # the labels of the layout on the metal, of the cut cells and outside them, by their texts and positions
+        self.labels_of_cut_cells: Set[Tuple[str, kdb.Point]] = {(label.text, label.position)
+                                                                for block in blocks for label in block.labels}
+        self.labels_of_rest: Set[Tuple[str, kdb.Point]] = set()
 
     @classmethod
     def from_region(cls,
@@ -354,7 +638,9 @@ class Exclusions:
                     marker_layers: Iterable[MarkerLayer],
                     dbu: float,
                     ports: bool = False,
-                    substrate_layer_name: LayerName = 'VSUBS') -> Exclusions:
+                    substrate_layer_name: LayerName = 'VSUBS',
+                    cut_requests: Sequence[CutRequest] = (),
+                    cut_layers: Optional[CutLayers] = None) -> Exclusions:
         """
         :param layout: the layout the LVS database is of
         :param cell_name: the top cell of the extraction
@@ -362,6 +648,8 @@ class Exclusions:
         :param dbu: the database unit of the extraction
         :param ports: where a net enters a marker is a port, otherwise it stays connected across the marker
         :param substrate_layer_name: see __init__
+        :param cut_requests: the cells to leave out, with ports where a net enters them
+        :param cut_layers: which shapes of a cell are on which layers, for the cut requests
         """
         cell = layout.cell(cell_name)
         scale = kdb.ICplxTrans(layout.dbu / dbu)
@@ -371,23 +659,46 @@ class Exclusions:
             if layer_index is not None:
                 region = kdb.Region(cell.begin_shapes_rec(layer_index)).transformed(scale)
                 blocks.extend(cls.blocks_of_marker_region(region, marker_layer, ports, first_index=len(blocks)))
-        return cls(blocks, substrate_layer_name)
+        labels_of_rest: Set[Tuple[str, kdb.Point]] = set()
+        if cut_requests:
+            blocks_of_cells, labels_of_rest = blocks_of_cut_cells(layout, cell, cut_requests, cut_layers, scale)
+            blocks.extend(blocks_of_cells)
+        exclusions = cls(blocks, substrate_layer_name)
+        exclusions.labels_of_rest = labels_of_rest
+        return exclusions
+
+    def without_shapes(self, shapes_by_layer: Mapping[LayerName, kdb.Region]):
+        """
+        Takes shapes out of the cut cells (kpex --cut-keep-net), so that they are extracted like the rest of the layout
+
+        :param shapes_by_layer: the shapes by layer of the stack
+        """
+        for block in self.blocks:
+            if block.kind == BlockKind.CUT:
+                for layer_name, shapes in shapes_by_layer.items():
+                    region = block.region_of(layer_name)
+                    if region is not None:
+                        block.layer_regions[layer_name] = (region - shapes).merged()
+        self._masks.clear()
 
     def mask(self,
              layer_name: LayerName,
-             ports: Optional[bool] = None) -> kdb.Region:
+             ports: Optional[bool] = None,
+             kind: Optional[BlockKind] = None) -> kdb.Region:
         """
         :param layer_name: a layer of the stack
         :param ports: only of the blocks with ports at their cuts, or without
+        :param kind: only of the blocks of this kind
         :return: the shapes of the blocks on the layer, but of those that only leave out some capacitances
         """
-        key = (layer_name, ports)
+        key = (layer_name, ports, kind)
         mask = self._masks.get(key, None)
         if mask is None:
             mask = kdb.Region()
             for block in self.blocks:
                 region = block.region_of(layer_name)
-                if region is not None and block.capacitance_pair is None and ports in (None, block.ports):
+                if region is not None and block.capacitance_pair is None and ports in (None, block.ports) \
+                        and kind in (None, block.kind):
                     mask += region
             mask = mask.merged()
             self._masks[key] = mask
@@ -396,11 +707,12 @@ class Exclusions:
     def mask_near(self,
                   box: kdb.Box,
                   layer_name: LayerName,
-                  ports: Optional[bool] = None) -> kdb.Region:
+                  ports: Optional[bool] = None,
+                  kind: Optional[BlockKind] = None) -> kdb.Region:
         """
         :return: the polygons of the mask (see mask) that touch the box
         """
-        return self.regions.near(self.mask(layer_name, ports), box)
+        return self.regions.near(self.mask(layer_name, ports, kind), box)
 
     def block_indexes_touching(self, box: kdb.Box) -> List[int]:
         """
@@ -437,6 +749,35 @@ class Exclusions:
             return block.ports and region is not None and not (polygon & self.regions.near(region, box)).is_empty()
 
         return [index for index in self.block_indexes_touching(box) if overlaps(self.blocks[index])]
+
+    def is_only_label_of_cut_cell(self, text: str, position: kdb.Point) -> bool:
+        """
+        :return: whether a cut cell has the label, and the rest of the layout not
+        """
+        return (text, position) in self.labels_of_cut_cells and (text, position) not in self.labels_of_rest
+
+    def is_only_named_by_cut_cells(self, net_name: NetName) -> bool:
+        """
+        :return: whether all labels that the net is named after (e.g. A,B) are labels of the cut cells only
+        """
+        texts_of_cut_cells = {text for text, _ in self.labels_of_cut_cells}
+        texts_of_rest = {text for text, _ in self.labels_of_rest}
+        return all(text in texts_of_cut_cells and text not in texts_of_rest for text in net_name.split(','))
+
+    def labels_at(self, block_index: int, layer_name: LayerName, box: kdb.Box) -> Dict[int, BlockLabel]:
+        """
+        :return: the labels of the cell of the block at the box, on the layer, by their indexes in its list
+        """
+        block = self.blocks[block_index]
+        positions = self._label_positions.get((block_index, layer_name), None)
+        if positions is None:
+            positions = kdb.Shapes()
+            for index, label in enumerate(block.labels):
+                if label.layer_name == layer_name:
+                    positions.insert(kdb.BoxWithProperties(kdb.Box(label.position, label.position), {'label': index}))
+            self._label_positions[(block_index, layer_name)] = positions
+        indexes = (shape.property('label') for shape in positions.each_touching(kdb.Shapes.SAll, box))
+        return {index: block.labels[index] for index in indexes}
 
     def net_of_capacitance(self, net_name: NetName, substrate_net_name: NetName) -> NetName:
         """

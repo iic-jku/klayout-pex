@@ -55,6 +55,7 @@ VIA1:         GDSPair = (19, 0)
 VIA2:         GDSPair = (29, 0)
 METAL3:       GDSPair = (30, 0)
 METAL3_PIN:   GDSPair = (30, 2)
+VIA3:         GDSPair = (49, 0)
 METAL4:       GDSPair = (50, 0)
 METAL4_PIN:   GDSPair = (50, 2)
 METAL5:       GDSPair = (67, 0)
@@ -604,6 +605,104 @@ def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) ->
     return p
 
 
+COIL_LOOP_BOXES = ((-30000, 10000, -24000, 70000), (24000, 10000, 30000, 70000),
+                   (-30000, 64000, 30000, 70000),
+                   (-30000, 10000, -16000, 16000), (16000, 10000, 30000, 16000),
+                   (-22000, 0, -16000, 16000), (16000, 0, 22000, 16000))
+COIL_CENTER_TAP_BOX = (-2000, 0, 2000, 69000)
+COIL_VIA_BOX = (-1000, 65500, 1000, 68500)
+COIL_LABELS = ((TOPMETAL2, 'LA', -19000, 2000), (TOPMETAL2, 'LB', 19000, 2000), (TOPMETAL1, 'CT', 0, 2000))
+
+
+def cut_coil_model() -> Pattern:
+    """
+    The coil of cut_coil_pattern on its own, without its guard ring, with pins on its leads, as a model
+    that goes between the ports of the cut
+    """
+    p = pattern('cut_coil_model')
+    for box in COIL_LOOP_BOXES:
+        p.box(TOPMETAL2, *box)
+    p.box(TOPMETAL1, *COIL_CENTER_TAP_BOX)
+    p.box(TOPVIA2, *COIL_VIA_BOX)
+    for (layer, text, x, y), pin_layer, half_width in zip(COIL_LABELS, (TOPMETAL2_PIN, TOPMETAL2_PIN, TOPMETAL1_PIN),
+                                                          (3000, 3000, 2000)):
+        p.box(pin_layer, x - half_width, 0, x + half_width, 2)
+        p.label(layer, text, x, 1)
+    return p
+
+
+def cut_coil_pattern(name: str, instance_count: int = 1) -> Pattern:
+    """
+    The tank of an LC oscillator with its coil in a child cell, to cut out for an EM model:
+      - the child cell has a TopMetal2 loop with stubs of its leads, a center tap on TopMetal1 with a TopVia2,
+        the labels LA, LB and CT on them, and a guard ring on TopMetal1 around all of it, labeled VDD, with a gap
+      - the top cell has wires that go on from the stubs to OSCP, OSCN and VCT, and a Metal5 wire VC under the coil,
+        which is no shape of the cell
+    """
+    p = pattern(name)
+    coil = p.layout.create_cell('coil')
+
+    def box(layer: GDSPair, x1: int, y1: int, x2: int, y2: int):
+        coil.shapes(p.layout.layer(*layer)).insert(kdb.Box(x1, y1, x2, y2))
+
+    def label(layer: GDSPair, text: str, x: int, y: int):
+        coil.shapes(p.layout.layer(*p.label_layer_by_layer[layer])).insert(kdb.Text(text, kdb.Trans(x, y)))
+
+    for loop_box in COIL_LOOP_BOXES:
+        box(TOPMETAL2, *loop_box)
+    box(TOPMETAL1, *COIL_CENTER_TAP_BOX)
+    box(TOPVIA2, *COIL_VIA_BOX)
+    for coil_label in COIL_LABELS:
+        label(*coil_label)
+    for x1, y1, x2, y2 in ((-45000, -5000, -40000, 85000), (40000, -5000, 45000, 85000),
+                           (-45000, 80000, 45000, 85000),
+                           (-45000, -5000, -26000, 0), (26000, -5000, 45000, 0)):
+        box(TOPMETAL1, x1, y1, x2, y2)
+
+    for index in range(instance_count):
+        x = index * 150000
+        p.top.insert(kdb.CellInstArray(coil.cell_index(), kdb.Trans(x, 0)))
+        suffix = '' if instance_count == 1 else str(index)
+        for layer, pin_layer, wire_x, text in ((TOPMETAL2, TOPMETAL2_PIN, -19000, f"OSCP{suffix}"),
+                                               (TOPMETAL2, TOPMETAL2_PIN, 19000, f"OSCN{suffix}"),
+                                               (TOPMETAL1, TOPMETAL1_PIN, 0, f"VCT{suffix}")):
+            half_width = 3000 if layer == TOPMETAL2 else 2000
+            p.box(layer, x + wire_x - half_width, -20000, x + wire_x + half_width, 1000)
+            p.box(pin_layer, x + wire_x - 1000, -20000, x + wire_x + 1000, -18000)
+            p.label(layer, text, x + wire_x, -19000)
+        # NOTE: the guard ring joins the net by a stub of the top cell, which has its label
+        p.box(TOPMETAL1, x - 45000, 40000, x - 50000, 42000)
+        p.box(TOPMETAL1_PIN, x - 50000, 40000, x - 49000, 42000)
+        p.label(TOPMETAL1, f"VDD{suffix}", x - 49500, 41000)
+        p.box(METAL5, x - 60000, 30000, x + 60000, 32000)
+        p.box(METAL5_PIN, x - 60000, 30000, x - 59000, 32000)
+        p.label(METAL5, f"VC{suffix}", x - 59500, 31000)
+    return p
+
+
+def cut_coil_beside_marker() -> Pattern:
+    """
+    cut_coil with a marker over the half of the lead to OSCP next to the cell, which it abuts
+    """
+    p = cut_coil_pattern('cut_coil_beside_marker')
+    p.box(NORCX, -25000, -10000, -13000, 0)
+    return p
+
+
+def cut_abutting_wires() -> Pattern:
+    """
+    A Metal3 wire through two instances of the cell seg, which abut, with wires of the top cell to the pins A and B
+    """
+    p = pattern('cut_abutting_wires')
+    segment = p.layout.create_cell('seg')
+    segment.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 10000, 2000))
+    for x in (0, 10000):
+        p.top.insert(kdb.CellInstArray(segment.cell_index(), kdb.Trans(x, 0)))
+    metal3_wire(p, -10000, 0, 0, 2000, 'A')
+    metal3_wire(p, 20000, 0, 30000, 2000, 'B')
+    return p
+
+
 def exclusion_hairpin_around_wire(name: str, bridge_gap: int) -> Pattern:
     """
     Metal3 wires from A and B, 6 µm apart, which end within a marker, joined there by a bridge (or two nets with a gap),
@@ -654,6 +753,53 @@ def exclusion_slanted_wire() -> Pattern:
     p.box(METAL3_PIN, 19800, 13000, 20000, 13200)
     p.label(METAL3, 'B', 19900, 13100)
     p.box(NORCX, -5000, -20000, 5000, 20000)
+    return p
+
+
+def cut_two_strips() -> Pattern:
+    """
+    The cell blk with two strips of Metal3, the label X on one of them, which only a wire of the top cell joins,
+    with the pin T
+    """
+    p = pattern('cut_two_strips')
+    block = p.layout.create_cell('blk')
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 2000, 2000))
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 10000, 2000, 12000))
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[METAL3])).insert(kdb.Text('X', kdb.Trans(1000, 1000)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(METAL3, -50000, 0, 0, 2000)
+    p.box(METAL3, -50000, 10000, 0, 12000)
+    p.box(METAL3, -52000, 0, -50000, 12000)
+    p.box(METAL3_PIN, -52000, 5000, -51000, 6000)
+    p.label(METAL3, 'T', -51500, 5500)
+    return p
+
+
+def cut_bend_beside_marker() -> Pattern:
+    """
+    Metal3 wires from A and B, which the cell bend joins, with a marker over 2 µm of the wire from A
+    """
+    p = pattern('cut_bend_beside_marker')
+    bend = p.layout.create_cell('bend')
+    bend.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 5000, 8000))
+    p.top.insert(kdb.CellInstArray(bend.cell_index(), kdb.Trans()))
+    metal3_wire(p, -40000, 0, 0, 2000, 'A')
+    metal3_wire(p, -40000, 6000, 0, 8000, 'B')
+    p.box(NORCX, -5000, -1000, -3000, 3000)
+    return p
+
+
+def cut_rotated_cell() -> Pattern:
+    """
+    An instance of the cell seg with a Metal3 wire, rotated by 30 degrees, and a wire that goes on from it to the pin A
+    """
+    p = pattern('cut_rotated_cell')
+    segment = p.layout.create_cell('seg')
+    segment.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 10000, 2000))
+    p.top.insert(kdb.CellInstArray(segment.cell_index(), kdb.ICplxTrans(1.0, 30, False, 0, 0)))
+    p.path(METAL3, [(8660, 5000), (20000, 11547)], 2000)
+    p.box(METAL3_PIN, 19900, 11400, 20100, 11600)
+    p.label(METAL3, 'A', 20000, 11500)
     return p
 
 
@@ -944,6 +1090,85 @@ def nmos_pair_abutting_ptaps() -> Pattern:
     return p
 
 
+def cut_pad_via_on_label(name: str = 'cut_pad_via_on_label') -> Pattern:
+    """
+    A child cell with a Metal3 pad of 5 µm x 5 µm and its pin P in the middle, on which a Via3 of the top cell lands,
+    from a Metal4 wire to its pin W
+    """
+    p = pattern(name)
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 5000, 5000))
+    block.shapes(p.layout.layer(*METAL3_PIN)).insert(kdb.Box(2400, 2400, 2600, 2600))
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[METAL3])).insert(kdb.Text('P', kdb.Trans(2500, 2500)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(VIA3, 2400, 2400, 2600, 2600)
+    p.box(METAL4, 2000, 1000, 3000, 20000)
+    p.box(METAL4_PIN, 2000, 19000, 3000, 20000)
+    p.label(METAL4, 'W', 2500, 19500)
+    return p
+
+
+def cut_pad_with_same_label_in_top() -> Pattern:
+    """
+    The child cell of cut_pad_via_on_label, whose pin P the top cell also has, at the same place
+    """
+    p = cut_pad_via_on_label('cut_pad_with_same_label_in_top')
+    p.box(METAL3_PIN, 2400, 2400, 2600, 2600)
+    p.label(METAL3, 'P', 2500, 2500)
+    return p
+
+
+def cut_rotated_child() -> Pattern:
+    """
+    A child cell with an instance of the cell seg with a Metal3 wire, rotated by 30 degrees,
+    with a wire beside it in the top cell
+    """
+    p = pattern('cut_rotated_child')
+    segment = p.layout.create_cell('seg')
+    segment.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 10000, 2000))
+    block = p.layout.create_cell('block')
+    block.insert(kdb.CellInstArray(segment.cell_index(), kdb.ICplxTrans(1.0, 30, False, 0, 0)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(METAL3, 30000, 0, 31000, 5000)
+    return p
+
+
+def cut_plate_with_fill() -> Pattern:
+    """
+    A child cell of a Metal3 plate of 10 µm x 10 µm, with fill below it on Metal2.filler, and a wire W beside it
+    in the top cell
+    """
+    p = pattern('cut_plate_with_fill')
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 10000, 10000))
+    for x in range(1000, 10000, 3000):
+        for y in range(1000, 10000, 3000):
+            block.shapes(p.layout.layer(10, 22)).insert(kdb.Box(x, y, x + 1500, y + 1500))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(METAL3, 11000, 4000, 40000, 6000)
+    p.box(METAL3_PIN, 39000, 4000, 40000, 6000)
+    p.label(METAL3, 'W', 39500, 5000)
+    return p
+
+
+def cut_strip_along_wire() -> Pattern:
+    """
+    A Metal3 wire of 100 µm x 1 µm with the pins A and B, with a child cell with the Metal3 of the upper half of
+    its width along 50 µm, and a marker over the same
+    """
+    p = pattern('cut_strip_along_wire')
+    p.box(METAL3, 0, 0, 100000, 1000)
+    p.box(METAL3_PIN, 0, 0, 200, 1000)
+    p.label(METAL3, 'A', 100, 500)
+    p.box(METAL3_PIN, 99800, 0, 100000, 1000)
+    p.label(METAL3, 'B', 99900, 500)
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(25000, 500, 75000, 1000))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(NORCX, 25000, 500, 75000, 2000)
+    return p
+
+
 def exclusion_substrate_pin_within() -> Pattern:
     """
     A p-tap with the pin VSS of the net of the substrate on it within a marker, and a Metal2 rail to another p-tap
@@ -1045,16 +1270,29 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_tap_wire_through': exclusion_tap_wire_through,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'cut_pad_via_on_label': cut_pad_via_on_label,
+    'cut_pad_with_same_label_in_top': cut_pad_with_same_label_in_top,
+    'cut_rotated_child': cut_rotated_child,
+    'cut_strip_along_wire': cut_strip_along_wire,
+    'cut_plate_with_fill': cut_plate_with_fill,
     'exclusion_substrate_pin_within': exclusion_substrate_pin_within,
     'exclusion_wire_beside_label_of_other_net':
         lambda: exclusion_wires_through_and_beside('exclusion_wire_beside_label_of_other_net', 'B'),
     'exclusion_wire_beside_label_of_piece':
         lambda: exclusion_wires_through_and_beside('exclusion_wire_beside_label_of_piece', 'A#marker0'),
+    'cut_two_strips': cut_two_strips,
+    'cut_bend_beside_marker': cut_bend_beside_marker,
+    'cut_rotated_cell': cut_rotated_cell,
     'exclusion_coil_guard_ring': exclusion_coil_guard_ring,
     'exclusion_inductor2_wire_under': exclusion_inductor2_wire_under,
     'exclusion_plate_noqrc': lambda: exclusion_plate_between_wires('exclusion_plate_noqrc', METAL3_NOQRC),
     'exclusion_plate_pair_m2m3': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m2m3', NORCX_M2M3),
     'exclusion_plate_pair_m3sub': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m3sub', NORCX_M3SUB),
+    'cut_coil': lambda: cut_coil_pattern('cut_coil'),
+    'cut_coil_beside_marker': cut_coil_beside_marker,
+    'cut_abutting_wires': cut_abutting_wires,
+    'cut_coil_model': cut_coil_model,
+    'cut_coil_x2': lambda: cut_coil_pattern('cut_coil_x2', instance_count=2),
     'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
     'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),
     'exclusion_hairpin_bridge_m2': lambda: exclusion_hairpin('exclusion_hairpin_bridge_m2', 0, METAL2),

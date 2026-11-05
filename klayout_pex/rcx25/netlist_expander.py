@@ -149,10 +149,14 @@ class RCX25NetlistExpander:
                     continue
                 nets_with_pin.add(net.expanded_name())
                 # NOTE: a net that only exclusion blocks give other ports stays a port, as what instantiates this
-                #       connects it, also if its label has no pin shape,
+                #       connects it, also if its label has no pin shape, unless only a cut cell names it,
                 #       and the substrate net also if no label names it, as its node has its capacitances
                 if pin.name() not in port_names and \
-                        set(port_names) <= set(summary.exclusion_ports.get(net.expanded_name(), ())):
+                        set(port_names) <= set(summary.exclusion_ports.get(net.expanded_name(), ())) and \
+                        (net.expanded_name() == substrate_net_name
+                         or not any(results.exclusions is not None
+                                    and results.exclusions.is_only_named_by_cut_cells(net.expanded_name())
+                                    for results in extraction_results.cell_extraction_results.values())):
                     ports.append((pin.name(), net))
                 for port_name in port_names:
                     add_net_if_needed(port_name)

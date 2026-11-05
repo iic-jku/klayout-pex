@@ -41,6 +41,7 @@ from pattern_builder import GDSPair, Pattern, main, pdk_root
 
 DNWELL:   GDSPair = (64, 18)
 NWELL:    GDSPair = (64, 20)
+DIFF:     GDSPair = (65, 20)
 TAP:      GDSPair = (65, 44)
 NSDM:     GDSPair = (93, 44)
 PSDM:     GDSPair = (94, 20)
@@ -488,6 +489,22 @@ def exclusion_pfet_between_taps() -> Pattern:
     return p
 
 
+def cut_ntaps_in_one_nwell() -> Pattern:
+    """
+    The n-taps of r_ntap_pair_nwell_li1_m1 with their nwell in a child cell, with the pins VL and VR in the top cell,
+    like a guard ring within a cell
+    """
+    p = pattern('cut_ntaps_in_one_nwell')
+    block = p.layout.create_cell('block')
+    source = r_ntap_pair_nwell_li1_m1()
+    block.copy_tree(source.top)
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    for x, text in ((0, 'VL'), (10000, 'VR')):
+        p.box(MET1_PIN, x + 100, 2350, x + 400, 2650)
+        p.label(MET1, text, x + 250, 2500)
+    return p
+
+
 def exclusion_rail_between_taps() -> Pattern:
     """
     A met1 rail of 300 µm x 0.4 µm between two n-taps, in a nwell each, with the pins A and B on them,
@@ -504,7 +521,73 @@ def exclusion_rail_between_taps() -> Pattern:
     return p
 
 
+def cut_well_under_wire() -> Pattern:
+    """
+    An n-tap with its nwell in a child cell, with no node on the nwell, as the net VDD enters the cell on met1,
+    and a met3 wire W over the nwell, in the top cell
+    """
+    p = pattern('cut_well_under_wire')
+    source = pattern('nwell_and_tap')
+    source.box(NWELL, -1000, -1000, 1500, 6000)
+    tap_li1_m1(source, 0, ptap=False)
+    block = p.layout.create_cell('block')
+    block.copy_tree(source.top)
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 80, 5000, 420, 12000)
+    p.box(MET1_PIN, 100, 11000, 400, 11900)
+    p.label(MET1, 'VDD', 250, 11500)
+    p.box(MET3, -5000, 2000, 5000, 3000)
+    p.box(MET3_PIN, -5000, 2000, -4000, 3000)
+    p.label(MET3, 'W', -4500, 2500)
+    return p
+
+
+def cut_wires_with_label_like_numbered_port() -> Pattern:
+    """
+    Two met1 wires of a child cell, one with the label VDD_0, the other without a label, which the top cell joins
+    to the pin VDD
+    """
+    p = pattern('cut_wires_with_label_like_numbered_port')
+    block = p.layout.create_cell('block')
+    for y in (0, 2000):
+        block.shapes(p.layout.layer(*MET1)).insert(kdb.Box(0, y, 3000, y + 500))
+        p.box(MET1, 3000, y, 5000, y + 500)
+    block.shapes(p.layout.layer(*MET1_PIN)).insert(kdb.Box(500, 100, 700, 300))
+    block.shapes(p.layout.layer(*LABEL_BY_LAYER[MET1])).insert(kdb.Text('VDD_0', kdb.Trans(600, 200)))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 5000, 0, 5500, 2500)
+    p.box(MET1_PIN, 5100, 1000, 5400, 1200)
+    p.label(MET1, 'VDD', 5250, 1100)
+    return p
+
+
+def cut_wire_with_label_without_pin() -> Pattern:
+    """
+    A met1 wire with its start in a child cell and the label A in the top cell, without a pin shape,
+    and an nfet of the top cell on it
+    """
+    p = pattern('cut_wire_with_label_without_pin')
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*MET1)).insert(kdb.Box(0, 0, 3000, 1000))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.box(MET1, 3000, 0, 10000, 1000)
+    p.label(MET1, 'A', 9500, 500)
+    p.box(DIFF, 12000, 0, 13500, 800)
+    p.box(NSDM, 11800, -200, 13700, 1000)
+    p.box(POLY, 12600, -300, 12900, 1100)
+    for x in (12150, 13350):
+        p.box(LICON, x - 85, 315, x + 85, 485)
+        p.box(LI1, x - 150, 250, x + 150, 550)
+    p.box(MCON, 12065, 315, 12235, 485)
+    p.box(MET1, 10000, 200, 12300, 600)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'cut_wires_with_label_like_numbered_port': cut_wires_with_label_like_numbered_port,
+    'cut_wire_with_label_without_pin': cut_wire_with_label_without_pin,
+    'cut_well_under_wire': cut_well_under_wire,
+    'cut_ntaps_in_one_nwell': cut_ntaps_in_one_nwell,
     'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
     'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
     'exclusion_wire_beside_marker_over_nwell': exclusion_wire_beside_marker_over_nwell,

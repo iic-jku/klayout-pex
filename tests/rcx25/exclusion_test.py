@@ -34,6 +34,10 @@ import pytest
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
 from klayout_pex.rcx25.exclusion import (
+    BlockKind,
+    BlockLabel,
+    CutLayers,
+    CutRequest,
     ExclusionError,
     ExcludedBlock,
     Exclusions,
@@ -45,6 +49,7 @@ from klayout_pex.rcx25.exclusion import (
     intersected_intervals,
     intervals_within,
     listed_names,
+    matches_name,
     merged_intervals,
 )
 from klayout_pex.rcx25.extraction_results import (
@@ -442,6 +447,95 @@ def test_invalid_marker_layer_specification_lists_the_valid_values(specification
         MarkerLayer.parse(specification, TECH_MARKERS, ['Metal2', 'Metal3'])
 
 
+def layout_with_cell_instances() -> kdb.Layout:
+    """
+    The top cell with instances of the cell block, at x = 0 and x = 2000, and of the cell parent at x = 10000,
+    which has another instance of block, and the shapes of the cell block
+    """
+    layout = kdb.Layout()
+    top = layout.create_cell('TOP')
+    parent = layout.create_cell('parent')
+    block = layout.create_cell('block')
+    block.shapes(layout.layer(8, 0)).insert(kdb.Box(0, 0, 100, 100))
+    block.shapes(layout.layer(1, 0)).insert(kdb.Box(0, 0, 50, 50))
+    block.shapes(layout.layer(8, 25)).insert(kdb.Text('A', kdb.Trans(10, 10)))
+    block.shapes(layout.layer(189, 4)).insert(kdb.Box(0, 0, 200, 200))
+    top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans(0, 0)))
+    top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans(2000, 0)))
+    top.insert(kdb.CellInstArray(parent.cell_index(), kdb.Trans(10000, 0)))
+    parent.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans(kdb.Trans.R90, 0, 0)))
+    return layout
+
+
+CUT_LAYERS = CutLayers(gds_pairs_by_layer={'Metal1': ((8, 0),), 'nSD': ((1, 0),)},
+                       label_gds_pairs={'Metal1': (8, 25)},
+                       diffusion_gds_pairs=set())
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_prefixes_that_give_instances_the_same_name_are_an_error():
+    layout = kdb.Layout()
+    top = layout.create_cell('TOP')
+    for name, count in (('a', 2), ('b', 1)):
+        cell = layout.create_cell(name)
+        cell.shapes(layout.layer(8, 0)).insert(kdb.Box(0, 0, 100, 100))
+        for index in range(count):
+            top.insert(kdb.CellInstArray(cell.cell_index(), kdb.Trans(1000 * index, 1000 * ord(name))))
+
+    with pytest.raises(ExclusionError, match='S_0'):
+        Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('a', 'S'), CutRequest('b', 'S_0')], cut_layers=CUT_LAYERS)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_blocks_of_a_cut_cell():
+    layout = layout_with_cell_instances()
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('block', 'x')], cut_layers=CUT_LAYERS)
+    assert [b.name for b in e.blocks] == ['x_0', 'x_1', 'x_2']
+    assert all(b.kind == BlockKind.CUT and b.ports for b in e.blocks)
+    # NOTE: by instance, also of the one below another cell, which is turned
+    assert [b.region_of('Metal1').bbox() for b in e.blocks] == [kdb.Box(0, 0, 100, 100), kdb.Box(2000, 0, 2100, 100),
+                                                                kdb.Box(9900, 0, 10000, 100)]
+    # NOTE: on the conductors computed from the diffusion by the diffusion, not by what else the cell has (189/4)
+    assert e.blocks[0].region_of('nSD').bbox() == kdb.Box(0, 0, 50, 50)
+    assert e.blocks[0].region_of('Metal2') is None
+    assert e.blocks[1].labels[0].text == 'A' and e.blocks[1].labels[0].position == kdb.Point(2010, 10)
+    assert e.is_only_label_of_cut_cell('A', kdb.Point(2010, 10))
+    assert not e.is_only_label_of_cut_cell('A', kdb.Point(2011, 10))
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cell_within_a_cut_cell_is_part_of_it():
+    layout = layout_with_cell_instances()
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('p*'), CutRequest('block')], cut_layers=CUT_LAYERS)
+    assert sorted(b.name for b in e.blocks) == ['block_0', 'block_1', 'parent_0']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_instances_are_numbered_per_cell_also_for_a_pattern_of_several():
+    layout = layout_with_cell_instances()
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('*')], cut_layers=CUT_LAYERS)
+    assert sorted(b.name for b in e.blocks) == ['block_0', 'block_1', 'parent_0']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_shapes_taken_out_of_cut_cells():
+    layout = layout_with_cell_instances()
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('block')], cut_layers=CUT_LAYERS)
+    assert e.mask('Metal1').area() == 3 * 100 * 100
+    e.without_shapes({'Metal1': kdb.Region(kdb.Box(0, 0, 50, 100))})
+    assert e.mask('Metal1').area() == 3 * 100 * 100 - 50 * 100
+
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('pdk_name', ['ihp-sg13g2', 'ihp-sg13cmos5l', 'sky130A', 'gf180mcuD'])
@@ -454,6 +548,21 @@ def test_tech_info_tells_the_layers_of_each_device_class_once(pdk_name: str):
         assert len(matching) == 1, mapping.lvs_device_class_name
         assert tech_info.device_gds_pairs(mapping.lvs_device_class_name)
     assert tech_info.device_gds_pairs('nothing') is None
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, metal, drawn, fill', [
+    ('ihp-sg13g2', 'Metal1', (8, 0), (8, 22)),
+    ('ihp-sg13cmos5l', 'TopMetal1', (126, 0), (126, 22)),
+    ('gf180mcuD', 'Metal2', (36, 0), (36, 4)),
+])
+def test_shapes_of_cut_cells_are_of_their_layers_with_their_fill(pdk_name: str,
+                                                                 metal: str,
+                                                                 drawn: Tuple[int, int],
+                                                                 fill: Tuple[int, int]):
+    tech_info = TechInfo.from_json(PDK.from_string(pdk_name).config.tech_pb_json_path, dielectric_filter=None)
+    assert set(CutLayers.of_tech(tech_info).gds_pairs_by_layer[metal]) == {drawn, fill}
 
 
 @allure.parent_suite(parent_suite)
@@ -472,6 +581,44 @@ def test_port_along_a_conductor_is_short():
     assert port.bbox() == kdb.Box(4750, 999, 5250, 1000)
     across = next(kdb.Region(kdb.Box(0, 0, 1, 1000)).each())
     assert port_of_cut(across, lambda box: kdb.Region(kdb.Box(0, 0, 10000, 1000)), 1, 500).bbox() == across.bbox()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_labels_of_a_cell_are_found_by_location_and_layer():
+    label_a = BlockLabel('A', kdb.Point(10, 10), 'Metal1')
+    label_b = BlockLabel('B', kdb.Point(500, 500), 'Metal1')
+    label_c = BlockLabel('C', kdb.Point(10, 10), 'Metal2')
+    e = Exclusions([ExcludedBlock('X', kdb.Region(kdb.Box(0, 0, 1000, 1000)), layer_regions={}, kind=BlockKind.CUT,
+                                  labels=[label_a, label_b, label_c])])
+    assert e.labels_at(0, 'Metal1', kdb.Box(0, 0, 100, 100)) == {0: label_a}
+    assert e.labels_at(0, 'Metal2', kdb.Box(0, 0, 100, 100)) == {2: label_c}
+    assert e.is_only_label_of_cut_cell('A', kdb.Point(10, 10))
+    assert not e.is_only_label_of_cut_cell('A', kdb.Point(11, 10))
+    assert e.is_only_named_by_cut_cells('A,B')
+    assert not e.is_only_named_by_cut_cells('A,D')
+    e.labels_of_rest = {('A', kdb.Point(900, 900))}
+    assert not e.is_only_named_by_cut_cells('A')
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('name, pattern, matches', [
+    ('data[1]', 'data[1]', True),
+    ('data[0]', 'data[1]', False),
+    ('data1', 'data[1]', True),
+    ('data[0]', 'data*', True),
+    ('other', 'data*', False),
+])
+def test_names_match_exactly_before_as_patterns(name: str, pattern: str, matches: bool):
+    assert matches_name(name, pattern) == matches
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('specification, expected', [('a', CutRequest('a')), ('a*=x', CutRequest('a*', 'x'))])
+def test_cut_request(specification: str, expected: CutRequest):
+    assert CutRequest.parse(specification) == expected
 
 
 @allure.parent_suite(parent_suite)

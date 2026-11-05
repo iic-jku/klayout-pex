@@ -484,7 +484,33 @@ def exclusion_rail_between_taps() -> Pattern:
     return p
 
 
+def cut_taps_with_labels(name: str, label_of_cell: str, label_of_top: str) -> Pattern:
+    """
+    Two p-taps that only the substrate joins, the first in a child cell, each with a label in the top cell,
+    and an nfet of the top cell on the substrate
+    """
+    p = pattern(name)
+    block = p.layout.create_cell('block')
+    for cell, x in ((block, 0), (p.top, 5000)):
+        for layer, x1, y1, x2, y2 in ((COMP, 0, 0, 1000, 1000), (PPLUS, -100, -100, 1100, 1100),
+                                      (CONT, 400, 400, 620, 620), (METAL1, 0, 0, 1000, 1000)):
+            cell.shapes(p.layout.layer(*layer)).insert(kdb.Box(x + x1, y1, x + x2, y2))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    p.label(METAL1, label_of_cell, 500, 500)
+    p.label(METAL1, label_of_top, 5500, 500)
+    p.box(COMP, 8000, 0, 9500, 800)
+    p.box(NPLUS, 7900, -100, 9600, 900)
+    p.box(POLY2, 8600, -300, 8900, 1100)
+    for x, text in ((8150, 'S'), (9350, 'D')):
+        p.box(CONT, x - 110, 290, x + 110, 510)
+        p.box(METAL1, x - 150, 250, x + 150, 550)
+        p.label(METAL1, text, x, 400)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'cut_taps_with_labels_a_b': lambda: cut_taps_with_labels('cut_taps_with_labels_a_b', 'A', 'B'),
+    'cut_taps_with_labels_b_a': lambda: cut_taps_with_labels('cut_taps_with_labels_b_a', 'B', 'A'),
     'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
     'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,

@@ -40,6 +40,8 @@ from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
 from klayout_pex.rcx25.exclusion import (
+    BlockKind,
+    BlockLabel,
     Exclusions,
     NetPiece,
     RegionIndex,
@@ -707,6 +709,11 @@ class RExtractor:
             #       which are one node, as the ports of a device terminal are
             for point, pin in zip(vertex_ports.pop(layer_id, []), vertex_port_pins.pop(layer_id, [])):
                 label_box = kdb.Region(kdb.Box(point, point).enlarged(1, 1))
+                # NOTE: a pin of a cut cell is none of the top cell, but it names the port of the model,
+                #       also where its metal stays for a via from above, which can land on it
+                if exclusions.is_only_label_of_cut_cell(pin[0], point) and \
+                        not (label_box & exclusions.mask_near(label_box.bbox(), layer_name, ports=True)).is_empty():
+                    continue
                 if not (label_box & outside).is_empty():
                     vertex_ports[layer_id].append(point)
                     vertex_port_pins[layer_id].append(pin)
@@ -784,7 +791,10 @@ class RExtractor:
         within the block that is nearest to it (e.g. of a lead of a coil), otherwise <net>__<block>_<number>,
         like the device terminals within the markers.
 
-        A pin only names a cut of the shapes it is joined to within the block, as a port is one node.
+        At a cut cell, it can also be a label of the cell on the net, <block>__<label>, also for several cuts,
+        as these are one pin of its model, otherwise <block>__<net>_<number>
+
+        A pin or a label only names a cut of the shapes it is joined to within the block, as a port is one node.
         So does a pin of a label the net also has outside the block only when that isn't the same name,
         which would be one node with that pin
 
@@ -814,6 +824,9 @@ class RExtractor:
         candidates_by_cut: Dict[PolygonPortKey, List[Tuple[bool, float, str]]] = defaultdict(list)
         pin_sets = [connected_shapes.set_at_position(layer_names[pin.layer_id], pin.position)
                     for pin in split.pins_within]
+        labels_with_sets = {block_index: [(label, connected_shapes.set_at_position(label.layer_name, label.position))
+                                          for label in self.labels_at_shapes(block_index, split)]
+                            for block_index in set(split.cut_port_blocks.values())}
         for key in cut_keys:
             block_index = split.cut_port_blocks[key]
             cut_box = split.cut_port_boxes[key]
@@ -825,6 +838,11 @@ class RExtractor:
                     candidates_by_cut[key].append((pin.layer_id != key[0],
                                                    distance(pin.position, cut_box),
                                                    pin.label))
+            for label, label_set in labels_with_sets[block_index]:
+                if label_set == cut_set:
+                    candidates_by_cut[key].append((label.layer_name != layer_names[key[0]],
+                                                   distance(label.position, cut_box),
+                                                   f"{blocks[block_index].name}__{label.text}"))
 
         # NOTE: the nearest pairs first, on the layer of the pin before others, each pin names one cut
         names_by_cut: Dict[PolygonPortKey, str] = {}
@@ -845,14 +863,20 @@ class RExtractor:
             while True:
                 number = numbers[block_index]
                 numbers[block_index] += 1
-                name = f"{safe_net_name}__{blocks[block_index].name}_{number}"
+                name = f"{blocks[block_index].name}__{safe_net_name}_{number}" \
+                    if blocks[block_index].kind == BlockKind.CUT else \
+                    f"{safe_net_name}__{blocks[block_index].name}_{number}"
                 if name not in taken_names:
                     taken_names.add(name)
                     return name
 
         for key in cut_keys:
-            if key not in names_by_cut:
-                names_by_cut[key] = numbered_name(split.cut_port_blocks[key])
+            if key in names_by_cut:
+                continue
+            block_index = split.cut_port_blocks[key]
+            cut_candidates = [c for c in candidates_by_cut[key] if c[2].startswith(f"{blocks[block_index].name}__")]
+            names_by_cut[key] = min(cut_candidates)[2] if blocks[block_index].kind == BlockKind.CUT and cut_candidates \
+                else numbered_name(block_index)
 
         # NOTE: the polygons of a device terminal are one port
         names_by_terminal: Dict[Tuple[int, int], str] = {}
@@ -864,6 +888,19 @@ class RExtractor:
                     within.box, layer_names[within.layer_id]))
             names_by_terminal_index[index] = names_by_terminal[key]
         return names_by_cut, names_by_terminal_index
+
+    def labels_at_shapes(self, block_index: int, split: NetSplit) -> List[BlockLabel]:
+        """
+        :return: the labels of the block at the shapes of the net within it,
+                 also at its metal kept for vias, which can be in a hole of them or beside them
+        """
+        labels: Dict[int, BlockLabel] = {}
+        for layer_name, region in split.regions_within.get(block_index, {}).items():
+            for shapes in (region, split.kept_for_vias.get(layer_name, None)):
+                if shapes is not None:
+                    for polygon in shapes.merged().each():
+                        labels.update(self.exclusions.labels_at(block_index, layer_name, polygon.bbox()))
+        return [labels[index] for index in sorted(labels)]
 
     def internal_node_indexes(self,
                               resistor_network: klp.RNetwork,
@@ -1089,7 +1126,7 @@ class RExtractor:
             #       so the names of the other nodes must be unique
             #       (the internal nodes are numbered per network, the ports per layer, so no 2 layers
             #        of the same name must have ports, e.g. a conductor split into several GDS pairs)
-            # NOTE: and so are the ports of one label within the markers
+            # NOTE: and so are the ports of the cuts of one pin of a cut cell
             name_counts = Counter(n.node_name for n in result_network.nodes
                                   if n.node_kind not in (r_network_pb2.RNode.Kind.KIND_PIN,
                                                          r_network_pb2.RNode.Kind.KIND_EXCLUSION_PORT))
