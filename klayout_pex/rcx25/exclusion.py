@@ -33,10 +33,12 @@ NOTE: the conductors within a marker stay in the layout the capacitances are ext
         - both outside: unchanged
         - one within a marker, the other outside: kept (on the net of the plate within the marker, or on the
           substrate if nothing connects that net to the netlist), as the model doesn't know the conductor outside
+      The resistance network has no resistance within a marker (see RExtractor.split_at_exclusions)
 """
 
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 from enum import StrEnum
 import re
@@ -64,7 +66,9 @@ class ExclusionMarkerMode(StrEnum):
     IGNORE = 'ignore'
     """extract what is within them, like the rest of the layout"""
     TIE = 'tie'
-    """leave out the capacitances within them"""
+    """leave out the parasitics within them, each net stays connected across them, without resistance"""
+    PORTS = 'ports'
+    """leave out the parasitics within them, where a net enters them is a port, for the model"""
     DEFAULT = 'ignore'
 
 
@@ -236,12 +240,32 @@ class ExcludedBlock:
     region: kdb.Region  # NOTE: all of its shapes, or the same on each layer if it has no layer_regions
     layer_regions: Optional[Dict[LayerName, kdb.Region]] = None  # its shapes by layer, it isn't on other layers
     capacitance_pair: Optional[FrozenSet[LayerName]] = None  # it only leaves out the capacitances between these layers
+    ports: bool = False  # where a net enters it is a port, otherwise it stays connected across it
 
     def region_of(self, layer_name: LayerName) -> Optional[kdb.Region]:
         return self.region if self.layer_regions is None else self.layer_regions.get(layer_name, None)
 
     def applies_between(self, layer_name_a: LayerName, layer_name_b: LayerName) -> bool:
         return self.capacitance_pair is None or self.capacitance_pair == {layer_name_a, layer_name_b}
+
+
+def polygons_by_center_inside(shapes: kdb.Region, mask: kdb.Region) -> kdb.Region:
+    """
+    :return: the merged polygons of the shapes with the center of their bounding boxes strictly inside the mask
+    """
+    polygons_by_center_box: Dict[kdb.Box, List[kdb.Polygon]] = defaultdict(list)
+    center_boxes = kdb.Region()
+    center_boxes.merged_semantics = False  # NOTE: each box on its own
+    for polygon in shapes.merged().each():
+        center = polygon.bbox().center()
+        box = kdb.Box(center, center).enlarged(1, 1)
+        polygons_by_center_box[box].append(polygon.downcast())
+        center_boxes.insert(box)
+    within = kdb.Region()
+    for box in center_boxes.inside(mask).each():
+        for polygon in polygons_by_center_box[box.bbox()]:
+            within.insert(polygon)
+    return within
 
 
 class Exclusions:
@@ -265,7 +289,7 @@ class Exclusions:
         for index, block in enumerate(blocks):
             self.block_boxes.insert(kdb.BoxWithProperties(block.region.bbox(), {'block': index}))
 
-        self._masks: Dict[LayerName, kdb.Region] = {}
+        self._masks: Dict[Tuple[LayerName, Optional[bool]], kdb.Region] = {}
         self.regions = RegionIndex()
 
         # the nets within the blocks that nothing connects to the netlist (see net_of_capacitance)
@@ -274,16 +298,18 @@ class Exclusions:
     @classmethod
     def from_region(cls,
                     region: kdb.Region,
+                    ports: bool = False,
                     substrate_layer_name: LayerName = 'VSUBS') -> Exclusions:
         """
         :param region: shapes that mark all layers of the stack, each merged polygon a block
         """
-        return cls(cls.blocks_of_marker_region(region, MarkerLayer('', (0, 0)), first_index=0),
+        return cls(cls.blocks_of_marker_region(region, MarkerLayer('', (0, 0)), ports, first_index=0),
                    substrate_layer_name)
 
     @staticmethod
     def blocks_of_marker_region(region: kdb.Region,
                                 marker_layer: MarkerLayer,
+                                ports: bool,
                                 first_index: int) -> List[ExcludedBlock]:
         """
         :param region: the shapes of the marker layer
@@ -299,7 +325,8 @@ class Exclusions:
                                         region=block_region,
                                         layer_regions=layer_regions,
                                         capacitance_pair=marker_layer.layer_names
-                                                         if marker_layer.is_capacitance_pair else None))
+                                                         if marker_layer.is_capacitance_pair else None,
+                                        ports=ports and not marker_layer.is_capacitance_pair))
         return blocks
 
     @classmethod
@@ -308,12 +335,14 @@ class Exclusions:
                     cell_name: str,
                     marker_layers: Iterable[MarkerLayer],
                     dbu: float,
+                    ports: bool = False,
                     substrate_layer_name: LayerName = 'VSUBS') -> Exclusions:
         """
         :param layout: the layout the LVS database is of
         :param cell_name: the top cell of the extraction
         :param marker_layers: the marker layers
         :param dbu: the database unit of the extraction
+        :param ports: where a net enters a marker is a port, otherwise it stays connected across the marker
         :param substrate_layer_name: see __init__
         """
         cell = layout.cell(cell_name)
@@ -323,30 +352,73 @@ class Exclusions:
             layer_index = layout.find_layer(*marker_layer.gds_pair)
             if layer_index is not None:
                 region = kdb.Region(cell.begin_shapes_rec(layer_index)).transformed(scale)
-                blocks.extend(cls.blocks_of_marker_region(region, marker_layer, first_index=len(blocks)))
+                blocks.extend(cls.blocks_of_marker_region(region, marker_layer, ports, first_index=len(blocks)))
         return cls(blocks, substrate_layer_name)
 
-    def mask(self, layer_name: LayerName) -> kdb.Region:
+    def mask(self,
+             layer_name: LayerName,
+             ports: Optional[bool] = None) -> kdb.Region:
         """
         :param layer_name: a layer of the stack
+        :param ports: only of the blocks with ports at their cuts, or without
         :return: the shapes of the blocks on the layer, but of those that only leave out some capacitances
         """
-        mask = self._masks.get(layer_name, None)
+        key = (layer_name, ports)
+        mask = self._masks.get(key, None)
         if mask is None:
             mask = kdb.Region()
             for block in self.blocks:
                 region = block.region_of(layer_name)
-                if region is not None and block.capacitance_pair is None:
+                if region is not None and block.capacitance_pair is None and ports in (None, block.ports):
                     mask += region
             mask = mask.merged()
-            self._masks[layer_name] = mask
+            self._masks[key] = mask
         return mask
+
+    def mask_near(self,
+                  box: kdb.Box,
+                  layer_name: LayerName,
+                  ports: Optional[bool] = None) -> kdb.Region:
+        """
+        :return: the polygons of the mask (see mask) that touch the box
+        """
+        return self.regions.near(self.mask(layer_name, ports), box)
 
     def block_indexes_touching(self, box: kdb.Box) -> List[int]:
         """
         :return: the indexes of the blocks whose boxes touch the box, in their order
         """
         return sorted(shape.property('block') for shape in self.block_boxes.each_touching(kdb.Shapes.SAll, box))
+
+    def block_index_with_ports_at(self, box: kdb.Box, layer_name: LayerName) -> int:
+        """
+        :param box: of something at a block (e.g. a strip of metal beside it)
+        :param layer_name: of a layer the block is on
+        :return: the index of the first block with ports it touches (not only by the box of the block)
+        """
+        box = box.enlarged(1, 1)
+        box_region = kdb.Region(box)
+
+        def touches(block: ExcludedBlock) -> bool:
+            region = block.region_of(layer_name)
+            return block.ports and region is not None and \
+                not self.regions.near(region, box).interacting(box_region).is_empty()
+
+        return next(index for index in self.block_indexes_touching(box) if touches(self.blocks[index]))
+
+    def block_indexes_with_ports_within(self, polygon: kdb.Region, layer_name: LayerName) -> List[int]:
+        """
+        :param polygon: of something within blocks
+        :param layer_name: its layer
+        :return: the indexes of the blocks with ports it is within, also only partly
+        """
+        box = polygon.bbox()
+
+        def overlaps(block: ExcludedBlock) -> bool:
+            region = block.region_of(layer_name)
+            return block.ports and region is not None and not (polygon & self.regions.near(region, box)).is_empty()
+
+        return [index for index in self.block_indexes_touching(box) if overlaps(self.blocks[index])]
 
     def net_of_capacitance(self, net_name: NetName, substrate_net_name: NetName) -> NetName:
         """

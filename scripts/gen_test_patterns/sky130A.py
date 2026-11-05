@@ -51,6 +51,7 @@ LI1:      GDSPair = (67, 20)
 LI1_PIN:  GDSPair = (67, 16)
 MCON:     GDSPair = (67, 44)
 MET1:     GDSPair = (68, 20)
+MET1_PIN: GDSPair = (68, 16)
 VIA1:     GDSPair = (68, 44)
 MET2:     GDSPair = (69, 20)
 MET2_PIN: GDSPair = (69, 16)
@@ -431,7 +432,72 @@ def rf_inductors_03_90_05_125_05_220() -> Pattern:
     return p
 
 
+def exclusion_user_marker_wire() -> Pattern:
+    """
+    A met2 wire of 60 µm x 2 µm from A to B, with its middle third within a layer no PDK layer is on,
+    for a marker given by the user, as the PDK has none
+    """
+    p = pattern('exclusion_user_marker_wire')
+    p.box(MET2, -20000, 0, 40000, 2000)
+    p.box(MET2_PIN, -20000, 0, -19000, 2000)
+    p.label(MET2, 'A', -19500, 1000)
+    p.box(MET2_PIN, 39000, 0, 40000, 2000)
+    p.label(MET2, 'B', 39500, 1000)
+    p.box((200, 0), 0, -5000, 20000, 7000)
+    return p
+
+
+def exclusion_nwell_between_pfet_and_tap(name: str = 'exclusion_nwell_between_pfet_and_tap') -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_li1, in one nwell, with the middle of the nwell within a layer
+    no PDK layer is on, for a marker given by the user, so that nothing but a model joins the part with the pfet
+    """
+    p = pattern(name)
+    p.copy_design('sky130A', 'test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    p.box((200, 0), 5000, -1000, 7000, 4000)
+    return p
+
+
+def exclusion_pfet_between_taps() -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_li1, with another n-tap on the other side of the pfet, labelled A,
+    all in one nwell, with the pfet within a layer no PDK layer is on, for a marker given by the user,
+    so that only a model joins the taps and the bulk of the pfet
+    """
+    p = pattern('exclusion_pfet_between_taps')
+    p.copy_design('sky130A', 'test_patterns', 'r_nwell_pfet_ntap_li1.gds.gz')
+    p.box(NWELL, -6000, 0, 0, 3000)
+    p.box(TAP, -4500, 1000, -3500, 2000)
+    p.box(NSDM, -4625, 875, -3375, 2125)
+    p.box(LICON, -4085, 1415, -3915, 1585)
+    p.box(LI1, -4165, 1335, -3835, 1665)
+    p.box(LI1_PIN, -4165, 1335, -3835, 1665)
+    p.label(LI1, 'A', -4000, 1500)
+    p.box((200, 0), 500, -1000, 3000, 4000)
+    return p
+
+
+def exclusion_rail_between_taps() -> Pattern:
+    """
+    A met1 rail of 300 µm x 0.4 µm between two n-taps, in a nwell each, with the pins A and B on them,
+    with 20 µm of it within a layer no PDK layer is on, for a marker given by the user
+    """
+    p = pattern('exclusion_rail_between_taps')
+    for x, text in ((0, 'A'), (300000, 'B')):
+        p.box(NWELL, x - 1000, -1000, x + 1500, 6000)
+        tap_li1_m1(p, x, ptap=False)
+        p.box(MET1_PIN, x + 100, 2350, x + 400, 2650)
+        p.label(MET1, text, x + 250, 2500)
+    p.box(MET1, 80, 2300, 300420, 2700)
+    p.box((200, 0), 140000, 0, 160000, 5000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
+    'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
+    'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_user_marker_wire': exclusion_user_marker_wire,
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':
         lambda: overlap_shield_same_net('overlap_shield_same_net_100um_x_100um_li1_m1_m2', 100000),
     'overlap_shield_same_net_half_100um_x_100um_li1_m1_m2':

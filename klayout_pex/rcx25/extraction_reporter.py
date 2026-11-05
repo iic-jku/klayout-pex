@@ -438,6 +438,8 @@ class ExtractionReporter:
                 node_kind = 'Wire Junction'
             case r_network_pb2.RNode.Kind.KIND_VIA_JUNCTION:
                 node_kind = 'Via Junction'
+            case r_network_pb2.RNode.Kind.KIND_EXCLUSION_PORT:
+                node_kind = 'Exclusion Port'
             case _:
                 raise NotImplementedError()
 

@@ -65,6 +65,7 @@ TOPMETAL1:    GDSPair = (126, 0)
 TOPMETAL1_PIN: GDSPair = (126, 2)
 TOPMETAL2:    GDSPair = (134, 0)
 TOPMETAL2_PIN: GDSPair = (134, 2)
+TOPVIA2:      GDSPair = (133, 0)
 DIGISUB:      GDSPair = (60, 0)
 POLYRES:      GDSPair = (128, 0)
 NORCX:        GDSPair = (148, 0)
@@ -375,6 +376,35 @@ def exclusion_wire_through() -> Pattern:
     return p
 
 
+def exclusion_wire_through_octagon() -> Pattern:
+    """
+    A Metal3 wire from A to B, which bends by 45° through the sloped edges of an octagonal marker
+    """
+    p = pattern('exclusion_wire_through_octagon')
+    p.path(METAL3, [(-20000, -15000), (-10000, -15000), (10000, 5000), (20000, 5000)], 2000)
+    p.box(METAL3_PIN, -20000, -16000, -19000, -14000)
+    p.label(METAL3, 'A', -19500, -15000)
+    p.box(METAL3_PIN, 19000, 4000, 20000, 6000)
+    p.label(METAL3, 'B', 19500, 5000)
+    p.polygon(NORCX, [(-6000, -14000), (-14000, -6000), (-14000, 6000), (-6000, 14000),
+                      (6000, 14000), (14000, 6000), (14000, -6000), (6000, -14000)])
+    return p
+
+
+def exclusion_wire_middle() -> Pattern:
+    """
+    The part of exclusion_wire_through within the marker, on its own, with the pins P and Q at its ends,
+    as a model that goes between the ports at the cuts
+    """
+    p = pattern('exclusion_wire_middle')
+    p.box(METAL3, 0, 0, 20000, 2000)
+    p.box(METAL3_PIN, 0, 0, 2, 2000)
+    p.box(METAL3_PIN, 19998, 0, 20000, 2000)
+    p.label(METAL3, 'P', 1, 1000)
+    p.label(METAL3, 'Q', 19999, 1000)
+    return p
+
+
 def exclusion_wire_end(name: str, label: Optional[str]) -> Pattern:
     """
     A Metal3 wire of 40 µm x 2 µm, whose half ends within a marker
@@ -426,6 +456,107 @@ def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
     return p
 
 
+def exclusion_via_across() -> Pattern:
+    """
+    A wire from A on Metal2 to B on Metal3, through a via across the edge of a marker
+    """
+    p = pattern('exclusion_via_across')
+    p.box(METAL2, -10000, 0, 5000, 2000)
+    p.box(METAL3, -1000, 0, 5000, 2000)
+    p.box(VIA2, -200, 500, 200, 900)
+    metal2_pin(p, 'A', -10000, 0, -9000, 2000)
+    p.box(METAL3_PIN, 4000, 0, 5000, 2000)
+    p.label(METAL3, 'B', 4500, 1000)
+    p.box(NORCX, 0, -5000, 10000, 7000)
+    return p
+
+
+def exclusion_stubs() -> Pattern:
+    """
+    Two Metal3 stubs of a net, which only the metal outside the marker joins, with their pins S1 and S2 within it
+    """
+    p = pattern('exclusion_stubs')
+    metal3_wire(p, -10000, 0, 3000, 1000)
+    metal3_wire(p, -10000, 4000, 3000, 5000)
+    metal3_wire(p, -10000, 0, -9000, 5000)
+    p.box(METAL3_PIN, -10000, 2000, -9000, 3000)
+    p.label(METAL3, 'A', -9500, 2500)
+    for label, y in (('S1', 0), ('S2', 4000)):
+        p.box(METAL3_PIN, 2000, y, 3000, y + 1000)
+        p.label(METAL3, label, 2500, y + 500)
+    p.box(NORCX, 0, -5000, 10000, 10000)
+    return p
+
+
+def exclusion_marker_in_cell() -> Pattern:
+    """
+    A wire of the top cell from A to a Metal3 stub in a rotated child cell, which has the marker
+    """
+    p = pattern('exclusion_marker_in_cell')
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 20000, 2000))
+    block.shapes(p.layout.layer(*NORCX)).insert(kdb.Box(0, -5000, 20000, 7000))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans(kdb.Trans.R90, 50000, 50000)))
+    metal3_wire(p, 47000, 30000, 49000, 60000)
+    p.box(METAL3, 47000, 49000, 53000, 51000)
+    p.box(METAL3_PIN, 47000, 30000, 49000, 31000)
+    p.label(METAL3, 'A', 48000, 30500)
+    return p
+
+
+def exclusion_coil_guard_ring() -> Pattern:
+    """
+    A hand-drawn coil of the tank of an LC oscillator, for an EM model:
+      - a TopMetal2 loop within a marker, with its leads to OSCP and OSCN,
+        and a center tap on TopMetal1 to VCT, labeled ind1, ind2 and ct within the marker, near where they leave it
+      - a TopMetal1 guard ring VDD around the marker, so outside it, with a gap for the center tap
+      - a Metal5 wire VC below the leads, outside the marker
+    """
+    p = pattern('exclusion_coil_guard_ring')
+    for x1, y1, x2, y2 in ((-30000, 10000, -24000, 70000), (24000, 10000, 30000, 70000),
+                           (-30000, 64000, 30000, 70000),
+                           (-30000, 10000, -16000, 16000), (16000, 10000, 30000, 16000),
+                           (-22000, -20000, -16000, 16000), (16000, -20000, 22000, 16000)):
+        p.box(TOPMETAL2, x1, y1, x2, y2)
+    p.box(TOPMETAL1, -2000, -20000, 2000, 69000)
+    p.box(TOPVIA2, -1000, 65500, 1000, 68500)
+
+    for layer, pin_layer, x, outer_label, inner_label in ((TOPMETAL2, TOPMETAL2_PIN, -19000, 'OSCP', 'ind1'),
+                                                          (TOPMETAL2, TOPMETAL2_PIN, 19000, 'OSCN', 'ind2'),
+                                                          (TOPMETAL1, TOPMETAL1_PIN, 0, 'VCT', 'ct')):
+        for label, y in ((outer_label, -19000), (inner_label, 6000)):
+            p.box(pin_layer, x - 1000, y - 1000, x + 1000, y + 1000)
+            p.label(layer, label, x, y)
+
+    for x1, y1, x2, y2 in ((-45000, -5000, -40000, 85000), (40000, -5000, 45000, 85000),
+                           (-45000, 80000, 45000, 85000),
+                           (-45000, -5000, -26000, 0), (26000, -5000, 45000, 0)):
+        p.box(TOPMETAL1, x1, y1, x2, y2)
+    p.box(TOPMETAL1_PIN, -45000, 40000, -40000, 42000)
+    p.label(TOPMETAL1, 'VDD', -42500, 41000)
+
+    p.box(METAL5, -60000, -14000, 60000, -12000)
+    p.box(METAL5_PIN, -60000, -14000, -59000, -12000)
+    p.label(METAL5, 'VC', -59500, -13000)
+
+    p.box(NORCX, -36000, 4000, 36000, 76000)
+    return p
+
+
+def exclusion_inductor2_wire_under() -> Pattern:
+    """
+    The inductor of inductor2_w2u_d15u48_tm2_wires_50u,
+    with a Metal5 wire from Y1 to Y2 across its marker, under its coil
+    """
+    p = pattern('exclusion_inductor2_wire_under')
+    p.copy_design('ihp-sg13g2', 'test_patterns', 'inductor2_w2u_d15u48_tm2_wires_50u.gds.gz')
+    p.box(METAL5, -50000, 28000, 50000, 30000)
+    for label, x1 in (('Y1', -50000), ('Y2', 49000)):
+        p.box(METAL5_PIN, x1, 28000, x1 + 1000, 30000)
+        p.label(METAL5, label, x1 + 500, 29000)
+    return p
+
+
 def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) -> Pattern:
     """
     A Metal3 plate P of 20 µm x 20 µm between a Metal2 wire A and a Metal4 wire B, with a marker of its size
@@ -438,6 +569,65 @@ def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) ->
     metal3_wire(p, 0, 0, 20000, 20000, 'P')
     if plate_marker is not None:
         p.box(plate_marker, 0, 0, 20000, 20000)
+    return p
+
+
+def exclusion_same_label_within() -> Pattern:
+    """
+    A Metal3 wire with a pin A outside a marker, and another pin A on its end within the marker
+    """
+    p = pattern('exclusion_same_label_within')
+    metal3_wire(p, -20000, 0, 20000, 2000, 'A')
+    p.box(METAL3_PIN, 9000, 0, 10000, 2000)
+    p.label(METAL3, 'A', 9500, 1000)
+    p.box(NORCX, 0, -5000, 30000, 7000)
+    return p
+
+
+def exclusion_tap_wire_through() -> Pattern:
+    """
+    A p-tap, whose Metal2 wire of the substrate net, without a label, goes through a marker, and a Metal3 wire W
+    """
+    p = pattern('exclusion_tap_wire_through')
+    tap_m1_m2(p, 0, True, None)
+    p.box(METAL2, 0, 0, 30000, 1000)
+    p.box(NORCX, 10000, -3000, 20000, 4000)
+    metal3_wire(p, -10000, 8000, 30000, 10000, 'W')
+    return p
+
+
+def exclusion_slanted_wire() -> Pattern:
+    """
+    A Metal3 wire at an angle of 33 degrees from A to B through a marker
+    """
+    p = pattern('exclusion_slanted_wire')
+    p.path(METAL3, [(-20000, -13000), (20000, 13000)], 2000)
+    p.box(METAL3_PIN, -20000, -13200, -19800, -13000)
+    p.label(METAL3, 'A', -19900, -13100)
+    p.box(METAL3_PIN, 19800, 13000, 20000, 13200)
+    p.label(METAL3, 'B', 19900, 13100)
+    p.box(NORCX, -5000, -20000, 5000, 20000)
+    return p
+
+
+def exclusion_nmos_diode2_all() -> Pattern:
+    """
+    The design nmos_diode2 with a marker over all of it, so its nets, with their pins, are within the marker
+    """
+    p = pattern('exclusion_nmos_diode2_all')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz')
+    p.box(NORCX, -20000, -20000, 20000, 20000)
+    return p
+
+
+def exclusion_nmos_diode2() -> Pattern:
+    """
+    The design nmos_diode2 with a marker over its MOS, whose terminals are on the conductors there,
+    which leave the marker on Metal1 and Metal2
+    """
+    p = pattern('exclusion_nmos_diode2')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz')
+    p.box(NORCX, -500, -700, 500, 700)
     return p
 
 
@@ -707,6 +897,31 @@ def nmos_pair_abutting_ptaps() -> Pattern:
     return p
 
 
+def exclusion_substrate_pin_within() -> Pattern:
+    """
+    A p-tap with the pin VSS of the net of the substrate on it within a marker, and a Metal2 rail to another p-tap
+    """
+    p = pattern('exclusion_substrate_pin_within')
+    tap_m1_m2(p, 0, True, 'VSS')
+    tap_m1_m2(p, 30000, True)
+    p.box(METAL2, 100, 2400, 30400, 2700)
+    p.box(NORCX, -1000, 0, 1000, 5000)
+    return p
+
+
+def exclusion_rail_between_taps() -> Pattern:
+    """
+    A Metal2 rail of 300 µm x 0.3 µm between two p-taps with the pins A and B (see tap_m1_m2),
+    with 20 µm of it within a marker, so that the substrate is what joins its parts but a model
+    """
+    p = pattern('exclusion_rail_between_taps')
+    tap_m1_m2(p, 0, True, 'A')
+    tap_m1_m2(p, 300000, True, 'B')
+    p.box(METAL2, 100, 2400, 300400, 2700)
+    p.box(NORCX, 140000, 0, 160000, 5000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
@@ -744,14 +959,30 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,
     'inductor3_w2u_d25u84_2_turns': inductor3_w2u_d25u84_2_turns,
     'exclusion_wire_through': exclusion_wire_through,
+    'exclusion_wire_through_octagon': exclusion_wire_through_octagon,
+    'exclusion_wire_middle': exclusion_wire_middle,
     'exclusion_wire_end': lambda: exclusion_wire_end('exclusion_wire_end', 'W'),
+    'exclusion_wire_end_no_label': lambda: exclusion_wire_end('exclusion_wire_end_no_label', None),
     'exclusion_plate_neighbor': lambda: exclusion_plate_neighbor('exclusion_plate_neighbor', 'P'),
     'exclusion_floating_plate_neighbor': lambda: exclusion_plate_neighbor('exclusion_floating_plate_neighbor', None),
     'exclusion_plates_2_markers': lambda: exclusion_plates_markers('exclusion_plates_2_markers',
                                                                    [(0, 0, 20000, 20000), (20500, 0, 40500, 20000)]),
     'exclusion_plates_1_marker': lambda: exclusion_plates_markers('exclusion_plates_1_marker',
                                                                   [(0, 0, 40500, 20000)]),
+    'exclusion_via_stack': lambda: metal2_wires_metal3_bridge('exclusion_via_stack', marker=True),
     'exclusion_via_stack_no_marker': lambda: metal2_wires_metal3_bridge('exclusion_via_stack_no_marker', marker=False),
+    'exclusion_via_across': exclusion_via_across,
+    'exclusion_stubs': exclusion_stubs,
+    'exclusion_marker_in_cell': exclusion_marker_in_cell,
+    'exclusion_nmos_diode2': exclusion_nmos_diode2,
+    'exclusion_nmos_diode2_all': exclusion_nmos_diode2_all,
+    'exclusion_same_label_within': exclusion_same_label_within,
+    'exclusion_tap_wire_through': exclusion_tap_wire_through,
+    'exclusion_slanted_wire': exclusion_slanted_wire,
+    'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_substrate_pin_within': exclusion_substrate_pin_within,
+    'exclusion_coil_guard_ring': exclusion_coil_guard_ring,
+    'exclusion_inductor2_wire_under': exclusion_inductor2_wire_under,
     'exclusion_plate_noqrc': lambda: exclusion_plate_between_wires('exclusion_plate_noqrc', METAL3_NOQRC),
     'exclusion_plate_pair_m2m3': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m2m3', NORCX_M2M3),
     'exclusion_plate_pair_m3sub': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m3sub', NORCX_M3SUB),

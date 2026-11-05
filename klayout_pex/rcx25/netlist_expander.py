@@ -140,15 +140,29 @@ class RCX25NetlistExpander:
         # the pin of a net of several labels (e.g. A,B) becomes a port per label, in its place (#211 §11)
         if summary.label_ports:
             ports: List[Tuple[str, Optional[kdb.Net]]] = []
+            nets_with_pin: Set[str] = set()
             for pin in top_circuit.each_pin():
                 net = top_circuit.net_for_pin(pin.id())
                 port_names = summary.label_ports.get(net.expanded_name(), None) if net else None
                 if port_names is None:
                     ports.append((pin.name(), net))
                     continue
+                nets_with_pin.add(net.expanded_name())
+                # NOTE: a net that only exclusion blocks give other ports stays a port, as what instantiates this
+                #       connects it, also if its label has no pin shape,
+                #       and the substrate net also if no label names it, as its node has its capacitances
+                if pin.name() not in port_names and \
+                        set(port_names) <= set(summary.exclusion_ports.get(net.expanded_name(), ())):
+                    ports.append((pin.name(), net))
                 for port_name in port_names:
                     add_net_if_needed(port_name)
                     ports.append((port_name, name2net[port_name]))
+            # NOTE: a net without a label has its ports at exclusion markers only
+            for net_name, port_names in sorted(summary.exclusion_ports.items()):
+                if net_name not in nets_with_pin:
+                    for port_name in summary.label_ports[net_name]:
+                        add_net_if_needed(port_name)
+                        ports.append((port_name, name2net[port_name]))
             for pin in list(top_circuit.each_pin()):
                 top_circuit.remove_pin(pin.id())
             for port_name, net in ports:

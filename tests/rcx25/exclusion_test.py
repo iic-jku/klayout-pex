@@ -51,6 +51,7 @@ from klayout_pex.rcx25.extraction_results import (
     SidewallCap,
     SidewallKey,
 )
+from klayout_pex.rcx25.r.r_extractor import port_of_cut
 
 parent_suite = "kpex/2.5D exclusion markers"
 tags = ("PEX", "2.5D", "Exclusion")
@@ -328,6 +329,17 @@ def test_names_in_messages_are_limited():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_port_along_a_conductor_is_short():
+    conductor = kdb.Region(kdb.Box(0, 0, 10000, 1000))
+    strip = next(kdb.Region(kdb.Box(2000, 999, 8000, 1000)).each())
+    port = port_of_cut(strip, lambda box: conductor, strip_width=1, port_length=500)
+    assert port.bbox() == kdb.Box(4750, 999, 5250, 1000)
+    across = next(kdb.Region(kdb.Box(0, 0, 1, 1000)).each())
+    assert port_of_cut(across, lambda box: kdb.Region(kdb.Box(0, 0, 10000, 1000)), 1, 500).bbox() == across.bbox()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_region_index_has_the_polygons_near_a_box():
     region = kdb.Region()
     region.insert(kdb.Box(0, 0, 10, 10))
@@ -337,4 +349,15 @@ def test_region_index_has_the_polygons_near_a_box():
     assert index.near(region, kdb.Box(5, 5, 6, 6)).bbox() == kdb.Box(0, 0, 20, 10)
     assert index.near(region, kdb.Box(105, 5, 106, 6)).bbox() == kdb.Box(100, 0, 110, 10)
     assert index.near(region, kdb.Box(50, 50, 60, 60)).is_empty()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_block_with_ports_is_found_beside_one_without():
+    tie = ExcludedBlock('m0', kdb.Region(kdb.Box(0, 0, 100, 100)))
+    ports = ExcludedBlock('m1', kdb.Region(kdb.Box(100, 0, 200, 100)), ports=True)
+    e = Exclusions([tie, ports])
+    assert e.block_index_with_ports_at(kdb.Box(90, 40, 100, 60), 'Metal1') == 1
+    assert e.block_indexes_with_ports_within(kdb.Region(kdb.Box(150, 40, 160, 60)), 'Metal1') == [1]
+    assert e.block_indexes_with_ports_within(kdb.Region(kdb.Box(50, 40, 60, 60)), 'Metal1') == []
 

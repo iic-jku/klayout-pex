@@ -23,9 +23,13 @@
 #
 
 from collections import Counter, defaultdict
+from dataclasses import dataclass, field
+import math
+import re
 from typing import *
 
 from klayout_pex.log import (
+    info,
     subproc,
     warning,
 )
@@ -35,6 +39,12 @@ from klayout_pex.types import DeviceID, GDSPair, Label, LayerName, NetName, Term
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
+from klayout_pex.rcx25.exclusion import (
+    Exclusions,
+    RegionIndex,
+    listed_names,
+    polygons_by_center_inside,
+)
 from klayout_pex.util.disjoint_sets import DisjointSets
 
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
@@ -56,6 +66,164 @@ class RExtractionTechError(Exception):
     pass
 
 
+# NOTE: the layer of what is within an exclusion marker is the one of the layout plus this (see ideal_layer_id),
+#       only known to the resistance extraction, which identifies its layers by these IDs
+IDEAL_LAYER_ID_OFFSET = 1 << 24
+
+
+def ideal_layer_id(layer_id: int) -> int:
+    return layer_id + IDEAL_LAYER_ID_OFFSET
+
+
+# the widths of the polygon ports at a cut, in DBU
+CUT_STRIP_WIDTH = 1
+ANY_ANGLE_CUT_STRIP_WIDTH = 5
+# the length of the polygon port at a cut along a conductor, in µm, see port_of_cut
+PORT_LENGTH_ALONG_CONDUCTOR = 1.0
+
+
+PolygonPortKey = Tuple[int, int]  # (layer ID, port index)
+
+# what the polygon ports of each layer ID are of, None for the ones at a cut (see split_at_exclusions)
+PolygonPortTerminals = Dict[int, List[Optional[device_pb2.Device.Terminal]]]
+
+
+@dataclass
+class PinWithinMarker:
+    position: kdb.Point
+    layer_id: int
+    label: Label
+    net_name: NetName
+
+
+@dataclass
+class TerminalWithinMarker:
+    terminal: device_pb2.Device.Terminal
+    layer_id: int
+    box: kdb.Box
+
+
+class ConnectedShapesWithin:
+    """
+    Which shapes of a net within the blocks are joined there, by metal or vias, regardless of the rest of the net,
+    so that a label on them can name the ports of a cut of only these shapes
+    """
+    def __init__(self,
+                 regions_within: Mapping[int, Mapping[LayerName, kdb.Region]],
+                 vias_within: Iterable[Tuple[LayerName, LayerName, kdb.Region]],
+                 kept_for_vias: Mapping[LayerName, kdb.Region]):
+        self.kept_for_vias = kept_for_vias
+        self.shapes_by_layer: Dict[LayerName, kdb.Shapes] = defaultdict(kdb.Shapes)
+        polygon_count = 0
+        for region_by_layer in regions_within.values():
+            for layer_name, region in region_by_layer.items():
+                for polygon in region.merged().each():
+                    self.shapes_by_layer[layer_name].insert(kdb.PolygonWithProperties(polygon.downcast(),
+                                                                                      {'id': polygon_count}))
+                    polygon_count += 1
+
+        self.polygon_sets = DisjointSets(range(polygon_count))
+        for bottom_layer_name, top_layer_name, vias in vias_within:
+            for via in vias.each():
+                box = via.bbox()
+                bottom, top = self.polygon_at(bottom_layer_name, box), self.polygon_at(top_layer_name, box)
+                if bottom is not None and top is not None:
+                    self.polygon_sets.union(bottom, top)
+
+    def polygon_at(self, layer_name: LayerName, box: kdb.Box) -> Optional[int]:
+        """
+        :return: the ID of the polygon on the layer with the largest overlap with the box
+        """
+        area_by_id: Dict[int, int] = {}
+        box_region = kdb.Region(box)
+        for shape in self.shapes_by_layer[layer_name].each_touching(kdb.Shapes.SRegions, box):
+            area = (kdb.Region(shape.polygon) & box_region).area()
+            if area > 0:
+                area_by_id[shape.property('id')] = area
+        return max(sorted(area_by_id), key=area_by_id.get, default=None)
+
+    def set_at(self, layer_name: LayerName, box: kdb.Box) -> Optional[int]:
+        """
+        :return: the ID of what is joined to the shapes at the box on the layer, None if there are no shapes
+        """
+        polygon = self.polygon_at(layer_name, box)
+        return None if polygon is None else self.polygon_sets.find(polygon)
+
+    def set_at_position(self, layer_name: LayerName, position: kdb.Point) -> Optional[int]:
+        """
+        :return: the ID of what is joined to the shapes at the position (e.g. of a pin) on the layer,
+                 None if there are no shapes
+        """
+        box = kdb.Box(position, position).enlarged(1, 1)
+        # NOTE: where the metal stays for a via from above, what is around it has the position
+        kept = self.kept_for_vias.get(layer_name, None)
+        if kept is not None:
+            for via in kept.interacting(kdb.Region(box)).each():
+                box = via.bbox().enlarged(1, 1)
+        return self.set_at(layer_name, box)
+
+
+@dataclass
+class NetSplit:
+    """
+    What split_at_exclusions tells about the network of a net
+    """
+    # the polygon ports to join without resistance, of the conductors on both sides of a cut
+    polygon_port_ties: List[Tuple[PolygonPortKey, PolygonPortKey]] = field(default_factory=list)
+    # with ports at the cuts: their polygon ports (by the box of the strip), and what is within the markers
+    cut_port_boxes: Dict[PolygonPortKey, kdb.Box] = field(default_factory=dict)
+    # the index of the block of each of them
+    cut_port_blocks: Dict[PolygonPortKey, int] = field(default_factory=dict)
+    pins_within: List[PinWithinMarker] = field(default_factory=list)
+    terminals_within: List[TerminalWithinMarker] = field(default_factory=list)
+    # the shapes within each marker, by its index, by layer
+    regions_within: Dict[int, Dict[LayerName, kdb.Region]] = field(default_factory=lambda: defaultdict(dict))
+    # the vias between them: the layers below and above them, and the vias
+    vias_within: List[Tuple[LayerName, LayerName, kdb.Region]] = field(default_factory=list)
+    # the blocks with ports that a conductor goes on from one to another, without a cut between them
+    abutting_block_indexes: Set[int] = field(default_factory=set)
+    # the vias across a cut by the layer of the conductor below or above them, whose metal stays outside the block
+    kept_for_vias: Dict[LayerName, kdb.Region] = field(default_factory=dict)
+    # whether a conductor goes on beside a block along a cut, see port_of_cut
+    has_cut_along_conductor: bool = False
+
+
+def port_of_cut(strip: kdb.PolygonWithProperties,
+                conductor_near: Callable[[kdb.Box], kdb.Region],
+                strip_width: int,
+                port_length: int) -> kdb.PolygonWithProperties:
+    """
+    A polygon port is one node. So it's the whole strip where a conductor enters a block, across the current,
+    also of a wide wire. But where the conductor goes on beyond the ends of the strip, the strip is along the current,
+    beside metal that it would short (a port can't stand for a model in parallel to that metal),
+    so then it's a short piece in the middle of the longest edge of the strip
+
+    :param strip: of a conductor along the cut
+    :param conductor_near: the polygons of the conductor at a box
+    :param strip_width: of the strip
+    :param port_length: of the short piece, in DBU
+    """
+    box = strip.bbox()
+    if box.width() >= box.height():
+        ends = (kdb.Box(box.left - 1, box.bottom, box.left, box.top),
+                kdb.Box(box.right, box.bottom, box.right + 1, box.top))
+    else:
+        ends = (kdb.Box(box.left, box.bottom - 1, box.right, box.bottom),
+                kdb.Box(box.left, box.top, box.right, box.top + 1))
+    if not strip.is_rectilinear() or all((conductor_near(end) & kdb.Region(end)).is_empty() for end in ends):
+        return strip
+
+    edge = max(strip.each_edge(), key=lambda e: e.length())
+    if edge.length() <= port_length:
+        return strip
+    middle = kdb.Point((edge.x1 + edge.x2) // 2, (edge.y1 + edge.y2) // 2)
+    half_length = port_length // 2
+    window = kdb.Box(middle.x - half_length, middle.y - strip_width, middle.x + half_length, middle.y + strip_width) \
+        if edge.dy() == 0 else \
+        kdb.Box(middle.x - strip_width, middle.y - half_length, middle.x + strip_width, middle.y + half_length)
+    return next((kdb.Region(strip.downcast()) & kdb.Region(window)).each())
+
+
 class RExtractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
@@ -64,7 +232,8 @@ class RExtractor:
                  delaunay_b: float,
                  delaunay_amax: float,
                  via_merge_distance: float,
-                 skip_simplify: bool):
+                 skip_simplify: bool,
+                 exclusions: Optional[Exclusions] = None):
         """
         :param pex_context: KLayout PEX extraction context
         :param substrate_algorithm: The KLayout PEXCore Algorithm for decomposing polygons.
@@ -77,6 +246,7 @@ class RExtractor:
                               produced in square micrometers.
         :param via_merge_distance: Maximum distance where close vias are merged together
         :param skip_simplify: skip simplification of resistor network
+        :param exclusions: within these, the network has no resistances (see split_at_exclusions)
         """
         self.pex_context = pex_context
         self.substrate_algorithm = substrate_algorithm
@@ -85,6 +255,7 @@ class RExtractor:
         self.delaunay_amax = delaunay_amax
         self.via_merge_distance = via_merge_distance
         self.skip_simplify = skip_simplify
+        self.exclusions = exclusions
 
         self.shapes_converter = ShapesConverter(dbu=self.pex_context.dbu)
 
@@ -334,7 +505,29 @@ class RExtractor:
                 '\n'.join(f"  - {via}" for via in sorted(vias_without_conductor))
             )
 
+        if self.exclusions is not None:
+            self.add_ideal_layers(rex_tech)
+
         return rex_tech
+
+    @staticmethod
+    def add_ideal_layers(rex_tech: pb_RExtractorTech):
+        """
+        Adds a copy without resistance of each conductor and via, for what is within an exclusion marker
+        (see split_at_exclusions)
+        """
+        for conductor in list(rex_tech.conductors):
+            ideal = rex_tech.conductors.add()
+            ideal.CopyFrom(conductor)
+            ideal.layer.id = ideal_layer_id(conductor.layer.id)
+            ideal.resistance = 0
+        for via in list(rex_tech.vias):
+            ideal = rex_tech.vias.add()
+            ideal.CopyFrom(via)
+            ideal.layer.id = ideal_layer_id(via.layer.id)
+            ideal.bottom_conductor.id = ideal_layer_id(via.bottom_conductor.id)
+            ideal.top_conductor.id = ideal_layer_id(via.top_conductor.id)
+            ideal.resistance = 0
 
     def prepare_request(self) -> pex_request_pb2.RExtractionRequest:
         rex_request = pex_request_pb2.RExtractionRequest()
@@ -419,6 +612,256 @@ class RExtractor:
                 raise NotImplementedError()
         return f"{prefix}{index}.{layer_name}"
 
+    def split_at_exclusions(self,
+                            tech: pb_RExtractorTech,
+                            regions: Dict[int, kdb.Region],
+                            vertex_ports: Dict[int, List[kdb.Point]],
+                            vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]],
+                            polygon_ports: Dict[int, List[kdb.Polygon]],
+                            polygon_port_device_terminals: PolygonPortTerminals,
+                            layer_names: Dict[int, LayerName]) -> NetSplit:
+        """
+        Takes the shapes of a net within the exclusion markers out of its network.
+        A polygon port on the conductor beside each cut is its node, as a whole cut is one node, also of a wide wire.
+
+        Either these become ports of the netlist, for the model of what the markers stand for,
+        like the device terminals within the markers, which the model connects then.
+
+        Or the shapes go to layers without resistance (ideal_layer_id), so that the extraction still tells what they
+        connect, with their pins and device terminals, and a polygon port on them joins each cut to them.
+
+        NOTE: a via is within a block by its center, which is the location of its nodes, on both of its conductors,
+              otherwise it keeps its resistance and the metal it lands on, as a via port needs its center on the metal,
+              and the resistance of a part of it would be made up
+
+        :param tech: the conductors and vias, with their ideal copies
+        :param regions: the shapes of the net by layer ID
+        :param vertex_ports: the pins by layer ID
+        :param vertex_port_pins: what the pins are of, by layer ID
+        :param polygon_ports: the device terminals by layer ID
+        :param polygon_port_device_terminals: what the polygon ports are of
+        :param layer_names: the canonical names of the conductors and vias, by layer ID
+        """
+        split = NetSplit()
+        exclusions = self.exclusions
+
+        def is_ideal(layer_id: int) -> bool:
+            return layer_id >= IDEAL_LAYER_ID_OFFSET
+
+        kept_for_vias: Dict[int, kdb.Region] = defaultdict(kdb.Region)
+        for via in {v.layer.id: v for v in tech.vias if not is_ideal(v.layer.id)}.values():
+            shapes = regions.get(via.layer.id, None)
+            # NOTE: most nets are far from the blocks
+            if shapes is None or not shapes.bbox().touches(exclusions.bbox):
+                continue
+            bottom_layer_name = layer_names[via.bottom_conductor.id]
+            top_layer_name = layer_names[via.top_conductor.id]
+            # NOTE: within a block on both of its conductors
+            box = shapes.bbox()
+            within_tie = polygons_by_center_inside(shapes, exclusions.mask_near(box, bottom_layer_name, ports=False) &
+                                                   exclusions.mask_near(box, top_layer_name, ports=False))
+            within_ports = polygons_by_center_inside(shapes, exclusions.mask_near(box, bottom_layer_name, ports=True) &
+                                                     exclusions.mask_near(box, top_layer_name, ports=True))
+            if not within_tie.is_empty():
+                regions[ideal_layer_id(via.layer.id)] = within_tie
+            if not within_ports.is_empty():
+                split.vias_within.append((bottom_layer_name, top_layer_name, within_ports))
+            rest = shapes - within_tie - within_ports
+            regions[via.layer.id] = rest
+            across = rest.interacting(exclusions.mask_near(box, bottom_layer_name) +
+                                      exclusions.mask_near(box, top_layer_name))
+            kept_for_vias[via.bottom_conductor.id] += across
+            kept_for_vias[via.top_conductor.id] += across
+
+        for layer_id in sorted({c.layer.id for c in tech.conductors if not is_ideal(c.layer.id)}):
+            shapes = regions.get(layer_id, None)
+            if shapes is None or not shapes.bbox().touches(exclusions.bbox):
+                continue
+            layer_name = layer_names[layer_id]
+            box = shapes.bbox()
+            mask_ports = exclusions.mask_near(box, layer_name, ports=True) - kept_for_vias[layer_id]
+            mask_tie = exclusions.mask_near(box, layer_name, ports=False) - kept_for_vias[layer_id] - mask_ports
+            within_ports = shapes & mask_ports
+            within_tie = shapes & mask_tie
+            if within_tie.is_empty() and within_ports.is_empty():
+                continue
+            # NOTE: without the masks rather than what is within them, as any-angle edges round differently,
+            #       which leaves slivers along the cuts otherwise, that join what is on both sides of a block
+            outside = shapes - mask_ports - mask_tie
+            ideal_id = ideal_layer_id(layer_id)
+            regions[layer_id] = outside
+            split.kept_for_vias[layer_name] = kept_for_vias[layer_id]
+            if not within_tie.is_empty():
+                regions[ideal_id] = within_tie
+            for polygon in within_ports.merged().each():
+                block_indexes = exclusions.block_indexes_with_ports_within(kdb.Region(polygon.downcast()), layer_name)
+                if len(block_indexes) > 1:
+                    split.abutting_block_indexes.update(block_indexes)
+                region_by_layer = split.regions_within[block_indexes[0]]
+                region_by_layer.setdefault(layer_name, kdb.Region()).insert(polygon.downcast())
+
+            # NOTE: the pins and device terminals go with the conductor they are on, those on both to both of them,
+            #       which are one node, as the ports of a device terminal are
+            for point, pin in zip(vertex_ports.pop(layer_id, []), vertex_port_pins.pop(layer_id, [])):
+                label_box = kdb.Region(kdb.Box(point, point).enlarged(1, 1))
+                if not (label_box & outside).is_empty():
+                    vertex_ports[layer_id].append(point)
+                    vertex_port_pins[layer_id].append(pin)
+                elif not (label_box & within_ports).is_empty():
+                    split.pins_within.append(PinWithinMarker(point, layer_id, *pin))
+                else:
+                    vertex_ports[ideal_id].append(point)
+                    vertex_port_pins[ideal_id].append(pin)
+
+            def add_port(port_layer_id: int,
+                         polygon: kdb.Polygon,
+                         device_terminal: Optional[device_pb2.Device.Terminal] = None) -> PolygonPortKey:
+                polygon_ports[port_layer_id].append(polygon.downcast())
+                polygon_port_device_terminals[port_layer_id].append(device_terminal)
+                return port_layer_id, len(polygon_ports[port_layer_id]) - 1
+
+            for port, terminal in zip(polygon_ports.pop(layer_id, []), polygon_port_device_terminals.pop(layer_id, [])):
+                port_region = kdb.Region(port)
+                part_tie = port_region & within_tie
+                part_ports = port_region & within_ports
+                for polygon in (port_region - part_tie - part_ports).each():
+                    add_port(layer_id, polygon, terminal)
+                for polygon in part_tie.each():
+                    add_port(ideal_id, polygon, terminal)
+                for polygon in part_ports.each():
+                    split.terminals_within.append(TerminalWithinMarker(terminal, layer_id, polygon.bbox()))
+
+            # NOTE: strips of 1 dbu, like the device terminals that abut a conductor
+            #       (see KLayoutExtractionContext.terminal_region_on_net),
+            #       wider at any angle, where the extractor can't split such a narrow polygon into triangles
+            strip_width = CUT_STRIP_WIDTH if (outside + within_ports + within_tie).non_rectilinear().is_empty() \
+                else ANY_ANGLE_CUT_STRIP_WIDTH
+            around_ports = within_ports.sized(strip_width)
+
+            # NOTE: also where what is within a marker without ports goes on into a block with ports
+            conductors_near = RegionIndex()
+            for strip_layer_id, conductor in ((layer_id, outside), (ideal_id, within_tie)):
+                for strip in (conductor & around_ports).merged().each():
+                    port = port_of_cut(strip, lambda box: conductors_near.near(conductor, box), strip_width,
+                                       round(PORT_LENGTH_ALONG_CONDUCTOR / self.pex_context.dbu))
+                    split.has_cut_along_conductor |= port.bbox() != strip.bbox()
+                    key = add_port(strip_layer_id, port)
+                    split.cut_port_boxes[key] = port.bbox()
+                    split.cut_port_blocks[key] = exclusions.block_index_with_ports_at(port.bbox(), layer_name)
+            for outside_strip in (outside & within_tie.sized(strip_width) - around_ports).merged().each():
+                outside_key = add_port(layer_id, outside_strip)
+                for within_strip in (within_tie & kdb.Region(outside_strip).sized(strip_width)).merged().each():
+                    split.polygon_port_ties.append((outside_key, add_port(ideal_id, within_strip)))
+
+        return split
+
+    @staticmethod
+    def sets_of_cuts(split: NetSplit,
+                     connected_shapes: ConnectedShapesWithin,
+                     layer_names: Dict[int, LayerName]) -> Dict[PolygonPortKey, int]:
+        """
+        :return: what is joined to the shapes within the blocks at each cut, by its polygon port
+        """
+        sets_of_cuts: Dict[PolygonPortKey, int] = {}
+        for key, cut_box in split.cut_port_boxes.items():
+            cut_set = connected_shapes.set_at(layer_names[key[0]], cut_box.enlarged(1, 1))
+            if cut_set is not None:
+                sets_of_cuts[key] = cut_set
+        return sets_of_cuts
+
+    def exclusion_port_names(self,
+                             net_name: NetName,
+                             split: NetSplit,
+                             connected_shapes: ConnectedShapesWithin,
+                             sets_of_cuts: Mapping[PolygonPortKey, int],
+                             layer_names: Dict[int, LayerName],
+                             labels_outside: Collection[Label]) -> Tuple[Dict[PolygonPortKey, str], Dict[int, str]]:
+        """
+        The names of the ports of a net at the exclusion blocks: a cut has the name of the pin of the net
+        within the block that is nearest to it (e.g. of a lead of a coil), otherwise <net>__<block>_<number>,
+        like the device terminals within the markers.
+
+        A pin only names a cut of the shapes it is joined to within the block, as a port is one node.
+        So does a pin of a label the net also has outside the block only when that isn't the same name,
+        which would be one node with that pin
+
+        :param connected_shapes: of the shapes within the blocks
+        :param sets_of_cuts: see sets_of_cuts
+        :param labels_outside: the labels of the pins of the net outside the blocks
+        :return: the names of the cuts by their polygon ports,
+                 and the names of the device terminals within the markers by their indexes in split.terminals_within
+        """
+        blocks = self.exclusions.blocks
+        safe_net_name = re.sub(r'[^A-Za-z0-9_]', '_', net_name)  # NOTE: e.g. A,B of several labels, $2 of none
+
+        def block_index_of_pin(pin: PinWithinMarker) -> int:
+            return self.exclusions.block_index_with_ports_at(kdb.Box(pin.position, pin.position),
+                                                             layer_names[pin.layer_id])
+
+        cut_keys = sorted(split.cut_port_boxes,
+                          key=lambda key: (split.cut_port_blocks[key],
+                                           split.cut_port_boxes[key].bottom, split.cut_port_boxes[key].left,
+                                           layer_names[key[0]]))
+
+        def distance(position: kdb.Point, box: kdb.Box) -> float:
+            center = box.center()
+            return math.hypot(position.x - center.x, position.y - center.y)
+
+        # the candidates of the names of each cut: whether on another layer, the distance, the name
+        candidates_by_cut: Dict[PolygonPortKey, List[Tuple[bool, float, str]]] = defaultdict(list)
+        pin_sets = [connected_shapes.set_at_position(layer_names[pin.layer_id], pin.position)
+                    for pin in split.pins_within]
+        for key in cut_keys:
+            block_index = split.cut_port_blocks[key]
+            cut_box = split.cut_port_boxes[key]
+            cut_set = sets_of_cuts.get(key, None)
+            if cut_set is None:
+                continue
+            for pin, pin_set in zip(split.pins_within, pin_sets):
+                if pin_set == cut_set and pin.label not in labels_outside and block_index_of_pin(pin) == block_index:
+                    candidates_by_cut[key].append((pin.layer_id != key[0],
+                                                   distance(pin.position, cut_box),
+                                                   pin.label))
+
+        # NOTE: the nearest pairs first, on the layer of the pin before others, each pin names one cut
+        names_by_cut: Dict[PolygonPortKey, str] = {}
+        names_left = {candidate[2] for candidates in candidates_by_cut.values() for candidate in candidates}
+        for _, _, name, _, key in sorted((*candidate, index, key)
+                                         for index, key in enumerate(cut_keys)
+                                         for candidate in candidates_by_cut[key]):
+            if name in names_left and key not in names_by_cut:
+                names_by_cut[key] = name
+                names_left.discard(name)
+
+        numbers: Counter[int] = Counter()
+        taken_names: Set[str] = {candidate[2] for candidates in candidates_by_cut.values() for candidate in candidates}
+        taken_names.update(labels_outside)
+        taken_names.update(pin.label for pin in split.pins_within)
+
+        def numbered_name(block_index: int) -> str:
+            while True:
+                number = numbers[block_index]
+                numbers[block_index] += 1
+                name = f"{safe_net_name}__{blocks[block_index].name}_{number}"
+                if name not in taken_names:
+                    taken_names.add(name)
+                    return name
+
+        for key in cut_keys:
+            if key not in names_by_cut:
+                names_by_cut[key] = numbered_name(split.cut_port_blocks[key])
+
+        # NOTE: the polygons of a device terminal are one port
+        names_by_terminal: Dict[Tuple[int, int], str] = {}
+        names_by_terminal_index: Dict[int, str] = {}
+        for index, within in enumerate(split.terminals_within):
+            key = (within.terminal.device_id, within.terminal.terminal_id)
+            if key not in names_by_terminal:
+                names_by_terminal[key] = numbered_name(self.exclusions.block_index_with_ports_at(
+                    within.box, layer_names[within.layer_id]))
+            names_by_terminal_index[index] = names_by_terminal[key]
+        return names_by_cut, names_by_terminal_index
+
     def internal_node_indexes(self,
                               resistor_network: klp.RNetwork,
                               layer_names: Dict[int, LayerName],
@@ -470,6 +913,10 @@ class RExtractor:
             layer_names[v.layer.id] = v.layer.canonical_layer_name
             via_layer_ids.add(v.layer.id)
 
+        # NOTE: the nodes of a layer are named after it, and those of an ideal layer have to differ from them
+        node_layer_names: Dict[int, str] = {layer_id: f"{name}.excluded" if layer_id >= IDEAL_LAYER_ID_OFFSET else name
+                                            for layer_id, name in layer_names.items()}
+
         LP = tech_pb2.LayerInfo.Purpose
         well_layer_ids: Set[int] = set()
         for c in rex_request.tech.conductors:
@@ -478,12 +925,13 @@ class RExtractor:
                 well_layer_ids.add(c.layer.id)
 
         nets_with_isolated_wells: List[NetName] = []
+        nets_with_cuts_along_conductors: List[NetName] = []
 
         for net_extraction_request in rex_request.net_extraction_requests:
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]] = defaultdict(list)
-            polygon_port_device_terminals: Dict[int, List[device_pb2.Device.Terminal]] = defaultdict(list)
+            polygon_port_device_terminals: PolygonPortTerminals = defaultdict(list)
             regions: Dict[int, kdb.Region] = defaultdict(kdb.Region)
 
             for t in net_extraction_request.device_terminals:
@@ -501,25 +949,61 @@ class RExtractor:
             for l2r in net_extraction_request.region_by_layer:
                 regions[l2r.layer.id] = self.shapes_converter.klayout_region(l2r.region)
 
+            split = NetSplit()
+            if self.exclusions is not None:
+                split = self.split_at_exclusions(rex_request.tech, regions,
+                                                 vertex_ports, vertex_port_pins,
+                                                 polygon_ports, polygon_port_device_terminals,
+                                                 layer_names)
+                if split.has_cut_along_conductor:
+                    nets_with_cuts_along_conductors.append(net_extraction_request.net_name)
+                if split.abutting_block_indexes:
+                    block_names = sorted(self.exclusions.blocks[index].name for index in split.abutting_block_indexes)
+                    warning(f"The net {net_extraction_request.net_name} goes on from one to another of "
+                            f"{listed_names(block_names)}, where they abut, so the netlist has no ports for their "
+                            f"models there")
+
             rex = klp.RNetExtractor(self.pex_context.dbu)
-            resistor_network = rex.extract(rex_tech_kly,
-                                           regions,
-                                           vertex_ports,
-                                           polygon_ports)
+            try:
+                resistor_network = rex.extract(rex_tech_kly,
+                                               regions,
+                                               vertex_ports,
+                                               polygon_ports)
+            except RuntimeError as exc:
+                raise RExtractionTechError(f"KLayout's resistance extraction fails for net "
+                                           f"{net_extraction_request.net_name}: {exc}") from exc
 
             result_network = rex_result.networks.add()
             result_network.net_name = net_extraction_request.net_name
 
-            pieces = self.network_pieces(resistor_network)
+            polygon_port_node_ids = {(rn.layer(), rn.port_index()): rn.object_id()
+                                     for rn in resistor_network.each_node()
+                                     if rn.type() == klp.RNodeType.PolygonPort}
+            node_id_ties = [(polygon_port_node_ids[a], polygon_port_node_ids[b]) for a, b in split.polygon_port_ties]
+
+            cut_port_names: Dict[PolygonPortKey, str] = {}
+            terminal_port_names: Dict[int, str] = {}
+            sets_of_cuts: Dict[PolygonPortKey, int] = {}
+            connected_shapes: Optional[ConnectedShapesWithin] = None
+            if split.cut_port_boxes or split.terminals_within or split.pins_within:
+                connected_shapes = ConnectedShapesWithin(split.regions_within, split.vias_within, split.kept_for_vias)
+                sets_of_cuts = self.sets_of_cuts(split, connected_shapes, layer_names)
+                labels_outside = {pin[0] for pins in vertex_port_pins.values() for pin in pins}
+                cut_port_names, terminal_port_names = self.exclusion_port_names(result_network.net_name, split,
+                                                                                connected_shapes, sets_of_cuts,
+                                                                                layer_names, labels_outside)
+
+            pieces = self.network_pieces(resistor_network, node_id_ties)
 
             # NOTE: LVS may join a well to its net other than by the contacts over its taps,
             #       e.g. by a label of the net on the well, so it's a piece of the network that joins nothing else.
             #       It's left out, so that the device terminals on it stay on the node of their net, ideally
-            isolated_well_node_ids = self.isolated_well_node_ids(pieces, well_layer_ids)
+            isolated_well_node_ids = self.isolated_well_node_ids(pieces, well_layer_ids, split.cut_port_boxes)
             if isolated_well_node_ids:
                 nets_with_isolated_wells.append(result_network.net_name)
 
-            internal_node_indexes = self.internal_node_indexes(resistor_network, layer_names, isolated_well_node_ids)
+            internal_node_indexes = self.internal_node_indexes(resistor_network, node_layer_names,
+                                                               isolated_well_node_ids)
 
             for rn in resistor_network.each_node():
                 if rn.object_id() in isolated_well_node_ids:
@@ -533,7 +1017,7 @@ class RExtractor:
 
                 r_node = result_network.nodes.add()
                 r_node.node_id = rn.object_id()
-                r_node.node_name = self.node_name(rn, canonical_layer_name,
+                r_node.node_name = self.node_name(rn, node_layer_names[layer_id],
                                                   internal_node_indexes.get(rn.object_id(), rn.port_index()))
                 r_node.node_kind = r_network_pb2.RNode.Kind.KIND_UNSPECIFIED  # TODO!
                 r_node.layer_name = canonical_layer_name
@@ -566,11 +1050,19 @@ class RExtractor:
                         r_node.location.point.net = r_node.net_name
 
                     case klp.RNodeType.PolygonPort:
-                        r_node.node_kind = r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL
                         port_idx = rn.port_index()
-                        # NOTE: the device terminal behind the port, to connect the device to this node
-                        r_node.device_terminal.CopyFrom(polygon_port_device_terminals[rn.layer()][port_idx])
-                        r_node.device_terminal.ClearField('region_by_layer')
+                        device_terminal = polygon_port_device_terminals[rn.layer()][port_idx]
+                        cut_port_name = cut_port_names.get((rn.layer(), port_idx), None)
+                        if cut_port_name is not None:
+                            r_node.node_kind = r_network_pb2.RNode.Kind.KIND_EXCLUSION_PORT
+                            r_node.node_name = cut_port_name
+                        elif device_terminal is None:  # NOTE: at a cut, see split_at_exclusions
+                            r_node.node_kind = r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION
+                        else:
+                            r_node.node_kind = r_network_pb2.RNode.Kind.KIND_DEVICE_TERMINAL
+                            # NOTE: the device terminal behind the port, to connect the device to this node
+                            r_node.device_terminal.CopyFrom(device_terminal)
+                            r_node.device_terminal.ClearField('region_by_layer')
                         r_node.net_name = f"{result_network.net_name}.{r_node.node_name}"
                         r_node.location.box.net = r_node.net_name
                     case klp.RNodeType.Internal:
@@ -593,8 +1085,10 @@ class RExtractor:
             #       so the names of the other nodes must be unique
             #       (the internal nodes are numbered per network, the ports per layer, so no 2 layers
             #        of the same name must have ports, e.g. a conductor split into several GDS pairs)
+            # NOTE: and so are the ports of one label within the markers
             name_counts = Counter(n.node_name for n in result_network.nodes
-                                  if n.node_kind != r_network_pb2.RNode.Kind.KIND_PIN)
+                                  if n.node_kind not in (r_network_pb2.RNode.Kind.KIND_PIN,
+                                                         r_network_pb2.RNode.Kind.KIND_EXCLUSION_PORT))
             duplicate_names = sorted(name for name, count in name_counts.items() if count > 1)
             if duplicate_names:
                 raise RExtractionTechError(f"Nodes of net {result_network.net_name} have the same name, "
@@ -609,9 +1103,29 @@ class RExtractor:
                 r_element.node_b.node_id = el.b().object_id()
                 r_element.resistance = el.resistance()
 
+            for node_id_a, node_id_b in node_id_ties:
+                if node_id_a in isolated_well_node_ids:
+                    continue  # NOTE: and so is b, of the same piece
+                self.add_tie(result_network, node_id_a, node_id_b)
+
+            node_ids_by_set: Dict[int, List[int]] = defaultdict(list)
+            for key, cut_set in sets_of_cuts.items():
+                node_ids_by_set[cut_set].append(polygon_port_node_ids[key])
+
+            self.add_nodes_within_markers(result_network, split, terminal_port_names, cut_port_names,
+                                          layer_names, vertex_port_pins, connected_shapes, node_ids_by_set)
             if len(pieces) > 1 + sum(p[0].object_id() in isolated_well_node_ids for p in pieces):
                 node_ids = self.substrate_joined_node_ids(result_network, regions, layer_names, well_layer_ids)
                 result_network.substrate_joined_node_ids.extend(sorted(node_ids))
+
+            for _, node_ids in sorted(node_ids_by_set.items()):
+                if len(node_ids) > 1:
+                    result_network.model_joins.add().node_ids.extend(sorted(node_ids))
+
+        if nets_with_cuts_along_conductors:
+            info("The metal of these nets goes on beside exclusion blocks, along their cuts, so it carries the current "
+                 "alone, with a short port for each model, as a port can't connect a model in parallel to it: " +
+                 listed_names(sorted(nets_with_cuts_along_conductors)))
 
         if nets_with_isolated_wells:
             warning("The resistance network leaves out the wells of these nets, as no contact joins them "
@@ -622,14 +1136,93 @@ class RExtractor:
         return rex_result
 
     @staticmethod
-    def network_pieces(resistor_network: klp.RNetwork) -> List[List[klp.RNode]]:
+    def add_tie(network: r_network_pb2.RNetwork, node_id_a: int, node_id_b: int):
         """
+        Adds an element without resistance, which makes the nodes one (see NetworkNodeNames.from_network)
+        """
+        element = network.elements.add()
+        element.element_id = node_id_a
+        element.node_a.node_id = node_id_a
+        element.node_b.node_id = node_id_b
+        element.resistance = 0.0
+
+    @classmethod
+    def add_nodes_within_markers(cls,
+                                 network: r_network_pb2.RNetwork,
+                                 split: NetSplit,
+                                 terminal_port_names: Dict[int, str],
+                                 cut_port_names: Dict[PolygonPortKey, str],
+                                 layer_names: Dict[int, LayerName],
+                                 vertex_port_pins: Mapping[int, List[Tuple[Label, NetName]]],
+                                 connected_shapes: Optional[ConnectedShapesWithin],
+                                 node_ids_by_set: Dict[int, List[int]]):
+        """
+        Adds the nodes of what is within the exclusion markers, for ports at the cuts, as no conductors are there:
+        the device terminals with their ports, and the pins that name no cut, which are ports for the model too,
+        but those that are pins of the net outside the markers as well
+
+        NOTE: the extractor's node IDs are addresses, so these small ones are unique
+
+        :param connected_shapes: of the shapes within the blocks, if there are such nodes
+        :param node_ids_by_set: the ports by what is joined to them within the blocks (see ConnectedShapesWithin),
+                                to which these go too
+        """
+        K = r_network_pb2.RNode.Kind
+        next_node_id = 1
+
+        def add_node(kind: r_network_pb2.RNode.Kind, name: str, layer_id: int, box: kdb.Box) -> r_network_pb2.RNode:
+            nonlocal next_node_id
+            node = network.nodes.add()
+            node.node_id = next_node_id
+            next_node_id += 1
+            node.node_name = name
+            node.node_kind = kind
+            node.layer_name = layer_names[layer_id]
+            node.net_name = f"{network.net_name}.{name}"
+            node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_BOX
+            node.location.box.lower_left.x, node.location.box.lower_left.y = box.left, box.bottom
+            node.location.box.upper_right.x, node.location.box.upper_right.y = box.right, box.top
+            node.location.box.net = node.net_name
+            return node
+
+        def add_to_set(node_set: Optional[int], node_id: int):
+            if node_set is not None:
+                node_ids_by_set[node_set].append(node_id)
+
+        port_node_id_by_name: Dict[str, int] = {}
+        for index, within in enumerate(split.terminals_within):
+            port_name = terminal_port_names[index]
+            if port_name not in port_node_id_by_name:
+                port_node_id_by_name[port_name] = add_node(K.KIND_EXCLUSION_PORT, port_name,
+                                                           within.layer_id, within.box).node_id
+                add_to_set(connected_shapes.set_at(layer_names[within.layer_id], within.box),
+                           port_node_id_by_name[port_name])
+            terminal_node = add_node(K.KIND_DEVICE_TERMINAL, f"T{index}.{layer_names[within.layer_id]}.excluded",
+                                     within.layer_id, within.box)
+            terminal_node.device_terminal.CopyFrom(within.terminal)
+            terminal_node.device_terminal.ClearField('region_by_layer')
+            cls.add_tie(network, port_node_id_by_name[port_name], terminal_node.node_id)
+
+        taken_names = set(cut_port_names.values()) | {pin[0] for pins in vertex_port_pins.values() for pin in pins}
+        for within in split.pins_within:
+            if within.label not in taken_names:
+                add_to_set(connected_shapes.set_at_position(layer_names[within.layer_id], within.position),
+                           add_node(K.KIND_EXCLUSION_PORT, within.label, within.layer_id,
+                                    kdb.Box(within.position, within.position)).node_id)
+
+    @staticmethod
+    def network_pieces(resistor_network: klp.RNetwork,
+                       node_id_ties: Sequence[Tuple[int, int]] = ()) -> List[List[klp.RNode]]:
+        """
+        :param node_id_ties: the nodes joined besides by the resistors
         :return: the nodes of each piece of the network, which no resistor joins to the others
         """
         nodes = list(resistor_network.each_node())
         node_sets = DisjointSets(n.object_id() for n in nodes)
         for el in resistor_network.each_element():
             node_sets.union(el.a().object_id(), el.b().object_id())
+        for node_id_a, node_id_b in node_id_ties:
+            node_sets.union(node_id_a, node_id_b)
 
         pieces: Dict[int, List[klp.RNode]] = defaultdict(list)
         for n in nodes:
@@ -637,18 +1230,25 @@ class RExtractor:
         return list(pieces.values())
 
     @staticmethod
-    def isolated_well_node_ids(pieces: List[List[klp.RNode]], well_layer_ids: Set[int]) -> Set[int]:
+    def isolated_well_node_ids(pieces: List[List[klp.RNode]],
+                               well_layer_ids: Set[int],
+                               cut_ports: Collection[PolygonPortKey] = ()) -> Set[int]:
         """
-        :return: the nodes of the pieces of the network that are wells only, without a pin,
+        :param cut_ports: the polygon ports at the cuts of exclusion blocks, where a model joins a piece to the rest
+        :return: the nodes of the pieces of the network that are wells only, without a pin or a port at a cut,
                  i.e. the wells no contact joins to the rest of their net
                  (none if the network is one piece, e.g. a well with the bulks of transistors only)
         """
         if len(pieces) < 2:
             return set()
 
+        def is_port(n: klp.RNode) -> bool:
+            return n.type() == klp.RNodeType.VertexPort or \
+                (n.type() == klp.RNodeType.PolygonPort and (n.layer(), n.port_index()) in cut_ports)
+
         return {n.object_id()
                 for piece in pieces
-                if all(n.layer() in well_layer_ids and n.type() != klp.RNodeType.VertexPort for n in piece)
+                if all(n.layer() in well_layer_ids and not is_port(n) for n in piece)
                 for n in piece}
 
     def substrate_joined_node_ids(self,
@@ -672,8 +1272,11 @@ class RExtractor:
             tap_layer_id = layout.layer(*tech.gds_pair(connection.tap_lvs_layer_name))
             if conductor_layer_id not in layer_names or conductor_layer_id not in regions or tap_layer_id not in regions:
                 continue
+            conductor = regions[conductor_layer_id]
+            if ideal_layer_id(conductor_layer_id) in regions:
+                conductor = conductor + regions[ideal_layer_id(conductor_layer_id)]
             node_ids |= self.node_ids_at(nodes=[n for n in network.nodes if n.layer_name == layer_names[conductor_layer_id]],
-                                         polygons=regions[conductor_layer_id].interacting(regions[tap_layer_id]))
+                                         polygons=conductor.interacting(regions[tap_layer_id]))
         return node_ids
 
     @staticmethod

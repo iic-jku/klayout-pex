@@ -25,17 +25,20 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+import math
 import os
 from typing import *
 from unittest import mock
 
 import klayout.db as kdb
+import numpy as np
 
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
+from klayout_pex.util.disjoint_sets import DisjointSets
 from tests.common.csv_comparison import assert_csv_matches_expected
 from tests.common.layout_preview import attach_layout_preview
 from tests.common.lvsdb_fixtures import LVSDBFixture
@@ -150,3 +153,43 @@ def pair(net1: str, net2: str) -> FrozenSet[str]:
     :return: the key of a capacitance or a resistance, by its nets
     """
     return frozenset((net1, net2))
+
+
+def effective_resistance(resistances: Mapping[FrozenSet[str], float],
+                         node_a: str,
+                         node_b: str,
+                         joined: Collection[str] = ()) -> float:
+    """
+    :param resistances: the resistances by the nodes they are between
+    :param node_a: a node
+    :param node_b: another node
+    :param joined: nodes without resistance between them (e.g. the ports of a net, as an ideal model joins them)
+    :return: the resistance between the nodes, infinite if nothing joins them
+    """
+    nodes = sorted({node for pair_of_nodes in resistances for node in pair_of_nodes} | {node_a, node_b} | set(joined))
+    node_sets = DisjointSets(nodes)
+    for node in joined:
+        node_sets.union(node, next(iter(joined)))
+    roots = sorted({node_sets.find(node) for node in nodes})
+    index = {root: i for i, root in enumerate(roots)}
+    conductances = np.zeros((len(roots), len(roots)))
+    connected = DisjointSets(roots)
+    for pair_of_nodes, resistance in resistances.items():
+        root_a, root_b = (node_sets.find(node) for node in pair_of_nodes)
+        if root_a != root_b:
+            connected.union(root_a, root_b)
+            i, j = index[root_a], index[root_b]
+            conductances[i, i] += 1.0 / resistance
+            conductances[j, j] += 1.0 / resistance
+            conductances[i, j] -= 1.0 / resistance
+            conductances[j, i] -= 1.0 / resistance
+    root_a, root_b = node_sets.find(node_a), node_sets.find(node_b)
+    if root_a == root_b:
+        return 0.0
+    if connected.find(root_a) != connected.find(root_b):
+        return math.inf
+    within = [index[root] for root in roots if connected.find(root) == connected.find(root_a) and root != root_b]
+    currents = np.zeros(len(within))
+    currents[within.index(index[root_a])] = 1.0
+    voltages = np.linalg.solve(conductances[np.ix_(within, within)], currents)
+    return float(voltages[within.index(index[root_a])])

@@ -162,6 +162,15 @@ def prepare_exclusions(exclusions: Exclusions,
                 f"{listed_names(sorted(lost_devices))}")
 
 
+def warn_of_ports_without_nodes(exclusions: Exclusions, netlist_description: str):
+    """
+    :param netlist_description: of a netlist with one node per net
+    """
+    if any(block.ports for block in exclusions.blocks):
+        warning(f"{netlist_description} has one node per net, so the netlist has no ports where nets enter "
+                f"what is left out, use --mode R or RC of the 2.5D engine to connect a model")
+
+
 class RCX25Extractor:
     def __init__(self,
                  pex_context: KLayoutExtractionContext,
@@ -289,6 +298,9 @@ class RCX25Extractor:
                      report: ExtractionReporter):
         netlist: kdb.Netlist = self.pex_context.lvsdb.netlist()
         dbu = self.pex_context.dbu
+
+        if self.exclusions is not None and not self.pex_mode.need_resistance():
+            warn_of_ports_without_nodes(self.exclusions, f"--mode {self.pex_mode}")
         # ------------------------------------------------------------------------
 
         layer_regions_by_name: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)
@@ -414,7 +426,8 @@ class RCX25Extractor:
                                      delaunay_b = self.delaunay_b,
                                      delaunay_amax = self.delaunay_amax,
                                      via_merge_distance = 0,
-                                     skip_simplify = True)
+                                     skip_simplify = True,
+                                     exclusions = self.exclusions)
             rex_request = r_extractor.prepare_request()
             report.output_rex_request(request=rex_request)
 

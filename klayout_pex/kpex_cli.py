@@ -449,7 +449,8 @@ class KpexCLI:
     @staticmethod
     def _add_exclusion_arguments(parser: argparse.ArgumentParser):
         group = parser.add_argument_group("Exclusion Options",
-                                          "Leave parts of the layout to models, with the 2.5D engine")
+                                          "Leave parts of the layout to models, with the 2.5D engine. "
+                                          "The netlists of --mode CC have one node per net, so no ports for models")
         group.add_argument("--exclusion-markers", dest='exclusion_marker_mode',
                            default=ExclusionMarkerMode.DEFAULT, type=ExclusionMarkerMode,
                            choices=list(ExclusionMarkerMode),
@@ -457,7 +458,11 @@ class KpexCLI:
                                 "mark what a model has the parasitics of: 'ignore' extracts what is within them, "
                                 "'tie' leaves out the capacitances within them and to the substrate, but not "
                                 "the shapes, which still shield the rest of the layout, nor their capacitances "
-                                "to it. Needs --gds, which has the markers. "
+                                "to it, and has no resistance within them, so that each net stays connected "
+                                "across them, 'ports' does the same, but each cut of a net at a marker and each "
+                                "device terminal within it is a port of the netlist, for a model to connect, "
+                                "named after the pin of the net within the marker nearest to it, otherwise "
+                                "<net>__m<marker>_<number>. Needs --gds, which has the markers. "
                                 + render_enum_help(topic='exclusion_markers', enum_cls=ExclusionMarkerMode))
         group.add_argument("--exclusion-marker-layer", dest='exclusion_marker_layers', action='append',
                            default=None, metavar='LAYER',
@@ -681,7 +686,7 @@ class KpexCLI:
 
             if args.exclusion_marker_layers and args.exclusion_marker_mode == ExclusionMarkerMode.IGNORE:
                 error(f"--exclusion-marker-layer {args.exclusion_marker_layers[0]} needs --exclusion-markers "
-                      f"{ExclusionMarkerMode.TIE}")
+                      f"{ExclusionMarkerMode.TIE} or {ExclusionMarkerMode.PORTS}")
                 found_errors = True
 
             if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE:
@@ -1202,6 +1207,7 @@ class KpexCLI:
             cell_name=args.effective_cell_name,
             marker_layers=args.selected_marker_layers,
             dbu=pex_context.dbu,
+            ports=marker_mode == ExclusionMarkerMode.PORTS,
             substrate_layer_name=substrate_layer_name
         )
         if not exclusions.blocks:

@@ -235,8 +235,12 @@ class ExtractionSummary:
     # node of the resistor network each device terminal connects to
     device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = field(default_factory=dict)
 
-    # the ports of each net of several labels, a node per label (#211 §11)
+    # the ports of each net of several labels, a node per label (#211 §11),
+    # or with ports at exclusion markers, which are among them
     label_ports: Dict[NetName, List[NetName]] = field(default_factory=dict)
+
+    # the ports of each net at exclusion markers, for a model that joins the pieces of the net
+    exclusion_ports: Dict[NetName, List[NetName]] = field(default_factory=dict)
 
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
@@ -244,6 +248,7 @@ class ExtractionSummary:
         merged_resistances: Dict[NetCoupleKey, float] = {}
         merged_device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
         merged_label_ports: Dict[NetName, List[NetName]] = {}
+        merged_exclusion_ports: Dict[NetName, List[NetName]] = {}
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
@@ -251,10 +256,12 @@ class ExtractionSummary:
                 add_resistance(merged_resistances, couple_key.normed(), res)
             merged_device_terminal_nodes.update(s.device_terminal_nodes)
             merged_label_ports.update(s.label_ports)
+            merged_exclusion_ports.update(s.exclusion_ports)
         return ExtractionSummary(capacitances=merged_capacitances,
                                  resistances=merged_resistances,
                                  device_terminal_nodes=merged_device_terminal_nodes,
-                                 label_ports=merged_label_ports)
+                                 label_ports=merged_label_ports,
+                                 exclusion_ports=merged_exclusion_ports)
 
 
 @dataclass
@@ -288,11 +295,17 @@ class NetworkNodeNames:
 
         pin_labels = {n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN}
 
+        def is_port(node: r_network_pb2.RNode) -> bool:
+            return node.node_kind in (K.KIND_PIN, K.KIND_EXCLUSION_PORT)
+
         def default_name(node: r_network_pb2.RNode) -> NetName:
+            if node.node_kind == K.KIND_EXCLUSION_PORT:
+                return (port_names or {}).get(node.node_name, node.node_name)
             if node.node_kind == K.KIND_PIN:
                 # NOTE: the pins of a net with one label are the node of the net,
-                #       which is named after the label, unless other nets are too (e.g. vss$1, #211 §10)
-                if len(pin_labels) == 1:
+                #       which is named after the label, unless other nets are too (e.g. vss$1, #211 §10),
+                #       or it has ports at exclusion blocks as well, whose labels may be in its name
+                if len(pin_labels) == 1 and node.node_name not in (port_names or {}):
                     return network.net_name
                 # NOTE: if we have an electrical short between 2 pins A and B
                 #       and a parasitic resistance between the two,
@@ -329,10 +342,10 @@ class NetworkNodeNames:
             groups[find(n.node_id)].append(n)
 
         def has_pin(root: int) -> bool:
-            return any(n.node_kind == K.KIND_PIN for n in groups[root])
+            return any(is_port(n) for n in groups[root])
 
         def group_name(root: int) -> NetName:
-            pin_names = sorted({default_name(n) for n in groups[root] if n.node_kind == K.KIND_PIN})
+            pin_names = sorted({default_name(n) for n in groups[root] if is_port(n)})
             if network.net_name in pin_names:
                 return network.net_name
             if pin_names:
@@ -355,7 +368,10 @@ class NetworkNodeNames:
             if root is not None:
                 name_by_root[root] = network.net_name
             elif candidate_roots:
-                net_tie_node_ids.append(candidate_roots[0])
+                # NOTE: a pin of the top cell rather than a port for a model, which a model may leave open
+                net_tie_node_ids.append(next((root for root in candidate_roots
+                                              if any(n.node_kind == K.KIND_PIN for n in groups[root])),
+                                             candidate_roots[0]))
 
         candidate_roots = [find(terminal_node_ids[key][0]) for key in sorted(terminal_node_ids)] + \
                           [find(n.node_id) for n in nodes]
@@ -376,6 +392,10 @@ class NetworkNodeNames:
             for n in nodes:
                 name = name_by_root[find(n.node_id)]
                 pieces.union(n.node_id, first_node_id_by_name.setdefault(name, n.node_id))
+            # NOTE: so does the model of an exclusion block, which an ideal node of each side would bypass
+            for join in network.model_joins:
+                for node_id in join.node_ids[1:]:
+                    pieces.union(join.node_ids[0], node_id)
 
             pieces_on_net = {pieces.find(n.node_id) for n in nodes if name_by_root[find(n.node_id)] == network.net_name}
             joined_pieces = {pieces.find(node_id) for node_id in network.substrate_joined_node_ids}
@@ -515,11 +535,16 @@ class CellExtractionResults:
         taken_names: Set[NetName] = {network.net_name.casefold() for network in networks}  # NOTE: case-folded
         port_names_by_net: Dict[NetName, Dict[str, NetName]] = {}
         for network in networks:
-            labels = sorted({n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN})
-            if len(labels) < 2:
+            labels = {n.node_name for n in network.nodes if n.node_kind == K.KIND_PIN}
+            exclusion_ports = {n.node_name for n in network.nodes if n.node_kind == K.KIND_EXCLUSION_PORT}
+            if len(labels) < 2 and not exclusion_ports:
                 continue
             port_names: Dict[str, NetName] = {}
-            for label in labels:
+            for label in sorted(labels | exclusion_ports):
+                # NOTE: the one label of a net with ports at exclusion markers names the net too
+                if label == network.net_name:
+                    port_names[label] = label
+                    continue
                 port_names[label] = unique_name(label, taken_names)
                 taken_names.add(port_names[label].casefold())
             port_names_by_net[network.net_name] = port_names
@@ -596,6 +621,7 @@ class CellExtractionResults:
 
         normalized_resistance_table: Dict[NetCoupleKey, float] = {}
         device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
+        exclusion_ports: Dict[NetName, List[NetName]] = {}
 
         for network in self.r_extraction_result.networks:
             port_names = port_names_by_net.get(network.net_name, {})
@@ -603,10 +629,16 @@ class CellExtractionResults:
             for terminal_key, node_ids in node_names.terminal_node_ids.items():
                 device_terminal_nodes[terminal_key] = node_names.by_node_id[node_ids[0]]
 
+            K = r_network_pb2.RNode.Kind
+            net_exclusion_ports = sorted({port_names[n.node_name] for n in network.nodes
+                                          if n.node_kind == K.KIND_EXCLUSION_PORT})
+            if net_exclusion_ports:
+                exclusion_ports[network.net_name] = net_exclusion_ports
+
             # NOTE: the port of a label on the node of another label (e.g. both on one via) is tied to it
             ties = {NetCoupleKey(port_names[n.node_name], node_names.by_node_id[n.node_id]).normed()
                     for n in network.nodes
-                    if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN
+                    if n.node_kind in (K.KIND_PIN, K.KIND_EXCLUSION_PORT)
                     and n.node_name in port_names
                     and port_names[n.node_name] != node_names.by_node_id[n.node_id]}
             ties.update(NetCoupleKey(network.net_name, node_names.by_node_id[node_id]).normed()
@@ -631,7 +663,8 @@ class CellExtractionResults:
                                                resistances=normalized_resistance_table,
                                                device_terminal_nodes=device_terminal_nodes,
                                                label_ports={net_name: [port_names[label] for label in sorted(port_names)]
-                                                            for net_name, port_names in port_names_by_net.items()})
+                                                            for net_name, port_names in port_names_by_net.items()},
+                                               exclusion_ports=exclusion_ports)
 
         summary = ExtractionSummary.merged([
             overlap_summary, sidewall_summary, sideoverlap_summary,

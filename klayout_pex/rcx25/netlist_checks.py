@@ -145,6 +145,13 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
         if other != lvs_net.expanded_name():
             problems.append(f"resistors join the nets {other} and {lvs_net.expanded_name()}")
 
+    # NOTE: the model of what an exclusion marker stands for joins the pieces of a net at their ports there
+    for lvs_net_name_of_ports, port_names in sorted(summary.exclusion_ports.items()):
+        for port_name in port_names:
+            port_net = rc_circuit.net_by_name(port_name)
+            if port_net is not None:
+                lvs_net_by_piece.setdefault(piece_of(id_of(port_net)), lvs_net_name_of_ports)
+
     def lvs_net_name(rc_net: kdb.Net) -> NetName:
         # NOTE: a net of no LVS net, e.g. the substrate of the capacitances
         return lvs_net_by_piece.get(piece_of(id_of(rc_net)), rc_net.expanded_name())
@@ -210,10 +217,13 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
                             f"is not on the node {node_name} of its port")
 
     # every port touches something, and every net with a pin in the LVS netlist keeps a port
+    # NOTE: but a port at an exclusion marker of a part of a net that ends there (in R mode, which has no capacitances),
+    #       as the marker cuts metal, so it isn't a label off the metal, and the port is the same in each mode
+    exclusion_port_names = {port_name for port_names in summary.exclusion_ports.values() for port_name in port_names}
     ported_lvs_nets: Set[NetName] = set()
     for pin in rc_circuit.each_pin():
         rc_net = rc_circuit.net_for_pin(pin.id())
-        if rc_net is None or rc_net.terminal_count() == 0:
+        if (rc_net is None or rc_net.terminal_count() == 0) and pin.name() not in exclusion_port_names:
             # NOTE: but for a net that touches nothing in the LVS netlist either (e.g. a wire of one pin, R mode)
             lvs_net = lvs_circuit.net_by_name(lvs_net_name(rc_net)) if rc_net is not None else None
             if lvs_net is None or lvs_net.terminal_count() + lvs_net.subcircuit_pin_count() > 0:

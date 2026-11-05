@@ -430,7 +430,65 @@ def r_ntap_pair_two_nwells_over_dnwell_m1_m2() -> Pattern:
     return p
 
 
+def exclusion_user_marker_wire() -> Pattern:
+    """
+    A Metal2 wire of 60 µm x 2 µm from A to B, with its middle third within a layer no PDK layer is on,
+    for a marker given by the user, as the PDK has none
+    """
+    p = pattern('exclusion_user_marker_wire')
+    p.box(METAL2, -20000, 0, 40000, 2000)
+    p.label(METAL2, 'A', -19500, 1000)
+    p.label(METAL2, 'B', 39500, 1000)
+    p.box((200, 0), 0, -5000, 20000, 7000)
+    return p
+
+
+def exclusion_nwell_between_pfet_and_tap() -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_m1, in one Nwell, with the middle of the Nwell within a layer
+    no PDK layer is on, for a marker given by the user, so that nothing but a model joins the part with the pfet
+    """
+    p = pattern('exclusion_nwell_between_pfet_and_tap')
+    p.copy_design('gf180mcuD', 'test_patterns', 'r_nwell_pfet_ntap_m1.gds.gz')
+    p.box((200, 0), 5000, -1000, 7000, 4000)
+    return p
+
+
+def exclusion_pfet_between_taps() -> Pattern:
+    """
+    The pfet and the n-tap of r_nwell_pfet_ntap_m1, with another n-tap on the other side of the pfet, labelled A,
+    all in one Nwell, with the pfet within a layer no PDK layer is on, for a marker given by the user,
+    so that only a model joins the taps and the bulk of the pfet
+    """
+    p = pattern('exclusion_pfet_between_taps')
+    p.copy_design('gf180mcuD', 'test_patterns', 'r_nwell_pfet_ntap_m1.gds.gz')
+    p.box(NWELL, -6000, 0, 0, 3000)
+    tap(p, NPLUS, 'A', -4000, 1500)
+    p.box((200, 0), 500, -1000, 3000, 4000)
+    return p
+
+
+def exclusion_rail_between_taps() -> Pattern:
+    """
+    A Metal1 rail of 300 µm x 0.6 µm between two n-taps, in a Nwell each, with the labels A and B on it,
+    with 20 µm of it within a layer no PDK layer is on, for a marker given by the user
+    """
+    p = pattern('exclusion_rail_between_taps')
+    for x in (0, 300000):
+        p.box(NWELL, x - 2000, -2000, x + 2000, 2000)
+        tap(p, NPLUS, None, x, 0)
+    p.box(METAL1, 0, -300, 300000, 300)
+    p.label(METAL1, 'A', 100, 0)
+    p.label(METAL1, 'B', 299900, 0)
+    p.box((200, 0), 140000, -2000, 160000, 2000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
+    'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
+    'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_user_marker_wire': exclusion_user_marker_wire,
     'r_single_wire_m1': r_single_wire_m1,
     'r_wire_voltage_divider_m1': r_wire_voltage_divider_m1,
     'r_wire_and_floating_branch_m1': r_wire_and_floating_branch_m1,
