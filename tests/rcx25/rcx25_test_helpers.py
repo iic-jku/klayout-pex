@@ -35,6 +35,7 @@ import numpy as np
 
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.netlist.netlist_format import NetlistFormat
+from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.pex_mode import PEXMode
@@ -46,6 +47,14 @@ from tests.common.pdk_test_config import PDKTestConfig
 
 
 CSVPath = str
+
+
+def netlist_path_of(cli: KpexCLI) -> str:
+    return f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
+
+
+def netlist_ports(cli: KpexCLI) -> List[str]:
+    return next(s for s in SpiceRCNetlist.read(netlist_path_of(cli)).scopes if s.name is not None).ports
 
 
 @dataclass

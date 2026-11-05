@@ -43,7 +43,6 @@ import pytest
 
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.kpex_cli import KpexCLI
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.rcx25.exclusion import CutLayers, CutRequest, ExclusionMarkerMode, Exclusions
@@ -55,7 +54,7 @@ from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import committed_fixtures, lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
-from tests.rcx25.rcx25_test_helpers import RCX25Extraction, effective_resistance, pair
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction, effective_resistance, netlist_path_of, netlist_ports, pair
 
 parent_suite = "kpex/2.5D exclusion markers"
 tags = ("PEX", "2.5D", "Exclusion")
@@ -92,14 +91,6 @@ def capacitances(cli: KpexCLI) -> Values:
 
 def resistances(cli: KpexCLI) -> Values:
     return values_of(cli, 'Resistance [Ω]')
-
-
-def netlist_path_of(cli: KpexCLI) -> str:
-    return f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
-
-
-def netlist_ports(cli: KpexCLI) -> List[str]:
-    return next(s for s in SpiceRCNetlist.read(netlist_path_of(cli)).scopes if s.name is not None).ports
 
 
 @allure.parent_suite(parent_suite)
@@ -287,6 +278,16 @@ def test_pin_within_a_marker_names_the_cut_on_its_layer():
     assert resistances(honored) == {pair('A', 'A_B__m0_0'): pytest.approx(0.418, abs=0.001),
                                     pair('A,B', 'A_B__m0_0'): pytest.approx(2.031, abs=0.001),
                                     pair('A,B', 'B'): pytest.approx(0.02, abs=0.001)}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_label_in_a_child_cell_names_the_cut_of_its_marker():
+    # NOTE: e.g. of an inductor in a child cell, whose labels are the pins of its model (#403)
+    extraction = Extraction('label_in_child_cell_within_marker', PEXMode.R)
+    assert sorted(netlist_ports(extraction.run(ExclusionMarkerMode.PORTS))) == ['inner', 'outer']
+    assert netlist_ports(extraction.run(ExclusionMarkerMode.IGNORE)) == ['outer']
+    assert netlist_ports(extraction.run(ExclusionMarkerMode.TIE)) == ['outer']
 
 
 @allure.parent_suite(parent_suite)
