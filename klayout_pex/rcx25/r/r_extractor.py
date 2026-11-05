@@ -1065,6 +1065,9 @@ class RExtractor:
         nets_with_cuts_along_conductors: List[NetName] = []
 
         for net_extraction_request in rex_request.net_extraction_requests:
+            if self.exclusions is not None and net_extraction_request.net_name in self.exclusions.excluded_net_names:
+                continue
+
             vertex_ports: Dict[int, List[kdb.Point]] = defaultdict(list)
             polygon_ports: Dict[int, List[kdb.Polygon]] = defaultdict(list)
             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]] = defaultdict(list)

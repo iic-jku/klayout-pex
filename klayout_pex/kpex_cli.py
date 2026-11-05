@@ -456,7 +456,7 @@ class KpexCLI:
     @staticmethod
     def _add_exclusion_arguments(parser: argparse.ArgumentParser):
         group = parser.add_argument_group("Exclusion Options",
-                                          "Leave parts of the layout to models, with the 2.5D engine. "
+                                          "Leave parts of the layout to models or ideal sources, with the 2.5D engine. "
                                           "The netlists of --mode CC have one node per net, so no ports for models")
         group.add_argument("--exclusion-markers", dest='exclusion_marker_mode',
                            default=ExclusionMarkerMode.DEFAULT, type=ExclusionMarkerMode,
@@ -490,6 +490,12 @@ class KpexCLI:
                            metavar='NET',
                            help="Extract the shapes of the net (a name, or a glob pattern) within the cells "
                                 "of --cut like the rest of the layout, e.g. a guard ring. Repeatable")
+        group.add_argument("--exclude-net", dest='excluded_net_patterns', action='append', default=None,
+                           metavar='NET',
+                           help="Leave the net (a name, or a glob pattern) to a model or an ideal source, "
+                                "e.g. the power grid of a block, which the top level extracts: it has no "
+                                "resistance, and no capacitance to the substrate, while the capacitances "
+                                "between it and other nets stay. Repeatable")
 
     @staticmethod
     def _add_pex25d_output_arguments(parser: argparse.ArgumentParser) -> None:
@@ -715,7 +721,8 @@ class KpexCLI:
             layout_options = [f"--exclusion-markers {args.exclusion_marker_mode}"
                               if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE else None,
                               f"--cut {args.cut_specifications[0]}" if args.cut_specifications else None]
-            for exclusion_option in filter(None, layout_options):
+            net_options = [f"--exclude-net {args.excluded_net_patterns[0]}" if args.excluded_net_patterns else None]
+            for exclusion_option in filter(None, layout_options + net_options):
                 # NOTE: MAGIC would extract what is left out
                 if args.run_magic:
                     error(f"{exclusion_option} applies to the 2.5D engine, not to MAGIC")
@@ -1249,20 +1256,22 @@ class KpexCLI:
         """
         marker_mode = args.exclusion_marker_mode
         honors_markers = marker_mode != ExclusionMarkerMode.IGNORE
-        if not honors_markers and not args.cut_requests:
+        if not honors_markers and not args.cut_requests and not args.excluded_net_patterns:
             return None
 
         substrate_layer_name = tech_info.internal_substrate_layer_name
-        exclusions = Exclusions.from_layout(
-            layout=args.layout,
-            cell_name=args.effective_cell_name,
-            marker_layers=args.selected_marker_layers if honors_markers else [],
-            dbu=pex_context.dbu,
-            ports=marker_mode == ExclusionMarkerMode.PORTS,
-            substrate_layer_name=substrate_layer_name,
-            cut_requests=args.cut_requests,
-            cut_layers=CutLayers.of_tech(tech_info) if args.cut_requests else None
-        )
+        exclusions = Exclusions([], substrate_layer_name)
+        if honors_markers or args.cut_requests:
+            exclusions = Exclusions.from_layout(
+                layout=args.layout,
+                cell_name=args.effective_cell_name,
+                marker_layers=args.selected_marker_layers if honors_markers else [],
+                dbu=pex_context.dbu,
+                ports=marker_mode == ExclusionMarkerMode.PORTS,
+                substrate_layer_name=substrate_layer_name,
+                cut_requests=args.cut_requests,
+                cut_layers=CutLayers.of_tech(tech_info) if args.cut_requests else None
+            )
         if honors_markers and not any(block.kind == BlockKind.MARKER for block in exclusions.blocks):
             warning("The layout has no shapes on the exclusion markers, so the extraction leaves nothing out of them")
 
@@ -1277,6 +1286,8 @@ class KpexCLI:
         for pattern in args.cut_kept_net_patterns or []:
             for net_name in names_of_nets('--cut-keep-net', pattern):
                 exclusions.without_shapes(pex_context.net_shapes_by_conductor_layer(net_name))
+        for pattern in args.excluded_net_patterns or []:
+            exclusions.excluded_net_names.update(names_of_nets('--exclude-net', pattern))
         prepare_exclusions(exclusions, pex_context, tech_info)
         return exclusions
 

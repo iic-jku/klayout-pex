@@ -673,6 +673,10 @@ class Exclusions:
         # the devices the netlist leaves out by their IDs, with the indexes of their blocks (of cut cells)
         self.removed_device_blocks: Dict[int, int] = {}
 
+        # the nets without resistance, and without capacitance to the substrate (kpex --exclude-net)
+        # NOTE: no blocks, as all capacitances between nets stay, and a block of a power grid would cost each of them
+        self.excluded_net_names: Set[NetName] = set()
+
         # the labels of the layout on the metal, of the cut cells and outside them, by their texts and positions
         self.labels_of_cut_cells: Set[Tuple[str, kdb.Point]] = {(label.text, label.position)
                                                                 for block in blocks for label in block.labels}
@@ -777,6 +781,16 @@ class Exclusions:
         self.bbox += shapes.bbox()
         self.block_boxes.insert(kdb.BoxWithProperties(shapes.bbox(), {'block': block_index}))
         self._masks.clear()
+
+    def leaves_out_capacitance_of_net(self, net_name: NetName, other_net_name: NetName) -> bool:
+        """
+        :param net_name: the net of a plate
+        :param other_net_name: the net of what the plate couples to
+        :return: whether it's a capacitance of an excluded net to the substrate
+
+        NOTE: by the net, as a well of another net is on the layer of the substrate, which stays like any other net
+        """
+        return net_name in self.excluded_net_names and other_net_name == self.substrate_layer_name
 
     def mask(self,
              layer_name: LayerName,

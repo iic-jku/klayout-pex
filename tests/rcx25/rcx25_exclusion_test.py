@@ -1132,6 +1132,17 @@ def test_marker_without_ports_beside_a_cut_cell_keeps_the_capacitances_of_the_pa
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.RC])
+def test_excluded_net_keeps_its_capacitance_to_a_well_of_another_net(mode: PEXMode):
+    extraction = Extraction('exclusion_wire_over_nwell', mode)
+    ignored = capacitances(extraction.run(ExclusionMarkerMode.IGNORE))
+    excluded = capacitances(extraction.run(ExclusionMarkerMode.IGNORE, '--exclude-net', 'W'))
+    assert ignored[pair('NW', 'W')] > 0.0
+    assert excluded[pair('NW', 'W')] == ignored[pair('NW', 'W')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 @pytest.mark.parametrize('marker_mode', [ExclusionMarkerMode.TIE, ExclusionMarkerMode.PORTS])
 def test_any_angle_wire_is_cut_at_a_marker(marker_mode: ExclusionMarkerMode):
     # NOTE: rounded differently, slivers along the cuts would join what is on both sides of the marker
@@ -1556,6 +1567,80 @@ def test_unknown_kept_net_is_an_error_listing_the_nets(tmp_path):
                                                     '--cut', 'coil', '--cut-keep-net', 'nope'))
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert 'no such net' in ' '.join(output.split()) and 'VDD' in output, output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.RC])
+@pytest.mark.parametrize('pattern', ['P', 'P*'])
+def test_excluded_net_has_no_capacitance_to_the_substrate_but_keeps_the_ones_of_other_nets(mode: PEXMode, pattern: str):
+    extraction = Extraction('exclusion_plate_neighbor', mode)
+    ignored = capacitances(extraction.run(ExclusionMarkerMode.IGNORE))
+    excluded_cli = extraction.run(ExclusionMarkerMode.IGNORE, '--exclude-net', pattern)
+    excluded = capacitances(excluded_cli)
+
+    assert ignored[pair('P', 'VSUBS')] > 0.0
+    assert pair('P', 'VSUBS') not in excluded
+    assert excluded[pair('N', 'P')] == ignored[pair('N', 'P')] > 0.0
+    assert excluded[pair('N', 'VSUBS')] == ignored[pair('N', 'VSUBS')] > 0.0
+    assert excluded_cli.rcx25_netlist_problems == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_excluded_net_has_no_resistance():
+    ignored = resistances(Extraction('exclusion_wire_through', PEXMode.R).run(ExclusionMarkerMode.IGNORE))
+    assert ignored
+
+    cli = Extraction('exclusion_wire_through', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--exclude-net', 'A,B')
+    assert resistances(cli) == {}
+    assert cli.rcx25_netlist_problems == []
+    # NOTE: the one node of the net, as in --mode CC, a SPICE name can't have a comma
+    assert netlist_ports(cli) == ['A|B']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_excluded_nets_keep_the_capacitances_between_them_and_their_devices():
+    extraction = Extraction('exclusion_nmos_diode2', PEXMode.RC)
+    ignored_cli = extraction.run(ExclusionMarkerMode.IGNORE)
+    ignored = capacitances(ignored_cli)
+    ignored_devices = devices_of(ignored_cli)
+    assert len(ignored_devices) == 1
+
+    cli = extraction.run(ExclusionMarkerMode.IGNORE, '--exclude-net', 'VDD', '--exclude-net', 'VSS')
+    assert cli.rcx25_netlist_problems == []
+    assert resistances(cli) == {}
+    # NOTE: the terminals of the device are on the one node of each net
+    assert set(devices_of(cli)[0][1:4]) <= {'VDD', 'VSS', 'sub!'}
+    values = capacitances(cli)
+    assert set(values) == {pair('VDD', 'VSS')}
+    total_between_nets = sum(value for key, value in ignored.items()
+                             if any(net.startswith('VDD') for net in key) and any(net.startswith('VSS') for net in key))
+    assert values[pair('VDD', 'VSS')] == pytest.approx(total_between_nets, abs=0.01)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_excluded_net_needs_no_layout(tmp_path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', 'exclusion_plate_neighbor.gds.gz')
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D', '--mode', 'CC',
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
+                                                    '--exclude-net', 'P'))
+    assert code == 0, output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_unknown_excluded_net_is_an_error_listing_the_nets(tmp_path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds_path = pdk.gds_path('test_patterns', 'exclusion_plate_neighbor.gds.gz')
+    code, output = run_cli(KpexCLI().main, cli_args(tmp_path, '--2.5D',
+                                                    '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
+                                                    '--exclude-net', 'nope'))
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert '--exclude-net nope: no such net, the nets are: N, P' in ' '.join(output.split()), output
 
 
 @allure.parent_suite(parent_suite)

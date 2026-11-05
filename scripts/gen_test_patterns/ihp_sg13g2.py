@@ -802,6 +802,21 @@ def exclusion_tap_wire_through() -> Pattern:
     return p
 
 
+def exclusion_wire_over_nwell() -> Pattern:
+    """
+    A Metal3 wire W over an n-well, whose net is NW by a tap with a Metal1 pin
+    """
+    p = pattern('exclusion_wire_over_nwell')
+    p.box(NWELL, 0, 0, 30000, 30000)
+    metal3_wire(p, 5000, 5000, 25000, 10000, 'W')
+    p.box(ACTIV, 1000, 20000, 4000, 23000)
+    p.box(CONT, 2000, 21000, 2160, 21160)
+    p.box(METAL1, 1000, 20000, 4000, 23000)
+    p.box(METAL1_PIN, 1000, 20000, 2000, 23000)
+    p.label(METAL1, 'NW', 1500, 21500)
+    return p
+
+
 def exclusion_slanted_wire() -> Pattern:
     """
     A Metal3 wire at an angle of 33 degrees from A to B through a marker
@@ -1404,6 +1419,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
                                                                                 2000),
     'exclusion_same_label_within': exclusion_same_label_within,
     'exclusion_tap_wire_through': exclusion_tap_wire_through,
+    'exclusion_wire_over_nwell': exclusion_wire_over_nwell,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
     'cut_boundary_over_devices': cut_boundary_over_devices,

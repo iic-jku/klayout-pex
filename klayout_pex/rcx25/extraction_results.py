@@ -472,6 +472,10 @@ class CellExtractionResults:
             return [cap]
 
         key = cap.key
+        if exclusions.leaves_out_capacitance_of_net(key.net_top, key.net_bot):
+            cap.cap_value = 0.0
+            return []
+
         capacitance_per_area = cap.cap_value / cap.area.area()
         kept_area = cap.area - exclusions.excluded_area(cap.area, key.layer_top, key.layer_bot)
 
@@ -509,6 +513,10 @@ class CellExtractionResults:
         exclusions = self.exclusions
         if exclusions is None:
             return [(cap, inside_net_name, outside_net_name)]
+
+        if exclusions.leaves_out_capacitance_of_net(inside_net_name, outside_net_name):
+            cap.cap_value = 0.0
+            return []
 
         inside_parts = exclusions.edge_parts(cap.inside_edge, -1, inside_net_name, inside_layer_name)
         outside_parts = exclusions.edge_parts(facing_edge, 1, outside_net_name, outside_layer_name)
