@@ -23,7 +23,7 @@
 #
 """
 Consistency checks of the RC netlist against the LVS netlist it's made of (#215),
-and of the LVS netlist against the schematic (#345)
+and of the LVS netlist (#345) and the ports of the RC netlist (#406) against the schematic
 
 NOTE: the defects of #211 gave RC netlists that simulate to plausible, but wrong numbers,
       so these checks compare the RC netlist with the LVS netlist by identity
@@ -41,6 +41,8 @@ import klayout.db as kdb
 from ..device_models import DeviceModels
 from ..device_totals import DeviceTotalParameters
 from ..log import info, warning
+from ..netlist.spice_hierarchy import SpiceHierarchy
+from ..netlist.spice_netlist import SpiceNetlist
 from ..schematic_devices import SchematicDevices
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
@@ -301,6 +303,45 @@ def check_schematic_device_classes(lvs_netlist: kdb.Netlist,
     return [f"the schematic has devices of class {class_name} ({first_names(device_names)}), the LVS netlist none"
             for class_name, device_names in sorted(schematic.device_names_by_class_name.items())
             if class_name not in lvs_class_names]
+
+
+def check_schematic_pins(schematic: SpiceNetlist,
+                         top_cell_name: str,
+                         port_names: Sequence[str],
+                         left_out_names: Collection[str] = ()) -> List[str]:
+    """
+    Compares the ports of the netlist with the pins of the top circuit of the schematic (#406):
+    its subcircuit of the cell, else its only one that no element calls, regardless of case, as SPICE reads names
+
+    :param port_names: of the netlist, where a port of a net of several labels (e.g. A,B in --mode CC)
+                       is a port of each, as in --mode R and RC
+    :param left_out_names: compared neither as pins nor as ports, e.g. the substrate, which a schematic may leave
+                           global, and the ports for the models of what exclusion markers and cut cells leave out
+    :return: the problems: the pins without port, and the ports without pin
+    """
+    hierarchy = SpiceHierarchy(schematic)
+    top = hierarchy.subcircuit(top_cell_name)
+    if top is None:
+        uncalled = hierarchy.uncalled_subcircuits()
+        if len(uncalled) != 1:
+            names = [subcircuit.name for subcircuit in uncalled]
+            return [f"the schematic has no subcircuit {top_cell_name}, and {len(names)} that no element calls"
+                    f"{f' ({first_names(names)})' if names else ''}, so no pins are compared"]
+        top = uncalled[0]
+
+    left_out = {name.casefold() for name in left_out_names}
+    ports = [name for port_name in port_names for name in port_name.split(',') if name.casefold() not in left_out]
+    pins = [name for name in top.ports if name.casefold() not in left_out]
+    port_keys = {name.casefold() for name in ports}
+    pin_keys = {name.casefold() for name in pins}
+    problems: List[str] = []
+    pins_without_port = [name for name in pins if name.casefold() not in port_keys]
+    if pins_without_port:
+        problems.append(f"the schematic has pins without port in the netlist: {first_names(pins_without_port)}")
+    ports_without_pin = [name for name in ports if name.casefold() not in pin_keys]
+    if ports_without_pin:
+        problems.append(f"the netlist has ports without pin in the schematic: {first_names(ports_without_pin)}")
+    return problems
 
 
 class _DeviceTotals:

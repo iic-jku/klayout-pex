@@ -153,7 +153,7 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
                                             '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
     assert code == 1, output  # NOTE: no KLayout
-    assert "--schematic is checked for its device classes and their totals only, " \
+    assert "--schematic is checked for its device classes, their totals and the pins of its top circuit only, " \
            "use regular LVS to compare layout against schematic" in output
     assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_dummy_schematic.spice')
 
@@ -164,11 +164,14 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
 def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     # NOTE: the alignment with a schematic kept the cells it has as subcircuits, and the RC netlist
     #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
+    # NOTE: --check n, as the labels are in SUBNFET only, so that the ports are named after the nets ($1.D, $1.G,
+    #       $1.S, #404), unlike the pins of the schematic (D, G, S, VNB), which --check compares them with (#406)
     config = PDKTestConfig(PDKName.SKY130A)
     gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path,
                                             '--schematic', gds_path.replace('.gds.gz', '.spice'),
+                                            '--check', 'n',
                                             '--out-dir', str(tmp_path)])
     assert code == 0, output
     run_dir = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell'
@@ -179,49 +182,53 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
         assert "Netlists don't match" not in f.read()
 
 
+def schematic_problems(schematic_path: str, port_names: Sequence[str]) -> List[str]:
+    """
+    :return: the problems of the schematic of the cell chip, against a netlist without devices with these ports
+    """
+    return KpexCLI.schematic_problems(schematic_path=schematic_path, lvs_netlist=kdb.Netlist(),
+                                      device_models=device_models(NMOS), top_cell_name='chip', port_names=port_names)
+
+
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Schematic")
 def test_unreadable_schematic_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
     schematic_path.write_text('.subckt chip a b\n.include models.lib\n.ends chip\n', encoding='utf-8')
-    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
-                                                       lvs_netlist=kdb.Netlist(),
-                                                       device_models=device_models(NMOS),
-                                                       top_cell_name='chip')
-    assert problems == [f"kpex can't read the schematic, so no device classes are compared: "
-                        f"{schematic_path}: line 2: .include is not supported"]
+    assert schematic_problems(str(schematic_path), ['a', 'b']) == [
+        f"kpex can't read the schematic, so neither pins nor device classes are compared: "
+        f"{schematic_path}: line 2: .include is not supported"]
 
 
 def test_schematic_without_value_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
     schematic_path.write_text('.subckt chip a b\nXM1 a b b b nmos w={w0*2}\n.ends chip\n', encoding='utf-8')
-    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
-                                                       lvs_netlist=kdb.Netlist(),
-                                                       device_models=device_models(NMOS),
-                                                       top_cell_name='chip')
-    assert problems == [f"kpex can't evaluate the schematic, so no device classes are compared: "
-                        f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
+    assert schematic_problems(str(schematic_path), ['a', 'b']) == [
+        f"kpex can't evaluate the schematic, so no device classes are compared: "
+        f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
 
 
 def test_schematic_with_diode_of_three_nodes_is_no_check_problem(tmp_path):
     # NOTE: the reader took the third node as the model and the model as the area, which it couldn't evaluate (#368)
     schematic_path = tmp_path / 'chip.spice'
     schematic_path.write_text('.subckt chip a b vss\nDD1 a b vss schottky_nbl1\n.ends chip\n', encoding='utf-8')
-    problems = KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
-                                                       lvs_netlist=kdb.Netlist(),
-                                                       device_models=device_models(NMOS),
-                                                       top_cell_name='chip')
-    assert problems == []
+    assert schematic_problems(str(schematic_path), ['a', 'b', 'vss']) == []
+
+
+def test_pins_of_the_schematic_other_than_the_ports_are_check_problems(tmp_path):
+    # NOTE: regardless of case, as SPICE reads names (#406)
+    schematic_path = tmp_path / 'chip.spice'
+    schematic_path.write_text('.subckt chip a b\n.ends chip\n', encoding='utf-8')
+    assert schematic_problems(str(schematic_path), ['A', 'c']) == [
+        "the schematic has pins without port in the netlist: b",
+        "the netlist has ports without pin in the schematic: c"]
 
 
 def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
     # NOTE: e.g. a standard cell, which the schematic calls, but doesn't define
     schematic_path = tmp_path / 'chip.spice'
     schematic_path.write_text('.subckt chip a b\nXinv a b sg13g2_inv_1\n.ends chip\n', encoding='utf-8')
-    KpexCLI.schematic_device_class_problems(schematic_path=str(schematic_path),
-                                            lvs_netlist=kdb.Netlist(),
-                                            device_models=device_models(NMOS),
-                                            top_cell_name='chip')
+    schematic_problems(str(schematic_path), ['a', 'b'])
     assert ('__kpex__', logging.WARNING,
             "The device class check leaves out the devices of the schematic of models without device model "
             "mapping:\n  - sg13g2_inv_1: Xinv") in caplog.record_tuples
@@ -264,3 +271,22 @@ def test_device_totals_of_the_schematic_that_differ_from_the_layout_fail_the_rc_
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert "the schematic has Σ W·L = 0.195 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.0975" in output
     assert "the schematic has Σ W = 1.3 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.65" in output
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.slow
+def test_pins_of_the_schematic_other_than_the_ports_fail_the_rc_run(tmp_path):
+    # NOTE: e.g. a label of the layout other than the pin of the schematic, by which a netlist that replaces
+    #       the schematic is connected (#406), but not the substrate sky130_gnd, which the schematic leaves global
+    schematic_path = tmp_path / 'nfet_li1.spice'
+    schematic_path.write_text('.subckt nfet_li1 D G SRC\n'
+                              'XM1 SRC G D sky130_gnd sky130_fd_pr__nfet_01v8 L=0.15 W=0.65\n'
+                              '.ends nfet_li1\n', encoding='utf-8')
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                            '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert "The extracted netlist is inconsistent with the LVS netlist (--check n to accept it):\n" \
+           "  - the schematic has pins without port in the netlist: SRC\n" \
+           "  - the netlist has ports without pin in the schematic: S" in output

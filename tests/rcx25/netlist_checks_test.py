@@ -34,11 +34,13 @@ from klayout_pex.klayout.parasitic_device_classes import (
     PARASITIC_CAPACITOR_CLASS_NAME,
     PARASITIC_RESISTOR_CLASS_NAME,
 )
+from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
 from klayout_pex.rcx25.netlist_checks import (
     check_rc_netlist,
     check_schematic_device_classes,
     check_schematic_device_totals,
+    check_schematic_pins,
 )
 from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices
 from tests.common.device_model_mappings import NMOS, device_models
@@ -286,6 +288,59 @@ class SchematicDeviceClassesTest(unittest.TestCase):
         self.assertEqual(['kpex reads no devices from the schematic, e.g. of models without device model mapping '
                           '(nfet), so no device classes are compared'],
                          check_schematic_device_classes(lvs_netlist(), devices))
+
+
+INVERTER_CHAIN = """\
+.subckt inv A Y VDD VSS
+XM1 Y A VDD VDD pmos w=1u l=0.13u
+XM2 Y A VSS VSS nmos w=1u l=0.13u
+.ends inv
+.subckt chip IN OUT VDD VSS
+X1 IN MID VDD VSS inv
+X2 MID OUT VDD VSS inv
+.ends chip
+"""
+
+
+def pin_problems(port_names: List[str],
+                 schematic: str = INVERTER_CHAIN,
+                 left_out_names: Sequence[str] = ()) -> List[str]:
+    return check_schematic_pins(schematic=SpiceReader().parse(schematic), top_cell_name='chip',
+                                port_names=port_names, left_out_names=left_out_names)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Netlist Checks", "Schematic")
+class SchematicPinsTest(unittest.TestCase):
+    def test_ports_of_the_pins_regardless_of_case_and_order(self):
+        # NOTE: as SPICE reads names
+        self.assertEqual([], pin_problems(['vss', 'VDD', 'out', 'IN']))
+
+    def test_pin_without_port_and_port_without_pin(self):
+        # NOTE: e.g. a label of the layout other than the pin of the schematic
+        self.assertEqual(['the schematic has pins without port in the netlist: OUT',
+                          'the netlist has ports without pin in the schematic: Y'],
+                         pin_problems(['IN', 'Y', 'VDD', 'VSS']))
+
+    def test_port_of_a_net_of_several_labels_is_one_of_each(self):
+        # NOTE: --mode CC has a port of the net, R and RC a port of each label
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD,VSS']))
+
+    def test_substrate_and_ports_for_models_are_left_out(self):
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS', 'sub!', 'X1__A'],
+                                          schematic=INVERTER_CHAIN.replace('OUT VDD VSS\n', 'OUT VDD VSS SUB!\n'),
+                                          left_out_names=['sub!', 'X1__A']))
+
+    def test_top_circuit_is_the_only_subcircuit_that_no_element_calls(self):
+        # NOTE: e.g. of a cell of another name in the schematic
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS'],
+                                          schematic=INVERTER_CHAIN.replace('chip', 'chip_schematic')))
+
+    def test_schematic_without_top_circuit(self):
+        schematic = INVERTER_CHAIN.replace('chip', 'chip_schematic') + ".subckt other a\n.ends other\n"
+        self.assertEqual(['the schematic has no subcircuit chip, and 2 that no element calls '
+                          '(chip_schematic, other), so no pins are compared'],
+                         pin_problems(['IN'], schematic=schematic))
 
 
 def mos_netlist(*widths: float, finger_calls: int = 0) -> kdb.Netlist:
