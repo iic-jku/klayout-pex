@@ -441,9 +441,10 @@ def exclusion_plates_markers(name: str, marker_boxes: List[Tuple[int, int, int, 
     return p
 
 
-def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
+def metal2_wires_metal3_bridge(name: str, marker: bool, bridge_label: Optional[str] = None) -> Pattern:
     """
-    A wire from A to B on Metal2, with a Metal3 bridge of its gap in the middle, with a marker around the bridge
+    A wire from A to B on Metal2, with a Metal3 bridge of its gap in the middle, with a marker around the bridge,
+    and a pin on the left half of the bridge, if it has a label
     """
     p = pattern(name)
     p.box(METAL2, -10000, 0, 4000, 2000)
@@ -455,6 +456,9 @@ def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
     metal2_pin(p, 'B', 19000, 0, 20000, 2000)
     if marker:
         p.box(NORCX, 0, -5000, 10000, 7000)
+    if bridge_label is not None:
+        p.box(METAL3_PIN, 4000, 0, 5000, 2000)
+        p.label(METAL3, bridge_label, 4500, 1000)
     return p
 
 
@@ -1415,6 +1419,15 @@ def exclusion_rail_between_taps() -> Pattern:
     return p
 
 
+def exclusion_ptap_within_marker() -> Pattern:
+    """
+    The p-taps of r_ptap_pair_m1_m2_pins_A_B, which only the substrate joins, with a marker over the one with the pin B
+    """
+    p = r_ptap_pair_m1_m2('exclusion_ptap_within_marker', ('A', 'B'))
+    p.box(NORCX, 9000, -1000, 11500, 6000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
@@ -1464,6 +1477,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
                                                                   [(0, 0, 40500, 20000)]),
     'exclusion_via_stack': lambda: metal2_wires_metal3_bridge('exclusion_via_stack', marker=True),
     'exclusion_via_stack_no_marker': lambda: metal2_wires_metal3_bridge('exclusion_via_stack_no_marker', marker=False),
+    'exclusion_via_stack_pin_on_bridge':
+        lambda: metal2_wires_metal3_bridge('exclusion_via_stack_pin_on_bridge', marker=True, bridge_label='P'),
     'exclusion_via_across': exclusion_via_across,
     'exclusion_stubs': exclusion_stubs,
     'exclusion_marker_in_cell': exclusion_marker_in_cell,
@@ -1477,6 +1492,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_wire_over_nwell': exclusion_wire_over_nwell,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_ptap_within_marker': exclusion_ptap_within_marker,
     'exclusion_overlapping_markers': exclusion_overlapping_markers,
     'cut_boundary_over_devices': cut_boundary_over_devices,
     'cut_boundary_over_inductor': cut_boundary_over_inductor,
