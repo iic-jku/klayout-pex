@@ -1,0 +1,69 @@
+[20:48:28] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1595
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r
+_ptap_li1_m1_two_wires.lvsdb.gz --out-dir                                       
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:48:28] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:837
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[20:48:28] INFO     Peak memory (resident set size) after       kpex_cli.py:1778
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:48:28] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1782
+[20:48:28] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1782
+[20:48:28] INFO     (66, 4405) -> (licon_ptap_con)              kpex_cli.py:1782
+[20:48:28] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1782
+[20:48:28] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1782
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:48:28] INFO     LVSDB: found 0pins                          extractor.py:482
+[20:48:28] WARNING  Only the substrate, a well or a tap joins   extractor.py:536
+                    pieces of the metal of these nets, which                    
+                    the resistance network has no resistance                    
+                    for, so the pieces are ideally on their                     
+                    nets: $2                                                    
+[20:48:28] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$2;$2.$1.li1;;37.647                                                         
+R2;$2;$2.$10.met1;;9.3                                                          
+R3;$2;$2.$15.met1;;9.3                                                          
+R4;$2;$2.$6.li1;;37.647                                                         
+R5;$2.$1.li1;$2.$11.met1;;9.3                                                   
+R6;$2.$1.li1;$2.$2.li1;;37.647                                                  
+R7;$2.$10.met1;$2.$11.met1;;0.368                                               
+R8;$2.$11.met1;$2.$12.met1;;0.368                                               
+R9;$2.$12.met1;$2.$13.met1;;0.368                                               
+R10;$2.$12.met1;$2.$2.li1;;9.3                                                  
+R11;$2.$13.met1;$2.$14.met1;;0.368                                              
+R12;$2.$13.met1;$2.$3.li1;;9.3                                                  
+R13;$2.$14.met1;$2.$4.li1;;9.3                                                  
+R14;$2.$15.met1;$2.$16.met1;;0.368                                              
+R15;$2.$16.met1;$2.$17.met1;;0.368                                              
+R16;$2.$16.met1;$2.$6.li1;;9.3                                                  
+R17;$2.$17.met1;$2.$18.met1;;0.368                                              
+R18;$2.$17.met1;$2.$7.li1;;9.3                                                  
+R19;$2.$18.met1;$2.$19.met1;;0.368                                              
+R20;$2.$18.met1;$2.$8.li1;;9.3                                                  
+R21;$2.$19.met1;$2.$9.li1;;9.3                                                  
+R22;$2.$2.li1;$2.$3.li1;;37.647                                                 
+R23;$2.$3.li1;$2.$4.li1;;37.647                                                 
+R24;$2.$6.li1;$2.$7.li1;;37.647                                                 
+R25;$2.$7.li1;$2.$8.li1;;37.647                                                 
+R26;$2.$8.li1;$2.$9.li1;;37.647                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_ptap_li1_m1_two_wires
+__r_ptap_li1_m1_two_wires/r_ptap_li1_m1_two_wires_k25d_pex_netlist.csv          
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_ptap_li1_m1_two_wires
+__r_ptap_li1_m1_two_wires/r_ptap_li1_m1_two_wires_k25d_pex_netlist.spice        
+[20:48:28] INFO     Peak memory (resident set size) after the   kpex_cli.py:1390
+                    netlist: 1.1 GiB                                            
+[20:48:28] INFO     Peak memory (resident set size) after the   kpex_cli.py:1661
+                    run: 1.1 GiB                                                
