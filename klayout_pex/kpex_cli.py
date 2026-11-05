@@ -105,7 +105,18 @@ from .pex25d.pex25d_cli import Pex25DCLI
 from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, reduced_netlist_path
 from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
-from .rcx25.extractor import CExtractionTechError, RCX25Extractor, ExtractionResults
+from .rcx25.exclusion import (
+    ExclusionError,
+    ExclusionMarkerMode,
+    Exclusions,
+    selected_marker_layers,
+)
+from .rcx25.extractor import (
+    CExtractionTechError,
+    ExtractionResults,
+    RCX25Extractor,
+    prepare_exclusions,
+)
 from .rcx25.netlist_checks import (
     check_rc_netlist,
     check_schematic_device_classes,
@@ -235,7 +246,8 @@ class KpexCLI:
         # one, should be writing PEX25D, not passing LVSDBs around.
         group_pex_input.add_argument("--lvsdb", "-l", dest="lvsdb_path", default=None,
                                      help="KLayout PEX-LVSDB path from a previous run "
-                                          "(bypass PEX-LVS). Developer shortcut for "
+                                          "(bypass PEX-LVS, also with --gds, which then gives what the LVSDB "
+                                          "lacks, e.g. the shapes of --exclusion-markers). Developer shortcut for "
                                           "re-running without repeating LVS; not an "
                                           "interchange format — use PEX25D for that")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
@@ -435,6 +447,27 @@ class KpexCLI:
 
 
     @staticmethod
+    def _add_exclusion_arguments(parser: argparse.ArgumentParser):
+        group = parser.add_argument_group("Exclusion Options",
+                                          "Leave parts of the layout to models, with the 2.5D engine")
+        group.add_argument("--exclusion-markers", dest='exclusion_marker_mode',
+                           default=ExclusionMarkerMode.DEFAULT, type=ExclusionMarkerMode,
+                           choices=list(ExclusionMarkerMode),
+                           help="What to do with the exclusion markers of the PDK (e.g. IHP NoRCX.drawing), which "
+                                "mark what a model has the parasitics of: 'ignore' extracts what is within them, "
+                                "'tie' leaves out the capacitances within them and to the substrate, but not "
+                                "the shapes, which still shield the rest of the layout, nor their capacitances "
+                                "to it. Needs --gds, which has the markers. "
+                                + render_enum_help(topic='exclusion_markers', enum_cls=ExclusionMarkerMode))
+        group.add_argument("--exclusion-marker-layer", dest='exclusion_marker_layers', action='append',
+                           default=None, metavar='LAYER',
+                           help="An exclusion marker of the PDK by its name (e.g. IHP Metal3.noqrc), or any layer "
+                                "of the layout, as L/D for all layers of the stack, or as L/D:layer,layer for "
+                                "these (e.g. 235/5:met2,met3), which also is how a PDK without exclusion markers "
+                                "(sky130A, gf180mcuD) gets them. Repeatable, it replaces the markers "
+                                "the PDK has on by default, e.g. NoRCX.drawing")
+
+    @staticmethod
     def _add_pex25d_output_arguments(parser: argparse.ArgumentParser) -> None:
         group_out = parser.add_argument_group(
             "PEX25D Output",
@@ -540,6 +573,7 @@ class KpexCLI:
         KpexCLI._add_fastercap_arguments(parser_extract)
         KpexCLI._add_magic_arguments(parser_extract, env)
         KpexCLI._add_analytical_25d_arguments(parser_extract)
+        KpexCLI._add_exclusion_arguments(parser_extract)
 
         parser_pex25d = subparsers.add_parser(
             "pex25d",
@@ -645,6 +679,22 @@ class KpexCLI:
                 error(f"--reduce-tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
                 found_errors = True
 
+            if args.exclusion_marker_layers and args.exclusion_marker_mode == ExclusionMarkerMode.IGNORE:
+                error(f"--exclusion-marker-layer {args.exclusion_marker_layers[0]} needs --exclusion-markers "
+                      f"{ExclusionMarkerMode.TIE}")
+                found_errors = True
+
+            if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE:
+                exclusion_option = f"--exclusion-markers {args.exclusion_marker_mode}"
+                # NOTE: MAGIC would extract what is left out
+                if args.run_magic:
+                    error(f"{exclusion_option} applies to the 2.5D engine, not to MAGIC")
+                    found_errors = True
+                # NOTE: the LVS database only has the shapes of nets
+                if args.gds_path is None:
+                    error(f"{exclusion_option} reads its shapes from the layout, so it needs --gds, also with --lvsdb")
+                    found_errors = True
+
             args.netlist_format = NetlistFormat(args.netlist_format)
             if args.netlist_format != NetlistFormat.SPICE:
                 # NOTE: MAGIC writes its SPICE netlist itself, FasterCap and FastCap2 have no other format (yet)
@@ -683,7 +733,8 @@ class KpexCLI:
 
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
-            info(f"GDS input file passed, running in LVS mode")
+            if args.lvsdb_path is None:
+                info(f"GDS input file passed, running in LVS mode")
             args.input_mode = InputMode.GDS
             if not os.path.isfile(args.gds_path):
                 error(f"Can't read GDS file (LVS input) at path {args.gds_path}")
@@ -733,7 +784,7 @@ class KpexCLI:
 
                 if not hasattr(args, 'effective_gds_path'):
                     args.effective_gds_path = args.gds_path
-        elif args.lvsdb_path is not None:
+        if args.lvsdb_path is not None:
             info(f"LVSDB input file passed, bypassing LVS")
             args.input_mode = InputMode.LVSDB
             if not os.path.isfile(args.lvsdb_path):
@@ -743,6 +794,10 @@ class KpexCLI:
                 lvsdb = kdb.LayoutVsSchematic()
                 lvsdb.read(args.lvsdb_path)
                 top_cell: kdb.Cell = lvsdb.internal_top_cell()
+                if args.gds_path and not found_errors and args.effective_cell_name != top_cell.name:
+                    error(f"The LVS database {args.lvsdb_path} is of the cell {top_cell.name}, "
+                          f"not of the cell {args.effective_cell_name} of the GDS {args.gds_path}")
+                    found_errors = True
                 args.effective_cell_name = top_cell.name
 
         if hasattr(args, 'effective_cell_name'):
@@ -1130,13 +1185,39 @@ class KpexCLI:
         return check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic) + \
                check_schematic_device_totals(lvs_netlist=lvs_netlist, schematic=schematic, device_models=device_models)
 
+    @staticmethod
+    def exclusions_of(args: argparse.Namespace,
+                      pex_context: KLayoutExtractionContext,
+                      tech_info: TechInfo) -> Optional[Exclusions]:
+        """
+        :return: what is left out of the extraction, None if nothing is
+        """
+        marker_mode = args.exclusion_marker_mode
+        if marker_mode == ExclusionMarkerMode.IGNORE:
+            return None
+
+        substrate_layer_name = tech_info.internal_substrate_layer_name
+        exclusions = Exclusions.from_layout(
+            layout=args.layout,
+            cell_name=args.effective_cell_name,
+            marker_layers=args.selected_marker_layers,
+            dbu=pex_context.dbu,
+            substrate_layer_name=substrate_layer_name
+        )
+        if not exclusions.blocks:
+            warning("The layout has no shapes on the exclusion markers, so the extraction leaves nothing out of them")
+
+        prepare_exclusions(exclusions, pex_context, tech_info)
+        return exclusions
+
     def run_kpex_2_5d_engine(self,
                              args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
                              tech_info: TechInfo,
                              report_path: str,
                              netlist_csv_path: Optional[str],
-                             expanded_netlist_path: Optional[str]):
+                             expanded_netlist_path: Optional[str],
+                             exclusions: Optional[Exclusions]):
         # TODO: make this separatly configurable
         #       for now we use 0
         args.rcx25d_delaunay_amax = 0
@@ -1149,7 +1230,8 @@ class KpexCLI:
                                    scale_ratio_to_fit_halo=args.scale_ratio_to_fit_halo,
                                    tech_info=tech_info,
                                    report_path=report_path,
-                                   report_caps=args.report_caps)
+                                   report_caps=args.report_caps,
+                                   exclusions=exclusions)
         extraction_results = extractor.extract()
 
         if netlist_csv_path is not None:
@@ -1474,7 +1556,8 @@ class KpexCLI:
                     try:
                         self.run_extraction(args=args, tech_info=tech_info)
                     except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
-                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError) as e:
+                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
+                            ExclusionError) as e:
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
@@ -1568,6 +1651,15 @@ class KpexCLI:
         if args.halo is not None:
             tech_info.tech.process_parasitics.side_halo = args.halo
 
+        if args.exclusion_marker_mode != ExclusionMarkerMode.IGNORE:
+            stack_layer_names = set(tech_info.canonical_layer_name_by_gds_pair.values())
+            args.selected_marker_layers = selected_marker_layers(tech_info.tech.exclusion_markers,
+                                                                 stack_layer_names,
+                                                                 args.exclusion_marker_layers)
+            if not args.selected_marker_layers:
+                raise ExclusionError(f"--exclusion-markers {args.exclusion_marker_mode}: the tech info of {args.pdk} "
+                                     f"has no exclusion markers, give them with --exclusion-marker-layer")
+
         if args.run_magic:
             rule('MAGIC')
             self.run_magic_extraction(args)
@@ -1627,6 +1719,8 @@ class KpexCLI:
             error("No extracted layers found")
             sys.exit(1)
 
+        exclusions = self.exclusions_of(args, pex_context, tech_info)
+
         if args.run_fastcap or args.run_fastercap:
             lst_file = self.build_fastercap_input(args=args,
                                                   pex_context=pex_context,
@@ -1654,7 +1748,8 @@ class KpexCLI:
                 tech_info=tech_info,
                 report_path=report_path,
                 netlist_csv_path=netlist_csv_path,
-                expanded_netlist_path=netlist_spice_path
+                expanded_netlist_path=netlist_spice_path,
+                exclusions=exclusions
             )
 
             self._rcx25_extracted_csv_path = netlist_csv_path

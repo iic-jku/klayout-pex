@@ -528,6 +528,10 @@ class SidewallAndFringeExtractor:
                                              outside_edge=geometry_restorer.restore_edge(
                                                  kdb.Edge(kdb.Point(edge_interval[0], distance_middle),
                                                           kdb.Point(edge_interval[1], distance_middle))
+                                             ),
+                                             near_edge=geometry_restorer.restore_edge(
+                                                 kdb.Edge(kdb.Point(edge_interval[0], distance_near),
+                                                          kdb.Point(edge_interval[1], distance_near))
                                              ))
                         self.results.add_sideoverlap_cap(soc)
 

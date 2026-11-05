@@ -822,6 +822,40 @@ class TechBuilder:
         add_tap_connection(si, "ptap", "nsd_fet")
         add_tap_connection(si, "ntap", "psd_fet")
 
+    def build_exclusion_markers(self, tech: Technology):
+        # NOTE: of the layer rules, "no parasitics extraction", which the pcells of the inductors draw (blockqrc)
+        add_exclusion_marker(tech, "NoRCX.drawing", (148, 0))
+
+        metals = {"m2": "Metal2", "m3": "Metal3", "m4": "Metal4", "tm1": "TopMetal1"}
+        if self.is_g2:
+            metals |= {"m5": "Metal5", "tm2": "TopMetal2"}
+
+        # NOTE: each marks a pair of layers in its name, so a filter of the capacitances between them
+        #       (the layer rules have just the name, e.g. "Metal1 and Substrate")
+        for datatype, top, bottom in ((41, "m2", "m3"), (42, "m2", "m4"), (43, "m2", "m5"), (44, "m2", "tm1"),
+                                      (45, "m2", "tm2"), (46, "m3", "m4"), (47, "m3", "m5"), (48, "m3", "tm1"),
+                                      (49, "m3", "tm2"), (50, "m4", "m5"), (51, "m4", "tm1"), (52, "m4", "tm2"),
+                                      (53, "m5", "tm1"), (54, "m5", "tm2"), (55, "tm1", "tm2")):
+            if top in metals and bottom in metals:
+                add_exclusion_marker(tech, f"NoRCX.{top}{bottom}", (148, datatype),
+                                     layer_names=[metals[top], metals[bottom]], is_capacitance_pair=True)
+        for datatype, metal in ((123, "m1"), (124, "m2"), (125, "m3"), (126, "m4"), (127, "m5"),
+                                (300, "tm1"), (301, "tm2")):
+            layer_name = "Metal1" if metal == "m1" else metals.get(metal, None)
+            if layer_name is not None:
+                add_exclusion_marker(tech, f"NoRCX.{metal}sub", (148, datatype),
+                                     layer_names=[layer_name, "VSUBS"], is_capacitance_pair=True)
+
+        # NOTE: only on request, as the pcell of the rfcmim draws them around a device the extraction knows anyway,
+        #       and they also cover other metal there
+        add_exclusion_marker(tech, "Activ.noqrc", (1, 28), layer_names=["Activ", "nSD", "pSD"], on_request=True)
+        add_exclusion_marker(tech, "GatPoly.noqrc", (5, 28), layer_names=["GatPoly"], on_request=True)
+        for layer_name, layer in (("Metal1", 8), ("Metal2", 10), ("Metal3", 30), ("Metal4", 50), ("TopMetal1", 126)):
+            add_exclusion_marker(tech, f"{layer_name}.noqrc", (layer, 28), layer_names=[layer_name], on_request=True)
+        if self.is_g2:
+            add_exclusion_marker(tech, "Metal5.noqrc", (67, 28), layer_names=["Metal5"], on_request=True)
+            add_exclusion_marker(tech, "TopMetal2.noqrc", (134, 28), layer_names=["TopMetal2"], on_request=True)
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
@@ -836,6 +870,8 @@ class TechBuilder:
         self.build_device_models_info(tech.device_models)
 
         self.build_substrate_info(tech.substrate)
+
+        self.build_exclusion_markers(tech)
 
         return tech
 

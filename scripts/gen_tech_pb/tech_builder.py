@@ -26,7 +26,7 @@ Helpers to fill a kpex.tech.Technology message, one table row per call (see the 
 """
 from __future__ import annotations
 
-from typing import List, Optional, Set, Tuple
+from typing import Iterable, List, Optional, Set, Tuple
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
@@ -123,6 +123,19 @@ def add_computed_layer(tech: Technology,
 
 def add_tap_connection(si: SubstrateInfo, tap_lvs_layer_name: str, conductor_layer_name: str):
     si.tap_connections.add(tap_lvs_layer_name=tap_lvs_layer_name, conductor_layer_name=conductor_layer_name)
+
+
+def add_exclusion_marker(tech: Technology,
+                         name: str,
+                         gds_pair: GDSPair,
+                         layer_names: Iterable[str] = (),
+                         is_capacitance_pair: bool = False,
+                         on_request: bool = False):
+    tech.exclusion_markers.add(name=name,
+                               gds_pair=_gds_pair(gds_pair),
+                               layer_names=layer_names,
+                               is_capacitance_pair=is_capacitance_pair,
+                               on_request=on_request)
 
 #-------------------------------------------------------------------------
 

@@ -35,9 +35,11 @@ from ..log import (
     rule
 )
 from ..tech_info import TechInfo
-from ..types import GDSPair
+from ..types import GDSPair, LVSLayerName
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
+from .exclusion import ExcludedBlock, Exclusions, listed_names
+from .netlist_expander import RCX25NetlistExpander
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
@@ -49,6 +51,7 @@ import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.request.pex_request_pb2 as pex_request_pb2
 import klayout_pex_protobuf.kpex.result.pex_result_pb2 as pex_result_pb2
 import klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 as rex_tech_pb2
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech as pb_RExtractorTech
 
 
@@ -57,6 +60,106 @@ class CExtractionTechError(Exception):
     The tech info can't model the capacitances of the layout
     """
     pass
+
+
+def prepare_exclusions(exclusions: Exclusions,
+                       pex_context: KLayoutExtractionContext,
+                       tech_info: TechInfo):
+    """
+    Finds the nets within the exclusion blocks that nothing connects to the netlist,
+    and warns of what the extraction leaves out with the markers beyond what they stand for
+    """
+    if not exclusions.blocks:
+        return
+
+    K = tech_pb2.ComputedLayerInfo.Kind
+    layers_within: Dict[NetName, Set[LayerName]] = defaultdict(set)
+    nets_outside: Set[NetName] = set()
+    # NOTE: not the wells and the substrate below the markers, which are in the models of what they stand for
+    for gds_pair in tech_info.process_conductor_gds_pairs:
+        extracted_layer = pex_context.extracted_layers.get(gds_pair, None)
+        if extracted_layer is None:
+            continue
+        layer_name = tech_info.canonical_layer_name_by_gds_pair[gds_pair]
+        mask = exclusions.mask(layer_name)
+        for source_layer in extracted_layer.source_layers:
+            kind = tech_info.computed_layer_info_by_name[source_layer.lvs_layer_name].kind
+            if kind in (K.KIND_PIN, K.KIND_LABEL):
+                continue
+            shapes_by_net = pex_context.shapes_by_net_name_by_lvs_layer[source_layer.lvs_layer_name]
+            for net_name, shapes in shapes_by_net.items():
+                box = shapes.bbox()
+                if not box.touches(mask.bbox()):
+                    nets_outside.add(net_name)
+                    continue
+                near = exclusions.regions.near(mask, box)
+                if not (shapes & near).is_empty():
+                    layers_within[net_name].add(layer_name)
+                if not (shapes - near).is_empty():
+                    nets_outside.add(net_name)
+
+    circuit = pex_context.top_circuit
+    blackbox_devices = pex_context.blackbox_devices
+    device_models = tech_info.device_models
+
+    def is_whiteboxed(device: kdb.Device) -> bool:
+        return not blackbox_devices and RCX25NetlistExpander.is_whiteboxed(device.device_class(), device_models)
+
+    def is_connected(net_name: NetName) -> bool:
+        net = circuit.net_by_name(net_name)
+        return net is None or net.pin_count() + net.subcircuit_pin_count() > 0 or \
+            any(not is_whiteboxed(terminal.device()) for terminal in net.each_terminal())
+
+    exclusions.floating_net_names = {net_name for net_name in layers_within
+                                     if net_name not in nets_outside and not is_connected(net_name)}
+
+    nets_across = sorted(net_name for net_name in layers_within if net_name in nets_outside)
+    if nets_across:
+        listed_count = 20
+        warning("These nets are partly within exclusion markers, so the extraction leaves out their parasitics "
+                "there, for the model of what the markers stand for (a wire across a marker loses them too):\n" +
+                '\n'.join(f"  - {net_name}: {', '.join(sorted(layers_within[net_name]))}"
+                           for net_name in nets_across[:listed_count]) +
+                (f"\n  - and {len(nets_across) - listed_count} more" if len(nets_across) > listed_count else ''))
+    if exclusions.floating_net_names:
+        info(f"Nothing connects these nets within exclusion markers to the netlist, "
+             f"so their capacitances to the rest of the layout go to the substrate: "
+             f"{listed_names(sorted(exclusions.floating_net_names))}")
+
+    substrate_lvs_layer_names = set(tech_info.tech.substrate.lvs_layer_names)
+
+    def is_plate_within(block: ExcludedBlock, lvs_layer_name: LVSLayerName, shapes: kdb.Region) -> bool:
+        computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+        region = block.region if computed_layer_info is None \
+            else block.region_of(computed_layer_info.original_layer_name)
+        return region is not None and not (shapes & exclusions.regions.near(region, shapes.bbox())).is_empty()
+
+    def has_plates_within_a_block(device: kdb.Device) -> bool:
+        """
+        NOTE: all of them, as what a capacitance is left out by has both of its plates within one block
+        """
+        plates: List[List[Tuple[LVSLayerName, kdb.Region]]] = []
+        box = kdb.Box()
+        for terminal in device.device_class().terminal_definitions():
+            plate: List[Tuple[LVSLayerName, kdb.Region]] = []
+            for reference in pex_context.terminal_refs[(device.id(), terminal.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = pex_context.lvsdb.layer_name(index)
+                    if not shapes.is_empty() and lvs_layer_name not in substrate_lvs_layer_names:
+                        plate.append((lvs_layer_name, shapes))
+                        box += shapes.bbox()
+            if plate:
+                plates.append(plate)
+        return any(block.capacitance_pair is None and
+                   all(any(is_plate_within(block, *part) for part in plate) for plate in plates)
+                   for block in exclusions.blocks_touching(box))
+
+    lost_devices = [d.expanded_name() for d in circuit.each_device()
+                    if is_whiteboxed(d) and has_plates_within_a_block(d)]
+    if lost_devices:
+        warning(f"The netlist loses these devices within exclusion markers, as white-box mode (--blackbox n) "
+                f"removes them, and the capacitances of their plates are left out, use --blackbox y to keep them: "
+                f"{listed_names(sorted(lost_devices))}")
 
 
 class RCX25Extractor:
@@ -68,9 +171,11 @@ class RCX25Extractor:
                  delaunay_b: float,
                  tech_info: TechInfo,
                  report_path: str,
-                 report_caps: bool):
+                 report_caps: bool,
+                 exclusions: Optional[Exclusions] = None):
         """
         :param report_caps: the report has each capacitance contribution with its shapes (see ExtractionReporter)
+        :param exclusions: what a model has the parasitics of (see exclusion.py), after prepare_exclusions
         """
         self.pex_context = pex_context
         self.pex_mode = pex_mode
@@ -80,6 +185,7 @@ class RCX25Extractor:
         self.tech_info = tech_info
         self.report_path = report_path
         self.report_caps = report_caps
+        self.exclusions = exclusions
 
         if "PolygonWithProperties" not in kdb.__all__:
             raise Exception("KLayout version does not support properties (needs 0.30 at least)")
@@ -156,7 +262,8 @@ class RCX25Extractor:
             cell_name=cell_name,
             keep_capacitance_geometry=self.pex_mode == PEXMode.RC,
             substrate_layer_name=self.tech_info.internal_substrate_layer_name,
-            substrate_well_layer_names=self.tech_info.substrate_well_layer_names
+            substrate_well_layer_names=self.tech_info.substrate_well_layer_names,
+            exclusions=self.exclusions
         )
 
         # Explicitly log the stacktrace here, because otherwise Exceptions 

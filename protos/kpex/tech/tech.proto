@@ -55,6 +55,28 @@ message Technology {
 
     // How to find the substrate net of the LVS netlist
     SubstrateInfo substrate = 400;
+
+    // The layers of the layout that mark what a model has the parasitics of
+    repeated ExclusionMarker exclusion_markers = 500;
+}
+
+// A layer that marks a region of the layout, whose parasitics a model has (e.g. an EM model of an inductor),
+// so that the extraction leaves them out, but not the conductors, which still shield the rest of the layout
+message ExclusionMarker {
+    // of the layer rules of the PDK, to select it, e.g. "NoRCX.drawing"
+    string name = 1;
+
+    // read from the layout, as the LVS database only has the shapes of nets
+    GDSPair gds_pair = 2;
+
+    // the layers of the stack it applies to, all if empty
+    repeated string layer_names = 3;
+
+    // it only leaves out the capacitances between its two layers (the substrate is VSUBS), and no resistances
+    bool is_capacitance_pair = 4;
+
+    // not on by default, e.g. as a pcell draws it around a device the extraction knows anyway
+    bool on_request = 5;
 }
 
 message GDSPair {

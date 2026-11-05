@@ -52,6 +52,7 @@ METAL1_PIN:   GDSPair = (8, 2)
 METAL2:       GDSPair = (10, 0)
 METAL2_PIN:   GDSPair = (10, 2)
 VIA1:         GDSPair = (19, 0)
+VIA2:         GDSPair = (29, 0)
 METAL3:       GDSPair = (30, 0)
 METAL3_PIN:   GDSPair = (30, 2)
 METAL4:       GDSPair = (50, 0)
@@ -66,6 +67,10 @@ TOPMETAL2:    GDSPair = (134, 0)
 TOPMETAL2_PIN: GDSPair = (134, 2)
 DIGISUB:      GDSPair = (60, 0)
 POLYRES:      GDSPair = (128, 0)
+NORCX:        GDSPair = (148, 0)
+METAL3_NOQRC: GDSPair = (30, 28)
+NORCX_M2M3:   GDSPair = (148, 41)
+NORCX_M3SUB:  GDSPair = (148, 125)
 
 LABEL_BY_LAYER: Dict[GDSPair, GDSPair] = {
     METAL1: (8, 25),
@@ -336,6 +341,103 @@ def r_wire_over_nbulay_m1() -> Pattern:
     p.box(METAL1_PIN, 9500, 0, 10000, 500)
     p.label(METAL1, 'A', 250, 250)
     p.label(METAL1, 'B', 9750, 250)
+    return p
+
+
+#
+# Exclusion marker patterns
+#
+
+def metal3_wire(p: Pattern, x1: int, y1: int, x2: int, y2: int, label: Optional[str] = None):
+    """
+    A Metal3 wire, with a pin at its left end, if it has a label
+    """
+    p.box(METAL3, x1, y1, x2, y2)
+    if label is not None:
+        p.box(METAL3_PIN, x1, y1, x1 + 1000, y2)
+        p.label(METAL3, label, x1 + 500, (y1 + y2) // 2)
+
+
+def metal2_pin(p: Pattern, label: str, x1: int, y1: int, x2: int, y2: int):
+    p.box(METAL2_PIN, x1, y1, x2, y2)
+    p.label(METAL2, label, (x1 + x2) // 2, (y1 + y2) // 2)
+
+
+def exclusion_wire_through() -> Pattern:
+    """
+    A Metal3 wire of 60 µm x 2 µm from A to B, with its middle third within a marker
+    """
+    p = pattern('exclusion_wire_through')
+    metal3_wire(p, -20000, 0, 40000, 2000, 'A')
+    p.box(METAL3_PIN, 39000, 0, 40000, 2000)
+    p.label(METAL3, 'B', 39500, 1000)
+    p.box(NORCX, 0, -5000, 20000, 7000)
+    return p
+
+
+def exclusion_wire_end(name: str, label: Optional[str]) -> Pattern:
+    """
+    A Metal3 wire of 40 µm x 2 µm, whose half ends within a marker
+    """
+    p = pattern(name)
+    metal3_wire(p, -20000, 0, 20000, 2000, label)
+    p.box(NORCX, 0, -5000, 30000, 7000)
+    return p
+
+
+def exclusion_plate_neighbor(name: str, plate_label: Optional[str]) -> Pattern:
+    """
+    A Metal3 plate of 20 µm x 20 µm just within a marker, and a Metal3 wire N beside it outside the marker,
+    0.3 µm from the plate
+    """
+    p = pattern(name)
+    metal3_wire(p, 0, 0, 20000, 20000, plate_label)
+    metal3_wire(p, -20000, 20300, 40000, 20800, 'N')
+    p.box(NORCX, 0, 0, 20000, 20000)
+    return p
+
+
+def exclusion_plates_markers(name: str, marker_boxes: List[Tuple[int, int, int, int]]) -> Pattern:
+    """
+    Metal3 plates P and Q of 20 µm x 20 µm, 0.5 µm apart
+    """
+    p = pattern(name)
+    metal3_wire(p, 0, 0, 20000, 20000, 'P')
+    metal3_wire(p, 20500, 0, 40500, 20000, 'Q')
+    for box in marker_boxes:
+        p.box(NORCX, *box)
+    return p
+
+
+def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
+    """
+    A wire from A to B on Metal2, with a Metal3 bridge of its gap in the middle, with a marker around the bridge
+    """
+    p = pattern(name)
+    p.box(METAL2, -10000, 0, 4000, 2000)
+    p.box(METAL2, 7000, 0, 20000, 2000)
+    p.box(METAL3, 3000, 0, 8000, 2000)
+    p.box(VIA2, 3200, 500, 3600, 900)
+    p.box(VIA2, 7200, 500, 7600, 900)
+    metal2_pin(p, 'A', -10000, 0, -9000, 2000)
+    metal2_pin(p, 'B', 19000, 0, 20000, 2000)
+    if marker:
+        p.box(NORCX, 0, -5000, 10000, 7000)
+    return p
+
+
+def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) -> Pattern:
+    """
+    A Metal3 plate P of 20 µm x 20 µm between a Metal2 wire A and a Metal4 wire B, with a marker of its size
+    """
+    p = pattern(name)
+    for layer, pin_layer, label in ((METAL2, METAL2_PIN, 'A'), (METAL4, METAL4_PIN, 'B')):
+        p.box(layer, -15000, 9000, 35000, 11000)
+        p.box(pin_layer, -15000, 9000, -14000, 11000)
+        p.label(layer, label, -14500, 10000)
+    metal3_wire(p, 0, 0, 20000, 20000, 'P')
+    if plate_marker is not None:
+        p.box(plate_marker, 0, 0, 20000, 20000)
     return p
 
 
@@ -641,6 +743,18 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'diode_schottky_nbl1': diode_schottky_nbl1,
     'inductor2_w2u_d15u48_tm2_wires_50u': inductor2_w2u_d15u48_tm2_wires_50u,
     'inductor3_w2u_d25u84_2_turns': inductor3_w2u_d25u84_2_turns,
+    'exclusion_wire_through': exclusion_wire_through,
+    'exclusion_wire_end': lambda: exclusion_wire_end('exclusion_wire_end', 'W'),
+    'exclusion_plate_neighbor': lambda: exclusion_plate_neighbor('exclusion_plate_neighbor', 'P'),
+    'exclusion_floating_plate_neighbor': lambda: exclusion_plate_neighbor('exclusion_floating_plate_neighbor', None),
+    'exclusion_plates_2_markers': lambda: exclusion_plates_markers('exclusion_plates_2_markers',
+                                                                   [(0, 0, 20000, 20000), (20500, 0, 40500, 20000)]),
+    'exclusion_plates_1_marker': lambda: exclusion_plates_markers('exclusion_plates_1_marker',
+                                                                  [(0, 0, 40500, 20000)]),
+    'exclusion_via_stack_no_marker': lambda: metal2_wires_metal3_bridge('exclusion_via_stack_no_marker', marker=False),
+    'exclusion_plate_noqrc': lambda: exclusion_plate_between_wires('exclusion_plate_noqrc', METAL3_NOQRC),
+    'exclusion_plate_pair_m2m3': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m2m3', NORCX_M2M3),
+    'exclusion_plate_pair_m3sub': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m3sub', NORCX_M3SUB),
 }
 
 

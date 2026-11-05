@@ -143,3 +143,10 @@ class RCX25Extraction:
         attach_layout_preview(self.pdk.lyt_path, self.pdk.gds_path(*path_components))
         assert_csv_matches_expected(csv_path, expected_csv_content)
         return result
+
+
+def pair(net1: str, net2: str) -> FrozenSet[str]:
+    """
+    :return: the key of a capacitance or a resistance, by its nets
+    """
+    return frozenset((net1, net2))

@@ -24,12 +24,13 @@
 
 from __future__ import annotations
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import *
 
 import klayout.db as kdb
 
 from .capacitance_distributor import CapacitanceDistributor, NodePair
+from .exclusion import Exclusions, edge_part
 from ..types import CellName, LayerName, NetName
 from ..klayout.lvsdb_extractor import unique_name
 from ..log import debug, error
@@ -120,6 +121,10 @@ class SideOverlapCap:
     # to distribute the capacitance (in DBU)
     inside_edge: Optional[kdb.Edge] = None
     outside_edge: Optional[kdb.Edge] = None
+
+    # the near side of that polygon along it, which tells the part of the outside net at exclusion blocks,
+    # as the fringe mostly ends there, also of a polygon that goes on across a block (see kept_edge_caps)
+    near_edge: Optional[kdb.Edge] = None
 
     def __str__(self) -> str:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
@@ -407,26 +412,95 @@ class CellExtractionResults:
     substrate_layer_name: Optional[LayerName] = None
     substrate_well_layer_names: Set[LayerName] = field(default_factory=set)
 
+    # NOTE: the capacitances that a model of what they mark has are left out (see exclusion.py)
+    exclusions: Optional[Exclusions] = None
+
     overlap_table: Dict[OverlapKey, List[OverlapCap]] = field(default_factory=lambda: defaultdict(list))
     sidewall_table: Dict[SidewallKey, List[SidewallCap]] = field(default_factory=lambda: defaultdict(list))
     sideoverlap_table: Dict[SideOverlapKey, List[SideOverlapCap]] = field(default_factory=lambda: defaultdict(list))
 
     r_extraction_result: pex_result_pb2.RExtractionResult = field(default_factory=lambda: pex_result_pb2.RExtractionResult())
 
+    def net_of_capacitance(self, net_name: NetName) -> NetName:
+        return self.exclusions.net_of_capacitance(net_name, self.substrate_layer_name)
+
+    def kept_overlap_caps(self, cap: OverlapCap) -> List[OverlapCap]:
+        """
+        :return: the parts of the overlap capacitance that the exclusion markers don't leave out, by their nets
+        """
+        exclusions = self.exclusions
+        if exclusions is None:
+            return [cap]
+
+        key = cap.key
+        capacitance_per_area = cap.cap_value / cap.area.area()
+        kept_area = cap.area - exclusions.excluded_area(cap.area, key.layer_top, key.layer_bot)
+
+        parts: List[OverlapCap] = []
+        net_top, net_bot = self.net_of_capacitance(key.net_top), self.net_of_capacitance(key.net_bot)
+        if not kept_area.is_empty() and net_top != net_bot:
+            parts.append(replace(cap,
+                                 key=replace(key, net_top=net_top, net_bot=net_bot),
+                                 cap_value=capacitance_per_area * kept_area.area(),
+                                 area=kept_area))
+        cap.cap_value = sum(part.cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
+        return parts
+
     def add_overlap_cap(self, cap: OverlapCap):
-        if not self.keep_capacitance_geometry:
-            cap.area = None
-        self.overlap_table[cap.key].append(cap)
+        for part in self.kept_overlap_caps(cap):
+            if not self.keep_capacitance_geometry:
+                part.area = None
+            self.overlap_table[part.key].append(part)
+
+    def kept_edge_caps(self,
+                       cap: SidewallCap | SideOverlapCap,
+                       inside_net_name: NetName,
+                       inside_layer_name: LayerName,
+                       outside_net_name: NetName,
+                       outside_layer_name: LayerName,
+                       facing_edge: kdb.Edge) -> List[Tuple[SidewallCap | SideOverlapCap, NetName, NetName]]:
+        """
+        :param facing_edge: of the outside net, facing the inside edge (same direction), which tells its part
+        :return: the parts of the capacitance between two edges that the exclusion markers don't leave out,
+                 with their nets at the inside edge and at the outside edge
+        """
+        exclusions = self.exclusions
+        if exclusions is None:
+            return [(cap, inside_net_name, outside_net_name)]
+
+        parts: List[Tuple[SidewallCap | SideOverlapCap, NetName, NetName]] = []
+        net_inside, net_outside = self.net_of_capacitance(inside_net_name), self.net_of_capacitance(outside_net_name)
+        if net_inside != net_outside:
+            for interval in exclusions.kept_edge_parts(cap.inside_edge, inside_layer_name,
+                                                       facing_edge, outside_layer_name):
+                parts.append((replace(cap,
+                                      cap_value=cap.cap_value * (interval[1] - interval[0]),
+                                      inside_edge=edge_part(cap.inside_edge, interval),
+                                      outside_edge=edge_part(cap.outside_edge, interval)),
+                              net_inside, net_outside))
+        cap.cap_value = sum(part[0].cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
+        return parts
 
     def add_sidewall_cap(self, cap: SidewallCap):
-        if not self.keep_capacitance_geometry:
-            cap.inside_edge = cap.outside_edge = None
-        self.sidewall_table[cap.key].append(cap)
+        for part, net1, net2 in self.kept_edge_caps(cap, cap.key.net1, cap.key.layer, cap.key.net2, cap.key.layer,
+                                                    cap.outside_edge):
+            if self.exclusions is not None:
+                part.key = replace(part.key, net1=net1, net2=net2)
+            if not self.keep_capacitance_geometry:
+                part.inside_edge = part.outside_edge = None
+            self.sidewall_table[part.key].append(part)
 
     def add_sideoverlap_cap(self, cap: SideOverlapCap):
-        if not self.keep_capacitance_geometry:
-            cap.inside_edge = cap.outside_edge = None
-        self.sideoverlap_table[cap.key].append(cap)
+        for part, net_inside, net_outside in self.kept_edge_caps(cap,
+                                                                 cap.key.net_inside, cap.key.layer_inside,
+                                                                 cap.key.net_outside, cap.key.layer_outside,
+                                                                 cap.near_edge):
+            if self.exclusions is not None:
+                part.key = replace(part.key, net_inside=net_inside, net_outside=net_outside)
+            part.near_edge = None
+            if not self.keep_capacitance_geometry:
+                part.inside_edge = part.outside_edge = None
+            self.sideoverlap_table[part.key].append(part)
 
     def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:
         """
