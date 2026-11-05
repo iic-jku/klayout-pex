@@ -23,25 +23,33 @@
 #
 
 """
-The ports of the netlists of test patterns: a port for each pin label, also of a net without devices,
+The ports of the netlists of test patterns: a port for each pin label of the top cell, also of a net without devices,
 which KLayout's LVS netlist has no pin for
 """
 
 from __future__ import annotations
 
-import os
 from typing import *
 
 import allure
 import pytest
 
-from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
-from tests.rcx25.rcx25_test_helpers import RCX25Extraction
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction, netlist_ports
 
 parent_suite = "kpex/2.5D netlist ports"
 tags = ("PEX", "2.5D", "Ports")
+
+
+def ports_of(pdk_name: PDKName, gds_name: str, mode: PEXMode) -> List[str]:
+    """
+    :return: the ports of the netlist of the test pattern, which has to pass the checks of the netlist
+    """
+    cli = RCX25Extraction(pdk=PDKTestConfig(pdk_name), pex_mode=mode, blackbox=False) \
+        .run_kpex('test_patterns', gds_name)
+    assert cli.rcx25_netlist_problems == []
+    return netlist_ports(cli)
 
 
 @allure.parent_suite(parent_suite)
@@ -57,9 +65,26 @@ tags = ("PEX", "2.5D", "Ports")
     ('cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz', PEXMode.RC, ['A', 'B', 'D', 'sky130_gnd']),
 ])
 def test_nets_without_devices_have_the_ports_of_their_pins(gds_name: str, mode: PEXMode, ports: List[str]):
-    cli = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=mode, blackbox=False) \
-        .run_kpex('test_patterns', gds_name)
-    netlist_path = f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
-    scope = next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.name is not None)
-    assert scope.ports == ports
-    assert cli.rcx25_netlist_problems == []
+    assert ports_of(PDKName.SKY130A, gds_name, mode) == ports
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('gds_name, ports', [
+    # NOTE: the wire of the pin outer of the top cell also has the pin inner of the child cell
+    ('label_in_child_cell.gds.gz', ['outer']),
+    # NOTE: the pins VDD and VSS of the child cell are on the wires of the pins A and B of the top cell
+    ('cut_block_with_mos.gds.gz', ['A', 'B', 'R']),
+    # NOTE: the wire of the top cell between the pins a and b of the child cells has no label, so KLayout names it
+    ('labels_in_child_cells.gds.gz', None),
+])
+def test_labels_in_child_cells_are_no_ports_of_the_top_cell(gds_name: str, ports: Optional[List[str]]):
+    def without_substrate(mode: PEXMode) -> List[str]:
+        # NOTE: in R mode, the substrate only is a port of a netlist with devices on it
+        return sorted(port for port in ports_of(PDKName.IHP_SG13G2, gds_name, mode) if port != 'sub!')
+
+    ports_cc = without_substrate(PEXMode.CC)
+    if ports is not None:
+        assert ports_cc == ports
+    assert without_substrate(PEXMode.RC) == ports_cc
+    assert without_substrate(PEXMode.R) == ports_cc

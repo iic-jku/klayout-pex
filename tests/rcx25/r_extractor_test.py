@@ -33,7 +33,12 @@ import klayout.db as kdb
 import klayout.pex as klp
 
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.rcx25.r.r_extractor import RExtractionTechError, RExtractor
+from klayout_pex.rcx25.r.r_extractor import (
+    RExtractionTechError,
+    RExtractor,
+    keep_pins_of_top_circuit,
+    label_names_net
+)
 from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.klayout.r_extractor_tech_pb2 import RExtractorTech
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
@@ -69,6 +74,56 @@ def r_extractor(tech: tech_pb2.Technology,
                       delaunay_amax=0.0,
                       via_merge_distance=0.0,
                       skip_simplify=skip_simplify)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("R", "RExtractor")
+class RExtractorPinsOfTopCircuitTest(unittest.TestCase):
+    def test_label_names_net(self):
+        for label, net_name, expected in (
+                ('A', 'A', True),
+                ('a', 'A', True),
+                ('B', 'A,B', True),
+                ('vss', 'vss$1', True),
+                ('B', 'A,B$1', True),
+                ('VDD', '$1.VDD', True),
+                ('X', '$1.VDD,X', True),
+                ('x$1', 'x$1', True),
+                ('a.b', 'a.b', True),
+                ('inner', 'outer', False),
+                ('a', '$2', False),
+                ('DD', 'VDD', False),
+        ):
+            with self.subTest(label=label, net_name=net_name):
+                self.assertEqual(expected, label_names_net(label, net_name))
+
+    def pins_kept(self, net_name: str, labels_by_layer: Dict[int, List[str]]) -> Dict[int, List[str]]:
+        vertex_ports = {layer_id: [kdb.Point(index, layer_id) for index in range(len(labels))]
+                        for layer_id, labels in labels_by_layer.items()}
+        vertex_port_pins = {layer_id: [(label, net_name) for label in labels]
+                            for layer_id, labels in labels_by_layer.items()}
+        labels_at_points = {(layer_id, point.x): label
+                            for layer_id, labels in labels_by_layer.items()
+                            for label, point in zip(labels, vertex_ports[layer_id])}
+        keep_pins_of_top_circuit(net_name, vertex_ports, vertex_port_pins)
+        self.assertEqual(vertex_ports.keys(), vertex_port_pins.keys())
+        for layer_id, pins in vertex_port_pins.items():
+            self.assertEqual([labels_at_points[(layer_id, point.x)] for point in vertex_ports[layer_id]],
+                             [pin[0] for pin in pins])
+        return {layer_id: [pin[0] for pin in pins] for layer_id, pins in vertex_port_pins.items()}
+
+    def test_label_in_subcell_is_no_pin_of_a_net_named_otherwise(self):
+        self.assertEqual({2: ['outer']}, self.pins_kept('outer', {1: ['inner'], 2: ['inner', 'outer']}))
+
+    def test_labels_of_a_net_of_several_labels_stay_pins(self):
+        self.assertEqual({1: ['A', 'B'], 2: ['A']}, self.pins_kept('A,B', {1: ['A', 'B', 'inner'], 2: ['A']}))
+
+    def test_first_label_of_a_net_that_no_label_names_is_its_pin(self):
+        self.assertEqual({1: ['a', 'a']}, self.pins_kept('$2', {1: ['b', 'a', 'a'], 2: ['c']}))
+
+    def test_net_without_labels_has_no_pins(self):
+        self.assertEqual({}, self.pins_kept('$2', {}))
+
 
 
 @allure.parent_suite("Unit Tests")

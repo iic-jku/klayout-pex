@@ -198,6 +198,47 @@ class NetSplit:
     has_cut_along_conductor: bool = False
 
 
+def label_names_net(label: Label, net_name: NetName) -> bool:
+    """
+    :return: whether KLayout named the net after the label, regardless of case, as SPICE reads names:
+             A of A,B (a net of several labels), vss of vss$1 (islands of one name),
+             VDD of $1.VDD (a net within a subcircuit)
+    """
+    label = label.casefold()
+    for name in net_name.casefold().split(','):
+        for candidate in (name, re.sub(r'\$\d+$', '', name)):
+            if candidate == label or candidate.endswith(f".{label}"):
+                return True
+    return False
+
+
+def keep_pins_of_top_circuit(net_name: NetName,
+                             vertex_ports: Dict[int, List[kdb.Point]],
+                             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]]):
+    """
+    Keeps the labels of the hierarchy that are pins of the top circuit, like the ports of its LVS netlist:
+    a label in a subcell is none on a net that KLayout named after the labels of its own circuit (#403),
+    and the first one of a net that no label names (e.g. with labels in subcells only) is the node of its port
+
+    NOTE: after the split at the exclusions, as a label within a marker names the port of the model there,
+          also in a subcell (e.g. of an inductor)
+    """
+    labels = {pin[0] for pins in vertex_port_pins.values() for pin in pins}
+    if not labels:
+        return
+    pin_labels = {label for label in labels if label_names_net(label, net_name)} or {min(labels)}
+    for layer_id in list(vertex_port_pins):
+        kept = [(point, pin)
+                for point, pin in zip(vertex_ports[layer_id], vertex_port_pins[layer_id])
+                if pin[0] in pin_labels]
+        if kept:
+            vertex_ports[layer_id] = [point for point, _ in kept]
+            vertex_port_pins[layer_id] = [pin for _, pin in kept]
+        else:
+            del vertex_ports[layer_id]
+            del vertex_port_pins[layer_id]
+
+
 def port_of_cut(strip: kdb.PolygonWithProperties,
                 conductor_near: Callable[[kdb.Box], kdb.Region],
                 strip_width: int,
@@ -1102,6 +1143,8 @@ class RExtractor:
                     warning(f"The net {net_extraction_request.net_name} goes on from one to another of "
                             f"{listed_names(block_names)}, where they abut, so the netlist has no ports for their "
                             f"models there")
+
+            keep_pins_of_top_circuit(net_extraction_request.net_name, vertex_ports, vertex_port_pins)
 
             rex = klp.RNetExtractor(self.pex_context.dbu)
             try:

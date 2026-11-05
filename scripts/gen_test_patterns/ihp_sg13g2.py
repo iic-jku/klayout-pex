@@ -726,6 +726,50 @@ def cut_block_with_mos() -> Pattern:
     return p
 
 
+def child_cell_with_wire(p: Pattern, name: str, label: str) -> kdb.Cell:
+    """
+    A child cell with a Metal3 wire of 10 µm x 1 µm, with a pin at its left end
+    """
+    child = p.layout.create_cell(name)
+    child.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(0, 0, 10000, 1000))
+    child.shapes(p.layout.layer(*METAL3_PIN)).insert(kdb.Box(0, 0, 1000, 1000))
+    child.shapes(p.layout.layer(*p.label_layer_by_layer[METAL3])).insert(kdb.Text(label, kdb.Trans(500, 500)))
+    return child
+
+
+def label_in_child_cell_pattern(name: str) -> Pattern:
+    """
+    A wire in a child cell with the pin inner, and the pin outer of the top cell on the same wire
+    """
+    p = pattern(name)
+    child = child_cell_with_wire(p, 'child', 'inner')
+    p.top.insert(kdb.CellInstArray(child.cell_index(), kdb.Trans()))
+    p.box(METAL3_PIN, 9000, 0, 10000, 1000)
+    p.label(METAL3, 'outer', 9500, 500)
+    return p
+
+
+def label_in_child_cell_within_marker() -> Pattern:
+    """
+    label_in_child_cell with a marker over the left half of the wire, with the pin inner of the child cell
+    """
+    p = label_in_child_cell_pattern('label_in_child_cell_within_marker')
+    p.box(NORCX, -1000, -1000, 5000, 2000)
+    return p
+
+
+def labels_in_child_cells() -> Pattern:
+    """
+    Wires in two child cells with the pins a and b, joined by a wire of the top cell without a label
+    """
+    p = pattern('labels_in_child_cells')
+    for index, label in enumerate(('a', 'b')):
+        child = child_cell_with_wire(p, f"child_{label}", label)
+        p.top.insert(kdb.CellInstArray(child.cell_index(), kdb.Trans(index * 20000, 0)))
+    p.box(METAL3, 9000, 0, 21000, 1000)
+    return p
+
+
 def cut_block_beside_mos() -> Pattern:
     """
     The design nmos_diode2 twice, in the child cells block and kept, side by side
@@ -1464,6 +1508,9 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cut_coil_x2': lambda: cut_coil_pattern('cut_coil_x2', instance_count=2),
     'cut_block_with_mos': cut_block_with_mos,
     'cut_block_beside_mos': cut_block_beside_mos,
+    'label_in_child_cell': lambda: label_in_child_cell_pattern('label_in_child_cell'),
+    'label_in_child_cell_within_marker': label_in_child_cell_within_marker,
+    'labels_in_child_cells': labels_in_child_cells,
     'cut_inductor2_leads_in_top': cut_inductor2_leads_in_top,
     'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
     'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),
