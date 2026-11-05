@@ -359,59 +359,7 @@ class RCX25Extractor:
         all_layer_names = list(layer_regions_by_name.keys())
 
         # ------------------------------------------------------------------------
-        if self.pex_mode.need_capacitance():
-            # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
-            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode,
-            #       but for the capacitances of the devices (e.g. of the diffusion to the substrate)
-            missing_overlap_caps = [f"{top_layer_name} over {bottom_layer_name}"
-                                    for idx, bottom_layer_name in enumerate(all_layer_names)
-                                    for top_layer_name in all_layer_names[idx + 1:]
-                                    if not self.tech_info.overlap_cap_by_layer_names
-                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)
-                                    and not self.tech_info.is_device_capacitance(top_layer_name, bottom_layer_name)]
-            if missing_overlap_caps:
-                raise CExtractionTechError(
-                    "The tech info has no overlap capacitance for these layer pairs of the layout, "
-                    "so their capacitances would be missing (e.g. the plates of a MIM cap, "
-                    "which --blackbox leaves to the device model):\n" +
-                    '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
-                )
-
-            # NOTE: with --blackbox, the capacitances between the plates of a capacitor device
-            #       (e.g. the fingers of a MOM cap) are left to its model,
-            #       and those to the substrate, if the substrate is a terminal of the device (e.g. of a VPP cap)
-            device_capacitor_plates = DeviceCapacitorPlates.from_circuit(
-                circuit=self.pex_context.top_circuit,
-                device_class_names=self.tech_info.device_models.metal_capacitor_class_names,
-                substrate_net_name=self.pex_context.substrate_net_name,
-                substrate_shapes_net_name=self.tech_info.internal_substrate_layer_name
-            ) if self.pex_context.blackbox_devices else DeviceCapacitorPlates()
-
-            overlap_extractor = OverlapExtractor(
-                all_layer_names=all_layer_names,
-                layer_regions_by_name=layer_regions_by_name,
-                dbu=dbu,
-                tech_info=self.tech_info,
-                device_capacitor_plates=device_capacitor_plates,
-                results=results,
-                report=report
-            )
-            overlap_extractor.extract()
-
-            sidewall_and_fringe_extractor = SidewallAndFringeExtractor(
-                all_layer_names=all_layer_names,
-                layer_regions_by_name=layer_regions_by_name,
-                dbu=dbu,
-                scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
-                tech_info=self.tech_info,
-                device_capacitor_plates=device_capacitor_plates,
-                mos_channels=self.pex_context.mos_channels,
-                results=results,
-                report=report
-            )
-            sidewall_and_fringe_extractor.extract()
-
-        # ------------------------------------------------------------------------
+        # NOTE: before the capacitances, which go by the pieces of the nets with ports at exclusion markers (NetPiece)
         if self.pex_mode.need_resistance():
             c: kdb.Circuit = netlist.top_circuit()
             info(f"LVSDB: found {c.pin_count()}pins")
@@ -471,5 +419,58 @@ class RCX25Extractor:
                 warning("Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
                         "resistance network has no resistance for, so the pieces are ideally on their nets: " +
                         ', '.join(nets_joined_by_substrate))
+
+        # ------------------------------------------------------------------------
+        if self.pex_mode.need_capacitance():
+            # NOTE: a layer pair without an overlap capacitance would miss its capacitances,
+            #       which is never intended (#217), e.g. the plates of a MIM cap in white-box mode,
+            #       but for the capacitances of the devices (e.g. of the diffusion to the substrate)
+            missing_overlap_caps = [f"{top_layer_name} over {bottom_layer_name}"
+                                    for idx, bottom_layer_name in enumerate(all_layer_names)
+                                    for top_layer_name in all_layer_names[idx + 1:]
+                                    if not self.tech_info.overlap_cap_by_layer_names
+                                                         .get(top_layer_name, {}).get(bottom_layer_name, None)
+                                    and not self.tech_info.is_device_capacitance(top_layer_name, bottom_layer_name)]
+            if missing_overlap_caps:
+                raise CExtractionTechError(
+                    "The tech info has no overlap capacitance for these layer pairs of the layout, "
+                    "so their capacitances would be missing (e.g. the plates of a MIM cap, "
+                    "which --blackbox leaves to the device model):\n" +
+                    '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
+                )
+
+            # NOTE: with --blackbox, the capacitances between the plates of a capacitor device
+            #       (e.g. the fingers of a MOM cap) are left to its model,
+            #       and those to the substrate, if the substrate is a terminal of the device (e.g. of a VPP cap)
+            device_capacitor_plates = DeviceCapacitorPlates.from_circuit(
+                circuit=self.pex_context.top_circuit,
+                device_class_names=self.tech_info.device_models.metal_capacitor_class_names,
+                substrate_net_name=self.pex_context.substrate_net_name,
+                substrate_shapes_net_name=self.tech_info.internal_substrate_layer_name
+            ) if self.pex_context.blackbox_devices else DeviceCapacitorPlates()
+
+            overlap_extractor = OverlapExtractor(
+                all_layer_names=all_layer_names,
+                layer_regions_by_name=layer_regions_by_name,
+                dbu=dbu,
+                tech_info=self.tech_info,
+                device_capacitor_plates=device_capacitor_plates,
+                results=results,
+                report=report
+            )
+            overlap_extractor.extract()
+
+            sidewall_and_fringe_extractor = SidewallAndFringeExtractor(
+                all_layer_names=all_layer_names,
+                layer_regions_by_name=layer_regions_by_name,
+                dbu=dbu,
+                scale_ratio_to_fit_halo=self.scale_ratio_to_fit_halo,
+                tech_info=self.tech_info,
+                device_capacitor_plates=device_capacitor_plates,
+                mos_channels=self.pex_context.mos_channels,
+                results=results,
+                report=report
+            )
+            sidewall_and_fringe_extractor.extract()
 
         return results

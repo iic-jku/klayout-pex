@@ -458,6 +458,17 @@ def exclusion_nwell_between_pfet_and_tap(name: str = 'exclusion_nwell_between_pf
     return p
 
 
+def exclusion_wire_beside_marker_over_nwell() -> Pattern:
+    """
+    exclusion_nwell_between_pfet_and_tap with a met1 wire N over the nwell beside the marker, on the side of the n-tap
+    """
+    p = exclusion_nwell_between_pfet_and_tap('exclusion_wire_beside_marker_over_nwell')
+    p.box(MET1, 7200, 500, 9000, 2500)
+    p.box(MET1_PIN, 7200, 500, 7400, 700)
+    p.label(MET1, 'N', 7300, 600)
+    return p
+
+
 def exclusion_pfet_between_taps() -> Pattern:
     """
     The pfet and the n-tap of r_nwell_pfet_ntap_li1, with another n-tap on the other side of the pfet, labelled A,
@@ -496,6 +507,7 @@ def exclusion_rail_between_taps() -> Pattern:
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
     'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
+    'exclusion_wire_beside_marker_over_nwell': exclusion_wire_beside_marker_over_nwell,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
     'exclusion_user_marker_wire': exclusion_user_marker_wire,
     'overlap_shield_same_net_100um_x_100um_li1_m1_m2':

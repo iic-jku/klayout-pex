@@ -215,6 +215,8 @@ class SidewallAndFringeExtractor:
 
                 nearest_distance: Optional[float] = None
                 nearest_lateral_edge: Optional[kdb.EdgeWithProperties] = None
+                nearest_of_same_polygon: Optional[Tuple[float, kdb.PolygonWithProperties]] = None
+                nearest_of_other_polygons: Optional[float] = None
 
                 for child_index, polygons in polygons_by_child.items():
                     if child_index == len(self.all_layer_names):  # TODO, fix index, same layer, same polygon
@@ -224,6 +226,8 @@ class SidewallAndFringeExtractor:
                            distance < nearest_distance:
                             nearest_distance = distance
                             nearest_lateral_edge = nearest_edge(nearby_polygon)
+
+                        nearest_of_same_polygon = distance, nearby_polygon
                     elif self.inside_layer_index == child_index:   # SIDEWALL!
                         # NOTE: use only the nearest polygon,
                         #       as the others are laterally shielded by the nearer ones
@@ -233,6 +237,7 @@ class SidewallAndFringeExtractor:
                            distance < nearest_distance:
                             nearest_distance = distance
                             nearest_lateral_edge = nearest_edge(nearby_polygon)
+                        nearest_of_other_polygons = distance
 
                         self.emit_sidewall(
                             layer_name=self.inside_layer_name,
@@ -241,6 +246,18 @@ class SidewallAndFringeExtractor:
                             polygon=nearby_polygon,
                             geometry_restorer=geometry_restorer
                         )
+
+                # NOTE: parts of a polygon can be apart in the netlist, e.g. the leads of a coil,
+                #       as far as no nearer polygon shields them from each other
+                if nearest_of_same_polygon is not None and self.results.has_net_pieces(edge.property('net')) and \
+                        (nearest_of_other_polygons is None or nearest_of_same_polygon[0] < nearest_of_other_polygons):
+                    self.emit_sidewall(
+                        layer_name=self.inside_layer_name,
+                        edge=edge,
+                        edge_interval=edge_interval,
+                        polygon=nearest_of_same_polygon[1],
+                        geometry_restorer=geometry_restorer
+                    )
 
                 lateral_shield: Optional[kdb.Polygon] = None
                 if nearest_lateral_edge is not None:
@@ -290,7 +307,8 @@ class SidewallAndFringeExtractor:
             net1 = edge.property('net')
             net2 = polygon.property('net')
 
-            if net1 == net2:
+            # NOTE: but for the parts of a net that are apart in the netlist
+            if net1 == net2 and not self.results.has_net_pieces(net1):
                 return
 
             # NOTE: the model of a device has the capacitance between its plates
@@ -433,8 +451,9 @@ class SidewallAndFringeExtractor:
 
             # NOTE: the model of a device has the capacitance between its plates, so they are like one net,
             #       with the fringe from the edge of a plate to the other plate beyond it
+            # NOTE: and the parts of a net that are apart in the netlist are like nets of their own
             same_net_markers = [
-                inside_net_name == outside_net_name or
+                (inside_net_name == outside_net_name and not self.results.has_net_pieces(inside_net_name)) or
                 self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net_name)
                 for outside_net_name in outside_net_names
             ]

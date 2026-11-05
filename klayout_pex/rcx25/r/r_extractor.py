@@ -41,6 +41,7 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
 from klayout_pex.rcx25.exclusion import (
     Exclusions,
+    NetPiece,
     RegionIndex,
     listed_names,
     polygons_by_center_inside,
@@ -180,6 +181,8 @@ class NetSplit:
     regions_within: Dict[int, Dict[LayerName, kdb.Region]] = field(default_factory=lambda: defaultdict(dict))
     # the vias between them: the layers below and above them, and the vias
     vias_within: List[Tuple[LayerName, LayerName, kdb.Region]] = field(default_factory=list)
+    # the index of the block of each node of the network at a cut, by the ID of the node
+    block_of_node_id: Dict[int, int] = field(default_factory=dict)
     # the blocks with ports that a conductor goes on from one to another, without a cut between them
     abutting_block_indexes: Set[int] = field(default_factory=set)
     # the vias across a cut by the layer of the conductor below or above them, whose metal stays outside the block
@@ -1056,6 +1059,7 @@ class RExtractor:
                         if cut_port_name is not None:
                             r_node.node_kind = r_network_pb2.RNode.Kind.KIND_EXCLUSION_PORT
                             r_node.node_name = cut_port_name
+                            split.block_of_node_id[r_node.node_id] = split.cut_port_blocks[(rn.layer(), port_idx)]
                         elif device_terminal is None:  # NOTE: at a cut, see split_at_exclusions
                             r_node.node_kind = r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION
                         else:
@@ -1112,8 +1116,13 @@ class RExtractor:
             for key, cut_set in sets_of_cuts.items():
                 node_ids_by_set[cut_set].append(polygon_port_node_ids[key])
 
-            self.add_nodes_within_markers(result_network, split, terminal_port_names, cut_port_names,
-                                          layer_names, vertex_port_pins, connected_shapes, node_ids_by_set)
+            nodes_within = self.add_nodes_within_markers(result_network, split, terminal_port_names, cut_port_names,
+                                                         layer_names, vertex_port_pins, connected_shapes,
+                                                         node_ids_by_set)
+            if self.exclusions is not None:
+                self.find_net_pieces(result_network, pieces, nodes_within, split, regions, layer_names, wire_layer_ids,
+                                     well_layer_ids)
+
             if len(pieces) > 1 + sum(p[0].object_id() in isolated_well_node_ids for p in pieces):
                 node_ids = self.substrate_joined_node_ids(result_network, regions, layer_names, well_layer_ids)
                 result_network.substrate_joined_node_ids.extend(sorted(node_ids))
@@ -1155,7 +1164,7 @@ class RExtractor:
                                  layer_names: Dict[int, LayerName],
                                  vertex_port_pins: Mapping[int, List[Tuple[Label, NetName]]],
                                  connected_shapes: Optional[ConnectedShapesWithin],
-                                 node_ids_by_set: Dict[int, List[int]]):
+                                 node_ids_by_set: Dict[int, List[int]]) -> List[r_network_pb2.RNode]:
         """
         Adds the nodes of what is within the exclusion markers, for ports at the cuts, as no conductors are there:
         the device terminals with their ports, and the pins that name no cut, which are ports for the model too,
@@ -1166,13 +1175,16 @@ class RExtractor:
         :param connected_shapes: of the shapes within the blocks, if there are such nodes
         :param node_ids_by_set: the ports by what is joined to them within the blocks (see ConnectedShapesWithin),
                                 to which these go too
+        :return: the nodes
         """
         K = r_network_pb2.RNode.Kind
         next_node_id = 1
+        nodes: List[r_network_pb2.RNode] = []
 
         def add_node(kind: r_network_pb2.RNode.Kind, name: str, layer_id: int, box: kdb.Box) -> r_network_pb2.RNode:
             nonlocal next_node_id
             node = network.nodes.add()
+            nodes.append(node)
             node.node_id = next_node_id
             next_node_id += 1
             node.node_name = name
@@ -1209,6 +1221,88 @@ class RExtractor:
                 add_to_set(connected_shapes.set_at_position(layer_names[within.layer_id], within.position),
                            add_node(K.KIND_EXCLUSION_PORT, within.label, within.layer_id,
                                     kdb.Box(within.position, within.position)).node_id)
+        return nodes
+
+    def find_net_pieces(self,
+                        network: r_network_pb2.RNetwork,
+                        pieces: List[List[klp.RNode]],
+                        nodes_within: List[r_network_pb2.RNode],
+                        split: NetSplit,
+                        regions: Dict[int, kdb.Region],
+                        layer_names: Dict[int, LayerName],
+                        wire_layer_ids: Set[int],
+                        well_layer_ids: Set[int]):
+        """
+        Finds the pieces of a net with ports at exclusion markers (see NetPiece), by the nodes of its network:
+        what resistors join outside the markers, and what is within each marker, with the ports at its cuts
+        """
+        if not split.regions_within:
+            return
+
+        K = r_network_pb2.RNode.Kind
+        well_layer_names = {layer_names[layer_id] for layer_id in well_layer_ids}
+
+        def with_substrate(region_by_layer: Dict[LayerName, kdb.Region]) -> Dict[LayerName, kdb.Region]:
+            # NOTE: the capacitances to a well are on the layer of the substrate, which the wells are split from
+            wells = [region for layer_name, region in region_by_layer.items() if layer_name in well_layer_names]
+            if not wells:
+                return region_by_layer
+            substrate = kdb.Region()
+            for region in wells:
+                substrate += region
+            return {**region_by_layer, self.exclusions.substrate_layer_name: substrate}
+
+        node_by_id = {node.node_id: node for node in network.nodes}
+        names_by_node_id: Dict[int, List[str]] = defaultdict(list)
+        net_pieces: List[NetPiece] = []
+
+        def piece_name(name: str) -> str:
+            # NOTE: not the name of another net, as a label can have any text
+            while self.pex_context.top_circuit.net_by_name(name) is not None:
+                name = f"{name}#"
+            return name
+
+        for index, piece in enumerate(pieces):
+            piece_nodes = [node_by_id[rn.object_id()] for rn in piece if rn.object_id() in node_by_id]
+            name = piece_name(f"{network.net_name}#piece{index}")
+            region_by_layer: Dict[LayerName, kdb.Region] = {}
+            for layer_id in sorted(wire_layer_ids & set(regions)):
+                nodes_on_layer = [node for node in piece_nodes if node.layer_name == layer_names[layer_id]]
+                if nodes_on_layer:
+                    # NOTE: with what is on the ideal copy of the layer, which has the same name
+                    region = regions[layer_id].interacting(self.node_boxes(nodes_on_layer))
+                    layer_name = layer_names[layer_id]
+                    region_by_layer[layer_name] = region_by_layer[layer_name] + region \
+                        if layer_name in region_by_layer else region
+            if piece_nodes:
+                net_pieces.append(NetPiece(name, with_substrate(region_by_layer)))
+            for node in piece_nodes:
+                names_by_node_id[node.node_id].append(name)
+
+        def block_index_of(node: r_network_pb2.RNode) -> int:
+            block_index = split.block_of_node_id.get(node.node_id, None)
+            if block_index is None:
+                block_index = self.exclusions.block_index_with_ports_at(self.node_box(node), node.layer_name)
+            return block_index
+
+        nodes_of_blocks: Dict[int, List[r_network_pb2.RNode]] = defaultdict(list)
+        for node in network.nodes:
+            if node.node_kind == K.KIND_EXCLUSION_PORT:
+                nodes_of_blocks[block_index_of(node)].append(node)
+        for node in nodes_within:
+            nodes_of_blocks[block_index_of(node)].append(node)
+        for block_index, region_by_layer in split.regions_within.items():
+            name = piece_name(f"{network.net_name}#marker{block_index}")
+            nodes_of_block = nodes_of_blocks.get(block_index, [])
+            if nodes_of_block:
+                net_pieces.append(NetPiece(name, with_substrate(region_by_layer)))
+            for node in nodes_of_block:
+                names_by_node_id[node.node_id].append(name)
+
+        if len(net_pieces) > 1:
+            self.exclusions.pieces_by_net[network.net_name] = net_pieces
+            for node in network.nodes:
+                node.piece_names.extend(names_by_node_id.get(node.node_id, []))
 
     @staticmethod
     def network_pieces(resistor_network: klp.RNetwork,
@@ -1280,21 +1374,36 @@ class RExtractor:
         return node_ids
 
     @staticmethod
-    def node_ids_at(nodes: List[r_network_pb2.RNode], polygons: kdb.Region) -> Set[int]:
+    def node_box(node: r_network_pb2.RNode) -> kdb.Box:
+        """
+        :return: the location of the node, enlarged, as a region drops a box without area
+                 (the location of a pin, or a junction across a wire)
+        """
+        match node.location.kind:
+            case location_pb2.Location.Kind.LOCATION_KIND_POINT:
+                point = kdb.Point(node.location.point.x, node.location.point.y)
+                box = kdb.Box(point, point)
+            case _:
+                box = kdb.Box(node.location.box.lower_left.x, node.location.box.lower_left.y,
+                              node.location.box.upper_right.x, node.location.box.upper_right.y)
+        return box.enlarged(1)
+
+    @classmethod
+    def node_boxes(cls, nodes: List[r_network_pb2.RNode]) -> kdb.Region:
+        boxes = kdb.Region()
+        boxes.merged_semantics = False  # NOTE: each box on its own, rather than the polygon of those overlapping
+        for node in nodes:
+            boxes.insert(cls.node_box(node))
+        return boxes
+
+    @classmethod
+    def node_ids_at(cls, nodes: List[r_network_pb2.RNode], polygons: kdb.Region) -> Set[int]:
         """
         :return: the nodes at the polygons, by their location
         """
         node_ids_by_box: Dict[kdb.Box, List[int]] = defaultdict(list)
         for node in nodes:
-            match node.location.kind:
-                case location_pb2.Location.Kind.LOCATION_KIND_POINT:
-                    point = kdb.Point(node.location.point.x, node.location.point.y)
-                    box = kdb.Box(point, point)
-                case _:
-                    box = kdb.Box(node.location.box.lower_left.x, node.location.box.lower_left.y,
-                                  node.location.box.upper_right.x, node.location.box.upper_right.y)
-            # NOTE: enlarged, as a region drops a box without area (the location of a pin, or a junction across a wire)
-            node_ids_by_box[box.enlarged(1)].append(node.node_id)
+            node_ids_by_box[cls.node_box(node)].append(node.node_id)
 
         boxes = kdb.Region()
         boxes.merged_semantics = False  # NOTE: each box on its own, rather than the polygon of those overlapping

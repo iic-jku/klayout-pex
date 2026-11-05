@@ -557,6 +557,38 @@ def exclusion_inductor2_wire_under() -> Pattern:
     return p
 
 
+def exclusion_hairpin(name: str, bridge_gap: int, bridge_layer: GDSPair) -> Pattern:
+    """
+    Metal3 wires from A and B, 2 µm apart, which end within a marker, joined there by a bridge,
+    of Metal3, so one polygon with them, or of Metal2, through vias, with a gap for two nets
+    """
+    p = pattern(name)
+    metal3_wire(p, -30000, 0, 5000, 2000, 'A')
+    metal3_wire(p, -30000, 4000, 5000, 6000, 'B')
+    p.box(bridge_layer, 3000, 0, 5000, 3000 - bridge_gap // 2)
+    p.box(bridge_layer, 3000, 3000 + bridge_gap // 2, 5000, 6000)
+    if bridge_layer != METAL3:
+        p.box(VIA2, 3500, 500, 3900, 900)
+        p.box(VIA2, 3500, 5100, 3900, 5500)
+    p.box(NORCX, 0, -5000, 10000, 11000)
+    return p
+
+
+def exclusion_stacked_wires(name: str, via: bool) -> Pattern:
+    """
+    A Metal3 wire from A over a Metal2 wire from B, overlapping by half of their widths, which end within a marker,
+    joined there by a via, or not, for two nets
+    """
+    p = pattern(name)
+    metal3_wire(p, -30000, 0, 5000, 2000, 'A')
+    p.box(METAL2, -30000, 1000, 5000, 3000)
+    metal2_pin(p, 'B', -30000, 1000, -29000, 3000)
+    if via:
+        p.box(VIA2, 3000, 1300, 3400, 1700)
+    p.box(NORCX, 0, -5000, 10000, 8000)
+    return p
+
+
 def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) -> Pattern:
     """
     A Metal3 plate P of 20 µm x 20 µm between a Metal2 wire A and a Metal4 wire B, with a marker of its size
@@ -569,6 +601,21 @@ def exclusion_plate_between_wires(name: str, plate_marker: Optional[GDSPair]) ->
     metal3_wire(p, 0, 0, 20000, 20000, 'P')
     if plate_marker is not None:
         p.box(plate_marker, 0, 0, 20000, 20000)
+    return p
+
+
+def exclusion_hairpin_around_wire(name: str, bridge_gap: int) -> Pattern:
+    """
+    Metal3 wires from A and B, 6 µm apart, which end within a marker, joined there by a bridge (or two nets with a gap),
+    and a Metal3 wire M between them, which shields them from each other
+    """
+    p = pattern(name)
+    metal3_wire(p, -40000, 0, 5000, 2000, 'A')
+    metal3_wire(p, -40000, 8000, 5000, 10000, 'B')
+    p.box(METAL3, 3000, 0, 5000, 5000 - bridge_gap // 2)
+    p.box(METAL3, 3000, 5000 + bridge_gap // 2, 5000, 10000)
+    metal3_wire(p, -40000, 4000, -1000, 6000, 'M')
+    p.box(NORCX, 0, -5000, 10000, 15000)
     return p
 
 
@@ -909,6 +956,21 @@ def exclusion_substrate_pin_within() -> Pattern:
     return p
 
 
+def exclusion_wires_through_and_beside(name: str, label: str) -> Pattern:
+    """
+    A Metal3 wire with the pin A through a marker, and a Metal3 wire beside it and the marker with the pin of the label
+    """
+    p = pattern(name)
+    p.box(METAL3, 0, 0, 20000, 1000)
+    p.box(METAL3_PIN, 0, 0, 200, 1000)
+    p.label(METAL3, 'A', 100, 500)
+    p.box(METAL3, 0, 2000, 20000, 3000)
+    p.box(METAL3_PIN, 0, 2000, 200, 3000)
+    p.label(METAL3, label, 100, 2500)
+    p.box(NORCX, 8000, -1000, 12000, 1500)
+    return p
+
+
 def exclusion_rail_between_taps() -> Pattern:
     """
     A Metal2 rail of 300 µm x 0.3 µm between two p-taps with the pins A and B (see tap_m1_m2),
@@ -976,16 +1038,29 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_marker_in_cell': exclusion_marker_in_cell,
     'exclusion_nmos_diode2': exclusion_nmos_diode2,
     'exclusion_nmos_diode2_all': exclusion_nmos_diode2_all,
+    'exclusion_hairpin_around_wire': lambda: exclusion_hairpin_around_wire('exclusion_hairpin_around_wire', 0),
+    'exclusion_hairpin_around_wire_open': lambda: exclusion_hairpin_around_wire('exclusion_hairpin_around_wire_open',
+                                                                                2000),
     'exclusion_same_label_within': exclusion_same_label_within,
     'exclusion_tap_wire_through': exclusion_tap_wire_through,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
     'exclusion_substrate_pin_within': exclusion_substrate_pin_within,
+    'exclusion_wire_beside_label_of_other_net':
+        lambda: exclusion_wires_through_and_beside('exclusion_wire_beside_label_of_other_net', 'B'),
+    'exclusion_wire_beside_label_of_piece':
+        lambda: exclusion_wires_through_and_beside('exclusion_wire_beside_label_of_piece', 'A#marker0'),
     'exclusion_coil_guard_ring': exclusion_coil_guard_ring,
     'exclusion_inductor2_wire_under': exclusion_inductor2_wire_under,
     'exclusion_plate_noqrc': lambda: exclusion_plate_between_wires('exclusion_plate_noqrc', METAL3_NOQRC),
     'exclusion_plate_pair_m2m3': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m2m3', NORCX_M2M3),
     'exclusion_plate_pair_m3sub': lambda: exclusion_plate_between_wires('exclusion_plate_pair_m3sub', NORCX_M3SUB),
+    'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
+    'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),
+    'exclusion_hairpin_bridge_m2': lambda: exclusion_hairpin('exclusion_hairpin_bridge_m2', 0, METAL2),
+    'exclusion_hairpin_bridge_m2_open': lambda: exclusion_hairpin('exclusion_hairpin_bridge_m2_open', 1000, METAL2),
+    'exclusion_stacked_wires': lambda: exclusion_stacked_wires('exclusion_stacked_wires', True),
+    'exclusion_stacked_wires_open': lambda: exclusion_stacked_wires('exclusion_stacked_wires_open', False),
 }
 
 

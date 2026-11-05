@@ -50,6 +50,11 @@ message RNode {
     string net_name = 50;
     kpex.layout.Location location = 60;
 
+    // Of a net that only the model of an exclusion block joins:
+    // the parts of the net this node stands for, whose capacitances go to their nodes (see NetPiece).
+    // A node at a cut has the conductor on each side of it
+    repeated string piece_names = 70;
+
     oneof parameters {
         kpex.layout.Pin pin = 90;
         kpex.layout.Device.Terminal device_terminal = 91;

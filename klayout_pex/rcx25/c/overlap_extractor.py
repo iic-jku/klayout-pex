@@ -129,7 +129,8 @@ class OverlapExtractor:
                     shields_before = shield_count
                     shield_count += 1
 
-                    if net_top == net_bot:
+                    # NOTE: but for the parts of a net that are apart in the netlist
+                    if net_top == net_bot and not self.results.has_net_pieces(net_top):
                         continue
 
                     top_layer_name = self.layer_names[other_layer_index]

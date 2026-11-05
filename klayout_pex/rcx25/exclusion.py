@@ -34,6 +34,9 @@ NOTE: the conductors within a marker stay in the layout the capacitances are ext
         - one within a marker, the other outside: kept (on the net of the plate within the marker, or on the
           substrate if nothing connects that net to the netlist), as the model doesn't know the conductor outside
       The resistance network has no resistance within a marker (see RExtractor.split_at_exclusions)
+
+NOTE: with ports at the cuts, the parts of a net that only a model joins are apart in the netlist,
+      so their capacitances to each other count, unlike the ones within a net otherwise (see NetPiece)
 """
 
 from __future__ import annotations
@@ -176,6 +179,18 @@ class RegionIndex:
         return polygons
 
 
+@dataclass
+class NetPiece:
+    """
+    A part of a net with ports at exclusion markers, which its other parts are only joined to through a model:
+    the metal outside the markers that resistors join, or the metal within one marker.
+
+    NOTE: by location, as a polygon can have several of them, e.g. a coil with its leads
+    """
+    name: str  # NOTE: stands for the net in the capacitance tables, until they go to the nodes of the piece
+    region_by_layer: Dict[LayerName, kdb.Region]
+
+
 @dataclass(frozen=True)
 class MarkerLayer:
     """
@@ -294,6 +309,9 @@ class Exclusions:
 
         # the nets within the blocks that nothing connects to the netlist (see net_of_capacitance)
         self.floating_net_names: Set[NetName] = set()
+
+        # the pieces of the nets with ports at the blocks, by the resistance extraction
+        self.pieces_by_net: Dict[NetName, List[NetPiece]] = {}
 
     @classmethod
     def from_region(cls,
@@ -427,6 +445,61 @@ class Exclusions:
                  like metal with a floating node, but which a model of the block doesn't know either
         """
         return substrate_net_name if net_name in self.floating_net_names else net_name
+
+    def has_pieces(self, net_name: NetName) -> bool:
+        return net_name in self.pieces_by_net
+
+    def area_parts(self,
+                   area: kdb.Region,
+                   net_name: NetName,
+                   layer_name: LayerName) -> List[Tuple[kdb.Region, NetName]]:
+        """
+        :param area: of a plate of the net on the layer
+        :return: its parts by the piece of the net they are on, or by the net itself, off its pieces
+                 (e.g. the substrate, or metal the resistance extraction has no nodes on)
+        """
+        pieces = self.pieces_by_net.get(net_name, None)
+        if pieces is None:
+            return [(area, net_name)]
+        parts: List[Tuple[kdb.Region, NetName]] = []
+        rest = area
+        for piece in pieces:
+            region = piece.region_by_layer.get(layer_name, None)
+            if region is None:
+                continue
+            part = rest & self.regions.near(region, rest.bbox())
+            if not part.is_empty():
+                parts.append((part, piece.name))
+                rest = rest - part
+        if not rest.is_empty():
+            parts.append((rest, net_name))
+        return parts
+
+    def edge_parts(self,
+                   edge: kdb.Edge,
+                   metal_side: int,
+                   net_name: NetName,
+                   layer_name: LayerName) -> List[Tuple[Interval, NetName]]:
+        """
+        :param edge: of a plate of the net on the layer
+        :param metal_side: where the metal is beside the edge, -1 on its right, 1 on its left
+        :return: its parts by the piece of the net they are on, or by the net itself, off its pieces
+        """
+        pieces = self.pieces_by_net.get(net_name, None)
+        if pieces is None:
+            return [((0.0, 1.0), net_name)]
+        metal_edge = edge.shifted(metal_side)
+        parts: List[Tuple[Interval, NetName]] = []
+        rest: List[Interval] = [(0.0, 1.0)]
+        for piece in pieces:
+            region = piece.region_by_layer.get(layer_name, None)
+            if region is not None:
+                # NOTE: each part of the edge on one piece only, as a node of a piece can touch a polygon of another
+                within = intervals_within(metal_edge, self.regions.near(region, metal_edge.bbox()))
+                parts.extend((interval, piece.name) for interval in intersected_intervals(within, rest))
+                rest = intersected_intervals(rest, complemented_intervals(within))
+        parts.extend((interval, net_name) for interval in rest)
+        return sorted(parts)
 
     def blocks_touching(self, box: kdb.Box) -> Iterator[ExcludedBlock]:
         for shape in self.block_boxes.each_touching(kdb.Shapes.SAll, box):

@@ -261,10 +261,15 @@ class CapacitanceDistributor:
     def __init__(self,
                  sites_by_net_and_layer: Dict[Tuple[NetName, LayerName], NodeSites],
                  sites_by_net: Dict[NetName, NodeSites],
-                 substrate_layer_name: Optional[LayerName] = None):
+                 substrate_layer_name: Optional[LayerName] = None,
+                 piece_names: Collection[str] = ()):
+        """
+        :param piece_names: of the pieces of nets (see NetPiece), which are no nodes of the netlist, unlike nets
+        """
         self.sites_by_net_and_layer = sites_by_net_and_layer
         self.sites_by_net = sites_by_net
         self.substrate_layer_name = substrate_layer_name
+        self.piece_names = piece_names
 
     @classmethod
     def from_networks(cls,
@@ -279,6 +284,7 @@ class CapacitanceDistributor:
         """
         sites_by_net_and_layer: Dict[Tuple[NetName, LayerName], List[NodeSite]] = defaultdict(list)
         sites_by_net: Dict[NetName, List[NodeSite]] = defaultdict(list)
+        piece_names: Set[str] = set()
         for network, node_names in networks:
             for node in network.nodes:
                 site = NodeSite.from_node(node, node_names[node.node_id])
@@ -288,22 +294,40 @@ class CapacitanceDistributor:
                 if substrate_layer_name is not None and node.layer_name in substrate_well_layer_names:
                     sites_by_net_and_layer[(network.net_name, substrate_layer_name)].append(site)
                 sites_by_net[network.net_name].append(site)
+                # NOTE: the capacitances of a piece of a net go to its own nodes, not to a nearer one of another piece
+                for piece_name in node.piece_names:
+                    piece_names.add(piece_name)
+                    sites_by_net_and_layer[(piece_name, node.layer_name)].append(site)
+                    if substrate_layer_name is not None and node.layer_name in substrate_well_layer_names:
+                        sites_by_net_and_layer[(piece_name, substrate_layer_name)].append(site)
+                    sites_by_net[piece_name].append(site)
         return cls(sites_by_net_and_layer={key: NodeSites(sites) for key, sites in sites_by_net_and_layer.items()},
                    sites_by_net={net_name: NodeSites(sites) for net_name, sites in sites_by_net.items()},
-                   substrate_layer_name=substrate_layer_name)
+                   substrate_layer_name=substrate_layer_name,
+                   piece_names=piece_names)
 
     def has_nodes(self, net_name: NetName) -> bool:
         return net_name in self.sites_by_net
+
+    def whole_capacitance(self, net_a: NetName, net_b: NetName) -> Dict[NodePair, float]:
+        """
+        :return: the fractions of a capacitance without geometry to go by: all of it between the nets,
+                 for a piece of a net on one of its nodes
+        """
+        def node_of(net_name: NetName) -> NetName:
+            return self.sites_by_net[net_name].sites[0].node_name if net_name in self.piece_names else net_name
+        return {(node_of(net_a), node_of(net_b)): 1.0}
 
     def sites(self, net_name: NetName, layer_name: LayerName) -> Optional[NodeSites]:
         """
         The sites of the nodes of the net on the layer,
         otherwise on any layer (e.g. a layer the resistance extraction doesn't model),
         but on the substrate the ones of its wells, otherwise none (the node of the net),
-        as the rest of the substrate is ideal, and not the metal above (#288)
+        as the rest of the substrate is ideal, and not the metal above (#288).
+        A piece of a net always has sites, as it's no node of the netlist (e.g. a well without nodes within a block)
         """
         sites = self.sites_by_net_and_layer.get((net_name, layer_name), None)
-        if sites or layer_name == self.substrate_layer_name:
+        if sites or (layer_name == self.substrate_layer_name and net_name not in self.piece_names):
             return sites
         return self.sites_by_net.get(net_name, None)
 
@@ -317,7 +341,7 @@ class CapacitanceDistributor:
         :return: the fraction by node pair, which sum up to 1
         """
         if area is None or area.is_empty():
-            return {(net_a, net_b): 1.0}
+            return self.whole_capacitance(net_a, net_b)
 
         # NOTE: relative to the center, to keep the coordinates small
         origin = area.bbox().center()
@@ -341,7 +365,7 @@ class CapacitanceDistributor:
         :return: the fraction by node pair, which sum up to 1
         """
         if edge_a is None or edge_b is None:
-            return {(net_a, net_b): 1.0}
+            return self.whole_capacitance(net_a, net_b)
 
         parts_a = self._edge_parts(net_a, layer_a, edge_a)
         parts_b = self._edge_parts(net_b, layer_b, edge_b)
@@ -368,10 +392,9 @@ class CapacitanceDistributor:
             return [(0.0, 1.0, net_name)]
         return edge_parts((edge.p1.x, edge.p1.y), (edge.p2.x, edge.p2.y), sites.candidates(edge.bbox()))
 
-    @staticmethod
-    def _normalized(fractions: Dict[NodePair, float], net_a: NetName, net_b: NetName) -> Dict[NodePair, float]:
+    def _normalized(self, fractions: Dict[NodePair, float], net_a: NetName, net_b: NetName) -> Dict[NodePair, float]:
         total = sum(fractions.values())
         if total <= 0.0:
-            return {(net_a, net_b): 1.0}
+            return self.whole_capacitance(net_a, net_b)
         # NOTE: in order, so that the sums are the same from run to run
         return {pair: fraction / total for pair, fraction in sorted(fractions.items()) if fraction > 0.0}

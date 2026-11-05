@@ -177,9 +177,11 @@ def add_resistance(resistance_table: Dict[NetCoupleKey, float],
 def add_distributed_capacitance(capacitance_table: Dict[NetCoupleKey, float],
                                 cap_value: float,
                                 fractions: Dict[NodePair, float]):
-    # NOTE: capacitances between the same pair of nodes are in parallel
+    # NOTE: capacitances between the same pair of nodes are in parallel,
+    #       and the ones between parts of a net with ports at exclusion markers can end on one node (e.g. at a cut)
     for (node_a, node_b), fraction in fractions.items():
-        capacitance_table[NetCoupleKey(node_a, node_b).normed()] += cap_value * fraction
+        if node_a != node_b:
+            capacitance_table[NetCoupleKey(node_a, node_b).normed()] += cap_value * fraction
 
 
 # NOTE: a capacitance between nodes of resistor networks below this goes to a larger one between the same nets,
@@ -444,6 +446,23 @@ class CellExtractionResults:
     def net_of_capacitance(self, net_name: NetName) -> NetName:
         return self.exclusions.net_of_capacitance(net_name, self.substrate_layer_name)
 
+    def has_net_pieces(self, net_name: NetName) -> bool:
+        """
+        :return: whether the capacitances within the net count, as parts of it are apart in the netlist (see NetPiece)
+        """
+        return self.exclusions is not None and self.exclusions.has_pieces(net_name)
+
+    @staticmethod
+    def are_apart(net_a: NetName, part_a: NetName, net_b: NetName, part_b: NetName) -> bool:
+        """
+        :param net_a: the net of a plate
+        :param part_a: its part of the net, a piece or the net itself
+        :param net_b: the net of the other plate
+        :param part_b: its part of the net, a piece or the net itself
+        :return: whether the netlist has the plates apart
+        """
+        return net_a != net_b or (part_a != net_a and part_b != net_b and part_a != part_b)
+
     def kept_overlap_caps(self, cap: OverlapCap) -> List[OverlapCap]:
         """
         :return: the parts of the overlap capacitance that the exclusion markers don't leave out, by their nets
@@ -457,12 +476,15 @@ class CellExtractionResults:
         kept_area = cap.area - exclusions.excluded_area(cap.area, key.layer_top, key.layer_bot)
 
         parts: List[OverlapCap] = []
-        net_top, net_bot = self.net_of_capacitance(key.net_top), self.net_of_capacitance(key.net_bot)
-        if not kept_area.is_empty() and net_top != net_bot:
-            parts.append(replace(cap,
-                                 key=replace(key, net_top=net_top, net_bot=net_bot),
-                                 cap_value=capacitance_per_area * kept_area.area(),
-                                 area=kept_area))
+        top_areas = [] if kept_area.is_empty() else exclusions.area_parts(kept_area, key.net_top, key.layer_top)
+        for top_area, part_top in top_areas:
+            for area, part_bot in exclusions.area_parts(top_area, key.net_bot, key.layer_bot):
+                net_top, net_bot = self.net_of_capacitance(part_top), self.net_of_capacitance(part_bot)
+                if net_top != net_bot and self.are_apart(key.net_top, part_top, key.net_bot, part_bot):
+                    parts.append(replace(cap,
+                                         key=replace(key, net_top=net_top, net_bot=net_bot),
+                                         cap_value=capacitance_per_area * area.area(),
+                                         area=area))
         cap.cap_value = sum(part.cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
         return parts
 
@@ -488,16 +510,23 @@ class CellExtractionResults:
         if exclusions is None:
             return [(cap, inside_net_name, outside_net_name)]
 
+        inside_parts = exclusions.edge_parts(cap.inside_edge, -1, inside_net_name, inside_layer_name)
+        outside_parts = exclusions.edge_parts(facing_edge, 1, outside_net_name, outside_layer_name)
+
         parts: List[Tuple[SidewallCap | SideOverlapCap, NetName, NetName]] = []
-        net_inside, net_outside = self.net_of_capacitance(inside_net_name), self.net_of_capacitance(outside_net_name)
-        if net_inside != net_outside:
-            for interval in exclusions.kept_edge_parts(cap.inside_edge, inside_layer_name,
-                                                       facing_edge, outside_layer_name):
-                parts.append((replace(cap,
-                                      cap_value=cap.cap_value * (interval[1] - interval[0]),
-                                      inside_edge=edge_part(cap.inside_edge, interval),
-                                      outside_edge=edge_part(cap.outside_edge, interval)),
-                              net_inside, net_outside))
+        for kept in exclusions.kept_edge_parts(cap.inside_edge, inside_layer_name, facing_edge, outside_layer_name):
+            for inside, part_inside in inside_parts:
+                for outside, part_outside in outside_parts:
+                    interval = max(kept[0], inside[0], outside[0]), min(kept[1], inside[1], outside[1])
+                    net_inside = self.net_of_capacitance(part_inside)
+                    net_outside = self.net_of_capacitance(part_outside)
+                    if interval[0] < interval[1] and net_inside != net_outside and \
+                            self.are_apart(inside_net_name, part_inside, outside_net_name, part_outside):
+                        parts.append((replace(cap,
+                                              cap_value=cap.cap_value * (interval[1] - interval[0]),
+                                              inside_edge=edge_part(cap.inside_edge, interval),
+                                              outside_edge=edge_part(cap.outside_edge, interval)),
+                                      net_inside, net_outside))
         cap.cap_value = sum(part[0].cap_value for part in parts)  # NOTE: also for the report, which has the capacitance
         return parts
 

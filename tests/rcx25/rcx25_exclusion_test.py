@@ -349,6 +349,48 @@ def test_coil_with_guard_ring_has_ports_of_its_labels_near_its_cuts():
     assert pair('ind1', 'OSCP') in values and pair('ind2', 'OSCN') in values and pair('ct', 'VCT') in values
     # NOTE: and only the leads and the tap have resistances, not the loop within the marker
     assert pair('ind1', 'ind2') not in values and pair('ct', 'ind1') not in values
+    # NOTE: though LVS has all of this on one net, the leads are apart in the netlist, so they have a capacitance
+    assert capacitances(honored)[pair('OSCN', 'OSCP')] > 0.0
+
+
+# NOTE: the wires are apart in the netlist in both, whether something within the marker joins them or not
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('joined_cell_name, apart_cell_name', [
+    # NOTE: one polygon, so their capacitance is between parts of it
+    ('exclusion_hairpin', 'exclusion_hairpin_open'),
+    # NOTE: polygons of one net
+    ('exclusion_hairpin_bridge_m2', 'exclusion_hairpin_bridge_m2_open'),
+    # NOTE: on two layers, with an overlap and a fringe
+    ('exclusion_stacked_wires', 'exclusion_stacked_wires_open'),
+])
+def test_wires_only_a_model_joins_have_the_capacitances_of_two_nets(joined_cell_name: str, apart_cell_name: str):
+    joined = Extraction(joined_cell_name, PEXMode.RC).run(ExclusionMarkerMode.PORTS)
+    assert joined.rcx25_netlist_problems == []
+    assert pair('A_B__m0_0', 'A_B__m0_1') in capacitances(joined)
+
+    # NOTE: the cuts of a net are numbered from the bottom up, where A is
+    node_of_two_nets = {'A_B__m0_0': 'A__m0_0', 'A_B__m0_1': 'B__m0_0'}
+    joined_values = {frozenset(node_of_two_nets.get(node, node) for node in key): value
+                     for key, value in capacitances(joined).items()}
+
+    apart = Extraction(apart_cell_name, PEXMode.RC).run(ExclusionMarkerMode.PORTS)
+    assert apart.rcx25_netlist_problems == []
+    assert joined_values == pytest.approx(capacitances(apart), abs=0.001)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode, marker_mode', [
+    (PEXMode.RC, ExclusionMarkerMode.TIE),  # NOTE: they are one net in the netlist, like without a marker
+    (PEXMode.CC, ExclusionMarkerMode.PORTS),  # NOTE: a net is one node, so there are no ports
+])
+def test_wires_of_a_net_have_no_capacitance_where_the_netlist_has_them_on_one_net(mode: PEXMode,
+                                                                                  marker_mode: ExclusionMarkerMode):
+    honored = Extraction('exclusion_hairpin', mode).run(marker_mode)
+    assert honored.rcx25_netlist_problems == []
+    assert capacitances(honored)
+    assert all('VSUBS' in key for key in capacitances(honored)), capacitances(honored)
 
 
 @allure.parent_suite(parent_suite)
@@ -503,6 +545,18 @@ def test_invalid_marker_layer_is_an_error_listing_the_valid_ones(tmp_path):
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_wire_between_parts_of_a_net_shields_them_from_each_other():
+    # NOTE: the wire M ends in front of the bridge of the wires, or its gap, which changes the capacitances of M,
+    #       but the wires only see each other beyond its end, as two nets do
+    joined = capacitances(Extraction('exclusion_hairpin_around_wire', PEXMode.RC).run(ExclusionMarkerMode.PORTS))
+    apart = capacitances(Extraction('exclusion_hairpin_around_wire_open', PEXMode.RC).run(ExclusionMarkerMode.PORTS))
+    assert pair('A', 'M') in joined and pair('A', 'M') in apart
+    assert pair('A', 'B') not in joined and pair('A', 'B') not in apart
+    assert joined[pair('A_B__m0_0', 'A_B__m0_1')] == pytest.approx(apart[pair('A__m0_0', 'B__m0_0')], abs=0.001)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 @pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
 def test_pin_within_a_marker_of_a_label_also_outside_is_not_the_port_of_the_cut(mode: PEXMode):
     # NOTE: the pin outside and the port at the cut with the same name would be one node
@@ -536,11 +590,41 @@ def test_any_angle_wire_is_cut_at_a_marker(marker_mode: ExclusionMarkerMode):
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_capacitances_of_a_wire_over_a_well_stay_on_its_side_of_a_marker():
+    extraction = Extraction('exclusion_wire_beside_marker_over_nwell', PEXMode.RC, pdk_name=PDKName.SKY130A)
+    arguments = ('--exclusion-marker-layer', '200/0')
+    tied = extraction.run(ExclusionMarkerMode.TIE, *arguments)
+    ported = extraction.run(ExclusionMarkerMode.PORTS, *arguments)
+    assert ported.rcx25_netlist_problems == []
+
+    def to_well(cli: KpexCLI) -> float:
+        return sum(value for nodes, value in capacitances(cli).items() if 'N' in nodes and 'VSUBS' not in nodes
+                   and any(node.startswith('VPWR') for node in nodes))
+
+    values = capacitances(ported)
+    assert 0.0 < values[pair('N', 'VPWR__m0_1')]
+    assert pair('N', 'VPWR__m0_0') not in values
+    assert to_well(ported) == pytest.approx(to_well(tied), rel=1e-2)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_pin_of_the_substrate_within_a_marker_is_one_port_of_the_netlist():
     ported = Extraction('exclusion_substrate_pin_within', PEXMode.R).run(ExclusionMarkerMode.PORTS)
     ports = netlist_ports(ported)
     assert 'VSS' in ports
     assert len(set(ports)) == len(ports), ports
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_net_labelled_like_a_piece_stays_apart_from_it():
+    def values(cell_name: str) -> List[float]:
+        extraction = Extraction(cell_name, PEXMode.RC)
+        return sorted(capacitances(extraction.run(ExclusionMarkerMode.PORTS)).values())
+
+    assert values('exclusion_wire_beside_label_of_piece') == \
+        pytest.approx(values('exclusion_wire_beside_label_of_other_net'), rel=1e-3)
 
 
 @allure.parent_suite(parent_suite)

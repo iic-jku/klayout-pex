@@ -29,11 +29,13 @@ from typing import *
 import allure
 import klayout.db as kdb
 import pytest
+from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
 from klayout_pex.rcx25.exclusion import (
     ExclusionError,
     ExcludedBlock,
     Exclusions,
     MarkerLayer,
+    NetPiece,
     RegionIndex,
     complemented_intervals,
     edge_part,
@@ -44,6 +46,8 @@ from klayout_pex.rcx25.exclusion import (
 )
 from klayout_pex.rcx25.extraction_results import (
     CellExtractionResults,
+    add_distributed_capacitance,
+    NetCoupleKey,
     OverlapCap,
     OverlapKey,
     SideOverlapCap,
@@ -52,6 +56,8 @@ from klayout_pex.rcx25.extraction_results import (
     SidewallKey,
 )
 from klayout_pex.rcx25.r.r_extractor import port_of_cut
+import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
 parent_suite = "kpex/2.5D exclusion markers"
 tags = ("PEX", "2.5D", "Exclusion")
@@ -244,6 +250,118 @@ def test_capacitances_of_floating_nets_within_a_marker_go_to_the_substrate():
     assert math.isclose(sum(r.summarize().capacitances.values()), 12.0)
 
 
+def results_with_pieces() -> CellExtractionResults:
+    """
+    The net N, with a piece left of the marker, a piece right of it, and a piece within it, on the layer Metal3
+    """
+    r = results(kdb.Box(0, 0, 100, 100))
+    r.exclusions.pieces_by_net['N'] = [
+        NetPiece('N#left', {'Metal3': kdb.Region(kdb.Box(-200, 0, 0, 100))}),
+        NetPiece('N#right', {'Metal3': kdb.Region(kdb.Box(100, 0, 300, 100))}),
+        NetPiece('N#within', {'Metal3': kdb.Region(kdb.Box(0, 0, 100, 100))}),
+    ]
+    return r
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_area_parts_by_piece():
+    m = results_with_pieces().exclusions
+    parts = m.area_parts(kdb.Region(kdb.Box(-100, 0, 200, 200)), 'N', 'Metal3')
+    assert sorted((name, part.area()) for part, name in parts) == [('N', 300 * 100), ('N#left', 100 * 100),
+                                                                   ('N#right', 100 * 100), ('N#within', 100 * 100)]
+    # NOTE: the substrate has no pieces, nor has another net
+    assert [name for _, name in m.area_parts(kdb.Region(kdb.Box(0, 0, 10, 10)), 'N', 'VSUBS')] == ['N']
+    assert [name for _, name in m.area_parts(kdb.Region(kdb.Box(0, 0, 10, 10)), 'X', 'Metal3')] == ['X']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_edge_parts_by_piece():
+    m = results_with_pieces().exclusions
+    # NOTE: the metal is below the edge, on its right
+    parts = m.edge_parts(kdb.Edge(-100, 100, 300, 100), -1, 'N', 'Metal3')
+    assert [name for _, name in parts] == ['N#left', 'N#within', 'N#right']
+    assert [interval for interval, _ in parts] == [pytest.approx((0.0, 0.25)), pytest.approx((0.25, 0.5)),
+                                                   pytest.approx((0.5, 1.0))]
+    # NOTE: above the edge, off the pieces
+    assert m.edge_parts(kdb.Edge(-100, 100, 300, 100), 1, 'N', 'Metal3') == [((0.0, 1.0), 'N')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_overlap_within_a_net_counts_between_its_pieces_only():
+    r = results_with_pieces()
+    r.exclusions.pieces_by_net['N'][0].region_by_layer['Metal2'] = kdb.Region(kdb.Box(-200, 0, -150, 100))
+    r.exclusions.pieces_by_net['N'][1].region_by_layer['Metal2'] = kdb.Region(kdb.Box(-150, 0, -100, 100))
+    # NOTE: the Metal3 of the left piece over the Metal2 of both pieces
+    cap = overlap_cap('N', 'N', 'Metal2', kdb.Box(-200, 0, -100, 100))
+    r.add_overlap_cap(cap)
+    assert list(r.overlap_table) == [OverlapKey(layer_top='Metal3', net_top='N#left',
+                                                layer_bot='Metal2', net_bot='N#right')]
+    assert cap.cap_value == pytest.approx(5.0)  # NOTE: for the report
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_overlap_of_a_piece_on_the_substrate_of_its_net_stays_left_out():
+    # NOTE: e.g. VDD over its nwell, the nwell has no pieces
+    r = results_with_pieces()
+    r.add_overlap_cap(overlap_cap('N', 'N', 'VSUBS', kdb.Box(-100, 0, -50, 100)))
+    assert r.overlap_table == {}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sidewall_within_a_net_counts_between_its_pieces_only():
+    r = results_with_pieces()
+    key = SidewallKey(layer='Metal3', net1='N', net2='N')
+    # NOTE: the upper edge of the piece to the left faces a part of the same piece, and of the piece within the marker
+    r.exclusions.pieces_by_net['N'][0].region_by_layer['Metal3'].insert(kdb.Box(-200, 200, -50, 300))
+    r.exclusions.pieces_by_net['N'][2].region_by_layer['Metal3'].insert(kdb.Box(-50, 200, -1, 300))
+    r.add_sidewall_cap(SidewallCap(key=key, cap_value=1.0, distance=0.1, length=0.1, tech_spec=None,
+                                   inside_edge=kdb.Edge(-100, 100, 0, 100),
+                                   outside_edge=kdb.Edge(-100, 200, 0, 200)))
+    kept_key, = r.sidewall_table
+    assert (kept_key.net1, kept_key.net2) == ('N#left', 'N#within')
+    assert sum(c.cap_value for c in r.sidewall_table[kept_key]) == pytest.approx(0.49, abs=0.01)
+
+
+def network_with_pieces() -> r_network_pb2.RNetwork:
+    network = r_network_pb2.RNetwork(net_name='N')
+    for node_id, x, piece_name in ((1, 0, 'N#a'), (2, 100, 'N#b')):
+        node = network.nodes.add(node_id=node_id, node_name=f"n{node_id}", layer_name='Metal3',
+                                 node_kind=r_network_pb2.RNode.Kind.KIND_WIRE_JUNCTION)
+        node.location.kind = location_pb2.Location.Kind.LOCATION_KIND_BOX
+        node.location.box.lower_left.x, node.location.box.upper_right.x = x, x
+        node.piece_names.append(piece_name)
+    return network
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitance_of_a_piece_goes_to_its_own_nodes_also_if_another_one_is_nearer():
+    network = network_with_pieces()
+    distributor = CapacitanceDistributor.from_networks([(network, {1: 'n1', 2: 'n2'})])
+    # NOTE: nearer to the node of the other piece
+    area = kdb.Region(kdb.Box(90, 0, 110, 10))
+    assert distributor.area_fractions('N#a', 'Metal3', 'X', 'Metal3', area) == {('n1', 'X'): 1.0}
+    assert distributor.area_fractions('N#b', 'Metal3', 'X', 'Metal3', area) == {('n2', 'X'): 1.0}
+    assert distributor.area_fractions('N', 'Metal3', 'X', 'Metal3', area) == {('n2', 'X'): 1.0}
+    # NOTE: and a piece is no node of the netlist, also without geometry to go by
+    assert distributor.area_fractions('N#b', 'Metal3', 'X', 'Metal3', None) == {('n2', 'X'): 1.0}
+    assert distributor.edge_fractions('N#a', 'Metal3', None, 'X', 'Metal3', None) == {('n1', 'X'): 1.0}
+    assert distributor.area_fractions('N', 'Metal3', 'X', 'Metal3', None) == {('N', 'X'): 1.0}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitance_between_parts_of_a_net_on_one_node_is_dropped():
+    table = {NetCoupleKey('a', 'b'): 0.0}
+    add_distributed_capacitance(table, 2.0, {('a', 'a'): 0.5, ('a', 'b'): 0.5})
+    assert table == {NetCoupleKey('a', 'b'): 1.0}
+
+
 def per_layer_exclusions() -> Exclusions:
     return Exclusions([ExcludedBlock(name='m0', region=kdb.Region(kdb.Box(0, 0, 100, 100)),
                                      layer_regions={'Metal3': kdb.Region(kdb.Box(0, 0, 100, 100))})],
@@ -360,4 +478,16 @@ def test_block_with_ports_is_found_beside_one_without():
     assert e.block_index_with_ports_at(kdb.Box(90, 40, 100, 60), 'Metal1') == 1
     assert e.block_indexes_with_ports_within(kdb.Region(kdb.Box(150, 40, 160, 60)), 'Metal1') == [1]
     assert e.block_indexes_with_ports_within(kdb.Region(kdb.Box(50, 40, 60, 60)), 'Metal1') == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_edge_parts_of_overlapping_pieces_add_up_to_the_edge():
+    # NOTE: a node of a piece can touch a polygon of another one, so that a polygon is in both of them
+    e = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)), ports=True)
+    region = kdb.Region(kdb.Box(0, 0, 50, 20))
+    e.pieces_by_net['N'] = [NetPiece('N#piece0', {'Metal1': region}), NetPiece('N#piece1', {'Metal1': region})]
+    parts = e.edge_parts(kdb.Edge(0, 20, 100, 20), -1, 'N', 'Metal1')
+    assert sum(interval[1] - interval[0] for interval, _ in parts) == pytest.approx(1.0)
+    assert [name for _, name in parts] == ['N#piece0', 'N']
 
