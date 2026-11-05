@@ -1,0 +1,2160 @@
+[20:25:35] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --gds                                             
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/exclusion_overlapping_markers.gds.gz --lvsdb                                
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_overlapping_markers.lvsdb.gz --out-dir                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap         
+--exclusion-markers tie --exclusion-marker-layer NoRCX.drawing                  
+--exclusion-marker-layer NoRCX.m2m3                                             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:25:35] INFO     No explicit top cell specified, using top    kpex_cli.py:854
+                    cell 'exclusion_overlapping_markers'                        
+[20:25:35] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:865
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool       Found  Effective range                                               
+FasterCap  6.2.1  >=6.2.1                                                       
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:25:35] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1806
+[20:25:35] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1806
+[20:25:35] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1806
+[20:25:35] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1806
+[20:25:35] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1806
+[20:25:35] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1806
+[20:25:35] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1806
+[20:25:35] WARNING  These nets are partly within exclusion      extractor.py:234
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A: Metal2                                               
+                      - B: Metal4                                               
+                      - P: Metal3                                               
+─────────────────────────────── Process stackup ────────────────────────────────
+[20:25:35] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[20:25:35] INFO     Delaunay b: 0.5             fastercap_model_generator.py:122
+[20:25:35] INFO     Delaunay area_max: 50       fastercap_model_generator.py:123
+[20:25:35] INFO     Conductor A, metal Metal2,    fastercap_input_builder.py:212
+                    z=2.0, height=0.49                                          
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] INFO     Conductor P, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] INFO     Conductor B, metal Metal4,    fastercap_input_builder.py:212
+                    z=4.06, height=0.49                                         
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:35] INFO     Substrate sub!, z=-0.28,      fastercap_input_builder.py:284
+                    height=0.28                                                 
+[20:25:35] INFO     Simple dielectric (field      fastercap_input_builder.py:310
+                    oxide) fox: z=0, height=0.4                                 
+[20:25:35] INFO     Simple dielectric ild0:       fastercap_input_builder.py:400
+                    z=0.4, height=0.64                                          
+[20:25:35] INFO     Simple dielectric ild1:       fastercap_input_builder.py:400
+                    z=1.04, height=0.96                                         
+[20:25:35] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild2: z=2.49,                                               
+                    height=0.5399999999999998                                   
+[20:25:35] INFO     Simple dielectric ild2:       fastercap_input_builder.py:400
+                    z=2.0,                                                      
+                    height=1.0299999999999998                                   
+[20:25:35] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild3: z=3.5199999999999996,                                 
+                    height=0.5399999999999998                                   
+[20:25:35] INFO     Simple dielectric ild3:       fastercap_input_builder.py:400
+                    z=3.03,                                                     
+                    height=1.0299999999999998                                   
+[20:25:35] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild4: z=4.55,                                               
+                    height=0.5400000000000003                                   
+[20:25:35] INFO     Simple dielectric ild4:       fastercap_input_builder.py:400
+                    z=4.06,                                                     
+                    height=1.0300000000000002                                   
+[20:25:35] INFO     Simple dielectric ildtm1b:    fastercap_input_builder.py:400
+                    z=5.09,                                                     
+                    height=0.5300000000000002                                   
+[20:25:35] INFO     Simple dielectric ildtm1c:    fastercap_input_builder.py:400
+                    z=5.62,                                                     
+                    height=0.8099999999999996                                   
+[20:25:35] INFO     Simple dielectric ildtm2:     fastercap_input_builder.py:400
+                    z=6.43,                                                     
+                    height=4.800000000000001                                    
+[20:25:35] INFO     Simple dielectric air:        fastercap_input_builder.py:400
+                    z=11.23, height=5.0                                         
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+_outside=fox_inside=ild0.geo                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+_outside=ild0_inside=ild1.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+_outside=ild1_inside=ild2.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_4
+_outside=ild2_inside=ild3.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_5
+_outside=ild3_inside=ild4.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_6
+_outside=ild4_inside=ildtm1b.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_7
+_outside=ildtm1b_inside=ildtm1c.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_8
+_outside=ildtm1c_inside=ildtm2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_9
+_outside=ildtm2_inside=air.geo                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+0_outside=air_inside=(void).geo                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+1_outside=(void)_inside=fox.geo                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+2_outside=(void)_inside=ild0.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+3_outside=(void)_inside=ild1.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+4_outside=(void)_inside=ild2.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+5_outside=(void)_inside=ild3.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+6_outside=(void)_inside=ild4.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+7_outside=(void)_inside=ildtm1b.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+8_outside=(void)_inside=ildtm1c.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+9_outside=(void)_inside=ildtm2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+0_outside=(void)_net=sub!#substrate.geo                                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+1_outside=fox_net=sub!#substrate.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+2_outside=ild1_net=A#x0_1_Metal2.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+3_outside=ild2_net=A#x0_1_Metal2.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+4_outside=ild1_net=A#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+5_outside=ild2_net=A#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+6_outside=ild1_net=A#x1_Metal2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+7_outside=ild2_net=A#x1_Metal2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+8_outside=ild1_net=A.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+9_outside=ild2_net=A.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+0_outside=ild2_net=P#x0_1_Metal3.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+1_outside=ild3_net=P#x0_1_Metal3.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+2_outside=ild2_net=P#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+3_outside=ild3_net=P#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+4_outside=ild2_net=P#x1_Metal3.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+5_outside=ild3_net=P#x1_Metal3.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+6_outside=ild3_net=B#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+7_outside=ild4_net=B#x0.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+8_outside=ild3_net=B.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+9_outside=ild4_net=B.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst                                                                             
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_fox.stl                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild0.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild1.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild2.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild3.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild4.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm1b.stl            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm1c.stl            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm2.stl             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_air.stl                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x0_1_Metal2.stl      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x0.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x1_Metal2.stl        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A.stl                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x0_1_Metal3.stl      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x0.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x1_Metal3.stl        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_B#x0.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_B.stl                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_sub!#substrate.stl     
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[20:25:35] INFO     Configure number of OpenMP threads          kpex_cli.py:1054
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[20:25:35] INFO     Calling FasterCap                     fastercap_runner.py:90
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f2 -ap                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst, output file:                                                               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/exclusion_overlapping_markers_FasterCap
+_Output.txt                                                                     
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.2.1                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst                                                                             
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 2                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 2789                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 2789                                         
+Number of links to be computed: 528802                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18                 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17                    
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17                    
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18                 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  7.70539e-09 -8.1737e-10 8.39119e-11 -7.57315e-10 1.0655e-09  
+-1.18929e-09 3.58841e-10 -1.78802e-09 -1.6437e-09 5.2757e-09                    
+g2_A#x0_1_Metal2  -1.54586e-08 1.54679e-09 6.33917e-10 -5.24383e-11 2.90984e-09 
+2.29041e-09 4.47693e-09 2.03847e-09 -1.99228e-09 -8.96696e-09                   
+g3_A#x0  1.70601e-07 4.10867e-09 5.12062e-09 7.43499e-10 -3.49282e-09           
+-1.12732e-08 -3.75385e-08 7.87457e-10 4.6879e-09 -2.70248e-08                   
+g4_A#x1_Metal2  3.72284e-08 3.14543e-10 -6.94363e-10 8.15146e-09 3.64515e-10    
+3.49577e-10 -2.00449e-09 -2.80141e-08 1.64376e-09 -3.512e-09                    
+g5_A  1.3726e-09 -2.85459e-10 -1.19393e-10 2.80744e-10 -4.70035e-09 3.53646e-09 
+-7.99618e-10 -1.70519e-09 2.69999e-10 3.30948e-09                               
+g6_P#x0_1_Metal3  -1.46566e-08 -9.46607e-10 5.334e-11 3.3531e-12 1.46964e-09    
+-6.77761e-09 -2.39946e-09 1.27686e-09 1.80271e-09 1.22719e-08                   
+g7_P#x0  -1.12493e-07 -2.65626e-09 -5.37968e-09 -4.69937e-10 1.907e-09          
+6.12256e-09 3.47436e-08 -2.19601e-10 -3.31345e-09 1.61015e-08                   
+g8_P#x1_Metal3  -5.177e-08 -6.85615e-10 1.13486e-09 -7.31664e-09 -6.88166e-12   
+-4.02232e-10 3.0327e-09 2.89591e-08 -2.22533e-09 6.41664e-09                    
+g9_B#x0  -8.24675e-08 -2.09591e-09 1.46929e-09 -3.53394e-10 2.09888e-09         
+6.84322e-09 4.97334e-09 -5.06099e-10 -1.94902e-09 1.46982e-08                   
+g10_B  7.14669e-08 1.60147e-09 -2.22382e-09 4.6983e-12 -1.90362e-09 4.0933e-10  
+-5.68704e-09 -9.23634e-10 3.1341e-09 -1.91426e-08                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 1                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 2                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 4                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 6                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 9                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 1             
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 6             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 2789                                         
+Number of potential estimates: 431701                                           
+Number of links: 531591 (uncompressed 7778521, compression ratio is 93.2%)      
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00275288                                  
+Time for reading input file: 0.028188s                                          
+Time for building super hierarchy: 0.002897s                                    
+Time for discretization: 0.178030s                                              
+Time for building potential matrix: 0.063257s                                   
+Time for precond calculation: 0.000084s                                         
+Time for gmres solving: 0.132437s                                               
+Memory allocated for panel hierarchy: 1113989 bytes                             
+Memory allocated for links structure: 16799544 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 741376 bytes                                        
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.767749s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 18323 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Delta in refined panel and link count w.r.t. previous iteration less than 10%   
+(Panels # 2988, Links # 624778)                                                 
+(Mesh relative refinement value (-m): 0.00194658)                               
+Automatically increasing the refinement parameters                              
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00137561                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 3455                                         
+Number of links to be computed: 826404                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.06163e-08 -2.1998e-10 -6.15304e-10 -5.17862e-10            
+-2.75846e-09 -1.33517e-09 -2.92384e-09 -2.93821e-09 7.21592e-11 -1.27848e-09    
+g2_A#x0_1_Metal2  -2.96905e-10 1.37448e-09 -5.80423e-11 -2.17115e-10 2.11948e-11
+-6.11622e-10 -1.46526e-10 -2.50961e-11 -1.81414e-11 -3.17488e-11                
+g3_A#x0  -6.11215e-10 -6.8224e-11 2.60243e-09 9.65413e-13 -8.4988e-11           
+-5.24142e-11 -1.80848e-09 -3.19238e-11 1.0318e-10 -4.61393e-11                  
+g4_A#x1_Metal2  -6.07043e-10 -7.29928e-11 -3.48954e-11 2.59859e-09 -1.04593e-10 
+-8.71321e-11 7.40104e-11 -1.87299e-09 -1.15458e-10 2.31642e-10                  
+g5_A  -2.65375e-09 8.48247e-12 -5.21079e-11 -4.58611e-11 5.26614e-09 3.02677e-11
+-1.89843e-10 -1.75548e-10 3.38131e-11 -2.13328e-09                              
+g6_P#x0_1_Metal3  -1.08102e-09 -8.32055e-10 -4.67039e-11 -1.13009e-10           
+1.48586e-11 5.16505e-09 -1.10828e-09 -1.13472e-09 -7.82065e-10 -1.87427e-11     
+g7_P#x0  -2.80541e-09 -2.75054e-11 -1.81232e-09 7.89915e-11 -1.40534e-10        
+-1.17595e-09 8.10986e-09 7.66406e-11 -1.91454e-09 -2.69412e-10                  
+g8_P#x1_Metal3  -2.75719e-09 -1.31908e-10 -2.76292e-11 -1.8487e-09 -4.89913e-11 
+-1.21963e-09 8.42208e-11 8.38423e-09 -5.4027e-11 -2.31317e-09                   
+g9_B#x0  -1.40931e-10 1.15057e-12 -3.59476e-11 -4.90134e-11 1.2008e-11          
+-7.45181e-10 -1.51781e-09 -1.66938e-10 2.92503e-09 -2.38117e-10                 
+g10_B  -1.43143e-09 -4.48518e-11 1.40332e-11 4.36609e-11 -2.08416e-09           
+4.56793e-11 -3.56615e-10 -1.98124e-09 -2.5292e-10 6.31428e-09                   
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 3                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 4                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 6                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+9.06095                                                                         
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 3455                                         
+Number of potential estimates: 707368                                           
+Number of links: 829859 (uncompressed 11937025, compression ratio is 93.0%)     
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00137549                                  
+Time for reading input file: 0.002710s                                          
+Time for building super hierarchy: 0.000266s                                    
+Time for discretization: 0.038717s                                              
+Time for building potential matrix: 0.079430s                                   
+Time for precond calculation: 0.033410s                                         
+Time for gmres solving: 0.206031s                                               
+Memory allocated for panel hierarchy: 1381055 bytes                             
+Memory allocated for links structure: 16804872 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 795392 bytes                                        
+Memory allocated for preconditioner: 268528632 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.715624s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 280877 kilobytes                                    
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00097262                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 4375                                         
+Number of links to be computed: 1221022                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps):    
+1024                                                                            
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.07783e-08 -2.78218e-10 -4.92033e-10 -4.60115e-10           
+-2.92652e-09 -1.23364e-09 -2.96372e-09 -3.04459e-09 -1.88396e-11 -1.28154e-09   
+g2_A#x0_1_Metal2  -2.993e-10 1.2634e-09 -6.87052e-11 -8.41386e-11 -7.56608e-12  
+-8.70565e-10 3.26207e-11 6.58293e-11 -5.98301e-12 -2.80938e-11                  
+g3_A#x0  -5.19201e-10 -6.91599e-11 2.58437e-09 -7.03589e-12 -3.51637e-11        
+-6.77595e-11 -2.03708e-09 3.1569e-11 1.50597e-10 -2.02811e-11                   
+g4_A#x1_Metal2  -5.23354e-10 -9.22397e-11 3.19623e-12 2.56276e-09 -2.53481e-11  
+-4.55951e-11 4.92709e-11 -2.03789e-09 -4.56906e-11 1.67029e-10                  
+g5_A  -2.76231e-09 -1.40107e-12 -8.10671e-11 -2.19918e-11 5.4314e-09            
+-1.99849e-11 -1.46452e-10 -2.13758e-10 -2.08382e-11 -2.08034e-09                
+g6_P#x0_1_Metal3  -1.16771e-09 -9.35121e-10 -5.32381e-11 -7.1847e-11            
+-4.21877e-12 6.20291e-09 -1.40234e-09 -1.40897e-09 -1.00526e-09 -1.00425e-10    
+g7_P#x0  -2.90303e-09 1.7814e-11 -2.07617e-09 7.27995e-11 -1.68848e-10          
+-1.34389e-09 8.98937e-09 -1.59578e-10 -2.12299e-09 -1.95608e-10                 
+g8_P#x1_Metal3  -2.93988e-09 8.0459e-11 3.62018e-11 -2.11008e-09 -1.45345e-10   
+-1.42715e-09 -1.34007e-10 9.0786e-09 7.72548e-11 -2.44481e-09                   
+g9_B#x0  -6.323e-11 1.96501e-11 1.18552e-10 -5.6134e-11 -1.22115e-11 -1.0074e-09
+-1.97266e-09 7.73265e-11 3.19025e-09 -2.41132e-10                               
+g10_B  -1.3898e-09 -3.49738e-11 -1.07473e-11 1.45597e-10 -2.12187e-09           
+-5.16564e-11 -2.52053e-10 -2.31862e-09 -2.18962e-10 6.52485e-09                 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 4                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.069794                                                                        
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 4375                                         
+Number of potential estimates: 1003789                                          
+Number of links: 1225397 (uncompressed 19140625, compression ratio is 93.6%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.000972316                                 
+Time for reading input file: 0.002719s                                          
+Time for building super hierarchy: 0.000279s                                    
+Time for discretization: 0.057563s                                              
+Time for building potential matrix: 0.108460s                                   
+Time for precond calculation: 0.033471s                                         
+Time for gmres solving: 0.265941s                                               
+Memory allocated for panel hierarchy: 1749975 bytes                             
+Memory allocated for links structure: 33589464 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 1029248 bytes                                       
+Memory allocated for preconditioner: 268535992 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.950097s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 297864 kilobytes                                    
+                                                                                
+Iteration number #3 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000687531                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 6109                                         
+Number of links to be computed: 2056992                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps):    
+1024                                                                            
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.086e-08 -2.34746e-10 -5.21568e-10 -4.90473e-10 -2.96069e-09
+-1.26662e-09 -3.04656e-09 -2.97595e-09 2.29453e-11 -1.31861e-09                 
+g2_A#x0_1_Metal2  -2.74643e-10 1.28038e-09 -8.44378e-11 -3.8677e-11 -1.35748e-12
+-7.91627e-10 -4.68158e-11 -7.63772e-11 -1.79837e-11 5.39783e-11                 
+g3_A#x0  -5.51455e-10 -8.96264e-11 2.53445e-09 -1.79781e-11 -1.1789e-10         
+-4.53525e-11 -1.76801e-09 1.32648e-11 7.51377e-11 -2.81387e-11                  
+g4_A#x1_Metal2  -5.16465e-10 -2.81379e-11 -1.47143e-11 2.50757e-09 -1.21508e-10 
+-2.15609e-10 -2.61851e-11 -1.66597e-09 2.5287e-11 6.05825e-11                   
+g5_A  -2.84014e-09 -4.93148e-12 -1.15713e-10 -1.15464e-10 5.5779e-09 4.44886e-11
+-1.60894e-10 -1.26372e-10 -9.75416e-12 -2.1796e-09                              
+g6_P#x0_1_Metal3  -1.18175e-09 -8.89108e-10 -5.12118e-11 -1.83734e-10           
+4.58147e-11 5.91678e-09 -1.18914e-09 -1.19617e-09 -1.01506e-09 -2.0414e-10      
+g7_P#x0  -2.96123e-09 -5.4841e-11 -1.86116e-09 -7.4137e-12 -1.32771e-10         
+-1.2013e-09 8.907e-09 -1.36246e-11 -2.25589e-09 -2.87727e-10                    
+g8_P#x1_Metal3  -2.89607e-09 -9.46407e-11 2.92998e-11 -1.8016e-09 -9.62475e-11  
+-1.14976e-09 -3.01605e-11 8.5375e-09 -8.81713e-11 -2.28055e-09                  
+g9_B#x0  -7.82841e-11 2.91491e-11 1.14002e-10 1.15104e-11 -2.18234e-11          
+-9.92564e-10 -2.21056e-09 -1.21609e-10 3.56466e-09 -2.4102e-10                  
+g10_B  -1.36888e-09 6.88527e-11 -2.86941e-11 9.08138e-11 -2.1768e-09            
+-2.38603e-10 -3.27322e-10 -2.19151e-09 -2.28795e-10 6.65061e-09                 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 2                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 4                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 6             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0445522                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 6109                                         
+Number of potential estimates: 1807636                                          
+Number of links: 2063101 (uncompressed 37319881, compression ratio is 94.5%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.00068753                                  
+Time for reading input file: 0.002747s                                          
+Time for building super hierarchy: 0.000280s                                    
+Time for discretization: 0.098563s                                              
+Time for building potential matrix: 0.179652s                                   
+Time for precond calculation: 0.175139s                                         
+Time for gmres solving: 0.602612s                                               
+Memory allocated for panel hierarchy: 2445309 bytes                             
+Memory allocated for links structure: 33603336 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 1466680 bytes                                       
+Memory allocated for preconditioner: 268549864 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 1.887598s (0 days, 0 hours, 0 mins, 1 s)                        
+Iteration allocated memory: 298997 kilobytes                                    
+                                                                                
+Total allocated memory: 298997 kilobytes                                        
+Total time: 2.185791s (0 days, 0 hours, 0 mins, 2 s)                            
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[20:25:38] INFO     FasterCap succeeded after 2.221s     fastercap_runner.py:118
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_1;sub!;A;3.4                                                             
+Cext_0_2;sub!;P;2.94                                                            
+Cext_0_3;sub!;B;1.34                                                            
+Cext_1_2;A;P;0.21                                                               
+Cext_1_3;A;B;2.07                                                               
+Cext_1_1;A;sub!;0.01                                                            
+Cext_2_3;P;B;2.87                                                               
+Cext_2_2;P;sub!;0.16                                                            
+Cext_3_3;B;sub!;0.24                                                            
+────────────────────────────────────────────────────────────────────────────────
+[20:25:38] INFO     Wrote expanded netlist CSV to:              kpex_cli.py:1109
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Expanded_Ne                 
+                    tlist.csv                                                   
+[20:25:38] INFO     Wrote expanded netlist to:                  kpex_cli.py:1113
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Expanded_Ne                 
+                    tlist.cir                                                   
+[20:25:38] INFO     Wrote reduced netlist to:                   kpex_cli.py:1124
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Reduced_Net                 
+                    list.cir                                                    
+[20:25:38] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --gds                                             
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/exclusion_overlapping_markers.gds.gz --lvsdb                                
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_overlapping_markers.lvsdb.gz --out-dir                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap         
+--exclusion-markers tie --exclusion-marker-layer NoRCX.m2m3                     
+--exclusion-marker-layer NoRCX.drawing                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[20:25:38] INFO     No explicit top cell specified, using top    kpex_cli.py:854
+                    cell 'exclusion_overlapping_markers'                        
+[20:25:38] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:865
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool       Found  Effective range                                               
+FasterCap  6.2.1  >=6.2.1                                                       
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:25:38] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1806
+[20:25:38] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1806
+[20:25:38] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1806
+[20:25:38] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1806
+[20:25:38] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1806
+[20:25:38] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1806
+[20:25:38] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1806
+[20:25:38] WARNING  These nets are partly within exclusion      extractor.py:234
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A: Metal2                                               
+                      - B: Metal4                                               
+                      - P: Metal3                                               
+─────────────────────────────── Process stackup ────────────────────────────────
+[20:25:38] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[20:25:38] INFO     Delaunay b: 0.5             fastercap_model_generator.py:122
+[20:25:38] INFO     Delaunay area_max: 50       fastercap_model_generator.py:123
+[20:25:38] INFO     Conductor A, metal Metal2,    fastercap_input_builder.py:212
+                    z=2.0, height=0.49                                          
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] INFO     Conductor P, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] INFO     Conductor B, metal Metal4,    fastercap_input_builder.py:212
+                    z=4.06, height=0.49                                         
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[20:25:38] INFO     Substrate sub!, z=-0.28,      fastercap_input_builder.py:284
+                    height=0.28                                                 
+[20:25:38] INFO     Simple dielectric (field      fastercap_input_builder.py:310
+                    oxide) fox: z=0, height=0.4                                 
+[20:25:38] INFO     Simple dielectric ild0:       fastercap_input_builder.py:400
+                    z=0.4, height=0.64                                          
+[20:25:38] INFO     Simple dielectric ild1:       fastercap_input_builder.py:400
+                    z=1.04, height=0.96                                         
+[20:25:38] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild2: z=2.49,                                               
+                    height=0.5399999999999998                                   
+[20:25:38] INFO     Simple dielectric ild2:       fastercap_input_builder.py:400
+                    z=2.0,                                                      
+                    height=1.0299999999999998                                   
+[20:25:38] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild3: z=3.5199999999999996,                                 
+                    height=0.5399999999999998                                   
+[20:25:38] INFO     Simple dielectric ild3:       fastercap_input_builder.py:400
+                    z=3.03,                                                     
+                    height=1.0299999999999998                                   
+[20:25:38] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild4: z=4.55,                                               
+                    height=0.5400000000000003                                   
+[20:25:38] INFO     Simple dielectric ild4:       fastercap_input_builder.py:400
+                    z=4.06,                                                     
+                    height=1.0300000000000002                                   
+[20:25:38] INFO     Simple dielectric ildtm1b:    fastercap_input_builder.py:400
+                    z=5.09,                                                     
+                    height=0.5300000000000002                                   
+[20:25:38] INFO     Simple dielectric ildtm1c:    fastercap_input_builder.py:400
+                    z=5.62,                                                     
+                    height=0.8099999999999996                                   
+[20:25:38] INFO     Simple dielectric ildtm2:     fastercap_input_builder.py:400
+                    z=6.43,                                                     
+                    height=4.800000000000001                                    
+[20:25:38] INFO     Simple dielectric air:        fastercap_input_builder.py:400
+                    z=11.23, height=5.0                                         
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+_outside=fox_inside=ild0.geo                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+_outside=ild0_inside=ild1.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+_outside=ild1_inside=ild2.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_4
+_outside=ild2_inside=ild3.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_5
+_outside=ild3_inside=ild4.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_6
+_outside=ild4_inside=ildtm1b.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_7
+_outside=ildtm1b_inside=ildtm1c.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_8
+_outside=ildtm1c_inside=ildtm2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_9
+_outside=ildtm2_inside=air.geo                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+0_outside=air_inside=(void).geo                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+1_outside=(void)_inside=fox.geo                                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+2_outside=(void)_inside=ild0.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+3_outside=(void)_inside=ild1.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+4_outside=(void)_inside=ild2.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+5_outside=(void)_inside=ild3.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+6_outside=(void)_inside=ild4.geo                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+7_outside=(void)_inside=ildtm1b.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+8_outside=(void)_inside=ildtm1c.geo                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_1
+9_outside=(void)_inside=ildtm2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+0_outside=(void)_net=sub!#substrate.geo                                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+1_outside=fox_net=sub!#substrate.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+2_outside=ild1_net=A#x0_1_Metal2.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+3_outside=ild2_net=A#x0_1_Metal2.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+4_outside=ild1_net=A#x0_Metal2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+5_outside=ild2_net=A#x0_Metal2.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+6_outside=ild1_net=A#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+7_outside=ild2_net=A#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+8_outside=ild1_net=A.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_2
+9_outside=ild2_net=A.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+0_outside=ild2_net=P#x0_1_Metal3.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+1_outside=ild3_net=P#x0_1_Metal3.geo                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+2_outside=ild2_net=P#x0_Metal3.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+3_outside=ild3_net=P#x0_Metal3.geo                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+4_outside=ild2_net=P#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+5_outside=ild3_net=P#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+6_outside=ild3_net=B#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+7_outside=ild4_net=B#x1.geo                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+8_outside=ild3_net=B.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_3
+9_outside=ild4_net=B.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst                                                                             
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_fox.stl                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild0.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild1.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild2.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild3.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ild4.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm1b.stl            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm1c.stl            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_ildtm2.stl             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/diel_air.stl                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x0_1_Metal2.stl      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x0_Metal2.stl        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A#x1.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_A.stl                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x0_1_Metal3.stl      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x0_Metal3.stl        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_P#x1.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_B#x1.stl               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_B.stl                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/Geometries/cond_sub!#substrate.stl     
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[20:25:38] INFO     Configure number of OpenMP threads          kpex_cli.py:1054
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[20:25:38] INFO     Calling FasterCap                     fastercap_runner.py:90
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f2 -ap                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst, output file:                                                               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/exclusion_overlapping_markers_FasterCap
+_Output.txt                                                                     
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.2.1                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappin
+g_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_.
+lst                                                                             
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 2                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 2789                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 2789                                         
+Number of links to be computed: 528802                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18                 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17                    
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17                    
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18                 
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  7.70539e-09 -8.1737e-10 -7.57315e-10 8.39119e-11 1.0655e-09  
+-1.18929e-09 -1.78802e-09 3.58841e-10 -1.6437e-09 5.2757e-09                    
+g2_A#x0_1_Metal2  -1.54586e-08 1.54679e-09 -5.24383e-11 6.33917e-10 2.90984e-09 
+2.29041e-09 2.03847e-09 4.47693e-09 -1.99228e-09 -8.96696e-09                   
+g3_A#x0_Metal2  3.72284e-08 3.14543e-10 8.15146e-09 -6.94363e-10 3.64515e-10    
+3.49577e-10 -2.80141e-08 -2.00449e-09 1.64376e-09 -3.512e-09                    
+g4_A#x1  1.70601e-07 4.10867e-09 7.43499e-10 5.12062e-09 -3.49282e-09           
+-1.12732e-08 7.87457e-10 -3.75385e-08 4.6879e-09 -2.70248e-08                   
+g5_A  1.3726e-09 -2.85459e-10 2.80744e-10 -1.19393e-10 -4.70035e-09 3.53646e-09 
+-1.70519e-09 -7.99618e-10 2.69999e-10 3.30948e-09                               
+g6_P#x0_1_Metal3  -1.46566e-08 -9.46607e-10 3.3531e-12 5.334e-11 1.46964e-09    
+-6.77761e-09 1.27686e-09 -2.39946e-09 1.80271e-09 1.22719e-08                   
+g7_P#x0_Metal3  -5.177e-08 -6.85615e-10 -7.31664e-09 1.13486e-09 -6.88166e-12   
+-4.02232e-10 2.89591e-08 3.0327e-09 -2.22533e-09 6.41664e-09                    
+g8_P#x1  -1.12493e-07 -2.65626e-09 -4.69937e-10 -5.37968e-09 1.907e-09          
+6.12256e-09 -2.19601e-10 3.47436e-08 -3.31345e-09 1.61015e-08                   
+g9_B#x1  -8.24675e-08 -2.09591e-09 -3.53394e-10 1.46929e-09 2.09888e-09         
+6.84322e-09 -5.06099e-10 4.97334e-09 -1.94902e-09 1.46982e-08                   
+g10_B  7.14669e-08 1.60147e-09 4.6983e-12 -2.22382e-09 -1.90362e-09 4.0933e-10  
+-9.23634e-10 -5.68704e-09 3.1341e-09 -1.91426e-08                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+1                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 1                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 2                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 3                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 6                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 9                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 1             
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 6             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 2789                                         
+Number of potential estimates: 428780                                           
+Number of links: 531591 (uncompressed 7778521, compression ratio is 93.2%)      
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00275288                                  
+Time for reading input file: 0.027629s                                          
+Time for building super hierarchy: 0.002428s                                    
+Time for discretization: 0.178183s                                              
+Time for building potential matrix: 0.060898s                                   
+Time for precond calculation: 0.000072s                                         
+Time for gmres solving: 0.134833s                                               
+Memory allocated for panel hierarchy: 1113989 bytes                             
+Memory allocated for links structure: 16799544 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 741376 bytes                                        
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.767027s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 18323 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Delta in refined panel and link count w.r.t. previous iteration less than 10%   
+(Panels # 2988, Links # 624778)                                                 
+(Mesh relative refinement value (-m): 0.00194658)                               
+Automatically increasing the refinement parameters                              
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00137561                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 3455                                         
+Number of links to be computed: 826404                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.06163e-08 -2.19975e-10 -5.17912e-10 -6.15301e-10           
+-2.75845e-09 -1.33519e-09 -2.93798e-09 -2.92395e-09 7.2166e-11 -1.27857e-09     
+g2_A#x0_1_Metal2  -2.96902e-10 1.37448e-09 -2.17116e-10 -5.80428e-11 2.11941e-11
+-6.11621e-10 -2.50987e-11 -1.46525e-10 -1.81414e-11 -3.17492e-11                
+g3_A#x0_Metal2  -6.07065e-10 -7.29933e-11 2.5986e-09 -3.48932e-11 -1.04581e-10  
+-8.71308e-11 -1.87299e-09 7.40042e-11 -1.15455e-10 2.31651e-10                  
+g4_A#x1  -6.11196e-10 -6.82228e-11 9.59461e-13 2.60243e-09 -8.49954e-11         
+-5.2409e-11 -3.19273e-11 -1.80849e-09 1.0318e-10 -4.6149e-11                    
+g5_A  -2.65375e-09 8.48254e-12 -4.58625e-11 -5.21077e-11 5.26614e-09 3.02682e-11
+-1.75544e-10 -1.89846e-10 3.38134e-11 -2.13328e-09                              
+g6_P#x0_1_Metal3  -1.08102e-09 -8.32056e-10 -1.13012e-10 -4.67057e-11           
+1.48584e-11 5.16505e-09 -1.1347e-09 -1.10829e-09 -7.82067e-10 -1.87474e-11      
+g7_P#x0_Metal3  -2.75724e-09 -1.31912e-10 -1.8487e-09 -2.76341e-11 -4.90128e-11 
+-1.21964e-09 8.38424e-09 8.43376e-11 -5.40392e-11 -2.3132e-09                   
+g8_P#x1  -2.80535e-09 -2.75055e-11 7.90379e-11 -1.81232e-09 -1.40522e-10        
+-1.17593e-09 7.64379e-11 8.10985e-09 -1.91454e-09 -2.69347e-10                  
+g9_B#x1  -1.40922e-10 1.15093e-12 -4.90188e-11 -3.59461e-11 1.20033e-11         
+-7.45178e-10 -1.66931e-10 -1.51781e-09 2.92503e-09 -2.38126e-10                 
+g10_B  -1.43144e-09 -4.4852e-11 4.36596e-11 1.40348e-11 -2.08414e-09 4.56808e-11
+-1.98123e-09 -3.56634e-10 -2.52917e-10 6.31429e-09                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 3                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 4                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 6                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+9.06094                                                                         
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 3455                                         
+Number of potential estimates: 710086                                           
+Number of links: 829859 (uncompressed 11937025, compression ratio is 93.0%)     
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00137549                                  
+Time for reading input file: 0.002734s                                          
+Time for building super hierarchy: 0.000269s                                    
+Time for discretization: 0.038431s                                              
+Time for building potential matrix: 0.081057s                                   
+Time for precond calculation: 0.033547s                                         
+Time for gmres solving: 0.226774s                                               
+Memory allocated for panel hierarchy: 1381055 bytes                             
+Memory allocated for links structure: 16804872 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 795392 bytes                                        
+Memory allocated for preconditioner: 268528632 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.776076s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 280877 kilobytes                                    
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00097262                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 4375                                         
+Number of links to be computed: 1221022                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps):    
+1024                                                                            
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.07786e-08 -2.79001e-10 -4.56853e-10 -4.93972e-10           
+-2.92629e-09 -1.23099e-09 -3.0545e-09 -2.95935e-09 -2.06831e-11 -1.2777e-09     
+g2_A#x0_1_Metal2  -2.99289e-10 1.26329e-09 -8.50403e-11 -6.86529e-11            
+-7.60611e-12 -8.71599e-10 6.91568e-11 3.21515e-11 -5.93552e-12 -2.89758e-11     
+g3_A#x0_Metal2  -5.23717e-10 -9.35657e-11 2.567e-09 4.14575e-13 -2.52759e-11    
+-4.3552e-11 -2.04841e-09 5.83175e-11 -4.99252e-11 1.70821e-10                   
+g4_A#x1  -5.1957e-10 -6.91079e-11 -6.25643e-12 2.58275e-09 -3.488e-11           
+-6.85155e-11 2.87389e-11 -2.03404e-09 1.49991e-10 -1.82255e-11                  
+g5_A  -2.76218e-09 -1.42417e-12 -2.18299e-11 -8.09723e-11 5.43141e-09           
+-1.95974e-11 -2.14285e-10 -1.46956e-10 -2.07395e-11 -2.08016e-09                
+g6_P#x0_1_Metal3  -1.16842e-09 -9.36417e-10 -6.76179e-11 -5.73638e-11           
+-3.86225e-12 6.2042e-09 -1.41837e-09 -1.39378e-09 -1.00919e-09 -9.53882e-11     
+g7_P#x0_Metal3  -2.93988e-09 8.55143e-11 -2.12144e-09 4.5019e-11 -1.45231e-10   
+-1.43179e-09 9.10404e-09 -1.60947e-10 9.09476e-11 -2.4551e-09                   
+g8_P#x1  -2.90214e-09 1.7526e-11 7.04935e-11 -2.07374e-09 -1.70198e-10          
+-1.34541e-09 -1.52355e-10 8.99165e-09 -2.1245e-09 -2.01522e-10                  
+g9_B#x1  -6.38151e-11 1.9847e-11 -5.7309e-11 1.1858e-10 -1.18447e-11            
+-1.00913e-09 8.14304e-11 -1.975e-09 3.19149e-09 -2.41225e-10                    
+g10_B  -1.38928e-09 -3.63346e-11 1.49502e-10 -1.3047e-11 -2.12183e-09           
+-4.95893e-11 -2.32803e-09 -2.45733e-10 -2.22261e-10 6.52842e-09                 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+8                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 8 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 3                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 7             
+Warning: capacitance matrix is not diagonally dominant due to row 8             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0705141                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 4375                                         
+Number of potential estimates: 1003785                                          
+Number of links: 1225397 (uncompressed 19140625, compression ratio is 93.6%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.000972316                                 
+Time for reading input file: 0.002693s                                          
+Time for building super hierarchy: 0.000253s                                    
+Time for discretization: 0.057273s                                              
+Time for building potential matrix: 0.108805s                                   
+Time for precond calculation: 0.033947s                                         
+Time for gmres solving: 0.255483s                                               
+Memory allocated for panel hierarchy: 1749975 bytes                             
+Memory allocated for links structure: 33589464 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 1029248 bytes                                       
+Memory allocated for preconditioner: 268535992 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.947382s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 297864 kilobytes                                    
+                                                                                
+Iteration number #3 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_overlappi
+ng_markers__exclusion_overlapping_markers/FasterCap_Input_Files/FasterCap_Input_
+.lst"                                                                           
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000687531                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 6109                                         
+Number of links to be computed: 2056984                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps):    
+1024                                                                            
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12                                   
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15                          
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14                             
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16                       
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13                                
+Capacitance matrix is:                                                          
+Dimension 10 x 10                                                               
+g1_sub!#substrate  2.08591e-08 -2.35037e-10 -4.90581e-10 -5.22129e-10           
+-2.96037e-09 -1.26445e-09 -2.97719e-09 -3.0456e-09 2.22128e-11 -1.31833e-09     
+g2_A#x0_1_Metal2  -2.74815e-10 1.28046e-09 -3.85959e-11 -8.40939e-11            
+-1.40384e-12 -7.91894e-10 -7.5997e-11 -4.77271e-11 -1.75747e-11 5.40862e-11     
+g3_A#x0_Metal2  -5.15175e-10 -2.80529e-11 2.5079e-09 -1.42903e-11 -1.2122e-10   
+-2.08777e-10 -1.66651e-09 -3.6813e-11 2.64582e-11 6.13708e-11                   
+g4_A#x1  -5.52573e-10 -8.91663e-11 -1.82254e-11 2.53439e-09 -1.18306e-10        
+-5.32644e-11 2.30624e-11 -1.76871e-09 7.54649e-11 -2.82817e-11                  
+g5_A  -2.84006e-09 -4.96208e-12 -1.15101e-10 -1.16177e-10 5.57789e-09           
+4.42325e-11 -1.27734e-10 -1.59042e-10 -1.03251e-11 -2.17923e-09                 
+g6_P#x0_1_Metal3  -1.17974e-09 -8.89134e-10 -1.77397e-10 -5.79976e-11           
+4.56967e-11 5.91703e-09 -1.20925e-09 -1.1778e-09 -1.02233e-09 -1.96862e-10      
+g7_P#x0_Metal3  -2.90012e-09 -9.39855e-11 -1.80263e-09 3.60504e-11 -9.76469e-11 
+-1.1678e-09 8.54093e-09 -1.96476e-11 -8.1914e-11 -2.28354e-09                   
+g8_P#x1  -2.95834e-09 -5.66805e-11 -1.46394e-11 -1.8616e-09 -1.30968e-10        
+-1.18172e-09 -2.05953e-11 8.90889e-09 -2.25776e-09 -2.95614e-10                 
+g9_B#x1  -7.9814e-11 2.96393e-11 1.10445e-11 1.14558e-10 -2.23272e-11           
+-1.00199e-09 -1.08578e-10 -2.21364e-09 3.56571e-09 -2.41147e-10                 
+g10_B  -1.36756e-09 6.89937e-11 9.15844e-11 -2.80799e-11 -2.17654e-09           
+-2.31135e-10 -2.19364e-09 -3.38274e-10 -2.27546e-10 6.65191e-09                 
+Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col
+10                                                                              
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+7                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col
+9                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col
+6                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 6 col
+5                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 7 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+2                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+3                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 9 col
+4                                                                               
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 2                                                                           
+Warning: capacitance matrix has a non-negative off-diagonal element at row 10   
+col 3                                                                           
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+Warning: capacitance matrix is not diagonally dominant due to row 4             
+Warning: capacitance matrix is not diagonally dominant due to row 5             
+Warning: capacitance matrix is not diagonally dominant due to row 6             
+Warning: capacitance matrix is not diagonally dominant due to row 9             
+Warning: capacitance matrix is not diagonally dominant due to row 10            
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0452435                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2789 of which 964 conductors and 1825 dielectric        
+Number of input panels to solver engine: 2789                                   
+Number of panels after refinement: 6109                                         
+Number of potential estimates: 1766152                                          
+Number of links: 2063093 (uncompressed 37319881, compression ratio is 94.5%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.00068753                                  
+Time for reading input file: 0.002708s                                          
+Time for building super hierarchy: 0.000281s                                    
+Time for discretization: 0.098530s                                              
+Time for building potential matrix: 0.175993s                                   
+Time for precond calculation: 0.175206s                                         
+Time for gmres solving: 0.613805s                                               
+Memory allocated for panel hierarchy: 2445309 bytes                             
+Memory allocated for links structure: 33603336 bytes                            
+Memory allocated for conductor list: 108240 bytes                               
+Memory allocated for Gmres: 1466680 bytes                                       
+Memory allocated for preconditioner: 268549864 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 1.939126s (0 days, 0 hours, 0 mins, 1 s)                        
+Iteration allocated memory: 298997 kilobytes                                    
+                                                                                
+Total allocated memory: 298997 kilobytes                                        
+Total time: 2.206200s (0 days, 0 hours, 0 mins, 2 s)                            
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[20:25:40] INFO     FasterCap succeeded after 2.24s      fastercap_runner.py:118
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_1;sub!;A;3.4                                                             
+Cext_0_2;sub!;P;2.94                                                            
+Cext_0_3;sub!;B;1.34                                                            
+Cext_1_2;A;P;0.21                                                               
+Cext_1_3;A;B;2.07                                                               
+Cext_1_1;A;sub!;0.01                                                            
+Cext_2_3;P;B;2.86                                                               
+Cext_2_2;P;sub!;0.16                                                            
+Cext_3_3;B;sub!;0.24                                                            
+────────────────────────────────────────────────────────────────────────────────
+[20:25:40] INFO     Wrote expanded netlist CSV to:              kpex_cli.py:1109
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Expanded_Ne                 
+                    tlist.csv                                                   
+[20:25:40] INFO     Wrote expanded netlist to:                  kpex_cli.py:1113
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Expanded_Ne                 
+                    tlist.cir                                                   
+[20:25:40] INFO     Wrote reduced netlist to:                   kpex_cli.py:1124
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_overlapping_mark                 
+                    ers__exclusion_overlapping_markers/exclusio                 
+                    n_overlapping_markers_FasterCap_Reduced_Net                 
+                    list.cir                                                    

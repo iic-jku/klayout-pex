@@ -1,0 +1,31 @@
+[20:23:29] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_plates_1_marker.lvsdb.gz' --out-dir                                           
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[20:23:29] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:865
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:23:29] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1806
+[20:23:29] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1806
+[20:23:29] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1806
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:23:29] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1346
+[20:23:29] INFO     LVSDB: found 2pins                         extractor.py:481
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;P;Q;0.828;                                                                  
+C2;P;VSUBS;6.726;                                                              
+C3;Q;VSUBS;6.726;                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plates_1_marker__exclu
+sion_plates_1_marker\exclusion_plates_1_marker_k25d_pex_netlist.csv            
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plates_1_marker__exclu
+sion_plates_1_marker\exclusion_plates_1_marker_k25d_pex_netlist.spice          

@@ -1,0 +1,37 @@
+WARNING  __kpex__:kpex_cli.py:1625 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1662 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_wire_through_octagon.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusion_wire_through_octagon.gds.gz' --exclusion-markers ports
+INFO     __kpex__:kpex_cli.py:854 No explicit top cell specified, using top cell 'exclusion_wire_through_octagon'
+INFO     __kpex__:kpex_cli.py:865 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1806 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1806 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1806 (30, 0) -> (metal3_n_mom)
+WARNING  __kpex__:extractor.py:234 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal3
+INFO     __kpex__:kpex_cli.py:1346 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:481 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1375 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1375 C1;A;VSUBS;0.649;
+SUBPROCESS __kpex__:kpex_cli.py:1375 C2;A_B__m0_0;VSUBS;0.587;
+SUBPROCESS __kpex__:kpex_cli.py:1375 C3;A_B__m0_1;VSUBS;0.238;
+SUBPROCESS __kpex__:kpex_cli.py:1375 C4;B;VSUBS;0.344;
+SUBPROCESS __kpex__:kpex_cli.py:1375 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1375 R2;A;A_B__m0_0;;0.523
+SUBPROCESS __kpex__:kpex_cli.py:1375 R3;A_B__m0_1;B;;0.242
+SUBPROCESS __kpex__:kpex_cli.py:1378 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1395 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1625 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1662 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_wire_through_octagon.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusion_wire_through_octagon.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:854 No explicit top cell specified, using top cell 'exclusion_wire_through_octagon'
+INFO     __kpex__:kpex_cli.py:865 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1806 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1806 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1806 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1346 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:481 LVSDB: found 1pins
+SUBPROCESS __kpex__:kpex_cli.py:1375 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1375 C1;A;VSUBS;2.155;
+SUBPROCESS __kpex__:kpex_cli.py:1375 C2;B;VSUBS;2.155;
+SUBPROCESS __kpex__:kpex_cli.py:1375 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1375 R2;A;B;;1.496
+SUBPROCESS __kpex__:kpex_cli.py:1378 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1395 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.spice

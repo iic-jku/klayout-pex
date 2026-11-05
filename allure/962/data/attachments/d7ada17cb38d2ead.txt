@@ -1,0 +1,33 @@
+[20:20:49] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox y --lvsdb                       
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cap_vpp_lico
+n_within_marker.lvsdb.gz' --out-dir                                            
+'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n    
+──────────────────────────────── Input Layout ─────────────────────────────────
+[20:20:49] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:865
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[20:20:49] INFO     (67, 20) -> (li_vpp li_con)                kpex_cli.py:1806
+[20:20:49] INFO     (66, 20) -> (poly_con poly_vpp)            kpex_cli.py:1806
+[20:20:49] INFO     (64, 44) -> (vpp_sub)                      kpex_cli.py:1806
+[20:20:49] INFO     (66, 4403) -> (licon_poly_con)             kpex_cli.py:1806
+[20:20:49] INFO     (66, 16) -> (poly_pin_con)                 kpex_cli.py:1806
+[20:20:49] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1806
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[20:20:49] INFO     LVSDB: found 1pins                         extractor.py:481
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;L;L,P;;90.08                                                                
+R2;L,P;L,P.$1.poly;;152.0                                                      
+R3;L,P.$1.poly;P;;359.693                                                      
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\cap_vpp_licon_within_marker__cap_vp
+p_licon_within_marker\cap_vpp_licon_within_marker_k25d_pex_netlist.csv         
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\cap_vpp_licon_within_marker__cap_vp
+p_licon_within_marker\cap_vpp_licon_within_marker_k25d_pex_netlist.spice       
