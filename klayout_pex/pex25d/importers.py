@@ -26,7 +26,7 @@
 Translation of external scene descriptions into an unresolved ``PEX25DFile``.
 
 The CLI exposes this operation as ``pex25d import``. Importers are plugins in the
-``klayout_pex.importers.v1`` entry-point group; the built-in ``openrcx-uf`` is a stub.
+``klayout_pex.importers.v1`` entry-point group; ``openrcx-uf`` is built in.
 Resolving and validating the result stay with the caller.
 """
 
@@ -94,10 +94,6 @@ def importer_registry() -> ImporterRegistry:
 
 
 def create_openrcx_uf_importer() -> PEX25DImporter:
-    """OpenRCX Universal Pattern Format input: a stub, not implemented yet.
-
-    Imports raise NotImplementedError; ``klayout_pex/openrcx/pex25d_importer.py``
-    holds the template for the implementation.
-    """
+    """OpenRCX Universal Pattern Format (UF) 3D patterns with one ground plane."""
     from ..openrcx.pex25d_importer import OpenRCXUFImporter
     return OpenRCXUFImporter()

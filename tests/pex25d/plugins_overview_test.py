@@ -72,9 +72,10 @@ def test_overview_shows_versions_summaries_and_selectors(install_plugin: Callabl
     assert exporter not in sys.modules and importer not in sys.modules
 
 
-def test_overview_lists_builtin_importer_stub():
+def test_overview_lists_builtin_importer():
     _, importers = rendered()
-    assert row(importers, '│ openrcx-uf ', 'klayout-pex', __version__, 'a stub, not implemented yet')
+    assert row(importers, '│ openrcx-uf ', 'klayout-pex', __version__,
+               'OpenRCX Universal Pattern Format (UF) 3D patterns with one ground plane.')
 
 
 def test_overview_marks_missing_plugins(monkeypatch: pytest.MonkeyPatch):
