@@ -256,10 +256,10 @@ class PDK(StrEnum):
         ]
 
         # 'tap.drawing':          ('Activ.drawing',),
-        # 'nwell.label':          ('NWell.pin', 'NWell.label'), # NOTE: EMX loves purpose .pin
-        # 'pwell.label':          ('PWell.pin', 'PWell.label'),  # NOTE: EMX loves purpose .pin
+        # 'nwell.label':          ('NWell.pin', 'NWell.label'), # NOTE: commercial tool A loves purpose .pin
+        # 'pwell.label':          ('PWell.pin', 'PWell.label'),  # NOTE: commercial tool A loves purpose .pin
         # 'pwell.pin':            ('PWell.pin',),
-        # 'li1.label':            ('Metal1.pin', 'Metal1.text'), # NOTE: OSS flow LVS needs .text (Virtuoso .pin)
+        # 'li1.label':            ('Metal1.pin', 'Metal1.text'), # NOTE: OSS flow LVS needs .text (commercial tool B .pin)
         return l
 
 
