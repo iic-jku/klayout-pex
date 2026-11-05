@@ -1,0 +1,43 @@
+[21:17:32] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1613
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_hairpin_bridge_m2.lvsdb.gz --out-dir                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:17:32] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:838
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:17:32] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1794
+[21:17:32] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1794
+[21:17:32] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1794
+[21:17:32] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1794
+[21:17:32] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1794
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:17:32] INFO     LVSDB: found 1pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;1.161;                                                               
+C2;A,B;VSUBS;0.387;                                                             
+C3;A,B.$1.Metal2;VSUBS;0.387;                                                   
+C4;A,B.$2.Metal3;VSUBS;1.147;                                                   
+C5;A,B.$3.Metal3;VSUBS;1.147;                                                   
+C6;B;VSUBS;1.161;                                                               
+R1;A;A,B.$2.Metal3;;1.461                                                       
+R2;A,B;A,B.$1.Metal2;;0.202                                                     
+R3;A,B;A,B.$2.Metal3;;2.031                                                     
+R4;A,B.$1.Metal2;A,B.$3.Metal3;;2.031                                           
+R5;A,B.$3.Metal3;B;;1.461                                                       
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin_br
+idge_m2__exclusion_hairpin_bridge_m2/exclusion_hairpin_bridge_m2_k25d_pex_netlis
+t.csv                                                                           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin_br
+idge_m2__exclusion_hairpin_bridge_m2/exclusion_hairpin_bridge_m2_k25d_pex_netlis
+t.spice                                                                         

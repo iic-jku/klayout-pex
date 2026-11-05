@@ -1,0 +1,22 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --lvsdb                                  
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/wires_no_pin.lvsdb.gz --out-dir                                              
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpi46pu5ri --2.5D             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[21:14:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:838
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[21:14:49] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1794
+[21:14:49] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1794
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[21:14:49] INFO     LVSDB: found 0pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpi46pu5ri/wires_no_pin__wires
+_no_pin/wires_no_pin_k25d_pex_netlist.csv                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpi46pu5ri/wires_no_pin__wires
+_no_pin/wires_no_pin_k25d_pex_netlist.spice                                     

@@ -1,0 +1,40 @@
+WARNING  __kpex__:kpex_cli.py:1613 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1650 main extract --pdk sky130A --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_nfet_finger_beside_top.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\cut_nfet_finger_beside_top.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:827 No explicit top cell specified, using top cell 'cut_nfet_finger_beside_top'
+INFO     __kpex__:kpex_cli.py:838 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1794 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1794 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1794 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1794 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1794 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1794 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:481 LVSDB: found 5pins
+SUBPROCESS __kpex__:kpex_cli.py:1344 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1344 R1;D1;D1.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R2;D2;D2.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R3;G;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R4;G.$1.poly;G.P0.poly;;192.8
+SUBPROCESS __kpex__:kpex_cli.py:1344 R5;G.$1.poly;G.P1.poly;;192.8
+SUBPROCESS __kpex__:kpex_cli.py:1344 R6;S;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1347 D:\a\klayout-pex\klayout-pex\output_sky130A\cut_nfet_finger_beside_top__cut_nfet_finger_beside_top\cut_nfet_finger_beside_top_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1364 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_nfet_finger_beside_top__cut_nfet_finger_beside_top\cut_nfet_finger_beside_top_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1613 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1650 main extract --pdk sky130A --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_nfet_finger_beside_top.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\cut_nfet_finger_beside_top.gds.gz' --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:827 No explicit top cell specified, using top cell 'cut_nfet_finger_beside_top'
+INFO     __kpex__:kpex_cli.py:838 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1794 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1794 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1794 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1794 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1794 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1794 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:179 The netlist leaves out the 1 devices of the cut cells
+INFO     __kpex__:extractor.py:481 LVSDB: found 5pins
+SUBPROCESS __kpex__:kpex_cli.py:1344 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1344 R1;D1;X__S;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R2;D2;D2.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R3;G;X__G_0;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1344 R4;G.P0.poly;X__G_0;;192.8
+SUBPROCESS __kpex__:kpex_cli.py:1344 R5;S;X__D;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1347 D:\a\klayout-pex\klayout-pex\output_sky130A\cut_nfet_finger_beside_top__cut_nfet_finger_beside_top\cut_nfet_finger_beside_top_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1364 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_nfet_finger_beside_top__cut_nfet_finger_beside_top\cut_nfet_finger_beside_top_k25d_pex_netlist.spice
