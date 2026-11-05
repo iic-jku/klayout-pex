@@ -328,6 +328,19 @@ def single_plate_6um_x_8um_m1_over_isolated_pwell() -> Pattern:
     return p
 
 
+def wires_no_pin() -> Pattern:
+    """
+    Two Metal3 wires of 50 µm x 0.5 µm, 1.5 µm apart, labelled A and B on the text layer only, without a pin,
+    so that nothing drives them (#407)
+    """
+    p = pattern('wires_no_pin')
+    for index, label in enumerate(('A', 'B')):
+        y = index * 2000
+        p.box(METAL3, 0, y, 50000, y + 500)
+        p.label(METAL3, label, 1000, y + 250)
+    return p
+
+
 #
 # Resistance patterns
 #
@@ -1437,6 +1450,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_rfcmim_w7u_l7u_metal5_routes_in_cells': cap_rfcmim_w7u_l7u_metal5_routes_in_cells,
     'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
+    'wires_no_pin': wires_no_pin,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'r_ptap_pair_m1_m2': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2', (None, None)),
     'r_ptap_pair_m1_m2_pins_A_B': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2_pins_A_B', ('A', 'B')),

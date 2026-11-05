@@ -130,6 +130,8 @@ from .rcx25.netlist_checks import (
     check_schematic_device_totals,
     first_names,
     RCNetlistCheckError,
+    undriven_nets,
+    undriven_nets_warning,
 )
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
@@ -1363,11 +1365,12 @@ class KpexCLI:
             self._rcx25_netlist_paths = {NetlistFormat.SPICE: expanded_netlist_path}  # NOTE: store for test case
 
             # NOTE: a defect of the RC netlist simulates to a plausible, but wrong number (#215)
+            summary = extraction_results.summarize()
             self._rcx25_netlist_problems = check_rc_netlist(  # NOTE: store for test case
                 lvs_netlist=pex_context.lvsdb.netlist(),
                 rc_netlist=expanded_netlist,
                 top_cell_name=pex_context.annotated_top_cell.name,
-                summary=extraction_results.summarize(),
+                summary=summary,
                 blackbox_devices=args.blackbox_devices,
                 device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name,
@@ -1386,6 +1389,24 @@ class KpexCLI:
             if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+
+            # NOTE: a warning, not a problem of --check, as fill has such nets too, but they were also defects
+            #       that LVS passed (e.g. a rail under a wrong net name), which have to stay visible,
+            #       also where --reduce removes them
+            capacitance_by_undriven_net = undriven_nets(
+                lvs_netlist=pex_context.lvsdb.netlist(),
+                top_cell_name=pex_context.annotated_top_cell.name,
+                summary=summary,
+                network_net_names={network.net_name
+                                   for results in extraction_results.cell_extraction_results.values()
+                                   for network in results.r_extraction_result.networks},
+                substrate_net_name=pex_context.substrate_net_name,
+                removed_device_ids=removed_device_ids,
+                floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
+            )
+            if capacitance_by_undriven_net:
+                warning(undriven_nets_warning(capacitance_by_undriven_net,
+                                              has_capacitances=args.pex_mode.need_capacitance()))
 
             # NOTE: the reduction reads the netlist as written, the checks above ran on the full one
             self._rcx25_reduced_netlist_path = None

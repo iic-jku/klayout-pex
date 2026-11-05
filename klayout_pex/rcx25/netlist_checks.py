@@ -23,7 +23,7 @@
 #
 """
 Consistency checks of the RC netlist against the LVS netlist it's made of (#215),
-and of the LVS netlist against the schematic (#345)
+and of the LVS netlist against the schematic (#345), and the nets that nothing drives (#407)
 
 NOTE: the defects of #211 gave RC netlists that simulate to plausible, but wrong numbers,
       so these checks compare the RC netlist with the LVS netlist by identity
@@ -42,6 +42,7 @@ from ..device_models import DeviceModels
 from ..device_totals import DeviceTotalParameters
 from ..log import info, warning
 from ..schematic_devices import SchematicDevices
+from .exclusion import listed_names
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
 from ..types import NetName
@@ -67,6 +68,9 @@ CAPACITANCE_TOLERANCE = 1e-9
 
 # NOTE: relative, the device totals of a schematic and its layout differ by rounding only (e.g. of µm in m and back)
 DEVICE_TOTAL_TOLERANCE = 1e-6
+
+# NOTE: the warning of more nets that nothing drives sums up the others (e.g. fill), see undriven_nets_warning
+UNDRIVEN_NETS_LISTED = 20
 
 
 def first_names(names: List[str]) -> str:
@@ -284,6 +288,65 @@ def check_rc_netlist(lvs_netlist: kdb.Netlist,
                             f"but {'%.12g' % expected} fF in the summary")
 
     return problems
+
+
+def undriven_nets(lvs_netlist: kdb.Netlist,
+                  top_cell_name: str,
+                  summary: ExtractionSummary,
+                  network_net_names: Collection[NetName] = (),
+                  substrate_net_name: Optional[str] = None,
+                  removed_device_ids: Collection[int] = (),
+                  floating_net_names: Collection[NetName] = ()) -> Dict[NetName, float]:
+    """
+    The nets that nothing drives, as they have no device terminal and no port (#407), e.g. a rail under a wrong
+    net name, which LVS passes, or fill: in the netlist, they have capacitors only, in --mode R resistors, if any
+
+    :param network_net_names: the nets of the resistor networks, which have conductors, also those without nodes
+    :param substrate_net_name: the net of the capacitances to the substrate (see RCX25NetlistExpander)
+    :param removed_device_ids: the devices the netlist leaves out, as a model has them (of cut cells)
+    :param floating_net_names: the nets within exclusion markers that nothing connects to,
+                               whose capacitances go to the substrate (see prepare_exclusions)
+    :return: the total capacitance (fF) of each, of those with capacitances or a resistor network, but the substrate
+    """
+    # NOTE: the capacitances of a net with a resistor network are on its nodes, but those between them
+    capacitance_by_net: Dict[NetName, float] = defaultdict(float)
+    for key, capacitance in summary.capacitances.items():
+        net1, net2 = (summary.net_by_node.get(node, node) for node in (key.net1, key.net2))
+        if net1 != net2:
+            capacitance_by_net[net1] += capacitance
+            capacitance_by_net[net2] += capacitance
+
+    nets: Dict[NetName, float] = {}
+    for net in lvs_netlist.circuit_by_name(top_cell_name).each_net():
+        name = net.expanded_name()
+        if name not in capacitance_by_net and name not in network_net_names:
+            continue  # NOTE: e.g. on LVS layers without parasitics, of which the netlist has nothing
+        if name == substrate_net_name or name in floating_net_names or name in summary.exclusion_ports \
+                or net.pin_count() + net.subcircuit_pin_count() > 0 \
+                or any(terminal.device().id() not in removed_device_ids for terminal in net.each_terminal()):
+            continue
+        nets[name] = capacitance_by_net.get(name, 0.0)
+    return nets
+
+
+def undriven_nets_warning(capacitance_by_net: Mapping[NetName, float], has_capacitances: bool) -> str:
+    """
+    :param capacitance_by_net: see undriven_nets
+    :param has_capacitances: whether the netlist has capacitances, not in --mode R
+    :return: the warning, which names the nets of the largest capacitance first, and the named ones before the
+             unnamed ones (e.g. $12, of fill), of many only the first ones (UNDRIVEN_NETS_LISTED)
+    """
+    names = sorted(capacitance_by_net,
+                   key=lambda name: (-round(capacitance_by_net[name], 3), name.startswith('$'), name.casefold()))
+    reason = "Nothing drives these nets, as they have no device terminal and no port " \
+             "(e.g. a rail under a wrong net name, or fill)"
+    if not has_capacitances:
+        return f"{reason}: {listed_names(names, UNDRIVEN_NETS_LISTED)}"
+    listed = [f"{name} ({capacitance_by_net[name]:.3f} fF)" for name in names[:UNDRIVEN_NETS_LISTED]]
+    rest = names[UNDRIVEN_NETS_LISTED:]
+    if rest:
+        listed.append(f"and {len(rest)} more ({sum(capacitance_by_net[name] for name in rest):.3f} fF)")
+    return f"{reason}, so simulators stop on them: {', '.join(listed)}"
 
 
 def check_schematic_device_classes(lvs_netlist: kdb.Netlist,
