@@ -399,20 +399,22 @@ def test_sonosfet_with_deep_nwell():
     # The SONOS FET has a deep nwell, which is no conductor of the resistance network
     # (no via joins it to the nwell over it). It used to stop the extraction (#292).
     # Its source/drain (sonos_nsd) is the n+ diffusion of nsd, so the licon on it is licon_nsd_con (185 Ω),
-    # rather than a contact shape the tech info doesn't know (#294)
+    # rather than a contact shape the tech info doesn't know (#294).
+    # The labels D, G and S on li1, without pin shapes, are the nodes of the ports, rather than the terminals (#405),
+    # so the licons are in the paths: 185 Ω to the drain and the source, 152 Ω + 73.395 Ω (half the gate) to the gate
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sonosfet_star_w0p45_l0p22.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-R1;D;D.$0.li1;;185.0
-R2;D.$0.li1;D.$2.met1;;9.3
-R3;G;G.$6.poly;;73.395
-R4;G;G.$7.poly;;73.395
+R1;D;D.$2.met1;;9.3
+R2;D;D.P0.nsdm;;185.0
+R3;G;G.$5.met1;;9.3
+R4;G;G.$7.poly;;152.0
 R5;G.$0.li1;G.$4.met1;;9.3
 R6;G.$0.li1;G.$6.poly;;152.0
-R7;G.$2.li1;G.$5.met1;;9.3
-R8;G.$2.li1;G.$7.poly;;152.0
-R9;S;S.$0.li1;;185.0
-R10;S.$0.li1;S.$2.met1;;9.3"""
+R7;G.$6.poly;G.P0.poly;;73.395
+R8;G.$7.poly;G.P0.poly;;73.395
+R9;S;S.$2.met1;;9.3
+R10;S;S.P0.nsdm;;185.0"""
     )
 
 
