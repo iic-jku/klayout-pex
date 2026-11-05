@@ -1,0 +1,87 @@
+[17:37:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --lvsdb                                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_ntap_pair_nwell_li1_m1.lvsdb.gz --out-dir                                     
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgfpwhl2_ --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:37:17] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:37:17] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1773
+[17:37:17] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1773
+[17:37:17] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1773
+[17:37:17] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1773
+[17:37:17] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1773
+[17:37:17] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1773
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:37:17] INFO     LVSDB: found 0pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;VSUBS;0.029;                                                              
+C2;$1.$10.li1;VSUBS;0.029;                                                      
+C3;$1.$12.li1;VSUBS;0.021;                                                      
+C4;$1.$14.li1;VSUBS;0.021;                                                      
+C5;$1.$16.li1;VSUBS;0.021;                                                      
+C6;$1.$18.li1;VSUBS;0.029;                                                      
+C7;$1.$2.li1;VSUBS;0.021;                                                       
+C8;$1.$20.met1;VSUBS;0.034;                                                     
+C9;$1.$21.met1;VSUBS;0.025;                                                     
+C10;$1.$22.met1;VSUBS;0.025;                                                    
+C11;$1.$23.met1;VSUBS;0.025;                                                    
+C12;$1.$24.met1;VSUBS;0.034;                                                    
+C13;$1.$25.met1;VSUBS;0.034;                                                    
+C14;$1.$26.met1;VSUBS;0.025;                                                    
+C15;$1.$27.met1;VSUBS;0.025;                                                    
+C16;$1.$28.met1;VSUBS;0.025;                                                    
+C17;$1.$29.met1;VSUBS;0.034;                                                    
+C18;$1.$4.li1;VSUBS;0.021;                                                      
+C19;$1.$6.li1;VSUBS;0.021;                                                      
+C20;$1.$8.li1;VSUBS;0.029;                                                      
+R1;$1;$1.$2.li1;;37.647                                                         
+R2;$1;$1.$20.met1;;9.3                                                          
+R3;$1;$1.$30.nwell;;185.0                                                       
+R4;$1.$10.li1;$1.$12.li1;;37.647                                                
+R5;$1.$10.li1;$1.$25.met1;;9.3                                                  
+R6;$1.$10.li1;$1.$35.nwell;;185.0                                               
+R7;$1.$12.li1;$1.$14.li1;;37.647                                                
+R8;$1.$12.li1;$1.$26.met1;;9.3                                                  
+R9;$1.$12.li1;$1.$35.nwell;;185.0                                               
+R10;$1.$14.li1;$1.$16.li1;;37.647                                               
+R11;$1.$14.li1;$1.$27.met1;;9.3                                                 
+R12;$1.$14.li1;$1.$35.nwell;;185.0                                              
+R13;$1.$16.li1;$1.$18.li1;;37.647                                               
+R14;$1.$16.li1;$1.$28.met1;;9.3                                                 
+R15;$1.$16.li1;$1.$35.nwell;;185.0                                              
+R16;$1.$18.li1;$1.$29.met1;;9.3                                                 
+R17;$1.$18.li1;$1.$35.nwell;;185.0                                              
+R18;$1.$2.li1;$1.$21.met1;;9.3                                                  
+R19;$1.$2.li1;$1.$30.nwell;;185.0                                               
+R20;$1.$2.li1;$1.$4.li1;;37.647                                                 
+R21;$1.$20.met1;$1.$21.met1;;0.368                                              
+R22;$1.$21.met1;$1.$22.met1;;0.368                                              
+R23;$1.$22.met1;$1.$23.met1;;0.368                                              
+R24;$1.$22.met1;$1.$4.li1;;9.3                                                  
+R25;$1.$23.met1;$1.$24.met1;;0.368                                              
+R26;$1.$23.met1;$1.$6.li1;;9.3                                                  
+R27;$1.$24.met1;$1.$8.li1;;9.3                                                  
+R28;$1.$25.met1;$1.$26.met1;;0.368                                              
+R29;$1.$26.met1;$1.$27.met1;;0.368                                              
+R30;$1.$27.met1;$1.$28.met1;;0.368                                              
+R31;$1.$28.met1;$1.$29.met1;;0.368                                              
+R32;$1.$30.nwell;$1.$35.nwell;;2428.571                                         
+R33;$1.$30.nwell;$1.$4.li1;;185.0                                               
+R34;$1.$30.nwell;$1.$6.li1;;185.0                                               
+R35;$1.$30.nwell;$1.$8.li1;;185.0                                               
+R36;$1.$4.li1;$1.$6.li1;;37.647                                                 
+R37;$1.$6.li1;$1.$8.li1;;37.647                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgfpwhl2_/r_ntap_pair_nwell_l
+i1_m1__r_ntap_pair_nwell_li1_m1/r_ntap_pair_nwell_li1_m1_k25d_pex_netlist.csv   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgfpwhl2_/r_ntap_pair_nwell_l
+i1_m1__r_ntap_pair_nwell_li1_m1/r_ntap_pair_nwell_li1_m1_k25d_pex_netlist.spice 

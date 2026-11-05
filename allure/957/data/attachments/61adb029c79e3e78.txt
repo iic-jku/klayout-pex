@@ -1,0 +1,36 @@
+[17:36:41] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                     
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_ptap_pai
+r_m1_m2.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD'    
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[17:36:41] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:36:41] INFO     (35, 0) -> (via1)                          kpex_cli.py:1773
+[17:36:41] INFO     (22, 244) -> (ptap)                        kpex_cli.py:1773
+[17:36:41] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1773
+[17:36:41] INFO     (36, 0) -> (metal2_con)                    kpex_cli.py:1773
+[17:36:41] INFO     (33, 4405) -> (contact_ptap_con)           kpex_cli.py:1773
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:36:41] INFO     LVSDB: found 0pins                         extractor.py:481
+[17:36:41] WARNING  Only the substrate, a well or a tap joins  extractor.py:535
+                    pieces of the metal of these nets, which                   
+                    the resistance network has no resistance                   
+                    for, so the pieces are ideally on their                    
+                    nets: SUB                                                  
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;SUB;SUB.$2.Metal2;;4.5                                                      
+R2;SUB;SUB.$3.Metal2;;4.5                                                      
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_ptap_pair_m1_m2__r_ptap_pair_m1
+_m2\r_ptap_pair_m1_m2_k25d_pex_netlist.csv                                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\r_ptap_pair_m1_m2__r_ptap_pair_m1
+_m2\r_ptap_pair_m1_m2_k25d_pex_netlist.spice                                   

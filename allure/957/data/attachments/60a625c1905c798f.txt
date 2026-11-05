@@ -1,0 +1,33 @@
+[17:38:51] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_wire_beside_label_of_other_net.lvsdb.gz --out-dir                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:38:51] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:38:51] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1773
+[17:38:51] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1773
+[17:38:51] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1773
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:38:51] INFO     LVSDB: found 2pins                          extractor.py:481
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;0.395;                                                                   
+C2;A;VSUBS;1.023;                                                               
+C3;B;VSUBS;1.023;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_wire_besid
+e_label_of_other_net__exclusion_wire_beside_label_of_other_net/exclusion_wire_be
+side_label_of_other_net_k25d_pex_netlist.csv                                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_wire_besid
+e_label_of_other_net__exclusion_wire_beside_label_of_other_net/exclusion_wire_be
+side_label_of_other_net_k25d_pex_netlist.spice                                  
