@@ -29,6 +29,7 @@
 # https://www.fastfieldsolvers.com/software.htm#fastercap
 #
 
+from collections import defaultdict
 from typing import *
 from functools import cached_property
 import math
@@ -44,8 +45,9 @@ from ..log import (
     warning,
     error
 )
+from ..rcx25.exclusion import ConductorPart, Exclusions
 from ..tech_info import TechInfo
-from ..types import GDSPair
+from ..types import GDSPair, LayerName
 
 
 
@@ -56,10 +58,13 @@ class FasterCapInputBuilder:
                  substrate_net_name: str,
                  k_void: float = 3.5,
                  delaunay_amax: float = 0.0,
-                 delaunay_b: float = 1.0):
+                 delaunay_b: float = 1.0,
+                 exclusions: Optional[Exclusions] = None):
         """
         :param substrate_net_name: the conductor of the substrate block, the substrate net (e.g. VSS),
                                    whose metal is then the same conductor, or a name for a port of its own
+        :param exclusions: what a model has the parasitics of, so the nets have conductors per block
+                           (see Exclusions.capacitance_matrix_of_nets)
         """
         self.pex_context = pex_context
         self.tech_info = tech_info
@@ -67,6 +72,8 @@ class FasterCapInputBuilder:
         self.k_void = k_void
         self.delaunay_amax = delaunay_amax
         self.delaunay_b = delaunay_b
+        self.exclusions = exclusions
+        self.conductor_parts_by_layer: Dict[str, kdb.Region] = defaultdict(kdb.Region)
 
     @cached_property
     def dbu(self) -> float:
@@ -107,6 +114,51 @@ class FasterCapInputBuilder:
 
     def top_cell_bbox(self) -> kdb.Box:
         return self.pex_context.top_cell_bbox()
+
+    def canonical_layer_name(self, layer_name: str) -> LayerName:
+        """
+        :return: the name of the layer of the stack by the one of the process stack, the masks go by these
+        """
+        return self.tech_info.canonical_layer_name_by_gds_pair.get(self.gds_pair(layer_name=layer_name), layer_name)
+
+    def add_conductor(self,
+                      model_builder: FasterCapModelBuilder,
+                      net_name: str,
+                      layer_name: str,
+                      shapes: kdb.Region,
+                      z: float,
+                      height: float):
+        """
+        :param layer_name: the layer of the process stack
+        """
+        if self.exclusions is None:
+            model_builder.add_conductor(net_name=net_name, layer=shapes, z=z, height=height)
+            return
+        for part, conductor_name in self.exclusions.conductor_parts_of_shapes(shapes, net_name,
+                                                                              self.canonical_layer_name(layer_name)):
+            model_builder.add_conductor(net_name=conductor_name, layer=part, z=z, height=height, group_name=net_name)
+            self.conductor_parts_by_layer[layer_name] += part
+
+    def add_via(self,
+                model_builder: FasterCapModelBuilder,
+                net_name: str,
+                layer_below_name: str,
+                contact: Any,
+                shapes: kdb.Region,
+                z: float):
+        """
+        :param layer_below_name: the layer of the process stack that has the contact above it
+        :param contact: the contact, of the process stack
+        """
+        if self.exclusions is None:
+            model_builder.add_conductor(net_name=net_name, layer=shapes, z=z, height=contact.thickness)
+            return
+        for part, conductor_name in self.exclusions.conductor_parts_of_vias(
+                shapes, net_name,
+                self.canonical_layer_name(layer_below_name),
+                self.canonical_layer_name(contact.metal_above or layer_below_name)):
+            model_builder.add_conductor(net_name=conductor_name, layer=part, z=z, height=contact.thickness,
+                                        group_name=net_name)
 
     def build(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb
@@ -159,10 +211,12 @@ class FasterCapInputBuilder:
                     if shapes.count() >= 1:
                         info(f"Conductor {net_name}, metal {metal_layer_name}, "
                              f"z={metal_layer.z}, height={metal_layer.thickness}")
-                        model_builder.add_conductor(net_name=net_name,
-                                                    layer=shapes,
-                                                    z=metal_layer.z,
-                                                    height=metal_layer.thickness)
+                        self.add_conductor(model_builder,
+                                           net_name=net_name,
+                                           layer_name=metal_layer_name,
+                                           shapes=shapes,
+                                           z=metal_layer.z,
+                                           height=metal_layer.thickness)
 
                 if metal_layer.HasField('contact_above'):
                     contact = metal_layer.contact_above
@@ -170,10 +224,12 @@ class FasterCapInputBuilder:
                     if shapes and not shapes.is_empty():
                         info(f"Conductor {net_name}, via {contact.name}, "
                              f"z={metal_z_top}, height={contact.thickness}")
-                        model_builder.add_conductor(net_name=net_name,
-                                                    layer=shapes,
-                                                    z=metal_z_top,
-                                                    height=contact.thickness)
+                        self.add_via(model_builder,
+                                     net_name=net_name,
+                                     layer_below_name=metal_layer_name,
+                                     contact=contact,
+                                     shapes=shapes,
+                                     z=metal_z_top)
 
                 # diel_above = self.tech_info.process_stack_layer_by_name.get(metal_layer.reference_above, None)
                 # if diel_above:
@@ -191,20 +247,24 @@ class FasterCapInputBuilder:
                     diffusion_regions.append(shapes)
                     info(f"Diffusion {net_name}, layer {diffusion_layer_name}, "
                          f"z={0}, height={0.1}")
-                    model_builder.add_conductor(net_name=net_name,
-                                                layer=shapes,
-                                                z=0,  # TODO
-                                                height=0.1)  # TODO: diffusion_layer.z
+                    self.add_conductor(model_builder,
+                                       net_name=net_name,
+                                       layer_name=diffusion_layer_name,
+                                       shapes=shapes,
+                                       z=0,  # TODO
+                                       height=0.1)  # TODO: diffusion_layer.z
 
                 contact = diffusion_layer.contact_above
                 shapes = self.shapes_of_net(layer_name=contact.name, net=net)
                 if shapes and not shapes.is_empty():
                     info(f"Diffusion {net_name}, contact {contact.name}, "
                          f"z={0}, height={contact.thickness}")
-                    model_builder.add_conductor(net_name=net_name,
-                                                layer=shapes,
-                                                z=0.0,
-                                                height=contact.thickness)
+                    self.add_via(model_builder,
+                                 net_name=net_name,
+                                 layer_below_name=diffusion_layer_name,
+                                 contact=contact,
+                                 shapes=shapes,
+                                 z=0.0)
 
         enlarged_top_cell_bbox = self.top_cell_bbox().enlarged(math.floor(8 / self.dbu))  # 8µm fringe halo
 
@@ -223,10 +283,17 @@ class FasterCapInputBuilder:
             substrate_region -= d.sized(diffusion_margin)
         info(f"Substrate {self.substrate_net_name}, "
              f"z={0 - substrate_layer.height - substrate_layer.thickness}, height={substrate_layer.thickness}")
-        model_builder.add_conductor(net_name=self.substrate_net_name,
+        # NOTE: with exclusions, the substrate is apart from the metal of its net (e.g. VSS),
+        #       which can be within a block
+        substrate_conductor_name = self.substrate_net_name
+        if self.exclusions is not None:
+            substrate_conductor_name = self.exclusions.conductor_name(ConductorPart(self.substrate_net_name,
+                                                                                    is_substrate=True))
+        model_builder.add_conductor(net_name=substrate_conductor_name,
                                     layer=substrate_region,
                                     z=0 - substrate_layer.height - substrate_layer.thickness,
-                                    height=substrate_layer.thickness)
+                                    height=substrate_layer.thickness,
+                                    group_name=self.substrate_net_name)
 
         #
         # add dielectrics
@@ -253,7 +320,10 @@ class FasterCapInputBuilder:
 
             metal_z_bottom = metal_layer.z
 
-            extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name)
+            # NOTE: as the conductors have them with exclusions, any-angle edges have the cuts as vertices then,
+            #       which would leave slivers between these conductors and dielectrics of the shapes as they are
+            extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name) if self.exclusions is None \
+                else self.conductor_parts_by_layer.get(metal_layer_name, None)
 
             sidewall_region: Optional[kdb.Region] = None
             sidewall_height = 0

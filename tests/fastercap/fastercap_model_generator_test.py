@@ -23,8 +23,11 @@
 #
 import allure
 import os
+from typing import *
+from unittest import mock
+
 import klayout.db as kdb
-from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
 
 
 @allure.parent_suite("Unit Tests")
@@ -102,3 +105,51 @@ def test_fastercap_model_generator(tmp_path):
     os.makedirs(output_dir_path_stl)
     gen.write_fastcap(prefix='test', output_dir_path=output_dir_path_fc)
     gen.dump_stl(prefix='test', output_dir_path=output_dir_path_stl)
+
+
+def touching_conductors(group_name_of_b: str) -> FasterCapModelGenerator:
+    """
+    :return: the conductors A and B, which touch at x = 1000: side by side, and from z = 1 µm on with a via of B on A
+    """
+    fcm = FasterCapModelBuilder(dbu=0.001, k_void=3.5, delaunay_amax=0.5, delaunay_b=0.5)
+    fcm.add_conductor(net_name='A', layer=kdb.Region(kdb.Box(0, 0, 1000, 500)), z=0.0, height=1.0, group_name='N')
+    fcm.add_conductor(net_name='B', layer=kdb.Region(kdb.Box(1000, 0, 2000, 500)), z=0.0, height=1.0,
+                      group_name=group_name_of_b)
+    fcm.add_conductor(net_name='B', layer=kdb.Region(kdb.Box(100, 100, 400, 400)), z=1.0, height=1.0,
+                      group_name=group_name_of_b)
+    return fcm.generate()
+
+
+def has_triangle_at(generator: FasterCapModelGenerator, net_name: str, is_at: Callable[[Any], bool]) -> bool:
+    return any(all(is_at(point) for point in triangle)
+               for key, triangles in generator.cond_data.items() if key.net_name == net_name
+               for triangle in triangles)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_conductors_of_a_group_have_no_surfaces_between_them():
+    def is_at_the_side_of_contact(point: Any) -> bool:
+        return abs(point.x - 1.0) < 1e-6
+
+    def is_at_the_via_of_contact(point: Any) -> bool:
+        return abs(point.z - 1.0) < 1e-6 and 0.1 - 1e-6 <= point.x <= 0.4 + 1e-6 and 0.1 - 1e-6 <= point.y <= 0.4 + 1e-6
+
+    apart = touching_conductors('other')
+    assert has_triangle_at(apart, 'A', is_at_the_side_of_contact)
+    assert has_triangle_at(apart, 'B', is_at_the_side_of_contact)
+    assert has_triangle_at(apart, 'B', is_at_the_via_of_contact)
+
+    together = touching_conductors('N')
+    assert not has_triangle_at(together, 'A', is_at_the_side_of_contact)
+    assert not has_triangle_at(together, 'B', is_at_the_side_of_contact)
+    assert not has_triangle_at(together, 'B', is_at_the_via_of_contact)
+    assert not has_triangle_at(together, 'A', is_at_the_via_of_contact)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("Capacitance", "FasterCap")
+def test_geometry_check_takes_the_conductors_of_a_group_as_one_surface():
+    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as error_mock:
+        touching_conductors('N').check()
+    assert [c.args[0] for c in error_mock.call_args_list] == []

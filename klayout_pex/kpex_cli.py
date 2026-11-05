@@ -122,6 +122,7 @@ from .rcx25.extractor import (
     ExtractionResults,
     RCX25Extractor,
     prepare_exclusions,
+    warn_of_ports_without_nodes,
 )
 from .rcx25.netlist_checks import (
     check_rc_netlist,
@@ -456,8 +457,9 @@ class KpexCLI:
     @staticmethod
     def _add_exclusion_arguments(parser: argparse.ArgumentParser):
         group = parser.add_argument_group("Exclusion Options",
-                                          "Leave parts of the layout to models or ideal sources, with the 2.5D engine. "
-                                          "The netlists of --mode CC have one node per net, so no ports for models")
+                                          "Leave parts of the layout to models or ideal sources, with the 2.5D engine "
+                                          "or the field solvers. The netlists of the field solvers, and of --mode CC, "
+                                          "have one node per net, so no ports for models")
         group.add_argument("--exclusion-markers", dest='exclusion_marker_mode',
                            default=ExclusionMarkerMode.DEFAULT, type=ExclusionMarkerMode,
                            choices=list(ExclusionMarkerMode),
@@ -725,7 +727,7 @@ class KpexCLI:
             for exclusion_option in filter(None, layout_options + net_options):
                 # NOTE: MAGIC would extract what is left out
                 if args.run_magic:
-                    error(f"{exclusion_option} applies to the 2.5D engine, not to MAGIC")
+                    error(f"{exclusion_option} applies to the 2.5D engine, FasterCap and FastCap2, not to MAGIC")
                     found_errors = True
             for exclusion_option in filter(None, layout_options):
                 # NOTE: the LVS database only has the shapes of nets
@@ -984,14 +986,16 @@ class KpexCLI:
     def build_fastercap_input(self,
                               args: argparse.Namespace,
                               pex_context: KLayoutExtractionContext,
-                              tech_info: TechInfo) -> str:
+                              tech_info: TechInfo,
+                              exclusions: Optional[Exclusions]) -> str:
         rule('Process stackup')
         fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
                                                         tech_info=tech_info,
                                                         substrate_net_name=pex_context.substrate_net_name,
                                                         k_void=args.k_void,
                                                         delaunay_amax=args.delaunay_amax,
-                                                        delaunay_b=args.delaunay_b)
+                                                        delaunay_b=args.delaunay_b,
+                                                        exclusions=exclusions)
         gen: FasterCapModelGenerator = fastercap_input_builder.build()
 
         rule('FasterCap Input File Generation')
@@ -1015,7 +1019,8 @@ class KpexCLI:
     def run_fastercap_extraction(self,
                                  args: argparse.Namespace,
                                  pex_context: KLayoutExtractionContext,
-                                 lst_file: str):
+                                 lst_file: str,
+                                 exclusions: Optional[Exclusions]):
         rule('FasterCap Execution')
         info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
         os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
@@ -1056,7 +1061,8 @@ class KpexCLI:
             cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices,
             device_models=pex_context.tech.device_models,
-            substrate_net_name=pex_context.substrate_net_name
+            substrate_net_name=pex_context.substrate_net_name,
+            exclusions=exclusions
         )
 
         # create a nice CSV for reports, useful for spreadsheets
@@ -1172,7 +1178,8 @@ class KpexCLI:
     def run_fastcap_extraction(self,
                                args: argparse.Namespace,
                                pex_context: KLayoutExtractionContext,
-                               lst_file: str):
+                               lst_file: str,
+                               exclusions: Optional[Exclusions]):
         rule('FastCap2 Execution')
 
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
@@ -1203,7 +1210,8 @@ class KpexCLI:
             cap_matrix_interpreter=cap_matrix_interpreter,
             blackbox_devices=args.blackbox_devices,
             device_models=pex_context.tech.device_models,
-            substrate_net_name=pex_context.substrate_net_name
+            substrate_net_name=pex_context.substrate_net_name,
+            exclusions=exclusions
         )
 
         netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTCAP2, pex_context.tech)
@@ -1806,17 +1814,22 @@ class KpexCLI:
         exclusions = self.exclusions_of(args, pex_context, tech_info)
 
         if args.run_fastcap or args.run_fastercap:
+            if exclusions is not None:
+                warn_of_ports_without_nodes(exclusions, "The netlist of a field solver")
             lst_file = self.build_fastercap_input(args=args,
                                                   pex_context=pex_context,
-                                                  tech_info=tech_info)
+                                                  tech_info=tech_info,
+                                                  exclusions=exclusions)
             if args.run_fastercap:
                 self.run_fastercap_extraction(args=args,
                                               pex_context=pex_context,
-                                              lst_file=lst_file)
+                                              lst_file=lst_file,
+                                              exclusions=exclusions)
             if args.run_fastcap:
                 self.run_fastcap_extraction(args=args,
                                             pex_context=pex_context,
-                                            lst_file=lst_file)
+                                            lst_file=lst_file,
+                                            exclusions=exclusions)
 
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")

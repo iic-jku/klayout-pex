@@ -31,11 +31,14 @@ from typing import *
 import allure
 import klayout.db as kdb
 import pytest
+
+from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
 from klayout_pex.rcx25.exclusion import (
     BlockKind,
     BlockLabel,
+    ConductorPart,
     CutLayers,
     CutRequest,
     ExclusionError,
@@ -490,6 +493,18 @@ def test_prefixes_that_give_instances_the_same_name_are_an_error():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_conductor_of_a_part_stays_apart_from_a_net_labelled_like_it():
+    e = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)))
+    part_within = ConductorPart('a', frozenset({0}))
+    net_like_it = ConductorPart('a#x0')
+    names = [e.conductor_name(part_within), e.conductor_name(net_like_it)]
+    assert names[0] == 'a#x0' and names[1] != names[0]
+    assert [e.conductor_parts[name] for name in names] == [part_within, net_like_it]
+    assert [e.conductor_name(part_within), e.conductor_name(net_like_it)] == names
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_blocks_of_a_cut_cell():
     layout = layout_with_cell_instances()
     e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
@@ -694,6 +709,172 @@ def test_cell_draws_a_device_by_the_polygons_at_all_of_its_terminals():
 @pytest.mark.parametrize('specification, expected', [('a', CutRequest('a')), ('a*=x', CutRequest('a*', 'x'))])
 def test_cut_request(specification: str, expected: CutRequest):
     assert CutRequest.parse(specification) == expected
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_conductor_parts_of_a_wire_across_a_block():
+    e = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)))
+    parts = e.conductor_parts_of_shapes(kdb.Region(kdb.Box(-50, 10, 50, 20)), 'N', 'Metal1')
+    assert [(part.bbox(), name) for part, name in parts] == [(kdb.Box(0, 10, 50, 20), 'N#x0'),
+                                                             (kdb.Box(-50, 10, 0, 20), 'N')]
+    assert e.conductor_parts['N#x0'] == ConductorPart('N', frozenset({0}))
+    assert e.conductor_parts['N'] == ConductorPart('N')
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_conductor_parts_of_a_block_that_leaves_out_some_capacitances_are_by_layer():
+    region = kdb.Region(kdb.Box(0, 0, 100, 100))
+    e = Exclusions([ExcludedBlock('m0', region, {'Metal1': region, 'Metal2': region},
+                                  capacitance_pair=frozenset({'Metal1', 'Metal2'}))])
+    parts = e.conductor_parts_of_shapes(kdb.Region(kdb.Box(0, 10, 50, 20)), 'N', 'Metal1')
+    assert [name for _, name in parts] == ['N#x0_Metal1']
+    assert e.conductor_parts_of_shapes(kdb.Region(kdb.Box(0, 10, 50, 20)), 'N', 'Metal3')[0][1] == 'N'
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_conductor_parts_of_vias_are_by_their_centers():
+    e = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)))
+    vias = kdb.Region()
+    vias.insert(kdb.Box(10, 10, 20, 20))  # within
+    vias.insert(kdb.Box(-2, 30, 10, 40))  # across, its center within
+    vias.insert(kdb.Box(-10, 50, 2, 60))  # across, its center outside
+    parts = e.conductor_parts_of_vias(vias, 'N', 'Metal1', 'Metal2')
+    assert [(sorted(str(polygon.bbox()) for polygon in part.each()), name) for part, name in parts] == \
+           [(sorted((str(kdb.Box(10, 10, 20, 20)), str(kdb.Box(-2, 30, 10, 40)))), 'N#x0'),
+            ([str(kdb.Box(-10, 50, 2, 60))], 'N')]
+
+
+def maxwell_matrix(capacitances: Dict[Tuple[str, str], float],
+                   capacitances_to_infinity: Dict[str, float],
+                   names: List[str]) -> CapacitanceMatrix:
+    rows = [[0.0] * len(names) for _ in names]
+    for (name_a, name_b), value in capacitances.items():
+        a, b = names.index(name_a), names.index(name_b)
+        rows[a][b] = rows[b][a] = -value
+        rows[a][a] += value
+        rows[b][b] += value
+    for name, value in capacitances_to_infinity.items():
+        rows[names.index(name)][names.index(name)] += value
+    return CapacitanceMatrix(conductor_names=names, rows=rows)
+
+
+def capacitances_of_matrix(matrix: CapacitanceMatrix) -> Dict[FrozenSet[str], float]:
+    return {frozenset((matrix.conductor_names[a], matrix.conductor_names[b])): -matrix[a][b]
+            for a in range(matrix.dimension) for b in range(a + 1, matrix.dimension) if matrix[a][b] != 0.0}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitance_matrix_of_nets_sums_parts_up_and_leaves_out_what_a_model_has():
+    block = kdb.Region(kdb.Box(0, 0, 100, 100))
+    other_block = kdb.Region(kdb.Box(200, 0, 300, 100))
+    e = Exclusions([ExcludedBlock('m0', block), ExcludedBlock('m1', other_block)], substrate_layer_name='VSUBS')
+    e.floating_net_names = {'F'}
+
+    def name(*arguments, **keywords) -> str:
+        return e.conductor_name(ConductorPart(*arguments, **keywords))
+
+    substrate, n_out, n_in = name('sub!', is_substrate=True), name('N'), name('N', frozenset({0}))
+    m_in, m_other, f_in = name('M', frozenset({0})), name('M', frozenset({1})), name('F', frozenset({0}))
+    names = [substrate, n_out, n_in, m_in, m_other, f_in]
+    matrix = maxwell_matrix({(substrate, n_out): 10.0,
+                             (substrate, n_in): 20.0,  # left out
+                             (substrate, m_in): 30.0,  # left out
+                             (substrate, m_other): 40.0,  # left out
+                             (substrate, f_in): 50.0,  # left out
+                             (n_out, n_in): 1000.0,  # within the net, as the parts touch
+                             (n_out, m_in): 1.0,
+                             (n_out, m_other): 2.0,
+                             (n_in, m_in): 3.0,  # left out, within one block
+                             (n_in, m_other): 4.0,
+                             (n_out, f_in): 5.0,  # goes to the substrate
+                             (n_in, f_in): 6.0,  # left out, within one block
+                             (m_other, f_in): 7.0},  # goes to the substrate
+                            {n_out: 0.5, n_in: 0.25}, names)
+
+    nets = e.capacitance_matrix_of_nets(matrix, names, 'sub!')
+
+    assert nets.conductor_names == ['sub!', 'N', 'M']
+    assert capacitances_of_matrix(nets) == {frozenset(('N', 'M')): 1.0 + 2.0 + 4.0,
+                                            frozenset(('N', 'sub!')): 10.0 + 5.0,
+                                            frozenset(('M', 'sub!')): 7.0}
+    n = nets.conductor_names.index('N')
+    # NOTE: the capacitance to infinity of the part outside, which goes to the substrate
+    assert nets[n][n] == pytest.approx(1.0 + 2.0 + 4.0 + 10.0 + 5.0 + 0.5)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitance_matrix_of_nets_is_the_one_of_the_parts_without_a_block_in_common():
+    # NOTE: all at one potential, the charges of the parts of a net add up to the one of the net
+    e = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)))
+    e.excluded_net_names = {'X'}
+    substrate, n_out, x_out = (e.conductor_name(ConductorPart('sub!', is_substrate=True)),
+                               e.conductor_name(ConductorPart('N')),
+                               e.conductor_name(ConductorPart('X')))
+    names = [substrate, n_out, x_out]
+    matrix = maxwell_matrix({(substrate, n_out): 10.0, (substrate, x_out): 20.0, (n_out, x_out): 3.0},
+                            {x_out: 0.5}, names)
+    nets = e.capacitance_matrix_of_nets(matrix, names, 'sub!')
+    # NOTE: an excluded net has no capacitance to the substrate, the others keep theirs to it
+    assert capacitances_of_matrix(nets) == {frozenset(('sub!', 'N')): 10.0, frozenset(('N', 'X')): 3.0}
+    x = nets.conductor_names.index('X')
+    assert nets[x][x] == 3.0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_capacitance_matrix_of_nets_leaves_out_only_the_pair_of_a_pair_block():
+    region = kdb.Region(kdb.Box(0, 0, 100, 100))
+    e = Exclusions([ExcludedBlock('m0', region, {'Metal1': region, 'Metal2': region, 'Metal3': region},
+                                  capacitance_pair=frozenset({'Metal1', 'Metal2'}))])
+    names = [e.conductor_name(part) for part in (ConductorPart('sub!', is_substrate=True),
+                                                 ConductorPart('A', frozenset({0}), 'Metal1'),
+                                                 ConductorPart('B', frozenset({0}), 'Metal2'),
+                                                 ConductorPart('C', frozenset({0}), 'Metal3'))]
+    substrate, a, b, c = names
+    matrix = maxwell_matrix({(substrate, a): 1.0, (a, b): 2.0, (a, c): 3.0, (b, c): 4.0}, {}, names)
+    assert capacitances_of_matrix(e.capacitance_matrix_of_nets(matrix, names, 'sub!')) == \
+           {frozenset(('sub!', 'A')): 1.0, frozenset(('A', 'C')): 3.0, frozenset(('B', 'C')): 4.0}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('order', [(0, 1), (1, 0)])
+def test_conductor_parts_within_overlapping_blocks_are_within_both(order: Tuple[int, int]):
+    regular = ExcludedBlock('regular', kdb.Region(kdb.Box(0, 0, 60, 100)))
+    pair_region = kdb.Region(kdb.Box(40, 0, 100, 100))
+    pair_block = ExcludedBlock('pair', pair_region, {'Metal2': pair_region, 'Metal3': pair_region},
+                               capacitance_pair=frozenset({'Metal2', 'Metal3'}))
+    blocks = [(regular, pair_block)[index] for index in order]
+    e = Exclusions(blocks)
+
+    def parts_of(net_name: str, layer_name: str) -> Dict[Tuple[str, ...], Tuple[ConductorPart, int]]:
+        return {tuple(sorted(blocks[index].name for index in e.conductor_parts[name].block_indexes)):
+                (e.conductor_parts[name], region.area())
+                for region, name in e.conductor_parts_of_shapes(kdb.Region(kdb.Box(0, 0, 100, 100)),
+                                                                net_name, layer_name)}
+
+    a, b = parts_of('A', 'Metal2'), parts_of('B', 'Metal3')
+    assert {names: area for names, (_, area) in a.items()} == {('regular',): 40 * 100, ('pair', 'regular'): 20 * 100,
+                                                               ('pair',): 40 * 100}
+    assert {names: area for names, (_, area) in a.items()} == {names: area for names, (_, area) in b.items()}
+
+    def leaves_out(names_a: Tuple[str, ...], names_b: Tuple[str, ...]) -> bool:
+        return e.leaves_out_between(a[names_a][0], b[names_b][0])
+
+    # NOTE: within the regular block, also with what is within the other one too
+    assert leaves_out(('regular',), ('regular',)) and leaves_out(('regular',), ('pair', 'regular'))
+    assert leaves_out(('pair', 'regular'), ('pair', 'regular'))
+    # NOTE: within the block of the pair, the layers of which these are
+    assert leaves_out(('pair',), ('pair',)) and leaves_out(('pair', 'regular'), ('pair',))
+    assert not leaves_out(('regular',), ('pair',))
+
+    assert e.leaves_out_to_substrate(a[('regular',)][0]) and e.leaves_out_to_substrate(a[('pair', 'regular')][0])
+    assert not e.leaves_out_to_substrate(a[('pair',)][0])
 
 
 @allure.parent_suite(parent_suite)

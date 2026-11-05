@@ -1534,7 +1534,7 @@ def test_taps_and_wells_do_not_bypass_the_model_of_a_rail(pdk_name: PDKName, arg
     (('--cut', 'coil=x', '--cut', 'other=x'), 'given several times: x'),
     (('--cut-keep-net', 'VDD'), '--cut-keep-net VDD needs --cut'),
     (('--cut', 'coil=a', '--cut', 'coil=b'), '--cut coil=b: all instances of its cells are of another --cut'),
-    (('--cut', 'coil', '--magic'), 'applies to the 2.5D engine, not to MAGIC'),
+    (('--cut', 'coil', '--magic'), 'applies to the 2.5D engine, FasterCap and FastCap2, not to MAGIC'),
 ])
 def test_invalid_cut_is_an_error_listing_the_valid_values(tmp_path, arguments: Tuple[str, ...], message: str):
     pdk = PDKTestConfig(PDKName.IHP_SG13G2)
@@ -1700,7 +1700,7 @@ def test_does_not_apply_to_magic(tmp_path):
                                                     '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),
                                                     '--exclusion-markers', 'tie'))
     assert code != 0, output
-    message = 'applies to the 2.5D engine, not to MAGIC'
+    message = 'applies to the 2.5D engine, FasterCap and FastCap2, not to MAGIC'
     assert message in ' '.join(output.split()), output
 
 

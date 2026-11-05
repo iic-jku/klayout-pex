@@ -34,7 +34,10 @@ import klayout.db as kdb
 
 from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
 from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.rcx25.exclusion import Exclusions
+from klayout_pex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
@@ -43,10 +46,9 @@ parent_suite = "kpex/FasterCap Input Tests"
 tags = ("PEX", "FasterCap")
 
 
-def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float]:
+def context_of_layout(pdk_name: PDKName, *path_components) -> Tuple[KLayoutExtractionContext, TechInfo]:
     """
-    The areas of the FasterCap input dielectrics of a layout (in µm², with the white-box devices),
-    built from the LVS database of a run (whose engine is left out)
+    :return: the extraction context and the tech info of the LVS database of a run (whose engine is left out)
     """
     pdk = PDKTestConfig(pdk_name)
     with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', autospec=True) as run_kpex_2_5d_engine:
@@ -56,8 +58,15 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
                         '--out-dir', pdk.output_dir,
                         '--2.5D',
                         '--blackbox', 'n'])
-    pex_context = run_kpex_2_5d_engine.call_args.kwargs['pex_context']
-    tech_info = run_kpex_2_5d_engine.call_args.kwargs['tech_info']
+    return run_kpex_2_5d_engine.call_args.kwargs['pex_context'], run_kpex_2_5d_engine.call_args.kwargs['tech_info']
+
+
+def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float]:
+    """
+    The areas of the FasterCap input dielectrics of a layout (in µm², with the white-box devices),
+    built from the LVS database of a run (whose engine is left out)
+    """
+    pex_context, tech_info = context_of_layout(pdk_name, *path_components)
 
     regions_by_material: Dict[str, kdb.Region] = defaultdict(kdb.Region)
     add_dielectric = FasterCapModelBuilder.add_dielectric
@@ -111,3 +120,43 @@ def test_mim_dielectric_of_gf180mcuD():
     # FuseTop 5 µm x 5 µm and 20 µm x 10 µm, over Metal4 of 275.88 µm²
     areas = dielectric_areas_um2(PDKName.GF180MCUD, 'test_patterns', 'cap_mim_m4m5.gds.gz')
     assert areas['capild'] == 225.0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_net_across_a_block_has_a_conductor_per_part_which_have_one_surface():
+    # NOTE: a Metal3 wire of 40 µm x 2 µm, whose half ends within the marker (at x from 0 on)
+    pex_context, tech_info = context_of_layout(PDKName.IHP_SG13G2, 'test_patterns', 'exclusion_wire_end.gds.gz')
+    exclusions = Exclusions.from_region(kdb.Region(kdb.Box(0, -5000, 30000, 7000)),
+                                        substrate_layer_name=tech_info.internal_substrate_layer_name)
+    generator = FasterCapInputBuilder(pex_context=pex_context,
+                                      tech_info=tech_info,
+                                      substrate_net_name=pex_context.substrate_net_name,
+                                      delaunay_amax=50.0,  # NOTE: few triangles, as the check is quadratic in them
+                                      delaunay_b=0.5,
+                                      exclusions=exclusions).build()
+
+    assert sorted(generator.net_names) == ['W', 'W#x0', 'sub!#substrate']
+    assert exclusions.conductor_parts['W#x0'].net_name == 'W'
+    assert exclusions.conductor_parts['sub!#substrate'].is_substrate
+    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as error_mock:
+        generator.check()
+    assert [c.args[0] for c in error_mock.call_args_list] == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('ports', [False, True])
+def test_any_angle_wire_across_a_block_has_no_slivers_to_the_dielectrics(ports: bool):
+    # NOTE: its cuts are vertices on the grid, off its edges, which leaves slivers that can't be triangulated otherwise
+    pex_context, tech_info = context_of_layout(PDKName.IHP_SG13G2, 'test_patterns', 'exclusion_slanted_wire.gds.gz')
+    exclusions = Exclusions.from_region(kdb.Region(kdb.Box(-5000, -30000, 5000, 30000)),
+                                        ports=ports,
+                                        substrate_layer_name=tech_info.internal_substrate_layer_name)
+    generator = FasterCapInputBuilder(pex_context=pex_context,
+                                      tech_info=tech_info,
+                                      substrate_net_name=pex_context.substrate_net_name,
+                                      delaunay_amax=50.0,
+                                      delaunay_b=0.5,
+                                      exclusions=exclusions).build()
+    assert [name for name in generator.net_names if '#x' in name]

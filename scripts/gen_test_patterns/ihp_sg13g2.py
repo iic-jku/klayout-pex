@@ -1347,6 +1347,17 @@ def exclusion_wires_through_and_beside(name: str, label: str) -> Pattern:
     return p
 
 
+def exclusion_overlapping_markers() -> Pattern:
+    """
+    The wires and the plate of exclusion_plate_between_wires, with a marker of all layers and one of Metal2 and Metal3
+    that overlap over the plate
+    """
+    p = exclusion_plate_between_wires('exclusion_overlapping_markers', None)
+    p.box(NORCX, 0, -5000, 12000, 25000)
+    p.box(NORCX_M2M3, 8000, -5000, 20000, 25000)
+    return p
+
+
 def exclusion_rail_between_taps() -> Pattern:
     """
     A Metal2 rail of 300 µm x 0.3 µm between two p-taps with the pins A and B (see tap_m1_m2),
@@ -1422,6 +1433,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_wire_over_nwell': exclusion_wire_over_nwell,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_overlapping_markers': exclusion_overlapping_markers,
     'cut_boundary_over_devices': cut_boundary_over_devices,
     'cut_boundary_over_inductor': cut_boundary_over_inductor,
     'cut_cell_of_devices': cut_cell_of_devices,

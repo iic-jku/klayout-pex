@@ -37,6 +37,9 @@ NOTE: the conductors within a marker stay in the layout the capacitances are ext
 
 NOTE: with ports at the cuts, the parts of a net that only a model joins are apart in the netlist,
       so their capacitances to each other count, unlike the ones within a net otherwise (see NetPiece)
+
+NOTE: a field solver only tells the capacitances between its conductors, not where they end on them,
+      so each net is a conductor per set of blocks it is within (see ConductorPart), and the matrix filtered by these
 """
 
 from __future__ import annotations
@@ -50,6 +53,7 @@ from typing import *
 
 import klayout.db as kdb
 
+from ..common.capacitance_matrix import CapacitanceMatrix
 from ..types import GDSPair, LayerName, NetName
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
@@ -192,6 +196,17 @@ class NetPiece:
     """
     name: str  # NOTE: stands for the net in the capacitance tables, until they go to the nodes of the piece
     region_by_layer: Dict[LayerName, kdb.Region]
+
+
+@dataclass(frozen=True)
+class ConductorPart:
+    """
+    A part of a net that a field solver has as a conductor of its own
+    """
+    net_name: NetName
+    block_indexes: FrozenSet[int] = frozenset()  # of the blocks it is within, as these can overlap
+    layer_name: Optional[LayerName] = None  # its layer, within a block that only leaves out some capacitances
+    is_substrate: bool = False  # the substrate below everything, as the net of the substrate can have metal as well
 
 
 @dataclass(frozen=True)
@@ -682,6 +697,10 @@ class Exclusions:
                                                                 for block in blocks for label in block.labels}
         self.labels_of_rest: Set[Tuple[str, kdb.Point]] = set()
 
+        # the parts of the nets the field solvers have as conductors, by the names of the conductors
+        self.conductor_parts: Dict[str, ConductorPart] = {}
+        self.conductor_names: Dict[ConductorPart, str] = {}
+
     @classmethod
     def from_region(cls,
                     region: kdb.Region,
@@ -781,6 +800,150 @@ class Exclusions:
         self.bbox += shapes.bbox()
         self.block_boxes.insert(kdb.BoxWithProperties(shapes.bbox(), {'block': block_index}))
         self._masks.clear()
+
+    def conductor_name(self, part: ConductorPart) -> str:
+        """
+        :return: the name of the conductor of the part, the name of the net for its part outside of the blocks,
+                 unless that is the name of another conductor, as a label can have any text
+        """
+        name = self.conductor_names.get(part, None)
+        if name is not None:
+            return name
+        if part.is_substrate:
+            name = f"{part.net_name}#substrate"
+        elif not part.block_indexes:
+            name = part.net_name
+        else:
+            block_indexes = '_'.join(str(index) for index in sorted(part.block_indexes))
+            name = f"{part.net_name}#x{block_indexes}"
+            if part.layer_name is not None:
+                name = f"{name}_{part.layer_name}"
+        while name in self.conductor_parts:
+            name = f"{name}#"
+        self.conductor_parts[name] = part
+        self.conductor_names[part] = name
+        return name
+
+    def conductor_parts_of_shapes(self,
+                                  shapes: kdb.Region,
+                                  net_name: NetName,
+                                  layer_name: LayerName) -> List[Tuple[kdb.Region, str]]:
+        """
+        :param shapes: of the net on the conductor layer of the stack
+        :return: the parts of the shapes with the names of their conductors
+        """
+        def part_within(rest: kdb.Region, index: int) -> Optional[Tuple[kdb.Region, kdb.Region, Optional[LayerName]]]:
+            block = self.blocks[index]
+            region = block.region_of(layer_name)
+            if region is None:
+                return None
+            near = self.regions.near(region, rest.bbox())
+            return rest & near, near, None if block.capacitance_pair is None else layer_name
+
+        return self.parts_within_blocks(shapes, net_name, part_within)
+
+    def conductor_parts_of_vias(self,
+                                shapes: kdb.Region,
+                                net_name: NetName,
+                                bottom_layer_name: LayerName,
+                                top_layer_name: LayerName) -> List[Tuple[kdb.Region, str]]:
+        """
+        :param shapes: of the net on the via layer of the stack
+        :return: the parts of the shapes with the names of their conductors: within a block by their centers,
+                 as for the resistances (see RExtractor.split_at_exclusions)
+        """
+        def part_within(rest: kdb.Region, index: int) -> Optional[Tuple[kdb.Region, kdb.Region, Optional[LayerName]]]:
+            block = self.blocks[index]
+            bottom_region, top_region = block.region_of(bottom_layer_name), block.region_of(top_layer_name)
+            if bottom_region is None or top_region is None or block.capacitance_pair is not None:
+                return None
+            box = rest.bbox()
+            mask = self.regions.near(bottom_region, box) & self.regions.near(top_region, box)
+            part = polygons_by_center_inside(rest, mask)
+            return part, part, None
+
+        return self.parts_within_blocks(shapes, net_name, part_within)
+
+    def parts_within_blocks(self,
+                            shapes: kdb.Region,
+                            net_name: NetName,
+                            part_within: Callable[[kdb.Region, int],
+                                                  Optional[Tuple[kdb.Region, kdb.Region, Optional[LayerName]]]]) \
+            -> List[Tuple[kdb.Region, str]]:
+        """
+        :param shapes: of the net
+        :param part_within: what of some shapes is within the block of the index, what to take out of the shapes
+                            for what isn't, and the layer that the block needs a part to have its name
+        :return: the parts of the shapes, each within other blocks, with the names of their conductors
+
+        NOTE: the rest goes without the mask rather than the part, as any-angle edges round differently, which leaves
+              slivers along the cut otherwise, that join what is on both sides of a block
+        """
+        parts: List[Tuple[kdb.Region, FrozenSet[int], Optional[LayerName]]] = [(shapes, frozenset(), None)]
+        for index in self.block_indexes_touching(shapes.bbox()):
+            split_parts: List[Tuple[kdb.Region, FrozenSet[int], Optional[LayerName]]] = []
+            for region, block_indexes, part_layer_name in parts:
+                within = part_within(region, index)
+                if within is None or within[0].is_empty():
+                    split_parts.append((region, block_indexes, part_layer_name))
+                    continue
+                split_parts.append((within[0], block_indexes | {index}, part_layer_name or within[2]))
+                rest = region - within[1]
+                if not rest.is_empty():
+                    split_parts.append((rest, block_indexes, part_layer_name))
+            parts = split_parts
+        return [(region, self.conductor_name(ConductorPart(net_name, block_indexes, part_layer_name)))
+                for region, block_indexes, part_layer_name in parts]
+
+    def leaves_out_to_substrate(self, part: ConductorPart) -> bool:
+        """
+        :return: whether the capacitance of the part to the substrate is left out
+        """
+        if part.net_name in self.excluded_net_names:
+            return True
+        return any(self.blocks[index].applies_between(part.layer_name, self.substrate_layer_name)
+                   for index in part.block_indexes)
+
+    def leaves_out_between(self, part_a: ConductorPart, part_b: ConductorPart) -> bool:
+        """
+        :return: whether the capacitance between the parts is left out
+        """
+        if part_a.is_substrate or part_b.is_substrate:
+            return self.leaves_out_to_substrate(part_b if part_a.is_substrate else part_a)
+        return any(self.blocks[index].applies_between(part_a.layer_name, part_b.layer_name)
+                   for index in part_a.block_indexes & part_b.block_indexes)
+
+    def capacitance_matrix_of_nets(self,
+                                   matrix: CapacitanceMatrix,
+                                   conductor_names: List[str],
+                                   substrate_net_name: NetName) -> CapacitanceMatrix:
+        """
+        :param matrix: the Maxwell capacitance matrix of the conductors, whose capacitances to infinity
+                       go to the substrate, as in the netlist
+        :param conductor_names: of the axes of the matrix, as in conductor_name
+        :param substrate_net_name: the net of the capacitances to the substrate
+        :return: the Maxwell capacitance matrix of the nets, by their names, without what is left out,
+                 the capacitances of the parts of a net summed up: with all at the same potential,
+                 the charge they induce adds up to the one of the net as one conductor
+        """
+        parts = [self.conductor_parts[name] for name in conductor_names]
+        nets_of_parts = [self.net_of_capacitance(part.net_name, substrate_net_name) for part in parts]
+        net_names = list(dict.fromkeys(nets_of_parts))
+        index_of_net = {net_name: index for index, net_name in enumerate(net_names)}
+        rows = [[0.0] * len(net_names) for _ in net_names]
+
+        for i, part in enumerate(parts):
+            row, net_i = matrix[i], index_of_net[nets_of_parts[i]]
+            if part.is_substrate or not self.leaves_out_to_substrate(part):
+                rows[net_i][net_i] += sum(row)  # NOTE: the capacitance to infinity, the rest of the row
+            for j in range(i + 1, len(parts)):
+                net_j = index_of_net[nets_of_parts[j]]
+                if net_i != net_j and not self.leaves_out_between(part, parts[j]):
+                    rows[net_i][net_j] += row[j]
+                    rows[net_j][net_i] += row[j]
+                    rows[net_i][net_i] -= row[j]
+                    rows[net_j][net_j] -= row[j]
+        return CapacitanceMatrix(conductor_names=net_names, rows=rows)
 
     def leaves_out_capacitance_of_net(self, net_name: NetName, other_net_name: NetName) -> bool:
         """
