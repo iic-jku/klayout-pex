@@ -39,6 +39,19 @@ from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
 
 
+def remove_devices(extracted_circuit: kdb.Circuit, copied_circuit: kdb.Circuit, device_ids: Collection[int]):
+    """
+    :param extracted_circuit: the circuit with the IDs of the devices
+    :param copied_circuit: its copy, which leaves out the devices of the IDs after this
+
+    NOTE: by their order, as the copy numbers its devices anew, which closes the gaps of the IDs
+    """
+    if device_ids:
+        for original, device in list(zip(extracted_circuit.each_device(), copied_circuit.each_device())):
+            if original.id() in device_ids:
+                copied_circuit.remove_device(device)
+
+
 class NetlistExpander:
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,

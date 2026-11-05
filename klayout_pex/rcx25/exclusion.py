@@ -341,6 +341,81 @@ class BlockKind(StrEnum):
     CUT = 'cut'
 
 
+@dataclass(frozen=True)
+class CutCellInstance:
+    """
+    An instance of a cut cell in the layout, which tells who draws what is at a place of it
+    """
+    layout: kdb.Layout
+    top_cell: kdb.Cell
+    cell: kdb.Cell
+    top_trans: kdb.ICplxTrans  # of the top cell, into the coordinates of the blocks
+    cell_trans: kdb.ICplxTrans  # of the instance, into the coordinates of the blocks
+
+    @staticmethod
+    def _shapes_of(cell: kdb.Cell, trans: kdb.ICplxTrans, layer_index: int, box: kdb.Box) -> kdb.Region:
+        return kdb.Region(cell.begin_shapes_rec_touching(layer_index, trans.inverted() * box)).transformed(trans)
+
+    def shapes_of_layout(self, gds_pairs: Iterable[GDSPair], box: kdb.Box) -> kdb.Region:
+        """
+        :param box: in the coordinates of the blocks
+        :return: all shapes of the layout on the layers that touch the box
+        """
+        shapes = kdb.Region()
+        for gds_pair in gds_pairs:
+            layer_index = self.layout.find_layer(*gds_pair)
+            if layer_index is not None:
+                shapes += self._shapes_of(self.top_cell, self.top_trans, layer_index, box)
+        return shapes
+
+    def draws_device(self, gds_pairs: Iterable[GDSPair], terminals: Sequence[kdb.Region]) -> bool:
+        """
+        :param gds_pairs: the layers that LVS makes the device from (see TechInfo.device_gds_pairs)
+        :param terminals: the shapes of its terminals, in the coordinates of the blocks
+        :return: whether the cell draws the device, on each of these layers that is at its terminals: a polygon at all
+                 of them, unless only the rest of the layout has one, or it has one over more of them (e.g. a tap
+                 that overlaps the one of a neighbor), as a terminal can be on a wire that goes on to another device
+                 (a diffusion can also go on beyond the cell), or else at each of them, if nothing is at all of them
+                 (e.g. the diffusions of a BJT)
+
+        NOTE: a polygon of the cell is apart from one of the rest of the layout that it abuts (e.g. the taps at a cell,
+              the fingers of a transistor). At a terminal are the polygons that overlap it, or else those that touch it,
+              as the terminals of a resistor abut its marker
+        """
+        box = kdb.Box()
+        for shapes in terminals:
+            box += shapes.bbox()
+
+        def polygons_at(shapes: kdb.Region) -> Tuple[kdb.Region, kdb.Region]:
+            cell_at, rest_at = cell_polygons.overlapping(shapes), rest_polygons.overlapping(shapes)
+            if cell_at.is_empty() and rest_at.is_empty():
+                return cell_polygons.interacting(shapes), rest_polygons.interacting(shapes)
+            return cell_at, rest_at
+
+        draws_any = False
+        for gds_pair in gds_pairs:
+            layer_index = self.layout.find_layer(*gds_pair)
+            if layer_index is None:
+                continue
+            cell_polygons = self._shapes_of(self.cell, self.cell_trans, layer_index, box).merged()
+            rest_polygons = (self._shapes_of(self.top_cell, self.top_trans, layer_index, box) - cell_polygons).merged()
+            at_terminals = [(shapes, *polygons_at(shapes)) for shapes in terminals]
+            at_terminals = [at for at in at_terminals if not (at[1].is_empty() and at[2].is_empty())]
+            if not at_terminals:
+                continue
+            draws_any = True
+            cell_at_all, rest_at_all = at_terminals[0][1:]
+            for _, cell_at, rest_at in at_terminals[1:]:
+                cell_at_all, rest_at_all = cell_at_all & cell_at, rest_at_all & rest_at
+            if cell_at_all.is_empty():
+                if not rest_at_all.is_empty() or any(cell_at.is_empty() for _, cell_at, _ in at_terminals):
+                    return False
+            elif sum((rest_at_all & shapes).area() for shapes, _, _ in at_terminals) > \
+                    sum((cell_at_all & shapes).area() for shapes, _, _ in at_terminals):
+                return False
+        return draws_any
+
+
 @dataclass
 class ExcludedBlock:
     """
@@ -353,6 +428,7 @@ class ExcludedBlock:
     ports: bool = False  # where a net enters it is a port, otherwise it stays connected across it
     kind: BlockKind = BlockKind.MARKER
     labels: List[BlockLabel] = field(default_factory=list)  # of a cut cell, which name the ports
+    cell_instance: Optional[CutCellInstance] = None  # of a cut cell, which tells its devices
 
     def region_of(self, layer_name: LayerName) -> Optional[kdb.Region]:
         return self.region if self.layer_regions is None else self.layer_regions.get(layer_name, None)
@@ -557,7 +633,8 @@ def blocks_of_cut_cells(layout: kdb.Layout,
 
             labels = [BlockLabel(label.text, trans * label.position, label.layer_name) for label in labels_of(cell)]
             blocks.append(ExcludedBlock(name=name, region=region.merged(), layer_regions=layer_regions, ports=True,
-                                        kind=BlockKind.CUT, labels=labels))
+                                        kind=BlockKind.CUT, labels=labels,
+                                        cell_instance=CutCellInstance(layout, top_cell, cell, scale, trans)))
     return blocks, labels_of_rest
 
 
@@ -583,6 +660,7 @@ class Exclusions:
             self.block_boxes.insert(kdb.BoxWithProperties(block.region.bbox(), {'block': index}))
 
         self._masks: Dict[Tuple[LayerName, Optional[bool], Optional[BlockKind]], kdb.Region] = {}
+        self._kept_shapes: Dict[LayerName, kdb.Region] = defaultdict(kdb.Region)  # see without_shapes
         self._label_positions: Dict[Tuple[int, LayerName], kdb.Shapes] = {}  # see labels_at
         self.regions = RegionIndex()
 
@@ -591,6 +669,9 @@ class Exclusions:
 
         # the pieces of the nets with ports at the blocks, by the resistance extraction
         self.pieces_by_net: Dict[NetName, List[NetPiece]] = {}
+
+        # the devices the netlist leaves out by their IDs, with the indexes of their blocks (of cut cells)
+        self.removed_device_blocks: Dict[int, int] = {}
 
         # the labels of the layout on the metal, of the cut cells and outside them, by their texts and positions
         self.labels_of_cut_cells: Set[Tuple[str, kdb.Point]] = {(label.text, label.position)
@@ -673,12 +754,28 @@ class Exclusions:
 
         :param shapes_by_layer: the shapes by layer of the stack
         """
+        for layer_name, shapes in shapes_by_layer.items():
+            self._kept_shapes[layer_name] += shapes
         for block in self.blocks:
             if block.kind == BlockKind.CUT:
                 for layer_name, shapes in shapes_by_layer.items():
                     region = block.region_of(layer_name)
                     if region is not None:
                         block.layer_regions[layer_name] = (region - shapes).merged()
+        self._masks.clear()
+
+    def add_to_cut_cell(self, block_index: int, layer_name: LayerName, shapes: kdb.Region):
+        """
+        :param shapes: what the cell of the block stands for beyond what it draws on the layer of the stack
+        """
+        shapes = shapes - self._kept_shapes[layer_name]
+        if shapes.is_empty():
+            return
+        block = self.blocks[block_index]
+        block.layer_regions[layer_name] = (block.layer_regions[layer_name] + shapes).merged()
+        block.region = (block.region + shapes).merged()
+        self.bbox += shapes.bbox()
+        self.block_boxes.insert(kdb.BoxWithProperties(shapes.bbox(), {'block': block_index}))
         self._masks.clear()
 
     def mask(self,
@@ -718,7 +815,7 @@ class Exclusions:
         """
         :return: the indexes of the blocks whose boxes touch the box, in their order
         """
-        return sorted(shape.property('block') for shape in self.block_boxes.each_touching(kdb.Shapes.SAll, box))
+        return sorted({shape.property('block') for shape in self.block_boxes.each_touching(kdb.Shapes.SAll, box)})
 
     def block_index_with_ports_at(self, box: kdb.Box, layer_name: LayerName) -> int:
         """

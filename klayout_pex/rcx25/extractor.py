@@ -38,7 +38,7 @@ from ..tech_info import TechInfo
 from ..types import GDSPair, LVSLayerName
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
-from .exclusion import BlockKind, ExcludedBlock, Exclusions, listed_names
+from .exclusion import BlockKind, CutLayers, ExcludedBlock, Exclusions, listed_names
 from .netlist_expander import RCX25NetlistExpander
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
@@ -62,6 +62,108 @@ class CExtractionTechError(Exception):
     pass
 
 
+def is_on_tap(lvs_layer_name: LVSLayerName, tech_info: TechInfo) -> bool:
+    LP = tech_pb2.LayerInfo.Purpose
+    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+    return computed_layer_info is not None and \
+        computed_layer_info.layer_info.purpose in (LP.PURPOSE_NTAP, LP.PURPOSE_PTAP, LP.PURPOSE_NTAP_OR_PTAP)
+
+
+def is_on_well(lvs_layer_name: LVSLayerName, tech_info: TechInfo) -> bool:
+    LP = tech_pb2.LayerInfo.Purpose
+    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+    return computed_layer_info is not None and \
+        computed_layer_info.layer_info.purpose in (LP.PURPOSE_NWELL, LP.PURPOSE_PWELL, LP.PURPOSE_DNWELL)
+
+
+def devices_of_cut_cells(exclusions: Exclusions,
+                         pex_context: KLayoutExtractionContext,
+                         tech_info: TechInfo) -> Dict[int, int]:
+    """
+    :return: the devices within the cut cells by their IDs, with the indexes of their blocks: those that a cell draws,
+             by the layers that LVS makes them from (see TechInfo.device_gds_pairs), at their terminals, but those
+             on the substrate, and on a tap, which goes on beyond the cell, unless the device is a tap
+             (see CutCellInstance.draws_device)
+
+    NOTE: by geometry, as the LVS netlist is flat
+    """
+    cut_block_indexes = {index for index, block in enumerate(exclusions.blocks) if block.kind == BlockKind.CUT}
+    if not cut_block_indexes:
+        return {}
+
+    lvsdb = pex_context.lvsdb
+    substrate_lvs_layer_names = set(tech_info.tech.substrate.lvs_layer_names)
+    gds_pairs_by_class: Dict[str, Optional[Set[GDSPair]]] = {}
+    blocks: Dict[int, int] = {}
+    for device in pex_context.top_circuit.each_device():
+        class_name = device.device_class().name
+        if class_name not in gds_pairs_by_class:
+            gds_pairs_by_class[class_name] = tech_info.device_gds_pairs(class_name)
+        gds_pairs = gds_pairs_by_class[class_name]
+        if gds_pairs is None:
+            continue
+
+        terminals: List[kdb.Region] = []
+        on_taps: List[kdb.Region] = []
+        is_a_tap = True
+        bbox = kdb.Box()
+        for terminal_definition in device.device_class().terminal_definitions():
+            for reference in pex_context.terminal_refs[(device.id(), terminal_definition.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = lvsdb.layer_name(index)
+                    if shapes.is_empty() or lvs_layer_name in substrate_lvs_layer_names:
+                        continue
+                    if is_on_tap(lvs_layer_name, tech_info):
+                        on_taps.append(shapes)
+                        continue
+                    terminals.append(shapes)
+                    bbox += shapes.bbox()
+                    is_a_tap &= is_on_well(lvs_layer_name, tech_info)
+        if is_a_tap:
+            terminals += on_taps
+            for shapes in on_taps:
+                bbox += shapes.bbox()
+
+        block_index = next((index for index in exclusions.block_indexes_touching(bbox)
+                            if index in cut_block_indexes
+                            and exclusions.blocks[index].cell_instance.draws_device(gds_pairs, terminals)), None)
+        if block_index is not None:
+            blocks[device.id()] = block_index
+
+    unknown_classes = sorted(name for name, gds_pairs in gds_pairs_by_class.items() if gds_pairs is None)
+    if unknown_classes:
+        warning(f"The tech info doesn't tell what LVS makes these device classes from, so the netlist keeps "
+                f"their devices, also of the cut cells: {', '.join(unknown_classes)}")
+    return blocks
+
+
+def add_filled_diffusion_to_cut_cells(exclusions: Exclusions,
+                                      pex_context: KLayoutExtractionContext,
+                                      tech_info: TechInfo):
+    """
+    The cut cells stand for what LVS computes of their devices where the layout draws no diffusion,
+    e.g. the drain of an LDMOS, across the gap to its gate
+    """
+    diffusion_layer_names = set(tech_info.process_diffusion_layer_names)
+    diffusion_gds_pairs = CutLayers.of_tech(tech_info).diffusion_gds_pairs
+    for device in pex_context.top_circuit.each_device():
+        block_index = exclusions.removed_device_blocks.get(device.id(), None)
+        if block_index is None:
+            continue
+        instance = exclusions.blocks[block_index].cell_instance
+        for terminal_definition in device.device_class().terminal_definitions():
+            for reference in pex_context.terminal_refs[(device.id(), terminal_definition.id())]:
+                for index, shapes in pex_context.shapes_of_terminal(device, reference).items():
+                    lvs_layer_name = pex_context.lvsdb.layer_name(index)
+                    computed_layer_info = tech_info.computed_layer_info_by_name.get(lvs_layer_name, None)
+                    layer_name = computed_layer_info.original_layer_name if computed_layer_info is not None else None
+                    # NOTE: not the box of a ring (e.g. the collector of a Schottky diode), which is no gap of a device
+                    if layer_name in diffusion_layer_names and not is_on_tap(lvs_layer_name, tech_info):
+                        filled = shapes - instance.shapes_of_layout(diffusion_gds_pairs, shapes.bbox())
+                        if not filled.is_empty():
+                            exclusions.add_to_cut_cell(block_index, layer_name, filled)
+
+
 def prepare_exclusions(exclusions: Exclusions,
                        pex_context: KLayoutExtractionContext,
                        tech_info: TechInfo):
@@ -71,6 +173,11 @@ def prepare_exclusions(exclusions: Exclusions,
     """
     if not exclusions.blocks:
         return
+
+    exclusions.removed_device_blocks = devices_of_cut_cells(exclusions, pex_context, tech_info)
+    if exclusions.removed_device_blocks:
+        info(f"The netlist leaves out the {len(exclusions.removed_device_blocks)} devices of the cut cells")
+        add_filled_diffusion_to_cut_cells(exclusions, pex_context, tech_info)
 
     K = tech_pb2.ComputedLayerInfo.Kind
     layers_within: Dict[NetName, Set[LayerName]] = defaultdict(set)
@@ -110,10 +217,13 @@ def prepare_exclusions(exclusions: Exclusions,
     def is_whiteboxed(device: kdb.Device) -> bool:
         return not blackbox_devices and RCX25NetlistExpander.is_whiteboxed(device.device_class(), device_models)
 
+    def is_removed(device: kdb.Device) -> bool:
+        return device.id() in exclusions.removed_device_blocks or is_whiteboxed(device)
+
     def is_connected(net_name: NetName) -> bool:
         net = circuit.net_by_name(net_name)
         return net is None or net.pin_count() + net.subcircuit_pin_count() > 0 or \
-            any(not is_whiteboxed(terminal.device()) for terminal in net.each_terminal())
+            any(not is_removed(terminal.device()) for terminal in net.each_terminal())
 
     exclusions.floating_net_names = {net_name for net_name in layers_within
                                      if net_name not in nets_outside and not is_connected(net_name)}
@@ -160,7 +270,8 @@ def prepare_exclusions(exclusions: Exclusions,
                    for block in exclusions.blocks_touching(box))
 
     lost_devices = [d.expanded_name() for d in circuit.each_device()
-                    if is_whiteboxed(d) and has_plates_within_a_block(d)]
+                    if is_whiteboxed(d) and d.id() not in exclusions.removed_device_blocks
+                    and has_plates_within_a_block(d)]
     if lost_devices:
         warning(f"The netlist loses these devices within exclusion markers, as white-box mode (--blackbox n) "
                 f"removes them, and the capacitances of their plates are left out, use --blackbox y to keep them: "

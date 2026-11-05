@@ -34,6 +34,7 @@ from ..log import (
 )
 from .extraction_results import ExtractionResults
 from ..device_models import DeviceModels
+from ..klayout.netlist_expander import remove_devices
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
 
@@ -61,14 +62,18 @@ class RCX25NetlistExpander:
                extraction_results: ExtractionResults,
                blackbox_devices: bool,
                device_models: DeviceModels,
-               substrate_net_name: Optional[str] = None) -> kdb.Netlist:
+               substrate_net_name: Optional[str] = None,
+               removed_device_ids: Collection[int] = ()) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, which tell the whiteboxed devices
         :param substrate_net_name: the net the capacitances to the substrate go to (VSUBS if not given),
                                    created if the netlist has none, and a port if it has no pin
+        :param removed_device_ids: the devices to leave out, as a model has them (of cut cells)
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
+
+        remove_devices(extracted_netlist.circuit_by_name(top_cell_name), top_circuit, removed_device_ids)
 
         if not blackbox_devices:
             # NOTE: removing a device ends the iteration over the circuit's devices,

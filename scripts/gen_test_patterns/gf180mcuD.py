@@ -484,6 +484,29 @@ def exclusion_rail_between_taps() -> Pattern:
     return p
 
 
+def cut_ldmos_pair() -> Pattern:
+    """
+    The LDMOS pair of nfet_10v0_asym_pair within a child cell, whose drain terminal LVS fills up, across the gaps
+    to the gates, with a wire beside it in the top cell
+    """
+    p = pattern('cut_ldmos_pair')
+    p.copy_design('gf180mcuD', 'test_patterns', 'nfet_10v0_asym_pair.gds.gz', subcell_name='block')
+    bbox = p.top.bbox()
+    p.box(METAL3, bbox.right + 2000, bbox.bottom, bbox.right + 3000, bbox.bottom + 5000)
+    return p
+
+
+def cut_diffusion_resistors_wire_on_pad() -> Pattern:
+    """
+    The resistors of res_diffusion_w1_l4 within a child cell, with a Metal1 wire of the top cell as wide as a pad
+    of the first one, which ends on it
+    """
+    p = pattern('cut_diffusion_resistors_wire_on_pad')
+    p.copy_design('gf180mcuD', 'test_patterns', 'res_diffusion_w1_l4.gds.gz', subcell_name='block')
+    p.box(METAL1, -8520, 310, -260, 690)
+    return p
+
+
 def cut_taps_with_labels(name: str, label_of_cell: str, label_of_top: str) -> Pattern:
     """
     Two p-taps that only the substrate joins, the first in a child cell, each with a label in the top cell,
@@ -511,9 +534,11 @@ def cut_taps_with_labels(name: str, label_of_cell: str, label_of_top: str) -> Pa
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cut_taps_with_labels_a_b': lambda: cut_taps_with_labels('cut_taps_with_labels_a_b', 'A', 'B'),
     'cut_taps_with_labels_b_a': lambda: cut_taps_with_labels('cut_taps_with_labels_b_a', 'B', 'A'),
+    'cut_diffusion_resistors_wire_on_pad': cut_diffusion_resistors_wire_on_pad,
     'exclusion_nwell_between_pfet_and_tap': exclusion_nwell_between_pfet_and_tap,
     'exclusion_pfet_between_taps': exclusion_pfet_between_taps,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'cut_ldmos_pair': cut_ldmos_pair,
     'exclusion_user_marker_wire': exclusion_user_marker_wire,
     'r_single_wire_m1': r_single_wire_m1,
     'r_wire_voltage_divider_m1': r_wire_voltage_divider_m1,

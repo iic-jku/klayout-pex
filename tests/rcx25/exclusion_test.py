@@ -534,6 +534,9 @@ def test_shapes_taken_out_of_cut_cells():
     assert e.mask('Metal1').area() == 3 * 100 * 100
     e.without_shapes({'Metal1': kdb.Region(kdb.Box(0, 0, 50, 100))})
     assert e.mask('Metal1').area() == 3 * 100 * 100 - 50 * 100
+    # NOTE: and they stay out of what the cell stands for beyond what it draws
+    e.add_to_cut_cell(0, 'Metal1', kdb.Region(kdb.Box(0, 0, 50, 200)))
+    assert e.mask('Metal1').area() == 3 * 100 * 100 - 50 * 100 + 50 * 100
 
 
 @allure.parent_suite(parent_suite)
@@ -585,6 +588,51 @@ def test_port_along_a_conductor_is_short():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_cell_draws_a_device_by_each_of_its_layers():
+    layout = layout_with_cell_instances()
+    top = layout.cell('TOP')
+    top.shapes(layout.layer(30, 0)).insert(kdb.Box(0, 0, 100, 100))
+    top.shapes(layout.layer(1, 0)).insert(kdb.Box(0, 0, 100, 100))
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('block')], cut_layers=CUT_LAYERS)
+    instance = e.blocks[0].cell_instance
+    terminal = kdb.Region(kdb.Box(0, 0, 40, 40))
+    assert instance.draws_device([(8, 0)], [terminal])
+    # NOTE: also if the rest of the layout draws it there too
+    assert instance.draws_device([(8, 0), (1, 0)], [terminal])
+    assert not instance.draws_device([(8, 0), (30, 0)], [terminal])
+    assert not instance.draws_device([(30, 0)], [terminal])
+    # NOTE: a layer that isn't at the terminals doesn't count
+    assert instance.draws_device([(8, 0), (77, 0)], [terminal])
+    assert not instance.draws_device([(77, 0)], [terminal])
+    assert not instance.draws_device([(8, 0)], [kdb.Region(kdb.Box(500, 500, 600, 600))])
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_polygons_of_a_cell_stay_apart_from_those_of_the_rest_it_abuts():
+    layout = kdb.Layout()
+    top = layout.create_cell('TOP')
+    block = layout.create_cell('block')
+    diffusion = layout.layer(65, 20)
+    block.shapes(diffusion).insert(kdb.Box(0, 0, 100, 100))
+    top.shapes(diffusion).insert(kdb.Box(100, 0, 200, 100))
+    top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('block')], cut_layers=CUT_LAYERS)
+    instance = e.blocks[0].cell_instance
+    assert instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(10, 10, 90, 90))])
+    assert not instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(110, 10, 190, 90))])
+    # NOTE: a polygon only touches a terminal if none overlaps it
+    assert not instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(100, 10, 190, 90))])
+    assert instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(-10, 10, 0, 90))])
+    # NOTE: of a terminal on polygons of both, the device is of the one with more of it
+    assert not instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(90, 10, 190, 90))])
+    assert instance.draws_device([(65, 20)], [kdb.Region(kdb.Box(10, 10, 110, 90))])
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_labels_of_a_cell_are_found_by_location_and_layer():
     label_a = BlockLabel('A', kdb.Point(10, 10), 'Metal1')
     label_b = BlockLabel('B', kdb.Point(500, 500), 'Metal1')
@@ -612,6 +660,33 @@ def test_labels_of_a_cell_are_found_by_location_and_layer():
 ])
 def test_names_match_exactly_before_as_patterns(name: str, pattern: str, matches: bool):
     assert matches_name(name, pattern) == matches
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cell_draws_a_device_by_the_polygons_at_all_of_its_terminals():
+    layout = kdb.Layout()
+    top = layout.create_cell('TOP')
+    block = layout.create_cell('block')
+    marker = layout.layer(68, 13)
+    # NOTE: markers of a cell at the ends of a wire, and one of the top cell over the wire
+    block.shapes(marker).insert(kdb.Box(0, 0, 100, 100))
+    block.shapes(marker).insert(kdb.Box(900, 0, 1000, 100))
+    top.shapes(marker).insert(kdb.Box(400, 0, 500, 100))
+    top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    e = Exclusions.from_layout(layout, 'TOP', marker_layers=[], dbu=layout.dbu,
+                               cut_requests=[CutRequest('block')], cut_layers=CUT_LAYERS)
+    instance = e.blocks[0].cell_instance
+    wire_a = kdb.Region(kdb.Box(100, 0, 400, 100))
+    wire_b = kdb.Region(kdb.Box(500, 0, 900, 100))
+    lead_a = kdb.Region(kdb.Box(-100, 0, 0, 100))
+    lead_b = kdb.Region(kdb.Box(1000, 0, 1100, 100))
+    assert not instance.draws_device([(68, 13)], [wire_a, wire_b])
+    assert instance.draws_device([(68, 13)], [lead_a, wire_a])
+    assert instance.draws_device([(68, 13)], [wire_b, lead_b])
+    # NOTE: without a polygon at all terminals, it has to draw those at each of them
+    assert instance.draws_device([(68, 13)], [lead_a, lead_b])
+    assert not instance.draws_device([(68, 13)], [lead_a, kdb.Region(kdb.Box(500, 0, 600, 100))])
 
 
 @allure.parent_suite(parent_suite)

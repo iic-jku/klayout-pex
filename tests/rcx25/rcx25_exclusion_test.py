@@ -40,13 +40,19 @@ import allure
 import klayout.db as kdb
 import numpy as np
 import pytest
+
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
+from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
-from klayout_pex.rcx25.exclusion import ExclusionMarkerMode, Exclusions
+from klayout_pex.rcx25.exclusion import CutLayers, CutRequest, ExclusionMarkerMode, Exclusions
+from klayout_pex.rcx25.extractor import add_filled_diffusion_to_cut_cells, devices_of_cut_cells
 from klayout_pex.rcx25.pex_mode import PEXMode
+from klayout_pex.tech_info import TechInfo
+from klayout_pex.types import GDSPair
 from tests.common.cli_runner import run_cli
-from tests.common.lvsdb_fixtures import lvsdb_fixture_path
+from tests.common.lvsdb_fixtures import committed_fixtures, lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.rcx25.rcx25_test_helpers import RCX25Extraction, effective_resistance, pair
@@ -55,6 +61,9 @@ parent_suite = "kpex/2.5D exclusion markers"
 tags = ("PEX", "2.5D", "Exclusion")
 
 Values = Dict[FrozenSet[str], float]
+
+# draws over a design, with the layout, the top cell, a cell to cut, and the box of the design
+DrawOverDesign = Callable[[kdb.Layout, kdb.Cell, kdb.Cell, kdb.Box], None]
 
 
 class Extraction:
@@ -544,6 +553,329 @@ def test_invalid_marker_layer_is_an_error_listing_the_valid_ones(tmp_path):
     assert 'NoRCX.drawing' in output and 'Metal3.noqrc' in output, output
 
 
+def exclusions_of_cell_of_layers(pdk_name: PDKName,
+                                 path_components: Sequence[str],
+                                 is_of_cell: Callable[[GDSPair], bool],
+                                 over_design: Sequence[GDSPair] = (),
+                                 over_design_of_cell: Sequence[GDSPair] = (),
+                                 draw: Optional[DrawOverDesign] = None) \
+        -> Tuple[Exclusions, KLayoutExtractionContext, TechInfo]:
+    """
+    :param path_components: of a design
+    :param is_of_cell: which layers of the design go to a cell that is cut, the others stay in the top cell
+    :param over_design: the layers on which the top cell also has a shape over the design (e.g. a wire, a boundary)
+    :param over_design_of_cell: the same of the cell
+    :param draw: draws more with the layout, the top cell, the cell, and the box of the design
+    :return: the exclusions of the cell, with the context and tech info of the design, without running LVS
+             on the hierarchy of the design, which LVS flattens
+    """
+    extraction = RCX25Extraction(pdk=PDKTestConfig(pdk_name), pex_mode=PEXMode.CC, blackbox=True)
+    lvsdb = extraction.read_lvsdb(*path_components)
+    tech_info = TechInfo.from_json(PDK.from_string(extraction.pdk.name).config.tech_pb_json_path,
+                                   dielectric_filter=None)
+    cell_name = lvsdb.internal_top_cell().name
+    context = KLayoutExtractionContext.prepare_extraction(lvsdb=lvsdb, top_cell=cell_name, tech=tech_info,
+                                                          blackbox_devices=True)
+
+    design = kdb.Layout()
+    design.read(extraction.pdk.gds_path(*path_components))
+    layout = kdb.Layout()
+    layout.dbu = design.dbu
+    top = layout.create_cell(cell_name)
+    cell = layout.create_cell('block')
+    for layer_index in design.layer_indexes():
+        info = design.get_info(layer_index)
+        target = cell if is_of_cell((info.layer, info.datatype)) else top
+        target.shapes(layout.layer(info.layer, info.datatype)) \
+            .insert(kdb.Region(design.top_cell().begin_shapes_rec(layer_index)))
+    top.insert(kdb.CellInstArray(cell.cell_index(), kdb.Trans()))
+    box = design.top_cell().bbox().enlarged(1000, 1000)
+    for target, gds_pairs in ((top, over_design), (cell, over_design_of_cell)):
+        for gds_pair in gds_pairs:
+            target.shapes(layout.layer(*gds_pair)).insert(box)
+    if draw is not None:
+        draw(layout, top, cell, design.top_cell().bbox())
+
+    exclusions = Exclusions.from_layout(layout, cell_name, marker_layers=[], dbu=context.dbu, ports=True,
+                                        cut_requests=[CutRequest('block')], cut_layers=CutLayers.of_tech(tech_info))
+    return exclusions, context, tech_info
+
+
+def classes_of_devices_of_cell_of_layers(pdk_name: PDKName,
+                                         path_components: Sequence[str],
+                                         is_of_cell: Callable[[GDSPair], bool],
+                                         over_design: Sequence[GDSPair] = (),
+                                         over_design_of_cell: Sequence[GDSPair] = (),
+                                         draw: Optional[DrawOverDesign] = None) \
+        -> Tuple[List[str], List[str]]:
+    """
+    :return: the device classes of the devices the design has, and of those of the cell
+             (see exclusions_of_cell_of_layers)
+    """
+    exclusions, context, tech_info = exclusions_of_cell_of_layers(pdk_name, path_components, is_of_cell,
+                                                                  over_design, over_design_of_cell, draw)
+    device_ids = devices_of_cut_cells(exclusions, context, tech_info)
+    return ([device.device_class().name for device in context.top_circuit.each_device()],
+            [device.device_class().name for device in context.top_circuit.each_device() if device.id() in device_ids])
+
+
+def devices_of_cell_of_layers(pdk_name: PDKName,
+                              path_components: Sequence[str],
+                              is_of_cell: Callable[[GDSPair], bool],
+                              over_design: Sequence[GDSPair] = (),
+                              over_design_of_cell: Sequence[GDSPair] = (),
+                              draw: Optional[DrawOverDesign] = None) \
+        -> Tuple[int, int]:
+    """
+    :return: how many devices the design has, and how many of them are of the cell
+             (see classes_of_devices_of_cell_of_layers)
+    """
+    device_classes, device_classes_of_cell = classes_of_devices_of_cell_of_layers(
+        pdk_name, path_components, is_of_cell, over_design, over_design_of_cell, draw)
+    return len(device_classes), len(device_classes_of_cell)
+
+
+def fill_squares(layout: kdb.Layout, cell: kdb.Cell, box: kdb.Box, gds_pairs: Sequence[GDSPair]):
+    """
+    Squares of 1 µm with a pitch of 1.5 µm around the box and over it, on the layers, at a DBU of 1 nm
+    """
+    around = box.enlarged(3000, 3000)
+    for gds_pair in gds_pairs:
+        for x in range(around.left, around.right, 1500):
+            for y in range(around.bottom, around.top, 1500):
+                cell.shapes(layout.layer(*gds_pair)).insert(kdb.Box(x, y, x + 1000, y + 1000))
+
+
+def ring_around(layout: kdb.Layout, cell: kdb.Cell, box: kdb.Box, gds_pairs: Sequence[GDSPair], width: int = 300):
+    for gds_pair in gds_pairs:
+        for side in (kdb.Box(box.left, box.bottom, box.left + width, box.top),
+                     kdb.Box(box.right - width, box.bottom, box.right, box.top),
+                     kdb.Box(box.left, box.bottom, box.right, box.bottom + width),
+                     kdb.Box(box.left, box.top - width, box.right, box.top)):
+            cell.shapes(layout.layer(*gds_pair)).insert(side)
+
+
+CMOMI = ('test_patterns', 'cap_cmomi_w5u_l5u_m4_m5_none.gds.gz')
+INDUCTOR2 = ('test_patterns', 'inductor2_w2u_d15u48_tm2_wires_50u.gds.gz')
+BJTS = ('test_patterns', 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa.gds.gz')
+ANTENNA_DIODES = ('test_patterns', 'diode_dantenna_dpantenna.gds.gz')
+ESD_DIODE = ('test_patterns', 'esd_diodevss_2kv.gds.gz')
+GF_DIFFUSION_RESISTORS = ('test_patterns', 'res_diffusion_w1_l4.gds.gz')
+GF_DIODES = ('test_patterns', 'diode_pw2dw_dw2ps_03v3_w2_l4.gds.gz')
+CMIM = ('test_patterns', 'cap_cmim_20um_x_20um_over_m4_wire.gds.gz')
+SKY_VPP = ('cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz')
+SKY_MIM = ('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
+GF_MIM = ('test_patterns', 'cap_mim_m4m5.gds.gz')
+GF_DNWELL: GDSPair = (12, 0)
+GF_METAL1: GDSPair = (34, 0)
+IHP_BOUNDARY: GDSPair = (189, 4)
+IHP_METAL1: GDSPair = (8, 0)
+IHP_METAL5: GDSPair = (67, 0)
+IHP_TOP_METAL2: GDSPair = (134, 0)
+IHP_ACTIV: GDSPair = (1, 0)
+IHP_PSD: GDSPair = (14, 0)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, design, wires', [
+    (PDKName.GF180MCUD, GF_DIFFUSION_RESISTORS, GF_METAL1),
+    (PDKName.GF180MCUD, GF_DIODES, GF_METAL1),
+    (PDKName.IHP_SG13G2, CMOMI, IHP_METAL5),
+    (PDKName.IHP_SG13G2, INDUCTOR2, IHP_TOP_METAL2),
+    (PDKName.IHP_SG13G2, ANTENNA_DIODES, IHP_METAL1),
+])
+def test_cell_of_the_wires_on_terminals_has_no_devices(pdk_name: PDKName, design: Sequence[str], wires: GDSPair):
+    devices, of_cell = devices_of_cell_of_layers(pdk_name, design, lambda gds_pair: gds_pair == wires)
+    assert devices > 0
+    assert of_cell == 0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, design, wires', [
+    (PDKName.GF180MCUD, GF_DIFFUSION_RESISTORS, GF_METAL1),
+    (PDKName.GF180MCUD, GF_DIODES, GF_METAL1),
+    (PDKName.IHP_SG13G2, BJTS, IHP_METAL1),
+    (PDKName.IHP_SG13G2, ANTENNA_DIODES, IHP_METAL1),
+    (PDKName.IHP_SG13G2, ESD_DIODE, IHP_METAL1),
+    (PDKName.IHP_SG13CMOS5L, ('inductor3_w2u_d25u85_2_turns', 'inductor3_w2u_d25u85_2_turns.gds.gz'), IHP_TOP_METAL2),
+])
+def test_wire_of_the_top_on_terminals_leaves_the_devices_to_the_cell(pdk_name: PDKName,
+                                                                     design: Sequence[str],
+                                                                     wires: GDSPair):
+    devices, of_cell = devices_of_cell_of_layers(pdk_name, design, lambda _: True, over_design=[wires])
+    assert (devices, of_cell) == (devices, devices)
+    assert devices > 0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, cell_name', [
+    (PDKName.GF180MCUD, 'cut_diffusion_resistors_wire_on_pad'),
+    (PDKName.IHP_SG13G2, 'cut_bjts_wire_on_collector'),
+])
+def test_wire_of_the_top_on_a_terminal_found_by_lvs_leaves_the_device_to_the_cell(pdk_name: PDKName, cell_name: str):
+    cut = Extraction(cell_name, PEXMode.R, blackbox=True, pdk_name=pdk_name).run(ExclusionMarkerMode.IGNORE,
+                                                                                 '--cut', 'block=X')
+    assert devices_of(cut) == []
+    assert cut.rcx25_netlist_problems == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_diffusion_that_lvs_fills_up_for_a_device_of_a_cut_cell_is_of_the_cell():
+    extraction = Extraction('cut_ldmos_pair', PEXMode.RC, pdk_name=PDKName.GF180MCUD)
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert not [port for port in netlist_ports(cut) if port.startswith('X__')], netlist_ports(cut)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_devices_on_a_well_go_by_what_else_is_drawn_there():
+    def is_dnwell(gds_pair: GDSPair) -> bool:
+        return gds_pair == GF_DNWELL
+
+    assert devices_of_cell_of_layers(PDKName.GF180MCUD, GF_DIODES, is_dnwell) == (2, 0)
+    assert devices_of_cell_of_layers(PDKName.GF180MCUD, GF_DIODES, lambda gds_pair: not is_dnwell(gds_pair)) == (2, 2)
+    assert devices_of_cell_of_layers(PDKName.GF180MCUD, GF_DIODES, lambda _: False,
+                                     over_design_of_cell=[GF_DNWELL]) == (2, 0)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('design', [
+    ('test_patterns', 'device_pcells.gds.gz'),
+    CMOMI,
+    INDUCTOR2,
+])
+def test_boundary_tells_no_devices(design: Sequence[str]):
+    devices, of_cell = devices_of_cell_of_layers(PDKName.IHP_SG13G2, design, lambda _: False,
+                                                 over_design_of_cell=[IHP_BOUNDARY])
+    assert (devices > 0, of_cell) == (True, 0)
+    devices, of_cell = devices_of_cell_of_layers(PDKName.IHP_SG13G2, design, lambda _: True,
+                                                 over_design=[IHP_BOUNDARY])
+    assert (devices > 0, of_cell) == (True, devices)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, design, fill', [
+    (PDKName.IHP_SG13G2, CMIM, [(1, 22), (5, 22)]),
+    (PDKName.IHP_SG13G2, CMOMI, [(1, 22), (5, 22)]),
+    (PDKName.SKY130A, SKY_VPP, [(62, 24)]),
+    (PDKName.SKY130A, SKY_MIM, [(62, 24)]),
+    (PDKName.GF180MCUD, GF_MIM, [(34, 4), (36, 4)]),
+])
+def test_fill_of_the_top_leaves_the_devices_to_the_cell(pdk_name: PDKName,
+                                                        design: Sequence[str],
+                                                        fill: Sequence[GDSPair]):
+    device_count, of_cell = devices_of_cell_of_layers(
+        pdk_name, design, lambda gds_pair: True,
+        draw=lambda layout, top, cell, box: fill_squares(layout, top, box, fill))
+    assert of_cell == device_count > 0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, design, boundary', [
+    (PDKName.IHP_SG13G2, BJTS, IHP_BOUNDARY),
+    (PDKName.SKY130A, SKY_VPP, (235, 4)),
+    (PDKName.SKY130A, SKY_MIM, (235, 4)),
+])
+def test_boundary_of_the_top_within_the_cell_leaves_the_devices_to_it(pdk_name: PDKName,
+                                                                      design: Sequence[str],
+                                                                      boundary: GDSPair):
+    def draw(layout: kdb.Layout, top: kdb.Cell, cell: kdb.Cell, box: kdb.Box):
+        top.shapes(layout.layer(*boundary)).insert(box.enlarged(-100, -100))
+
+    device_count, of_cell = devices_of_cell_of_layers(pdk_name, design, lambda gds_pair: True, draw=draw)
+    assert of_cell == device_count > 0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_cell_of_a_guard_ring_with_fill_blocks_has_no_device_within_it():
+    def draw(layout: kdb.Layout, top: kdb.Cell, cell: kdb.Cell, box: kdb.Box):
+        ring_around(layout, cell, box.enlarged(3000, 3000), [IHP_METAL1])
+        for gds_pair in ((1, 23), (5, 23), (8, 23), (10, 23)):
+            cell.shapes(layout.layer(*gds_pair)).insert(box.enlarged(2000, 2000))
+
+    assert devices_of_cell_of_layers(PDKName.IHP_SG13G2, CMOMI, lambda gds_pair: False, draw=draw) == (1, 0)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_guard_ring_below_the_ports_of_a_mom_cap_tells_nothing_of_it():
+    def ring_of(target: Callable[[kdb.Cell, kdb.Cell], kdb.Cell]) -> Callable[..., None]:
+        def draw(layout: kdb.Layout, top: kdb.Cell, cell: kdb.Cell, box: kdb.Box):
+            ring_around(layout, target(top, cell), box.enlarged(-200, -200), [IHP_ACTIV])
+            ring_around(layout, target(top, cell), box.enlarged(-100, -100), [IHP_PSD], width=500)
+        return draw
+
+    assert devices_of_cell_of_layers(PDKName.IHP_SG13G2, CMOMI, lambda gds_pair: False,
+                                     draw=ring_of(lambda top, cell: cell)) == (1, 0)
+    assert devices_of_cell_of_layers(PDKName.IHP_SG13G2, CMOMI, lambda gds_pair: True,
+                                     draw=ring_of(lambda top, cell: top)) == (1, 1)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_devices_of_the_top_stay_beside_the_diffusion_of_a_cell():
+    def draw(layout: kdb.Layout, top: kdb.Cell, cell: kdb.Cell, box: kdb.Box):
+        for polygon in kdb.Region(top.shapes(layout.layer(*IHP_ACTIV))).merged().each():
+            polygon_box = polygon.bbox()
+            cell.shapes(layout.layer(*IHP_ACTIV)).insert(kdb.Box(polygon_box.right, polygon_box.bottom,
+                                                                 polygon_box.right + 100, polygon_box.top))
+
+    device_classes, of_cell = classes_of_devices_of_cell_of_layers(
+        PDKName.IHP_SG13G2, ('test_patterns', 'device_pcells.gds.gz'), lambda gds_pair: False, draw=draw)
+    assert {'ntap1', 'ptap1'} <= set(device_classes)
+    assert of_cell == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_ring_of_a_device_is_no_diffusion_of_a_cut_cell():
+    exclusions, context, tech_info = exclusions_of_cell_of_layers(
+        PDKName.IHP_SG13G2, ('test_patterns', 'device_pcells.gds.gz'), lambda gds_pair: True)
+    exclusions.removed_device_blocks = devices_of_cut_cells(exclusions, context, tech_info)
+    assert 'schottky_nbl1' in [device.device_class().name for device in context.top_circuit.each_device()
+                               if device.id() in exclusions.removed_device_blocks]
+    area = exclusions.mask('Activ').area()
+    add_filled_diffusion_to_cut_cells(exclusions, context, tech_info)
+    assert exclusions.mask('Activ').area() == area
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_diffusion_of_a_cell_tells_nothing_of_an_isolbox_of_the_top_over_it():
+    device_classes, of_cell = classes_of_devices_of_cell_of_layers(
+        PDKName.IHP_SG13G2, ('test_patterns', 'cut_cell_of_devices.gds.gz'), lambda gds_pair: False,
+        over_design_of_cell=[IHP_ACTIV, IHP_METAL1])
+    assert 'isolbox' in device_classes
+    assert 'isolbox' not in of_cell
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name', [PDKName.IHP_SG13G2, PDKName.SKY130A, PDKName.GF180MCUD])
+def test_cell_of_a_design_has_all_its_devices_the_top_cell_none(pdk_name: PDKName):
+    designs = [fixture.relative_gds_path for fixture in committed_fixtures() if fixture.pdk.value == pdk_name.value]
+    assert designs
+    for design in designs:
+        path_components = design.split(os.sep)
+        device_count, of_cell = devices_of_cell_of_layers(pdk_name, path_components, lambda gds_pair: True)
+        assert of_cell == device_count, design
+        assert devices_of_cell_of_layers(pdk_name, path_components, lambda gds_pair: False)[1] == 0, design
+
+
+def devices_of(cli: KpexCLI) -> List[List[str]]:
+    with open(netlist_path_of(cli), encoding='utf-8') as f:
+        return [line.split() for line in f.read().replace('\n+', '').splitlines() if line.startswith('X')]
+
+
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
@@ -588,6 +920,42 @@ def test_shapes_of_a_kept_net_are_no_shapes_of_the_cut_cell():
     assert with_keep.rcx25_netlist_problems == []
     assert 'xind__VDD_0' not in netlist_ports(with_keep)
     assert capacitances(with_keep)[pair('VDD', 'VSUBS')] > ring_left_out * 5.0
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_devices_of_a_cut_cell_are_left_out():
+    cut = Extraction('cut_block_with_mos', PEXMode.RC).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert devices_of(cut) == []
+    # NOTE: the labels of the cell don't make pins of the top cell, but ports of the model
+    assert set(netlist_ports(cut)) == {'A', 'B', 'R', 'X__VDD', 'X__VSS', 'sub!'}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_devices_outside_a_cut_cell_stay():
+    extraction = Extraction('cut_block_beside_mos', PEXMode.R)
+    both = devices_of(extraction.run(ExclusionMarkerMode.IGNORE))
+    assert len(both) == 2
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block')
+    assert cut.rcx25_netlist_problems == []
+    assert len(devices_of(cut)) == 1
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_terminals_of_a_removed_device_on_the_metal_of_the_top_cell_are_ports():
+    cut = Extraction('cut_inductor2_leads_in_top', PEXMode.R, blackbox=True).run(ExclusionMarkerMode.IGNORE,
+                                                                                 '--cut', 'ind=xind')
+    assert cut.rcx25_netlist_problems == []
+    assert devices_of(cut) == []
+    ports = netlist_ports(cut)
+    assert {'A', 'B'} <= set(ports), ports
+    ports_of_inductor = [port for port in ports if port.startswith('xind__')]
+    assert len(ports_of_inductor) == 2, ports
+    values = resistances(cut)
+    assert sorted(max(key - {'A', 'B'}) for key in values if key & {'A', 'B'}) == sorted(ports_of_inductor)
 
 
 @allure.parent_suite(parent_suite)
@@ -685,6 +1053,18 @@ def test_cut_of_a_cell_beside_a_marker_without_ports_is_a_port():
     assert resistances(cli)[pair('OSCP', 'xind__LA')] == pytest.approx(without_marker[pair('OSCP', 'xind__LA')] / 2.0,
                                                                        rel=0.05)
     assert resistances(cli)[pair('OSCN', 'xind__LB')] == without_marker[pair('OSCN', 'xind__LB')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.R, PEXMode.RC])
+def test_devices_of_a_cut_cell_with_a_terminal_on_a_kept_net_are_left_out(mode: PEXMode):
+    # NOTE: the model has the device, whatever net its terminals are on, and the net needs a port at them
+    cli = Extraction('cut_block_with_mos', mode).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X',
+                                                     '--cut-keep-net', 'B')
+    assert cli.rcx25_netlist_problems == []
+    assert devices_of(cli) == []
+    assert any(port.startswith('X__') and port != 'X__VSS' for port in netlist_ports(cli)), netlist_ports(cli)
 
 
 @allure.parent_suite(parent_suite)
@@ -863,6 +1243,35 @@ def test_net_labelled_like_a_piece_stays_apart_from_it():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('cell_name', ['cut_pfets_sharing_diffusion', 'cut_pfet_drain_with_contacts_in_top'])
+def test_diffusion_of_the_top_stays_extracted_beside_a_device_of_a_cut_cell(cell_name: str):
+    extraction = Extraction(cell_name, PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A)
+    flat = extraction.run(ExclusionMarkerMode.IGNORE)
+    nodes_of_flat = [node for device in devices_of(flat) for node in device[1:5]]
+    resistances_of_flat = resistances(flat)
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    # NOTE: the pin D reaches the drain, on one port, as the flat extraction has it
+    assert [port for port in netlist_ports(cut) if port.startswith('X__D')] == ['X__D']
+    drain_of_flat = next(node for node in nodes_of_flat if node.startswith('D.P'))
+    assert effective_resistance(resistances(cut), 'D', 'X__D') == \
+           pytest.approx(effective_resistance(resistances_of_flat, 'D', drain_of_flat), rel=1e-3)
+    # NOTE: and a device that stays has its terminal on that drain there too
+    assert all('X__D' in device for device in devices_of(cut))
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_resistor_of_the_top_between_those_of_a_cut_cell_stays():
+    cut = Extraction('cut_resistors_in_series', PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    with open(netlist_path_of(cut), encoding='utf-8') as f:
+        assert f.read().count('sky130_fd_pr__res_generic_m1') == 1
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_capacitances_of_a_well_within_a_cut_cell_go_to_the_ports_of_its_net():
     extraction = Extraction('cut_well_under_wire', PEXMode.RC, pdk_name=PDKName.SKY130A)
     flat = capacitances(extraction.run(ExclusionMarkerMode.IGNORE))
@@ -873,6 +1282,21 @@ def test_capacitances_of_a_well_within_a_cut_cell_go_to_the_ports_of_its_net():
     assert values[pair('W', 'X__VDD_0')] == pytest.approx(sum(value for nodes, value in flat.items()
                                                               if 'W' in nodes and 'VSUBS' not in nodes
                                                               and 'sky130_gnd' not in nodes), rel=0.05)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_terminals_of_two_devices_of_a_cut_cell_are_two_ports():
+    extraction = Extraction('cut_nfets_wired_in_top', PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A)
+    flat = extraction.run(ExclusionMarkerMode.IGNORE)
+    resistances_to_sources_of_flat = sorted(effective_resistance(resistances(flat), 'VSS', device[3])
+                                            for device in devices_of(flat))
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    ports = [port for port in netlist_ports(cut) if port.startswith('X__S')]
+    assert ports == ['X__S_0', 'X__S_1']
+    assert sorted(effective_resistance(resistances(cut), 'VSS', port) for port in ports) == \
+           pytest.approx(resistances_to_sources_of_flat, rel=1e-3)
 
 
 @allure.parent_suite(parent_suite)
@@ -891,6 +1315,41 @@ def test_instances_of_cut_cells_are_checked_before_lvs(tmp_path):
     assert code != 0, output
     assert 'has an angle of 30' in ' '.join(output.split()), output
     assert 'LVS runs' not in output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name', ['cut_nfet_finger_beside_top', 'cut_nfet_finger_beside_sibling'])
+def test_finger_beside_a_cut_cell_on_merged_polygons_stays(cell_name: str):
+    extraction = Extraction(cell_name, PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A)
+    assert len(devices_of(extraction.run(ExclusionMarkerMode.IGNORE))) == 2
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert len(devices_of(cut)) == 1
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_terminal_of_a_device_across_a_cut_keeps_its_port_for_the_model():
+    cut = Extraction('cut_half_of_gate', PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    devices = devices_of(cut)
+    assert len(devices) == 1
+    # NOTE: without it, the model of the block would only reach the gate through the poly beside it
+    assert devices[0][2] in netlist_ports(cut)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_ports_of_instances_on_a_diffusion_of_the_top_are_named_after_their_blocks():
+    cut = Extraction('cut_instances_sharing_diffusion_in_top', PEXMode.R, blackbox=True, pdk_name=PDKName.SKY130A) \
+        .run(ExclusionMarkerMode.IGNORE, '--cut', 'unit=U')
+    assert cut.rcx25_netlist_problems == []
+    assert cut.rcx25_extraction_results.summarize().exclusion_ports == {'L': ['U_0__S'],
+                                                                        'M0': ['U_0__D', 'U_1__S'],
+                                                                        'M1': ['U_1__D', 'U_2__S'],
+                                                                        'R': ['U_2__D']}
 
 
 @allure.parent_suite(parent_suite)
@@ -950,6 +1409,43 @@ def test_warns_of_a_net_through_abutting_cut_cells():
         cli = Extraction('cut_abutting_wires', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'seg')
     assert cli.rcx25_netlist_problems == []
     assert any('seg_0, seg_1, where they abut' in c.args[0] for c in warning_mock.call_args_list)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name', ['cut_boundary_over_devices', 'cut_boundary_over_inductor'])
+def test_devices_under_a_shape_of_a_cut_cell_are_no_devices_of_it(cell_name: str):
+    extraction = Extraction(cell_name, PEXMode.R, blackbox=True)
+    flat = devices_of(extraction.run(ExclusionMarkerMode.IGNORE))
+    assert flat
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block')
+    assert cut.rcx25_netlist_problems == []
+    assert len(devices_of(cut)) == len(flat)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('cell_name, pdk_name', [('cut_cell_of_devices', PDKName.IHP_SG13G2),
+                                                 ('cut_ldmos_pair', PDKName.GF180MCUD)])
+def test_devices_of_a_cut_cell_on_other_layers_than_their_shapes_are_left_out(cell_name: str, pdk_name: PDKName):
+    # NOTE: terminals on the wells only, on layers only LVS knows, and on diffusion that LVS fills up
+    extraction = Extraction(cell_name, PEXMode.R, blackbox=True, pdk_name=pdk_name)
+    assert devices_of(extraction.run(ExclusionMarkerMode.IGNORE))
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block')
+    assert cut.rcx25_netlist_problems == []
+    assert devices_of(cut) == []
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_neighbor_under_the_overhang_of_a_cut_cell_has_no_ports():
+    # NOTE: the nets of the rails enter the cell, the nets within its neighbors under its NWell and pSD don't
+    extraction = Extraction('cut_abutting_std_cells', PEXMode.R, blackbox=True)
+    flat = devices_of(extraction.run(ExclusionMarkerMode.IGNORE))
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'middle=X')
+    assert cut.rcx25_netlist_problems == []
+    assert len(devices_of(cut)) == len(flat) * 2 // 3
+    assert sorted(port for port in netlist_ports(cut) if port.startswith('X__')) == ['X__VDD', 'X__VSS']
 
 
 @allure.parent_suite(parent_suite)

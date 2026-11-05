@@ -33,7 +33,7 @@ import klayout.db as kdb
 from klayout_pex.device_models import DeviceModels
 from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
-from klayout_pex.klayout.netlist_expander import NetlistExpander
+from klayout_pex.klayout.netlist_expander import NetlistExpander, remove_devices
 from klayout_pex.log import (
     debug,
 )
@@ -195,3 +195,19 @@ class WhiteboxTest(unittest.TestCase):
                                           device_models=device_models('mim'), substrate_net_name='B')
         self.assertEqual(['M1'], [d.name for d in expanded.circuit_by_name('chip').each_device()
                                   if d.device_class().name in ('mim', 'nmos')])
+
+    def test_remove_devices_goes_by_the_ids_of_the_extracted_circuit(self):
+        # NOTE: the copy numbers its devices anew, which closes the gaps of the IDs
+        netlist = substrate_test_netlist()
+        circuit = netlist.circuit_by_name('chip')
+        device_class = kdb.DeviceClassMOS4Transistor()
+        device_class.name = 'nmos'
+        netlist.add(device_class)
+        devices = [circuit.create_device(device_class, name) for name in ('M1', 'M2', 'M3')]
+        device_ids = [device.id() for device in devices]
+        circuit.remove_device(devices[0])
+
+        copy = netlist.dup()
+        copied_circuit = copy.circuit_by_name('chip')
+        remove_devices(circuit, copied_circuit, {device_ids[2]})
+        self.assertEqual(['M2'], [d.name for d in copied_circuit.each_device()])

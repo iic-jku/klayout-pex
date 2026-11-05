@@ -482,9 +482,9 @@ class KpexCLI:
                            metavar='CELL[=PREFIX]',
                            help="Leave the instances of the cell (a name, or a glob pattern) to a model, "
                                 "like what an exclusion marker marks, but only on the shapes of the cell, so that "
-                                "routing over it stays extracted. Where a net enters "
+                                "routing over it stays extracted, and leave out its devices. Where a net enters "
                                 "it is a port of the netlist: PREFIX__PIN by a label of the cell on the net, "
-                                "otherwise PREFIX__NET_NUMBER, the prefix "
+                                "by the terminal of a removed device, otherwise PREFIX__NET_NUMBER, the prefix "
                                 "by default the name of the cell and a number. Needs --gds. Repeatable")
         group.add_argument("--cut-keep-net", dest='cut_kept_net_patterns', action='append', default=None,
                            metavar='NET',
@@ -1303,6 +1303,7 @@ class KpexCLI:
                                    report_caps=args.report_caps,
                                    exclusions=exclusions)
         extraction_results = extractor.extract()
+        removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
 
         if netlist_csv_path is not None:
             # TODO: merge this with klayout_pex/klayout/netlist_csv.py
@@ -1333,7 +1334,8 @@ class KpexCLI:
                 extraction_results=extraction_results,
                 blackbox_devices=args.blackbox_devices,
                 device_models=tech_info.device_models,
-                substrate_net_name=pex_context.substrate_net_name
+                substrate_net_name=pex_context.substrate_net_name,
+                removed_device_ids=removed_device_ids
             )
 
             netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D, tech_info)
@@ -1349,7 +1351,8 @@ class KpexCLI:
                 summary=extraction_results.summarize(),
                 blackbox_devices=args.blackbox_devices,
                 device_models=tech_info.device_models,
-                substrate_net_name=pex_context.substrate_net_name
+                substrate_net_name=pex_context.substrate_net_name,
+                removed_device_ids=removed_device_ids
             )
             if args.input_mode == InputMode.GDS and args.schematic_path:
                 self._rcx25_netlist_problems += self.schematic_device_class_problems(

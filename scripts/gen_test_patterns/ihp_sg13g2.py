@@ -70,6 +70,7 @@ TOPVIA2:      GDSPair = (133, 0)
 DIGISUB:      GDSPair = (60, 0)
 POLYRES:      GDSPair = (128, 0)
 NORCX:        GDSPair = (148, 0)
+PR_BOUNDARY:  GDSPair = (189, 4)
 METAL3_NOQRC: GDSPair = (30, 28)
 NORCX_M2M3:   GDSPair = (148, 41)
 NORCX_M3SUB:  GDSPair = (148, 125)
@@ -703,6 +704,65 @@ def cut_abutting_wires() -> Pattern:
     return p
 
 
+def cut_block_with_mos() -> Pattern:
+    """
+    A MOS of the design nmos_diode2 in a child cell, whose pins VDD and VSS on Metal3 the top cell wires on, and
+    a Metal5 wire R over the cell, which is no shape of the cell
+    """
+    p = pattern('cut_block_with_mos')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz', subcell_name='block')
+    block = p.layout.cell('block')
+    bbox = block.bbox()
+    metal3 = kdb.Region(block.begin_shapes_rec(p.layout.layer(*METAL3))).merged()
+    pins = sorted(metal3.each(), key=lambda polygon: polygon.bbox().bottom)
+    for text, polygon in zip(('A', 'B'), pins):
+        box = polygon.bbox()
+        p.box(METAL3, box.right - 100, box.bottom, box.right + 10000, box.bottom + 300)
+        p.box(METAL3_PIN, box.right + 9500, box.bottom, box.right + 10000, box.bottom + 300)
+        p.label(METAL3, text, box.right + 9750, box.bottom + 150)
+    p.box(METAL5, bbox.left - 5000, bbox.center().y - 500, bbox.right + 15000, bbox.center().y + 500)
+    p.box(METAL5_PIN, bbox.left - 5000, bbox.center().y - 500, bbox.left - 4000, bbox.center().y + 500)
+    p.label(METAL5, 'R', bbox.left - 4500, bbox.center().y)
+    return p
+
+
+def cut_block_beside_mos() -> Pattern:
+    """
+    The design nmos_diode2 twice, in the child cells block and kept, side by side
+    """
+    p = pattern('cut_block_beside_mos')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz', subcell_name='block')
+    block = p.layout.cell('block')
+    kept = p.layout.create_cell('kept')
+    kept.copy_tree(block)
+    p.top.insert(kdb.CellInstArray(kept.cell_index(), kdb.Trans(block.bbox().width() + 5000, 0)))
+    return p
+
+
+def cut_inductor2_leads_in_top() -> Pattern:
+    """
+    The inductor of inductor2_w2u_d15u48_tm2_wires_50u in a child cell, without the wires outside its marker,
+    which the top cell has, to the pins A and B, so that the terminals of the inductor are on the metal of the top cell
+    """
+    p = pattern('cut_inductor2_leads_in_top')
+    p.copy_design('ihp-sg13g2', 'test_patterns', 'inductor2_w2u_d15u48_tm2_wires_50u.gds.gz', subcell_name='ind')
+    ind = p.layout.cell('ind')
+    metal_layer = p.layout.layer(*TOPMETAL2)
+    metal = kdb.Region(ind.begin_shapes_rec(metal_layer)).merged()
+    below_marker = kdb.Region(kdb.Box(-100000, -100000, 100000, 0))
+    wires = metal & below_marker
+    ind.shapes(metal_layer).clear()
+    ind.shapes(metal_layer).insert(metal - below_marker)
+    for layer in (TOPMETAL2_PIN, LABEL_BY_LAYER[TOPMETAL2]):
+        ind.shapes(p.layout.layer(*layer)).clear()
+    p.top.shapes(metal_layer).insert(wires)
+    for text, wire in zip(('A', 'B'), sorted(wires.each(), key=lambda polygon: polygon.bbox().left)):
+        box = wire.bbox()
+        p.box(TOPMETAL2_PIN, box.left, box.bottom, box.right, box.bottom + 2000)
+        p.label(TOPMETAL2, text, box.center().x, box.bottom + 1000)
+    return p
+
+
 def exclusion_hairpin_around_wire(name: str, bridge_gap: int) -> Pattern:
     """
     Metal3 wires from A and B, 6 µm apart, which end within a marker, joined there by a bridge (or two nets with a gap),
@@ -1090,6 +1150,70 @@ def nmos_pair_abutting_ptaps() -> Pattern:
     return p
 
 
+CUT_CELL_PCELLS = [('dantenna', {}), ('dpantenna', {}), ('rppd', {}), ('nmos', {}), ('moscap_n', {}), ('isolbox', {}),
+                   ('schottky', {})]
+
+
+def with_boundary_of_child_cell(p: Pattern) -> Pattern:
+    """
+    Adds the child cell block, which only has its boundary over all of the top cell, and a wire beside that
+    """
+    bbox = p.top.bbox()
+    block = p.layout.create_cell('block')
+    block.shapes(p.layout.layer(*PR_BOUNDARY)).insert(bbox.enlarged(1000, 1000))
+    block.shapes(p.layout.layer(*METAL3)).insert(kdb.Box(bbox.right + 2000, bbox.bottom,
+                                                         bbox.right + 3000, bbox.bottom + 5000))
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    return p
+
+
+def cut_boundary_over_devices() -> Pattern:
+    """
+    Devices (pcells of the PDK), whose terminals are on layers the tech info has or only LVS knows, in the top cell
+    under the boundary of a child cell, which they aren't devices of
+    """
+    return with_boundary_of_child_cell(pcells_side_by_side('cut_boundary_over_devices', CUT_CELL_PCELLS))
+
+
+def cut_boundary_over_inductor() -> Pattern:
+    """
+    The inductor of inductor2_w2u_d15u48_tm2_wires_50u, whose terminals only abut its leads, in the top cell
+    under the boundary of a child cell, which it isn't a device of
+    """
+    p = pattern('cut_boundary_over_inductor')
+    p.copy_design('ihp-sg13g2', 'test_patterns', 'inductor2_w2u_d15u48_tm2_wires_50u.gds.gz')
+    return with_boundary_of_child_cell(p)
+
+
+def cut_cell_of_devices() -> Pattern:
+    """
+    The devices of cut_boundary_over_devices within a child cell, with a wire beside it in the top cell
+    """
+    p = pcells_side_by_side('cut_cell_of_devices', CUT_CELL_PCELLS)
+    block = p.layout.create_cell('block')
+    block.copy_tree(p.top)
+    p.top.clear()
+    p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
+    bbox = p.top.bbox()
+    p.box(METAL3, bbox.right + 2000, bbox.bottom, bbox.right + 3000, bbox.bottom + 5000)
+    return p
+
+
+def cut_abutting_std_cells() -> Pattern:
+    """
+    Three abutting cells of the standard cell sg13g2_a21o_1: left, middle and right, whose NWell and pSD go on
+    over their neighbors
+    """
+    p = pattern('cut_abutting_std_cells')
+    p.copy_design('ihp-sg13g2', 'sg13g2_a21o_1', 'sg13g2_a21o_1.gds.gz', subcell_name='middle')
+    middle = p.layout.cell('middle')
+    for name, x in (('left', -3360), ('right', 3360)):
+        cell = p.layout.create_cell(name)
+        cell.copy_tree(middle)
+        p.top.insert(kdb.CellInstArray(cell.cell_index(), kdb.Trans(x, 0)))
+    return p
+
+
 def cut_pad_via_on_label(name: str = 'cut_pad_via_on_label') -> Pattern:
     """
     A child cell with a Metal3 pad of 5 µm x 5 µm and its pin P in the middle, on which a Via3 of the top cell lands,
@@ -1130,6 +1254,18 @@ def cut_rotated_child() -> Pattern:
     block.insert(kdb.CellInstArray(segment.cell_index(), kdb.ICplxTrans(1.0, 30, False, 0, 0)))
     p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans()))
     p.box(METAL3, 30000, 0, 31000, 5000)
+    return p
+
+
+def cut_bjts_wire_on_collector() -> Pattern:
+    """
+    The BJTs of bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa within a child cell, with a Metal1 wire of the top cell
+    over the whole collector terminal of the first one
+    """
+    p = pattern('cut_bjts_wire_on_collector')
+    p.copy_design('ihp-sg13g2', 'test_patterns', 'bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa.gds.gz',
+                  subcell_name='block')
+    p.box(METAL1, 2375, -10430, 9875, 1280)
     return p
 
 
@@ -1270,9 +1406,14 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_tap_wire_through': exclusion_tap_wire_through,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'cut_boundary_over_devices': cut_boundary_over_devices,
+    'cut_boundary_over_inductor': cut_boundary_over_inductor,
+    'cut_cell_of_devices': cut_cell_of_devices,
+    'cut_abutting_std_cells': cut_abutting_std_cells,
     'cut_pad_via_on_label': cut_pad_via_on_label,
     'cut_pad_with_same_label_in_top': cut_pad_with_same_label_in_top,
     'cut_rotated_child': cut_rotated_child,
+    'cut_bjts_wire_on_collector': cut_bjts_wire_on_collector,
     'cut_strip_along_wire': cut_strip_along_wire,
     'cut_plate_with_fill': cut_plate_with_fill,
     'exclusion_substrate_pin_within': exclusion_substrate_pin_within,
@@ -1293,6 +1434,9 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cut_abutting_wires': cut_abutting_wires,
     'cut_coil_model': cut_coil_model,
     'cut_coil_x2': lambda: cut_coil_pattern('cut_coil_x2', instance_count=2),
+    'cut_block_with_mos': cut_block_with_mos,
+    'cut_block_beside_mos': cut_block_beside_mos,
+    'cut_inductor2_leads_in_top': cut_inductor2_leads_in_top,
     'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
     'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),
     'exclusion_hairpin_bridge_m2': lambda: exclusion_hairpin('exclusion_hairpin_bridge_m2', 0, METAL2),

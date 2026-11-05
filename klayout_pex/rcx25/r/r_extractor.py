@@ -24,6 +24,7 @@
 
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+import itertools
 import math
 import re
 from typing import *
@@ -177,6 +178,10 @@ class NetSplit:
     cut_port_boxes: Dict[PolygonPortKey, kdb.Box] = field(default_factory=dict)
     # the index of the block of each of them
     cut_port_blocks: Dict[PolygonPortKey, int] = field(default_factory=dict)
+    # the terminal of a removed device that each of them stands for, if any,
+    # and that a cut is on, which it is one node with then, unless a label names the cut
+    cut_port_terminals: Dict[PolygonPortKey, device_pb2.Device.Terminal] = field(default_factory=dict)
+    terminals_of_cuts: Dict[PolygonPortKey, device_pb2.Device.Terminal] = field(default_factory=dict)
     pins_within: List[PinWithinMarker] = field(default_factory=list)
     terminals_within: List[TerminalWithinMarker] = field(default_factory=list)
     # the shapes within each marker, by its index, by layer
@@ -653,6 +658,20 @@ class RExtractor:
         def is_ideal(layer_id: int) -> bool:
             return layer_id >= IDEAL_LAYER_ID_OFFSET
 
+        # NOTE: the device terminals of the removed devices are no ports of devices anymore
+        removed_terminals: List[Tuple[int, kdb.Polygon, device_pb2.Device.Terminal]] = []
+        removed_terminal_shapes: Dict[int, kdb.Shapes] = defaultdict(kdb.Shapes)
+        for layer_id in list(polygon_ports):
+            ports_and_terminals = list(zip(polygon_ports.pop(layer_id), polygon_port_device_terminals.pop(layer_id)))
+            for port, terminal in ports_and_terminals:
+                if terminal.device_id in exclusions.removed_device_blocks:
+                    removed_terminal_shapes[layer_id].insert(kdb.PolygonWithProperties(
+                        port, {'terminal': len(removed_terminals)}))
+                    removed_terminals.append((layer_id, port, terminal))
+                else:
+                    polygon_ports[layer_id].append(port)
+                    polygon_port_device_terminals[layer_id].append(terminal)
+
         kept_for_vias: Dict[int, kdb.Region] = defaultdict(kdb.Region)
         for via in {v.layer.id: v for v in tech.vias if not is_ideal(v.layer.id)}.values():
             shapes = regions.get(via.layer.id, None)
@@ -758,11 +777,31 @@ class RExtractor:
                     key = add_port(strip_layer_id, port)
                     split.cut_port_boxes[key] = port.bbox()
                     split.cut_port_blocks[key] = exclusions.block_index_with_ports_at(port.bbox(), layer_name)
+                    for shape in removed_terminal_shapes[layer_id].each_touching(kdb.Shapes.SRegions, port.bbox()):
+                        terminal = removed_terminals[shape.property('terminal')][2]
+                        if exclusions.removed_device_blocks[terminal.device_id] == split.cut_port_blocks[key] and \
+                                not (kdb.Region(shape.polygon) & kdb.Region(port.downcast())).is_empty():
+                            split.terminals_of_cuts[key] = terminal
+                            break
             for outside_strip in (outside & within_tie.sized(strip_width) - around_ports).merged().each():
                 outside_key = add_port(layer_id, outside_strip)
                 for within_strip in (within_tie & kdb.Region(outside_strip).sized(strip_width)).merged().each():
                     split.polygon_port_ties.append((outside_key, add_port(ideal_id, within_strip)))
 
+        # NOTE: a removed device stands for what its model has, and where it meets the rest of its net is a port,
+        #       e.g. the terminal of a coil on its lead outside its marker
+        conductor_layer_ids = {c.layer.id for c in tech.conductors}
+        for layer_id, port, terminal in removed_terminals:
+            shapes = regions.get(layer_id, None)
+            if layer_id not in conductor_layer_ids or shapes is None or shapes.is_empty():
+                continue  # NOTE: e.g. the bulk of a transistor on the substrate
+            for polygon in (kdb.Region(port) & shapes).merged().each():
+                polygon_ports[layer_id].append(polygon.downcast())
+                polygon_port_device_terminals[layer_id].append(None)
+                key = (layer_id, len(polygon_ports[layer_id]) - 1)
+                split.cut_port_boxes[key] = polygon.bbox()
+                split.cut_port_blocks[key] = exclusions.removed_device_blocks[terminal.device_id]
+                split.cut_port_terminals[key] = terminal
         return split
 
     @staticmethod
@@ -770,7 +809,8 @@ class RExtractor:
                      connected_shapes: ConnectedShapesWithin,
                      layer_names: Dict[int, LayerName]) -> Dict[PolygonPortKey, int]:
         """
-        :return: what is joined to the shapes within the blocks at each cut, by its polygon port
+        :return: what is joined to the shapes within the blocks at each cut, by its polygon port,
+                 a cut without such shapes has none (e.g. of a terminal of a removed device, on a wire to its block)
         """
         sets_of_cuts: Dict[PolygonPortKey, int] = {}
         for key, cut_box in split.cut_port_boxes.items():
@@ -792,7 +832,8 @@ class RExtractor:
         like the device terminals within the markers.
 
         At a cut cell, it can also be a label of the cell on the net, <block>__<label>, also for several cuts,
-        as these are one pin of its model, otherwise <block>__<net>_<number>
+        as these are one pin of its model, or the terminal of a device of it that the cut is on,
+        <block>__<terminal>, numbered if devices have several such nodes, otherwise <block>__<net>_<number>
 
         A pin or a label only names a cut of the shapes it is joined to within the block, as a port is one node.
         So does a pin of a label the net also has outside the block only when that isn't the same name,
@@ -828,6 +869,9 @@ class RExtractor:
                                           for label in self.labels_at_shapes(block_index, split)]
                             for block_index in set(split.cut_port_blocks.values())}
         for key in cut_keys:
+            # NOTE: a port at the terminal of a removed device is named after that terminal
+            if key in split.cut_port_terminals:
+                continue
             block_index = split.cut_port_blocks[key]
             cut_box = split.cut_port_boxes[key]
             cut_set = sets_of_cuts.get(key, None)
@@ -875,8 +919,20 @@ class RExtractor:
                 continue
             block_index = split.cut_port_blocks[key]
             cut_candidates = [c for c in candidates_by_cut[key] if c[2].startswith(f"{blocks[block_index].name}__")]
-            names_by_cut[key] = min(cut_candidates)[2] if blocks[block_index].kind == BlockKind.CUT and cut_candidates \
-                else numbered_name(block_index)
+            if blocks[block_index].kind == BlockKind.CUT and cut_candidates:
+                names_by_cut[key] = min(cut_candidates)[2]
+            elif key not in split.cut_port_terminals and key not in split.terminals_of_cuts:
+                names_by_cut[key] = numbered_name(block_index)
+
+        names_by_cut.update(self.terminal_port_names(split, [key for key in cut_keys if key not in names_by_cut],
+                                                     taken_names))
+
+        def name_at_terminal_of_removed_device(within: TerminalWithinMarker) -> Optional[str]:
+            # NOTE: a diffusion on which a terminal of a removed device also is, which needs no second port
+            for key, terminal_box in split.cut_port_boxes.items():
+                if key in split.cut_port_terminals and key[0] == within.layer_id and terminal_box.touches(within.box):
+                    return names_by_cut[key]
+            return None
 
         # NOTE: the polygons of a device terminal are one port
         names_by_terminal: Dict[Tuple[int, int], str] = {}
@@ -884,8 +940,8 @@ class RExtractor:
         for index, within in enumerate(split.terminals_within):
             key = (within.terminal.device_id, within.terminal.terminal_id)
             if key not in names_by_terminal:
-                names_by_terminal[key] = numbered_name(self.exclusions.block_index_with_ports_at(
-                    within.box, layer_names[within.layer_id]))
+                names_by_terminal[key] = name_at_terminal_of_removed_device(within) or \
+                    numbered_name(self.exclusions.block_index_with_ports_at(within.box, layer_names[within.layer_id]))
             names_by_terminal_index[index] = names_by_terminal[key]
         return names_by_cut, names_by_terminal_index
 
@@ -901,6 +957,47 @@ class RExtractor:
                     for polygon in shapes.merged().each():
                         labels.update(self.exclusions.labels_at(block_index, layer_name, polygon.bbox()))
         return [labels[index] for index in sorted(labels)]
+
+    def terminal_port_names(self,
+                            split: NetSplit,
+                            keys: Sequence[PolygonPortKey],
+                            taken_names: Set[str]) -> Dict[PolygonPortKey, str]:
+        """
+        A port is one node: of a terminal of a device, also of several polygons,
+        and of the terminals of that name of the other devices of the block on the same polygon
+
+        :param keys: the polygon ports at the terminals of removed devices
+        :param taken_names: the names of the other ports of the net, to which these go too
+        :return: their names, <block>__<terminal>, numbered if the block has several such nodes on the net
+        """
+        blocks = self.exclusions.blocks
+        terminals = {**split.terminals_of_cuts, **split.cut_port_terminals}
+        ports = DisjointSets(keys)
+        first_key_by_node: Dict[Hashable, PolygonPortKey] = {}
+        for key in keys:
+            terminal = terminals[key]
+            for node in ((terminal.device_id, terminal.terminal_id),
+                         (split.cut_port_blocks[key], terminal.name, key[0], split.cut_port_boxes[key])):
+                ports.union(key, first_key_by_node.setdefault(node, key))
+
+        roots_by_name: Dict[str, List[PolygonPortKey]] = defaultdict(list)
+        for key in keys:
+            name = f"{blocks[split.cut_port_blocks[key]].name}__{terminals[key].name}"
+            root = ports.find(key)
+            if root not in roots_by_name[name]:
+                roots_by_name[name].append(root)
+
+        name_by_root: Dict[PolygonPortKey, str] = {}
+        for name, roots in roots_by_name.items():
+            if len(roots) == 1 and name not in taken_names:
+                name_by_root[roots[0]] = name
+                taken_names.add(name)
+                continue
+            numbers = (f"{name}_{number}" for number in itertools.count())
+            for root in roots:
+                name_by_root[root] = next(number for number in numbers if number not in taken_names)
+                taken_names.add(name_by_root[root])
+        return {key: name_by_root[ports.find(key)] for key in keys}
 
     def internal_node_indexes(self,
                               resistor_network: klp.RNetwork,
@@ -1317,6 +1414,7 @@ class RExtractor:
                 names_by_node_id[node.node_id].append(name)
 
         def block_index_of(node: r_network_pb2.RNode) -> int:
+            # NOTE: a port at a terminal of a removed device can be on a net taken out of the block
             block_index = split.block_of_node_id.get(node.node_id, None)
             if block_index is None:
                 block_index = self.exclusions.block_index_with_ports_at(self.node_box(node), node.layer_name)
