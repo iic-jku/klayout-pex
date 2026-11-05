@@ -1,0 +1,53 @@
+[17:44:11] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --lvsdb                                
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\nmos_pair
+_abutting_ptaps.lvsdb.gz' --out-dir                                            
+'C:\Users\RUNNER~1\AppData\Local\Temp\tmpxow38s0m' --2.5D --check n            
+──────────────────────────────── Input Layout ─────────────────────────────────
+[17:44:11] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:44:12] INFO     (5, 0) -> (poly_con)                       kpex_cli.py:1773
+[17:44:12] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1773
+[17:44:12] INFO     (7, 0) -> (nsd_fet)                        kpex_cli.py:1773
+[17:44:12] INFO     (65, 244) -> (ptap)                        kpex_cli.py:1773
+[17:44:12] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1773
+[17:44:12] INFO     (5, 2) -> (poly_pin_con)                   kpex_cli.py:1773
+[17:44:12] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1773
+[17:44:12] INFO     (6, 4401) -> (cont_nsd_con)                kpex_cli.py:1773
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:44:12] INFO     LVSDB: found 1pins                         extractor.py:481
+[17:44:12] WARNING  Only the substrate, a well or a tap joins  extractor.py:535
+                    pieces of the metal of these nets, which                   
+                    the resistance network has no resistance                   
+                    for, so the pieces are ideally on their                    
+                    nets: sub!                                                 
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;$1.$0.Metal1;$4;0.002;                                                      
+C2;$1.$0.Metal1;sub!.$0.Metal1;0.012;                                          
+C3;$1.$0.Metal1;VSUBS;0.022;                                                   
+C4;$3.$0.Metal1;$5;0.002;                                                      
+C5;$3.$0.Metal1;sub!.$1.Metal1;0.012;                                          
+C6;$3.$0.Metal1;VSUBS;0.022;                                                   
+C7;$4;sub!.$0.Metal1;0.002;                                                    
+C8;$4;VSUBS;0.042;                                                             
+C9;$5;sub!.$1.Metal1;0.002;                                                    
+C10;$5;VSUBS;0.042;                                                            
+C11;VSUBS;sub!.$0.Metal1;0.02;                                                 
+C12;VSUBS;sub!.$1.Metal1;0.02;                                                 
+R1;$1;$1.$0.Metal1;;17.0                                                       
+R2;$3;$3.$0.Metal1;;17.0                                                       
+R3;sub!;sub!.$0.Metal1;;17.0                                                   
+R4;sub!;sub!.$1.Metal1;;17.0                                                   
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpxow38s0m\nmos_pair_abutting_ptaps__nmos
+_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.csv             
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+C:\Users\RUNNER~1\AppData\Local\Temp\tmpxow38s0m\nmos_pair_abutting_ptaps__nmos
+_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.spice           
