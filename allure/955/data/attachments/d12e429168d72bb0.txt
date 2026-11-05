@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1592 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1629 main extract --pdk ihp-sg13g2 --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\r_ntap_pair_nwell_m1_m2.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpw9l0sf_f' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:836 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1773 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1773 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:1773 (46, 0) -> (pwell_sub)
+INFO     __kpex__:kpex_cli.py:1773 (65, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:1773 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:1773 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1773 (6, 4404) -> (cont_ntap_con)
+INFO     __kpex__:extractor.py:481 LVSDB: found 0pins
+WARNING  __kpex__:r_extractor.py:484 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+WARNING  __kpex__:extractor.py:535 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: $1
+SUBPROCESS __kpex__:kpex_cli.py:1342 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1342 R1;$1;$1.$1.Metal1;;1.467
+SUBPROCESS __kpex__:kpex_cli.py:1342 R2;$1;$1.$3.Metal1;;1.467
+SUBPROCESS __kpex__:kpex_cli.py:1342 R3;$1;$1.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1342 R4;$1;$1.$6.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1342 R5;$1.$1.Metal1;$1.$5.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1342 R6;$1.$3.Metal1;$1.$7.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1342 R7;$1.$4.Metal2;$1.$5.Metal2;;1.173
+SUBPROCESS __kpex__:kpex_cli.py:1342 R8;$1.$6.Metal2;$1.$7.Metal2;;1.173
+SUBPROCESS __kpex__:kpex_cli.py:1345 C:\Users\RUNNER~1\AppData\Local\Temp\tmpw9l0sf_f\r_ntap_pair_nwell_m1_m2__r_ntap_pair_nwell_m1_m2\r_ntap_pair_nwell_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1362 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpw9l0sf_f\r_ntap_pair_nwell_m1_m2__r_ntap_pair_nwell_m1_m2\r_ntap_pair_nwell_m1_m2_k25d_pex_netlist.spice

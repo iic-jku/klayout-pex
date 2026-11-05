@@ -1,0 +1,160 @@
+[13:32:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/cut_cell_of_devices.lvsdb.gz --out-dir                                       
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/cut_cell_of_devices.gds.gz --exclusion-markers ignore                      
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:32:17] INFO     No explicit top cell specified, using top    kpex_cli.py:825
+                    cell 'cut_cell_of_devices'                                  
+[13:32:17] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:32:17] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 8 of 85 shapes                         
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con,                                
+                    cont_ntap_con, cont_ptap_con,                               
+                    cont_bjt_con, schottcky_p,                                  
+                    schottcky_n_con, diodevdd_4kv_te,                           
+                    diodevss_4kv_te                                             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:32:17] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1773
+[13:32:17] INFO     (31, 0) -> (nwell_drw dpantenna_n)          kpex_cli.py:1773
+[13:32:17] INFO     (32, 0) -> (nbulay_drw isolbox_i)           kpex_cli.py:1773
+[13:32:17] INFO     (46, 0) -> (pwell iso_pwell pwell_sub       kpex_cli.py:1773
+                    isolbox_bn dantenna_p isolbox_s rppd_sub)                   
+[13:32:17] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1773
+[13:32:17] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1773
+[13:32:17] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1773
+[13:32:17] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1773
+[13:32:17] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1773
+[13:32:17] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1773
+[13:32:17] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1773
+[13:32:17] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1773
+[13:32:17] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1773
+[13:32:17] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1773
+[13:32:17] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1773
+[13:32:17] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1773
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:32:17] INFO     LVSDB: found 1pins                          extractor.py:481
+[13:32:17] WARNING  The resistance network leaves out these   r_extractor.py:484
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS dpantenna_n)                                 
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$I10;$I10.$0.Metal1;;17.0                                                    
+R2;$I13;$I13.$1.Metal1;;6.667                                                   
+R3;$I15;$I15.$0.Metal1;;0.067                                                   
+R4;$I15;$I15.$10.Metal2;;4.5                                                    
+R5;$I15;$I15.$2.Metal1;;0.067                                                   
+R6;$I15.$0.Metal1;$I15.$6.Metal2;;4.5                                           
+R7;$I15.$10.Metal2;$I15.$11.Metal2;;0.061                                       
+R8;$I15.$10.Metal2;$I15.$6.Metal2;;0.061                                        
+R9;$I15.$11.Metal2;$I15.$2.Metal1;;4.5                                          
+R10;$I4;$I4.$1.Metal1;;6.667                                                    
+R11;$I5;$I5.$0.GatPoly;;5.04                                                    
+R12;$I5;$I5.$1.GatPoly;;5.04                                                    
+R13;$I5.$0.GatPoly;$I5.$10.Metal1;;15.0                                         
+R14;$I5.$0.GatPoly;$I5.$6.Metal1;;15.0                                          
+R15;$I5.$0.GatPoly;$I5.$8.Metal1;;15.0                                          
+R16;$I5.$1.GatPoly;$I5.$11.Metal1;;15.0                                         
+R17;$I5.$1.GatPoly;$I5.$7.Metal1;;15.0                                          
+R18;$I5.$1.GatPoly;$I5.$9.Metal1;;15.0                                          
+R19;$I5.$10.Metal1;$I5.$8.Metal1;;0.148                                         
+R20;$I5.$11.Metal1;$I5.$9.Metal1;;0.148                                         
+R21;$I5.$6.Metal1;$I5.$8.Metal1;;0.148                                          
+R22;$I5.$7.Metal1;$I5.$9.Metal1;;0.148                                          
+R23;$I8;$I8.$0.Metal1;;17.0                                                     
+R24;sub!;sub!.$0.Metal1;;0.018                                                  
+R25;sub!;sub!.$2.Metal1;;0.018                                                  
+R26;sub!.$0.Metal1;sub!.$4.nSD;;8.5                                             
+R27;sub!.$2.Metal1;sub!.$6.nSD;;8.5                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices
+__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices
+__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice                
+[13:32:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/cut_cell_of_devices.lvsdb.gz --out-dir                                       
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/cut_cell_of_devices.gds.gz --exclusion-markers ignore --cut block          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:32:17] INFO     No explicit top cell specified, using top    kpex_cli.py:825
+                    cell 'cut_cell_of_devices'                                  
+[13:32:17] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:32:17] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 8 of 85 shapes                         
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con,                                
+                    cont_ntap_con, cont_ptap_con,                               
+                    cont_bjt_con, schottcky_p,                                  
+                    schottcky_n_con, diodevdd_4kv_te,                           
+                    diodevss_4kv_te                                             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:32:17] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1773
+[13:32:17] INFO     (31, 0) -> (nwell_drw dpantenna_n)          kpex_cli.py:1773
+[13:32:17] INFO     (32, 0) -> (nbulay_drw isolbox_i)           kpex_cli.py:1773
+[13:32:17] INFO     (46, 0) -> (pwell iso_pwell pwell_sub       kpex_cli.py:1773
+                    isolbox_bn dantenna_p isolbox_s rppd_sub)                   
+[13:32:17] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1773
+[13:32:17] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1773
+[13:32:17] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1773
+[13:32:17] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1773
+[13:32:17] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1773
+[13:32:17] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1773
+[13:32:17] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1773
+[13:32:17] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1773
+[13:32:17] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1773
+[13:32:17] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1773
+[13:32:17] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1773
+[13:32:17] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1773
+[13:32:17] INFO     The netlist leaves out the 7 devices of the extractor.py:179
+                    cut cells                                                   
+[13:32:17] INFO     Nothing connects these nets within          extractor.py:240
+                    exclusion markers to the netlist, so their                  
+                    capacitances to the rest of the layout go                   
+                    to the substrate: $I10, $I11, $I12, $I13,                   
+                    $I15, $I4, $I5, $I6, $I8, $I9                               
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:32:17] INFO     LVSDB: found 1pins                          extractor.py:481
+[13:32:17] WARNING  The resistance network leaves out these   r_extractor.py:484
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS dpantenna_n)                                 
+                      - NWell (LVS nwell_drw)                                   
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices
+__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv                  
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices
+__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice                

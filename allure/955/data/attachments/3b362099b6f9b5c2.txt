@@ -1,0 +1,82 @@
+[13:32:32] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1592
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_ntap_pair_two_nwells_over_dnwell_li1_m1.lvsdb.gz --out-dir                    
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp5s_nn5u0 --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:32:32] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:836
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:32:32] INFO     (64, 18) -> (dnwell)                        kpex_cli.py:1773
+[13:32:32] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1773
+[13:32:32] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1773
+[13:32:32] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1773
+[13:32:32] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1773
+[13:32:32] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1773
+[13:32:32] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1773
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:32:32] INFO     LVSDB: found 0pins                          extractor.py:481
+[13:32:32] WARNING  Only the substrate, a well or a tap joins   extractor.py:535
+                    pieces of the metal of these nets, which                    
+                    the resistance network has no resistance                    
+                    for, so the pieces are ideally on their                     
+                    nets: $1                                                    
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$1;$1.$0.li1;;185.0                                                          
+R2;$1;$1.$10.li1;;185.0                                                         
+R3;$1;$1.$31.nwell;;680.0                                                       
+R4;$1;$1.$36.nwell;;680.0                                                       
+R5;$1.$0.li1;$1.$2.li1;;37.647                                                  
+R6;$1.$0.li1;$1.$20.met1;;9.3                                                   
+R7;$1.$10.li1;$1.$12.li1;;37.647                                                
+R8;$1.$10.li1;$1.$25.met1;;9.3                                                  
+R9;$1.$12.li1;$1.$14.li1;;37.647                                                
+R10;$1.$12.li1;$1.$26.met1;;9.3                                                 
+R11;$1.$12.li1;$1.$36.nwell;;185.0                                              
+R12;$1.$14.li1;$1.$16.li1;;37.647                                               
+R13;$1.$14.li1;$1.$27.met1;;9.3                                                 
+R14;$1.$14.li1;$1.$37.nwell;;185.0                                              
+R15;$1.$16.li1;$1.$18.li1;;37.647                                               
+R16;$1.$16.li1;$1.$28.met1;;9.3                                                 
+R17;$1.$16.li1;$1.$38.nwell;;185.0                                              
+R18;$1.$18.li1;$1.$29.met1;;9.3                                                 
+R19;$1.$18.li1;$1.$39.nwell;;185.0                                              
+R20;$1.$2.li1;$1.$21.met1;;9.3                                                  
+R21;$1.$2.li1;$1.$31.nwell;;185.0                                               
+R22;$1.$2.li1;$1.$4.li1;;37.647                                                 
+R23;$1.$20.met1;$1.$21.met1;;0.368                                              
+R24;$1.$21.met1;$1.$22.met1;;0.368                                              
+R25;$1.$22.met1;$1.$23.met1;;0.368                                              
+R26;$1.$22.met1;$1.$4.li1;;9.3                                                  
+R27;$1.$23.met1;$1.$24.met1;;0.368                                              
+R28;$1.$23.met1;$1.$6.li1;;9.3                                                  
+R29;$1.$24.met1;$1.$8.li1;;9.3                                                  
+R30;$1.$25.met1;$1.$26.met1;;0.368                                              
+R31;$1.$26.met1;$1.$27.met1;;0.368                                              
+R32;$1.$27.met1;$1.$28.met1;;0.368                                              
+R33;$1.$28.met1;$1.$29.met1;;0.368                                              
+R34;$1.$31.nwell;$1.$32.nwell;;680.0                                            
+R35;$1.$32.nwell;$1.$33.nwell;;680.0                                            
+R36;$1.$32.nwell;$1.$4.li1;;185.0                                               
+R37;$1.$33.nwell;$1.$34.nwell;;680.0                                            
+R38;$1.$33.nwell;$1.$6.li1;;185.0                                               
+R39;$1.$34.nwell;$1.$8.li1;;185.0                                               
+R40;$1.$36.nwell;$1.$37.nwell;;680.0                                            
+R41;$1.$37.nwell;$1.$38.nwell;;680.0                                            
+R42;$1.$38.nwell;$1.$39.nwell;;680.0                                            
+R43;$1.$4.li1;$1.$6.li1;;37.647                                                 
+R44;$1.$6.li1;$1.$8.li1;;37.647                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp5s_nn5u0/r_ntap_pair_two_nwe
+lls_over_dnwell_li1_m1__r_ntap_pair_two_nwells_over_dnwell_li1_m1/r_ntap_pair_tw
+o_nwells_over_dnwell_li1_m1_k25d_pex_netlist.csv                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp5s_nn5u0/r_ntap_pair_two_nwe
+lls_over_dnwell_li1_m1__r_ntap_pair_two_nwells_over_dnwell_li1_m1/r_ntap_pair_tw
+o_nwells_over_dnwell_li1_m1_k25d_pex_netlist.spice                              
