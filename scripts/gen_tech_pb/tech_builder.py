@@ -26,7 +26,7 @@ Helpers to fill a kpex.tech.Technology message, one table row per call (see the 
 """
 from __future__ import annotations
 
-from typing import Iterable, List, Optional, Set, Tuple
+from typing import Iterable, List, Mapping, Optional, Set, Tuple
 
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
@@ -99,6 +99,18 @@ def add_layer(tech: Technology,
         layer.pin_gds_pair.CopyFrom(_gds_pair(pin_gds))
     if label_gds is not None:
         layer.label_gds_pair.CopyFrom(_gds_pair(label_gds))
+
+
+def set_fill_layers(tech: Technology, fill_gds_by_layer_name: Mapping[str, GDSPair]):
+    """
+    :param fill_gds_by_layer_name: the fill of the layers of the tech, which LVS joins to them
+    """
+    unknown = set(fill_gds_by_layer_name) - {layer.name for layer in tech.layers}
+    if unknown:
+        raise ValueError(f"No layers {', '.join(sorted(unknown))}")
+    for layer in tech.layers:
+        if layer.name in fill_gds_by_layer_name:
+            layer.fill_gds_pair.CopyFrom(_gds_pair(fill_gds_by_layer_name[layer.name]))
 
 
 def add_computed_layer(tech: Technology,
@@ -456,6 +468,13 @@ def add_device_model_mapping(dmi: DeviceModelsInfo,
                                   model_name=model_name,
                                   terminal_names=terminal_names,
                                   parameters=parameters)
+
+
+def add_device_layers(tech: Technology,
+                      lvs_device_class_patterns: Iterable[str],
+                      gds_pairs: Iterable[GDSPair]):
+    tech.device_layers.add(lvs_device_class_patterns=lvs_device_class_patterns,
+                           gds_pairs=[_gds_pair(gds_pair) for gds_pair in gds_pairs])
 
 
 def set_vacask_subcircuits_with_m(dmi: DeviceModelsInfo,

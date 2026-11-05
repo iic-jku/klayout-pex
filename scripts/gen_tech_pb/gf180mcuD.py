@@ -59,6 +59,9 @@ def build_layers(tech: Technology):
     add_layer(tech, MIM,     "FuseTop", (75, 0),  None,     None,      "MiM capacitor top plate over Metal4")
     add_layer(tech, METAL,   "Metal5",  (81, 0),  (81, 0),  (81, 10),  "Metal 5 interconnect")
 
+    set_fill_layers(tech, {"Metal1": (34, 4), "Metal2": (36, 4), "Metal3": (42, 4), "Metal4": (46, 4),
+                           "Metal5": (81, 4)})
+
 
 def build_lvs_computed_layers(tech: Technology):
     #                        purpose  kind  lvs_name       lvs_gds_pair orig. layer  process layer       description
@@ -482,6 +485,26 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #         cap_nmos_*_dn, cap_pmos_*_dn (only with CONSIDER_DN_DW_FEATURES): no ngspice models
 
 
+def build_device_layers(tech: Technology):
+    comp, poly2 = (22, 0), (30, 0)
+
+    #                       LVS device classes                               layers
+    add_device_layers(tech, ["nfet_*", "pfet_*"],                            [comp, poly2])
+    add_device_layers(tech, ["cap_nmos_*", "cap_pmos_*"],                    [(166, 5)])  # mos_cap_mk
+    add_device_layers(tech, ["diode_nd2ps_*", "diode_pd2nw_*"],              [(115, 5)])  # diode_mk
+    add_device_layers(tech, ["diode_nw2ps_*", "diode_pw2dw_*",
+                             "diode_dw2ps_*"],                               [(153, 51)])  # well_diode_mk
+    add_device_layers(tech, ["sc_diode"],                                    [(241, 0)])  # schottky_diode
+    add_device_layers(tech, ["npn_*", "pnp_*"],                              [(127, 5)])  # drc_bjt
+    add_device_layers(tech, ["nplus_*", "pplus_*", "npolyf_*", "ppolyf_*",
+                             "nwell", "pwell"],                              [(110, 5)])  # res_mk
+    for device_class, datatype in (("rm1", 11), ("rm2", 12), ("rm3", 13), ("rm4", 14), ("rm5", 15),
+                                   ("tm*", 15)):  # NOTE: the top metal of the 5 metal layers
+        add_device_layers(tech, [device_class],                              [(110, datatype)])
+    add_device_layers(tech, ["cap_mim_*"],                                   [(75, 0)])  # FuseTop
+    add_device_layers(tech, ["efuse"],                                       [(80, 5)])  # efuse_mk
+
+
 def build_substrate_info(si: SubstrateInfo):
     # NOTE: substrate_connections.lvs connects the substrate and the p-taps outside the isolated substrate
     #       (ptap_regular) to the global net SUB
@@ -510,6 +533,7 @@ def build_tech() -> Technology:
     build_process_parasitics_info(tech.process_parasitics)
 
     build_device_models_info(tech.device_models)
+    build_device_layers(tech)
 
     build_substrate_info(tech.substrate)
 

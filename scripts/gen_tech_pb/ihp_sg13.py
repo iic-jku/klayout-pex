@@ -86,6 +86,11 @@ class TechBuilder:
             add_layer(tech, VIA,      "TopVia2",   (133, 0),  None,      None,       "Defines via between TopMetal1 and TopMetal2")
             add_layer(tech, METAL,    "TopMetal2", (134, 0),  (134, 2),  (134, 25),  "Defines 2-nd thick TopMetal layer")
 
+        set_fill_layers(tech, {"Activ": (1, 22), "GatPoly": (5, 22), "Metal1": (8, 22), "Metal2": (10, 22),
+                               "Metal3": (30, 22), "Metal4": (50, 22), "TopMetal1": (126, 22)})
+        if self.is_g2:
+            set_fill_layers(tech, {"Metal5": (67, 22), "TopMetal2": (134, 22)})
+
     def build_lvs_computed_layers(self, tech: Technology):
         #                        purpose kind  lvs_name         lvs_gds_pair  orig. layer  process layer    description
         add_computed_layer(tech, PWELL, KREG, "pwell",          (46, 0),      "PWell",     None,            "Computed layer for PWell")
@@ -856,6 +861,30 @@ class TechBuilder:
             add_exclusion_marker(tech, "Metal5.noqrc", (67, 28), layer_names=["Metal5"], on_request=True)
             add_exclusion_marker(tech, "TopMetal2.noqrc", (134, 28), layer_names=["TopMetal2"], on_request=True)
 
+    def build_device_layers(self, tech: Technology):
+        activ, gatpoly = (1, 0), (5, 0)
+        recog_esd, recog_diode, recog_mom, recog_momf = (99, 30), (99, 31), (99, 39), (99, 40)
+        extblock, polyres, nbulay, trans = (111, 0), (128, 0), (32, 0), (26, 0)
+        ind, mim, substrate = (27, 0), (36, 0), (40, 0)
+
+        #                       LVS device classes                                             layers
+        add_device_layers(tech, ["sg13_lv_*", "sg13_hv_nmos", "sg13_hv_pmos", "rf?mos*"],      [activ, gatpoly])
+        add_device_layers(tech, ["sg13_hv_svaricap", "sg13_moscap_*"],                         [activ, gatpoly])
+        add_device_layers(tech, ["rsil", "rppd", "rhigh"],                                     [polyres, extblock])
+        add_device_layers(tech, ["ntap1", "pnpMPA"],                                           [activ])
+        add_device_layers(tech, ["ptap1"],                                                     [substrate])
+        add_device_layers(tech, ["npn13G2*"],                                                  [trans])
+        add_device_layers(tech, ["diodev*", "idiodev*", "nmoscl_*"],                           [recog_esd])
+        add_device_layers(tech, ["dantenna", "dpantenna", "schottky_nbl1"],                    [recog_diode])
+        add_device_layers(tech, ["isolbox"],                                                   [nbulay, recog_diode])
+        add_device_layers(tech, ["inductor", "inductor3"],                                     [ind])
+        add_device_layers(tech, ["cap_cmim", "rfcmim"],                                        [mim])
+        add_device_layers(tech, ["cap_cmomi"],                                                 [recog_mom])
+        add_device_layers(tech, ["cap_cmomf"],                                                 [recog_momf])
+        for device_class, layer in (("res_metal1", 8), ("res_metal2", 10), ("res_metal3", 30), ("res_metal4", 50),
+                                    ("res_metal5", 67), ("res_topmetal1", 126), ("res_topmetal2", 134)):
+            add_device_layers(tech, [device_class], [(layer, 29)])
+
     def build_tech(self) -> Technology:
         tech = Technology(name=self.variant.value)
 
@@ -868,6 +897,7 @@ class TechBuilder:
         self.build_process_parasitics_info(tech.process_parasitics)
 
         self.build_device_models_info(tech.device_models)
+        self.build_device_layers(tech)
 
         self.build_substrate_info(tech.substrate)
 

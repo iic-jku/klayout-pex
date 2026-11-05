@@ -660,6 +660,32 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #         their files in libs.ref/sky130_fd_pr/spice are empty
 
 
+def build_device_layers(tech: Technology):
+    diff, tap, poly = (65, 20), (65, 44), (66, 20)
+    pr = "sky130_fd_pr__"
+
+    #                       LVS device classes                                           layers
+    add_device_layers(tech, [f"{pr}nfet_*", f"{pr}pfet_*",
+                             "sky130_fd_bs_flash__special_sonosfet_star"],               [diff, poly])
+    add_device_layers(tech, [f"{pr}cap_var_*"],                                          [tap, poly])
+    add_device_layers(tech, [f"{pr}npn_*"],                                              [(82, 20)])  # npnid
+    add_device_layers(tech, [f"{pr}pnp_*"],                                              [(82, 44)])  # pnpid
+    add_device_layers(tech, [f"{pr}diode_*"],                                            [(81, 23)])  # areaid_de
+    add_device_layers(tech, [f"{pr}photodiode"],                                         [(81, 81)])  # areaid_po
+    add_device_layers(tech, [f"{pr}res_generic_nd*", f"{pr}res_generic_pd*"],            [(65, 13)])  # diff_res
+    add_device_layers(tech, [f"{pr}res_iso_pw"],                                         [(64, 13)])  # pwell_res
+    add_device_layers(tech, [f"{pr}res_generic_po", f"{pr}res_high_po_*",
+                             f"{pr}res_xhigh_po_*"],                                     [(66, 13)])  # poly_res
+    for name, layer in (("l1", 67), ("m1", 68), ("m2", 69), ("m3", 70), ("m4", 71), ("m5", 72)):
+        add_device_layers(tech, [f"{pr}res_generic_{name}"],                             [(layer, 13)])
+    for name, layer in (("m2", 69), ("m3", 70), ("m4", 71)):
+        add_device_layers(tech, [f"{pr}fuse_{name}"],                                    [(layer, 17)])
+    add_device_layers(tech, [f"{pr}model__cap_mim"],                                     [(89, 44)])  # capm
+    add_device_layers(tech, [f"{pr}model__cap_mim_m4"],                                  [(97, 44)])  # capm2
+    add_device_layers(tech, [f"{pr}cap_vpp_*"],                                          [(82, 64)])  # vpp
+    add_device_layers(tech, [f"{pr}rf_ind_*"],                                           [(82, 24)])  # inductor
+
+
 def build_substrate_info(si: SubstrateInfo):
     # NOTE: sky130.lvs connects the substrate (sub) to the global net sky130_gnd ($lvs_sub would name it otherwise).
     #       sub has the shapes of the bulk terminals of the transistors only, so the p-taps (ptap_conn)
@@ -689,6 +715,7 @@ def build_tech() -> Technology:
     build_process_parasitics_info(tech.process_parasitics)
 
     build_device_models_info(tech.device_models)
+    build_device_layers(tech)
 
     build_substrate_info(tech.substrate)
 

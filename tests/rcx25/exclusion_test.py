@@ -23,12 +23,15 @@
 #
 
 from __future__ import annotations
+
+from fnmatch import fnmatchcase
 import math
 from typing import *
 
 import allure
 import klayout.db as kdb
 import pytest
+from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
 from klayout_pex.rcx25.exclusion import (
     ExclusionError,
@@ -56,6 +59,7 @@ from klayout_pex.rcx25.extraction_results import (
     SidewallKey,
 )
 from klayout_pex.rcx25.r.r_extractor import port_of_cut
+from klayout_pex.tech_info import TechInfo
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 
@@ -436,6 +440,20 @@ def test_marker_layer_specification(specification: str, expected: MarkerLayer):
 def test_invalid_marker_layer_specification_lists_the_valid_values(specification: str, listed: str):
     with pytest.raises(ExclusionError, match=listed):
         MarkerLayer.parse(specification, TECH_MARKERS, ['Metal2', 'Metal3'])
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name', ['ihp-sg13g2', 'ihp-sg13cmos5l', 'sky130A', 'gf180mcuD'])
+def test_tech_info_tells_the_layers_of_each_device_class_once(pdk_name: str):
+    tech_info = TechInfo.from_json(PDK.from_string(pdk_name).config.tech_pb_json_path, dielectric_filter=None)
+    patterns = [(pattern, device_layers) for device_layers in tech_info.tech.device_layers
+                for pattern in device_layers.lvs_device_class_patterns]
+    for mapping in tech_info.tech.device_models.device_model_mappings:
+        matching = [pattern for pattern, _ in patterns if fnmatchcase(mapping.lvs_device_class_name, pattern)]
+        assert len(matching) == 1, mapping.lvs_device_class_name
+        assert tech_info.device_gds_pairs(mapping.lvs_device_class_name)
+    assert tech_info.device_gds_pairs('nothing') is None
 
 
 @allure.parent_suite(parent_suite)

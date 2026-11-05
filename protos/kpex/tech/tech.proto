@@ -58,6 +58,9 @@ message Technology {
 
     // The layers of the layout that mark what a model has the parasitics of
     repeated ExclusionMarker exclusion_markers = 500;
+
+    // The layers of the layout that LVS makes the devices from
+    repeated DeviceLayers device_layers = 510;
 }
 
 // A layer that marks a region of the layout, whose parasitics a model has (e.g. an EM model of an inductor),
@@ -77,6 +80,17 @@ message ExclusionMarker {
 
     // not on by default, e.g. as a pcell draws it around a device the extraction knows anyway
     bool on_request = 5;
+}
+
+// The layers of the layout that LVS makes the devices of some classes from, which tell the cell that draws a device,
+// as the LVS netlist is flat. Not what goes on beyond a device or overhangs it, or what a parent can draw over it,
+// e.g. the wells, the implants, the gate oxide, or the metal that leads to it
+message DeviceLayers {
+    // shell-style patterns of the names of the LVS device classes, e.g. "sky130_fd_pr__cap_vpp_*"
+    repeated string lvs_device_class_patterns = 1;
+
+    // read from the layout, as the LVS database only has the shapes of nets
+    repeated GDSPair gds_pairs = 2;
 }
 
 message GDSPair {
@@ -110,6 +124,9 @@ message LayerInfo {
     GDSPair drw_gds_pair = 40;
     GDSPair pin_gds_pair = 50;
     GDSPair label_gds_pair = 60;
+
+    // the fill of the layer, which LVS joins to it (e.g. IHP Metal1.filler)
+    GDSPair fill_gds_pair = 70;
 }
 
 message ComputedLayerInfo {
