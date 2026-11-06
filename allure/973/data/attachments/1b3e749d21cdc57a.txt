@@ -1,0 +1,109 @@
+[13:00:14] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_plate_noqrc.lvsdb.gz' --out-dir                                               
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_plate_noqrc.gds.gz' --exclusion-markers ignore                              
+──────────────────────────────── Input Layout ─────────────────────────────────
+[13:00:14] INFO     No explicit top cell specified, using top   kpex_cli.py:854
+                    cell 'exclusion_plate_noqrc'                               
+[13:00:14] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:865
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:00:14] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1806
+[13:00:14] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1806
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:00:14] INFO     LVSDB: found 3pins                         extractor.py:481
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.csv                        
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.spice                      
+[13:00:14] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_plate_noqrc.lvsdb.gz' --out-dir                                               
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_plate_noqrc.gds.gz' --exclusion-markers tie --exclusion-marker-layer        
+Metal3.noqrc                                                                   
+──────────────────────────────── Input Layout ─────────────────────────────────
+[13:00:14] INFO     No explicit top cell specified, using top   kpex_cli.py:854
+                    cell 'exclusion_plate_noqrc'                               
+[13:00:14] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:865
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:00:14] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1806
+[13:00:14] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1806
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:00:14] INFO     LVSDB: found 3pins                         extractor.py:481
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.csv                        
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.spice                      
+[13:00:14] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1625
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_plate_noqrc.lvsdb.gz' --out-dir                                               
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_plate_noqrc.gds.gz' --exclusion-markers ignore                              
+──────────────────────────────── Input Layout ─────────────────────────────────
+[13:00:14] INFO     No explicit top cell specified, using top   kpex_cli.py:854
+                    cell 'exclusion_plate_noqrc'                               
+[13:00:14] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:865
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:00:14] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1806
+[13:00:14] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1806
+[13:00:14] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1806
+[13:00:14] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1806
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:00:14] INFO     LVSDB: found 3pins                         extractor.py:481
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.csv                        
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_noqrc__exclusion
+_plate_noqrc\exclusion_plate_noqrc_k25d_pex_netlist.spice                      
