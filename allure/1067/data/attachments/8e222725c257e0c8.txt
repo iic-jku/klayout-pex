@@ -1,0 +1,29 @@
+WARNING  __kpex__:kpex_cli.py:1778 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1841 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/single_plate_6um_x_8um_m1_over_isolated_pwell.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:924 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1996 Peak memory (resident set size) after preparing the LVSDB: 817.1 MiB
+INFO     __kpex__:kpex_cli.py:2000 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:2000 (32, 0) -> (nbulay_drw)
+INFO     __kpex__:kpex_cli.py:2000 (46, 0) -> (pwell iso_pwell)
+INFO     __kpex__:kpex_cli.py:2000 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2000 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2000 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2000 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1455 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 2pins
+WARNING  __kpex__:r_extractor.py:526 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 817.1 MiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 817.1 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1487 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1487 C1;$3;A;0.274;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C2;$3;W;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C3;A;VSUBS;0.261;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C4;A;W;2.247;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C5;VSUBS;W;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1490 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1507 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell/single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1543 Peak memory (resident set size) after the netlist: 817.1 MiB
+WARNING  __kpex__:kpex_cli.py:1560 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $3 (0.282 fF), $4 (0.000 fF), $5 (0.000 fF)
+INFO     __kpex__:kpex_cli.py:1871 Peak memory (resident set size) after the run: 817.1 MiB
