@@ -220,7 +220,7 @@ class Pex25DTextReader:
         self.meta_keys: Dict[str, str] = {}
         self.include_stack: List[str] = []
         self.domain_box_record: Optional[Record] = None
-        self.domain_margin_records: List[Record] = []
+        self.domain_margin_record: Optional[Record] = None
 
     # ---------------------------------------------------------- diagnostics
 
@@ -774,12 +774,21 @@ class Pex25DTextReader:
                 return
             values[axis] = value
         cursor.end()
+        if self.domain_margin_record is not None:
+            self.repeated_domain_record(record, self.domain_margin_record)
+            return
+        self.domain_margin_record = record
         if self.domain_box_record is not None:
             self.ignore_domain_margin(record, self.domain_box_record)
             return
         margin = self.file.domain_margin
         margin.x, margin.y, margin.z = values['X'], values['Y'], values['Z']
-        self.domain_margin_records.append(record)
+
+    def repeated_domain_record(self, record: Record, first: Record):
+        """Like GROUND_PLANE, each is given at most once, and the first one is kept."""
+        self.error('PEX25D-E0255',
+                   f"{record.head} is already given in {first.file}:{first.line}",
+                   record, tier=Tier.SEMANTIC)
 
     def ignore_domain_margin(self, margin_record: Record, box_record: Record):
         """
@@ -806,10 +815,12 @@ class Pex25DTextReader:
             corners[keyword] = coordinates
         cursor.end()
 
-        if self.domain_box_record is None:
-            for margin_record in self.domain_margin_records:
-                self.ignore_domain_margin(margin_record, record)
+        if self.domain_box_record is not None:
+            self.repeated_domain_record(record, self.domain_box_record)
+            return
         self.domain_box_record = record
+        if self.domain_margin_record is not None:
+            self.ignore_domain_margin(self.domain_margin_record, record)
 
         box = self.file.domain_box.box
         box.lower_left.x, box.lower_left.y, box.lower_left.z = corners['LL']

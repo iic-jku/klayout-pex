@@ -170,6 +170,28 @@ class Pex25DReaderTest(unittest.TestCase):
                 assert report.diagnostics[0].severity == Severity.WARNING
                 assert report.diagnostics[0].source.line == text.splitlines().index(margin) + 1
 
+    def test_e0255_a_repeated_domain_record(self):
+        # Like a repeated GROUND_PLANE: an error at the repeat, and the first one is kept
+        margin = 'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0'
+        for first, repeat, field in (
+                ('DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0',
+                 'DOMAIN_BOX LL -2.0 -2.0 -2.0 UR 6.0 6.0 6.0', 'domain_box'),
+                (margin, 'DOMAIN_MARGIN X 1.0 Y 1.0 Z 1.0', 'domain_margin')):
+            with self.subTest(repeat=repeat):
+                text = replacing(margin, f"{first}\n{repeat}")
+                report = DiagnosticsReport()
+                with self.assertRaises(ReadError):
+                    read(text, report=report)
+                assert codes(report) == ['PEX25D-E0255']
+                assert report.diagnostics[0].source.line == text.splitlines().index(repeat) + 1
+
+    def test_a_repeated_margin_beside_a_box_is_both_ignored_and_repeated(self):
+        text = replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0',
+                         'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0\n'
+                         'DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0\n'
+                         'DOMAIN_MARGIN X 1.0 Y 1.0 Z 1.0')
+        assert read_codes(text) == ['PEX25D-W0253', 'PEX25D-E0255']
+
     def test_read_error_is_raised_once_errors_exist(self):
         with self.assertRaises(ReadError):
             read(replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS'))
