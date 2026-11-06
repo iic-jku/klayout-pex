@@ -91,13 +91,21 @@ class SidewallAndFringeExtractor:
 
         self.all_layer_regions = layer_regions_by_name.values()
 
+    @staticmethod
+    def has_fringe(tech_info: TechInfo, layer_name: LayerName) -> bool:
+        """
+        Whether the edges of the layer have a fringe to the other layers
+
+        NOTE: the substrate (with its wells) and the diffusion are the bottom plates of the capacitances
+              of the layers above, whose fringe ends at them, while their own edges have none
+              (like in the magic techs): those between them are the devices' (e.g. the junctions)
+        """
+        return layer_name != tech_info.internal_substrate_layer_name and \
+            layer_name not in tech_info.process_diffusion_layer_names
+
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
-            # NOTE: the substrate (with its wells) and the diffusion are the bottom plates of the capacitances
-            #       of the layers above, whose fringe ends at them, while their own edges have none
-            #       (like in the magic techs): those between them are the devices' (e.g. the junctions)
-            if layer_name == self.tech_info.internal_substrate_layer_name or \
-               layer_name in self.tech_info.process_diffusion_layer_names:
+            if not self.has_fringe(self.tech_info, layer_name):
                 continue
 
             other_layer_regions = [
