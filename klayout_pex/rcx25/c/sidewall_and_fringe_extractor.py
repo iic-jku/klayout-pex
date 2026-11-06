@@ -483,7 +483,6 @@ class SidewallAndFringeExtractor:
             if not overlap_cap_spec:
                 overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
 
-            substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name[inside_layer_name]
             sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][
                 outside_layer_name]
 
