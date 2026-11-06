@@ -476,3 +476,13 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
                     report = DiagnosticsReport()
                     resolve(pex25d_file, report=report)
                     assert [d.code for d in report.diagnostics if d.severity == Severity.ERROR] == []
+
+    def test_simple_dielectrics_between_the_top_metal_and_the_background_are_reported(self):
+        # NOTE: no metal above bounds them, so they have no extent; gf180mcuD's pass and sin became the background
+        #       in turn, silently, until air replaced them (#470)
+        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+            pex25d_file = self.stack(PDK.GF180MCUD)
+        assert pex25d_file.background.name == 'air'
+        assert [c.args[0] for c in warning_mock.call_args_list] == [
+            f"Simple dielectric '{name}' has no metal above it in the process stack to bound it; skipping"
+            for name in ('pass', 'sin')]

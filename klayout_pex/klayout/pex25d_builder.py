@@ -451,7 +451,9 @@ class PEX25DBuilder:
         ground_plane_name = pex25d_file.ground_plane.name
         previous_metal: Optional[str] = None
 
-        # NOTE: PEX25D needs a background, so --diel never leaves it out
+        # The last simple dielectric with no metal above it is the material that fills whatever nothing
+        # else claims. PEX25D needs one, so --diel never leaves it out.
+        # NOTE: the others above the top metal have no extent, as a metal above bounds a simple dielectric
         background_names = [lyr.name for index, lyr in enumerate(layers)
                             if lyr.layer_type == LT.LAYER_TYPE_SIMPLE_DIELECTRIC and next_metal_after(index) is None]
         background_name = background_names[-1] if background_names else None
@@ -474,9 +476,7 @@ class PEX25DBuilder:
 
             above = next_metal_after(index)
 
-            # The last simple dielectric with no metal above it is the material
-            # that fills whatever nothing else claims.
-            if layer.layer_type == LT.LAYER_TYPE_SIMPLE_DIELECTRIC and above is None:
+            if layer.name == background_name:
                 if not self.claim_name(layer.name, 'Background'):
                     continue
                 if layer.name not in self.included_dielectric_names:
@@ -519,8 +519,8 @@ class PEX25DBuilder:
                               below: Optional[str],
                               above: Optional[str]) -> None:
         if not below or not above:
-            warning(f"Simple dielectric '{layer.name}' has no metal below or above it "
-                    f"in the process stack; skipping")
+            warning(f"Simple dielectric '{layer.name}' has no metal {'below' if not below else 'above'} it "
+                    f"in the process stack to bound it; skipping")
             return
         if not self.claim_name(layer.name, 'Simple dielectric'):
             return
