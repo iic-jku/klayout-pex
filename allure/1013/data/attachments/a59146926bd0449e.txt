@@ -1,0 +1,111 @@
+[15:56:44] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1776
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/diode_schottky_nbl1.lvsdb.gz --out-dir                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:56:44] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:914
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:56:44] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_ihp-sg13g2/diode_schottky_nbl1__dio                  
+                    de_schottky_nbl1/kpex_result.json                           
+[15:56:44] INFO     Peak memory (resident set size) after       kpex_cli.py:2000
+                    preparing the LVSDB: 1.7 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:56:44] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:2004
+[15:56:44] INFO     (31, 0) -> (nwell_drw)                      kpex_cli.py:2004
+[15:56:44] INFO     (32, 0) -> (nbulay_drw)                     kpex_cli.py:2004
+[15:56:44] INFO     (46, 0) -> (pwell iso_pwell pwell_sub)      kpex_cli.py:2004
+[15:56:44] INFO     (65, 244) -> (ptap)                         kpex_cli.py:2004
+[15:56:44] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:2004
+[15:56:44] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:2004
+[15:56:44] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:2004
+[15:56:44] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:2004
+[15:56:44] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:2004
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:56:44] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1453
+[15:56:44] INFO     LVSDB: found 3pins                          extractor.py:482
+[15:56:44] WARNING  The resistance network leaves out these   r_extractor.py:525
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS nwell_drw)                                   
+[15:56:44] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.7 GiB                              
+[15:56:44] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.7 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$4;A;0.016;                                                                  
+C2;$4;A.$0.Metal1;0.012;                                                        
+C3;$4;A.$10.Metal2;0.003;                                                       
+C4;$4;A.$11.Metal2;0.011;                                                       
+C5;$4;A.$2.Metal1;0.012;                                                        
+C6;$4;A.$6.Metal2;0.015;                                                        
+C7;$4;A.P0.Metal1;0.006;                                                        
+C8;$4;K;0.024;                                                                  
+C9;$4;K.P0.Metal1;0.145;                                                        
+C10;$6;A.$0.Metal1;0.011;                                                       
+C11;$6;A.$11.Metal2;0.003;                                                      
+C12;$6;A.$2.Metal1;0.011;                                                       
+C13;$6;A.$6.Metal2;0.003;                                                       
+C14;$6;A.P0.Metal1;0.013;                                                       
+C15;$6;K;0.003;                                                                 
+C16;$6;K.P0.Metal1;0.009;                                                       
+C17;A;K;0.002;                                                                  
+C18;A;K.P0.Metal1;0.031;                                                        
+C19;A;sub!;0.149;                                                               
+C20;A;VSUBS;0.154;                                                              
+C21;A.$0.Metal1;K.P0.Metal1;0.024;                                              
+C22;A.$0.Metal1;sub!;0.011;                                                     
+C23;A.$0.Metal1;VSUBS;0.008;                                                    
+C24;A.$10.Metal2;K.P0.Metal1;0.006;                                             
+C25;A.$10.Metal2;sub!;0.01;                                                     
+C26;A.$10.Metal2;VSUBS;0.015;                                                   
+C27;A.$11.Metal2;K;0.018;                                                       
+C28;A.$11.Metal2;K.P0.Metal1;0.02;                                              
+C29;A.$11.Metal2;sub!;0.022;                                                    
+C30;A.$11.Metal2;VSUBS;0.043;                                                   
+C31;A.$2.Metal1;K;0.014;                                                        
+C32;A.$2.Metal1;K.P0.Metal1;0.024;                                              
+C33;A.$6.Metal2;K.P0.Metal1;0.028;                                              
+C34;A.$6.Metal2;sub!;0.026;                                                     
+C35;A.$6.Metal2;VSUBS;0.041;                                                    
+C36;A.P0.Metal1;K.P0.Metal1;0.029;                                              
+C37;K;sub!;0.23;                                                                
+C38;K;VSUBS;0.074;                                                              
+C39;K.P0.Metal1;sub!;0.279;                                                     
+C40;K.P0.Metal1;VSUBS;0.012;                                                    
+C41;VSUBS;sub!;0.492;                                                           
+R1;A;A.$6.Metal2;;0.176                                                         
+R2;A.$0.Metal1;A.$6.Metal2;;4.5                                                 
+R3;A.$0.Metal1;A.P0.Metal1;;0.067                                               
+R4;A.$10.Metal2;A.$11.Metal2;;0.061                                             
+R5;A.$10.Metal2;A.$6.Metal2;;0.061                                              
+R6;A.$10.Metal2;A.P0.Metal1;;4.5                                                
+R7;A.$11.Metal2;A.$2.Metal1;;4.5                                                
+R8;A.$2.Metal1;A.P0.Metal1;;0.067                                               
+R9;K;K.P0.Metal1;;0.055                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/diode_schottky_nbl1_
+_diode_schottky_nbl1/diode_schottky_nbl1_k25d_pex_netlist.csv                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/diode_schottky_nbl1_
+_diode_schottky_nbl1/diode_schottky_nbl1_k25d_pex_netlist.spice                 
+[15:56:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1541
+                    netlist: 1.7 GiB                                            
+[15:56:45] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1558
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: $4 (0.243 fF), $6                  
+                    (0.053 fF), $7 (0.000 fF)                                   
+[15:56:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1875
+                    run: 1.7 GiB                                                

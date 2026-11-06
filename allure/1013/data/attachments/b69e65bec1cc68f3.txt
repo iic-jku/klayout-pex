@@ -1,0 +1,114 @@
+[15:52:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1776
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode CC --blackbox y --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/nfet_10v0_asym_pair_m1.lvsdb.gz --out-dir                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:52:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:914
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:52:49] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_gf180mcuD/nfet_10v0_asym_pair_m1__n                  
+                    fet_10v0_asym_pair_m1/kpex_result.json                      
+[15:52:49] INFO     Peak memory (resident set size) after       kpex_cli.py:2000
+                    preparing the LVSDB: 276.4 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:52:49] INFO     (32, 0) -> (nsd nd_ldmos)                   kpex_cli.py:2004
+[15:52:49] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:2004
+[15:52:49] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:2004
+[15:52:49] INFO     (33, 4401) -> (contact_nsd_con)             kpex_cli.py:2004
+[15:52:49] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:2004
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:52:49] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1453
+[15:52:49] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 276.4 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;D;G1;0.116;                                                                  
+C2;D;G2;0.116;                                                                  
+C3;D;S1;0.069;                                                                  
+C4;D;S2;0.069;                                                                  
+C5;D;VSUBS;0.03;                                                                
+C6;G1;G2;0.088;                                                                 
+C7;G1;S1;0.118;                                                                 
+C8;G1;VSUBS;0.607;                                                              
+C9;G2;S2;0.118;                                                                 
+C10;G2;VSUBS;0.607;                                                             
+C11;S1;VSUBS;0.188;                                                             
+C12;S2;VSUBS;0.188;                                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair_m
+1__nfet_10v0_asym_pair_m1/nfet_10v0_asym_pair_m1_k25d_pex_netlist.csv           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair_m
+1__nfet_10v0_asym_pair_m1/nfet_10v0_asym_pair_m1_k25d_pex_netlist.spice         
+[15:52:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1541
+                    netlist: 276.4 MiB                                          
+[15:52:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1875
+                    run: 276.4 MiB                                              
+[15:52:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1776
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode CC --blackbox y --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/pfet_10v0_asym_pair_m1.lvsdb.gz --out-dir                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:52:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:914
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:52:49] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_gf180mcuD/pfet_10v0_asym_pair_m1__p                  
+                    fet_10v0_asym_pair_m1/kpex_result.json                      
+[15:52:49] INFO     Peak memory (resident set size) after       kpex_cli.py:2000
+                    preparing the LVSDB: 276.4 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:52:49] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:2004
+[15:52:49] INFO     (31, 0) -> (psd_dw pd_ldmos)                kpex_cli.py:2004
+[15:52:49] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:2004
+[15:52:49] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:2004
+[15:52:49] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:2004
+[15:52:49] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:2004
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:52:49] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1453
+[15:52:49] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 276.4 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$6;D;0.02;                                                                   
+C2;$6;G1;0.534;                                                                 
+C3;$6;G2;0.534;                                                                 
+C4;$6;S1;0.089;                                                                 
+C5;$6;S2;0.089;                                                                 
+C6;D;G1;0.116;                                                                  
+C7;D;G2;0.116;                                                                  
+C8;D;S1;0.069;                                                                  
+C9;D;S2;0.069;                                                                  
+C10;D;VSUBS;0.01;                                                               
+C11;G1;G2;0.088;                                                                
+C12;G1;S1;0.118;                                                                
+C13;G1;VSUBS;0.073;                                                             
+C14;G2;S2;0.118;                                                                
+C15;G2;VSUBS;0.073;                                                             
+C16;S1;VSUBS;0.098;                                                             
+C17;S2;VSUBS;0.098;                                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.csv           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.spice         
+[15:52:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1541
+                    netlist: 276.4 MiB                                          
+[15:52:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1875
+                    run: 276.4 MiB                                              
