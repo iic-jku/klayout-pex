@@ -41,8 +41,11 @@ import klayout.db as kdb
 import klayout.rdb as rdb
 
 from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.kpex_cli import KpexCLI
+from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
+from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
+from klayout_pex.tech_info import TechDefError, TechInfo
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from tests.common.cli_runner import run_cli
 from tests.common.device_model_mappings import NMOS, device_models
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
@@ -124,6 +127,59 @@ def test_log_names_the_peak_memory_of_a_failed_run(tmp_path):
                                                 '--out-dir', str(tmp_path)])
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert logged_peak_memory_stages(output) == ['the run'], output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+def test_help_names_the_default_halo_of_the_tech_infos():
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--help'])
+    assert code == 0, output
+    assert "(default is the tech info's, 8 µm in all PDKs)" in ' '.join(output.split()), output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('halo_by_pdk, default_help', [
+    ({'gf180mcuD': 8.0, 'sky130A': 8.0}, "the tech info's, 8 µm in all PDKs"),
+    ({'sky130A': 10.0, 'gf180mcuD': 8.0}, "the tech info's, 8 µm in gf180mcuD, 10 µm in sky130A"),
+    ({}, "the tech info's"),
+], ids=['same halo', 'different halos', 'no tech info'])
+def test_halo_default_help_names_the_halo_of_each_pdk(halo_by_pdk: Dict[str, float], default_help: str):
+    assert halo_default_help(halo_by_pdk) == default_help
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('failure', [FileNotFoundError('missing'), TechDefError('broken')], ids=['missing', 'broken'])
+def test_pdk_without_readable_tech_info_is_left_out_of_the_halo_help(failure: Exception):
+    # NOTE: its runs fail with an error (validate_args), the help and the runs of the other PDKs don't
+    parse_tech_def = TechInfo.parse_tech_def
+
+    def parse_but_sky130A(jsonpb_path: str) -> tech_pb2.Technology:
+        if jsonpb_path == PDK.SKY130A.config.tech_pb_json_path:
+            raise failure
+        return parse_tech_def(jsonpb_path)
+
+    side_halo_by_pdk.cache_clear()
+    try:
+        with mock.patch.object(TechInfo, 'parse_tech_def', side_effect=parse_but_sky130A):
+            assert sorted(side_halo_by_pdk()) == sorted(set(PDK) - {PDK.SKY130A})
+    finally:
+        side_halo_by_pdk.cache_clear()
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Logging")
+@pytest.mark.parametrize('halo_args, logged_halo', [
+    ([], "Sidewall halo: 8 µm (tech info of sky130A)"),
+    (['--halo', '2.5'], "Sidewall halo: 2.5 µm (--halo)"),
+], ids=['tech info', 'custom'])
+def test_log_names_the_halo_of_the_run(halo_args: List[str], logged_halo: str, tmp_path):
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', *halo_args,
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert logged_halo in output.splitlines(), output
 
 
 @allure.parent_suite("Unit Tests")

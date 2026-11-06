@@ -27,10 +27,12 @@ import argparse
 import contextlib
 from datetime import datetime
 from enum import StrEnum
+import functools
 import logging
 import os
 import os.path
 from pathlib import Path
+import google.protobuf.json_format
 import rich.console
 import rich.markdown
 import rich.text
@@ -172,6 +174,33 @@ class ArgumentValidationError(Exception):
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
+
+
+@functools.cache
+def side_halo_by_pdk() -> Dict[PDK, float]:
+    """
+    :return: the side halo (in µm) of the tech info of each PDK, but of those without a readable one,
+             which fail their own runs (see validate_args), rather than the help of all
+    """
+    side_halos: Dict[PDK, float] = {}
+    for pdk in PDK:
+        try:
+            side_halos[pdk] = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path).process_parasitics.side_halo
+        except (OSError, TechDefError, google.protobuf.json_format.ParseError):
+            continue
+    return side_halos
+
+
+def halo_default_help(halo_by_pdk: Mapping[str, float]) -> str:
+    """
+    :param halo_by_pdk: the side halo (in µm) of each PDK (see side_halo_by_pdk)
+    :return: the default of --halo for its help, the side halo of the tech info,
+             e.g. "the tech info's, 8 µm in all PDKs" or "the tech info's, 8 µm in gf180mcuD, 10 µm in sky130A"
+    """
+    halos = [f"{halo:g} µm in {pdk}" for pdk, halo in sorted(halo_by_pdk.items())]
+    if len(set(halo_by_pdk.values())) == 1:
+        halos = [f"{next(iter(halo_by_pdk.values())):g} µm in all PDKs"]
+    return ', '.join(["the tech info's"] + halos)
 
 
 class KpexCLI:
@@ -422,8 +451,8 @@ class KpexCLI:
                                help=render_enum_help(topic='mode', enum_cls=PEXMode))
         group_25d.add_argument("--halo", dest="halo",
                                  type=float, default=None,
-                                 help="Custom sidewall halo distance (in µm) to override tech info "
-                                      "(default is no custom halo)")
+                                 help=f"Custom sidewall halo distance (in µm) to override tech info "
+                                      f"(default is {halo_default_help(side_halo_by_pdk())})")
         group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
                                 type=true_or_false, default=True,
                                 help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
@@ -1312,6 +1341,10 @@ class KpexCLI:
         #       for now we use 0
         args.rcx25d_delaunay_amax = 0
         args.rcx25d_delaunay_b = 0.5
+
+        if args.pex_mode.need_capacitance():
+            halo_source = '--halo' if args.halo is not None else f"tech info of {args.pdk}"
+            info(f"Sidewall halo: {tech_info.tech.process_parasitics.side_halo:g} µm ({halo_source})")
 
         extractor = RCX25Extractor(pex_context=pex_context,
                                    pex_mode=args.pex_mode,
