@@ -167,6 +167,22 @@ class Pex25DValidatorTest(unittest.TestCase):
         scene.layers[0].zhigh = scene.layers[0].zlow
         assert 'PEX25D-E0271' in check_scene(scene)
 
+    def test_e0271_a_ground_plane_with_no_height(self):
+        assert 'PEX25D-E0211' in check(
+            replacing('GROUND_PLANE subs Z_OFFSETS -0.4 -0.1', 'GROUND_PLANE subs Z_OFFSETS -0.1 -0.4'))
+
+        scene = resolve(read(MINIMAL))
+        scene.ground_plane.zhigh = scene.ground_plane.zlow
+        assert check_scene(scene) == ['PEX25D-E0271']
+
+    def test_e0216_a_negative_conformal_thickness(self):
+        assert 'PEX25D-E0216' in check(
+            replacing('THICKNESS_BESIDE_WRAPPED 0.08', 'THICKNESS_BESIDE_WRAPPED -0.08'))
+
+        scene = resolve(read(MINIMAL))
+        next(d for d in scene.dielectrics if d.name == 'lint').thickness_on_field = -1
+        assert check_scene(scene) == ['PEX25D-E0216']
+
     def test_a_via_between_abutting_layers_is_not_an_error(self):
         scene = resolve(read(MINIMAL))
         via = next(l for l in scene.layers if l.name == 'via1')

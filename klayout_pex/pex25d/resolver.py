@@ -137,6 +137,10 @@ class Resolver:
         """
         if self.file.HasField('ground_plane'):
             ground_plane = self.file.ground_plane
+            if ground_plane.zhigh <= ground_plane.zlow:
+                self.diagnose('PEX25D-E0211',
+                              f"GROUND_PLANE '{ground_plane.name}': zlow must be less "
+                              f"than zhigh", source=ground_plane)
             self.declare(Profile(ground_plane.name, ground_plane.zlow,
                                  ground_plane.zhigh, is_conductive=True),
                          ground_plane)
@@ -388,6 +392,9 @@ class Resolver:
             return below[0], above[0]
 
         if dielectric.kind == kinds.DIELECTRIC_KIND_CONFORMAL:
+            problem = conformal_thickness_problem(dielectric.name, dielectric.conformal)
+            if problem is not None:
+                self.diagnose('PEX25D-E0216', problem, source=dielectric)
             wrapped = self.wrapped_extent(dielectric.wraps)
             if wrapped is None:
                 return None
@@ -647,6 +654,23 @@ def lateral_of(dielectric: Any) -> int:
     if dielectric.kind == kinds.DIELECTRIC_KIND_CONFORMAL:
         return dielectric.conformal.thickness_beside_wrapped
     return 0
+
+
+def conformal_thickness_problem(name: str, film: Any) -> Optional[str]:
+    """
+    Why the thicknesses of a conformal film are invalid, or ``None``.
+
+    :param film: a ``ConformalDielectric`` or a ``ResolvedDielectric``, which
+        both carry the thicknesses; none of them may be negative
+    """
+    negative = [f"{keyword} {getattr(film, keyword.lower())}"
+                for keyword in ('THICKNESS_OVER_WRAPPED', 'THICKNESS_BESIDE_WRAPPED',
+                                'THICKNESS_ON_FIELD')
+                if getattr(film, keyword.lower()) < 0]
+    if not negative:
+        return None
+    return (f"DIELECTRIC_CONFORMAL '{name}' has a negative "
+            f"{' '.join(negative)} (grid units)")
 
 
 def polygon_bounds_tuple(polygon: Any) -> Tuple[int, int, int, int]:

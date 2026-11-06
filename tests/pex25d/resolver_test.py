@@ -139,6 +139,20 @@ class Pex25DResolverTest(unittest.TestCase):
         assert 'PEX25D-E0211' in resolve_codes(
             replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS 1.4 1.0'))
 
+    def test_e0211_ground_plane_without_height(self):
+        for z_offsets in ('-0.1 -0.4', '-0.1 -0.1'):
+            with self.subTest(z_offsets=z_offsets):
+                assert 'PEX25D-E0211' in resolve_codes(
+                    replacing('GROUND_PLANE subs Z_OFFSETS -0.4 -0.1',
+                              f"GROUND_PLANE subs Z_OFFSETS {z_offsets}"))
+
+    def test_e0216_negative_conformal_thickness(self):
+        for old, new in (('THICKNESS_OVER_WRAPPED 0.1', 'THICKNESS_OVER_WRAPPED -0.1'),
+                         ('THICKNESS_BESIDE_WRAPPED 0.08', 'THICKNESS_BESIDE_WRAPPED -0.08'),
+                         ('THICKNESS_ON_FIELD 0.0', 'THICKNESS_ON_FIELD -0.1')):
+            with self.subTest(clause=new):
+                assert resolve_codes(replacing(old, new)) == ['PEX25D-E0216']
+
     def test_e0212_connects_endpoints_out_of_order(self):
         assert 'PEX25D-E0212' in resolve_codes(
             replacing('VIA via1 CONNECTS met1 met2', 'VIA via1 CONNECTS met2 met1'))
