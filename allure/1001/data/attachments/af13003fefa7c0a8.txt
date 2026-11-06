@@ -1,0 +1,48 @@
+[15:17:27] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_plate_pair_m2m3.lvsdb.gz' --out-dir                                           
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[15:17:27] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[15:17:27] INFO     Peak memory (resident set size) after      kpex_cli.py:1858
+                    preparing the LVSDB: 1.9 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:17:27] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1862
+[15:17:27] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1862
+[15:17:27] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1862
+[15:17:27] INFO     (50, 2) -> (metal4_pin_con)                kpex_cli.py:1862
+[15:17:27] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1862
+[15:17:27] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1862
+[15:17:27] INFO     (50, 0) -> (metal4_n_mom)                  kpex_cli.py:1862
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:17:27] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1370
+[15:17:27] INFO     LVSDB: found 3pins                         extractor.py:482
+[15:17:27] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.9 GiB                             
+[15:17:27] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.9 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;B;1.387;                                                                  
+C2;A;P;4.28;                                                                   
+C3;A;VSUBS;5.436;                                                              
+C4;B;P;4.721;                                                                  
+C5;B;VSUBS;2.272;                                                              
+C6;P;VSUBS;6.722;                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_pair_m2m3__exclu
+sion_plate_pair_m2m3\exclusion_plate_pair_m2m3_k25d_pex_netlist.csv            
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_plate_pair_m2m3__exclu
+sion_plate_pair_m2m3\exclusion_plate_pair_m2m3_k25d_pex_netlist.spice          
+[15:17:27] INFO     Peak memory (resident set size) after the  kpex_cli.py:1452
+                    netlist: 1.9 GiB                                           
+[15:17:27] INFO     Peak memory (resident set size) after the  kpex_cli.py:1741
+                    run: 1.9 GiB                                               
