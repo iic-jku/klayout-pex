@@ -154,13 +154,15 @@ def test_cli_exports_with_an_installed_plugin(
       '--stl', '--geo-check'],
      {'field_margin_um': 15.0, 'delaunay_amax': 0.5, 'delaunay_b': 0.8,
       'write_stl': True, 'geometry_check': True}),
+    (['--field-margin', '0', '--delaunay-amax', '0', '--delaunay-b', '1.1'],
+     {'field_margin_um': 0.0, 'delaunay_amax': 0.0, 'delaunay_b': 1.1}),
     (['--option', 'mesh_size=0.5', '--option', 'order=2', '--option', 'verbose=true',
       '--option', 'boundary=ground', '--option', 'label="10"', '--option', 'note='],
      {'mesh_size': 0.5, 'order': 2, 'verbose': True, 'boundary': 'ground', 'label': '10',
       'note': ''}),
     (['--field-margin', '15', '--option', 'mesh_size=1e-1'],
      {'field_margin_um': 15.0, 'mesh_size': 0.1}),
-], ids=['none', 'flags', 'options', 'flags-and-options'])
+], ids=['none', 'flags', 'flags-at-bounds', 'options', 'flags-and-options'])
 def test_cli_passes_only_explicit_export_options(
         install_exporter: Callable[..., str], tmp_path: Path,
         extra_arguments: List[str], expected: Dict[str, Any]):
@@ -203,6 +205,33 @@ def test_cli_rejects_malformed_options_before_loading(
     assert completion.value.code == ExitCode.USAGE
     assert message in caplog.text
     assert module not in sys.modules
+
+
+@pytest.mark.parametrize('option, value, expected', [
+    pytest.param(option, value, expected, id=f'{option}={value}')
+    for option, values, expected in (
+        ('--field-margin', ('-1', 'nan', 'inf'), ">= 0 (in µm)"),
+        ('--delaunay-amax', ('-1', 'nan', 'inf'), ">= 0 (in µm²)"),
+        ('--delaunay-b', ('-1', '1.5', 'nan', 'inf'), "from 0 to 1.1"),
+    )
+    for value in values
+])
+def test_cli_rejects_export_flags_out_of_range_before_loading(
+        tmp_path: Path, capsys: pytest.CaptureFixture, option: str, value: str, expected: str):
+    # NOTE: a --delaunay-b of 1.5 kept the triangulation from finishing, a negative --field-margin drew
+    #       the unbounded materials inside the geometry, the others were ignored or crashed the exporter (#432)
+    from klayout_pex.pex25d.diagnostics import ExitCode
+    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+
+    input_path = tmp_path / 'cell.pex25d'
+    input_path.write_text(MINIMAL, encoding='utf-8')
+    with pytest.raises(SystemExit) as completion:
+        Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'fastercap',
+                          '--out-dir', str(tmp_path / 'deck'), f'{option}={value}'])
+    error = capsys.readouterr().err
+    assert completion.value.code == ExitCode.USAGE, error
+    assert f"argument {option}: must be a finite number {expected}, got '{value}'" in error
+    assert not (tmp_path / 'deck').exists()
 
 
 @pytest.mark.parametrize('selector', ['unknown', 'example'])

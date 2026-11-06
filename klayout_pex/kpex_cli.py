@@ -151,12 +151,16 @@ from .tool_version_constraints import (
 from .util.multiple_choice import MultipleChoicePattern
 from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
+    DELAUNAY_B_MAX,
     SectionedHelpFormatter,
     add_argument_with_former_name,
     add_help_subcommand,
     add_log_level_argument,
     add_subcommand_sections,
+    delaunay_b,
     handle_help_subcommand,
+    non_negative_micrometers,
+    non_negative_square_micrometers,
     positive_micrometers,
     positive_spice_seconds,
     render_enum_help,
@@ -355,11 +359,12 @@ class KpexCLI:
 
         # TODO: reflect that these are also now used by KPEX/2.5D engine!
         add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
-                                      type=float, default=50,
+                                      type=non_negative_square_micrometers, default=50,
                                       help="Delaunay triangulation maximum area (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--delaunay-b", "--delaunay_b", "-b", dest="delaunay_b",
-                                      type=float, default=0.5,
-                                      help="Delaunay triangulation b (default is %(default)s)")
+                                      type=delaunay_b, default=0.5,
+                                      help=f"Delaunay triangulation b = 2·sin(minimum angle), "
+                                           f"from 0 to {DELAUNAY_B_MAX:g} (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--geo-check", "--geo_check", dest="geometry_check",
                                       type=true_or_false, default=False,
                                       help=f"Validate geometries before passing to FasterCap "
@@ -578,7 +583,7 @@ class KpexCLI:
                                     "an integer multiple of it, and it must divide the "
                                     "layout DBU exactly.")
         add_argument_with_former_name(group_out, "--domain-margin", "--domain_margin", dest='pex25d_domain_margin',
-                                      type=float, default=None, metavar='UM',
+                                      type=non_negative_micrometers, default=None, metavar='UM',
                                       help="Emit DOMAIN_MARGIN with this clearance in µm "
                                            "(default is none, leaving the domain unset for "
                                            "the solver adapter to choose)")
