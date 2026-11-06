@@ -71,10 +71,11 @@ def test_nets_without_devices_have_the_ports_of_their_pins(gds_name: str, mode: 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.R, PEXMode.RC])
-def test_label_without_pin_shape_makes_no_port_of_a_wire_without_devices(mode: PEXMode):
-    # NOTE: the label W names its wire, without a port, like a label of the text layer of Magic, while the label OUT,
-    #       also without a pin shape, names the net of the drain of the MOS, which has a port anyway (#405)
-    assert ports_of(PDKName.IHP_SG13G2, 'labels_without_pin_shapes.gds.gz', mode) == ['OUT', 'VDD', 'sub!']
+def test_labels_without_pin_shapes_make_no_ports_of_their_own(mode: PEXMode):
+    # NOTE: the label W names its wire, which has no devices, without making it a port, like a label of the text
+    #       layer of Magic, and the label Q names the wire of the pin P with it, one port P|Q, as in CC mode,
+    #       while the label OUT names the net of the drain of the MOS, which has a port anyway, but no pin label (#405)
+    assert ports_of(PDKName.IHP_SG13G2, 'labels_without_pin_shapes.gds.gz', mode) == ['OUT', 'VDD', 'sub!', 'P|Q']
 
 
 @allure.parent_suite(parent_suite)

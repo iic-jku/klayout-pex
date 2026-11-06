@@ -188,8 +188,10 @@ def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: 
         lines = f.read().replace('\n+', '').splitlines()
     ports = next(line for line in lines if line.startswith('.SUBCKT ')).split()[2:]
 
-    # NOTE: a port per pin label (e.g. A$1 if the name is taken), also of a net without devices (#312)
-    assert sorted(l for l in labels if not any(p == l or p.startswith(f"{l}$") for p in ports)) == []
+    # NOTE: a port per pin label (e.g. A$1 if the name is taken), also of a net without devices (#312),
+    #       which is the one of its net where labels without pin shapes name the net too (e.g. P|Q, #405)
+    assert sorted(l for l in labels if not any(p == l or p.startswith(f"{l}$") or l in p.split('|')
+                                               for p in ports)) == []
 
     # NOTE: SPICE reads names case-insensitively, names that differ in case only would be one node (#314)
     rc_elements = [line.split() for line in lines if line[:1] in 'RC' and len(line.split()) == 4]

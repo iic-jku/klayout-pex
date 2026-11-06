@@ -773,7 +773,9 @@ def labels_in_child_cells() -> Pattern:
 def labels_without_pin_shapes() -> Pattern:
     """
     The design nmos_diode2 without its label VSS, with a Metal3 wire of 50 µm from the pin of VSS (the drain)
-    to the label OUT, and beside it a Metal3 wire without devices with the label W, both without pin shapes
+    to the label OUT, and beside it a Metal3 wire without devices with the label W, both without pin shapes.
+    Below them, a Metal3 wire without devices with the pin P at its left end and the label Q at its right end,
+    and the label VDD on the Metal3 between the pin VDD and its Via2, both without pin shapes
     """
     p = pattern('labels_without_pin_shapes')
     p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz')
@@ -786,6 +788,10 @@ def labels_without_pin_shapes() -> Pattern:
     for text, bottom in (('OUT', vss.bottom), ('W', vss.bottom - 2000)):
         p.box(METAL3, vss.right - 100, bottom, vss.right + 50000, bottom + 300)
         p.label(METAL3, text, vss.right + 49900, bottom + 150)
+    bottom = vss.bottom - 4000
+    metal3_wire(p, vss.right - 100, bottom, vss.right + 50000, bottom + 300, 'P')
+    p.label(METAL3, 'Q', vss.right + 49900, bottom + 150)
+    p.label(METAL3, 'VDD', 800, 1000)
     return p
 
 
