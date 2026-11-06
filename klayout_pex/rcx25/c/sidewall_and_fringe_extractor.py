@@ -46,6 +46,20 @@ from klayout_pex.rcx25.types import EdgeInterval, EdgeNeighborhood
 from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
 
 
+def sidewall_separation(distance_um: float, offset_um: float) -> float:
+    """
+    The separation that the sidewall capacitance of two facing edges is inversely proportional to:
+    their distance plus the offset of the tech info (MAGIC's fit), but at least half the distance
+
+    NOTE: with a negative offset, the fit diverges at a distance of -offset and turns negative below,
+          while the capacitance of two facing sidewalls grows like 1 / distance. Below twice -offset,
+          where the two meet, it goes on as 1 / (distance / 2): continuous, finite and positive for
+          every distance > 0. The shipped tech infos have negative offsets of at most 0.082 µm,
+          for layers whose minimum space is at least 0.18 µm, so a DRC-clean layout doesn't get there.
+    """
+    return max(distance_um + offset_um, distance_um / 2.0)
+
+
 class SidewallAndFringeExtractor:
     def __init__(self,
                  all_layer_names: List[LayerName],
@@ -348,7 +362,7 @@ class SidewallAndFringeExtractor:
             #       lives here, see
             #       https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
             cap_femto = ((length_um * sidewall_cap_spec.capacitance)
-                         / (distance_um + sidewall_cap_spec.offset)
+                         / sidewall_separation(distance_um, sidewall_cap_spec.offset)
                          / 2.0  # non-bidirectional (half)
                          / 2.0  # the coefficient is the value for both edges
                          / 1000.0)  # aF -> fF
