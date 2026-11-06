@@ -58,7 +58,7 @@ def capacitances(cell_name: str, *arguments: str) -> Dict[FrozenSet[str], float]
     """
     gds_path = pdk.gds_path('test_patterns', f"{cell_name}.gds.gz")
     cli = KpexCLI()
-    cli.main(['main',
+    cli.main(['main', 'extract',
               '--pdk', pdk.name,
               '--gds', gds_path,
               '--lvsdb', lvsdb_fixture_path(pdk.name, gds_path),

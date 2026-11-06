@@ -115,6 +115,18 @@ def test_written_netlist_csv_is_logged_as_written(tmp_path):
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+def test_run_without_subcommand_is_an_extraction_with_a_warning(tmp_path):
+    # NOTE: the former command line, deprecated, which no other test uses
+    code, output = run_cli(KpexCLI().main, ['kpex', '--pdk', 'sky130A', '--2.5D',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert "Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'" in output
+    assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_k25d_pex_netlist.spice'), output
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Logging")
 def test_log_names_the_peak_memory_after_each_stage(tmp_path):
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',

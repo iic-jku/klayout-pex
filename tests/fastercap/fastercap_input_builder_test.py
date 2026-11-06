@@ -52,7 +52,7 @@ def context_of_layout(pdk_name: PDKName, *path_components) -> Tuple[KLayoutExtra
     """
     pdk = PDKTestConfig(pdk_name)
     with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', autospec=True) as run_kpex_2_5d_engine:
-        KpexCLI().main(['main',
+        KpexCLI().main(['main', 'extract',
                         '--pdk', pdk.name,
                         '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                         '--out-dir', pdk.output_dir,
