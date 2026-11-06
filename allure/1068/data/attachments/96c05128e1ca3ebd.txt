@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1778 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1841 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_pad_via_on_label.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:924 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_pad_via_on_label__cut_pad_via_on_label\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1996 Peak memory (resident set size) after preparing the LVSDB: 845.7 MiB
+INFO     __kpex__:kpex_cli.py:2000 (49, 0) -> (via3_drw)
+INFO     __kpex__:kpex_cli.py:2000 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2000 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2000 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:2000 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:2000 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:1455 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 845.7 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 845.7 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1487 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1487 C1;VSUBS;W;0.633;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C2;VSUBS;W.$0.Metal3;0.927;
+SUBPROCESS __kpex__:kpex_cli.py:1487 C3;VSUBS;W.$1.Metal4;0.61;
+SUBPROCESS __kpex__:kpex_cli.py:1487 R1;W;W.$1.Metal4;;1.496
+SUBPROCESS __kpex__:kpex_cli.py:1487 R2;W.$0.Metal3;W.$1.Metal4;;8.123
+SUBPROCESS __kpex__:kpex_cli.py:1490 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_pad_via_on_label__cut_pad_via_on_label\cut_pad_via_on_label_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1507 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_pad_via_on_label__cut_pad_via_on_label\cut_pad_via_on_label_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1543 Peak memory (resident set size) after the netlist: 845.7 MiB
+INFO     __kpex__:kpex_cli.py:1871 Peak memory (resident set size) after the run: 845.7 MiB
