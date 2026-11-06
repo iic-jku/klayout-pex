@@ -140,6 +140,18 @@ class Pex25DReaderTest(unittest.TestCase):
                                      'METAL met1 Z_OFFSETS 1.0 922337203685477.5807'))
         assert pex25d_file.metals[0].zhigh == 2 ** 63 - 1
 
+    def test_e0111_a_material_value_too_small_for_a_double(self):
+        # It would read as 0, a perfect conductor here
+        assert read_codes(replacing('RESISTANCE METAL met1 SHEET 0.125',
+                                    'RESISTANCE METAL met1 SHEET 1e-400')) == ['PEX25D-E0111']
+
+    def test_a_subnormal_or_zero_material_value_is_legal(self):
+        for literal, value in (('1e-310', 1e-310), ('0.0', 0.0), ('-0', 0.0)):
+            with self.subTest(literal=literal):
+                pex25d_file = read(replacing('RESISTANCE METAL met1 SHEET 0.125',
+                                             f"RESISTANCE METAL met1 SHEET {literal}"))
+                assert pex25d_file.metal_resistances[0].sheet == value
+
     def test_e0106_a_length_before_units(self):
         text = ("PEX25D 1.0-rc1\n"
                 "GROUND_PLANE subs Z_OFFSETS -0.4 -0.1\n"
