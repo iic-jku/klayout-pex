@@ -147,8 +147,8 @@ class TechBuilder:
         add_computed_layer(tech, CONT,  KREG, "cont_poly_con",  (6, 4403),    "Cont",      "cont_poly_con", "Computed layer for contact from GatPoly to Metal1")
         # NOTE: part of their taps, as the nwell (no sheet resistance) and the substrate below are no conductors
         #       of the resistance network
-        add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      None,            "Computed layer for contact from ntap (the nwell below) to Metal1")
-        add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      None,            "Computed layer for contact from ptap (the substrate below) to Metal1")
+        add_computed_layer(tech, NTAP,  KREG, "cont_ntap_con",  (6, 4404),    "Cont",      "cont_ntap_con", "Computed layer for contact from ntap (the nwell below) to Metal1")
+        add_computed_layer(tech, PTAP,  KREG, "cont_ptap_con",  (6, 4405),    "Cont",      "cont_ptap_con", "Computed layer for contact from ptap (the substrate below) to Metal1")
         # NOTE: within the bipolar transistors, whose models have the resistances up to the Metal1 over them,
         #       so their terminals are on that Metal1
         add_computed_layer(tech, CONT,  KDEV, "cont_bjt_con",   (6, 4406),    "Cont",      None,            "Computed layer for contact from the terminals of the bipolar transistors to Metal1")
@@ -253,8 +253,8 @@ class TechBuilder:
         ndiff = add_diffusion_layer(psi, "nSD",   0.0,     "fox")
         pdiff = add_diffusion_layer(psi, "pSD",   0.0,     "fox")
         # NOTE: the taps are diffusion too, the same stack as the source/drain
-        add_diffusion_layer(psi,         "ntap",  0.0,     "fox")
-        add_diffusion_layer(psi,         "ptap",  0.0,     "fox")
+        ntap = add_diffusion_layer(psi,  "ntap",  0.0,     "fox")
+        ptap = add_diffusion_layer(psi,  "ptap",  0.0,     "fox")
 
         # FOX:                      name     dielectric_k
         #-----------------------------------------------------------------------------------------------
@@ -411,9 +411,12 @@ class TechBuilder:
         #-----------------------------------------------------------------------------------------------
         add_simple_dielectric(psi,   "air",   1.0,          "pass2")
 
-        # TODO: cont over ntap (cont_ntap_con, part of the ntap until then), once the nwell has a sheet resistance
+        # NOTE: the contacts over the taps are theirs, as the nwell has no sheet resistance
+        #       (TODO: cont_ntap_con of the nwell, once it has one)
         contn = ndiff.contact_above
         contd = pdiff.contact_above
+        contnt = ntap.contact_above
+        contpt = ptap.contact_above
         contp = poly.contact_above
         via1 = met1.contact_above
         via2 = met2.contact_above
@@ -431,6 +434,8 @@ class TechBuilder:
         #--------------------------------------------------------------------------------------------------------------------------------
         set_contact(contn,           "cont_nsd_con",  "nsd_fet",       "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
         set_contact(contd,           "cont_psd_con",  "psd_fet",       "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
+        set_contact(contnt,          "cont_ntap_con", "ntap",          "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
+        set_contact(contpt,          "cont_ptap_con", "ptap",          "metal1_n_mom",  0.4 + 0.64,              0.16,  0.18,    0.0)    # TODO: spacing
         set_contact(contp,           "cont_poly_con", "poly_con",      "metal1_n_mom",  conp_thickness,          0.16,  0.18,    0.0)    # TODO: spacing
         set_contact(via1,            "via1_drw",      "metal1_n_mom",  "metal2_n_mom",  via1_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
         set_contact(via2,            "via2_drw",      "metal2_n_mom",  "metal3_n_mom",  via2_thickness,          0.19,  0.22,    0.0)    # TODO: spacing
