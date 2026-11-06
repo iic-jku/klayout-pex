@@ -363,8 +363,9 @@ class KpexCLI:
         group_tech.add_argument("--diel", dest="dielectric_filter",
                                 type=multiple_choice_pattern, default="all",
                                 help=f"Comma separated list of dielectric filter patterns. "
-                                     f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
-                                     f"(default is %(default)s)")
+                                     f"Allowed patterns are: (none, all, -dielname1, +dielname2), "
+                                     f"where -dielname1 alone means all,-dielname1 (give it as --diel=-dielname1) "
+                                     f"and +dielname2 alone none,+dielname2 (default is %(default)s)")
 
     @staticmethod
     def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
@@ -730,6 +731,20 @@ class KpexCLI:
         if not os.path.isfile(args.tech_pbjson_path):
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
             found_errors = True
+        else:
+            # NOTE: before the input is read, as --diel names dielectrics of the tech info
+            try:
+                args.tech_info = TechInfo.from_json(args.tech_pbjson_path, dielectric_filter=args.dielectric_filter)
+            except TechDefError as e:
+                error(str(e))
+                found_errors = True
+            else:
+                dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
+                unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
+                if unknown_names:
+                    error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
+                          f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
+                    found_errors = True
 
         if not os.path.isfile(args.lvs_script_path):
             error(f"Can't locate LVS script path at {args.lvs_script_path}")
@@ -1837,13 +1852,7 @@ class KpexCLI:
             finally:
                 self.identify_run(argv, args)  # NOTE: with the cell and the run directory, as far as they are known
             warn_deprecated_options(args)
-
-            try:
-                tech_info = TechInfo.from_json(args.tech_pbjson_path,
-                                               dielectric_filter=args.dielectric_filter)
-            except TechDefError as e:
-                error(str(e))
-                sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            tech_info: TechInfo = args.tech_info  # NOTE: loaded by validate_args
 
             try:
                 match args.command:

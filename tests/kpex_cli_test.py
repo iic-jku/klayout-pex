@@ -210,17 +210,40 @@ def test_halo_that_is_not_positive_is_a_usage_error(halo: str, tmp_path):
 @allure.tag("CLI")
 @pytest.mark.parametrize('command_args', [['extract', '--2.5D'], ['pex25d', '--out-file', 'x.pex25d']],
                          ids=['extract', 'pex25d'])
-def test_invalid_dielectric_filter_is_a_usage_error(command_args: List[str], tmp_path):
-    # NOTE: the message of the pattern only showed in a traceback, after the input was read (#431)
-    code, output = run_cli(KpexCLI().main, ['kpex', *command_args, '--pdk', 'sky130A', '--diel', 'all,none',
+@pytest.mark.parametrize('pattern, reason', [
+    ('all,none', "Multiple choice pattern can't have both subpatterns all and none"),
+    ('al', "Multiple choice pattern can only have the subpatterns all, none, +name and -name, not 'al'"),
+], ids=['all and none', 'typo'])
+def test_invalid_dielectric_filter_is_a_usage_error(command_args: List[str], pattern: str, reason: str, tmp_path,
+                                                    monkeypatch: pytest.MonkeyPatch):
+    # NOTE: the message of the pattern only showed in a traceback, after the input was read (#431),
+    #       a typo was ignored (#451)
+    monkeypatch.chdir(tmp_path)  # NOTE: where a run that isn't stopped would write x.pex25d
+    code, output = run_cli(KpexCLI().main, ['kpex', *command_args, '--pdk', 'sky130A', '--diel', pattern,
                                             '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
                                             '--out-dir', str(tmp_path)])
     assert code == ExitCode.USAGE, output
-    assert ("argument --diel: Multiple choice pattern can't have both subpatterns all and none, got 'all,none': "
+    assert (f"argument --diel: {reason}, got '{pattern}': "
             "give all, optionally with -name subpatterns to exclude, or none, optionally with +name subpatterns "
-            "to include, e.g. 'all,-name1,-name2' or 'none,+name1'") in output
+            "to include, e.g. 'all,-name1,-name2' or 'none,+name1', or the subpatterns alone, "
+            "e.g. '-name1,-name2'") in output
     assert 'Traceback' not in output
     assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+def test_dielectric_filter_naming_no_dielectric_is_reported_before_the_input_is_read(tmp_path, caplog):
+    # NOTE: such names were ignored, the field oxide is never left out (#451)
+    lvsdb_path = tmp_path / 'missing.lvsdb.gz'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                            '--diel', 'all,-fox,-nild7', '--lvsdb', str(lvsdb_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 1, output
+    errors = [message for _, level, message in caplog.record_tuples if level == logging.ERROR]
+    assert len(errors) == 2 and errors[1] == f"Can't read KLayout LVSDB file at path {lvsdb_path}", errors
+    assert errors[0].startswith("--diel all,-fox,-nild7: the tech info of sky130A has no dielectric to filter "
+                                "named fox, nild7, only: iox, spnit, psg, lint, nild2, "), errors
 
 
 @allure.parent_suite("Unit Tests")
@@ -254,9 +277,11 @@ def test_number_out_of_range_is_a_usage_error(command: str, option: str, value: 
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "PEX25D")
-def test_dielectric_filter_leaves_out_the_excluded_dielectrics(tmp_path):
+@pytest.mark.parametrize('pattern', ['all,-topnit', '-topnit'])
+def test_dielectric_filter_leaves_out_the_excluded_dielectrics(pattern: str, tmp_path):
+    # NOTE: -topnit left out all dielectrics (#451)
     output_path = tmp_path / 'nfet_li1.pex25d'
-    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A', '--diel', 'all,-topnit',
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A', f'--diel={pattern}',
                                             '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
                                             '--out-dir', str(tmp_path), '--out-file', str(output_path)])
     assert code == 0, output
