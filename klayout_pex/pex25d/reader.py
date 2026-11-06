@@ -47,6 +47,9 @@ STDIO_NAME = '-'
 # ratios like '1/2' and digit separators like '1_0'.
 NUMBER = re.compile(r'[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z')
 
+# Lengths are int64 grid units in the protobuf forms.
+INT64_MAX = 2 ** 63 - 1
+
 VERSION = re.compile(r'(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?\Z')
 
 LENGTH_UNITS = {'um': 1, 'nm': 2, 'm': 3}
@@ -287,12 +290,24 @@ class Pex25DTextReader:
                        f"{what}: {text} is not an integer multiple of the grid",
                        record)
             return None
+        if abs(rounded) > INT64_MAX:
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is beyond the {INT64_MAX} grid units "
+                       f"a coordinate can have", record)
+            return None
         return int(rounded)
 
     def to_double(self, text: str, record: Record, what: str) -> Optional[float]:
         """Permittivities, resistances and temperatures are not grid-quantized."""
         value = self.to_fraction(text, record, what)
-        return None if value is None else float(value)
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except OverflowError:
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is beyond the range of a double", record)
+            return None
 
     # --------------------------------------------------------------- driving
 
