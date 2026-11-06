@@ -1,0 +1,28 @@
+WARNING  __kpex__:kpex_cli.py:1770 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1833 main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:909 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1994 Peak memory (resident set size) after preparing the LVSDB: 272.3 MiB
+INFO     __kpex__:kpex_cli.py:1998 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1998 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1998 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1998 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:1998 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1998 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1998 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:1998 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:1998 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:kpex_cli.py:1447 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 272.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1479 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1479 C1;A;B;605.825;
+SUBPROCESS __kpex__:kpex_cli.py:1479 C2;A;D;5.343;
+SUBPROCESS __kpex__:kpex_cli.py:1479 C3;A;VSUBS;6.342;
+SUBPROCESS __kpex__:kpex_cli.py:1479 C4;B;D;0.084;
+SUBPROCESS __kpex__:kpex_cli.py:1479 C5;B;VSUBS;2.344;
+SUBPROCESS __kpex__:kpex_cli.py:1479 C6;D;VSUBS;3.462;
+SUBPROCESS __kpex__:kpex_cli.py:1482 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire\cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:83 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1499 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire\cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1535 Peak memory (resident set size) after the netlist: 272.3 MiB
+INFO     __kpex__:kpex_cli.py:1869 Peak memory (resident set size) after the run: 272.3 MiB

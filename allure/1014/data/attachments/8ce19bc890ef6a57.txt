@@ -1,0 +1,50 @@
+[15:56:45] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1770
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox y --lvsdb                     
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\cut_taps_w
+ith_labels_b_a.lvsdb.gz' --out-dir                                             
+'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n  
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\cut_taps
+_with_labels_b_a.gds.gz' --exclusion-markers ignore --cut block=X              
+──────────────────────────────── Input Layout ─────────────────────────────────
+[15:56:45] INFO     No explicit top cell specified, using top   kpex_cli.py:898
+                    cell 'cut_taps_with_labels_b_a'                            
+[15:56:45] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:909
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[15:56:45] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_gf180                  
+                    mcuD\cut_taps_with_labels_b_a__cut_taps_w                  
+                    ith_labels_b_a\kpex_result.json                            
+[15:56:45] INFO     Peak memory (resident set size) after      kpex_cli.py:1994
+                    preparing the LVSDB: 1.4 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:56:45] INFO     (32, 0) -> (nsd)                           kpex_cli.py:1998
+[15:56:45] INFO     (22, 244) -> (ptap)                        kpex_cli.py:1998
+[15:56:45] INFO     (30, 0) -> (poly2_con)                     kpex_cli.py:1998
+[15:56:45] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1998
+[15:56:45] INFO     (33, 4405) -> (contact_ptap_con)           kpex_cli.py:1998
+[15:56:45] INFO     (33, 4401) -> (contact_nsd_con)            kpex_cli.py:1998
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:56:45] INFO     LVSDB: found 3pins                         extractor.py:482
+[15:56:45] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.4 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A,B;;0.001                                                                
+R2;D;D.P0.Nplus;;6.3                                                           
+R3;S;S.P0.Nplus;;6.3                                                           
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\cut_taps_with_labels_b_a__cut_tap
+s_with_labels_b_a\cut_taps_with_labels_b_a_k25d_pex_netlist.csv                
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\cut_taps_with_labels_b_a__cut_tap
+s_with_labels_b_a\cut_taps_with_labels_b_a_k25d_pex_netlist.spice              
+[15:56:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1535
+                    netlist: 1.4 GiB                                           
+[15:56:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1869
+                    run: 1.4 GiB                                               
