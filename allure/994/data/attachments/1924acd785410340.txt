@@ -1,0 +1,53 @@
+[14:28:38] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/s
+ideoverlap_complex_li1_m1.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:28:38] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:28:38] INFO     Peak memory (resident set size) after       kpex_cli.py:1863
+                    preparing the LVSDB: 314.2 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:28:38] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1867
+[14:28:38] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1867
+[14:28:38] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1867
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:28:38] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1375
+[14:28:38] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 314.2 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;Complex_Shape_B;UPPER;1.348;                                                 
+C2;Complex_Shape_B;VSUBS;3.2;                                                   
+C3;Complex_Shape_L;UPPER;0.249;                                                 
+C4;Complex_Shape_L;VSUBS;3.2;                                                   
+C5;Complex_Shape_R;UPPER;0.089;                                                 
+C6;Complex_Shape_R;VSUBS;3.2;                                                   
+C7;Complex_Shape_T;UPPER;0.065;                                                 
+C8;Complex_Shape_T;VSUBS;3.2;                                                   
+C9;UPPER;VSUBS;13.019;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_complex_li1
+_m1__sideoverlap_complex_li1_m1/sideoverlap_complex_li1_m1_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_complex_li1
+_m1__sideoverlap_complex_li1_m1/sideoverlap_complex_li1_m1_k25d_pex_netlist.spic
+e                                                                               
+[14:28:38] INFO     Peak memory (resident set size) after the   kpex_cli.py:1457
+                    netlist: 314.2 MiB                                          
+[14:28:38] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1474
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: Complex_Shape_B                    
+                    (4.547 fF), Complex_Shape_L (3.448 fF),                     
+                    Complex_Shape_R (3.289 fF), Complex_Shape_T                 
+                    (3.265 fF)                                                  
+[14:28:38] INFO     Peak memory (resident set size) after the   kpex_cli.py:1746
+                    run: 314.2 MiB                                              

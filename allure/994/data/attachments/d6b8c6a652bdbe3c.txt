@@ -1,0 +1,63 @@
+[14:29:54] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_block
+_with_mos.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' 
+--2.5D --halo 10000 --scale n --gds                                            
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_blo
+ck_with_mos.gds.gz' --exclusion-markers ignore --cut block=X                   
+──────────────────────────────── Input Layout ─────────────────────────────────
+[14:29:54] INFO     No explicit top cell specified, using top   kpex_cli.py:881
+                    cell 'cut_block_with_mos'                                  
+[14:29:54] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[14:29:54] WARNING  The extraction leaves out these LVS  lvsdb_extractor.py:424
+                    layers, as the tech info doesn't                           
+                    know them:                                                 
+                      - cont_drw (Cont): 1 of 5 shapes                         
+                    are not within cont_nsd_con,                               
+                    cont_psd_con, cont_poly_con,                               
+                    cont_ntap_con, cont_ptap_con,                              
+                    cont_bjt_con, schottcky_p,                                 
+                    schottcky_n_con, diodevdd_4kv_te,                          
+                    diodevss_4kv_te                                            
+[14:29:54] INFO     Peak memory (resident set size) after      kpex_cli.py:1863
+                    preparing the LVSDB: 1.4 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:29:54] INFO     (19, 0) -> (via1_drw)                      kpex_cli.py:1867
+[14:29:54] INFO     (29, 0) -> (via2_drw)                      kpex_cli.py:1867
+[14:29:54] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1867
+[14:29:54] INFO     (5, 0) -> (poly_con)                       kpex_cli.py:1867
+[14:29:54] INFO     (7, 0) -> (nsd_fet)                        kpex_cli.py:1867
+[14:29:54] INFO     (5, 2) -> (poly_pin_con)                   kpex_cli.py:1867
+[14:29:54] INFO     (8, 2) -> (metal1_pin_con)                 kpex_cli.py:1867
+[14:29:54] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1867
+[14:29:54] INFO     (6, 4401) -> (cont_nsd_con)                kpex_cli.py:1867
+[14:29:54] INFO     (6, 4403) -> (cont_poly_con)               kpex_cli.py:1867
+[14:29:54] INFO     (67, 2) -> (metal5_pin_con)                kpex_cli.py:1867
+[14:29:54] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1867
+[14:29:54] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1867
+[14:29:54] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1867
+[14:29:54] INFO     (67, 0) -> (metal5_n_cap)                  kpex_cli.py:1867
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:29:54] INFO     LVSDB: found 4pins                         extractor.py:482
+[14:29:54] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.4 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;X__VSS;;2.86                                                              
+R2;B;X__VDD;;2.86                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_with_mos__cut_block_wi
+th_mos\cut_block_with_mos_k25d_pex_netlist.csv                                 
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_with_mos__cut_block_wi
+th_mos\cut_block_with_mos_k25d_pex_netlist.spice                               
+[14:29:54] INFO     Peak memory (resident set size) after the  kpex_cli.py:1457
+                    netlist: 1.4 GiB                                           
+[14:29:54] INFO     Peak memory (resident set size) after the  kpex_cli.py:1746
+                    run: 1.4 GiB                                               
