@@ -212,14 +212,19 @@ def test_halo_that_is_not_positive_is_a_usage_error(halo: str, tmp_path):
     for command, option, values, expected in (
         ('extract', '--delaunay-amax', ('-1', 'nan', 'inf'), ">= 0 (in µm²)"),
         ('extract', '--delaunay-b', ('-1', '1.5', 'nan', 'inf'), "from 0 to 1.1"),
+        ('extract', '--k-void', ('0.5', '0', '-1', 'nan', 'inf'), ">= 1"),
+        ('extract', '--tolerance', ('0', '1', '-1', 'nan', 'inf'), "> 0 and < 1"),
+        ('extract', '--d-coeff', ('0', '-1', 'nan', 'inf'), "> 0"),
+        ('extract', '--ooc', ('-1', 'nan', 'inf'), ">= 0"),
         ('pex25d', '--domain-margin', ('-1', 'nan', 'inf'), ">= 0 (in µm)"),
     )
     for value in values
 ])
-def test_triangulation_or_margin_out_of_range_is_a_usage_error(command: str, option: str, value: str, expected: str,
-                                                               tmp_path):
+def test_number_out_of_range_is_a_usage_error(command: str, option: str, value: str, expected: str, tmp_path):
     # NOTE: a --delaunay-b of 1.5 kept the triangulation from finishing, a negative --domain-margin
-    #       turned the domain inside out, the others were ignored or failed with a traceback (#432)
+    #       turned the domain inside out, the others were ignored or failed with a traceback (#432);
+    #       with a --tolerance of 0 FasterCap didn't finish, the other FasterCap options gave wrong
+    #       capacitances or failed FasterCap (#446)
     code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A', f'{option}={value}',
                                             '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
                                             '--out-dir', str(tmp_path)])

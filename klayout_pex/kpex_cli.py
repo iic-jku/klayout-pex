@@ -161,9 +161,13 @@ from .util.argparse_helpers import (
     delaunay_b,
     handle_help_subcommand,
     non_negative_micrometers,
+    non_negative_number,
     non_negative_square_micrometers,
     positive_micrometers,
+    positive_number,
     positive_spice_seconds,
+    relative_error,
+    relative_permittivity,
     render_enum_help,
     true_or_false,
     warn_deprecated_options,
@@ -365,8 +369,8 @@ class KpexCLI:
     def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
         group_fastercap = parser.add_argument_group("FasterCap Options")
         add_argument_with_former_name(group_fastercap, "--k-void", "--k_void", "-k", dest="k_void",
-                                      type=float, default=3.9,
-                                      help="Dielectric constant of void (default is %(default)s)")
+                                      type=relative_permittivity, default=3.9,
+                                      help="Dielectric constant of void, >= 1 (default is %(default)s)")
 
         # NOTE: these reach the FasterCap and FastCap2 input only, KPEX/2.5D triangulates with values of its own
         add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
@@ -381,17 +385,17 @@ class KpexCLI:
                                       help=f"Validate geometries before passing to FasterCap "
                                            f"(default is False)")
         group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
-                                     type=float, default=0.05,
-                                     help="FasterCap -aX error tolerance (default is %(default)s)")
+                                     type=relative_error, default=0.05,
+                                     help="FasterCap -aX relative error tolerance, > 0 and < 1 (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--d-coeff", "--d_coeff", dest="fastercap_d_coeff",
-                                      type=float, default=0.5,
+                                      type=positive_number, default=0.5,
                                       help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
                                            f"(default is %(default)s)")
         group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
                                      type=float, default=0.5,
                                      help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
         group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
-                                     type=float, default=2,
+                                     type=non_negative_number, default=2,
                                      help="FasterCap -f out-of-core free memory to link memory condition "
                                           "(0 = don't go OOC, default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--auto-precond", "--auto_precond",
