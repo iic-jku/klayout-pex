@@ -279,7 +279,7 @@ class KpexCLI:
         if include_spice_output:
             add_argument_with_former_name(group_pex, "--out-netlist", "--out_netlist", "-o",
                                           dest="output_netlist_path", default=None,
-                                          help="Optional additional output path of the netlist, "
+                                          help="Optional additional output path of the netlist, of one engine only, "
                                                "in the --netlist-format (default is none)")
             # NOTE: deprecated, the name of --out-netlist before --netlist-format
             group_pex.add_argument("--out_spice", dest="output_spice_path", default=None, help=argparse.SUPPRESS)
@@ -815,12 +815,16 @@ class KpexCLI:
                     error(f"{exclusion_option} reads its shapes from the layout, so it needs --gds, also with --lvsdb")
                     found_errors = True
 
+            # NOTE: in the order they run
+            engine_names = [name for name, is_run in (('MAGIC', args.run_magic),
+                                                      ('FasterCap', args.run_fastercap),
+                                                      ('FastCap2', args.run_fastcap),
+                                                      ('2.5D', args.run_2_5D)) if is_run]
+
             args.netlist_format = NetlistFormat(args.netlist_format)
             if args.netlist_format != NetlistFormat.SPICE:
                 # NOTE: MAGIC writes its SPICE netlist itself, FasterCap and FastCap2 have no other format (yet)
-                other_engines = [name for name, is_run in (('MAGIC', args.run_magic),
-                                                           ('FastCap2', args.run_fastcap),
-                                                           ('FasterCap', args.run_fastercap)) if is_run]
+                other_engines = [name for name in engine_names if name != '2.5D']
                 if other_engines:
                     error(f"Only the 2.5D engine writes {args.netlist_format} netlists "
                           f"(--netlist-format {args.netlist_format}), not {', '.join(other_engines)}")
@@ -837,6 +841,13 @@ class KpexCLI:
                 else:
                     warning("--out_spice is deprecated, use --out-netlist")
                     args.output_netlist_path = args.output_spice_path
+
+            # NOTE: each engine writes its netlist to --out-netlist, the last one would overwrite the others (#449)
+            if args.output_netlist_path is not None and len(engine_names) > 1:
+                error(f"--out-netlist takes the netlist of one engine, not of {', '.join(engine_names)}, "
+                      f"which would overwrite each other: run them one at a time, "
+                      f"or take their netlists from the run directory")
+                found_errors = True
 
         # check if we find magicrc
         if args.run_magic:
