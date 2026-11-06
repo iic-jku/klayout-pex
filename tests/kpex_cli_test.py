@@ -557,7 +557,8 @@ def test_result_file_of_a_run_with_invalid_arguments_has_their_errors(tmp_path):
     result = run_result(tmp_path / 'nfet_li1__nfet_li1')
     assert (result['stage'], result['exit_code'], result['cell']) == ('arguments', 1, 'nfet_li1')
     assert result['errors'] == [f"Can't read schematic at path {schematic_path}"]
-    assert result['warnings'] == [SCHEMATIC_WARNING]
+    # NOTE: no warning of what --schematic is checked for, as there is none to check (#425)
+    assert result['warnings'] == []
 
 
 @allure.parent_suite("Unit Tests")
