@@ -1,0 +1,43 @@
+WARNING  __kpex__:kpex_cli.py:1765 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk ihp-sg13g2 --mode RC --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/nmos_metal1_redux_two_labels_one_node.lvsdb.gz --out-dir /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpm7k56ufs --2.5D --check n
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpm7k56ufs/nmos_metal1_redux_two_labels_one_node__nmos_metal1_redux_two_labels_one_node/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1993 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1993 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1993 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1993 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1993 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1993 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:1993 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1442 Sidewall halo: 8 µm (tech info of ihp-sg13g2)
+INFO     __kpex__:extractor.py:482 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 C1;$1;D,X.$0.Metal1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C2;$1;S.$0.Metal1;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C3;$1;VSUBS;0.048;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C4;$1.$0.GatPoly;D;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C5;$1.$0.GatPoly;VSUBS;0.052;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C6;$1.$1.Metal1;D;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C7;$1.$1.Metal1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C8;D;VSUBS;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C9;D,X;S.$0.Metal1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C10;D,X.$0.Metal1;S.$0.Metal1;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C11;D,X.$0.Metal1;S.P0.nSD;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C12;D,X.$0.Metal1;VSUBS;0.035;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C13;S;VSUBS;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C14;S.$0.Metal1;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;$1;$1.$0.GatPoly;;33.654
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;$1.$0.GatPoly;$1.$1.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1474 R3;D;D,X.$0.Metal1;;0.488
+SUBPROCESS __kpex__:kpex_cli.py:1474 R4;D;X;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1474 R5;D,X;D,X.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1474 R6;S;S.$0.Metal1;;0.598
+SUBPROCESS __kpex__:kpex_cli.py:1474 R7;S.$0.Metal1;S.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1477 /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpm7k56ufs/nmos_metal1_redux_two_labels_one_node__nmos_metal1_redux_two_labels_one_node/nmos_metal1_redux_two_labels_one_node_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpm7k56ufs/nmos_metal1_redux_two_labels_one_node__nmos_metal1_redux_two_labels_one_node/nmos_metal1_redux_two_labels_one_node_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB

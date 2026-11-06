@@ -1,0 +1,121 @@
+[16:48:45] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_bend_
+beside_marker.lvsdb.gz' --out-dir                                              
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_ben
+d_beside_marker.gds.gz' --exclusion-markers ignore --cut bend                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:48:45] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'cut_bend_beside_marker'                              
+[16:48:45] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:48:45] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\cut_bend_beside_marker__cut_bend_be                  
+                    side_marker\kpex_result.json                               
+[16:48:45] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.3 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:48:45] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[16:48:45] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[16:48:45] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:48:45] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[16:48:45] INFO     LVSDB: found 1pins                         extractor.py:482
+[16:48:45] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.3 GiB                             
+[16:48:45] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.3 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;B;0.096;                                                                  
+C2;A;VSUBS;1.492;                                                              
+C3;B;VSUBS;1.492;                                                              
+C4;bend_0__A_B_0;bend_0__A_B_1;0.094;                                          
+C5;VSUBS;bend_0__A_B_0;1.394;                                                  
+C6;VSUBS;bend_0__A_B_1;1.394;                                                  
+R1;A;A,B;;0.001                                                                
+R2;A;bend_0__A_B_0;;1.738                                                      
+R3;B;bend_0__A_B_1;;1.738                                                      
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_bend_beside_marker__cut_bend
+_beside_marker\cut_bend_beside_marker_k25d_pex_netlist.csv                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_bend_beside_marker__cut_bend
+_beside_marker\cut_bend_beside_marker_k25d_pex_netlist.spice                   
+[16:48:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.3 GiB                                           
+[16:48:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.3 GiB                                               
+[16:48:45] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_bend_
+beside_marker.lvsdb.gz' --out-dir                                              
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_ben
+d_beside_marker.gds.gz' --exclusion-markers tie --cut bend                     
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:48:45] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'cut_bend_beside_marker'                              
+[16:48:45] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:48:45] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\cut_bend_beside_marker__cut_bend_be                  
+                    side_marker\kpex_result.json                               
+[16:48:45] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.3 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:48:45] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[16:48:45] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[16:48:45] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+[16:48:45] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A,B: Metal3                                            
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:48:45] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[16:48:45] INFO     LVSDB: found 1pins                         extractor.py:482
+[16:48:45] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.3 GiB                             
+[16:48:45] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.3 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;B;0.085;                                                                  
+C2;A;VSUBS;1.316;                                                              
+C3;A,B;B;0.012;                                                                
+C4;A,B;bend_0__A_B_1;0.087;                                                    
+C5;A,B;VSUBS;1.324;                                                            
+C6;B;VSUBS;1.492;                                                              
+C7;bend_0__A_B_0;bend_0__A_B_1;0.007;                                          
+C8;VSUBS;bend_0__A_B_0;0.106;                                                  
+C9;VSUBS;bend_0__A_B_1;1.394;                                                  
+R1;A;A,B;;1.518                                                                
+R2;A,B;bend_0__A_B_0;;0.132                                                    
+R3;B;bend_0__A_B_1;;1.738                                                      
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_bend_beside_marker__cut_bend
+_beside_marker\cut_bend_beside_marker_k25d_pex_netlist.csv                     
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_bend_beside_marker__cut_bend
+_beside_marker\cut_bend_beside_marker_k25d_pex_netlist.spice                   
+[16:48:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.3 GiB                                           
+[16:48:45] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.3 GiB                                               
