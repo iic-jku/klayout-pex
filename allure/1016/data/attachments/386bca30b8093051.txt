@@ -1,0 +1,51 @@
+[15:55:23] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_wire_voltage_divider_li1.lvsdb.gz --out-dir                                   
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:55:23] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:55:23] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_sky130A/r_wire_voltage_divider_li1                  
+                    __r_wire_voltage_divider_li1/kpex_result.j                  
+                    son                                                         
+[15:55:23] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 794.0 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:55:23] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1993
+[15:55:23] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:55:23] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[15:55:23] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:55:23] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 794.0 MiB                            
+[15:55:23] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 794.0 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;VSUBS;0.223;                                                               
+C2;A,B,C;VSUBS;0.459;                                                           
+C3;B;VSUBS;0.23;                                                                
+C4;C;VSUBS;0.056;                                                               
+R1;A;A,B,C;;426.667                                                             
+R2;A,B,C;B;;413.867                                                             
+R3;A,B,C;C;;72.533                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.csv
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.spi
+ce                                                                              
+[15:55:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 794.0 MiB                                          
+[15:55:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 794.0 MiB                                              

@@ -1,0 +1,64 @@
+[15:57:27] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r
+_ptap_li1_m1_and_floating_m1_m2.lvsdb.gz --out-dir /tmp/tmp4nznqz7q --2.5D      
+--check n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:57:27] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:57:27] INFO     Wrote result file to:                      run_result.py:230
+                    /tmp/tmp4nznqz7q/r_ptap_li1_m1_and_floatin                  
+                    g_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/                  
+                    kpex_result.json                                            
+[15:57:27] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.5 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:57:27] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1993
+[15:57:27] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1993
+[15:57:27] INFO     (66, 4405) -> (licon_ptap_con)              kpex_cli.py:1993
+[15:57:27] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1993
+[15:57:27] INFO     (68, 44) -> (via1_con)                      kpex_cli.py:1993
+[15:57:27] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1993
+[15:57:27] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:57:27] INFO     LVSDB: found 0pins                          extractor.py:482
+[15:57:27] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.5 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A.$1.li1;;37.647                                                           
+R2;A;A.$6.met1;;9.3                                                             
+R3;A.$1.li1;A.$2.li1;;37.647                                                    
+R4;A.$1.li1;A.$7.met1;;9.3                                                      
+R5;A.$10.met1;A.$4.li1;;9.3                                                     
+R6;A.$10.met1;A.$9.met1;;0.368                                                  
+R7;A.$11.met2;A.$5.met1;;3.955                                                  
+R8;A.$2.li1;A.$3.li1;;37.647                                                    
+R9;A.$2.li1;A.$8.met1;;9.3                                                      
+R10;A.$3.li1;A.$4.li1;;37.647                                                   
+R11;A.$3.li1;A.$9.met1;;9.3                                                     
+R12;A.$6.met1;A.$7.met1;;0.368                                                  
+R13;A.$7.met1;A.$8.met1;;0.368                                                  
+R14;A.$8.met1;A.$9.met1;;0.368                                                  
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmp4nznqz7q/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1
+_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.csv                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmp4nznqz7q/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1
+_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.spice                     
+[15:57:27] WARNING  The extracted netlist is inconsistent with  kpex_cli.py:1528
+                    the LVS netlist:                                            
+                      - resistors of the nodes A.$11.met2,                      
+                    A.$5.met1 touch no net                                      
+[15:57:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.5 GiB                                            
+[15:57:27] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): A                         
+[15:57:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.5 GiB                                                
