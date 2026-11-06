@@ -1,0 +1,282 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cap_moscap_n_x2_gatpoly_wire.lvsdb.gz --out-dir                               
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:21:20] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:21:21] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_ihp-sg13g2/cap_moscap_n_x2_gatpoly_                  
+                    wire__cap_moscap_n_x2_gatpoly_wire/kpex_re                  
+                    sult.json                                                   
+[16:21:21] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 980.7 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:21:21] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1993
+[16:21:21] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[16:21:21] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1993
+[16:21:21] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1993
+[16:21:21] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1993
+[16:21:21] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1993
+[16:21:21] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1993
+[16:21:21] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1993
+[16:21:21] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:21:21] INFO     LVSDB: found 1pins                          extractor.py:482
+[16:21:21] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 980.7 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$3;$3.$0.GatPoly;;3.808                                                      
+R2;$3;$3.$1.GatPoly;;3.808                                                      
+R3;$3.$0.GatPoly;$3.$28.Metal1;;15.0                                            
+R4;$3.$0.GatPoly;$3.$30.Metal1;;15.0                                            
+R5;$3.$0.GatPoly;$3.$32.Metal1;;15.0                                            
+R6;$3.$0.GatPoly;$3.$34.Metal1;;15.0                                            
+R7;$3.$0.GatPoly;$3.$36.Metal1;;15.0                                            
+R8;$3.$0.GatPoly;$3.$38.Metal1;;15.0                                            
+R9;$3.$0.GatPoly;$3.$40.Metal1;;15.0                                            
+R10;$3.$0.GatPoly;$3.$42.Metal1;;15.0                                           
+R11;$3.$0.GatPoly;$3.$44.Metal1;;15.0                                           
+R12;$3.$0.GatPoly;$3.$46.Metal1;;15.0                                           
+R13;$3.$0.GatPoly;$3.$48.Metal1;;15.0                                           
+R14;$3.$0.GatPoly;$3.$50.Metal1;;15.0                                           
+R15;$3.$0.GatPoly;$3.$52.Metal1;;15.0                                           
+R16;$3.$0.GatPoly;$3.$54.Metal1;;15.0                                           
+R17;$3.$1.GatPoly;$3.$29.Metal1;;15.0                                           
+R18;$3.$1.GatPoly;$3.$31.Metal1;;15.0                                           
+R19;$3.$1.GatPoly;$3.$33.Metal1;;15.0                                           
+R20;$3.$1.GatPoly;$3.$35.Metal1;;15.0                                           
+R21;$3.$1.GatPoly;$3.$37.Metal1;;15.0                                           
+R22;$3.$1.GatPoly;$3.$39.Metal1;;15.0                                           
+R23;$3.$1.GatPoly;$3.$41.Metal1;;15.0                                           
+R24;$3.$1.GatPoly;$3.$43.Metal1;;15.0                                           
+R25;$3.$1.GatPoly;$3.$45.Metal1;;15.0                                           
+R26;$3.$1.GatPoly;$3.$47.Metal1;;15.0                                           
+R27;$3.$1.GatPoly;$3.$49.Metal1;;15.0                                           
+R28;$3.$1.GatPoly;$3.$51.Metal1;;15.0                                           
+R29;$3.$1.GatPoly;$3.$53.Metal1;;15.0                                           
+R30;$3.$1.GatPoly;$3.$55.Metal1;;15.0                                           
+R31;$3.$28.Metal1;$3.$30.Metal1;;0.152                                          
+R32;$3.$29.Metal1;$3.$31.Metal1;;0.152                                          
+R33;$3.$30.Metal1;$3.$32.Metal1;;0.152                                          
+R34;$3.$31.Metal1;$3.$33.Metal1;;0.152                                          
+R35;$3.$32.Metal1;$3.$34.Metal1;;0.152                                          
+R36;$3.$33.Metal1;$3.$35.Metal1;;0.152                                          
+R37;$3.$34.Metal1;$3.$36.Metal1;;0.154                                          
+R38;$3.$35.Metal1;$3.$37.Metal1;;0.154                                          
+R39;$3.$36.Metal1;$3.$38.Metal1;;0.152                                          
+R40;$3.$37.Metal1;$3.$39.Metal1;;0.152                                          
+R41;$3.$38.Metal1;$3.$40.Metal1;;0.152                                          
+R42;$3.$39.Metal1;$3.$41.Metal1;;0.152                                          
+R43;$3.$40.Metal1;$3.$42.Metal1;;0.154                                          
+R44;$3.$41.Metal1;$3.$43.Metal1;;0.154                                          
+R45;$3.$42.Metal1;$3.$44.Metal1;;0.152                                          
+R46;$3.$43.Metal1;$3.$45.Metal1;;0.152                                          
+R47;$3.$44.Metal1;$3.$46.Metal1;;0.152                                          
+R48;$3.$45.Metal1;$3.$47.Metal1;;0.152                                          
+R49;$3.$46.Metal1;$3.$48.Metal1;;0.154                                          
+R50;$3.$47.Metal1;$3.$49.Metal1;;0.154                                          
+R51;$3.$48.Metal1;$3.$50.Metal1;;0.152                                          
+R52;$3.$49.Metal1;$3.$51.Metal1;;0.152                                          
+R53;$3.$50.Metal1;$3.$52.Metal1;;0.152                                          
+R54;$3.$51.Metal1;$3.$53.Metal1;;0.152                                          
+R55;$3.$52.Metal1;$3.$54.Metal1;;0.154                                          
+R56;$3.$53.Metal1;$3.$55.Metal1;;0.154                                          
+R57;$4;$4.$0.GatPoly;;3.808                                                     
+R58;$4;$4.$1.GatPoly;;3.808                                                     
+R59;$4.$0.GatPoly;$4.$28.Metal1;;15.0                                           
+R60;$4.$0.GatPoly;$4.$30.Metal1;;15.0                                           
+R61;$4.$0.GatPoly;$4.$32.Metal1;;15.0                                           
+R62;$4.$0.GatPoly;$4.$34.Metal1;;15.0                                           
+R63;$4.$0.GatPoly;$4.$36.Metal1;;15.0                                           
+R64;$4.$0.GatPoly;$4.$38.Metal1;;15.0                                           
+R65;$4.$0.GatPoly;$4.$40.Metal1;;15.0                                           
+R66;$4.$0.GatPoly;$4.$42.Metal1;;15.0                                           
+R67;$4.$0.GatPoly;$4.$44.Metal1;;15.0                                           
+R68;$4.$0.GatPoly;$4.$46.Metal1;;15.0                                           
+R69;$4.$0.GatPoly;$4.$48.Metal1;;15.0                                           
+R70;$4.$0.GatPoly;$4.$50.Metal1;;15.0                                           
+R71;$4.$0.GatPoly;$4.$52.Metal1;;15.0                                           
+R72;$4.$0.GatPoly;$4.$54.Metal1;;15.0                                           
+R73;$4.$1.GatPoly;$4.$29.Metal1;;15.0                                           
+R74;$4.$1.GatPoly;$4.$31.Metal1;;15.0                                           
+R75;$4.$1.GatPoly;$4.$33.Metal1;;15.0                                           
+R76;$4.$1.GatPoly;$4.$35.Metal1;;15.0                                           
+R77;$4.$1.GatPoly;$4.$37.Metal1;;15.0                                           
+R78;$4.$1.GatPoly;$4.$39.Metal1;;15.0                                           
+R79;$4.$1.GatPoly;$4.$41.Metal1;;15.0                                           
+R80;$4.$1.GatPoly;$4.$43.Metal1;;15.0                                           
+R81;$4.$1.GatPoly;$4.$45.Metal1;;15.0                                           
+R82;$4.$1.GatPoly;$4.$47.Metal1;;15.0                                           
+R83;$4.$1.GatPoly;$4.$49.Metal1;;15.0                                           
+R84;$4.$1.GatPoly;$4.$51.Metal1;;15.0                                           
+R85;$4.$1.GatPoly;$4.$53.Metal1;;15.0                                           
+R86;$4.$1.GatPoly;$4.$55.Metal1;;15.0                                           
+R87;$4.$28.Metal1;$4.$30.Metal1;;0.152                                          
+R88;$4.$29.Metal1;$4.$31.Metal1;;0.152                                          
+R89;$4.$30.Metal1;$4.$32.Metal1;;0.152                                          
+R90;$4.$31.Metal1;$4.$33.Metal1;;0.152                                          
+R91;$4.$32.Metal1;$4.$34.Metal1;;0.152                                          
+R92;$4.$33.Metal1;$4.$35.Metal1;;0.152                                          
+R93;$4.$34.Metal1;$4.$36.Metal1;;0.154                                          
+R94;$4.$35.Metal1;$4.$37.Metal1;;0.154                                          
+R95;$4.$36.Metal1;$4.$38.Metal1;;0.152                                          
+R96;$4.$37.Metal1;$4.$39.Metal1;;0.152                                          
+R97;$4.$38.Metal1;$4.$40.Metal1;;0.152                                          
+R98;$4.$39.Metal1;$4.$41.Metal1;;0.152                                          
+R99;$4.$40.Metal1;$4.$42.Metal1;;0.154                                          
+R100;$4.$41.Metal1;$4.$43.Metal1;;0.154                                         
+R101;$4.$42.Metal1;$4.$44.Metal1;;0.152                                         
+R102;$4.$43.Metal1;$4.$45.Metal1;;0.152                                         
+R103;$4.$44.Metal1;$4.$46.Metal1;;0.152                                         
+R104;$4.$45.Metal1;$4.$47.Metal1;;0.152                                         
+R105;$4.$46.Metal1;$4.$48.Metal1;;0.154                                         
+R106;$4.$47.Metal1;$4.$49.Metal1;;0.154                                         
+R107;$4.$48.Metal1;$4.$50.Metal1;;0.152                                         
+R108;$4.$49.Metal1;$4.$51.Metal1;;0.152                                         
+R109;$4.$50.Metal1;$4.$52.Metal1;;0.152                                         
+R110;$4.$51.Metal1;$4.$53.Metal1;;0.152                                         
+R111;$4.$52.Metal1;$4.$54.Metal1;;0.154                                         
+R112;$4.$53.Metal1;$4.$55.Metal1;;0.154                                         
+R113;sub!;sub!.$0.Metal1;;0.422                                                 
+R114;sub!;sub!.$15.Metal1;;0.019                                                
+R115;sub!;sub!.$19.Metal1;;0.044                                                
+R116;sub!;sub!.$20.Metal1;;0.005                                                
+R117;sub!;sub!.$29.Metal1;;0.11                                                 
+R118;sub!;sub!.$30.Metal1;;0.11                                                 
+R119;sub!;sub!.$31.Metal1;;0.019                                                
+R120;sub!;sub!.$35.Metal1;;0.044                                                
+R121;sub!;sub!.$36.Metal1;;0.005                                                
+R122;sub!;sub!.$49.Metal1;;0.057                                                
+R123;sub!;sub!.$5.Metal1;;0.057                                                 
+R124;sub!;sub!.$50.Metal1;;0.006                                                
+R125;sub!;sub!.$59.Metal1;;0.422                                                
+R126;sub!;sub!.$6.Metal1;;0.006                                                 
+R127;sub!.$0.Metal1;sub!.$7.Metal1;;0.03                                        
+R128;sub!.$0.Metal1;sub!.$8.Metal1;;0.029                                       
+R129;sub!.$1.Metal1;sub!.$2.Metal1;;0.071                                       
+R130;sub!.$1.Metal1;sub!.$60.nSD;;17.0                                          
+R131;sub!.$10.Metal1;sub!.$11.Metal1;;0.054                                     
+R132;sub!.$10.Metal1;sub!.$60.nSD;;17.0                                         
+R133;sub!.$10.Metal1;sub!.$9.Metal1;;0.056                                      
+R134;sub!.$100.nSD;sub!.$31.Metal1;;17.0                                        
+R135;sub!.$100.nSD;sub!.$32.Metal1;;17.0                                        
+R136;sub!.$100.nSD;sub!.$33.Metal1;;17.0                                        
+R137;sub!.$100.nSD;sub!.$34.Metal1;;17.0                                        
+R138;sub!.$100.nSD;sub!.$35.Metal1;;17.0                                        
+R139;sub!.$100.nSD;sub!.$36.Metal1;;17.0                                        
+R140;sub!.$100.nSD;sub!.$37.Metal1;;17.0                                        
+R141;sub!.$100.nSD;sub!.$38.Metal1;;17.0                                        
+R142;sub!.$100.nSD;sub!.$39.Metal1;;17.0                                        
+R143;sub!.$100.nSD;sub!.$40.Metal1;;17.0                                        
+R144;sub!.$100.nSD;sub!.$41.Metal1;;17.0                                        
+R145;sub!.$100.nSD;sub!.$42.Metal1;;17.0                                        
+R146;sub!.$100.nSD;sub!.$43.Metal1;;17.0                                        
+R147;sub!.$100.nSD;sub!.$44.Metal1;;17.0                                        
+R148;sub!.$102.nSD;sub!.$45.Metal1;;17.0                                        
+R149;sub!.$102.nSD;sub!.$46.Metal1;;17.0                                        
+R150;sub!.$102.nSD;sub!.$47.Metal1;;17.0                                        
+R151;sub!.$102.nSD;sub!.$48.Metal1;;17.0                                        
+R152;sub!.$102.nSD;sub!.$49.Metal1;;17.0                                        
+R153;sub!.$102.nSD;sub!.$50.Metal1;;17.0                                        
+R154;sub!.$102.nSD;sub!.$51.Metal1;;17.0                                        
+R155;sub!.$102.nSD;sub!.$52.Metal1;;17.0                                        
+R156;sub!.$102.nSD;sub!.$53.Metal1;;17.0                                        
+R157;sub!.$102.nSD;sub!.$54.Metal1;;17.0                                        
+R158;sub!.$102.nSD;sub!.$55.Metal1;;17.0                                        
+R159;sub!.$102.nSD;sub!.$56.Metal1;;17.0                                        
+R160;sub!.$102.nSD;sub!.$57.Metal1;;17.0                                        
+R161;sub!.$102.nSD;sub!.$58.Metal1;;17.0                                        
+R162;sub!.$11.Metal1;sub!.$12.Metal1;;0.053                                     
+R163;sub!.$11.Metal1;sub!.$60.nSD;;17.0                                         
+R164;sub!.$12.Metal1;sub!.$13.Metal1;;0.052                                     
+R165;sub!.$12.Metal1;sub!.$60.nSD;;17.0                                         
+R166;sub!.$13.Metal1;sub!.$14.Metal1;;0.05                                      
+R167;sub!.$13.Metal1;sub!.$60.nSD;;17.0                                         
+R168;sub!.$14.Metal1;sub!.$60.nSD;;17.0                                         
+R169;sub!.$15.Metal1;sub!.$16.Metal1;;0.049                                     
+R170;sub!.$15.Metal1;sub!.$74.nSD;;17.0                                         
+R171;sub!.$16.Metal1;sub!.$17.Metal1;;0.049                                     
+R172;sub!.$16.Metal1;sub!.$74.nSD;;17.0                                         
+R173;sub!.$17.Metal1;sub!.$18.Metal1;;0.049                                     
+R174;sub!.$17.Metal1;sub!.$74.nSD;;17.0                                         
+R175;sub!.$18.Metal1;sub!.$19.Metal1;;0.049                                     
+R176;sub!.$18.Metal1;sub!.$74.nSD;;17.0                                         
+R177;sub!.$19.Metal1;sub!.$74.nSD;;17.0                                         
+R178;sub!.$2.Metal1;sub!.$3.Metal1;;0.07                                        
+R179;sub!.$2.Metal1;sub!.$60.nSD;;17.0                                          
+R180;sub!.$20.Metal1;sub!.$21.Metal1;;0.049                                     
+R181;sub!.$20.Metal1;sub!.$74.nSD;;17.0                                         
+R182;sub!.$21.Metal1;sub!.$29.Metal1;;0.025                                     
+R183;sub!.$21.Metal1;sub!.$74.nSD;;17.0                                         
+R184;sub!.$22.Metal1;sub!.$23.Metal1;;0.049                                     
+R185;sub!.$22.Metal1;sub!.$29.Metal1;;0.024                                     
+R186;sub!.$22.Metal1;sub!.$74.nSD;;17.0                                         
+R187;sub!.$23.Metal1;sub!.$24.Metal1;;0.049                                     
+R188;sub!.$23.Metal1;sub!.$74.nSD;;17.0                                         
+R189;sub!.$24.Metal1;sub!.$25.Metal1;;0.049                                     
+R190;sub!.$24.Metal1;sub!.$74.nSD;;17.0                                         
+R191;sub!.$25.Metal1;sub!.$26.Metal1;;0.049                                     
+R192;sub!.$25.Metal1;sub!.$74.nSD;;17.0                                         
+R193;sub!.$26.Metal1;sub!.$27.Metal1;;0.049                                     
+R194;sub!.$26.Metal1;sub!.$74.nSD;;17.0                                         
+R195;sub!.$27.Metal1;sub!.$28.Metal1;;0.049                                     
+R196;sub!.$27.Metal1;sub!.$74.nSD;;17.0                                         
+R197;sub!.$28.Metal1;sub!.$74.nSD;;17.0                                         
+R198;sub!.$3.Metal1;sub!.$4.Metal1;;0.067                                       
+R199;sub!.$3.Metal1;sub!.$60.nSD;;17.0                                          
+R200;sub!.$30.Metal1;sub!.$37.Metal1;;0.025                                     
+R201;sub!.$30.Metal1;sub!.$38.Metal1;;0.024                                     
+R202;sub!.$31.Metal1;sub!.$32.Metal1;;0.049                                     
+R203;sub!.$32.Metal1;sub!.$33.Metal1;;0.049                                     
+R204;sub!.$33.Metal1;sub!.$34.Metal1;;0.049                                     
+R205;sub!.$34.Metal1;sub!.$35.Metal1;;0.049                                     
+R206;sub!.$36.Metal1;sub!.$37.Metal1;;0.049                                     
+R207;sub!.$38.Metal1;sub!.$39.Metal1;;0.049                                     
+R208;sub!.$39.Metal1;sub!.$40.Metal1;;0.049                                     
+R209;sub!.$4.Metal1;sub!.$5.Metal1;;0.065                                       
+R210;sub!.$4.Metal1;sub!.$60.nSD;;17.0                                          
+R211;sub!.$40.Metal1;sub!.$41.Metal1;;0.049                                     
+R212;sub!.$41.Metal1;sub!.$42.Metal1;;0.049                                     
+R213;sub!.$42.Metal1;sub!.$43.Metal1;;0.049                                     
+R214;sub!.$43.Metal1;sub!.$44.Metal1;;0.049                                     
+R215;sub!.$45.Metal1;sub!.$46.Metal1;;0.071                                     
+R216;sub!.$46.Metal1;sub!.$47.Metal1;;0.07                                      
+R217;sub!.$47.Metal1;sub!.$48.Metal1;;0.067                                     
+R218;sub!.$48.Metal1;sub!.$49.Metal1;;0.065                                     
+R219;sub!.$5.Metal1;sub!.$60.nSD;;17.0                                          
+R220;sub!.$50.Metal1;sub!.$51.Metal1;;0.061                                     
+R221;sub!.$51.Metal1;sub!.$59.Metal1;;0.03                                      
+R222;sub!.$52.Metal1;sub!.$53.Metal1;;0.058                                     
+R223;sub!.$52.Metal1;sub!.$59.Metal1;;0.029                                     
+R224;sub!.$53.Metal1;sub!.$54.Metal1;;0.056                                     
+R225;sub!.$54.Metal1;sub!.$55.Metal1;;0.054                                     
+R226;sub!.$55.Metal1;sub!.$56.Metal1;;0.053                                     
+R227;sub!.$56.Metal1;sub!.$57.Metal1;;0.052                                     
+R228;sub!.$57.Metal1;sub!.$58.Metal1;;0.05                                      
+R229;sub!.$6.Metal1;sub!.$60.nSD;;17.0                                          
+R230;sub!.$6.Metal1;sub!.$7.Metal1;;0.061                                       
+R231;sub!.$60.nSD;sub!.$7.Metal1;;17.0                                          
+R232;sub!.$60.nSD;sub!.$8.Metal1;;17.0                                          
+R233;sub!.$60.nSD;sub!.$9.Metal1;;17.0                                          
+R234;sub!.$8.Metal1;sub!.$9.Metal1;;0.058                                       
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_moscap_n_x2_gatp
+oly_wire__cap_moscap_n_x2_gatpoly_wire/cap_moscap_n_x2_gatpoly_wire_k25d_pex_net
+list.csv                                                                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_moscap_n_x2_gatp
+oly_wire__cap_moscap_n_x2_gatpoly_wire/cap_moscap_n_x2_gatpoly_wire_k25d_pex_net
+list.spice                                                                      
+[16:21:21] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 980.7 MiB                                          
+[16:21:21] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): $2                        
+[16:21:21] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 980.7 MiB                                              

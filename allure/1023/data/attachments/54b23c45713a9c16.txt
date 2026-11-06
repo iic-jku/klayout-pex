@@ -1,0 +1,38 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_wire_voltage_divider_li1.lvsdb.gz --out-dir                                   
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:32:06] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:32:06] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_sky130A/r_wire_voltage_divider_li1                  
+                    __r_wire_voltage_divider_li1/kpex_result.j                  
+                    son                                                         
+[16:32:06] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.0 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:32:06] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1993
+[16:32:06] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:32:06] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:32:06] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.0 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A,B,C;VSUBS;0.969;                                                           
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.csv
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/r_wire_voltage_divider
+_li1__r_wire_voltage_divider_li1/r_wire_voltage_divider_li1_k25d_pex_netlist.spi
+ce                                                                              
+[16:32:06] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.0 GiB                                            
+[16:32:06] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.0 GiB                                                

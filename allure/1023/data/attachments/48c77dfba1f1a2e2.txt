@@ -1,0 +1,59 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox y --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/c
+ut_instances_sharing_diffusion_in_top.lvsdb.gz --out-dir                        
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cut_instances_sharing_diffusion_in_top.gds.gz --exclusion-markers ignore --cut 
+unit=U                                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:22:27] INFO     No explicit top cell specified, using top    kpex_cli.py:892
+                    cell                                                        
+                    'cut_instances_sharing_diffusion_in_top'                    
+[16:22:27] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:22:27] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_sky130A/cut_instances_sharing_diffu                  
+                    sion_in_top__cut_instances_sharing_diffusi                  
+                    on_in_top/kpex_result.json                                  
+[16:22:27] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.3 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:22:27] INFO     (93, 44) -> (nsd)                           kpex_cli.py:1993
+[16:22:27] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1993
+[16:22:27] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1993
+[16:22:27] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1993
+[16:22:27] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1993
+[16:22:27] INFO     The netlist leaves out the 3 devices of the extractor.py:180
+                    cut cells                                                   
+[16:22:27] INFO     Nothing connects these nets within          extractor.py:241
+                    exclusion markers to the netlist, so their                  
+                    capacitances to the rest of the layout go                   
+                    to the substrate: $I1, $I2, $I3                             
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:22:27] INFO     LVSDB: found 5pins                          extractor.py:482
+[16:22:27] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.3 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;L;U_0__S;;185.0                                                              
+R2;M0;U_0__D;;185.0                                                             
+R3;M1;U_1__D;;185.0                                                             
+R4;R;U_2__D;;185.0                                                              
+R5;U_0__D;U_1__S;;0.001                                                         
+R6;U_1__D;U_2__S;;0.001                                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_instances_sharing_d
+iffusion_in_top__cut_instances_sharing_diffusion_in_top/cut_instances_sharing_di
+ffusion_in_top_k25d_pex_netlist.csv                                             
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_instances_sharing_d
+iffusion_in_top__cut_instances_sharing_diffusion_in_top/cut_instances_sharing_di
+ffusion_in_top_k25d_pex_netlist.spice                                           
+[16:22:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.3 GiB                                            
+[16:22:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.3 GiB                                                

@@ -1,0 +1,52 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/exclusion_via_across.lvsdb.gz --out-dir                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/exclusion_via_across.gds.gz --exclusion-markers tie                        
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:30:56] INFO     No explicit top cell specified, using top    kpex_cli.py:892
+                    cell 'exclusion_via_across'                                 
+[16:30:56] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:30:56] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_ihp-sg13g2/exclusion_via_across__e                  
+                    xclusion_via_across/kpex_result.json                        
+[16:30:56] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 785.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:30:56] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1993
+[16:30:56] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[16:30:56] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1993
+[16:30:56] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1993
+[16:30:56] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1993
+[16:30:56] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1993
+[16:30:56] WARNING  These nets are partly within exclusion      extractor.py:235
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A,B: Metal2, Metal3                                     
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:30:56] INFO     LVSDB: found 1pins                          extractor.py:482
+[16:30:56] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 785.8 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.418                                                                 
+R2;A,B;A,B.$1.Metal3;;2.031                                                     
+R3;A,B.$1.Metal3;B;;0.02                                                        
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_via_acros
+s__exclusion_via_across/exclusion_via_across_k25d_pex_netlist.csv               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_via_acros
+s__exclusion_via_across/exclusion_via_across_k25d_pex_netlist.spice             
+[16:30:56] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 785.8 MiB                                          
+[16:30:56] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 785.8 MiB                                              

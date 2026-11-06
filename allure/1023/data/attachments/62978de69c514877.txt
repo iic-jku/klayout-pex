@@ -1,0 +1,64 @@
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_user_marker_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_user_marker_wire.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'exclusion_user_marker_wire'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (36, 0) -> (metal2_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;A;B;;2.655
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_user_marker_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_user_marker_wire.gds.gz' --exclusion-markers tie --exclusion-marker-layer 200/0
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'exclusion_user_marker_wire'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (36, 0) -> (metal2_con)
+WARNING  __kpex__:extractor.py:235 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal2
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;A;A,B;;0.877
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;A,B;B;;0.877
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_user_marker_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_user_marker_wire.gds.gz' --exclusion-markers tie --exclusion-marker-layer 200/0:Metal3
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'exclusion_user_marker_wire'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (36, 0) -> (metal2_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;A;B;;2.655
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_user_marker_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_user_marker_wire.gds.gz' --exclusion-markers tie --exclusion-marker-layer 200/0:Metal2
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'exclusion_user_marker_wire'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (36, 0) -> (metal2_con)
+WARNING  __kpex__:extractor.py:235 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal2
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;A;A,B;;0.877
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;A,B;B;;0.877
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_user_marker_wire__exclusion_user_marker_wire\exclusion_user_marker_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB

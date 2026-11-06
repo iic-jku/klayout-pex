@@ -1,0 +1,17 @@
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk sky130A --mode R --blackbox y --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cut_half_of_gate.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cut_half_of_gate.gds.gz --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'cut_half_of_gate'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_half_of_gate__cut_half_of_gate/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1993 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1993 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1993 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.3 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;G;X__G_1;;771.2
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;X__G_0;X__G_1;;63.945
+SUBPROCESS __kpex__:kpex_cli.py:1477 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_half_of_gate__cut_half_of_gate/cut_half_of_gate_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_half_of_gate__cut_half_of_gate/cut_half_of_gate_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.3 GiB
