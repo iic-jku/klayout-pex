@@ -1,0 +1,50 @@
+[16:02:52] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox y --lvsdb                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/cut_taps_with_labels_b_a.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patter
+ns/cut_taps_with_labels_b_a.gds.gz --exclusion-markers ignore --cut block=X     
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:02:52] INFO     No explicit top cell specified, using top    kpex_cli.py:892
+                    cell 'cut_taps_with_labels_b_a'                             
+[16:02:52] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:02:52] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_gf180mcuD/cut_taps_with_labels_b_a_                  
+                    _cut_taps_with_labels_b_a/kpex_result.json                  
+[16:02:52] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.3 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:02:52] INFO     (32, 0) -> (nsd)                            kpex_cli.py:1993
+[16:02:52] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1993
+[16:02:52] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1993
+[16:02:52] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1993
+[16:02:52] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1993
+[16:02:52] INFO     (33, 4401) -> (contact_nsd_con)             kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:02:52] INFO     LVSDB: found 3pins                          extractor.py:482
+[16:02:52] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.3 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;D;D.P0.Nplus;;6.3                                                            
+R3;S;S.P0.Nplus;;6.3                                                            
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_taps_with_labels_
+b_a__cut_taps_with_labels_b_a/cut_taps_with_labels_b_a_k25d_pex_netlist.csv     
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_taps_with_labels_
+b_a__cut_taps_with_labels_b_a/cut_taps_with_labels_b_a_k25d_pex_netlist.spice   
+[16:02:52] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.3 GiB                                            
+[16:02:52] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.3 GiB                                                

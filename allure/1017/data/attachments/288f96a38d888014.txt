@@ -1,0 +1,51 @@
+[16:03:44] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/sideoverlap_fingered_m1_m2_patternA.lvsdb.gz --out-dir                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:03:44] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:03:44] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_ihp-sg13g2/sideoverlap_fingered_m1_                  
+                    m2_patternA__sideoverlap_fingered_m1_m2_pa                  
+                    tternA/kpex_result.json                                     
+[16:03:44] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.8 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:03:44] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[16:03:44] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1993
+[16:03:44] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1993
+[16:03:44] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1993
+[16:03:44] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:03:44] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:03:44] INFO     LVSDB: found 2pins                          extractor.py:482
+[16:03:44] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.8 GiB                              
+[16:03:44] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.8 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LOWER;UPPER;0.467;                                                           
+C2;LOWER;VSUBS;5.641;                                                           
+C3;UPPER;VSUBS;52.218;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_fingered
+_m1_m2_patternA__sideoverlap_fingered_m1_m2_patternA/sideoverlap_fingered_m1_m2_
+patternA_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_fingered
+_m1_m2_patternA__sideoverlap_fingered_m1_m2_patternA/sideoverlap_fingered_m1_m2_
+patternA_k25d_pex_netlist.spice                                                 
+[16:03:44] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.8 GiB                                            
+[16:03:44] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.8 GiB                                                
