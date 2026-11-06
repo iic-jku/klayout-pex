@@ -1,0 +1,23 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 863.9 MiB
+INFO     __kpex__:kpex_cli.py:1854 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1854 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:1854 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:1854 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:1854 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:1854 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:extractor.py:482 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 863.9 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;A;A.P0.Metal5;;0.043
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;B;B.$1.TopMetal1;;0.007
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;B.$1.TopMetal1;B.P0.MIM;;2.2
+SUBPROCESS __kpex__:kpex_cli.py:1394 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 863.9 MiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 863.9 MiB

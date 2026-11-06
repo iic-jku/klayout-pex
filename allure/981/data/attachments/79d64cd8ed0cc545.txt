@@ -1,0 +1,56 @@
+[13:42:27] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1667
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/s
+onosfet_star_w0p45_l0p22.lvsdb.gz --out-dir                                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:42:27] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:873
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:42:27] INFO     Peak memory (resident set size) after       kpex_cli.py:1850
+                    preparing the LVSDB: 1.0 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:42:27] INFO     (64, 18) -> (dnwell)                        kpex_cli.py:1854
+[13:42:27] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1854
+[13:42:27] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1854
+[13:42:27] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1854
+[13:42:27] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1854
+[13:42:27] INFO     (66, 4405) -> (licon_ptap_con)              kpex_cli.py:1854
+[13:42:27] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1854
+[13:42:27] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1854
+[13:42:27] INFO     (93, 44) -> (sonos_nsd)                     kpex_cli.py:1854
+[13:42:27] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1854
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:42:27] INFO     LVSDB: found 4pins                          extractor.py:482
+[13:42:27] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.0 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.$2.met1;;9.3                                                             
+R2;D;D.P0.nsdm;;185.0                                                           
+R3;G;G.$5.met1;;9.3                                                             
+R4;G;G.$7.poly;;152.0                                                           
+R5;G.$0.li1;G.$4.met1;;9.3                                                      
+R6;G.$0.li1;G.$6.poly;;152.0                                                    
+R7;G.$6.poly;G.P0.poly;;73.395                                                  
+R8;G.$7.poly;G.P0.poly;;73.395                                                  
+R9;S;S.$2.met1;;9.3                                                             
+R10;S;S.P0.nsdm;;185.0                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p
+22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.csv    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p
+22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.spice  
+[13:42:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1444
+                    netlist: 1.0 GiB                                            
+[13:42:27] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1461
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): B, $6                     
+[13:42:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1733
+                    run: 1.0 GiB                                                
