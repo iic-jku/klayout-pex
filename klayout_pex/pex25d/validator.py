@@ -120,6 +120,7 @@ class Validator:
     def validate_scene(self, scene: Any) -> None:
         self.check_units(scene)
         self.check_scene_layers(scene)
+        self.check_scene_profiles(scene)
         self.check_scene_references(scene)
         self.check_scene_order(scene)
         self.check_depth_ties(scene)
@@ -333,6 +334,26 @@ class Validator:
                               f"{'METAL' if metal else 'VIA'} but carries a "
                               f"{arm.split('_')[0].upper()} resistance",
                               source=layer)
+
+    def check_scene_profiles(self, scene: Any):
+        """The rules the resolver applies to the ground plane and the conformal films."""
+        from .resolver import conformal_thickness_problem
+
+        if scene.HasField('ground_plane'):
+            ground_plane = scene.ground_plane
+            if ground_plane.zhigh <= ground_plane.zlow:
+                self.diagnose('PEX25D-E0271',
+                              f"GROUND_PLANE '{ground_plane.name}' has z extent "
+                              f"[{ground_plane.zlow}, {ground_plane.zhigh}]",
+                              source=ground_plane)
+
+        kinds = pex25d_dielectric_pb2()
+        for dielectric in scene.dielectrics:
+            if dielectric.kind != kinds.DIELECTRIC_KIND_CONFORMAL:
+                continue
+            problem = conformal_thickness_problem(dielectric.name, dielectric)
+            if problem is not None:
+                self.diagnose('PEX25D-E0216', problem, source=dielectric)
 
     def check_scene_references(self, scene: Any) -> None:
         """
