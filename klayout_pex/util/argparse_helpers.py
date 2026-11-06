@@ -203,6 +203,26 @@ def non_negative_square_micrometers(text: str) -> float:
     return _finite_number(text, lambda value: value >= 0, ">= 0 (in µm²)")
 
 
+def positive_number(text: str) -> float:
+    """argparse type: a finite number > 0, e.g. '0.5'"""
+    return _finite_number(text, lambda value: value > 0, "> 0")
+
+
+def non_negative_number(text: str) -> float:
+    """argparse type: a finite number >= 0, e.g. '0' or '2'"""
+    return _finite_number(text, lambda value: value >= 0, ">= 0")
+
+
+def relative_error(text: str) -> float:
+    """argparse type: a finite relative error between 0 and 1, both excluded, e.g. '0.05' for 5 %"""
+    return _finite_number(text, lambda value: 0 < value < 1, "> 0 and < 1")
+
+
+def relative_permittivity(text: str) -> float:
+    """argparse type: a finite relative permittivity >= 1, that of vacuum, e.g. '3.9'"""
+    return _finite_number(text, lambda value: value >= 1, ">= 1")
+
+
 DELAUNAY_B_MAX = 1.1
 """
 The largest b = 2·sin(minimum angle) to ask the refinement of KLayout's Region#delaunay for: documented as stable
