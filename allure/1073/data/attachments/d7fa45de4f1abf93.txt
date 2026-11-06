@@ -1,0 +1,29 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_nmos_diode2_all.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/exclusion_nmos_diode2_all.gds.gz --exclusion-markers ports
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_nmos_diode2_all'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_nmos_diode2_all__exclusion_nmos_diode2_all/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:561 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 1 of 5 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 842.1 MiB
+INFO     __kpex__:kpex_cli.py:2011 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2011 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2011 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2011 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2011 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:2011 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2011 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1466 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 842.2 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 842.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1501 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_nmos_diode2_all__exclusion_nmos_diode2_all/exclusion_nmos_diode2_all_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_nmos_diode2_all__exclusion_nmos_diode2_all/exclusion_nmos_diode2_all_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 842.3 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 842.3 MiB
