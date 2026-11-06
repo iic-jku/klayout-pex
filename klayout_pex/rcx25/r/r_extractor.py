@@ -202,7 +202,8 @@ def label_names_net(label: Label, net_name: NetName) -> bool:
     """
     :return: whether KLayout named the net after the label, regardless of case, as SPICE reads names:
              A of A,B (a net of several labels), vss of vss$1 (islands of one name),
-             VDD of $1.VDD (a net within a subcircuit)
+             VDD of $1.VDD (a net within a subcircuit, which keeps that name where the label isn't unique,
+             see KLayoutExtractionContext.name_nets_after_subcell_labels)
     """
     label = label.casefold()
     for name in net_name.casefold().split(','):

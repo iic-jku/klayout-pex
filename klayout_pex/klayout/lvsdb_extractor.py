@@ -23,9 +23,10 @@
 #
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from functools import cached_property
+import re
 import tempfile
 from typing import *
 
@@ -45,7 +46,7 @@ from ..log import (
 from .shapes_pb2_converter import ShapesConverter
 
 from ..tech_info import TechInfo
-from ..types import GDSPair, LayerName, LVSLayerName, NetName
+from ..types import GDSPair, Label, LayerName, LVSLayerName, NetName
 import klayout_pex_protobuf.kpex.geometry.shapes_pb2 as shapes_pb2
 import klayout_pex_protobuf.kpex.layout.device_pb2 as device_pb2
 import klayout_pex_protobuf.kpex.layout.pin_pb2 as pin_pb2
@@ -85,6 +86,34 @@ def unique_name(name: str, present_names: Set[str], separator: str = '$') -> str
             j -= m
         m >>= 1
     return f"{name}{separator}{j + 1}"
+
+
+def subcell_label_name(net_name: NetName, labels: Collection[Label]) -> Optional[NetName]:
+    """
+    The name of the labels in a subcell that KLayout named a net of their parent after,
+    with the path of the subcircuit, as it flattens it (e.g. $1.D of the label D in the subcircuit $1, #330)
+
+    NOTE: like label_names_net, regardless of case and of a number that makes the name unique (e.g. $1.D$1),
+          and of several labels, as KLayout names a net after all of them (e.g. A,B of $1.A,B or $1.A,$2.B)
+
+    :param labels: the labels on the net
+    :return: the name of the labels (e.g. D), None if the net has no such name,
+             also if labels of its own circuit name it (e.g. bus.0)
+    """
+    folded_labels = {label.casefold() for label in labels}
+
+    def label_of(part: str) -> Optional[Label]:
+        # NOTE: the longest one, e.g. a.b of $1.a.b
+        for start in [0, *(match.end() for match in re.finditer(r'\.', part))]:
+            if part[start:].casefold() in folded_labels:
+                return part[start:]
+        return None
+
+    parts = [re.sub(r'\$\d+$', '', part) for part in net_name.split(',')]
+    part_labels = [label_of(part) for part in parts]
+    if None in part_labels or part_labels == parts:
+        return None
+    return ','.join(part_labels)
 
 
 def device_list(device_names: List[str]) -> str:
@@ -151,6 +180,7 @@ class KLayoutExtractionContext:
                     f"{', '.join(extra_top_cells)}")
 
         cls.make_net_names_unique(lvsdb.netlist())
+        nets_named_after_subcell_labels = cls.name_nets_after_subcell_labels(lvsdb)
 
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
@@ -215,6 +245,14 @@ class KLayoutExtractionContext:
             blackbox_devices=blackbox_devices
         )
         context.make_pins_of_pin_labels()
+
+        # NOTE: a warning, as other tools (e.g. Magic, SPEF writers, commercial ones) make ports of the labels
+        #       of the top cell only, and none drops the path of the subcell
+        ports = sorted(name for name in nets_named_after_subcell_labels
+                       if context.top_circuit.net_by_name(name).pin_count() > 0)
+        if ports:
+            warning(f"Ports named after labels in subcells: {', '.join(ports)} "
+                    f"(label them in the top cell to name ports explicitly)")
         return context
 
     def make_pins_of_pin_labels(self):
@@ -249,6 +287,58 @@ class KLayoutExtractionContext:
                 names.add(name.casefold())
                 if name != net.name:
                     net.name = name
+
+    @staticmethod
+    def name_nets_after_subcell_labels(lvsdb: kdb.LayoutToNetlist) -> List[NetName]:
+        """
+        Names each net of the top circuit that KLayout named after labels in a subcell (e.g. $1.D,
+        see subcell_label_name) after the labels (D), with its pin, so that its port is named like the pin
+        of a schematic (#417), where that name is unique among the nets, regardless of case, as SPICE reads names,
+        else it keeps its name (e.g. $1.D and $2.D of two instances of a cell, or $1.D beside a net D)
+
+        NOTE: before the extraction takes the names (e.g. the annotated layout, see build_all_nets),
+              so of the nets without a port too, as a pin label makes one later (see make_pins_of_pin_labels)
+
+        :return: the new names
+        """
+        circuit = lvsdb.netlist().top_circuit()
+        candidates = [net for net in circuit.each_net() if '.' in net.name]
+        if not candidates:
+            return []
+
+        # NOTE: the labels on a net, by the texts of its shapes, on the layers with texts only
+        #       (the other layers of a large net have many shapes)
+        top_cell = lvsdb.internal_top_cell()
+        text_layers: List[kdb.Region] = []
+        for layer_index in lvsdb.layer_indexes():
+            texts = top_cell.begin_shapes_rec(layer_index)
+            texts.shape_flags = kdb.Shapes.STexts
+            if not texts.at_end():
+                text_layers.append(lvsdb.layer_by_index(layer_index))
+
+        new_names: List[Tuple[kdb.Net, NetName]] = []
+        for net in candidates:
+            labels: Set[Label] = set()
+            for region in text_layers:
+                shapes = kdb.Shapes()
+                lvsdb.shapes_of_net(net, region, True, shapes)
+                labels.update(shape.text_string for shape in shapes.each(kdb.Shapes.STexts))
+            new_name = subcell_label_name(net.name, labels)
+            if new_name is not None:
+                new_names.append((net, new_name))
+
+        taken_names = {net.name.casefold() for net in circuit.each_net()}  # NOTE: case-folded
+        counts = Counter(new_name.casefold() for _, new_name in new_names)
+        renamed: List[NetName] = []
+        for net, new_name in new_names:
+            if counts[new_name.casefold()] > 1 or new_name.casefold() in taken_names:
+                continue
+            for pin_ref in list(net.each_pin()):
+                if circuit.pin_by_id(pin_ref.pin_id()).name() == net.name:
+                    circuit.rename_pin(pin_ref.pin_id(), new_name)
+            net.name = new_name
+            renamed.append(new_name)
+        return renamed
 
     @staticmethod
     def build_LVS_layer_map(annotated_layout: kdb.Layout,

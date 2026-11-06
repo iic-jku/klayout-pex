@@ -37,11 +37,15 @@ from klayout_pex.klayout.lvsdb_extractor import (
     KLayoutExtractedLayerInfo,
     KLayoutExtractionContext,
     KLayoutMergedExtractedLayerInfo,
-    LVSDBError
+    LVSDBError,
+    subcell_label_name
 )
+from klayout_pex.pdk_config import PDK
 from klayout_pex.types import LVSLayerName, NetName
 from klayout_pex.tech_info import TechInfo
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+from tests.common.lvsdb_fixtures import lvsdb_fixture_path
+from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 @allure.parent_suite("Unit Tests")
@@ -219,6 +223,95 @@ class NetNameTest(unittest.TestCase):
         shapes.clear()
         self.assertEqual(count, pex_context.shapes_of_net(gds_pair, net_name).count())
         self.assertTrue(pex_context.shapes_of_net(gds_pair, 'no such net').is_empty())
+
+
+def pattern_context(pdk_name: PDKName,
+                    cell_name: str,
+                    net_names: Mapping[NetName, NetName] = {}) -> Tuple[KLayoutExtractionContext, List[str]]:
+    """
+    :param net_names: new names of nets of the LVS netlist, given before the extraction
+    :return: the extraction context of the test pattern, from its committed LVS database, and the warnings
+    """
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(str(pdk_name), PDKTestConfig(pdk_name).gds_path('test_patterns',
+                                                                                  f"{cell_name}.gds.gz")))
+    for old_name, new_name in net_names.items():
+        lvsdb.netlist().circuit_by_name(cell_name).net_by_name(old_name).name = new_name
+    tech = TechInfo.from_json(PDK.from_string(str(pdk_name)).config.tech_pb_json_path, dielectric_filter=None)
+    with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
+        pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb, tech=tech,
+                                                                  blackbox_devices=False)
+    return pex_context, [call.args[0] for call in warning.call_args_list]
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("LVS", "LVSDB", "Net Names", "Pins")
+class SubcellLabelNameTest(unittest.TestCase):
+    def test_subcell_label_name(self):
+        for net_name, labels, expected in (
+                ('$1.D', {'D'}, 'D'),
+                ('$1.$2.D', {'D'}, 'D'),
+                ('$1.d', {'D'}, 'd'),
+                ('$1.D$1', {'D'}, 'D'),
+                ('$1.A,B', {'A', 'B'}, 'A,B'),
+                ('$1.A,$2.B', {'A', 'B'}, 'A,B'),
+                ('$1.VDD,X', {'VDD', 'X'}, 'VDD,X'),
+                ('$1.a.b', {'a.b', 'b'}, 'a.b'),
+                ('bus.0', {'bus.0'}, None),
+                ('a.b', {'a.b', 'b'}, None),
+                ('$1.D', set(), None),
+                ('$1.D', {'G'}, None),
+                ('$1.A,B', {'A'}, None),
+        ):
+            with self.subTest(net_name=net_name, labels=labels):
+                self.assertEqual(expected, subcell_label_name(net_name, labels))
+
+    def test_ports_of_labels_only_in_a_subcell_are_named_after_them(self):
+        # NOTE: the PEX-LVS flattens the subcell SUBNFET, whose labels KLayout names the nets after
+        #       with the path of the subcircuit, $1.D, $1.G and $1.S (#330), unlike the pins of a schematic (#417)
+        pex_context, warnings = pattern_context(PDKName.SKY130A, 'nfet_li1_in_subcell')
+        circuit = pex_context.top_circuit
+        self.assertEqual(['sky130_gnd', 'S', 'G', 'D'], [net.name for net in circuit.each_net()])
+        self.assertEqual(['D', 'G', 'S', 'sky130_gnd'], sorted(pin.name() for pin in circuit.each_pin()))
+        self.assertIn("Ports named after labels in subcells: D, G, S "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+        # NOTE: also on the shapes of the annotated layout, which the extraction finds the shapes of a net by
+        self.assertTrue(any(not pex_context.shapes_of_net(gds_pair, 'D').is_empty()
+                            for gds_pair in pex_context.extracted_layers))
+        self.assertEqual({'D', 'G', 'S'}, {pin.net_name for pins in pex_context.pins_pb2_by_layer.values()
+                                           for pin in pins})
+
+    def test_pin_label_only_in_a_subcell_names_the_port_of_a_wire(self):
+        # NOTE: a wire without devices, whose port the pin label makes later (see make_pins_of_pin_labels)
+        pex_context, warnings = pattern_context(PDKName.IHP_SG13G2, 'label_only_in_child_cell')
+        self.assertEqual(['inner'], [pin.name() for pin in pex_context.top_circuit.each_pin()])
+        self.assertIn("Ports named after labels in subcells: inner "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+
+    def test_labels_of_instances_of_a_cell_keep_their_paths(self):
+        # NOTE: the cell of the nfet in 8 orientations, each with the label G
+        pex_context, warnings = pattern_context(PDKName.SKY130A, 'nfet_li1_redux_orientations')
+        self.assertEqual([f"${index}.G" for index in range(1, 9)],
+                         sorted(pin.name() for pin in pex_context.top_circuit.each_pin() if '.' in pin.name()))
+        self.assertFalse([w for w in warnings if 'labels in subcells' in w], warnings)
+
+    def test_labels_of_subcells_name_the_ports_where_unique(self):
+        # NOTE: the label MET4 is in one of the cells of the PDK only, the labels C0 and C1 in each of the 4 VPP caps
+        pex_context, warnings = pattern_context(PDKName.SKY130A, 'cap_vpp_routing_across')
+        pin_names = [pin.name() for pin in pex_context.top_circuit.each_pin()]
+        self.assertIn('MET4', pin_names)
+        self.assertEqual([f"${index}.{label}" for index in range(1, 5) for label in ('C0', 'C1')],
+                         sorted(name for name in pin_names if '.' in name))
+        self.assertIn("Ports named after labels in subcells: MET4 "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+
+    def test_label_of_a_subcell_beside_a_net_of_its_name_keeps_its_path(self):
+        # NOTE: regardless of case, as SPICE reads names
+        pex_context, warnings = pattern_context(PDKName.SKY130A, 'nfet_li1_in_subcell', net_names={'sky130_gnd': 'd'})
+        self.assertEqual(['$1.D', 'G', 'S', 'd'], sorted(net.name for net in pex_context.top_circuit.each_net()))
+        self.assertIn("Ports named after labels in subcells: G, S "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("LVS", "LVSDB", "Pins")
