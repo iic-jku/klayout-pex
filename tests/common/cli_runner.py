@@ -77,6 +77,15 @@ def run_cli_process(module: str,
                           encoding='utf-8', env={**os.environ, **env})
 
 
+def run_python_script(script: str) -> subprocess.CompletedProcess:
+    """
+    Runs a Python script in a fresh process, which imports the modules of the checkout
+
+    :return: the result, with the output decoded as UTF-8
+    """
+    return subprocess.run([sys.executable, '-c', script], cwd=REPO_DIR, capture_output=True, encoding='utf-8')
+
+
 def assert_netlist_cli_loads_neither_klayout_nor_protobuf(argv: Sequence[str]):
     """
     Runs the netlist tool in a fresh process (the tests have loaded both) and asserts that it succeeds
@@ -90,6 +99,5 @@ def assert_netlist_cli_loads_neither_klayout_nor_protobuf(argv: Sequence[str]):
               "    assert exit.code == 0, exit.code\n"
               "loaded = sorted(m for m in sys.modules if m.split('.')[0] in ('klayout', 'klayout_pex_protobuf'))\n"
               "assert not loaded, loaded\n")
-    result = subprocess.run([sys.executable, '-c', script], cwd=REPO_DIR, capture_output=True,
-                            text=True, encoding='utf-8')
+    result = run_python_script(script)
     assert result.returncode == 0, result.stderr

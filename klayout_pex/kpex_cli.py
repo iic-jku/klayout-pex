@@ -27,10 +27,12 @@ import argparse
 import contextlib
 from datetime import datetime
 from enum import StrEnum
+import functools
 import logging
 import os
 import os.path
 from pathlib import Path
+import google.protobuf.json_format
 import rich.console
 import rich.markdown
 import rich.text
@@ -131,6 +133,8 @@ from .rcx25.netlist_checks import (
     check_schematic_pins,
     first_names,
     RCNetlistCheckError,
+    undriven_nets,
+    undriven_nets_warning,
 )
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
@@ -145,6 +149,7 @@ from .tool_version_constraints import (
     check_tool_versions
 )
 from .util.multiple_choice import MultipleChoicePattern
+from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
@@ -172,6 +177,33 @@ class ArgumentValidationError(Exception):
 class InputMode(StrEnum):
     LVSDB = "lvsdb"
     GDS = "gds"
+
+
+@functools.cache
+def side_halo_by_pdk() -> Dict[PDK, float]:
+    """
+    :return: the side halo (in µm) of the tech info of each PDK, but of those without a readable one,
+             which fail their own runs (see validate_args), rather than the help of all
+    """
+    side_halos: Dict[PDK, float] = {}
+    for pdk in PDK:
+        try:
+            side_halos[pdk] = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path).process_parasitics.side_halo
+        except (OSError, TechDefError, google.protobuf.json_format.ParseError):
+            continue
+    return side_halos
+
+
+def halo_default_help(halo_by_pdk: Mapping[str, float]) -> str:
+    """
+    :param halo_by_pdk: the side halo (in µm) of each PDK (see side_halo_by_pdk)
+    :return: the default of --halo for its help, the side halo of the tech info,
+             e.g. "the tech info's, 8 µm in all PDKs" or "the tech info's, 8 µm in gf180mcuD, 10 µm in sky130A"
+    """
+    halos = [f"{halo:g} µm in {pdk}" for pdk, halo in sorted(halo_by_pdk.items())]
+    if len(set(halo_by_pdk.values())) == 1:
+        halos = [f"{next(iter(halo_by_pdk.values())):g} µm in all PDKs"]
+    return ', '.join(["the tech info's"] + halos)
 
 
 class KpexCLI:
@@ -423,8 +455,8 @@ class KpexCLI:
                                help=render_enum_help(topic='mode', enum_cls=PEXMode))
         group_25d.add_argument("--halo", dest="halo",
                                  type=float, default=None,
-                                 help="Custom sidewall halo distance (in µm) to override tech info "
-                                      "(default is no custom halo)")
+                                 help=f"Custom sidewall halo distance (in µm) to override tech info "
+                                      f"(default is {halo_default_help(side_halo_by_pdk())})")
         group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
                                 type=true_or_false, default=True,
                                 help=f"Scale fringe ratios, so that halo distance is 100%% (default is %(default)s)")
@@ -1325,6 +1357,10 @@ class KpexCLI:
         args.rcx25d_delaunay_amax = 0
         args.rcx25d_delaunay_b = 0.5
 
+        if args.pex_mode.need_capacitance():
+            halo_source = '--halo' if args.halo is not None else f"tech info of {args.pdk}"
+            info(f"Sidewall halo: {tech_info.tech.process_parasitics.side_halo:g} µm ({halo_source})")
+
         extractor = RCX25Extractor(pex_context=pex_context,
                                    pex_mode=args.pex_mode,
                                    delaunay_amax=args.rcx25d_delaunay_amax,
@@ -1405,6 +1441,25 @@ class KpexCLI:
             if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+            log_peak_memory('the netlist')
+
+            # NOTE: a warning, not a problem of --check, as fill has such nets too, but they were also defects
+            #       that LVS passed (e.g. a rail under a wrong net name), which have to stay visible,
+            #       also where --reduce removes them
+            capacitance_by_undriven_net = undriven_nets(
+                lvs_netlist=pex_context.lvsdb.netlist(),
+                top_cell_name=pex_context.annotated_top_cell.name,
+                summary=summary,
+                network_net_names={network.net_name
+                                   for results in extraction_results.cell_extraction_results.values()
+                                   for network in results.r_extraction_result.networks},
+                substrate_net_name=pex_context.substrate_net_name,
+                removed_device_ids=removed_device_ids,
+                floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
+            )
+            if capacitance_by_undriven_net:
+                warning(undriven_nets_warning(capacitance_by_undriven_net,
+                                              has_capacitances=args.pex_mode.need_capacitance()))
 
             # NOTE: the reduction reads the netlist as written, the checks above ran on the full one
             self._rcx25_reduced_netlist_path = None
@@ -1418,6 +1473,7 @@ class KpexCLI:
                     subproc(scope.describe())
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
+                log_peak_memory('the netlist reduction')
 
             # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
             #       which is converted from the SPICE netlist (as 'netlist convert' does)
@@ -1660,17 +1716,21 @@ class KpexCLI:
                 error(str(e))
                 sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
-            match args.command:
-                case 'pex25d':
-                    self.run_pex25d_generation(args=args, tech_info=tech_info)
-                case _:
-                    try:
-                        self.run_extraction(args=args, tech_info=tech_info)
-                    except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
-                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
-                            ExclusionError) as e:
-                        error(str(e))
-                        sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            try:
+                match args.command:
+                    case 'pex25d':
+                        self.run_pex25d_generation(args=args, tech_info=tech_info)
+                    case _:
+                        try:
+                            self.run_extraction(args=args, tech_info=tech_info)
+                        except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
+                                RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
+                                ExclusionError) as e:
+                            error(str(e))
+                            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            finally:
+                # NOTE: also of a failed run, e.g. to size the next one
+                log_peak_memory('the run')
 
     def run_pex25d_generation(self,
                               args: argparse.Namespace,
@@ -1774,6 +1834,7 @@ class KpexCLI:
         if args.run_magic:
             rule('MAGIC')
             self.run_magic_extraction(args)
+            log_peak_memory('MAGIC')
 
         # no need to run LVS etc if only running magic engine
         if not (args.run_fastcap or args.run_fastercap or args.run_2_5D):
@@ -1786,6 +1847,7 @@ class KpexCLI:
                                                                   lvsdb=lvsdb,
                                                                   tech=tech_info,
                                                                   blackbox_devices=args.blackbox_devices)
+        log_peak_memory('preparing the LVSDB')
         rule('Non-empty layers in LVS database')
         for gds_pair, layer_info in pex_context.extracted_layers.items():
             names = [l.lvs_layer_name for l in layer_info.source_layers]
@@ -1839,16 +1901,19 @@ class KpexCLI:
                                                   pex_context=pex_context,
                                                   tech_info=tech_info,
                                                   exclusions=exclusions)
+            log_peak_memory('the FasterCap input')
             if args.run_fastercap:
                 self.run_fastercap_extraction(args=args,
                                               pex_context=pex_context,
                                               lst_file=lst_file,
                                               exclusions=exclusions)
+                log_peak_memory('FasterCap')
             if args.run_fastcap:
                 self.run_fastcap_extraction(args=args,
                                             pex_context=pex_context,
                                             lst_file=lst_file,
                                             exclusions=exclusions)
+                log_peak_memory('FastCap2')
 
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")

@@ -244,6 +244,9 @@ class ExtractionSummary:
     # the ports of each net at exclusion markers, for a model that joins the pieces of the net
     exclusion_ports: Dict[NetName, List[NetName]] = field(default_factory=dict)
 
+    # the net of each node of the resistor networks, which have the capacitances of their nets (#211 §8)
+    net_by_node: Dict[NetName, NetName] = field(default_factory=dict)
+
     @classmethod
     def merged(cls, summaries: List[ExtractionSummary]) -> ExtractionSummary:
         merged_capacitances = defaultdict(float)
@@ -251,6 +254,7 @@ class ExtractionSummary:
         merged_device_terminal_nodes: Dict[DeviceTerminalKey, NetName] = {}
         merged_label_ports: Dict[NetName, List[NetName]] = {}
         merged_exclusion_ports: Dict[NetName, List[NetName]] = {}
+        merged_net_by_node: Dict[NetName, NetName] = {}
         for s in summaries:
             for couple_key, cap in s.capacitances.items():
                 merged_capacitances[couple_key.normed()] += cap
@@ -259,11 +263,13 @@ class ExtractionSummary:
             merged_device_terminal_nodes.update(s.device_terminal_nodes)
             merged_label_ports.update(s.label_ports)
             merged_exclusion_ports.update(s.exclusion_ports)
+            merged_net_by_node.update(s.net_by_node)
         return ExtractionSummary(capacitances=merged_capacitances,
                                  resistances=merged_resistances,
                                  device_terminal_nodes=merged_device_terminal_nodes,
                                  label_ports=merged_label_ports,
-                                 exclusion_ports=merged_exclusion_ports)
+                                 exclusion_ports=merged_exclusion_ports,
+                                 net_by_node=merged_net_by_node)
 
 
 @dataclass
@@ -713,6 +719,7 @@ class CellExtractionResults:
                            for net_name, node_names in node_names_by_net.items()
                            for node_name in node_names.by_node_id.values()}
             summary.capacitances = merged_small_capacitances(summary.capacitances, net_by_node, MIN_NODE_CAPACITANCE)
+            summary.net_by_node = net_by_node
 
         return summary
 

@@ -39,11 +39,13 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
+from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.tech_info import TechInfo
+import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
 from tests.common.lvsdb_fixtures import DESIGNS_DIR, klayout_exe_path, lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
-from tests.rcx25.rcx25_test_helpers import RCX25Extraction
+from tests.rcx25.rcx25_test_helpers import RCX25Extraction, effective_resistance
 
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode R]"
 tags = ("PEX", "2.5D", "RF MOS")
@@ -386,6 +388,41 @@ R6;S;S.$0.Metal1;;0.598
 R7;S.$0.Metal1;S.P0.nSD;;17.0""".splitlines()
     assert subckt_ports(spice_lines) == ['D', 'X', 'S', 'sub!']  # sub!: the substrate, the bulk of the transistor
     assert ports_touching_nothing(spice_lines) == []
+
+
+def pin_nodes(results: CellExtractionResults, net_name: str) -> List[Tuple[str, str, int, int]]:
+    """
+    The pin nodes of the resistor network of the net: their names, layers and positions
+    """
+    network, = [n for n in results.r_extraction_result.networks if n.net_name == net_name]
+    return [(n.node_name, n.layer_name, n.location.point.x, n.location.point.y)
+            for n in network.nodes if n.node_kind == r_network_pb2.RNode.Kind.KIND_PIN]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_label_without_pin_shape_is_the_node_of_the_port_of_its_net():
+    # The drain of the MOS makes a port of its net, which the label OUT names, without a pin shape, at the end of
+    # a Metal3 wire of 50 µm. The label is the node of the port, as with a pin shape, rather than the drain,
+    # which left out the wire, 0 Ω instead of 52.517 Ω (#405): Metal3 15.121 Ω (51.55 µm / 0.3 µm at 88 mΩ/sq),
+    # Via2 and Via1 9 Ω each, Metal2 2.375 Ω, Metal1 0.02 Ω, Cont 17 Ω
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'labels_without_pin_shapes.gds.gz')
+
+    assert pin_nodes(results, 'OUT') == [('OUT', 'Metal3', 50050, -1150)]
+
+    summary = results.summarize()
+    drain, = [node for node in summary.device_terminal_nodes.values() if node == 'OUT' or node.startswith('OUT.')]
+    resistances = {frozenset((key.net1, key.net2)): value for key, value in summary.resistances.items()}
+    assert effective_resistance(resistances, 'OUT', drain) == pytest.approx(52.517, abs=0.001)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag("PEX", "2.5D")
+def test_label_without_pin_shape_beside_a_pin_label_of_its_name_is_no_node():
+    # The label VDD without a pin shape is on the Metal3 between the pin VDD and its Via2. It only stands in for
+    # a missing pin label, as a second node VDD would short the Metal3 between them (#405)
+    results, _ = pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'labels_without_pin_shapes.gds.gz')
+    assert pin_nodes(results, 'VDD') == [('VDD', 'Metal3', -900, 1800)]
 
 
 @allure.parent_suite(parent_suite)

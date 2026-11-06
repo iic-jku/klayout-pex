@@ -42,6 +42,8 @@ from klayout_pex.rcx25.netlist_checks import (
     check_schematic_device_classes,
     check_schematic_device_totals,
     check_schematic_pins,
+    undriven_nets,
+    undriven_nets_warning,
 )
 from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices
 from tests.common.device_model_mappings import NMOS, device_models
@@ -260,6 +262,52 @@ class Test(unittest.TestCase):
         rc = self.rc_netlist()
         rc.add_capacitor('D', 'B', 1.0)
         self.assertEqual([], self.check(rc, {('D', 'VSUBS'): 1.0, ('B', 'VSUBS'): 2.0}, substrate_net_name='B'))
+
+
+UNDRIVEN = "Nothing drives these nets, as they have no device terminal and no port " \
+           "(e.g. a rail under a wrong net name, or fill)"
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Netlist Checks")
+class UndrivenNetsTest(unittest.TestCase):
+    def test_nets_without_device_terminal_and_port(self):
+        # NOTE: F with capacitances, N with those on the nodes of its resistor network (but those between them),
+        #       R with a resistor network without nodes (--mode R), CUT with only a device of a cut cell,
+        #       but not the substrate, X with ports at exclusion markers, M within markers that nothing connects to
+        #       (its capacitances go to the substrate), and L, which the extraction has nothing of
+        netlist = lvs_netlist(mim_cap=True)
+        circuit = netlist.circuit_by_name('chip')
+        for name in ('F', 'N', 'R', 'X', 'M', 'L', 'sub!'):
+            circuit.create_net(name)
+        c1 = circuit.device_by_name('C1')
+        c1.connect_terminal('B', circuit.create_net('CUT'))
+        summary = ExtractionSummary(capacitances={NetCoupleKey('F', 'VSUBS'): 2.0, NetCoupleKey('F', 'G'): 0.5,
+                                                  NetCoupleKey('N', 'VSUBS'): 0.25, NetCoupleKey('N.$1.met1', 'G'): 0.5,
+                                                  NetCoupleKey('N', 'N.$1.met1'): 1.0,
+                                                  NetCoupleKey('CUT', 'VSUBS'): 1.0, NetCoupleKey('X', 'VSUBS'): 1.0,
+                                                  NetCoupleKey('G', 'sub!'): 1.0},
+                                    resistances={},
+                                    exclusion_ports={'X': ['X__m0_1']},
+                                    net_by_node={'N': 'N', 'N.$1.met1': 'N'})
+        self.assertEqual({'F': 2.5, 'N': 0.75, 'R': 0.0, 'CUT': 1.0},
+                         undriven_nets(lvs_netlist=netlist, top_cell_name='chip', summary=summary,
+                                       network_net_names={'N', 'R', 'M'}, substrate_net_name='sub!',
+                                       removed_device_ids={c1.id()}, floating_net_names={'M'}))
+
+    def test_warning_names_the_nets_of_the_largest_capacitance_first(self):
+        # NOTE: and the named ones before the unnamed ones (e.g. of fill)
+        self.assertEqual(f"{UNDRIVEN}, so simulators stop on them: B (2.000 fF), A (1.000 fF), $3 (1.000 fF)",
+                         undriven_nets_warning({'$3': 1.0, 'A': 1.0, 'B': 2.0}, has_capacitances=True))
+
+    def test_warning_sums_up_many_nets(self):
+        warning = undriven_nets_warning({f"N{index:02}": 1.0 for index in range(25)}, has_capacitances=True)
+        self.assertTrue(warning.endswith("N18 (1.000 fF), N19 (1.000 fF), and 5 more (5.000 fF)"), warning)
+
+    def test_warning_without_capacitances(self):
+        # NOTE: of --mode R
+        self.assertEqual(f"{UNDRIVEN}: A, B, $3",
+                         undriven_nets_warning({'$3': 0.0, 'B': 0.0, 'A': 0.0}, has_capacitances=False))
 
 
 def schematic(**device_names_by_class_name: List[str]) -> SchematicDevices:

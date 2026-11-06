@@ -282,6 +282,18 @@ def test_pin_within_a_marker_names_the_cut_on_its_layer():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_pin_within_a_marker_names_a_cut_that_vias_within_join_it_to():
+    # NOTE: the pin P is on the Metal3 bridge, which the vias within the marker join to the Metal2 of both cuts,
+    #       so it names the cut nearer to it, from A, and the other one is numbered
+    honored = Extraction('exclusion_via_stack_pin_on_bridge', PEXMode.R).run(ExclusionMarkerMode.PORTS)
+    assert honored.rcx25_netlist_problems == []
+    assert netlist_ports(honored) == ['A', 'A_B_P__m0_0', 'B', 'P']
+    values = resistances(honored)
+    assert values[pair('A', 'P')] == pytest.approx(values[pair('A_B_P__m0_0', 'B')], abs=0.001)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_label_in_a_child_cell_names_the_cut_of_its_marker():
     # NOTE: e.g. of an inductor in a child cell, whose labels are the pins of its model (#403)
     extraction = Extraction('label_in_child_cell_within_marker', PEXMode.R)
@@ -675,6 +687,7 @@ IHP_METAL5: GDSPair = (67, 0)
 IHP_TOP_METAL2: GDSPair = (134, 0)
 IHP_ACTIV: GDSPair = (1, 0)
 IHP_PSD: GDSPair = (14, 0)
+IHP_NWELL: GDSPair = (31, 0)
 
 
 @allure.parent_suite(parent_suite)
@@ -838,6 +851,25 @@ def test_devices_of_the_top_stay_beside_the_diffusion_of_a_cell():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_tap_of_the_top_at_a_device_of_a_cell_tells_nothing_of_it():
+    # NOTE: the p-taps of the design go to the top cell (e.g. a guard ring around the cell),
+    #       also the one of the varicap, which its terminal SUB is on
+    def draw(layout: kdb.Layout, top: kdb.Cell, cell: kdb.Cell, box: kdb.Box):
+        activ = layout.layer(*IHP_ACTIV)
+        activ_of_cell = kdb.Region(cell.shapes(activ))
+        p_taps = activ_of_cell & kdb.Region(cell.shapes(layout.layer(*IHP_PSD))) - \
+            kdb.Region(cell.shapes(layout.layer(*IHP_NWELL)))
+        cell.shapes(activ).clear()
+        cell.shapes(activ).insert(activ_of_cell - p_taps)
+        top.shapes(activ).insert(p_taps)
+
+    _, of_cell = classes_of_devices_of_cell_of_layers(
+        PDKName.IHP_SG13G2, ('test_patterns', 'device_pcells.gds.gz'), lambda gds_pair: True, draw=draw)
+    assert 'sg13_hv_svaricap' in of_cell
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_ring_of_a_device_is_no_diffusion_of_a_cut_cell():
     exclusions, context, tech_info = exclusions_of_cell_of_layers(
         PDKName.IHP_SG13G2, ('test_patterns', 'device_pcells.gds.gz'), lambda gds_pair: True)
@@ -931,6 +963,20 @@ def test_devices_of_a_cut_cell_are_left_out():
     assert devices_of(cut) == []
     # NOTE: the labels of the cell don't make pins of the top cell, but ports of the model
     assert set(netlist_ports(cut)) == {'A', 'B', 'R', 'X__VDD', 'X__VSS', 'sub!'}
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_devices_of_a_class_the_tech_info_does_not_know_stay_with_a_warning():
+    with mock.patch.object(TechInfo, 'device_gds_pairs', return_value=None), \
+         mock.patch('klayout_pex.rcx25.extractor.warning') as warning_mock:
+        cut = Extraction('cut_block_with_mos', PEXMode.R).run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert [device[5] for device in devices_of(cut)] == ['sg13_lv_nmos']
+    assert [c.args[0] for c in warning_mock.call_args_list if 'device classes' in c.args[0]] == [
+        "The tech info doesn't tell what LVS makes these device classes from, so the netlist keeps their devices, "
+        "also of the cut cells: sg13_lv_nmos"
+    ]
 
 
 @allure.parent_suite(parent_suite)
@@ -1350,6 +1396,9 @@ def test_terminal_of_a_device_across_a_cut_keeps_its_port_for_the_model():
     assert len(devices) == 1
     # NOTE: without it, the model of the block would only reach the gate through the poly beside it
     assert devices[0][2] in netlist_ports(cut)
+    # NOTE: a port of its own, apart from the one of the cut that the gate touches, X__G_0
+    assert devices[0][2] == 'X__G_1'
+    assert sorted(netlist_ports(cut)) == ['G', 'X__G_0', 'X__G_1', 'sky130_gnd']
 
 
 @allure.parent_suite(parent_suite)
@@ -1523,6 +1572,18 @@ def test_taps_and_wells_do_not_bypass_the_model_of_a_rail(pdk_name: PDKName, arg
     assert len(ports) == 2, netlist_ports(ported)
     assert effective_resistance(resistances(ported), 'A', 'B', joined=ports) == pytest.approx(tied, rel=1e-6)
     assert effective_resistance(resistances(ported), 'A', 'B') == float('inf')
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_metal_of_a_tap_within_a_marker_without_ports_is_on_its_net():
+    # NOTE: only the substrate joins the metal of the taps, the one of B is within the marker, so it has no resistance
+    extraction = Extraction('exclusion_ptap_within_marker', PEXMode.R)
+    ignored = resistances(extraction.run(ExclusionMarkerMode.IGNORE))
+    tied = extraction.run(ExclusionMarkerMode.TIE)
+    assert tied.rcx25_netlist_problems == []
+    assert effective_resistance(resistances(tied), 'A', 'B') == \
+           pytest.approx(effective_resistance(ignored, 'A', 'A,B'), abs=0.002)
 
 
 @allure.parent_suite(parent_suite)

@@ -328,6 +328,19 @@ def single_plate_6um_x_8um_m1_over_isolated_pwell() -> Pattern:
     return p
 
 
+def wires_no_pin() -> Pattern:
+    """
+    Two Metal3 wires of 50 µm x 0.5 µm, 1.5 µm apart, labelled A and B on the text layer only, without a pin,
+    so that nothing drives them (#407)
+    """
+    p = pattern('wires_no_pin')
+    for index, label in enumerate(('A', 'B')):
+        y = index * 2000
+        p.box(METAL3, 0, y, 50000, y + 500)
+        p.label(METAL3, label, 1000, y + 250)
+    return p
+
+
 #
 # Resistance patterns
 #
@@ -441,9 +454,10 @@ def exclusion_plates_markers(name: str, marker_boxes: List[Tuple[int, int, int, 
     return p
 
 
-def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
+def metal2_wires_metal3_bridge(name: str, marker: bool, bridge_label: Optional[str] = None) -> Pattern:
     """
-    A wire from A to B on Metal2, with a Metal3 bridge of its gap in the middle, with a marker around the bridge
+    A wire from A to B on Metal2, with a Metal3 bridge of its gap in the middle, with a marker around the bridge,
+    and a pin on the left half of the bridge, if it has a label
     """
     p = pattern(name)
     p.box(METAL2, -10000, 0, 4000, 2000)
@@ -455,6 +469,9 @@ def metal2_wires_metal3_bridge(name: str, marker: bool) -> Pattern:
     metal2_pin(p, 'B', 19000, 0, 20000, 2000)
     if marker:
         p.box(NORCX, 0, -5000, 10000, 7000)
+    if bridge_label is not None:
+        p.box(METAL3_PIN, 4000, 0, 5000, 2000)
+        p.label(METAL3, bridge_label, 4500, 1000)
     return p
 
 
@@ -767,6 +784,31 @@ def labels_in_child_cells() -> Pattern:
         child = child_cell_with_wire(p, f"child_{label}", label)
         p.top.insert(kdb.CellInstArray(child.cell_index(), kdb.Trans(index * 20000, 0)))
     p.box(METAL3, 9000, 0, 21000, 1000)
+    return p
+
+
+def labels_without_pin_shapes() -> Pattern:
+    """
+    The design nmos_diode2 without its label VSS, with a Metal3 wire of 50 µm from the pin of VSS (the drain)
+    to the label OUT, and beside it a Metal3 wire without devices with the label W, both without pin shapes.
+    Below them, a Metal3 wire without devices with the pin P at its left end and the label Q at its right end,
+    and the label VDD on the Metal3 between the pin VDD and its Via2, both without pin shapes
+    """
+    p = pattern('labels_without_pin_shapes')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz')
+    for layer_index in p.layout.layer_indexes():
+        for shape in list(p.top.shapes(layer_index).each(kdb.Shapes.STexts)):
+            if shape.text_string == 'VSS':
+                shape.delete()
+    vss = min(kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*METAL3))).merged().each(),
+              key=lambda polygon: polygon.bbox().bottom).bbox()
+    for text, bottom in (('OUT', vss.bottom), ('W', vss.bottom - 2000)):
+        p.box(METAL3, vss.right - 100, bottom, vss.right + 50000, bottom + 300)
+        p.label(METAL3, text, vss.right + 49900, bottom + 150)
+    bottom = vss.bottom - 4000
+    metal3_wire(p, vss.right - 100, bottom, vss.right + 50000, bottom + 300, 'P')
+    p.label(METAL3, 'Q', vss.right + 49900, bottom + 150)
+    p.label(METAL3, 'VDD', 800, 1000)
     return p
 
 
@@ -1415,6 +1457,15 @@ def exclusion_rail_between_taps() -> Pattern:
     return p
 
 
+def exclusion_ptap_within_marker() -> Pattern:
+    """
+    The p-taps of r_ptap_pair_m1_m2_pins_A_B, which only the substrate joins, with a marker over the one with the pin B
+    """
+    p = r_ptap_pair_m1_m2('exclusion_ptap_within_marker', ('A', 'B'))
+    p.box(NORCX, 9000, -1000, 11500, 6000)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_cmomf_w10u_l25u_m2_m4_m5_wire': cap_cmomf_w10u_l25u_m2_m4_m5_wire,
     'cap_cmomf_w5u_l5u_m2_m4_plus_from_m1': cap_cmomf_w5u_l5u_m2_m4_plus_from_m1,
@@ -1437,6 +1488,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cap_rfcmim_w7u_l7u_metal5_routes_in_cells': cap_rfcmim_w7u_l7u_metal5_routes_in_cells,
     'cap_rfcmim_w7u_l7u_two_feeds': cap_rfcmim_w7u_l7u_two_feeds,
     'single_plate_6um_x_8um_m1_over_isolated_pwell': single_plate_6um_x_8um_m1_over_isolated_pwell,
+    'wires_no_pin': wires_no_pin,
     'r_wire_over_nbulay_m1': r_wire_over_nbulay_m1,
     'r_ptap_pair_m1_m2': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2', (None, None)),
     'r_ptap_pair_m1_m2_pins_A_B': lambda: r_ptap_pair_m1_m2('r_ptap_pair_m1_m2_pins_A_B', ('A', 'B')),
@@ -1464,6 +1516,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
                                                                   [(0, 0, 40500, 20000)]),
     'exclusion_via_stack': lambda: metal2_wires_metal3_bridge('exclusion_via_stack', marker=True),
     'exclusion_via_stack_no_marker': lambda: metal2_wires_metal3_bridge('exclusion_via_stack_no_marker', marker=False),
+    'exclusion_via_stack_pin_on_bridge':
+        lambda: metal2_wires_metal3_bridge('exclusion_via_stack_pin_on_bridge', marker=True, bridge_label='P'),
     'exclusion_via_across': exclusion_via_across,
     'exclusion_stubs': exclusion_stubs,
     'exclusion_marker_in_cell': exclusion_marker_in_cell,
@@ -1477,6 +1531,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'exclusion_wire_over_nwell': exclusion_wire_over_nwell,
     'exclusion_slanted_wire': exclusion_slanted_wire,
     'exclusion_rail_between_taps': exclusion_rail_between_taps,
+    'exclusion_ptap_within_marker': exclusion_ptap_within_marker,
     'exclusion_overlapping_markers': exclusion_overlapping_markers,
     'cut_boundary_over_devices': cut_boundary_over_devices,
     'cut_boundary_over_inductor': cut_boundary_over_inductor,
@@ -1511,6 +1566,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'label_in_child_cell': lambda: label_in_child_cell_pattern('label_in_child_cell'),
     'label_in_child_cell_within_marker': label_in_child_cell_within_marker,
     'labels_in_child_cells': labels_in_child_cells,
+    'labels_without_pin_shapes': labels_without_pin_shapes,
     'cut_inductor2_leads_in_top': cut_inductor2_leads_in_top,
     'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
     'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),

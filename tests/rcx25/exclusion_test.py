@@ -747,6 +747,23 @@ def test_conductor_parts_of_vias_are_by_their_centers():
             ([str(kdb.Box(-10, 50, 2, 60))], 'N')]
 
 
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('layer_names, capacitance_pair', [
+    ({'Metal2'}, None),  # NOTE: a marker of the layer above the via only
+    ({'Metal1', 'Metal2'}, frozenset({'Metal1', 'Metal2'})),  # NOTE: of the capacitances between its layers only
+])
+def test_via_within_a_marker_of_one_of_its_layers_or_of_their_pair_has_no_part_within_it(
+        layer_names: Set[str],
+        capacitance_pair: Optional[FrozenSet[str]]):
+    # NOTE: as for the resistances, a via is within a block that is on both of its layers, with all their capacitances
+    region = kdb.Region(kdb.Box(0, 0, 100, 100))
+    e = Exclusions([ExcludedBlock('m0', region, {layer_name: region for layer_name in layer_names},
+                                  capacitance_pair=capacitance_pair)])
+    parts = e.conductor_parts_of_vias(kdb.Region(kdb.Box(10, 10, 20, 20)), 'N', 'Metal1', 'Metal2')
+    assert [name for _, name in parts] == ['N']
+
+
 def maxwell_matrix(capacitances: Dict[Tuple[str, str], float],
                    capacitances_to_infinity: Dict[str, float],
                    names: List[str]) -> CapacitanceMatrix:

@@ -846,10 +846,11 @@ class KLayoutExtractionContext:
 
         return largest_overlap(terminal_shapes) or largest_overlap(terminal_shapes.sized(1))
 
-    @cached_property
-    def pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:
-        d = defaultdict(list)
-
+    def label_layers(self) -> Iterator[Tuple[GDSPair, KLayoutExtractedLayerInfo]]:
+        """
+        Each drawn layer of the tech info, of the labels (see labels_of_layer), with each of its extracted LVS layers,
+        which the pins of the labels are on (see pin_pb2)
+        """
         for lvs_gds_pair, lyr_info in self.extracted_layers.items():
             canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lvs_gds_pair]
             # NOTE: LVS GDS Pair differs from real GDS Pair,
@@ -862,50 +863,113 @@ class KLayoutExtractionContext:
                 continue
 
             for lyr in lyr_info.source_layers:
-                klayout_index = self.annotated_layout.layer(*lyr.gds_pair)
+                yield gds_pair, lyr
 
-                pins = self.pins_of_layer(gds_pair)
-                labels = self.labels_of_layer(gds_pair)
+    def pin_pb2(self, label: kdb.Text, net_name: Optional[NetName], lyr: KLayoutExtractedLayerInfo) -> pin_pb2.Pin:
+        """
+        The label as a pin of the net, on the layer of the LVS layer
+        """
+        # NOTE: because we want more like a point as a junction
+        #       and folx create huge pins (covering the whole metal)
+        #       we create our own "mini squares"
+        #    (ResistorExtractor will subtract the pins from the metal polygons,
+        #     so in the extreme case the polygons could become empty)
 
-                # NOTE: the pins at a label are found by their boxes, rather than by going through all pins
-                #       for each label, which is quadratic in the number of pins (e.g. the ones of standard cells)
-                pin_polygons: List[kdb.PolygonWithProperties] = list(pins.each())
-                pin_boxes = kdb.Shapes()
-                for pin_index, p in enumerate(pin_polygons):
-                    pin_boxes.insert(kdb.BoxWithProperties(p.bbox(), {'pin_index': pin_index}))
+        pin = pin_pb2.Pin()
+        pin.label = label.string
+        if net_name is not None:
+            pin.net_name = net_name
 
-                pin_labels: kdb.Texts = labels & pins
-                for l in pin_labels:
-                    l: kdb.Text
-                    # NOTE: because we want more like a point as a junction
-                    #       and folx create huge pins (covering the whole metal)
-                    #       we create our own "mini squares"
-                    #    (ResistorExtractor will subtract the pins from the metal polygons,
-                    #     so in the extreme case the polygons could become empty)
+        pos = label.position()
 
-                    pin = pin_pb2.Pin()
-                    pin.label = l.string
+        canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr.gds_pair]
+        lvs_layer_name = self.tech.computed_layer_info_by_gds_pair[lyr.gds_pair].layer_info.name
+        pin.layer.id = self.annotated_layout.layer(*lyr.gds_pair)
+        pin.layer.canonical_layer_name = canonical_layer_name
+        pin.layer.lvs_layer_name = lvs_layer_name
 
-                    pos = l.position()
+        pin.label_point.x = pos.x
+        pin.label_point.y = pos.y
+        pin.label_point.net = pin.net_name
+        return pin
 
-                    # NOTE: the first pin the label is inside of
-                    for pin_index in sorted(shape.property('pin_index')
-                                            for shape in pin_boxes.each_touching(kdb.Shapes.SAll, kdb.Box(pos, pos))):
-                        p = pin_polygons[pin_index]
-                        if p.inside(pos):
-                            pin.net_name = p.property('net')
-                            break
+    @cached_property
+    def pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:
+        """
+        The labels on pin shapes, as pins of the nets of the pin shapes
+        """
+        d = defaultdict(list)
 
-                    canonical_layer_name = self.tech.canonical_layer_name_by_gds_pair[lyr.gds_pair]
-                    lvs_layer_name = self.tech.computed_layer_info_by_gds_pair[lyr.gds_pair].layer_info.name
-                    pin.layer.id = klayout_index
-                    pin.layer.canonical_layer_name = canonical_layer_name
-                    pin.layer.lvs_layer_name = lvs_layer_name
+        for gds_pair, lyr in self.label_layers():
+            pins = self.pins_of_layer(gds_pair)
+            labels = self.labels_of_layer(gds_pair)
 
-                    pin.label_point.x = pos.x
-                    pin.label_point.y = pos.y
-                    pin.label_point.net = pin.net_name
+            # NOTE: the pins at a label are found by their boxes, rather than by going through all pins
+            #       for each label, which is quadratic in the number of pins (e.g. the ones of standard cells)
+            pin_polygons: List[kdb.PolygonWithProperties] = list(pins.each())
+            pin_boxes = kdb.Shapes()
+            for pin_index, p in enumerate(pin_polygons):
+                pin_boxes.insert(kdb.BoxWithProperties(p.bbox(), {'pin_index': pin_index}))
 
-                    d[gds_pair].append(pin)
+            pin_labels: kdb.Texts = labels & pins
+            for l in pin_labels:
+                l: kdb.Text
+                pos = l.position()
+
+                # NOTE: the first pin the label is inside of
+                net_name: Optional[NetName] = None
+                for pin_index in sorted(shape.property('pin_index')
+                                        for shape in pin_boxes.each_touching(kdb.Shapes.SAll, kdb.Box(pos, pos))):
+                    p = pin_polygons[pin_index]
+                    if p.inside(pos):
+                        net_name = p.property('net')
+                        break
+
+                d[gds_pair].append(self.pin_pb2(l, net_name, lyr))
 
         return d
+
+    @cached_property
+    def text_label_pins_pb2_by_layer(self) -> Dict[GDSPair, List[pin_pb2.Pin]]:
+        """
+        The labels without a pin shape (text labels) on metal, as pins of the nets of the metal they are on
+
+        NOTE: a text label names its net, but makes no port of it (see make_pins_of_pin_labels),
+              like a label of the text layer of Magic (e.g. MET1TXT of sky130A), rather than of its pin layer
+
+        NOTE: on metal only: a label on a well joins it to its net by its name rather than at the label
+              (e.g. VPB of a standard cell), so the well is ideal there (see RExtractor.isolated_well_node_ids)
+        """
+        d = defaultdict(list)
+
+        for gds_pair, lyr in self.label_layers():
+            if self.tech.layer_info_by_gds_pair[gds_pair].purpose != tech_pb2.LayerInfo.Purpose.PURPOSE_METAL:
+                continue
+            labels = self.labels_of_layer(gds_pair)
+            pins = self.pins_of_layer(gds_pair)
+            # NOTE: KLayout 0.30.12 takes out all texts, rather than none, where there are no polygons to take out
+            text_labels: kdb.Texts = labels if pins.is_empty() else labels - pins
+            for l in text_labels:
+                l: kdb.Text
+                d[gds_pair].append(self.pin_pb2(l, self.net_at(gds_pair, l.position()), lyr))
+
+        return d
+
+    def net_at(self, gds_pair: GDSPair, point: kdb.Point) -> Optional[NetName]:
+        """
+        :return: the net of the shape of the GDS pair that the point is inside of (e.g. of the metal at a label),
+                 as the shapes of the layer have it (see shapes_of_layer), None if there is none
+
+        NOTE: by the shapes at the point, rather than by going through all shapes of the layer,
+              which a large layout has millions of
+        """
+        lvsdb_layer_indexes = self.lvsdb.layer_indexes()
+        for sl in self.source_layers(gds_pair):
+            annotated_layer_index = self.layer_index_map[lvsdb_layer_indexes[sl.index]]
+            iter = self.annotated_top_cell.begin_shapes_rec_touching(annotated_layer_index, kdb.Box(point, point))
+            while not iter.at_end():
+                shape = iter.shape()
+                if not shape.is_text() and (iter.trans() * shape.polygon).inside(point):
+                    return shape.property('net')
+                iter.next()
+        return None
