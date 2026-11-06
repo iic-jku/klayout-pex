@@ -1,0 +1,66 @@
+[18:33:30] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --lvsdb                                  
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/r_ntap_pair_two_nwells_over_dnwell_m1_m2.lvsdb.gz --out-dir /tmp/tmpl2tp716r   
+--2.5D --check n                                                                
+───────────────────────────────── Input Layout ─────────────────────────────────
+[18:33:30] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[18:33:30] INFO     Wrote result file to:                      run_result.py:230
+                    /tmp/tmpl2tp716r/r_ntap_pair_two_nwells_ov                  
+                    er_dnwell_m1_m2__r_ntap_pair_two_nwells_ov                  
+                    er_dnwell_m1_m2/kpex_result.json                            
+[18:33:30] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.4 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:33:30] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1993
+[18:33:30] INFO     (35, 0) -> (via1)                           kpex_cli.py:1993
+[18:33:30] INFO     (22, 144) -> (ntap)                         kpex_cli.py:1993
+[18:33:30] INFO     (21, 0) -> (nwell_con)                      kpex_cli.py:1993
+[18:33:30] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1993
+[18:33:30] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1993
+[18:33:30] INFO     (33, 4404) -> (contact_ntap_con)            kpex_cli.py:1993
+[18:33:30] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:33:30] INFO     Sidewall halo: 8 µm (tech info of           kpex_cli.py:1442
+                    gf180mcuD)                                                  
+[18:33:30] INFO     LVSDB: found 0pins                          extractor.py:482
+[18:33:30] WARNING  Only the substrate, a well or a tap joins   extractor.py:536
+                    pieces of the metal of these nets, which                    
+                    the resistance network has no resistance                    
+                    for, so the pieces are ideally on their                     
+                    nets: $1                                                    
+[18:33:30] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.4 GiB                              
+[18:33:30] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.4 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$1;VSUBS;0.037;                                                              
+C2;$1.$4.Metal2;VSUBS;0.128;                                                    
+C3;$1.$5.Metal2;VSUBS;0.128;                                                    
+R1;$1;$1.$4.Metal2;;4.5                                                         
+R2;$1;$1.$5.Metal2;;4.5                                                         
+R3;$1;$1.$6.Nwell;;6.3                                                          
+R4;$1;$1.$7.Nwell;;6.3                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/tmp/tmpl2tp716r/r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwell
+s_over_dnwell_m1_m2/r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.cs
+v                                                                               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/tmp/tmpl2tp716r/r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwell
+s_over_dnwell_m1_m2/r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.sp
+ice                                                                             
+[18:33:30] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.4 GiB                                            
+[18:33:30] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: $1 (0.292 fF)                      
+[18:33:30] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.4 GiB                                                
