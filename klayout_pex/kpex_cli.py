@@ -157,6 +157,7 @@ from .util.argparse_helpers import (
     add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
+    positive_micrometers,
     positive_spice_seconds,
     render_enum_help,
     true_or_false,
@@ -454,7 +455,7 @@ class KpexCLI:
                                default=PEXMode.DEFAULT, type=PEXMode, choices=list(PEXMode),
                                help=render_enum_help(topic='mode', enum_cls=PEXMode))
         group_25d.add_argument("--halo", dest="halo",
-                                 type=float, default=None,
+                                 type=positive_micrometers, default=None,
                                  help=f"Custom sidewall halo distance (in µm) to override tech info "
                                       f"(default is {halo_default_help(side_halo_by_pdk())})")
         group_25d.add_argument("--scale", dest="scale_ratio_to_fit_halo",
