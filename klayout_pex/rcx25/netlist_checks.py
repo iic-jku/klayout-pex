@@ -42,7 +42,7 @@ from ..device_models import DeviceModels
 from ..device_totals import DeviceTotalParameters
 from ..log import info, warning
 from ..netlist.spice_hierarchy import SpiceHierarchy
-from ..netlist.spice_netlist import SpiceNetlist
+from ..netlist.spice_netlist import SpiceElement, SpiceNetlist, SpiceSubcircuit
 from ..schematic_devices import SchematicDevices
 from .extraction_results import ExtractionSummary
 from .netlist_expander import RCX25NetlistExpander, SUBSTRATE
@@ -69,6 +69,15 @@ CAPACITANCE_TOLERANCE = 1e-9
 
 # NOTE: relative, the device totals of a schematic and its layout differ by rounding only (e.g. of µm in m and back)
 DEVICE_TOTAL_TOLERANCE = 1e-6
+
+# NOTE: the device classes of KLayout with a bulk terminal, by its ID: the bulk of a MOS4, the substrate of a BJT4,
+#       the well of a resistor or capacitor with bulk
+BULK_TERMINAL_IDS: Tuple[Tuple[Type[kdb.DeviceClass], int], ...] = (
+    (kdb.DeviceClassMOS4Transistor, kdb.DeviceClassMOS4Transistor.TERMINAL_B),
+    (kdb.DeviceClassBJT4Transistor, kdb.DeviceClassBJT4Transistor.TERMINAL_S),
+    (kdb.DeviceClassResistorWithBulk, kdb.DeviceClassResistorWithBulk.TERMINAL_W),
+    (kdb.DeviceClassCapacitorWithBulk, kdb.DeviceClassCapacitorWithBulk.TERMINAL_W),
+)
 
 
 def first_names(names: List[str]) -> str:
@@ -305,16 +314,79 @@ def check_schematic_device_classes(lvs_netlist: kdb.Netlist,
             if class_name not in lvs_class_names]
 
 
+def bulk_terminal_name(device_class: kdb.DeviceClass) -> Optional[str]:
+    """
+    :return: the name of the bulk terminal of the device class (see BULK_TERMINAL_IDS),
+             None if it has none, or terminals of its own (e.g. G1, W, G2, SUB of a varactor)
+    """
+    for kind, terminal_id in BULK_TERMINAL_IDS:
+        if isinstance(device_class, kind):
+            name = kind().terminal_definitions()[terminal_id].name
+            terminals = device_class.terminal_definitions()
+            return name if terminal_id < len(terminals) and terminals[terminal_id].name == name else None
+    return None
+
+
+def bulk_only_pins(hierarchy: SpiceHierarchy,
+                   top: SpiceSubcircuit,
+                   device_models: DeviceModels,
+                   lvs_netlist: kdb.Netlist) -> Set[str]:
+    """
+    :param device_models: which tell the LVS device classes of the devices of the schematic, and their terminals
+    :param lvs_netlist: which has the device classes, of which bulk_terminal_name tells the bulk terminal
+    :return: the pins of the top circuit whose nets reach only bulk terminals of devices, also in the subcircuits
+             it calls, e.g. VNB of a cell, which the layout may have on the substrate, without a port
+    """
+    def terminals(subcircuit: SpiceSubcircuit,
+                  node: str,
+                  calls: Tuple[str, ...]) -> Iterator[Tuple[SpiceElement, int]]:
+        """
+        :return: the elements on the node, with the index of their node, of a call those of its subcircuit
+        """
+        for element in subcircuit.elements:
+            for index, element_node in enumerate(element.nodes):
+                if element_node != node:
+                    continue
+                called = hierarchy.subcircuit(element.model) if element.kind == 'X' and element.model else None
+                if called is not None and called.name.casefold() not in calls and index < len(called.ports):
+                    yield from terminals(called, called.ports[index], calls + (called.name.casefold(),))
+                else:
+                    yield element, index
+
+    def bulk_terminal_of_class(class_name: str) -> Optional[str]:
+        device_class = lvs_netlist.device_class_by_name(class_name)
+        return bulk_terminal_name(device_class) if device_class is not None else None
+
+    def is_bulk(element: SpiceElement, index: int) -> bool:
+        # NOTE: in each mapping of its model, e.g. of sg13_lv_nmos and of rfnmos, which have the same terminals
+        mappings = device_models.mappings_of_model(element)
+        bulk_names = [bulk_terminal_of_class(mapping.lvs_device_class_name) for mapping in mappings]
+        return bool(mappings) and all(index < len(mapping.terminal_names) and mapping.terminal_names[index] == bulk_name
+                                      for mapping, bulk_name in zip(mappings, bulk_names))
+
+    pins: Set[str] = set()
+    for pin in top.ports:
+        reached = list(terminals(top, pin, (top.name.casefold(),)))
+        if reached and all(is_bulk(element, index) for element, index in reached):
+            pins.add(pin)
+    return pins
+
+
 def check_schematic_pins(schematic: SpiceNetlist,
                          top_cell_name: str,
                          port_names: Sequence[str],
+                         device_models: DeviceModels,
+                         lvs_netlist: kdb.Netlist,
                          left_out_names: Collection[str] = ()) -> List[str]:
     """
     Compares the ports of the netlist with the pins of the top circuit of the schematic (#406):
-    its subcircuit of the cell, else its only one that no element calls, regardless of case, as SPICE reads names
+    its subcircuit of the cell, else its only one that no element calls, regardless of case, as SPICE reads names,
+    but the pins that reach only bulk terminals (see bulk_only_pins), unless a port has their name
 
     :param port_names: of the netlist, where a port of a net of several labels (e.g. A,B in --mode CC)
                        is a port of each, as in --mode R and RC
+    :param device_models: see bulk_only_pins
+    :param lvs_netlist: see bulk_only_pins
     :param left_out_names: compared neither as pins nor as ports, e.g. the substrate, which a schematic may leave
                            global, and the ports for the models of what exclusion markers and cut cells leave out
     :return: the problems: the pins without port, and the ports without pin
@@ -331,8 +403,10 @@ def check_schematic_pins(schematic: SpiceNetlist,
 
     left_out = {name.casefold() for name in left_out_names}
     ports = [name for port_name in port_names for name in port_name.split(',') if name.casefold() not in left_out]
-    pins = [name for name in top.ports if name.casefold() not in left_out]
     port_keys = {name.casefold() for name in ports}
+    bulk_only = bulk_only_pins(hierarchy, top, device_models, lvs_netlist)
+    pins = [name for name in top.ports
+            if name.casefold() not in left_out and (name not in bulk_only or name.casefold() in port_keys)]
     pin_keys = {name.casefold() for name in pins}
     problems: List[str] = []
     pins_without_port = [name for name in pins if name.casefold() not in port_keys]

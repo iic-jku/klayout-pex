@@ -436,7 +436,8 @@ class KpexCLI:
                                     "or if the LVS netlist lacks a device class of --schematic "
                                     "or differs in its totals (e.g. Σ W·L of a MOS), "
                                     "or if the ports of the netlist differ from the pins of the top circuit "
-                                    "of --schematic, but the substrate and the ports for models "
+                                    "of --schematic, but the substrate, the pins that reach only bulk terminals "
+                                    "(unless a port has their name), and the ports for models "
                                     "(default is True for --mode RC, otherwise these are warnings)")
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -1251,8 +1252,9 @@ class KpexCLI:
             netlist = SpiceReader().read(schematic_path)
         except SpiceReaderError as e:
             return [f"kpex can't read the schematic, so neither pins nor device classes are compared: {e}"]
-        problems = check_schematic_pins(schematic=netlist, top_cell_name=top_cell_name,
-                                        port_names=port_names, left_out_names=left_out_names)
+        problems = check_schematic_pins(schematic=netlist, top_cell_name=top_cell_name, port_names=port_names,
+                                        device_models=device_models, lvs_netlist=lvs_netlist,
+                                        left_out_names=left_out_names)
         try:
             schematic = schematic_devices(netlist=netlist, device_models=device_models, top_cell_name=top_cell_name)
         except SpiceEvaluationError as e:

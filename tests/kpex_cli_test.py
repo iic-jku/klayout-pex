@@ -164,8 +164,8 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
 def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     # NOTE: the alignment with a schematic kept the cells it has as subcircuits, and the RC netlist
     #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
-    # NOTE: --check n, as the labels are in SUBNFET only, so that the ports are named after the nets ($1.D, $1.G,
-    #       $1.S, #404), unlike the pins of the schematic (D, G, S, VNB), which --check compares them with (#406)
+    # NOTE: --check n, as the ports are the pins $1.D, $1.G and $1.S of the LVS netlist, which flattens SUBNFET
+    #       (#417), unlike the pins D, G and S of the schematic, which --check compares them with (#406)
     config = PDKTestConfig(PDKName.SKY130A)
     gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',

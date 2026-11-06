@@ -37,6 +37,7 @@ from klayout_pex.klayout.parasitic_device_classes import (
 from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.rcx25.extraction_results import DeviceTerminalKey, ExtractionSummary, NetCoupleKey
 from klayout_pex.rcx25.netlist_checks import (
+    bulk_terminal_name,
     check_rc_netlist,
     check_schematic_device_classes,
     check_schematic_device_totals,
@@ -302,11 +303,39 @@ X2 MID OUT VDD VSS inv
 """
 
 
+# NOTE: the chain with the bulks of the nmos on a pin VNB of their own
+INVERTER_CHAIN_WITH_VNB = """\
+.subckt inv A Y VDD VSS VNB
+XM1 Y A VDD VDD pmos w=1u l=0.13u
+XM2 Y A VSS VNB nmos w=1u l=0.13u
+.ends inv
+.subckt chip IN OUT VDD VSS VNB
+X1 IN MID VDD VSS VNB inv
+X2 MID OUT VDD VSS VNB inv
+.ends chip
+"""
+
+
+def mos_device_classes() -> kdb.Netlist:
+    """
+    :return: an LVS netlist with the device classes nmos and pmos (MOS4), without circuits
+    """
+    netlist = kdb.Netlist()
+    for name in ('nmos', 'pmos'):
+        device_class = kdb.DeviceClassMOS4Transistor()
+        device_class.name = name
+        netlist.add(device_class)
+    return netlist
+
+
 def pin_problems(port_names: List[str],
                  schematic: str = INVERTER_CHAIN,
                  left_out_names: Sequence[str] = ()) -> List[str]:
     return check_schematic_pins(schematic=SpiceReader().parse(schematic), top_cell_name='chip',
-                                port_names=port_names, left_out_names=left_out_names)
+                                port_names=port_names,
+                                device_models=device_models(NMOS, {**NMOS, 'lvs_device_class_name': 'pmos'}),
+                                lvs_netlist=mos_device_classes(),
+                                left_out_names=left_out_names)
 
 
 @allure.parent_suite("Unit Tests")
@@ -341,6 +370,29 @@ class SchematicPinsTest(unittest.TestCase):
         self.assertEqual(['the schematic has no subcircuit chip, and 2 that no element calls '
                           '(chip_schematic, other), so no pins are compared'],
                          pin_problems(['IN'], schematic=schematic))
+
+    def test_pin_of_bulks_only_is_left_out(self):
+        # NOTE: e.g. VNB of a cell, which the layout has on the substrate, without a port, also in the subcircuits
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS'], schematic=INVERTER_CHAIN_WITH_VNB))
+
+    def test_pin_of_bulks_only_is_kept_where_a_port_has_its_name(self):
+        # NOTE: e.g. a label VNB of the layout on its well
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS', 'vnb'], schematic=INVERTER_CHAIN_WITH_VNB))
+
+    def test_pin_of_a_bulk_and_another_terminal_is_compared(self):
+        # NOTE: VDD, of the sources and the bulks of the pmos
+        self.assertEqual(['the schematic has pins without port in the netlist: VDD'],
+                         pin_problems(['IN', 'OUT', 'VSS'], schematic=INVERTER_CHAIN_WITH_VNB))
+
+    def test_bulk_terminal_of_a_device_class_with_terminals_of_its_own(self):
+        # NOTE: e.g. a varactor, whose well W is a plate of its capacitance, not a bulk
+        varactor = kdb.DeviceClassCapacitorWithBulk()
+        varactor.clear_terminals()
+        for name in ('G1', 'W', 'G2', 'SUB'):
+            varactor.add_terminal(kdb.DeviceTerminalDefinition(name))
+        self.assertEqual(['B', 'W', None], [bulk_terminal_name(device_class)
+                                            for device_class in (kdb.DeviceClassMOS4Transistor(),
+                                                                 kdb.DeviceClassCapacitorWithBulk(), varactor)])
 
 
 def mos_netlist(*widths: float, finger_calls: int = 0) -> kdb.Netlist:
