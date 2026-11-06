@@ -272,15 +272,20 @@ class KpexCLI:
 
 
     @staticmethod
-    def _add_pex_input_arguments(parser: argparse.ArgumentParser) -> None:
+    def _add_pex_input_arguments(parser: argparse.ArgumentParser,
+                                 include_schematic: bool = True):
         group_pex_input = parser.add_argument_group("Parasitic Extraction Input",
                                                          description="Either LVS is run, or an existing LVSDB is used")
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
-        group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (--check checks its device classes, "
-                                          "their totals and the pins of its top circuit only, use regular LVS "
-                                          "to compare layout against schematic)")
+        if include_schematic:
+            group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
+                                         help="Schematic SPICE netlist path (--check checks its device classes, "
+                                              "their totals and the pins of its top circuit only, use regular LVS "
+                                              "to compare layout against schematic)")
+        else:
+            # NOTE: a schematic is checked against the extracted netlist, which this command doesn't write
+            parser.set_defaults(schematic_path=None)
         # Developer shortcut, not a supported entry point. It exists so that a
         # PEX25D or engine run can be repeated without paying for LVS again while
         # working on the code downstream of it. An LVSDB is tied to the kpex
@@ -657,7 +662,7 @@ class KpexCLI:
             add_help=False, formatter_class=RichHelpFormatter, epilog=epilog_md)
         KpexCLI._add_special_options(parser_pex25d)
         KpexCLI._add_pex_setup_arguments(parser_pex25d, env, include_spice_output=False)
-        KpexCLI._add_pex_input_arguments(parser_pex25d)
+        KpexCLI._add_pex_input_arguments(parser_pex25d, include_schematic=False)
         KpexCLI._add_extraction_options(parser_pex25d)
         KpexCLI._add_tech_arguments(parser_pex25d)
         KpexCLI._add_pex25d_output_arguments(parser_pex25d)

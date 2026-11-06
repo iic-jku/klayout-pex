@@ -254,6 +254,18 @@ def test_pex25d_outputs_are_named_as_their_kind(tmp_path):
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX25D", "Schematic")
+def test_pex25d_takes_no_schematic(tmp_path):
+    # NOTE: it writes no netlist, which a schematic is checked against (#428)
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--schematic', str(tmp_path / 'nfet_li1.spice'),
+                                            '--out-dir', str(tmp_path), '--out-file', str(tmp_path / 'x.pex25d')])
+    assert code == ExitCode.USAGE, output
+    assert "unrecognized arguments: --schematic" in output
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "LVS")
 def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.MonkeyPatch):
     # NOTE: the PEX-LVS compares the layout with a dummy schematic only (#330)
