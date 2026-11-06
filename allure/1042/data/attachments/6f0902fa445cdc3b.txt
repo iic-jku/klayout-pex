@@ -1,0 +1,31 @@
+WARNING  __kpex__:kpex_cli.py:1765 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_boundary_over_inductor.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1993 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:1993 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:1993 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:1993 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1993 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:kpex_cli.py:1442 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 C1;$I2;LA;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C2;$I2;LB;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C3;$I2;VSUBS;0.436;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C4;LA;LB;0.74;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C5;LA;VSUBS;1.11;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C6;LA.P0.TopMetal2;LB.P0.TopMetal2;0.712;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C7;LA.P0.TopMetal2;VSUBS;1.07;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C8;LB;VSUBS;1.109;
+SUBPROCESS __kpex__:kpex_cli.py:1474 C9;LB.P0.TopMetal2;VSUBS;1.07;
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;LA;LA.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;LB;LB.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1477 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.1 GiB
+WARNING  __kpex__:kpex_cli.py:1547 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $I2 (0.437 fF)
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.1 GiB
