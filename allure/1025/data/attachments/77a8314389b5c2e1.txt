@@ -1,0 +1,40 @@
+──────────────────────────── Command line arguments ────────────────────────────
+kpex pex25d --pdk gf180mcuD --lvsdb                                             
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/nfet_10v0_asym_pair.lvsdb.gz --out-dir                                        
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --blackbox n        
+--out-file                                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair.
+pex25d                                                                          
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:22:48] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:22:48] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_gf180mcuD/nfet_10v0_asym_pair__nfe                  
+                    t_10v0_asym_pair/kpex_result.json                           
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:22:48] INFO     (35, 0) -> (via1)                           kpex_cli.py:1897
+[16:22:48] INFO     (32, 0) -> (nsd nd_ldmos)                   kpex_cli.py:1897
+[16:22:48] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1897
+[16:22:48] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1897
+[16:22:48] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1897
+[16:22:48] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1897
+[16:22:48] INFO     (33, 4401) -> (contact_nsd_con)             kpex_cli.py:1897
+[16:22:48] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:1897
+[16:22:48] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1897
+────────────────────────────── PEX25D Generation ───────────────────────────────
+[16:22:48] INFO     GROUND_PLANE subs: z -3300 … 0         pex25d_builder.py:322
+[16:22:48] INFO     DIELECTRIC_BACKGROUND pass: k=4.0      pex25d_builder.py:480
+[16:22:48] INFO     DIELECTRIC_BACKGROUND sin: k=8.5225    pex25d_builder.py:480
+[16:22:48] INFO     DIELECTRIC_BACKGROUND air: k=1.0       pex25d_builder.py:480
+[16:22:48] INFO     5 conductor(s), 41 shape record(s)     pex25d_builder.py:601
+[16:22:48] INFO     6 terminal record(s)                   pex25d_builder.py:779
+[16:22:48] INFO     8 metal and 8 via resistance record(s) pex25d_builder.py:841
+[16:22:48] INFO     Wrote                                       kpex_cli.py:1915
+                    /Users/runner/work/klayout-pex/klayout-pex/                 
+                    output_gf180mcuD/nfet_10v0_asym_pair.pex25d                 
+                     (file, text)                                               
+[16:22:48] INFO     No diagnostics.                           diagnostics.py:234
+[16:22:48] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 194.8 MiB                                              
