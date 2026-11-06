@@ -1,0 +1,240 @@
+SUBPROCESS __kpex__:kpex_cli.py:1704 kpex extract --pdk sky130A --2.5D --mode RC --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_in_subcell.gds.gz --schematic /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_in_subcell.spice --check n --out-dir /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0
+INFO     __kpex__:kpex_cli.py:822 GDS input file passed, running in LVS mode
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'nfet_li1_in_subcell'
+WARNING  __kpex__:kpex_cli.py:921 --schematic is checked for its device classes, their totals and the pins of its top circuit only, use regular LVS to compare layout against schematic
+SUBPROCESS __kpex__:tool_version_constraints.py:266 Tool     Found    Effective range
+SUBPROCESS __kpex__:tool_version_constraints.py:266 KLayout  0.30.12  >=0.30.1,>=0.30.2,>=0.30.3
+INFO     __kpex__:kpex_cli.py:1599 Cache miss: there is no cached LVSDB
+SUBPROCESS __kpex__:kpex_cli.py:1600 /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/.kpex_cache/sky130A/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_in_subcell.gds.gz/nfet_li1_in_subcell.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:129 klayout -b -r /home/runner/work/klayout-pex/klayout-pex/pdk/sky130A/libs.tech/kpex/sky130.lvs -rd input=/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_in_subcell.gds.gz -rd report=/tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell.lvsdb.gz -rd target_netlist=/tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_extracted.cir -rd schematic=/tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_dummy_schematic.spice -rd thr=22 -rd run_mode=deep -rd spice_net_names=true -rd spice_comments=false -rd scale=false -rd schematic_simplify=false -rd net_only=false -rd top_lvl_pins=true -rd combine=false -rd combine_devices=false -rd purge=false -rd purge_nets=false -rd no_simplify=true -rd verbose=false
+SUBPROCESS __kpex__:lvs_runner.py:130 /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_lvs.log
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (436968K) : Starting running SKY130 Klayout LVS runset on /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/nfet_li1_in_subcell.gds.gz
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Number of threads: 22
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Final report: /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell.lvsdb.gz
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : No substrate name given, default name is sky130_gnd
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Convert subcircuits: false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : device_scaling: false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Extracted netlist with net names: true
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Extracted netlist with comments in details: false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Extracted netlist file: /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_extracted.cir
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : Verbose mode: false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438216K) : deep mode is enabled.
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438344K) : Netlist file: /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_dummy_schematic.spice
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (438344K) : Read in polygons from layers.
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (445036K) : Read in labels from layers.
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : Evaluate switches start
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : SCH_SIMPLE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : NET_ONLY enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : TOP_LVL_PINS enabled  true
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : COMBINE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : PURGE enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : PURGE_NETS enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : SIMPLIFY enabled  false
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : Evaluate switches end.
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : SKY130 LVS rules started
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (446060K) : Starting deriving base layers.
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (454044K) : Starting MOSFET DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (454044K) : Starting PMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (455196K) : Starting NMOS layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (456476K) : Starting BJT DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (456988K) : Starting NPN layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (458652K) : Starting PNP layers DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (459932K) : Starting DIODE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (461596K) : Starting PHOTODIODE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (462236K) : Starting RESISTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (465176K) : Starting FUSE DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (465176K) : Starting MIM DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (465560K) : Starting VARACTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (467000K) : Starting INDUCTOR DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (468024K) : Starting VPP CAP DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (470840K) : Starting SONOS DERIVATIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472500K) : Starting SKY130 LVS connectivity setup
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472500K) : Starting SKY130 LVS connectivity setup (Inter-layer)
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472884K) : Starting SKY130 LVS connectivity setup (Attaching labels)
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472884K) : Starting SKY130 LVS connectivity setup (Global connections)
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472884K) : Starting SKY130 LVS connectivity setup (Multifinger Devices)
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (472884K) : Starting LVS BJT CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS DIODE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS PHOTODIODE CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS MIMCAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS VARACTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS RESISTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS INDUCTOR CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS VPP CAP CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting LVS SONOS CONNECTIONS
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting MOSFET EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Starting PMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473012K) : Extracting 1.8V PMOS transistor standard
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473140K) : Extracting 1.8V PMOS transistor low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473140K) : Extracting 1.8V PMOS transistor high threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473140K) : Extracting 5V gate 10.5V drain PMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473268K) : Starting NMOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473268K) : Extracting 1.8V NMOS transistor standard
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473524K) : Extracting 1.8V NMOS transistor low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473524K) : Extracting 3.3V NMOS transistor native voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473652K) : Extracting 5V NMOS transistor native voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473652K) : Extracting 5V gate 10.5V drain NMOS transistor
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473652K) : Starting BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473652K) : Starting NPN BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (473652K) : Extracting sky130_fd_pr__npn_05v5_W1p00L1p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474036K) : Extracting sky130_fd_pr__npn_05v5_W1p00L2p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474164K) : Extracting sky130_fd_pr__npn_11v0_W1p00L1p00 BJT
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474292K) : Starting PNP BJT EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474292K) : Extracting sky130_fd_pr__pnp_05v5_W0p68L0p68 BJT
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474420K) : Extracting sky130_fd_pr__pnp_05v5_W3p40L3p40 BJT
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting DIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 5V N+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 5V N+ diffusion diode low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 5V N+ diffusion diode native threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 11V N+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 5V P+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting5V P+ diffusion diode low threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 5V P+ diffusion diode high threshold voltage
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting 11V P+ diffusion diode
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting PHOTODIODE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting Photodiode
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting RESISTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_nd device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_nd device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_pd device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_pd device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_iso_pw device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_po device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_high_po_0p35 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_high_po_0p69 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_high_po_1p41 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_high_po_2p85 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_high_po_5p73 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_xhigh_po_0p35 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_xhigh_po_0p69 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_xhigh_po_1p41 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_xhigh_po_2p85 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_xhigh_po_5p73 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_l1 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_m1 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_m2 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_m3 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__res_generic_m5 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting FUSE EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__fuse_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting MIMCAP EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__model__cap_mim device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__model__cap_mim_m4 device
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting VARACTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting low threshold voltage varactor
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting high threshold voltage varactor
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting INDUCTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting RF Inductor with 3 turns and internal diameter of 90um
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting RF Inductor with 5 turns and internal diameter of 125um
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting RF Inductor with 5 turns and internal diameter of 220um
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting VARACTOR EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p4x04p6_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p7x06p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p7x11p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p7x21p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p7x41p1_m1m2m3m4_shieldl1_fingercap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_02p9x06p1_m1m2m3m4_shieldl1_fingercap2
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_03p9x03p9_m1m2_shieldl1_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_noshield_o2subcell
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_l1m1m2_shieldpo_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_noshield_o2
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_04p4x04p6_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_05p9x05p9_m1m2m3m4_shieldl1_wafflecap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_06p8x06p1_l1m1m2m3_shieldpom4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_06p8x06p1_m1m2m3_shieldl1m4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_noshield_o2subcell
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_l1m1m2_shieldpo_floatm3
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_08p6x07p8_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p3x11p3_m1m2m3m4_shieldl1_wafflecap
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting vpp cap sky130_fd_pr__cap_vpp_11p3x11p8_l1m1m2m3m4_shieldm5_nhv
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldm5
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3m4_shieldpom5_x
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldm4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2m3_shieldpom4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_l1m1m2_shieldpom3
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldl1m5
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3m4_shieldm5
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2m3_shieldl1m5_floatm4
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m2_shieldl1
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_m1m4_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_11p5x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_22p5x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_22p5x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_33p6x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_33p6x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_44p7x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_44p7x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_55p8x11p7_pol1m1m2m3m4m5_noshield_m5pullin
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_m5pullin
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting sky130_fd_pr__cap_vpp_55p8x23p1_pol1m1m2m3m4m5_noshield_test
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting SONOS EXTRACTION
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Extracting Build space flash special SONOSFET star
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474548K) : Starting SKY130 LVS comparison section
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474932K) : LVS Total Run time 0.344703 seconds
+SUBPROCESS __kpex__:lvs_runner.py:153 2026-11-06 13:50:49 +0000: Memory Usage (474932K) : [PEX] Compared with the dummy schematic of kpex only, for the LVS database; use regular LVS to compare layout against schematic
+INFO     __kpex__:lvs_runner.py:175 klayout LVS succeeded after 2.21s
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 240.7 MiB, largest subprocess 463.8 MiB
+INFO     __kpex__:kpex_cli.py:1854 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1854 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1362 Sidewall halo: 8 µm (tech info of sky130A)
+INFO     __kpex__:extractor.py:482 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 240.7 MiB, largest subprocess 463.8 MiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 240.7 MiB, largest subprocess 463.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 C1;$1.D;$1.G.$0.li1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C2;$1.D;$1.G.$1.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C3;$1.D;VSUBS;0.032;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C4;$1.D.$0.li1;$1.G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C5;$1.D.$0.li1;$1.S.$0.li1;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C6;$1.D.$0.li1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C7;$1.D.$1.li1;$1.G.P0.poly;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C8;$1.D.$1.li1;$1.S.$1.li1;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C9;$1.D.$1.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C10;$1.D.P0.nsdm;$1.S.$0.li1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C11;$1.G;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C12;$1.G.$0.li1;VSUBS;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C13;$1.G.$1.poly;VSUBS;0.064;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C14;$1.G.P0.poly;$1.S.$0.li1;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C15;$1.G.P0.poly;$1.S.$1.li1;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C16;$1.G.P0.poly;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C17;$1.S;VSUBS;0.032;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C18;$1.S.$0.li1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C19;$1.S.$1.li1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;$1.D;$1.D.$1.li1;;30.494
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;$1.D.$0.li1;$1.D.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;$1.D.$0.li1;$1.D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R4;$1.D.$1.li1;$1.D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R5;$1.G;$1.G.$0.li1;;6.4
+SUBPROCESS __kpex__:kpex_cli.py:1391 R6;$1.G.$0.li1;$1.G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R7;$1.G.$1.poly;$1.G.P0.poly;;234.381
+SUBPROCESS __kpex__:kpex_cli.py:1391 R8;$1.S;$1.S.$0.li1;;43.294
+SUBPROCESS __kpex__:kpex_cli.py:1391 R9;$1.S.$0.li1;$1.S.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1391 R10;$1.S.$0.li1;$1.S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R11;$1.S.$1.li1;$1.S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1394 /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_pex_lvs_flattens_the_cell0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1442 The extracted netlist is inconsistent with the LVS netlist:
+  - the schematic has pins without port in the netlist: D, G, S
+  - the netlist has ports without pin in the schematic: $1.D, $1.G, $1.S
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 240.7 MiB, largest subprocess 463.8 MiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 240.7 MiB, largest subprocess 463.8 MiB
