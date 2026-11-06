@@ -574,9 +574,9 @@ class Test(unittest.TestCase):
                 contact_resistance = parasitics_pb2.ResistanceInfo.ContactResistance(resistance=milliohm)
                 via_resistance = parasitics_pb2.ResistanceInfo.ViaResistance(resistance=milliohm)
                 self.assertAlmostEqual(milliohm / 1000.0, TechInfo.milliohm_to_ohm(milliohm))
-                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                self.assertAlmostEqual(expected, TechInfo.milliohm_per_cut_to_ohm_um2_for_contact(
                     contact, contact_resistance))
-                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_via(
+                self.assertAlmostEqual(expected, TechInfo.milliohm_per_cut_to_ohm_um2_for_via(
                     contact, via_resistance))
 
     def test_the_overlap_capacitances_have_those_to_the_substrate(self):
