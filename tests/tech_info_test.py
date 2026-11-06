@@ -164,6 +164,16 @@ class Test(unittest.TestCase):
                     self.assertNotEqual('', layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
+    def test_contacts_by_lvs_layer_name_are_the_set_ones(self):
+        # NOTE: not the unset contact of a layer without one, e.g. a tap, under the empty name (#469)
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            with self.subTest(tech=os.path.basename(path)):
+                contacts = TechInfo.from_json(path, dielectric_filter=None).contact_by_contact_lvs_layer_name
+                self.assertNotIn('', contacts)
+
     def test_shipped_tech_definitions_have_tap_connections_of_their_layers(self):
         # NOTE: a tap on a layer of another name would leave its metal off its net, as the LVS layers are not checked
         paths = tech_pbjson_paths()
