@@ -1,0 +1,90 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/cut_diffusion_resistors_wire_on_pad.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.8 GiB
+INFO     __kpex__:kpex_cli.py:1854 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1854 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:1854 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:1854 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1854 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:kpex_cli.py:1854 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:kpex_cli.py:1362 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 11pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.8 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.8 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 C1;$1;$1.nplus_s_A.P0.Metal1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C2;$1;$1.nplus_u_B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C3;$1;$1.pplus_u_A;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C4;$1;$I5.$1.Nwell;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C5;$1;$I8.$0.Metal1;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C6;$1;VSUBS;0.782;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C7;$1.nplus_s_A;$1.nplus_s_B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C8;$1.nplus_s_A;$1.pplus_s_A;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C9;$1.nplus_s_A;$I5.$1.Nwell;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C10;$1.nplus_s_A;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C11;$1.nplus_s_A.P0.Metal1;$1.pplus_u_A;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C12;$1.nplus_s_A.P0.Metal1;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C13;$1.nplus_s_B;$1.pplus_s_B;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C14;$1.nplus_s_B;$I5;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C15;$1.nplus_s_B;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C16;$1.nplus_s_B.P0.Metal1;$1.nplus_u_B;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C17;$1.nplus_s_B.P0.Metal1;$1.pplus_u_B;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C18;$1.nplus_s_B.P0.Metal1;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C19;$1.nplus_u_B;$1.pplus_u_B;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C20;$1.nplus_u_B;VSUBS;0.059;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C21;$1.pplus_s_A;$1.pplus_s_B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C22;$1.pplus_s_A;$I1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C23;$1.pplus_s_A;$I5.$1.Nwell;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C24;$1.pplus_s_A;$I8;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C25;$1.pplus_s_A;$I8.$1.Nwell;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C26;$1.pplus_s_A;VSUBS;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C27;$1.pplus_s_A.P0.Metal1;$1.pplus_u_A;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C28;$1.pplus_s_A.P0.Metal1;$1.pplus_u_dn_A;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C29;$1.pplus_s_A.P0.Metal1;$I8.$0.Metal1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C30;$1.pplus_s_A.P0.Metal1;$I8.$1.Nwell;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C31;$1.pplus_s_A.P0.Metal1;VSUBS;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C32;$1.pplus_s_B;$I1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C33;$1.pplus_s_B;$I5;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C34;$1.pplus_s_B;$I8;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C35;$1.pplus_s_B;VSUBS;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C36;$1.pplus_s_B.P0.Metal1;$1.pplus_u_B;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C37;$1.pplus_s_B.P0.Metal1;$1.pplus_u_dn_B;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C38;$1.pplus_s_B.P0.Metal1;$I8;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C39;$1.pplus_s_B.P0.Metal1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C40;$1.pplus_u_A;$1.pplus_u_B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C41;$1.pplus_u_A;$1.pplus_u_dn_A;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C42;$1.pplus_u_A;$I5;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C43;$1.pplus_u_A;$I5.$0.Metal1;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C44;$1.pplus_u_A;$I5.$1.Nwell;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C45;$1.pplus_u_A;$I8.$1.Nwell;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C46;$1.pplus_u_A;VSUBS;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C47;$1.pplus_u_B;$1.pplus_u_dn_B;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C48;$1.pplus_u_B;$I5;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C49;$1.pplus_u_B;$I8;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C50;$1.pplus_u_B;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C51;$1.pplus_u_dn_A;$1.pplus_u_dn_B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C52;$1.pplus_u_dn_A;$I1;0.044;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C53;$1.pplus_u_dn_A;$I8.$1.Nwell;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C54;$1.pplus_u_dn_A;VSUBS;0.014;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C55;$1.pplus_u_dn_B;$I1;0.036;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C56;$1.pplus_u_dn_B;$I8;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C57;$1.pplus_u_dn_B;VSUBS;0.023;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C58;$I1;$I5.$0.Metal1;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C59;$I1;$I8.$0.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C60;$I1;VSUBS;0.025;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C61;$I5.$0.Metal1;$I8.$0.Metal1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C62;$I5.$0.Metal1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C63;$I8.$0.Metal1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;$1.nplus_s_A;$1.nplus_s_A.P0.Metal1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;$1.nplus_s_B;$1.nplus_s_B.P0.Metal1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;$1.pplus_s_A;$1.pplus_s_A.P0.Metal1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1391 R4;$1.pplus_s_B;$1.pplus_s_B.P0.Metal1;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1391 R5;$I5;$I5.$1.Nwell;;1295.455
+SUBPROCESS __kpex__:kpex_cli.py:1391 R6;$I5.$0.Metal1;$I5.$1.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1391 R7;$I8;$I8.$1.Nwell;;1265.873
+SUBPROCESS __kpex__:kpex_cli.py:1391 R8;$I8.$0.Metal1;$I8.$1.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1394 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resistors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wire_on_pad_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resistors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wire_on_pad_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.8 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.8 GiB

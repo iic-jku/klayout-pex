@@ -1,0 +1,53 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk sky130A --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cut_nfets_wired_in_top.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cut_nfets_wired_in_top.gds.gz --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'cut_nfets_wired_in_top'
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1854 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1854 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 6pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;D1;D1.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;D2;D2.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;G1;G1.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1391 R4;G2;G2.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1391 R5;VSS;VSS.$1.li1;;87.273
+SUBPROCESS __kpex__:kpex_cli.py:1391 R6;VSS.$0.li1;VSS.$1.li1;;64.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R7;VSS.$0.li1;VSS.P1.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R8;VSS.$1.li1;VSS.$2.li1;;2621.927
+SUBPROCESS __kpex__:kpex_cli.py:1391 R9;VSS.$2.li1;VSS.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1394 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_nfets_wired_in_top__cut_nfets_wired_in_top/cut_nfets_wired_in_top_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_nfets_wired_in_top__cut_nfets_wired_in_top/cut_nfets_wired_in_top_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk sky130A --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cut_nfets_wired_in_top.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/cut_nfets_wired_in_top.gds.gz --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'cut_nfets_wired_in_top'
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1854 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1854 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:180 The netlist leaves out the 2 devices of the cut cells
+INFO     __kpex__:extractor.py:482 LVSDB: found 6pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;D1;X__D;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;D2;X__D$1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;VSS;VSS.$1.li1;;87.273
+SUBPROCESS __kpex__:kpex_cli.py:1391 R4;VSS.$0.li1;VSS.$1.li1;;64.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R5;VSS.$0.li1;X__S_0;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R6;VSS.$1.li1;VSS.$2.li1;;2621.927
+SUBPROCESS __kpex__:kpex_cli.py:1391 R7;VSS.$2.li1;X__S_1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1394 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_nfets_wired_in_top__cut_nfets_wired_in_top/cut_nfets_wired_in_top_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_nfets_wired_in_top__cut_nfets_wired_in_top/cut_nfets_wired_in_top_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.2 GiB

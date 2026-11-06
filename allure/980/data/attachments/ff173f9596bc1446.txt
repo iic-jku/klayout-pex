@@ -1,0 +1,40 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_boundary_over_inductor.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_boundary_over_inductor.gds.gz --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'cut_boundary_over_inductor'
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1854 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:1854 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:1854 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:1854 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1854 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;LA;LA.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;LB;LB.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1394 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1461 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): $I2
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_boundary_over_inductor.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_boundary_over_inductor.gds.gz --exclusion-markers ignore --cut block
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'cut_boundary_over_inductor'
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1854 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:1854 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:1854 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:1854 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1854 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:extractor.py:241 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I2
+INFO     __kpex__:extractor.py:482 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;LA;LA.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;LB;LB.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1394 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_boundary_over_inductor__cut_boundary_over_inductor/cut_boundary_over_inductor_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.2 GiB

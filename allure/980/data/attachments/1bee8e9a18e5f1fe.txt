@@ -1,0 +1,96 @@
+[13:26:23] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1667
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/exclusion_floating_plate_neighbor.lvsdb.gz --out-dir                         
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/exclusion_floating_plate_neighbor.gds.gz --exclusion-markers ignore        
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:26:23] INFO     No explicit top cell specified, using top    kpex_cli.py:862
+                    cell 'exclusion_floating_plate_neighbor'                    
+[13:26:23] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:873
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:26:23] INFO     Peak memory (resident set size) after       kpex_cli.py:1850
+                    preparing the LVSDB: 1009.8 MiB                             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:26:23] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1854
+[13:26:23] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1854
+[13:26:23] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1854
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:26:23] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1362
+[13:26:23] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1009.8 MiB                          
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$3;N;1.478;                                                                  
+C2;$3;VSUBS;6.707;                                                              
+C3;N;VSUBS;3.554;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_floating_
+plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neigh
+bor_k25d_pex_netlist.csv                                                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_floating_
+plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neigh
+bor_k25d_pex_netlist.spice                                                      
+[13:26:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1444
+                    netlist: 1009.8 MiB                                         
+[13:26:23] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1461
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: $3 (8.185 fF)                      
+[13:26:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1733
+                    run: 1009.8 MiB                                             
+[13:26:23] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1667
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/exclusion_floating_plate_neighbor.lvsdb.gz --out-dir                         
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/exclusion_floating_plate_neighbor.gds.gz --exclusion-markers tie           
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:26:23] INFO     No explicit top cell specified, using top    kpex_cli.py:862
+                    cell 'exclusion_floating_plate_neighbor'                    
+[13:26:23] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:873
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:26:23] INFO     Peak memory (resident set size) after       kpex_cli.py:1850
+                    preparing the LVSDB: 1010.3 MiB                             
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:26:23] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1854
+[13:26:23] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1854
+[13:26:23] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1854
+[13:26:23] INFO     Nothing connects these nets within          extractor.py:241
+                    exclusion markers to the netlist, so their                  
+                    capacitances to the rest of the layout go                   
+                    to the substrate: $3                                        
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:26:23] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1362
+[13:26:23] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1010.3 MiB                          
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;N;VSUBS;5.032;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_floating_
+plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neigh
+bor_k25d_pex_netlist.csv                                                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_floating_
+plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neigh
+bor_k25d_pex_netlist.spice                                                      
+[13:26:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1444
+                    netlist: 1010.3 MiB                                         
+[13:26:23] INFO     Peak memory (resident set size) after the   kpex_cli.py:1733
+                    run: 1010.3 MiB                                             
