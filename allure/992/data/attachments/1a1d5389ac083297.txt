@@ -1,0 +1,59 @@
+[14:15:13] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\diode_dan
+tenna_dpantenna.lvsdb.gz' --out-dir                                            
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[14:15:13] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[14:15:13] WARNING  The extraction leaves out these LVS  lvsdb_extractor.py:424
+                    layers, as the tech info doesn't                           
+                    know them:                                                 
+                      - cont_drw (Cont): 8 of 8 shapes                         
+                    are not within cont_nsd_con,                               
+                    cont_psd_con, cont_poly_con,                               
+                    cont_ntap_con, cont_ptap_con,                              
+                    cont_bjt_con, schottcky_p,                                 
+                    schottcky_n_con, diodevdd_4kv_te,                          
+                    diodevss_4kv_te                                            
+[14:15:13] INFO     Peak memory (resident set size) after      kpex_cli.py:1853
+                    preparing the LVSDB: 1.9 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:15:13] INFO     (31, 0) -> (nwell_drw dpantenna_n)         kpex_cli.py:1857
+[14:15:13] INFO     (46, 0) -> (pwell pwell_sub dantenna_p)    kpex_cli.py:1857
+[14:15:13] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1857
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:15:13] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1365
+[14:15:13] INFO     LVSDB: found 1pins                         extractor.py:482
+[14:15:13] WARNING  The resistance network leaves out these  r_extractor.py:525
+                    wells, as the tech info has no sheet                       
+                    resistance for them, so the device                         
+                    terminals on them (e.g. the PMOS bulks)                    
+                    are ideally on their nets:                                 
+                      - NWell (LVS dpantenna_n)                                
+                      - NWell (LVS nwell_drw)                                  
+[14:15:13] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.9 GiB                             
+[14:15:13] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.9 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;$1;$2;0.001;                                                                
+C2;$1;VSUBS;0.086;                                                             
+C3;$2;$3;0.024;                                                                
+C4;$2;VSUBS;0.062;                                                             
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\diode_dantenna_dpantenna__diode_
+dantenna_dpantenna\diode_dantenna_dpantenna_k25d_pex_netlist.csv               
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\diode_dantenna_dpantenna__diode_
+dantenna_dpantenna\diode_dantenna_dpantenna_k25d_pex_netlist.spice             
+[14:15:13] INFO     Peak memory (resident set size) after the  kpex_cli.py:1447
+                    netlist: 1.9 GiB                                           
+[14:15:13] INFO     Peak memory (resident set size) after the  kpex_cli.py:1736
+                    run: 1.9 GiB                                               

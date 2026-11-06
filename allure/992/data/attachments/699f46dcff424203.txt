@@ -1,0 +1,106 @@
+[14:12:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/cut_coil_beside_marker.lvsdb.gz --out-dir                                    
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/cut_coil_beside_marker.gds.gz --exclusion-markers ignore --cut coil=xind   
+--cut-keep-net VDD                                                              
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:12:29] INFO     No explicit top cell specified, using top    kpex_cli.py:871
+                    cell 'cut_coil_beside_marker'                               
+[14:12:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:12:29] INFO     Peak memory (resident set size) after       kpex_cli.py:1853
+                    preparing the LVSDB: 1.0 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:12:29] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1857
+[14:12:29] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (134, 0) -> (topmetal2_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1857
+[14:12:29] INFO     (134, 2) -> (topmetal2_pin_con)             kpex_cli.py:1857
+[14:12:29] INFO     (133, 0) -> (topvia2_drw)                   kpex_cli.py:1857
+[14:12:29] INFO     (67, 0) -> (metal5_n_cap)                   kpex_cli.py:1857
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:12:29] INFO     LVSDB: found 3pins                          extractor.py:482
+[14:12:29] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.0 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;OSCN;OSCN,OSCP,VCT;;0.001                                                    
+R2;OSCN;xind__LB;;0.035                                                         
+R3;OSCP;xind__LA;;0.035                                                         
+R4;VCT;xind__CT;;0.085                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_beside_mar
+ker__cut_coil_beside_marker/cut_coil_beside_marker_k25d_pex_netlist.csv         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_beside_mar
+ker__cut_coil_beside_marker/cut_coil_beside_marker_k25d_pex_netlist.spice       
+[14:12:29] INFO     Peak memory (resident set size) after the   kpex_cli.py:1447
+                    netlist: 1.0 GiB                                            
+[14:12:29] INFO     Peak memory (resident set size) after the   kpex_cli.py:1736
+                    run: 1.0 GiB                                                
+[14:12:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/cut_coil_beside_marker.lvsdb.gz --out-dir                                    
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patt
+erns/cut_coil_beside_marker.gds.gz --exclusion-markers tie --cut coil=xind      
+--cut-keep-net VDD                                                              
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:12:29] INFO     No explicit top cell specified, using top    kpex_cli.py:871
+                    cell 'cut_coil_beside_marker'                               
+[14:12:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:12:29] INFO     Peak memory (resident set size) after       kpex_cli.py:1853
+                    preparing the LVSDB: 1.0 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:12:29] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1857
+[14:12:29] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (134, 0) -> (topmetal2_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1857
+[14:12:29] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1857
+[14:12:29] INFO     (134, 2) -> (topmetal2_pin_con)             kpex_cli.py:1857
+[14:12:29] INFO     (133, 0) -> (topvia2_drw)                   kpex_cli.py:1857
+[14:12:29] INFO     (67, 0) -> (metal5_n_cap)                   kpex_cli.py:1857
+[14:12:29] WARNING  These nets are partly within exclusion      extractor.py:235
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - OSCN,OSCP,VCT: TopMetal2                                
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:12:29] INFO     LVSDB: found 3pins                          extractor.py:482
+[14:12:29] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.0 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;OSCN;OSCN,OSCP,VCT;;0.001                                                    
+R2;OSCN;xind__LB;;0.035                                                         
+R3;OSCP;xind__LA;;0.017                                                         
+R4;VCT;xind__CT;;0.085                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_beside_mar
+ker__cut_coil_beside_marker/cut_coil_beside_marker_k25d_pex_netlist.csv         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_beside_mar
+ker__cut_coil_beside_marker/cut_coil_beside_marker_k25d_pex_netlist.spice       
+[14:12:29] INFO     Peak memory (resident set size) after the   kpex_cli.py:1447
+                    netlist: 1.0 GiB                                            
+[14:12:29] INFO     Peak memory (resident set size) after the   kpex_cli.py:1736
+                    run: 1.0 GiB                                                
