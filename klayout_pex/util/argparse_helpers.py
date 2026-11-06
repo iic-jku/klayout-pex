@@ -173,15 +173,46 @@ def positive_spice_seconds(text: str) -> float:
     return value
 
 
-def positive_micrometers(text: str) -> float:
-    """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
+def _finite_number(text: str, is_in_range: Callable[[float], bool], range_text: str) -> float:
+    """
+    For the argparse types: a finite number in a range
+
+    :param range_text: the range, for the error message, e.g. '> 0 (in µm)'
+    """
     try:
         value = float(text)
     except ValueError:
         value = math.nan
-    if not (math.isfinite(value) and value > 0):
-        raise argparse.ArgumentTypeError(f"must be a finite number > 0 (in µm), got '{text}'")
+    if not (math.isfinite(value) and is_in_range(value)):
+        raise argparse.ArgumentTypeError(f"must be a finite number {range_text}, got '{text}'")
     return value
+
+
+def positive_micrometers(text: str) -> float:
+    """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
+    return _finite_number(text, lambda value: value > 0, "> 0 (in µm)")
+
+
+def non_negative_micrometers(text: str) -> float:
+    """argparse type: a finite length >= 0 µm, e.g. '0' or '2.5'"""
+    return _finite_number(text, lambda value: value >= 0, ">= 0 (in µm)")
+
+
+def non_negative_square_micrometers(text: str) -> float:
+    """argparse type: a finite area >= 0 µm², e.g. '0' or '0.5'"""
+    return _finite_number(text, lambda value: value >= 0, ">= 0 (in µm²)")
+
+
+DELAUNAY_B_MAX = 1.1
+"""
+The largest b = 2·sin(minimum angle) to ask the refinement of KLayout's Region#delaunay for: documented as stable
+up to roughly 1.2, it didn't finish with 1.2 for an L shape, with 1.25 for a box, taking more and more memory
+"""
+
+
+def delaunay_b(text: str) -> float:
+    """argparse type: the minimum b = 2·sin(angle) of the triangles of a Delaunay refinement, 0 to DELAUNAY_B_MAX"""
+    return _finite_number(text, lambda value: 0 <= value <= DELAUNAY_B_MAX, f"from 0 to {DELAUNAY_B_MAX:g}")
 
 
 DEPRECATED_OPTIONS_DEST = 'deprecated_options'

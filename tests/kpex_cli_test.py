@@ -201,6 +201,30 @@ def test_halo_that_is_not_positive_is_a_usage_error(halo: str, tmp_path):
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('command, option, value, expected', [
+    pytest.param(command, option, value, expected, id=f'{option}={value}')
+    for command, option, values, expected in (
+        ('extract', '--delaunay-amax', ('-1', 'nan', 'inf'), ">= 0 (in µm²)"),
+        ('extract', '--delaunay-b', ('-1', '1.5', 'nan', 'inf'), "from 0 to 1.1"),
+        ('pex25d', '--domain-margin', ('-1', 'nan', 'inf'), ">= 0 (in µm)"),
+    )
+    for value in values
+])
+def test_triangulation_or_margin_out_of_range_is_a_usage_error(command: str, option: str, value: str, expected: str,
+                                                               tmp_path):
+    # NOTE: a --delaunay-b of 1.5 kept the triangulation from finishing, a negative --domain-margin
+    #       turned the domain inside out, the others were ignored or failed with a traceback (#432)
+    code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A', f'{option}={value}',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert re.search(rf"argument {option}(/-\w)?: must be a finite number {re.escape(expected)}, got '{value}'",
+                     output), output
+    assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Windows")
 def test_klayout_writes_no_gzip_files(tmp_path):
     # NOTE: on Windows, KLayout leaks a C runtime stream with each gzip file it writes, of which a process has 512,
