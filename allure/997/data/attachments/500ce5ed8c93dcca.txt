@@ -1,0 +1,54 @@
+[14:33:58] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox y --lvsdb                      
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/cut_diffusion_resistors_wire_on_pad.lvsdb.gz --out-dir                        
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 
+--scale n --gds                                                                 
+/Users/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patte
+rns/cut_diffusion_resistors_wire_on_pad.gds.gz --exclusion-markers ignore --cut 
+block=X                                                                         
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:33:58] INFO     No explicit top cell specified, using top    kpex_cli.py:876
+                    cell 'cut_diffusion_resistors_wire_on_pad'                  
+[14:33:58] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:33:58] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 960.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:33:58] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1862
+[14:33:58] INFO     (22, 144) -> (ntap)                         kpex_cli.py:1862
+[14:33:58] INFO     (21, 0) -> (nwell_con)                      kpex_cli.py:1862
+[14:33:58] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1862
+[14:33:58] INFO     (33, 4404) -> (contact_ntap_con)            kpex_cli.py:1862
+[14:33:58] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1862
+[14:33:58] INFO     The netlist leaves out the 5 devices of the extractor.py:180
+                    cut cells                                                   
+[14:33:58] INFO     Nothing connects these nets within          extractor.py:241
+                    exclusion markers to the netlist, so their                  
+                    capacitances to the rest of the layout go                   
+                    to the substrate: $I1, $I5, $I8                             
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:33:58] INFO     LVSDB: found 11pins                         extractor.py:482
+[14:33:58] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 960.8 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$1;X__A;;0.001                                                               
+R2;X__A;X__nplus_u_A;;0.008                                                     
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resist
+ors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wir
+e_on_pad_k25d_pex_netlist.csv                                                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resist
+ors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wir
+e_on_pad_k25d_pex_netlist.spice                                                 
+[14:33:58] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 960.8 MiB                                          
+[14:33:58] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 960.8 MiB                                              

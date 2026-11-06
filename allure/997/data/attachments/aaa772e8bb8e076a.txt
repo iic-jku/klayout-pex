@@ -1,0 +1,116 @@
+[14:37:36] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox y --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/c
+ut_pfets_sharing_diffusion.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cut_pfets_sharing_diffusion.gds.gz --exclusion-markers ignore                  
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:37:36] INFO     No explicit top cell specified, using top    kpex_cli.py:876
+                    cell 'cut_pfets_sharing_diffusion'                          
+[14:37:36] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:37:36] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 1.3 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:37:36] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1862
+[14:37:36] INFO     (94, 20) -> (psd)                           kpex_cli.py:1862
+[14:37:36] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1862
+[14:37:36] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1862
+[14:37:36] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1862
+[14:37:36] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1862
+[14:37:36] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1862
+[14:37:36] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1862
+[14:37:36] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:37:36] INFO     LVSDB: found 6pins                          extractor.py:482
+[14:37:36] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.3 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;$I2;$I2.P0.poly;;363.107                                                     
+R2;D;D.$0.li1;;73.697                                                           
+R3;D.$0.li1;D.P0.psdm;;585.0                                                    
+R4;G2;G2.P0.poly;;363.107                                                       
+R5;S2;S2.P0.psdm;;585.0                                                         
+R6;ST;ST.$0.li1;;73.697                                                         
+R7;ST.$0.li1;ST.P0.psdm;;585.0                                                  
+R8;VPWR;VPWR.$1.nwell;;185.0                                                    
+R9;VPWR.$1.nwell;VPWR.P1.nwell;;4675.0                                          
+R10;VPWR.P0.nwell;VPWR.P1.nwell;;566.667                                        
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_pfets_sharing_diffu
+sion__cut_pfets_sharing_diffusion/cut_pfets_sharing_diffusion_k25d_pex_netlist.c
+sv                                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_pfets_sharing_diffu
+sion__cut_pfets_sharing_diffusion/cut_pfets_sharing_diffusion_k25d_pex_netlist.s
+pice                                                                            
+[14:37:36] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 1.3 GiB                                            
+[14:37:36] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 1.3 GiB                                                
+[14:37:36] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox y --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/c
+ut_pfets_sharing_diffusion.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/cut_pfets_sharing_diffusion.gds.gz --exclusion-markers ignore --cut block=X    
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:37:36] INFO     No explicit top cell specified, using top    kpex_cli.py:876
+                    cell 'cut_pfets_sharing_diffusion'                          
+[14:37:36] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:37:36] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 1.3 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:37:36] INFO     (64, 20) -> (nwell)                         kpex_cli.py:1862
+[14:37:36] INFO     (94, 20) -> (psd)                           kpex_cli.py:1862
+[14:37:36] INFO     (65, 144) -> (ntap_conn)                    kpex_cli.py:1862
+[14:37:36] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1862
+[14:37:36] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1862
+[14:37:36] INFO     (66, 4404) -> (licon_ntap_con)              kpex_cli.py:1862
+[14:37:36] INFO     (66, 16) -> (poly_pin_con)                  kpex_cli.py:1862
+[14:37:36] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1862
+[14:37:36] INFO     (66, 4402) -> (licon_psd_con)               kpex_cli.py:1862
+[14:37:36] INFO     The netlist leaves out the 1 devices of the extractor.py:180
+                    cut cells                                                   
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:37:36] INFO     LVSDB: found 6pins                          extractor.py:482
+[14:37:36] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.3 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.$0.li1;;73.697                                                           
+R2;D.$0.li1;X__D;;585.0                                                         
+R3;G2;G2.P0.poly;;363.107                                                       
+R4;S2;S2.P0.psdm;;585.0                                                         
+R5;ST;X__S;;67.258                                                              
+R6;VPWR;VPWR.$1.nwell;;185.0                                                    
+R7;VPWR.$1.nwell;VPWR.P0.nwell;;4675.0                                          
+R8;VPWR.P0.nwell;X__VPWR_0;;481.667                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_pfets_sharing_diffu
+sion__cut_pfets_sharing_diffusion/cut_pfets_sharing_diffusion_k25d_pex_netlist.c
+sv                                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_pfets_sharing_diffu
+sion__cut_pfets_sharing_diffusion/cut_pfets_sharing_diffusion_k25d_pex_netlist.s
+pice                                                                            
+[14:37:36] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 1.3 GiB                                            
+[14:37:36] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 1.3 GiB                                                

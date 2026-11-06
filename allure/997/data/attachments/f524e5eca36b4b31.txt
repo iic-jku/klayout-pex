@@ -1,0 +1,30 @@
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --lvsdb                                  
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/wires_no_pin.lvsdb.gz --out-dir                                              
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpeko2fqch --2.5D             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:34:56] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:34:56] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:34:56] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1862
+[14:34:56] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:34:56] INFO     LVSDB: found 0pins                          extractor.py:482
+[14:34:56] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpeko2fqch/wires_no_pin__wires
+_no_pin/wires_no_pin_k25d_pex_netlist.csv                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpeko2fqch/wires_no_pin__wires
+_no_pin/wires_no_pin_k25d_pex_netlist.spice                                     
+[14:34:56] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 1.1 GiB                                            
+[14:34:56] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 1.1 GiB                                                

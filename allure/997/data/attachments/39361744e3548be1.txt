@@ -1,0 +1,1491 @@
+[14:40:43] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --gds                                             
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/exclusion_plate_neighbor.gds.gz --lvsdb                                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_plate_neighbor.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap         
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:40:43] INFO     No explicit top cell specified, using top    kpex_cli.py:876
+                    cell 'exclusion_plate_neighbor'                             
+[14:40:43] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool       Found  Effective range                                               
+FasterCap  6.2.1  >=6.2.1                                                       
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:40:43] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 183.9 MiB, largest                     
+                    subprocess 201.3 MiB                                        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:40:43] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1862
+[14:40:43] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1862
+[14:40:43] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1862
+─────────────────────────────── Process stackup ────────────────────────────────
+[14:40:43] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[14:40:43] INFO     Delaunay b: 0.5             fastercap_model_generator.py:122
+[14:40:43] INFO     Delaunay area_max: 50       fastercap_model_generator.py:123
+[14:40:43] INFO     Conductor P, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] INFO     Conductor N, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:43] INFO     Substrate sub!, z=-0.28,      fastercap_input_builder.py:284
+                    height=0.28                                                 
+[14:40:43] INFO     Simple dielectric (field      fastercap_input_builder.py:310
+                    oxide) fox: z=0, height=0.4                                 
+[14:40:43] INFO     Simple dielectric ild0:       fastercap_input_builder.py:400
+                    z=0.4, height=0.64                                          
+[14:40:43] INFO     Simple dielectric ild1:       fastercap_input_builder.py:400
+                    z=1.04, height=0.96                                         
+[14:40:43] INFO     Simple dielectric ild2:       fastercap_input_builder.py:400
+                    z=2.0,                                                      
+                    height=1.0299999999999998                                   
+[14:40:43] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild3: z=3.5199999999999996,                                 
+                    height=0.5399999999999998                                   
+[14:40:43] INFO     Simple dielectric ild3:       fastercap_input_builder.py:400
+                    z=3.03,                                                     
+                    height=1.0299999999999998                                   
+[14:40:43] INFO     Simple dielectric ild4:       fastercap_input_builder.py:400
+                    z=4.06,                                                     
+                    height=1.0300000000000002                                   
+[14:40:43] INFO     Simple dielectric ildtm1b:    fastercap_input_builder.py:400
+                    z=5.09,                                                     
+                    height=0.5300000000000002                                   
+[14:40:43] INFO     Simple dielectric ildtm1c:    fastercap_input_builder.py:400
+                    z=5.62,                                                     
+                    height=0.8099999999999996                                   
+[14:40:43] INFO     Simple dielectric ildtm2:     fastercap_input_builder.py:400
+                    z=6.43,                                                     
+                    height=4.800000000000001                                    
+[14:40:43] INFO     Simple dielectric air:        fastercap_input_builder.py:400
+                    z=11.23, height=5.0                                         
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_1_outside=f
+ox_inside=ild0.geo                                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_2_outside=i
+ld0_inside=ild1.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_3_outside=i
+ld1_inside=ild2.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_4_outside=i
+ld2_inside=ild3.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_5_outside=i
+ld3_inside=ild4.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_6_outside=i
+ld4_inside=ildtm1b.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_7_outside=i
+ldtm1b_inside=ildtm1c.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_8_outside=i
+ldtm1c_inside=ildtm2.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_9_outside=i
+ldtm2_inside=air.geo                                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_10_outside=
+air_inside=(void).geo                                                           
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_11_outside=
+(void)_inside=fox.geo                                                           
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_12_outside=
+(void)_inside=ild0.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_13_outside=
+(void)_inside=ild1.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_14_outside=
+(void)_inside=ild2.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_15_outside=
+(void)_inside=ild3.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_16_outside=
+(void)_inside=ild4.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_17_outside=
+(void)_inside=ildtm1b.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_18_outside=
+(void)_inside=ildtm1c.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_19_outside=
+(void)_inside=ildtm2.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_20_outside=
+(void)_net=sub!.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_21_outside=
+fox_net=sub!.geo                                                                
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_22_outside=
+ild2_net=P.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_23_outside=
+ild3_net=P.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_24_outside=
+ild2_net=N.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_25_outside=
+ild3_net=N.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst       
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_fox.stl                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild0.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild1.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild2.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild3.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild4.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm1b.stl                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm1c.stl                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm2.stl                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_air.stl                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_P.stl                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_N.stl                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_sub!.stl                         
+[14:40:43] INFO     Peak memory (resident set size) after the   kpex_cli.py:1912
+                    FasterCap input: 183.9 MiB, largest                         
+                    subprocess 201.3 MiB                                        
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[14:40:43] INFO     Configure number of OpenMP threads          kpex_cli.py:1070
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[14:40:43] INFO     Calling FasterCap                     fastercap_runner.py:90
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f2 -ap                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst,      
+output file:                                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/exclusion_plate_neighbor_FasterCap_Output.txt    
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.2.1                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst       
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 2                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 2790                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 2790                                         
+Number of links to be computed: 457418                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4                                                      
+GMRES Iteration: 0 1 2 3 4 5                                                    
+GMRES Iteration: 0 1 2 3 4 5                                                    
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!  3.57183e-08 -8.33657e-09 -5.56563e-09                                  
+g2_P  -2.67096e-08 1.11877e-08 1.62858e-09                                      
+g3_N  -4.40223e-09 -2.48748e-09 5.5304e-09                                      
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+3                                                                               
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 2790                                         
+Number of potential estimates: 428349                                           
+Number of links: 460208 (uncompressed 7784100, compression ratio is 94.1%)      
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00279254                                  
+Time for reading input file: 0.049803s                                          
+Time for building super hierarchy: 0.003428s                                    
+Time for discretization: 0.250376s                                              
+Time for building potential matrix: 0.078789s                                   
+Time for precond calculation: 0.000077s                                         
+Time for gmres solving: 0.018966s                                               
+Memory allocated for panel hierarchy: 1115790 bytes                             
+Memory allocated for links structure: 16799552 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 450008 bytes                                        
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.565634s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 18006 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Delta in refined panel and link count w.r.t. previous iteration less than 10%   
+(Panels # 3034, Links # 572856)                                                 
+(Mesh relative refinement value (-m): 0.00197462)                               
+Automatically increasing the refinement parameters                              
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00139221                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 3501                                         
+Number of links to be computed: 746768                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!  1.93593e-08 -7.78925e-09 -3.89145e-09                                  
+g2_P  -7.62509e-09 9.93408e-09 -2.04769e-09                                     
+g3_N  -3.87719e-09 -2.11927e-09 6.80165e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.981106                                                                        
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 3501                                         
+Number of potential estimates: 687176                                           
+Number of links: 750269 (uncompressed 12257001, compression ratio is 93.9%)     
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.0013915                                   
+Time for reading input file: 0.004101s                                          
+Time for building super hierarchy: 0.000351s                                    
+Time for discretization: 0.044701s                                              
+Time for building potential matrix: 0.095330s                                   
+Time for precond calculation: 0.005008s                                         
+Time for gmres solving: 0.047217s                                               
+Memory allocated for panel hierarchy: 1400901 bytes                             
+Memory allocated for links structure: 16805240 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 720944 bytes                                        
+Memory allocated for preconditioner: 268529000 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.420213s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 280790 kilobytes                                    
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00098394                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 4500                                         
+Number of links to be computed: 1164402                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!  1.96283e-08 -7.69057e-09 -4.09028e-09                                  
+g2_P  -7.60685e-09 1.06679e-08 -2.76603e-09                                     
+g3_N  -4.04019e-09 -2.83806e-09 7.43613e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0542869                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 4500                                         
+Number of potential estimates: 1043906                                          
+Number of links: 1168902 (uncompressed 20250000, compression ratio is 94.2%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.000983704                                 
+Time for reading input file: 0.004304s                                          
+Time for building super hierarchy: 0.000364s                                    
+Time for discretization: 0.071819s                                              
+Time for building potential matrix: 0.139624s                                   
+Time for precond calculation: 0.003945s                                         
+Time for gmres solving: 0.059465s                                               
+Memory allocated for panel hierarchy: 1801500 bytes                             
+Memory allocated for links structure: 33590464 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 876648 bytes                                        
+Memory allocated for preconditioner: 268536992 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.548328s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 297733 kilobytes                                    
+                                                                                
+Iteration number #3 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000695584                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 6248                                         
+Number of links to be computed: 1936478                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!  1.92295e-08 -7.97288e-09 -3.41111e-09                                  
+g2_P  -7.82499e-09 1.03207e-08 -2.10267e-09                                     
+g3_N  -3.39653e-09 -2.11286e-09 5.88647e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0834447                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 6248                                         
+Number of potential estimates: 1703531                                          
+Number of links: 1942726 (uncompressed 39037504, compression ratio is 95.0%)    
+Max recursion level: 28                                                         
+Max Mesh relative refinement value: 0.000695582                                 
+Time for reading input file: 0.004154s                                          
+Time for building super hierarchy: 0.000344s                                    
+Time for discretization: 0.118034s                                              
+Time for building potential matrix: 0.225722s                                   
+Time for precond calculation: 0.003983s                                         
+Time for gmres solving: 0.075963s                                               
+Memory allocated for panel hierarchy: 2502448 bytes                             
+Memory allocated for links structure: 33604448 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 1098128 bytes                                       
+Memory allocated for preconditioner: 268550976 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.826102s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 298661 kilobytes                                    
+                                                                                
+Iteration number #4 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000491851                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 9181                                         
+Number of links to be computed: 3310710                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5                                                    
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!  1.89866e-08 -7.90812e-09 -3.25848e-09                                  
+g2_P  -7.80681e-09 1.04006e-08 -2.15284e-09                                     
+g3_N  -3.23914e-09 -2.16376e-09 5.74939e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0147105                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 9181                                         
+Number of potential estimates: 3001606                                          
+Number of links: 3319891 (uncompressed 84290761, compression ratio is 96.1%)    
+Max recursion level: 29                                                         
+Max Mesh relative refinement value: 0.00049185                                  
+Time for reading input file: 0.004172s                                          
+Time for building super hierarchy: 0.000343s                                    
+Time for discretization: 0.203230s                                              
+Time for building potential matrix: 0.373751s                                   
+Time for precond calculation: 0.093452s                                         
+Time for gmres solving: 0.118266s                                               
+Memory allocated for panel hierarchy: 3678581 bytes                             
+Memory allocated for links structure: 67182376 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 1443824 bytes                                       
+Memory allocated for preconditioner: 268574440 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 1.396644s (0 days, 0 hours, 0 mins, 1 s)                        
+Iteration allocated memory: 332961 kilobytes                                    
+                                                                                
+Total allocated memory: 332961 kilobytes                                        
+Total time: 1.939033s (0 days, 0 hours, 0 mins, 1 s)                            
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[14:40:45] INFO     FasterCap succeeded after 1.965s     fastercap_runner.py:118
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_1;sub!;P;7.86                                                            
+Cext_0_2;sub!;N;3.25                                                            
+Cext_1_2;P;N;2.16                                                               
+Cext_1_1;P;sub!;0.38                                                            
+Cext_2_2;N;sub!;0.34                                                            
+────────────────────────────────────────────────────────────────────────────────
+[14:40:45] INFO     Wrote expanded netlist CSV to:              kpex_cli.py:1125
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Expanded_Netlist.csv                       
+[14:40:45] INFO     Wrote expanded netlist to:                  kpex_cli.py:1129
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Expanded_Netlist.cir                       
+[14:40:45] INFO     Wrote reduced netlist to:                   kpex_cli.py:1140
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Reduced_Netlist.cir                        
+[14:40:45] INFO     Peak memory (resident set size) after       kpex_cli.py:1918
+                    FasterCap: 184.0 MiB, largest subprocess                    
+                    201.3 MiB                                                   
+[14:40:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 184.0 MiB, largest subprocess 201.3                    
+                    MiB                                                         
+[14:40:45] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --gds                                             
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patte
+rns/exclusion_plate_neighbor.gds.gz --lvsdb                                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_plate_neighbor.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap         
+--exclude-net P                                                                 
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:40:45] INFO     No explicit top cell specified, using top    kpex_cli.py:876
+                    cell 'exclusion_plate_neighbor'                             
+[14:40:45] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Tool versions ─────────────────────────────────
+Tool       Found  Effective range                                               
+FasterCap  6.2.1  >=6.2.1                                                       
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:40:45] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 184.5 MiB, largest                     
+                    subprocess 201.3 MiB                                        
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:40:45] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1862
+[14:40:45] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1862
+[14:40:45] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1862
+─────────────────────────────── Process stackup ────────────────────────────────
+[14:40:45] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[14:40:45] INFO     Delaunay b: 0.5             fastercap_model_generator.py:122
+[14:40:45] INFO     Delaunay area_max: 50       fastercap_model_generator.py:123
+[14:40:45] INFO     Conductor P, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] INFO     Conductor N, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[14:40:45] INFO     Substrate sub!, z=-0.28,      fastercap_input_builder.py:284
+                    height=0.28                                                 
+[14:40:45] INFO     Simple dielectric (field      fastercap_input_builder.py:310
+                    oxide) fox: z=0, height=0.4                                 
+[14:40:45] INFO     Simple dielectric ild0:       fastercap_input_builder.py:400
+                    z=0.4, height=0.64                                          
+[14:40:45] INFO     Simple dielectric ild1:       fastercap_input_builder.py:400
+                    z=1.04, height=0.96                                         
+[14:40:45] INFO     Simple dielectric ild2:       fastercap_input_builder.py:400
+                    z=2.0,                                                      
+                    height=1.0299999999999998                                   
+[14:40:45] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild3: z=3.5199999999999996,                                 
+                    height=0.5399999999999998                                   
+[14:40:45] INFO     Simple dielectric ild3:       fastercap_input_builder.py:400
+                    z=3.03,                                                     
+                    height=1.0299999999999998                                   
+[14:40:45] INFO     Simple dielectric ild4:       fastercap_input_builder.py:400
+                    z=4.06,                                                     
+                    height=1.0300000000000002                                   
+[14:40:45] INFO     Simple dielectric ildtm1b:    fastercap_input_builder.py:400
+                    z=5.09,                                                     
+                    height=0.5300000000000002                                   
+[14:40:45] INFO     Simple dielectric ildtm1c:    fastercap_input_builder.py:400
+                    z=5.62,                                                     
+                    height=0.8099999999999996                                   
+[14:40:45] INFO     Simple dielectric ildtm2:     fastercap_input_builder.py:400
+                    z=6.43,                                                     
+                    height=4.800000000000001                                    
+[14:40:45] INFO     Simple dielectric air:        fastercap_input_builder.py:400
+                    z=11.23, height=5.0                                         
+─────────────────────── FasterCap Input File Generation ────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_1_outside=f
+ox_inside=ild0.geo                                                              
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_2_outside=i
+ld0_inside=ild1.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_3_outside=i
+ld1_inside=ild2.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_4_outside=i
+ld2_inside=ild3.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_5_outside=i
+ld3_inside=ild4.geo                                                             
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_6_outside=i
+ld4_inside=ildtm1b.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_7_outside=i
+ldtm1b_inside=ildtm1c.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_8_outside=i
+ldtm1c_inside=ildtm2.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_9_outside=i
+ldtm2_inside=air.geo                                                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_10_outside=
+air_inside=(void).geo                                                           
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_11_outside=
+(void)_inside=fox.geo                                                           
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_12_outside=
+(void)_inside=ild0.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_13_outside=
+(void)_inside=ild1.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_14_outside=
+(void)_inside=ild2.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_15_outside=
+(void)_inside=ild3.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_16_outside=
+(void)_inside=ild4.geo                                                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_17_outside=
+(void)_inside=ildtm1b.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_18_outside=
+(void)_inside=ildtm1c.geo                                                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_19_outside=
+(void)_inside=ildtm2.geo                                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_20_outside=
+(void)_net=sub!#substrate.geo                                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_21_outside=
+fox_net=sub!#substrate.geo                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_22_outside=
+ild2_net=P.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_23_outside=
+ild3_net=P.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_24_outside=
+ild2_net=N.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_25_outside=
+ild3_net=N.geo                                                                  
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst       
+───────────────────────────── STL File Generation ──────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_fox.stl                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild0.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild1.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild2.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild3.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ild4.stl                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm1b.stl                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm1c.stl                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_ildtm2.stl                       
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/diel_air.stl                          
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_P.stl                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_N.stl                            
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/Geometries/cond_sub!#substrate.stl               
+[14:40:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1912
+                    FasterCap input: 184.9 MiB, largest                         
+                    subprocess 201.3 MiB                                        
+───────────────────────────── FasterCap Execution ──────────────────────────────
+[14:40:45] INFO     Configure number of OpenMP threads          kpex_cli.py:1070
+                    (environmental variable OMP_NUM_THREADS) as                 
+                    16                                                          
+[14:40:45] INFO     Calling FasterCap                     fastercap_runner.py:90
+FasterCap -b -i -v -a0.05 -d0.5 -m0.5 -f2 -ap                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst,      
+output file:                                                                    
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/exclusion_plate_neighbor_FasterCap_Output.txt    
+─────────────────────────────── FasterCap Output ───────────────────────────────
+Running FasterCap version 6.2.1                                                 
+Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All     
+Rights reserved                                                                 
+Starting capacitance extraction with the following parameters:                  
+Input file:                                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_neig
+hbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst       
+Auto calculation with max error: 0.05                                           
+Remark: Auto option overrides all other Manual settings                         
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+                                                                                
+3D Solver Engine invoked                                                        
+Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025                  
+Out-of-core free memory to link memory condition (-f): 2                        
+Potential interaction coefficient to mesh refinement ratio (-d): 0.5            
+Mesh curvature (-mc): 3                                                         
+Number of input panels to solver engine: 2790                                   
+                                                                                
+Iteration number #0 ***************************                                 
+                                                                                
+***************************************                                         
+Refining the geometry..                                                         
+Refinement completed                                                            
+Mesh refinement (-m): 1e+32                                                     
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 2790                                         
+Number of links to be computed: 457418                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4                                                      
+GMRES Iteration: 0 1 2 3 4 5                                                    
+GMRES Iteration: 0 1 2 3 4 5                                                    
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!#substrate  3.57183e-08 -8.33657e-09 -5.56563e-09                        
+g2_P  -2.67096e-08 1.11877e-08 1.62858e-09                                      
+g3_N  -4.40223e-09 -2.48748e-09 5.5304e-09                                      
+Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col
+3                                                                               
+Warning: capacitance matrix is not diagonally dominant due to row 2             
+Warning: capacitance matrix is not diagonally dominant due to row 3             
+                                                                                
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 2790                                         
+Number of potential estimates: 427874                                           
+Number of links: 460208 (uncompressed 7784100, compression ratio is 94.1%)      
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.00279254                                  
+Time for reading input file: 0.049222s                                          
+Time for building super hierarchy: 0.003379s                                    
+Time for discretization: 0.248207s                                              
+Time for building potential matrix: 0.077073s                                   
+Time for precond calculation: 0.000055s                                         
+Time for gmres solving: 0.017858s                                               
+Memory allocated for panel hierarchy: 1115790 bytes                             
+Memory allocated for links structure: 16799552 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 450008 bytes                                        
+Memory allocated for preconditioner: 0 bytes                                    
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.568991s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 18006 kilobytes                                     
+                                                                                
+Iteration number #1 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Delta in refined panel and link count w.r.t. previous iteration less than 10%   
+(Panels # 3034, Links # 572856)                                                 
+(Mesh relative refinement value (-m): 0.00197462)                               
+Automatically increasing the refinement parameters                              
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00139221                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 3501                                         
+Number of links to be computed: 746768                                          
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11                                      
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!#substrate  1.93593e-08 -7.78925e-09 -3.89145e-09                        
+g2_P  -7.62509e-09 9.93408e-09 -2.04769e-09                                     
+g3_N  -3.87719e-09 -2.11927e-09 6.80165e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.981106                                                                        
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 3501                                         
+Number of potential estimates: 693294                                           
+Number of links: 750269 (uncompressed 12257001, compression ratio is 93.9%)     
+Max recursion level: 25                                                         
+Max Mesh relative refinement value: 0.0013915                                   
+Time for reading input file: 0.004050s                                          
+Time for building super hierarchy: 0.000341s                                    
+Time for discretization: 0.044096s                                              
+Time for building potential matrix: 0.090370s                                   
+Time for precond calculation: 0.004948s                                         
+Time for gmres solving: 0.045915s                                               
+Memory allocated for panel hierarchy: 1400901 bytes                             
+Memory allocated for links structure: 16805240 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 720944 bytes                                        
+Memory allocated for preconditioner: 268529000 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.402793s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 280790 kilobytes                                    
+                                                                                
+Iteration number #2 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.00098394                                                
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 4500                                         
+Number of links to be computed: 1164402                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 128
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10                                         
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!#substrate  1.96283e-08 -7.69057e-09 -4.09028e-09                        
+g2_P  -7.60685e-09 1.06679e-08 -2.76603e-09                                     
+g3_N  -4.04019e-09 -2.83806e-09 7.43613e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0542869                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 4500                                         
+Number of potential estimates: 1068429                                          
+Number of links: 1168902 (uncompressed 20250000, compression ratio is 94.2%)    
+Max recursion level: 27                                                         
+Max Mesh relative refinement value: 0.000983704                                 
+Time for reading input file: 0.004138s                                          
+Time for building super hierarchy: 0.000347s                                    
+Time for discretization: 0.068939s                                              
+Time for building potential matrix: 0.140885s                                   
+Time for precond calculation: 0.003965s                                         
+Time for gmres solving: 0.060837s                                               
+Memory allocated for panel hierarchy: 1801500 bytes                             
+Memory allocated for links structure: 33590464 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 876648 bytes                                        
+Memory allocated for preconditioner: 268536992 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.519538s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 297733 kilobytes                                    
+                                                                                
+Iteration number #3 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000695584                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 6248                                         
+Number of links to be computed: 1936478                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+GMRES Iteration: 0 1 2 3 4 5 6 7 8                                              
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!#substrate  1.92295e-08 -7.97288e-09 -3.41111e-09                        
+g2_P  -7.82499e-09 1.03207e-08 -2.10267e-09                                     
+g3_N  -3.39653e-09 -2.11286e-09 5.88647e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0834447                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 6248                                         
+Number of potential estimates: 1736340                                          
+Number of links: 1942726 (uncompressed 39037504, compression ratio is 95.0%)    
+Max recursion level: 28                                                         
+Max Mesh relative refinement value: 0.000695582                                 
+Time for reading input file: 0.004170s                                          
+Time for building super hierarchy: 0.000342s                                    
+Time for discretization: 0.123898s                                              
+Time for building potential matrix: 0.212710s                                   
+Time for precond calculation: 0.003909s                                         
+Time for gmres solving: 0.074571s                                               
+Memory allocated for panel hierarchy: 2502448 bytes                             
+Memory allocated for links structure: 33604448 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 1098128 bytes                                       
+Memory allocated for preconditioner: 268550976 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 0.809795s (0 days, 0 hours, 0 mins, 0 s)                        
+Iteration allocated memory: 298661 kilobytes                                    
+                                                                                
+Iteration number #4 ***************************                                 
+                                                                                
+***************************************                                         
+Increasing the geometric refinement..                                           
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 3 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 4 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 5 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 6 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 7 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 8 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Warning: dummy dielectric-dielectric interface found in the input file, skipping
+         Dummy interface defined at line 9 of the input file                    
+"/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_plate_nei
+ghbor__exclusion_plate_neighbor/FasterCap_Input_Files/FasterCap_Input_.lst"     
+         Dielectric constants are: inperm 4.100000-j0.000000, outperm           
+4.100000-j0.000000; differing less than 0.100000%                               
+Refinement completed                                                            
+Mesh refinement (-m): 0.000491851                                               
+***************************************                                         
+Computing the links..                                                           
+Number of panels after refinement: 9181                                         
+Number of links to be computed: 3310710                                         
+Done computing links                                                            
+***************************************                                         
+Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512
+GMRES Iteration: 0 1 2 3 4 5                                                    
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+GMRES Iteration: 0 1 2 3 4 5 6                                                  
+Capacitance matrix is:                                                          
+Dimension 3 x 3                                                                 
+g1_sub!#substrate  1.89866e-08 -7.90812e-09 -3.25848e-09                        
+g2_P  -7.80681e-09 1.04006e-08 -2.15284e-09                                     
+g3_N  -3.23914e-09 -2.16376e-09 5.74939e-09                                     
+                                                                                
+Weighted Frobenius norm of the difference between capacitance (auto option):    
+0.0147105                                                                       
+                                                                                
+Solve statistics:                                                               
+Number of input panels: 2790 of which 1048 conductors and 1742 dielectric       
+Number of input panels to solver engine: 2790                                   
+Number of panels after refinement: 9181                                         
+Number of potential estimates: 3071950                                          
+Number of links: 3319891 (uncompressed 84290761, compression ratio is 96.1%)    
+Max recursion level: 29                                                         
+Max Mesh relative refinement value: 0.00049185                                  
+Time for reading input file: 0.007314s                                          
+Time for building super hierarchy: 0.000514s                                    
+Time for discretization: 0.203004s                                              
+Time for building potential matrix: 0.367886s                                   
+Time for precond calculation: 0.093287s                                         
+Time for gmres solving: 0.117619s                                               
+Memory allocated for panel hierarchy: 3678581 bytes                             
+Memory allocated for links structure: 67182376 bytes                            
+Memory allocated for conductor list: 73800 bytes                                
+Memory allocated for Gmres: 1443824 bytes                                       
+Memory allocated for preconditioner: 268574440 bytes                            
+Memory allocated for charge vectors: 0 bytes                                    
+Memory allocated for hierarchical multiplication: 0 bytes                       
+Iteration time: 1.354567s (0 days, 0 hours, 0 mins, 1 s)                        
+Iteration allocated memory: 332961 kilobytes                                    
+                                                                                
+Total allocated memory: 332961 kilobytes                                        
+Total time: 1.905158s (0 days, 0 hours, 0 mins, 1 s)                            
+                                                                                
+                                                                                
+────────────────────────────────────────────────────────────────────────────────
+[14:40:47] INFO     FasterCap succeeded after 1.933s     fastercap_runner.py:118
+──────────────────────── Extended netlist (CSV format): ────────────────────────
+Device;Net1;Net2;Capacitance [fF]                                               
+Cext_0_2;sub!;N;3.25                                                            
+Cext_1_2;P;N;2.16                                                               
+Cext_2_2;N;sub!;0.34                                                            
+────────────────────────────────────────────────────────────────────────────────
+[14:40:47] INFO     Wrote expanded netlist CSV to:              kpex_cli.py:1125
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Expanded_Netlist.csv                       
+[14:40:47] INFO     Wrote expanded netlist to:                  kpex_cli.py:1129
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Expanded_Netlist.cir                       
+[14:40:47] INFO     Wrote reduced netlist to:                   kpex_cli.py:1140
+                    /home/runner/work/klayout-pex/klayout-pex/o                 
+                    utput_ihp-sg13g2/exclusion_plate_neighbor__                 
+                    exclusion_plate_neighbor/exclusion_plate_ne                 
+                    ighbor_FasterCap_Reduced_Netlist.cir                        
+[14:40:47] INFO     Peak memory (resident set size) after       kpex_cli.py:1918
+                    FasterCap: 185.0 MiB, largest subprocess                    
+                    201.3 MiB                                                   
+[14:40:47] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 185.0 MiB, largest subprocess 201.3                    
+                    MiB                                                         
