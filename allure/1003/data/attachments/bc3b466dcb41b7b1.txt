@@ -1,0 +1,183 @@
+[15:29:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/e
+xclusion_user_marker_wire.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/exclusion_user_marker_wire.gds.gz --exclusion-markers ignore                   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:29:15] INFO     No explicit top cell specified, using top    kpex_cli.py:881
+                    cell 'exclusion_user_marker_wire'                           
+[15:29:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:29:15] INFO     Peak memory (resident set size) after       kpex_cli.py:1863
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:29:15] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1867
+[15:29:15] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1867
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:29:15] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:29:15] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;3.688                                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.spic
+e                                                                               
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1457
+                    netlist: 1.1 GiB                                            
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1746
+                    run: 1.1 GiB                                                
+[15:29:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/e
+xclusion_user_marker_wire.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/exclusion_user_marker_wire.gds.gz --exclusion-markers tie                      
+--exclusion-marker-layer 200/0                                                  
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:29:15] INFO     No explicit top cell specified, using top    kpex_cli.py:881
+                    cell 'exclusion_user_marker_wire'                           
+[15:29:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:29:15] INFO     Peak memory (resident set size) after       kpex_cli.py:1863
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:29:15] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1867
+[15:29:15] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1867
+[15:29:15] WARNING  These nets are partly within exclusion      extractor.py:235
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A,B: met2                                               
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:29:15] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:29:15] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;1.219                                                                 
+R2;A,B;B;;1.219                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.spic
+e                                                                               
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1457
+                    netlist: 1.1 GiB                                            
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1746
+                    run: 1.1 GiB                                                
+[15:29:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/e
+xclusion_user_marker_wire.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/exclusion_user_marker_wire.gds.gz --exclusion-markers tie                      
+--exclusion-marker-layer 200/0:met3                                             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:29:15] INFO     No explicit top cell specified, using top    kpex_cli.py:881
+                    cell 'exclusion_user_marker_wire'                           
+[15:29:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:29:15] INFO     Peak memory (resident set size) after       kpex_cli.py:1863
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:29:15] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1867
+[15:29:15] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1867
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:29:15] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:29:15] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;3.688                                                                   
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.spic
+e                                                                               
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1457
+                    netlist: 1.1 GiB                                            
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1746
+                    run: 1.1 GiB                                                
+[15:29:15] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1680
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/e
+xclusion_user_marker_wire.lvsdb.gz --out-dir                                    
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n --gds                                                                 
+/home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns
+/exclusion_user_marker_wire.gds.gz --exclusion-markers tie                      
+--exclusion-marker-layer 200/0:met2                                             
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:29:15] INFO     No explicit top cell specified, using top    kpex_cli.py:881
+                    cell 'exclusion_user_marker_wire'                           
+[15:29:15] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:892
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:29:15] INFO     Peak memory (resident set size) after       kpex_cli.py:1863
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:29:15] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1867
+[15:29:15] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1867
+[15:29:15] WARNING  These nets are partly within exclusion      extractor.py:235
+                    markers, so the extraction leaves out their                 
+                    parasitics there, for the model of what the                 
+                    markers stand for (a wire across a marker                   
+                    loses them too):                                            
+                      - A,B: met2                                               
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:29:15] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:29:15] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;1.219                                                                 
+R2;A,B;B;;1.219                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.csv 
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_user_marker_w
+ire__exclusion_user_marker_wire/exclusion_user_marker_wire_k25d_pex_netlist.spic
+e                                                                               
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1457
+                    netlist: 1.1 GiB                                            
+[15:29:15] INFO     Peak memory (resident set size) after the   kpex_cli.py:1746
+                    run: 1.1 GiB                                                

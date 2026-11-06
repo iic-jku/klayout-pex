@@ -1,0 +1,65 @@
+WARNING  __kpex__:kpex_cli.py:1680 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1717 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/sonosfet_star_w0p45_l0p22.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:892 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1863 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1867 (64, 18) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1867 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:1867 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1867 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1867 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:1867 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:1867 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1867 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1867 (93, 44) -> (sonos_nsd)
+INFO     __kpex__:kpex_cli.py:1867 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1375 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1404 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1404 C1;B;D;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C2;B;D.$2.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C3;B;D.P0.nsdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C4;B;G;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C5;B;G.$0.li1;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C6;B;G.$4.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C7;B;G.$5.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C8;B;G.$6.poly;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C9;B;G.$7.poly;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C10;B;G.P0.poly;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C11;B;S;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C12;B;S.$2.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C13;B;S.P0.nsdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C14;B;VSUBS;0.428;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C15;D;G.P0.poly;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C16;D;S;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C17;D;VSUBS;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C18;D.$2.met1;G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C19;D.$2.met1;S.$2.met1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C20;D.$2.met1;VSUBS;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C21;G;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C22;G.$0.li1;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C23;G.$4.met1;VSUBS;0.029;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C24;G.$5.met1;VSUBS;0.029;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C25;G.$6.poly;VSUBS;0.072;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C26;G.$7.poly;VSUBS;0.072;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C27;G.P0.poly;S;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C28;G.P0.poly;S.$2.met1;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C29;G.P0.poly;VSUBS;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C30;S;VSUBS;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1404 C31;S.$2.met1;VSUBS;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1404 R1;D;D.$2.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1404 R2;D;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1404 R3;G;G.$5.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1404 R4;G;G.$7.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1404 R5;G.$0.li1;G.$4.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1404 R6;G.$0.li1;G.$6.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1404 R7;G.$6.poly;G.P0.poly;;73.395
+SUBPROCESS __kpex__:kpex_cli.py:1404 R8;G.$7.poly;G.P0.poly;;73.395
+SUBPROCESS __kpex__:kpex_cli.py:1404 R9;S;S.$2.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1404 R10;S;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1407 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1424 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1457 Peak memory (resident set size) after the netlist: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1474 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: B (0.531 fF), $6 (0.000 fF)
+INFO     __kpex__:kpex_cli.py:1746 Peak memory (resident set size) after the run: 1.2 GiB
