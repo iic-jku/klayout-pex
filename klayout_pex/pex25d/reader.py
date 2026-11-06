@@ -219,6 +219,8 @@ class Pex25DTextReader:
         self.seen_header = False
         self.meta_keys: Dict[str, str] = {}
         self.include_stack: List[str] = []
+        self.domain_box_record: Optional[Record] = None
+        self.domain_margin_records: List[Record] = []
 
     # ---------------------------------------------------------- diagnostics
 
@@ -772,8 +774,22 @@ class Pex25DTextReader:
                 return
             values[axis] = value
         cursor.end()
+        if self.domain_box_record is not None:
+            self.ignore_domain_margin(record, self.domain_box_record)
+            return
         margin = self.file.domain_margin
         margin.x, margin.y, margin.z = values['X'], values['Y'], values['Z']
+        self.domain_margin_records.append(record)
+
+    def ignore_domain_margin(self, margin_record: Record, box_record: Record):
+        """
+        DOMAIN_BOX takes precedence over DOMAIN_MARGIN, in whichever order they come (record
+        order is not significant). Setting the box drops the margin, as they are one oneof.
+        """
+        self.warn('PEX25D-W0253',
+                  f"DOMAIN_MARGIN is ignored, as the DOMAIN_BOX in "
+                  f"{box_record.file}:{box_record.line} takes precedence",
+                  margin_record, tier=Tier.SEMANTIC)
 
     def read_domain_box(self, record: Record) -> None:
         cursor = Cursor(record, self)
@@ -789,6 +805,11 @@ class Pex25DTextReader:
                 coordinates.append(value)
             corners[keyword] = coordinates
         cursor.end()
+
+        if self.domain_box_record is None:
+            for margin_record in self.domain_margin_records:
+                self.ignore_domain_margin(margin_record, record)
+        self.domain_box_record = record
 
         box = self.file.domain_box.box
         box.lower_left.x, box.lower_left.y, box.lower_left.z = corners['LL']

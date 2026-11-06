@@ -155,6 +155,21 @@ class Pex25DReaderTest(unittest.TestCase):
         assert report.diagnostics[0].severity == Severity.WARNING
         assert [c.name for c in pex25d_file.conductors] == ['A', 'B']
 
+    def test_w0253_a_domain_box_takes_precedence_over_a_margin(self):
+        # In whichever order they come, as record order is not significant
+        box = 'DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0'
+        margin = 'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0'
+        for records in (f"{box}\n{margin}", f"{margin}\n{box}"):
+            with self.subTest(records=records):
+                text = replacing(margin, records)
+                report = DiagnosticsReport()
+                pex25d_file = read(text, report=report)
+                assert pex25d_file.WhichOneof('domain') == 'domain_box'
+                assert pex25d_file.domain_box.box.upper_right.x == 50000
+                assert codes(report) == ['PEX25D-W0253']
+                assert report.diagnostics[0].severity == Severity.WARNING
+                assert report.diagnostics[0].source.line == text.splitlines().index(margin) + 1
+
     def test_read_error_is_raised_once_errors_exist(self):
         with self.assertRaises(ReadError):
             read(replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS'))
