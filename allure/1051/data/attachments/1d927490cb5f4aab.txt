@@ -1,0 +1,24 @@
+WARNING  __kpex__:kpex_cli.py:1763 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1826 main extract --pdk gf180mcuD --mode R --blackbox y --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/cut_diffusion_resistors_wire_on_pad.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/cut_diffusion_resistors_wire_on_pad.gds.gz --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:898 No explicit top cell specified, using top cell 'cut_diffusion_resistors_wire_on_pad'
+INFO     __kpex__:kpex_cli.py:909 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resistors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:272 Ports named after labels in subcells: nplus_s_A, nplus_s_B, nplus_u_A, nplus_u_B, pplus_s_A, pplus_s_B, pplus_u_A, pplus_u_B, pplus_u_dn_A, pplus_u_dn_B (label them in the top cell to name ports explicitly)
+INFO     __kpex__:kpex_cli.py:1987 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1991 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1991 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:1991 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:1991 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1991 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:kpex_cli.py:1991 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:extractor.py:181 The netlist leaves out the 5 devices of the cut cells
+INFO     __kpex__:extractor.py:242 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I1, $I5, $I8
+INFO     __kpex__:extractor.py:483 LVSDB: found 11pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1472 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1472 R1;X__A;nplus_u_A;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1472 R2;X__A;X__nplus_u_A;;0.008
+SUBPROCESS __kpex__:kpex_cli.py:1475 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resistors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wire_on_pad_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1492 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_diffusion_resistors_wire_on_pad__cut_diffusion_resistors_wire_on_pad/cut_diffusion_resistors_wire_on_pad_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1528 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1862 Peak memory (resident set size) after the run: 1.1 GiB

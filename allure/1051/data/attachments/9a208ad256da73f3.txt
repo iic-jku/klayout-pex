@@ -1,0 +1,59 @@
+WARNING  __kpex__:kpex_cli.py:1763 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1826 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_bend_beside_marker.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_bend_beside_marker.gds.gz --exclusion-markers ignore --cut bend
+INFO     __kpex__:kpex_cli.py:898 No explicit top cell specified, using top cell 'cut_bend_beside_marker'
+INFO     __kpex__:kpex_cli.py:909 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1987 Peak memory (resident set size) after preparing the LVSDB: 1003.5 MiB
+INFO     __kpex__:kpex_cli.py:1991 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1991 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1991 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1440 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1003.5 MiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 1003.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1472 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1472 C1;A;B;0.096;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C2;A;VSUBS;1.492;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C3;B;VSUBS;1.492;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C4;bend_0__A_B_0;bend_0__A_B_1;0.094;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C5;VSUBS;bend_0__A_B_0;1.394;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C6;VSUBS;bend_0__A_B_1;1.394;
+SUBPROCESS __kpex__:kpex_cli.py:1472 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1472 R2;A;bend_0__A_B_0;;1.738
+SUBPROCESS __kpex__:kpex_cli.py:1472 R3;B;bend_0__A_B_1;;1.738
+SUBPROCESS __kpex__:kpex_cli.py:1475 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/cut_bend_beside_marker_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1492 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/cut_bend_beside_marker_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1528 Peak memory (resident set size) after the netlist: 1003.6 MiB
+INFO     __kpex__:kpex_cli.py:1862 Peak memory (resident set size) after the run: 1003.6 MiB
+WARNING  __kpex__:kpex_cli.py:1763 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1826 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_bend_beside_marker.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_bend_beside_marker.gds.gz --exclusion-markers tie --cut bend
+INFO     __kpex__:kpex_cli.py:898 No explicit top cell specified, using top cell 'cut_bend_beside_marker'
+INFO     __kpex__:kpex_cli.py:909 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1987 Peak memory (resident set size) after preparing the LVSDB: 1004.4 MiB
+INFO     __kpex__:kpex_cli.py:1991 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1991 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1991 (30, 0) -> (metal3_n_mom)
+WARNING  __kpex__:extractor.py:236 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal3
+INFO     __kpex__:kpex_cli.py:1440 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1004.4 MiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 1004.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1472 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1472 C1;A;B;0.085;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C2;A;VSUBS;1.316;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C3;A,B;B;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C4;A,B;bend_0__A_B_1;0.087;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C5;A,B;VSUBS;1.324;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C6;B;VSUBS;1.492;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C7;bend_0__A_B_0;bend_0__A_B_1;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C8;VSUBS;bend_0__A_B_0;0.106;
+SUBPROCESS __kpex__:kpex_cli.py:1472 C9;VSUBS;bend_0__A_B_1;1.394;
+SUBPROCESS __kpex__:kpex_cli.py:1472 R1;A;A,B;;1.518
+SUBPROCESS __kpex__:kpex_cli.py:1472 R2;A,B;bend_0__A_B_0;;0.132
+SUBPROCESS __kpex__:kpex_cli.py:1472 R3;B;bend_0__A_B_1;;1.738
+SUBPROCESS __kpex__:kpex_cli.py:1475 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/cut_bend_beside_marker_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1492 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_bend_beside_marker__cut_bend_beside_marker/cut_bend_beside_marker_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1528 Peak memory (resident set size) after the netlist: 1004.4 MiB
+INFO     __kpex__:kpex_cli.py:1862 Peak memory (resident set size) after the run: 1004.4 MiB

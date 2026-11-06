@@ -1,0 +1,25 @@
+WARNING  __kpex__:kpex_cli.py:1763 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1826 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\nmos_pair_abutting_ptaps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:909 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1987 Peak memory (resident set size) after preparing the LVSDB: 1.0 GiB
+INFO     __kpex__:kpex_cli.py:1991 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1991 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1991 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1991 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1991 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1991 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1991 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1991 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+WARNING  __kpex__:extractor.py:537 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: sub!
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1.0 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1472 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1472 R1;$1;$1.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1472 R2;$3;$3.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1472 R3;sub!;sub!.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1472 R4;sub!;sub!.$1.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1475 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1492 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps\nmos_pair_abutting_ptaps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1528 Peak memory (resident set size) after the netlist: 1.0 GiB
+INFO     __kpex__:kpex_cli.py:1862 Peak memory (resident set size) after the run: 1.0 GiB
