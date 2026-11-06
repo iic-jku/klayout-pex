@@ -369,15 +369,17 @@ class TechInfo:
         )
 
     @cached_property
+    def filterable_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        """
+        The dielectrics that the dielectric filter selects from: the simple and conformal ones, not the field oxide
+        """
+        return [pl for pl in self.tech.process_stack.layers
+                if pl.layer_type in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC,
+                                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC)]
+
+    @cached_property
     def filtered_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
-        layers = []
-        for pl in self.tech.process_stack.layers:
-            match pl.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC | \
-                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
-                    if self.dielectric_filter.is_included(pl.name):
-                        layers.append(pl)
-        return layers
+        return [pl for pl in self.filterable_dielectric_layers if self.dielectric_filter.is_included(pl.name)]
 
     @cached_property
     def dielectric_by_name(self) -> Dict[str, float]:

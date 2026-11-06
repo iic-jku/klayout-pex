@@ -186,14 +186,14 @@ def positive_micrometers(text: str) -> float:
 
 
 def multiple_choice_pattern(text: str) -> MultipleChoicePattern:
-    """argparse type: a comma separated multiple choice pattern, e.g. 'all,-name1,-name2' or 'none,+name1'"""
+    """argparse type: a comma separated multiple choice pattern, e.g. 'all,-name1,-name2', '-name1' or '+name1'"""
     try:
         return MultipleChoicePattern(pattern=text)
     except ValueError as e:
         raise argparse.ArgumentTypeError(
             f"{e}, got '{text}': give all, optionally with -name subpatterns to exclude, "
             f"or none, optionally with +name subpatterns to include, "
-            f"e.g. 'all,-name1,-name2' or 'none,+name1'") from e
+            f"e.g. 'all,-name1,-name2' or 'none,+name1', or the subpatterns alone, e.g. '-name1,-name2'") from e
 
 
 DEPRECATED_OPTIONS_DEST = 'deprecated_options'
