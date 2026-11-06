@@ -127,6 +127,36 @@ def test_public_api_exports_with_an_installed_plugin(
     assert options == {'mesh_size': 0.25}
 
 
+def test_public_api_exports_no_invalid_scene(
+        install_exporter: Callable[..., str], tmp_path: Path, scene: PEX25DScene):
+    install_exporter('test-one', 'example')
+    scene.layers[0].zhigh = scene.layers[0].zlow
+    report = pex25d.DiagnosticsReport()
+    with pytest.raises(pex25d.InvalidSceneError):
+        pex25d.export(scene, 'example', str(tmp_path / 'output'), report=report)
+    assert [d.code for d in report.diagnostics] == ['PEX25D-E0271']
+    assert not (tmp_path / 'output').exists()
+
+
+def test_cli_exports_no_invalid_scene(
+        install_exporter: Callable[..., str], tmp_path: Path, scene: PEX25DScene):
+    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+
+    install_exporter('test-one', 'example')
+    scene.layers[0].zhigh = scene.layers[0].zlow
+    input_path = tmp_path / 'cell.pex25d.scene.pb'
+    pex25d.write(scene, str(input_path))
+    diagnostics = tmp_path / 'diagnostics.json'
+    with pytest.raises(SystemExit) as completion:
+        Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'example',
+                          '--out-dir', str(tmp_path / 'deck'), '--diagnostics', 'json',
+                          '--out-diagnostics', str(diagnostics)])
+    assert completion.value.code == pex25d.ExitCode.DIAGNOSTIC_ERRORS
+    assert [d['code'] for d in json.loads(diagnostics.read_text(encoding='utf-8'))['diagnostics']] == \
+        ['PEX25D-E0271']
+    assert not (tmp_path / 'deck').exists()
+
+
 @pytest.mark.parametrize('selector', ['example', 'TEST_One:example'])
 def test_cli_exports_with_an_installed_plugin(
         install_exporter: Callable[..., str], tmp_path: Path, selector: str):
