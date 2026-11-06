@@ -230,6 +230,22 @@ def test_number_out_of_range_is_a_usage_error(command: str, option: str, value: 
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "FasterCap")
+def test_mesh_is_deprecated_as_it_has_no_effect(tmp_path):
+    # NOTE: FasterCap's automatic refinement (-a, which kpex always passes) overrides -m (#452)
+    advice = "it has no effect, as FasterCap's automatic refinement (--tolerance) overrides it"
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--help'])
+    assert code == 0, output
+    assert f"FasterCap -m mesh relative refinement value, deprecated: {advice}" in ' '.join(output.split()), output
+
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mesh', '0.1',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert f"--mesh is deprecated, {advice}" in output.splitlines(), output
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Windows")
 def test_klayout_writes_no_gzip_files(tmp_path):
     # NOTE: on Windows, KLayout leaks a C runtime stream with each gzip file it writes, of which a process has 512,
