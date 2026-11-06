@@ -122,6 +122,24 @@ class Pex25DReaderTest(unittest.TestCase):
             replacing('METAL met1 Z_OFFSETS 1.0 1.4',
                       'METAL met1 Z_OFFSETS 1.00005 1.4'))
 
+    def test_e0111_literals_beyond_the_range_of_their_fields(self):
+        # A length beyond int64 grid units, a material value beyond a double: both reported, with their lines
+        text = replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS 1.0 1e30')
+        text = replacing('DIELECTRIC_BACKGROUND air PERMITTIVITY 1.0',
+                         'DIELECTRIC_BACKGROUND air PERMITTIVITY 1e999', text)
+        report = DiagnosticsReport()
+        with self.assertRaises(ReadError):
+            read(text, report=report)
+        lines = text.splitlines()
+        assert [(d.code, lines[d.source.line - 1].split()[0]) for d in report.diagnostics] == \
+            [('PEX25D-E0111', 'METAL'), ('PEX25D-E0111', 'DIELECTRIC_BACKGROUND')]
+
+    def test_the_largest_length_of_the_grid_is_in_range(self):
+        # (2^63 - 1) * 0.0001 µm
+        pex25d_file = read(replacing('METAL met1 Z_OFFSETS 1.0 1.4',
+                                     'METAL met1 Z_OFFSETS 1.0 922337203685477.5807'))
+        assert pex25d_file.metals[0].zhigh == 2 ** 63 - 1
+
     def test_e0106_a_length_before_units(self):
         text = ("PEX25D 1.0-rc1\n"
                 "GROUND_PLANE subs Z_OFFSETS -0.4 -0.1\n"
