@@ -1,0 +1,24 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_hairpin.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/exclusion_hairpin.gds.gz --exclusion-markers tie
+INFO     __kpex__:kpex_cli.py:862 No explicit top cell specified, using top cell 'exclusion_hairpin'
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1854 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1854 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (30, 0) -> (metal3_n_mom)
+WARNING  __kpex__:extractor.py:235 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal3
+INFO     __kpex__:kpex_cli.py:1362 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 C1;A;VSUBS;1.043;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C2;A,B;VSUBS;1.896;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C3;B;VSUBS;1.043;
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;A;A,B;;1.298
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;A,B;B;;1.298
+SUBPROCESS __kpex__:kpex_cli.py:1394 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin__exclusion_hairpin/exclusion_hairpin_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin__exclusion_hairpin/exclusion_hairpin_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.1 GiB

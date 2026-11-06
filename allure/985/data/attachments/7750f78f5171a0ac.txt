@@ -1,0 +1,50 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk sky130A --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\exclusion_pfet_between_taps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.6 GiB
+INFO     __kpex__:kpex_cli.py:1854 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:1854 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:1854 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:1854 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1854 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1362 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.6 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.6 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 C1;A;VSUBS;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C2;A,VPWR;D;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C3;A,VPWR;G;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C4;A,VPWR;G.P0.poly;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C5;A,VPWR;S;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C6;A,VPWR.$2.nwell;G;0.021;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C7;A,VPWR.$2.nwell;G.P0.poly;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C8;A,VPWR.$2.nwell;S;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C9;A,VPWR.$3.nwell;D;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C10;A,VPWR.$3.nwell;G;0.021;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C11;A,VPWR.$3.nwell;G.P0.poly;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C12;D;G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C13;D;S;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C14;D;S.P0.psdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C15;D;VSUBS;0.014;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C16;D.P0.psdm;S;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C17;G;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C18;G.P0.poly;S;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C19;G.P0.poly;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C20;S;VSUBS;0.014;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C21;VPWR;VSUBS;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;A;A,VPWR.$2.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;A,VPWR;A,VPWR.$2.nwell;;3258.333
+SUBPROCESS __kpex__:kpex_cli.py:1391 R3;A,VPWR;A,VPWR.$3.nwell;;5241.667
+SUBPROCESS __kpex__:kpex_cli.py:1391 R4;A,VPWR.$3.nwell;VPWR;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R5;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1391 R6;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1391 R7;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1394 D:\a\klayout-pex\klayout-pex\output_sky130A\exclusion_pfet_between_taps__exclusion_pfet_between_taps\exclusion_pfet_between_taps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\exclusion_pfet_between_taps__exclusion_pfet_between_taps\exclusion_pfet_between_taps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.6 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.6 GiB
