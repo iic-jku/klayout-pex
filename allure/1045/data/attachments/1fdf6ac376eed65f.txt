@@ -1,0 +1,39 @@
+WARNING  __kpex__:kpex_cli.py:1769 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1832 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/cut_taps_with_labels_a_b.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:907 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_taps_with_labels_a_b__cut_taps_with_labels_a_b/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1993 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1997 (32, 0) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1997 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1997 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:kpex_cli.py:1997 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:1997 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1997 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:kpex_cli.py:1446 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+WARNING  __kpex__:extractor.py:537 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: A,B
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1478 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1478 C1;$5;B;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C2;$5;D;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C3;$5;S;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C4;$5;VSUBS;0.111;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C5;A;VSUBS;0.148;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C6;B;D.P0.Nplus;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C7;B;S;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C8;B;S.P0.Nplus;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C9;B;VSUBS;0.139;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C10;D;S;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C11;D;S.P0.Nplus;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C12;D;VSUBS;0.033;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C13;D.P0.Nplus;S;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1478 C14;S;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1478 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1478 R2;A,B;B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1478 R3;D;D.P0.Nplus;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1478 R4;S;S.P0.Nplus;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1481 /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_taps_with_labels_a_b__cut_taps_with_labels_a_b/cut_taps_with_labels_a_b_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1498 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_taps_with_labels_a_b__cut_taps_with_labels_a_b/cut_taps_with_labels_a_b_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1534 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1868 Peak memory (resident set size) after the run: 1.2 GiB
