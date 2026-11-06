@@ -1,0 +1,30 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 kpex extract --pdk sky130A --2.5D --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\nfet_li1_in_subcell.lvsdb.gz' --schematic 'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\nfet_li1_in_subcell.spice' --check y --out-dir 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_ports_of_labels_only_in_a1'
+WARNING  __kpex__:kpex_cli.py:878 --schematic is checked for its device classes, their totals and the pins of its top circuit only, use regular LVS to compare layout against schematic
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_ports_of_labels_only_in_a1\nfet_li1_in_subcell__nfet_li1_in_subcell\kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:272 Ports named after labels in subcells: D, G, S (label them in the top cell to name ports explicitly)
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 287.7 MiB
+INFO     __kpex__:kpex_cli.py:2011 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2011 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2011 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2011 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2011 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 287.7 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;D;D.$1.li1;;30.494
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;D.$0.li1;D.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;D.$0.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;D.$1.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R5;G;G.$0.li1;;6.4
+SUBPROCESS __kpex__:kpex_cli.py:1498 R6;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R7;G.$1.poly;G.P0.poly;;234.381
+SUBPROCESS __kpex__:kpex_cli.py:1498 R8;S;S.$0.li1;;43.294
+SUBPROCESS __kpex__:kpex_cli.py:1498 R9;S.$0.li1;S.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1498 R10;S.$0.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R11;S.$1.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1501 C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_ports_of_labels_only_in_a1\nfet_li1_in_subcell__nfet_li1_in_subcell\nfet_li1_in_subcell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_ports_of_labels_only_in_a1\nfet_li1_in_subcell__nfet_li1_in_subcell\nfet_li1_in_subcell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 287.7 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 287.7 MiB
