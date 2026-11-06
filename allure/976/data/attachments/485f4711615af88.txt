@@ -1,0 +1,34 @@
+WARNING  __kpex__:kpex_cli.py:1628 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1665 main extract --pdk sky130A --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_wire_with_label_without_pin.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:866 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1811 Peak memory (resident set size) after preparing the LVSDB: 1.6 GiB
+INFO     __kpex__:kpex_cli.py:1815 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1815 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:1815 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1815 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1815 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1815 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1347 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.6 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.6 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1376 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1376 C1;$2;A.$0.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C2;$2;A.$2.met1;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C3;$2.$0.li1;$3;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C4;$2.$0.li1;A;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C5;$2.$0.li1;A.$0.li1;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C6;$2.$0.li1;A.$2.met1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C7;$2.$0.li1;VSUBS;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C8;$3;A.$0.li1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C9;$3;A.$2.met1;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C10;$3;VSUBS;0.119;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C11;A.$0.li1;VSUBS;0.034;
+SUBPROCESS __kpex__:kpex_cli.py:1376 C12;A.$2.met1;VSUBS;1.347;
+SUBPROCESS __kpex__:kpex_cli.py:1376 R1;$2;$2.$0.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R2;A;A.$0.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R3;A.$0.li1;A.$2.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1379 D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wire_with_label_without_pin__cut_wire_with_label_without_pin\cut_wire_with_label_without_pin_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1396 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wire_with_label_without_pin__cut_wire_with_label_without_pin\cut_wire_with_label_without_pin_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1423 Peak memory (resident set size) after the netlist: 1.6 GiB
+INFO     __kpex__:kpex_cli.py:1694 Peak memory (resident set size) after the run: 1.6 GiB

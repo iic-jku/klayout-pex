@@ -1,0 +1,95 @@
+WARNING  __kpex__:kpex_cli.py:1628 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1665 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_cell_of_devices.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_cell_of_devices.gds.gz --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:855 No explicit top cell specified, using top cell 'cut_cell_of_devices'
+INFO     __kpex__:kpex_cli.py:866 LVSDB input file passed, bypassing LVS
+WARNING  __kpex__:lvsdb_extractor.py:424 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 8 of 85 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:1811 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1815 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1815 (31, 0) -> (nwell_drw dpantenna_n)
+INFO     __kpex__:kpex_cli.py:1815 (32, 0) -> (nbulay_drw isolbox_i)
+INFO     __kpex__:kpex_cli.py:1815 (46, 0) -> (pwell iso_pwell pwell_sub isolbox_bn dantenna_p isolbox_s rppd_sub)
+INFO     __kpex__:kpex_cli.py:1815 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1815 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1815 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1815 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:1815 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+WARNING  __kpex__:r_extractor.py:525 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS dpantenna_n)
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1376 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1376 R1;$I10;$I10.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R2;$I13;$I13.$1.Metal1;;6.667
+SUBPROCESS __kpex__:kpex_cli.py:1376 R3;$I15;$I15.$0.Metal1;;0.067
+SUBPROCESS __kpex__:kpex_cli.py:1376 R4;$I15;$I15.$10.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1376 R5;$I15;$I15.$2.Metal1;;0.067
+SUBPROCESS __kpex__:kpex_cli.py:1376 R6;$I15.$0.Metal1;$I15.$6.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1376 R7;$I15.$10.Metal2;$I15.$11.Metal2;;0.061
+SUBPROCESS __kpex__:kpex_cli.py:1376 R8;$I15.$10.Metal2;$I15.$6.Metal2;;0.061
+SUBPROCESS __kpex__:kpex_cli.py:1376 R9;$I15.$11.Metal2;$I15.$2.Metal1;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1376 R10;$I4;$I4.$1.Metal1;;6.667
+SUBPROCESS __kpex__:kpex_cli.py:1376 R11;$I5;$I5.$0.GatPoly;;5.04
+SUBPROCESS __kpex__:kpex_cli.py:1376 R12;$I5;$I5.$1.GatPoly;;5.04
+SUBPROCESS __kpex__:kpex_cli.py:1376 R13;$I5.$0.GatPoly;$I5.$10.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R14;$I5.$0.GatPoly;$I5.$6.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R15;$I5.$0.GatPoly;$I5.$8.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R16;$I5.$1.GatPoly;$I5.$11.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R17;$I5.$1.GatPoly;$I5.$7.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R18;$I5.$1.GatPoly;$I5.$9.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R19;$I5.$10.Metal1;$I5.$8.Metal1;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1376 R20;$I5.$11.Metal1;$I5.$9.Metal1;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1376 R21;$I5.$6.Metal1;$I5.$8.Metal1;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1376 R22;$I5.$7.Metal1;$I5.$9.Metal1;;0.148
+SUBPROCESS __kpex__:kpex_cli.py:1376 R23;$I8;$I8.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1376 R24;sub!;sub!.$0.Metal1;;0.018
+SUBPROCESS __kpex__:kpex_cli.py:1376 R25;sub!;sub!.$2.Metal1;;0.018
+SUBPROCESS __kpex__:kpex_cli.py:1376 R26;sub!.$0.Metal1;sub!.$4.nSD;;8.5
+SUBPROCESS __kpex__:kpex_cli.py:1376 R27;sub!.$2.Metal1;sub!.$6.nSD;;8.5
+SUBPROCESS __kpex__:kpex_cli.py:1379 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1396 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1423 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1694 Peak memory (resident set size) after the run: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1628 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1665 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_cell_of_devices.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_cell_of_devices.gds.gz --exclusion-markers ignore --cut block
+INFO     __kpex__:kpex_cli.py:855 No explicit top cell specified, using top cell 'cut_cell_of_devices'
+INFO     __kpex__:kpex_cli.py:866 LVSDB input file passed, bypassing LVS
+WARNING  __kpex__:lvsdb_extractor.py:424 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 8 of 85 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:1811 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1815 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1815 (31, 0) -> (nwell_drw dpantenna_n)
+INFO     __kpex__:kpex_cli.py:1815 (32, 0) -> (nbulay_drw isolbox_i)
+INFO     __kpex__:kpex_cli.py:1815 (46, 0) -> (pwell iso_pwell pwell_sub isolbox_bn dantenna_p isolbox_s rppd_sub)
+INFO     __kpex__:kpex_cli.py:1815 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1815 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1815 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1815 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:1815 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1815 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:extractor.py:180 The netlist leaves out the 7 devices of the cut cells
+INFO     __kpex__:extractor.py:241 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I10, $I11, $I12, $I13, $I15, $I4, $I5, $I6, $I8, $I9
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+WARNING  __kpex__:r_extractor.py:525 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS dpantenna_n)
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1376 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1379 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1396 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1423 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1694 Peak memory (resident set size) after the run: 1.2 GiB

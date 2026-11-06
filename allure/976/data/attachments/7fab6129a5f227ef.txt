@@ -1,0 +1,40 @@
+[13:22:31] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1628
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                        
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r
+f_inductors_03_90_05_125_05_220.lvsdb.gz --out-dir                              
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:22:31] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:866
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:22:32] INFO     Peak memory (resident set size) after       kpex_cli.py:1811
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:22:32] INFO     (70, 20) -> (met3_ncap)                     kpex_cli.py:1815
+[13:22:32] INFO     (69, 20) -> (met2_con)                      kpex_cli.py:1815
+[13:22:32] INFO     (69, 16) -> (met2_pin_con)                  kpex_cli.py:1815
+[13:22:32] INFO     (70, 16) -> (met3_pin_con)                  kpex_cli.py:1815
+[13:22:32] INFO     (64, 44) -> (inductor_sub)                  kpex_cli.py:1815
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:22:32] INFO     LVSDB: found 10pins                         extractor.py:482
+[13:22:32] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/rf_inductors_03_90_05_1
+25_05_220__rf_inductors_03_90_05_125_05_220/rf_inductors_03_90_05_125_05_220_k25
+d_pex_netlist.csv                                                               
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/rf_inductors_03_90_05_1
+25_05_220__rf_inductors_03_90_05_125_05_220/rf_inductors_03_90_05_125_05_220_k25
+d_pex_netlist.spice                                                             
+[13:22:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1423
+                    netlist: 1.1 GiB                                            
+[13:22:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1694
+                    run: 1.1 GiB                                                
