@@ -315,13 +315,10 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
 def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     # NOTE: the alignment with a schematic kept the cells it has as subcircuits, and the RC netlist
     #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
-    # NOTE: --check n, as the ports are the pins $1.D, $1.G and $1.S of the LVS netlist, which flattens SUBNFET
-    #       (#417), unlike the pins D, G and S of the schematic, which --check compares them with (#406)
     gds_path = NFET_IN_SUBCELL_GDS_PATH
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path,
                                             '--schematic', gds_path.replace('.gds.gz', '.spice'),
-                                            '--check', 'n',
                                             '--out-dir', str(tmp_path)])
     assert code == 0, output
     run_dir = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell'
@@ -330,6 +327,27 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     assert 'sky130_fd_pr__nfet_01v8' in netlist and 'SUBNFET' not in netlist, netlist
     with open(run_dir / 'nfet_li1_in_subcell_lvs.log', encoding='utf-8') as f:
         assert "Netlists don't match" not in f.read()
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic", "Pins")
+@pytest.mark.parametrize('mode', ['CC', 'R', 'RC'])
+def test_ports_of_labels_only_in_a_subcell_are_named_after_them(mode: str, tmp_path):
+    # NOTE: the PEX-LVS flattens SUBNFET, whose nets KLayout names after the subcircuit and the labels,
+    #       $1.D, $1.G and $1.S, unlike the pins D, G and S of the schematic, which --check compares the ports with
+    #       (#417), with a warning, as other tools make ports of the labels of the top cell only
+    gds_path = NFET_IN_SUBCELL_GDS_PATH
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', mode,
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', gds_path),
+                                            '--schematic', gds_path.replace('.gds.gz', '.spice'), '--check', 'y',
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    netlist_path = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell' / 'nfet_li1_in_subcell_k25d_pex_netlist.spice'
+    with open(netlist_path, encoding='utf-8') as f:
+        netlist = f.read()
+    assert re.search(r'^\.SUBCKT nfet_li1_in_subcell D G S sky130_gnd$', netlist, re.MULTILINE), netlist
+    assert "Ports named after labels in subcells: D, G, S (label them in the top cell to name ports explicitly)" \
+           in output
 
 
 def schematic_problems(schematic_path: str, port_names: Sequence[str]) -> List[str]:

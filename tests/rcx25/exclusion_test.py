@@ -658,8 +658,12 @@ def test_labels_of_a_cell_are_found_by_location_and_layer():
     assert e.labels_at(0, 'Metal2', kdb.Box(0, 0, 100, 100)) == {2: label_c}
     assert e.is_only_label_of_cut_cell('A', kdb.Point(10, 10))
     assert not e.is_only_label_of_cut_cell('A', kdb.Point(11, 10))
+    e.labels_by_net_name = {'A,B': {'A', 'B'}, 'A,D': {'A', 'D'}, 'A': {'A'}, '$I1': {'A'}, '$2': set()}
     assert e.is_only_named_by_cut_cells('A,B')
     assert not e.is_only_named_by_cut_cells('A,D')
+    # NOTE: by the labels on the net, also where its name keeps none of them, as it isn't unique (#417)
+    assert e.is_only_named_by_cut_cells('$I1')
+    assert not e.is_only_named_by_cut_cells('$2')
     e.labels_of_rest = {('A', kdb.Point(900, 900))}
     assert not e.is_only_named_by_cut_cells('A')
 
