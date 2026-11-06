@@ -60,6 +60,7 @@ jobs:
           distribution: zulu
           java-version: 17
 
+      # NOTE: only the trend history, not the reports of gh-pages (GBs)
       - name: "Load test report history (Allure)"
         uses: actions/checkout@v7
         if: always()
@@ -67,6 +68,8 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages
+          sparse-checkout: allure/last-history
+          filter: blob:none
 
       # NOTE: the Allure CLI on the JDK above, like simple-elf/allure-report-action did, whose Docker build
       #       pulls its base image from public.ecr.aws, which rate-limits the GitHub runners (429 Too Many Requests)
@@ -102,34 +105,14 @@ jobs:
           echo "<meta http-equiv=\"Pragma\" content=\"no-cache\"><meta http-equiv=\"Expires\" content=\"0\">" \
             >> allure-history/allure/index.html
 
-      # NOTE: not for pull requests from forks, nor for runs of Dependabot, whose token can't push to gh-pages
-      # NOTE: retried, as the push is rejected if another run pushed to gh-pages since the action cloned it;
-      #       twice, as each run pushes twice (test report, ~2 min later coverage report): the first retry
-      #       after the test report of another run often meets its coverage report
-      - name: "Publish test report"
-        id: publish-test-report
-        uses: peaceiris/actions-gh-pages@v4
-        if: ${{ always() && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        continue-on-error: true
-        with: &publish-test-report
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
-          destination_dir: ./
-          # destination_dir: ./allure
-          keep_files: true
-
-      - name: "Publish test report (retry 1)"
-        id: publish-test-report-retry
-        uses: peaceiris/actions-gh-pages@v4
-        if: ${{ always() && steps.publish-test-report.outcome == 'failure' }}
-        continue-on-error: true
-        with: *publish-test-report
-
-      - name: "Publish test report (retry 2)"
-        uses: peaceiris/actions-gh-pages@v4
-        if: ${{ always() && steps.publish-test-report-retry.outcome == 'failure' }}
-        with: *publish-test-report
+      # NOTE: published by publish-reports, with the coverage report
+      - name: "Store test report"
+        uses: actions/upload-artifact@v6
+        with:
+          name: allure-history
+          path: allure-history
+          retention-days: 1
+          if-no-files-found: error
 
   merge-coverage-reports:
     name: "Generate Coverage Report (Aggregated Suites)"
@@ -203,41 +186,73 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  publish-coverage-reports:
-    name: "Publish Coverage Report (Aggregated Suites)"
+  # NOTE: both reports in one push, as runs ending together reject each other's pushes to gh-pages (#420)
+  publish-reports:
+    name: "Publish Allure and Coverage Reports (Aggregated Suites)"
     runs-on: ubuntu-latest
-    # NOTE: after the Allure report, as both push to gh-pages: the one that pushes second is rejected
-    #       if the other pushed after it cloned gh-pages; the retries below are for other runs
-    needs: [merge-coverage-reports, allure-report]
-    # NOTE: not for pull requests from forks, nor for runs of Dependabot, whose token can't push to gh-pages
-    if: ${{ !cancelled() && needs.merge-coverage-reports.result == 'success' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+    needs: [allure-report, merge-coverage-reports]
+    # NOTE: each report also when the other one failed;
+    #       not for pull requests from forks, nor for runs of Dependabot, whose token can't push to gh-pages
+    if: ${{ !cancelled() && (needs.allure-report.result == 'success' || needs.merge-coverage-reports.result == 'success') && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+    permissions:
+      contents: write
     steps:
-      - name: "Download merged coverage artifact"
+      # NOTE: site/ is laid out like gh-pages
+      - name: "Download test report"
+        if: ${{ needs.allure-report.result == 'success' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: allure-history
+          path: site
+
+      - name: "Download coverage report"
+        if: ${{ needs.merge-coverage-reports.result == 'success' }}
         uses: actions/download-artifact@v8
         with:
           name: merged-coverage-report
-          path: pycov   # destination
-    
-      # NOTE: retried like the test report
-      - name: "Publish coverage reports"
-        id: publish-coverage-reports
-        uses: peaceiris/actions-gh-pages@v4
-        continue-on-error: true
-        with: &publish-coverage-reports
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: pycov
-          destination_dir: pycov
-          keep_files: true
+          path: site/pycov
 
-      - name: "Publish coverage reports (retry 1)"
-        id: publish-coverage-reports-retry
-        uses: peaceiris/actions-gh-pages@v4
-        if: ${{ steps.publish-coverage-reports.outcome == 'failure' }}
-        continue-on-error: true
-        with: *publish-coverage-reports
+      - name: "Check out gh-pages"
+        uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+          path: gh-pages
 
-      - name: "Publish coverage reports (retry 2)"
-        uses: peaceiris/actions-gh-pages@v4
-        if: ${{ steps.publish-coverage-reports-retry.outcome == 'failure' }}
-        with: *publish-coverage-reports
+      # NOTE: the push is rejected if another run pushed since the checkout: each attempt starts again
+      #       from the new tip of gh-pages, so that no report of the other run gets lost
+      - name: "Publish reports"
+        working-directory: gh-pages
+        env:
+          # NOTE: about 3 days of runs at the current rate; each report takes ~110 MB in the checkout above
+          #       and ~25 MB (compressed) of the 1 GB that a GitHub Pages site may have
+          KEEP_ALLURE_REPORTS: 30
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            if [ "$attempt" -gt 1 ]; then
+              echo "::warning::Push to gh-pages rejected, attempt $attempt on its new tip"
+              git fetch --depth 1 origin gh-pages
+              git reset --hard FETCH_HEAD
+            fi
+
+            # replaced rather than merged, so that no stale files pile up (also of a re-run)
+            for dir in pycov "allure/$RUN_NUMBER" allure/last-history; do
+              if [ -d "../site/$dir" ]; then rm -rf "$dir"; fi
+            done
+            cp -r ../site/. .
+
+            # keeps the newest Allure reports by run number, this run's among them
+            for old in $(ls allure | grep -Ex '[0-9]+' | grep -vx "$RUN_NUMBER" | sort -rn | tail -n +"$KEEP_ALLURE_REPORTS"); do
+              rm -rf "allure/$old"
+            done
+
+            git add -A
+            git diff --cached --quiet || git commit -q -m "deploy: $GITHUB_SHA (run $RUN_NUMBER)"
+            if git push origin HEAD:gh-pages; then
+              exit 0
+            fi
+          done
+          echo "::error::Push to gh-pages rejected $attempt times"
+          exit 1

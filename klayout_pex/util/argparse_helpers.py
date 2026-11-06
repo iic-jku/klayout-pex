@@ -36,6 +36,13 @@ from rich_argparse import RichHelpFormatter
 
 from ..log import LogLevel, warning
 from .multiple_choice import MultipleChoicePattern
+from .number_range import (
+    DELAUNAY_B,
+    NON_NEGATIVE_MICROMETERS,
+    NON_NEGATIVE_SQUARE_MICROMETERS,
+    POSITIVE_MICROMETERS,
+    NumberRange,
+)
 from .unit_formatter import parse_spice_number
 
 
@@ -174,15 +181,35 @@ def positive_spice_seconds(text: str) -> float:
     return value
 
 
-def positive_micrometers(text: str) -> float:
-    """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
+def _finite_number(text: str, number_range: NumberRange) -> float:
+    """For the argparse types: a finite number in a range"""
     try:
         value = float(text)
     except ValueError:
         value = math.nan
-    if not (math.isfinite(value) and value > 0):
-        raise argparse.ArgumentTypeError(f"must be a finite number > 0 (in µm), got '{text}'")
+    if value not in number_range:
+        raise argparse.ArgumentTypeError(number_range.error_message(f"'{text}'"))
     return value
+
+
+def positive_micrometers(text: str) -> float:
+    """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
+    return _finite_number(text, POSITIVE_MICROMETERS)
+
+
+def non_negative_micrometers(text: str) -> float:
+    """argparse type: a finite length >= 0 µm, e.g. '0' or '2.5'"""
+    return _finite_number(text, NON_NEGATIVE_MICROMETERS)
+
+
+def non_negative_square_micrometers(text: str) -> float:
+    """argparse type: a finite area >= 0 µm², e.g. '0' or '0.5'"""
+    return _finite_number(text, NON_NEGATIVE_SQUARE_MICROMETERS)
+
+
+def delaunay_b(text: str) -> float:
+    """argparse type: the minimum b = 2·sin(angle) of the triangles of a Delaunay refinement, 0 to DELAUNAY_B_MAX"""
+    return _finite_number(text, DELAUNAY_B)
 
 
 def multiple_choice_pattern(text: str) -> MultipleChoicePattern:
