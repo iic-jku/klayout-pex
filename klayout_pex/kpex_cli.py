@@ -148,7 +148,6 @@ from .tool_version_constraints import (
     VersionCheckMode,
     check_tool_versions
 )
-from .util.multiple_choice import MultipleChoicePattern
 from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
@@ -157,6 +156,7 @@ from .util.argparse_helpers import (
     add_log_level_argument,
     add_subcommand_sections,
     handle_help_subcommand,
+    multiple_choice_pattern,
     positive_micrometers,
     positive_spice_seconds,
     render_enum_help,
@@ -341,7 +341,7 @@ class KpexCLI:
     def _add_tech_arguments(parser: argparse.ArgumentParser) -> None:
         group_tech = parser.add_argument_group("Technology Options")
         group_tech.add_argument("--diel", dest="dielectric_filter",
-                                type=str, default="all",
+                                type=multiple_choice_pattern, default="all",
                                 help=f"Comma separated list of dielectric filter patterns. "
                                      f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
                                      f"(default is %(default)s)")
@@ -931,13 +931,6 @@ class KpexCLI:
                 args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                              f"{args.effective_cell_name}_dummy_schematic.spice")
                 LVSRunner.write_dummy_schematic(args.effective_schematic_path, args.effective_cell_name)
-
-        try:
-            pattern_string: str = args.dielectric_filter
-            args.dielectric_filter = MultipleChoicePattern(pattern=pattern_string)
-        except ValueError as e:
-            error("Failed to parse --diel arg", e)
-            found_errors = True
 
         if args.cache_dir_path is None:
             args.cache_dir_path = os.path.join(args.output_dir_base_path, '.kpex_cache')

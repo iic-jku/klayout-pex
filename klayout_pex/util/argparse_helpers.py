@@ -35,6 +35,7 @@ import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import LogLevel, warning
+from .multiple_choice import MultipleChoicePattern
 from .unit_formatter import parse_spice_number
 
 
@@ -182,6 +183,17 @@ def positive_micrometers(text: str) -> float:
     if not (math.isfinite(value) and value > 0):
         raise argparse.ArgumentTypeError(f"must be a finite number > 0 (in µm), got '{text}'")
     return value
+
+
+def multiple_choice_pattern(text: str) -> MultipleChoicePattern:
+    """argparse type: a comma separated multiple choice pattern, e.g. 'all,-name1,-name2' or 'none,+name1'"""
+    try:
+        return MultipleChoicePattern(pattern=text)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            f"{e}, got '{text}': give all, optionally with -name subpatterns to exclude, "
+            f"or none, optionally with +name subpatterns to include, "
+            f"e.g. 'all,-name1,-name2' or 'none,+name1'") from e
 
 
 DEPRECATED_OPTIONS_DEST = 'deprecated_options'
