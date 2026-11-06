@@ -121,7 +121,35 @@ class TechInfo:
         if not (math.isfinite(side_halo) and side_halo > 0):
             raise TechDefError(f"process_parasitics.side_halo has to be a finite number > 0 (in µm), "
                                f"but in {jsonpb_path} it is {side_halo:g}")
+        # NOTE: a negative one gives negative capacitances, NaN or infinity spreads into the totals of the nets,
+        #       while 0 is legal (e.g. the perimeter capacitance of a MIM plate)
+        problems = TechInfo.capacitance_problems(tech)
+        if problems:
+            raise TechDefError(
+                f"Capacitances have to be finite numbers ≥ 0, but in {jsonpb_path}"
+                + ''.join(f"\n  - {p}" for p in problems))
         return tech
+
+    @staticmethod
+    def capacitance_problems(tech: tech_pb2.Technology) -> List[str]:
+        """
+        Report every capacitance of the process parasitics that isn't a finite number ≥ 0
+        """
+        capacitance = tech.process_parasitics.capacitance
+        values = [
+            *((f"the substrate area capacitance of {c.layer_name}", c.area_capacitance)
+              for c in capacitance.substrates),
+            *((f"the substrate perimeter capacitance of {c.layer_name}", c.perimeter_capacitance)
+              for c in capacitance.substrates),
+            *((f"the overlap capacitance of {c.top_layer_name} over {c.bottom_layer_name}", c.capacitance)
+              for c in capacitance.overlaps),
+            *((f"the sidewall capacitance of {c.layer_name}", c.capacitance)
+              for c in capacitance.sidewalls),
+            *((f"the side overlap capacitance of {c.in_layer_name} to {c.out_layer_name}", c.capacitance)
+              for c in capacitance.sideoverlaps),
+        ]
+        return [f"{what} is {value:g}" for what, value in values
+                if not (math.isfinite(value) and value >= 0)]
 
     @staticmethod
     def process_layer_problems(tech: tech_pb2.Technology) -> List[str]:
@@ -603,7 +631,7 @@ class TechInfo:
 
         for k1, ve in d2.items():
             for k2, v in ve.items():
-                d[k1][k2] = v
+                d.setdefault(k1, {})[k2] = v
 
         return d
 
