@@ -89,6 +89,8 @@ def test_import_uf_pattern(tmp_path: Path):
     assert (box.lower_left.x, box.lower_left.y,
             box.upper_right.x, box.upper_right.y) == (0, 0, 140, 1400)
     assert pex25d_file.shapes[1].source.line == 5
+    assert pex25d_file.ground_plane.source.file == str(source)
+    assert pex25d_file.domain_box.source.file == str(source)
     domain = pex25d_file.domain_box.box
     assert (domain.lower_left.x, domain.lower_left.y, domain.lower_left.z) == (-980, 0, 0)
     assert (domain.upper_right.x, domain.upper_right.y, domain.upper_right.z) == (1120, 2800, 13930)
@@ -111,8 +113,8 @@ DIELECTRIC air_2 HEIGHT 1.000 13.930 EPSILON 2.9
 
 
 def test_import_uf_dielectric_stack(tmp_path: Path):
-    pex25d_file = pex25d.import_file(str(write_uf_pattern(tmp_path, UF_DIELECTRIC_STACK)),
-                                     'openrcx-uf')
+    source = str(write_uf_pattern(tmp_path, UF_DIELECTRIC_STACK))
+    pex25d_file = pex25d.import_file(source, 'openrcx-uf')
     assert_valid(pex25d_file)
 
     assert (pex25d_file.background.name, pex25d_file.background.permittivity) == ('air_2', 2.9)
@@ -133,7 +135,7 @@ def test_import_uf_dielectric_stack(tmp_path: Path):
         assert (dielectric.simple.between_below, dielectric.simple.between_above) == (below, above)
         assert dielectric.wraps == below
     assert simple['m1_1'].permittivity == 7.0
-    assert simple['m1_1'].source.line == 4
+    assert (simple['m1_1'].source.file, simple['m1_1'].source.line) == (source, 4)
 
 
 @pytest.mark.parametrize('dielectrics, message', [
@@ -162,9 +164,19 @@ def test_import_uf_rejects_dielectric_stack(tmp_path: Path, dielectrics: str, me
      'expected exactly one GROUND_PLANE, found 2'),
     ('LENGTH 1.400 VOLTAGE 1', 'VOLTAGE 1',
      r'pattern.uf:5: 2D UF input \(WIRE M1_w2 without LENGTH\)'),
-    ('UR  0.140 0.900', 'UR  0.140 0.950',
+    ('UR  0.140 0.900 UL  0.000 0.900', 'UR  0.140 0.950 UL  0.000 0.950',
      'pattern.uf:5: wire M1_w2 spans z 0.65 … 0.95 µm, other wires of layer M1 span 0.65 … 0.9 µm'),
     ('LL -0.280 0.650', 'LL -0.2805 0.650', r'pattern.uf:4: -0.2805 µm is not on the 1 nm grid'),
+    ('UR -0.140 0.900 UL -0.280 0.900', 'UR -0.160 0.900 UL -0.260 0.900',
+     'pattern.uf:4: wire M1_w1 is not a rectangle'),
+    ('LL -0.280 0.650 LR -0.140 0.650 UR -0.140 0.900 UL -0.280 0.900',
+     'LL -0.140 0.650 LR -0.280 0.650 UR -0.280 0.900 UL -0.140 0.900',
+     'pattern.uf:4: wire M1_w1 has LL not left of and below UR'),
+    ('HEIGHT 0.0 0.0  THICKNESS 0.0', 'HEIGHT 0.0 0.5  THICKNESS 0.0',
+     'pattern.uf:2: GROUND_PLANE M0_w0 has HEIGHT 0.0 … 0.5 µm, but THICKNESS 0.0 µm'),
+    ('WINDOW_BBOX  LL -0.280 0.000', 'WINDOW_BBOX  LL -0.280 0.200',
+     r'pattern.uf:6: the window \(WINDOW_BBOX and SIM_WIN_EXT\) starts at z 0.2 µm, '
+     r'not at the top of the ground plane, 0.0 µm'),
 ])
 def test_import_uf_rejects_pattern(tmp_path: Path, old: str, new: str, message: str):
     with pytest.raises(pex25d.ImporterError, match=message):
