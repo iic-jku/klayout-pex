@@ -1,0 +1,19 @@
+WARNING  __kpex__:kpex_cli.py:1670 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1707 main extract --pdk sky130A --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_resistors_in_series.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\cut_resistors_in_series.gds.gz' --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:871 No explicit top cell specified, using top cell 'cut_resistors_in_series'
+INFO     __kpex__:kpex_cli.py:882 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1853 Peak memory (resident set size) after preparing the LVSDB: 1.4 GiB
+INFO     __kpex__:kpex_cli.py:1857 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1857 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:extractor.py:180 The netlist leaves out the 2 devices of the cut cells
+INFO     __kpex__:extractor.py:482 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.4 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1394 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1394 R1;$3;X__A;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1394 R2;$4;X__B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1394 R3;A;X__A$1;;0.225
+SUBPROCESS __kpex__:kpex_cli.py:1394 R4;B;X__B$1;;0.225
+SUBPROCESS __kpex__:kpex_cli.py:1397 D:\a\klayout-pex\klayout-pex\output_sky130A\cut_resistors_in_series__cut_resistors_in_series\cut_resistors_in_series_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1414 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_resistors_in_series__cut_resistors_in_series\cut_resistors_in_series_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1447 Peak memory (resident set size) after the netlist: 1.4 GiB
+INFO     __kpex__:kpex_cli.py:1736 Peak memory (resident set size) after the run: 1.4 GiB

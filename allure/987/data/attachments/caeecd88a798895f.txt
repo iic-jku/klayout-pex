@@ -1,0 +1,122 @@
+[13:57:08] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_hairpin_bridge_m2.lvsdb.gz' --out-dir                                         
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_hairpin_bridge_m2.gds.gz' --exclusion-markers ports                         
+──────────────────────────────── Input Layout ─────────────────────────────────
+[13:57:08] INFO     No explicit top cell specified, using top   kpex_cli.py:871
+                    cell 'exclusion_hairpin_bridge_m2'                         
+[13:57:08] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[13:57:08] INFO     Peak memory (resident set size) after      kpex_cli.py:1853
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:57:08] INFO     (29, 0) -> (via2_drw)                      kpex_cli.py:1857
+[13:57:08] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1857
+[13:57:08] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1857
+[13:57:08] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1857
+[13:57:08] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1857
+[13:57:08] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A,B: Metal2, Metal3                                    
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:57:08] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1365
+[13:57:08] INFO     LVSDB: found 1pins                         extractor.py:482
+[13:57:08] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+[13:57:08] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.1 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;B;0.147;                                                                  
+C2;A;VSUBS;1.043;                                                              
+C3;A_B__m0_0;A_B__m0_1;0.142;                                                  
+C4;A_B__m0_0;VSUBS;0.948;                                                      
+C5;A_B__m0_1;VSUBS;0.948;                                                      
+C6;B;VSUBS;1.043;                                                              
+R1;A;A,B;;0.001                                                                
+R2;A;A_B__m0_0;;1.298                                                          
+R3;A_B__m0_1;B;;1.298                                                          
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_hairpin_bridge_m2__exc
+lusion_hairpin_bridge_m2\exclusion_hairpin_bridge_m2_k25d_pex_netlist.csv      
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_hairpin_bridge_m2__exc
+lusion_hairpin_bridge_m2\exclusion_hairpin_bridge_m2_k25d_pex_netlist.spice    
+[13:57:08] INFO     Peak memory (resident set size) after the  kpex_cli.py:1447
+                    netlist: 1.1 GiB                                           
+[13:57:08] INFO     Peak memory (resident set size) after the  kpex_cli.py:1736
+                    run: 1.1 GiB                                               
+[13:57:08] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_hairpin_bridge_m2_open.lvsdb.gz' --out-dir                                    
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_hairpin_bridge_m2_open.gds.gz' --exclusion-markers ports                    
+──────────────────────────────── Input Layout ─────────────────────────────────
+[13:57:08] INFO     No explicit top cell specified, using top   kpex_cli.py:871
+                    cell 'exclusion_hairpin_bridge_m2_open'                    
+[13:57:08] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[13:57:08] INFO     Peak memory (resident set size) after      kpex_cli.py:1853
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:57:08] INFO     (29, 0) -> (via2_drw)                      kpex_cli.py:1857
+[13:57:08] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1857
+[13:57:08] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1857
+[13:57:08] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1857
+[13:57:08] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1857
+[13:57:08] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A: Metal2, Metal3                                      
+                      - B: Metal2, Metal3                                      
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:57:08] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1365
+[13:57:08] INFO     LVSDB: found 2pins                         extractor.py:482
+[13:57:08] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+[13:57:09] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.1 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;B;0.147;                                                                  
+C2;A;VSUBS;1.043;                                                              
+C3;A__m0_0;B__m0_0;0.142;                                                      
+C4;A__m0_0;VSUBS;0.948;                                                        
+C5;B;VSUBS;1.043;                                                              
+C6;B__m0_0;VSUBS;0.948;                                                        
+R1;A;A__m0_0;;1.298                                                            
+R2;B;B__m0_0;;1.298                                                            
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_hairpin_bridge_m2_open
+__exclusion_hairpin_bridge_m2_open\exclusion_hairpin_bridge_m2_open_k25d_pex_ne
+tlist.csv                                                                      
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_hairpin_bridge_m2_open
+__exclusion_hairpin_bridge_m2_open\exclusion_hairpin_bridge_m2_open_k25d_pex_ne
+tlist.spice                                                                    
+[13:57:09] INFO     Peak memory (resident set size) after the  kpex_cli.py:1447
+                    netlist: 1.1 GiB                                           
+[13:57:09] INFO     Peak memory (resident set size) after the  kpex_cli.py:1736
+                    run: 1.1 GiB                                               

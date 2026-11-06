@@ -1,0 +1,36 @@
+WARNING  __kpex__:kpex_cli.py:1670 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1707 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_strip_along_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_strip_along_wire.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:871 No explicit top cell specified, using top cell 'cut_strip_along_wire'
+INFO     __kpex__:kpex_cli.py:882 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1853 Peak memory (resident set size) after preparing the LVSDB: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1857 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1857 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1857 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.3 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1394 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1394 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1394 R2;A;B;;8.782
+SUBPROCESS __kpex__:kpex_cli.py:1397 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_strip_along_wire__cut_strip_along_wire\cut_strip_along_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1414 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_strip_along_wire__cut_strip_along_wire\cut_strip_along_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1447 Peak memory (resident set size) after the netlist: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1736 Peak memory (resident set size) after the run: 1.3 GiB
+WARNING  __kpex__:kpex_cli.py:1670 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1707 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_strip_along_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_strip_along_wire.gds.gz' --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:871 No explicit top cell specified, using top cell 'cut_strip_along_wire'
+INFO     __kpex__:kpex_cli.py:882 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1853 Peak memory (resident set size) after preparing the LVSDB: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1857 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1857 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1857 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:r_extractor.py:1329 The metal of these nets goes on beside exclusion blocks, along their cuts, so it carries the current alone, with a short port for each model, as a port can't connect a model in parallel to it: A,B
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.3 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1394 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1394 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1394 R2;A;X__A_B_0;;8.707
+SUBPROCESS __kpex__:kpex_cli.py:1394 R3;B;X__A_B_0;;8.707
+SUBPROCESS __kpex__:kpex_cli.py:1397 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_strip_along_wire__cut_strip_along_wire\cut_strip_along_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1414 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_strip_along_wire__cut_strip_along_wire\cut_strip_along_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1447 Peak memory (resident set size) after the netlist: 1.3 GiB
+INFO     __kpex__:kpex_cli.py:1736 Peak memory (resident set size) after the run: 1.3 GiB

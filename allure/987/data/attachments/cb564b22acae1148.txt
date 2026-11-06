@@ -1,0 +1,28 @@
+WARNING  __kpex__:kpex_cli.py:1670 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1707 main extract --pdk gf180mcuD --mode RC --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/plates_m1_over_isolated_pwell_and_dnwell.lvsdb.gz --out-dir /tmp/tmp0i6knifx --2.5D --check n
+INFO     __kpex__:kpex_cli.py:882 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1853 Peak memory (resident set size) after preparing the LVSDB: 1.4 GiB
+INFO     __kpex__:kpex_cli.py:1857 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:1857 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1857 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:kpex_cli.py:1857 (33, 4407) -> (contact_ptap_dw_con)
+INFO     __kpex__:kpex_cli.py:1857 (204, 0) -> (lvpwell_dw_con)
+INFO     __kpex__:kpex_cli.py:1365 Sidewall halo: 8 µm (tech info of gf180mcuD)
+INFO     __kpex__:extractor.py:482 LVSDB: found 4pins
+WARNING  __kpex__:r_extractor.py:525 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - LVPWELL (LVS lvpwell_dw_con)
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.4 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.4 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1394 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1394 C1;A;B;0.055;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C2;A;D;0.216;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C3;A;W;2.223;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C4;B;D;1.788;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C5;B;VSUBS;0.247;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C6;B;W;0.17;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C7;D;VSUBS;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C8;D;W;0.014;
+SUBPROCESS __kpex__:kpex_cli.py:1397 /tmp/tmp0i6knifx/plates_m1_over_isolated_pwell_and_dnwell__plates_m1_over_isolated_pwell_and_dnwell/plates_m1_over_isolated_pwell_and_dnwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1414 Wrote expanded netlist to: /tmp/tmp0i6knifx/plates_m1_over_isolated_pwell_and_dnwell__plates_m1_over_isolated_pwell_and_dnwell/plates_m1_over_isolated_pwell_and_dnwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1447 Peak memory (resident set size) after the netlist: 1.4 GiB
+INFO     __kpex__:kpex_cli.py:1736 Peak memory (resident set size) after the run: 1.4 GiB

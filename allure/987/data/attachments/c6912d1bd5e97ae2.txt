@@ -1,0 +1,23 @@
+WARNING  __kpex__:kpex_cli.py:1670 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1707 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/sideoverlap_shielding_simple_plates_li1_m1_m2.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:882 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1853 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1857 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1857 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1857 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1365 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 0pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1394 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1394 C1;li1;met1;15.71;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C2;li1;met2;0.152;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C3;met1;met2;257.488;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C4;VSUBS;li1;11.793;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C5;VSUBS;met1;57.99;
+SUBPROCESS __kpex__:kpex_cli.py:1394 C6;VSUBS;met2;5.291;
+SUBPROCESS __kpex__:kpex_cli.py:1397 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_shielding_simple_plates_li1_m1_m2__sideoverlap_shielding_simple_plates_li1_m1_m2/sideoverlap_shielding_simple_plates_li1_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1414 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_shielding_simple_plates_li1_m1_m2__sideoverlap_shielding_simple_plates_li1_m1_m2/sideoverlap_shielding_simple_plates_li1_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1447 Peak memory (resident set size) after the netlist: 1.1 GiB
+WARNING  __kpex__:kpex_cli.py:1464 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: met1 (331.187 fF), met2 (262.930 fF), li1 (27.655 fF)
+INFO     __kpex__:kpex_cli.py:1736 Peak memory (resident set size) after the run: 1.1 GiB

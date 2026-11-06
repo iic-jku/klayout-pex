@@ -1,0 +1,44 @@
+[13:57:18] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1670
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/l
+ateral_fringe_shield_by_same_polygon_l1.lvsdb.gz --out-dir                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:57:18] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:882
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:57:18] INFO     Peak memory (resident set size) after       kpex_cli.py:1853
+                    preparing the LVSDB: 1.6 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:57:18] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1857
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:57:18] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1365
+[13:57:18] INFO     LVSDB: found 0pins                          extractor.py:482
+[13:57:18] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.6 GiB                              
+[13:57:18] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.6 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;C0;VSUBS;6.414;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/lateral_fringe_shield_b
+y_same_polygon_l1__lateral_fringe_shield_by_same_polygon_l1/lateral_fringe_shiel
+d_by_same_polygon_l1_k25d_pex_netlist.csv                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/lateral_fringe_shield_b
+y_same_polygon_l1__lateral_fringe_shield_by_same_polygon_l1/lateral_fringe_shiel
+d_by_same_polygon_l1_k25d_pex_netlist.spice                                     
+[13:57:18] INFO     Peak memory (resident set size) after the   kpex_cli.py:1447
+                    netlist: 1.6 GiB                                            
+[13:57:18] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1464
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: C0 (6.414 fF)                      
+[13:57:18] INFO     Peak memory (resident set size) after the   kpex_cli.py:1736
+                    run: 1.6 GiB                                                
