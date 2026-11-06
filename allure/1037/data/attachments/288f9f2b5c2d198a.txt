@@ -1,0 +1,20 @@
+WARNING  __kpex__:kpex_cli.py:1765 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk gf180mcuD --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\r_ptap_pair_m1_m2.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpu96wqoz1' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpu96wqoz1\r_ptap_pair_m1_m2__r_ptap_pair_m1_m2\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.5 GiB
+INFO     __kpex__:kpex_cli.py:1993 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1993 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1993 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1993 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:1993 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:extractor.py:482 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:536 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: SUB
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.5 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;SUB;SUB.$2.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;SUB;SUB.$3.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1477 C:\Users\RUNNER~1\AppData\Local\Temp\tmpu96wqoz1\r_ptap_pair_m1_m2__r_ptap_pair_m1_m2\r_ptap_pair_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpu96wqoz1\r_ptap_pair_m1_m2__r_ptap_pair_m1_m2\r_ptap_pair_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.5 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.5 GiB
