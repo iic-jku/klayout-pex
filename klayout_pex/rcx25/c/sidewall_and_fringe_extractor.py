@@ -46,6 +46,20 @@ from klayout_pex.rcx25.types import EdgeInterval, EdgeNeighborhood
 from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
 
 
+def sidewall_separation(distance_um: float, offset_um: float) -> float:
+    """
+    The separation that the sidewall capacitance of two facing edges is inversely proportional to:
+    their distance plus the offset of the tech info (MAGIC's fit), but at least half the distance
+
+    NOTE: with a negative offset, the fit diverges at a distance of -offset and turns negative below,
+          while the capacitance of two facing sidewalls grows like 1 / distance. Below twice -offset,
+          where the two meet, it goes on as 1 / (distance / 2): continuous, finite and positive for
+          every distance > 0. The shipped tech infos have negative offsets of at most 0.082 µm,
+          for layers whose minimum space is at least 0.18 µm, so a DRC-clean layout doesn't get there.
+    """
+    return max(distance_um + offset_um, distance_um / 2.0)
+
+
 class SidewallAndFringeExtractor:
     def __init__(self,
                  all_layer_names: List[LayerName],
@@ -77,13 +91,21 @@ class SidewallAndFringeExtractor:
 
         self.all_layer_regions = layer_regions_by_name.values()
 
+    @staticmethod
+    def has_fringe(tech_info: TechInfo, layer_name: LayerName) -> bool:
+        """
+        Whether the edges of the layer have a fringe to the other layers
+
+        NOTE: the substrate (with its wells) and the diffusion are the bottom plates of the capacitances
+              of the layers above, whose fringe ends at them, while their own edges have none
+              (like in the magic techs): those between them are the devices' (e.g. the junctions)
+        """
+        return layer_name != tech_info.internal_substrate_layer_name and \
+            layer_name not in tech_info.process_diffusion_layer_names
+
     def extract(self):
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
-            # NOTE: the substrate (with its wells) and the diffusion are the bottom plates of the capacitances
-            #       of the layers above, whose fringe ends at them, while their own edges have none
-            #       (like in the magic techs): those between them are the devices' (e.g. the junctions)
-            if layer_name == self.tech_info.internal_substrate_layer_name or \
-               layer_name in self.tech_info.process_diffusion_layer_names:
+            if not self.has_fringe(self.tech_info, layer_name):
                 continue
 
             other_layer_regions = [
@@ -348,7 +370,7 @@ class SidewallAndFringeExtractor:
             #       lives here, see
             #       https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
             cap_femto = ((length_um * sidewall_cap_spec.capacitance)
-                         / (distance_um + sidewall_cap_spec.offset)
+                         / sidewall_separation(distance_um, sidewall_cap_spec.offset)
                          / 2.0  # non-bidirectional (half)
                          / 2.0  # the coefficient is the value for both edges
                          / 1000.0)  # aF -> fF
@@ -469,7 +491,6 @@ class SidewallAndFringeExtractor:
             if not overlap_cap_spec:
                 overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[outside_layer_name][inside_layer_name]
 
-            substrate_cap_spec = self.tech_info.substrate_cap_by_layer_name[inside_layer_name]
             sideoverlap_cap_spec = self.tech_info.side_overlap_cap_by_layer_names[inside_layer_name][
                 outside_layer_name]
 

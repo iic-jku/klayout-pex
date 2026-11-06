@@ -202,7 +202,8 @@ def label_names_net(label: Label, net_name: NetName) -> bool:
     """
     :return: whether KLayout named the net after the label, regardless of case, as SPICE reads names:
              A of A,B (a net of several labels), vss of vss$1 (islands of one name),
-             VDD of $1.VDD (a net within a subcircuit)
+             VDD of $1.VDD (a net within a subcircuit, which keeps that name where the label isn't unique,
+             see KLayoutExtractionContext.name_nets_after_subcell_labels)
     """
     label = label.casefold()
     for name in net_name.casefold().split(','):
@@ -470,7 +471,7 @@ class RExtractor:
                         via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
                         via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
 
-                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                        via.resistance = self.pex_context.tech.milliohm_per_cut_to_ohm_um2_for_contact(
                             contact=contact,
                             contact_resistance=contact_resistance
                         )
@@ -505,7 +506,7 @@ class RExtractor:
 
                         contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[via_name]
 
-                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
+                        via.resistance = self.pex_context.tech.milliohm_per_cut_to_ohm_um2_for_via(
                             contact=contact,
                             via_resistance=via_resistance
                         )
@@ -1158,7 +1159,11 @@ class RExtractor:
                             f"{listed_names(block_names)}, where they abut, so the netlist has no ports for their "
                             f"models there")
 
-            keep_pins_of_top_circuit(net_extraction_request.net_name, vertex_ports, vertex_port_pins)
+            # NOTE: by the name KLayout gave the net, rather than the one of its labels in subcells,
+            #       so that a net that the top cell joins has one port, at its first label (#404)
+            klayout_net_name = self.pex_context.klayout_net_names.get(net_extraction_request.net_name,
+                                                                      net_extraction_request.net_name)
+            keep_pins_of_top_circuit(klayout_net_name, vertex_ports, vertex_port_pins)
 
             rex = klp.RNetExtractor(self.pex_context.dbu)
             try:

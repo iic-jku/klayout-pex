@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import allure
+import math
 from typing import *
 import unittest
 
@@ -138,6 +139,20 @@ class Pex25DResolverTest(unittest.TestCase):
     def test_e0211_metal_with_inverted_z(self):
         assert 'PEX25D-E0211' in resolve_codes(
             replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS 1.4 1.0'))
+
+    def test_e0211_ground_plane_without_height(self):
+        for z_offsets in ('-0.1 -0.4', '-0.1 -0.1'):
+            with self.subTest(z_offsets=z_offsets):
+                assert 'PEX25D-E0211' in resolve_codes(
+                    replacing('GROUND_PLANE subs Z_OFFSETS -0.4 -0.1',
+                              f"GROUND_PLANE subs Z_OFFSETS {z_offsets}"))
+
+    def test_e0216_negative_conformal_thickness(self):
+        for old, new in (('THICKNESS_OVER_WRAPPED 0.1', 'THICKNESS_OVER_WRAPPED -0.1'),
+                         ('THICKNESS_BESIDE_WRAPPED 0.08', 'THICKNESS_BESIDE_WRAPPED -0.08'),
+                         ('THICKNESS_ON_FIELD 0.0', 'THICKNESS_ON_FIELD -0.1')):
+            with self.subTest(clause=new):
+                assert resolve_codes(replacing(old, new)) == ['PEX25D-E0216']
 
     def test_e0212_connects_endpoints_out_of_order(self):
         assert 'PEX25D-E0212' in resolve_codes(
@@ -317,6 +332,20 @@ class Pex25DResolverTest(unittest.TestCase):
                 assert 'PEX25D-E0252' in resolve_codes(
                     replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0', f"DOMAIN_BOX {box}"))
 
+    def test_e0254_finite_geometry_outside_the_domain_box(self):
+        for box in ('LL 0.0 -1.0 -1.0 UR 5.0 5.0 5.0',    # cuts lint off in -x
+                    'LL -1.0 -1.0 -1.0 UR 5.0 5.0 2.3'):  # cuts met2 off in +z
+            with self.subTest(box=box):
+                assert 'PEX25D-E0254' in resolve_codes(
+                    replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0', f"DOMAIN_BOX {box}"))
+
+    def test_a_domain_box_may_touch_the_geometry_and_cut_unbounded_materials(self):
+        # The faces at the geometry bounds, met1 grown by lint; below the box are the
+        # ground plane and the fox band, which aren't finite
+        scene = resolved(replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0',
+                                   'DOMAIN_BOX LL -0.08 -0.08 1.0 UR 3.08 1.08 2.4'))
+        assert scene.domain.box == scene.domain.geometry_bounds
+
     # ------------------------------------------------------------- structure
 
     def test_conductors_carry_their_geometry_grouped_by_layer(self):
@@ -345,3 +374,22 @@ class Pex25DResolverTest(unittest.TestCase):
                                    'METAL met2 Z_OFFSETS 2.0 2.4\n'
                                    'METAL diff Z_OFFSETS 0.0 0.1'))
         assert layer(scene, 'diff').zlow == 0
+
+    def test_e0217_a_permittivity_below_that_of_vacuum(self):
+        for record in ('DIELECTRIC_BACKGROUND air PERMITTIVITY 1.0',
+                       'DIELECTRIC_SIMPLE fox WRAPS subs PERMITTIVITY 3.9',
+                       'DIELECTRIC_CONFORMAL lint WRAPS met1 PERMITTIVITY 7.3'):
+            for permittivity in ('0.99', '0.0', '-1.0'):
+                changed = f"{record.rsplit(' ', 1)[0]} {permittivity}"
+                with self.subTest(record=changed):
+                    assert resolve_codes(replacing(record, changed)) == ['PEX25D-E0217']
+
+    def test_e0217_a_permittivity_that_is_not_finite(self):
+        # Which no PEX25D text spells, but binary protobuf and the Python API can
+        for permittivity in (math.nan, math.inf):
+            pex25d_file = read(MINIMAL)
+            pex25d_file.background.permittivity = permittivity
+            report = DiagnosticsReport()
+            with self.subTest(permittivity=permittivity), self.assertRaises(ResolveError):
+                resolve(pex25d_file, report=report)
+            assert codes(report) == ['PEX25D-E0217']

@@ -122,6 +122,36 @@ class Pex25DReaderTest(unittest.TestCase):
             replacing('METAL met1 Z_OFFSETS 1.0 1.4',
                       'METAL met1 Z_OFFSETS 1.00005 1.4'))
 
+    def test_e0111_literals_beyond_the_range_of_their_fields(self):
+        # A length beyond int64 grid units, a material value beyond a double: both reported, with their lines
+        text = replacing('METAL met1 Z_OFFSETS 1.0 1.4', 'METAL met1 Z_OFFSETS 1.0 1e30')
+        text = replacing('DIELECTRIC_BACKGROUND air PERMITTIVITY 1.0',
+                         'DIELECTRIC_BACKGROUND air PERMITTIVITY 1e999', text)
+        report = DiagnosticsReport()
+        with self.assertRaises(ReadError):
+            read(text, report=report)
+        lines = text.splitlines()
+        assert [(d.code, lines[d.source.line - 1].split()[0]) for d in report.diagnostics] == \
+            [('PEX25D-E0111', 'METAL'), ('PEX25D-E0111', 'DIELECTRIC_BACKGROUND')]
+
+    def test_the_largest_length_of_the_grid_is_in_range(self):
+        # (2^63 - 1) * 0.0001 µm
+        pex25d_file = read(replacing('METAL met1 Z_OFFSETS 1.0 1.4',
+                                     'METAL met1 Z_OFFSETS 1.0 922337203685477.5807'))
+        assert pex25d_file.metals[0].zhigh == 2 ** 63 - 1
+
+    def test_e0111_a_material_value_too_small_for_a_double(self):
+        # It would read as 0, a perfect conductor here
+        assert read_codes(replacing('RESISTANCE METAL met1 SHEET 0.125',
+                                    'RESISTANCE METAL met1 SHEET 1e-400')) == ['PEX25D-E0111']
+
+    def test_a_subnormal_or_zero_material_value_is_legal(self):
+        for literal, value in (('1e-310', 1e-310), ('0.0', 0.0), ('-0', 0.0)):
+            with self.subTest(literal=literal):
+                pex25d_file = read(replacing('RESISTANCE METAL met1 SHEET 0.125',
+                                             f"RESISTANCE METAL met1 SHEET {literal}"))
+                assert pex25d_file.metal_resistances[0].sheet == value
+
     def test_e0106_a_length_before_units(self):
         text = ("PEX25D 1.0-rc1\n"
                 "GROUND_PLANE subs Z_OFFSETS -0.4 -0.1\n"
@@ -154,6 +184,43 @@ class Pex25DReaderTest(unittest.TestCase):
         assert codes(report) == ['PEX25D-W0110']
         assert report.diagnostics[0].severity == Severity.WARNING
         assert [c.name for c in pex25d_file.conductors] == ['A', 'B']
+
+    def test_w0253_a_domain_box_takes_precedence_over_a_margin(self):
+        # In whichever order they come, as record order is not significant
+        box = 'DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0'
+        margin = 'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0'
+        for records in (f"{box}\n{margin}", f"{margin}\n{box}"):
+            with self.subTest(records=records):
+                text = replacing(margin, records)
+                report = DiagnosticsReport()
+                pex25d_file = read(text, report=report)
+                assert pex25d_file.WhichOneof('domain') == 'domain_box'
+                assert pex25d_file.domain_box.box.upper_right.x == 50000
+                assert codes(report) == ['PEX25D-W0253']
+                assert report.diagnostics[0].severity == Severity.WARNING
+                assert report.diagnostics[0].source.line == text.splitlines().index(margin) + 1
+
+    def test_e0255_a_repeated_domain_record(self):
+        # Like a repeated GROUND_PLANE: an error at the repeat, and the first one is kept
+        margin = 'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0'
+        for first, repeat, field in (
+                ('DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0',
+                 'DOMAIN_BOX LL -2.0 -2.0 -2.0 UR 6.0 6.0 6.0', 'domain_box'),
+                (margin, 'DOMAIN_MARGIN X 1.0 Y 1.0 Z 1.0', 'domain_margin')):
+            with self.subTest(repeat=repeat):
+                text = replacing(margin, f"{first}\n{repeat}")
+                report = DiagnosticsReport()
+                with self.assertRaises(ReadError):
+                    read(text, report=report)
+                assert codes(report) == ['PEX25D-E0255']
+                assert report.diagnostics[0].source.line == text.splitlines().index(repeat) + 1
+
+    def test_a_repeated_margin_beside_a_box_is_both_ignored_and_repeated(self):
+        text = replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0',
+                         'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0\n'
+                         'DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0\n'
+                         'DOMAIN_MARGIN X 1.0 Y 1.0 Z 1.0')
+        assert read_codes(text) == ['PEX25D-W0253', 'PEX25D-E0255']
 
     def test_read_error_is_raised_once_errors_exist(self):
         with self.assertRaises(ReadError):

@@ -175,6 +175,7 @@ def prepare_exclusions(exclusions: Exclusions,
     if not exclusions.blocks:
         return
 
+    exclusions.labels_by_net_name = pex_context.labels_by_net_name
     exclusions.removed_device_blocks = devices_of_cut_cells(exclusions, pex_context, tech_info)
     if exclusions.removed_device_blocks:
         info(f"The netlist leaves out the {len(exclusions.removed_device_blocks)} devices of the cut cells")
@@ -555,6 +556,23 @@ class RCX25Extractor:
                     "so their capacitances would be missing (e.g. the plates of a MIM cap, "
                     "which --blackbox leaves to the device model):\n" +
                     '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
+                )
+            # NOTE: and the fringe from the edges of a layer to another without a side overlap capacitance
+            #       would fail the extraction (see SidewallAndFringeExtractor.emit_fringe)
+            missing_side_overlap_caps = [f"{inside_layer_name} to {outside_layer_name}"
+                                         for inside_layer_name in all_layer_names
+                                         if SidewallAndFringeExtractor.has_fringe(self.tech_info, inside_layer_name)
+                                         for outside_layer_name in all_layer_names
+                                         if outside_layer_name != inside_layer_name
+                                         and not self.tech_info.side_overlap_cap_by_layer_names
+                                                              .get(inside_layer_name, {}).get(outside_layer_name, None)
+                                         and not self.tech_info.is_device_capacitance(inside_layer_name,
+                                                                                      outside_layer_name)]
+            if missing_side_overlap_caps:
+                raise CExtractionTechError(
+                    "The tech info has no side overlap capacitance for these layer pairs of the layout, "
+                    "so the fringe from the edges of the first to the second can't be extracted:\n" +
+                    '\n'.join(f"  - {pair}" for pair in missing_side_overlap_caps)
                 )
 
             # NOTE: with --blackbox, the capacitances between the plates of a capacitor device

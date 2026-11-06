@@ -583,7 +583,7 @@ def test_device_the_deck_cannot_extract_stops_the_lvs(tmp_path: Path, gds_name: 
         pytest.skip("needs the KLayout executable (KPEX_KLAYOUT_EXE)")
     gds_path = pex_blackboxed.pdk.gds_path('test_patterns', gds_name)
     with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit) as exit_info:
-        KpexCLI().main(['main', '--pdk', pex_blackboxed.pdk.name, '--mode', 'R', '--blackbox', 'y',
+        KpexCLI().main(['main', 'extract', '--pdk', pex_blackboxed.pdk.name, '--mode', 'R', '--blackbox', 'y',
                         '--gds', gds_path, '--out-dir', str(tmp_path), '--2.5D'])
     assert exit_info.value.code == ExitCode.DIAGNOSTIC_ERRORS
     assert message in error_mock.call_args.args[0]

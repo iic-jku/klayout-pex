@@ -35,6 +35,18 @@ import rich.text
 from rich_argparse import RichHelpFormatter
 
 from ..log import LogLevel, warning
+from .multiple_choice import MultipleChoicePattern
+from .number_range import (
+    DELAUNAY_B,
+    NON_NEGATIVE_MICROMETERS,
+    NON_NEGATIVE_NUMBER,
+    NON_NEGATIVE_SQUARE_MICROMETERS,
+    POSITIVE_MICROMETERS,
+    POSITIVE_NUMBER,
+    RELATIVE_ERROR,
+    RELATIVE_PERMITTIVITY,
+    NumberRange,
+)
 from .unit_formatter import parse_spice_number
 
 
@@ -173,68 +185,91 @@ def positive_spice_seconds(text: str) -> float:
     return value
 
 
-def _finite_number(text: str, is_in_range: Callable[[float], bool], range_text: str) -> float:
-    """
-    For the argparse types: a finite number in a range
-
-    :param range_text: the range, for the error message, e.g. '> 0 (in µm)'
-    """
+def _finite_number(text: str, number_range: NumberRange) -> float:
+    """For the argparse types: a finite number in a range"""
     try:
         value = float(text)
     except ValueError:
         value = math.nan
-    if not (math.isfinite(value) and is_in_range(value)):
-        raise argparse.ArgumentTypeError(f"must be a finite number {range_text}, got '{text}'")
+    if value not in number_range:
+        raise argparse.ArgumentTypeError(number_range.error_message(f"'{text}'"))
     return value
 
 
 def positive_micrometers(text: str) -> float:
     """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
-    return _finite_number(text, lambda value: value > 0, "> 0 (in µm)")
+    return _finite_number(text, POSITIVE_MICROMETERS)
 
 
 def non_negative_micrometers(text: str) -> float:
     """argparse type: a finite length >= 0 µm, e.g. '0' or '2.5'"""
-    return _finite_number(text, lambda value: value >= 0, ">= 0 (in µm)")
+    return _finite_number(text, NON_NEGATIVE_MICROMETERS)
 
 
 def non_negative_square_micrometers(text: str) -> float:
     """argparse type: a finite area >= 0 µm², e.g. '0' or '0.5'"""
-    return _finite_number(text, lambda value: value >= 0, ">= 0 (in µm²)")
+    return _finite_number(text, NON_NEGATIVE_SQUARE_MICROMETERS)
 
 
-DELAUNAY_B_MAX = 1.1
-"""
-The largest b = 2·sin(minimum angle) to ask the refinement of KLayout's Region#delaunay for: documented as stable
-up to roughly 1.2, it didn't finish with 1.2 for an L shape, with 1.25 for a box, taking more and more memory
-"""
+def positive_number(text: str) -> float:
+    """argparse type: a finite number > 0, e.g. '0.5'"""
+    return _finite_number(text, POSITIVE_NUMBER)
+
+
+def non_negative_number(text: str) -> float:
+    """argparse type: a finite number >= 0, e.g. '0' or '2'"""
+    return _finite_number(text, NON_NEGATIVE_NUMBER)
+
+
+def relative_error(text: str) -> float:
+    """argparse type: a finite relative error between 0 and 1, both excluded, e.g. '0.05' for 5 %"""
+    return _finite_number(text, RELATIVE_ERROR)
+
+
+def relative_permittivity(text: str) -> float:
+    """argparse type: a finite relative permittivity >= 1, that of vacuum, e.g. '3.9'"""
+    return _finite_number(text, RELATIVE_PERMITTIVITY)
 
 
 def delaunay_b(text: str) -> float:
     """argparse type: the minimum b = 2·sin(angle) of the triangles of a Delaunay refinement, 0 to DELAUNAY_B_MAX"""
-    return _finite_number(text, lambda value: 0 <= value <= DELAUNAY_B_MAX, f"from 0 to {DELAUNAY_B_MAX:g}")
+    return _finite_number(text, DELAUNAY_B)
+
+
+def multiple_choice_pattern(text: str) -> MultipleChoicePattern:
+    """argparse type: a comma separated multiple choice pattern, e.g. 'all,-name1,-name2', '-name1' or '+name1'"""
+    try:
+        return MultipleChoicePattern(pattern=text)
+    except ValueError as e:
+        raise argparse.ArgumentTypeError(
+            f"{e}, got '{text}': give all, optionally with -name subpatterns to exclude, "
+            f"or none, optionally with +name subpatterns to include, "
+            f"e.g. 'all,-name1,-name2' or 'none,+name1', or the subpatterns alone, e.g. '-name1,-name2'") from e
 
 
 DEPRECATED_OPTIONS_DEST = 'deprecated_options'
-"""The namespace attribute with the former option names of the command line, see warn_deprecated_options"""
+"""
+The namespace attribute with the deprecated options of the command line and the advice of their warnings,
+e.g. ('--output', 'use --out-file'), see warn_deprecated_options
+"""
 
 
-class _FormerOptionName(argparse.Action):
+class _DeprecatedOption(argparse.Action):
     """
-    The former name of an option: stores the value as the option does, and notes the former name,
+    A deprecated option, e.g. the former name of an option: stores the value as the option does, and notes the option,
     as the warning must wait until the CLI decided where its output goes (e.g. stdout for an artifact)
     """
 
-    def __init__(self, option_strings: List[str], dest: str, option_name: str, **kwargs):
-        self.option_name = option_name
+    def __init__(self, option_strings: List[str], dest: str, advice: str, **kwargs):
+        self.advice = advice
         super().__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace,
                  values: Any, option_string: Optional[str] = None):
         setattr(namespace, self.dest, self.const if self.nargs == 0 else values)
-        former_names = getattr(namespace, DEPRECATED_OPTIONS_DEST, None) or []
-        former_names.append((option_string, self.option_name))
-        setattr(namespace, DEPRECATED_OPTIONS_DEST, former_names)
+        deprecated_options = getattr(namespace, DEPRECATED_OPTIONS_DEST, None) or []
+        deprecated_options.append((option_string, self.advice))
+        setattr(namespace, DEPRECATED_OPTIONS_DEST, deprecated_options)
 
 
 def add_argument_with_former_name(container: argparse._ActionsContainer,
@@ -257,17 +292,35 @@ def add_argument_with_former_name(container: argparse._ActionsContainer,
         value_kwargs = dict(nargs=0, const=action.const)
     else:
         value_kwargs = dict(nargs=action.nargs, type=action.type, choices=action.choices, metavar=action.metavar)
-    names.add_argument(former_name, dest=action.dest, action=_FormerOptionName, option_name=name,
+    names.add_argument(former_name, dest=action.dest, action=_DeprecatedOption, advice=f"use {name}",
                        default=argparse.SUPPRESS, help=argparse.SUPPRESS, **value_kwargs)
     return action
 
 
+def add_deprecated_argument(container: argparse._ActionsContainer,
+                            name: str,
+                            advice: str,
+                            help: str,
+                            **kwargs) -> argparse.Action:
+    """
+    Adds an option that is deprecated, but still accepted, e.g. as it has no effect any more
+
+    :param container: a parser or an argument group
+    :param advice: the end of the warning and of the help, after '<name> is deprecated, ', e.g. 'it has no effect'
+    :param help: what the option is, the help says that it is deprecated
+    :param kwargs: those of add_argument, for an option that stores a value
+    :return: the action of the option
+    """
+    return container.add_argument(name, action=_DeprecatedOption, advice=advice,
+                                  help=f"{help}, deprecated: {advice}", **kwargs)
+
+
 def warn_deprecated_options(args: argparse.Namespace):
     """
-    Warns about each former option name of the command line (see add_argument_with_former_name)
+    Warns about each deprecated option of the command line (see add_argument_with_former_name, add_deprecated_argument)
     """
-    for former_name, name in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
-        warning(f"{former_name} is deprecated, use {name}")
+    for option_string, advice in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
+        warning(f"{option_string} is deprecated, {advice}")
 
 
 def log_level_by_name(text: str) -> LogLevel:

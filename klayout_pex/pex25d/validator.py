@@ -120,11 +120,13 @@ class Validator:
     def validate_scene(self, scene: Any) -> None:
         self.check_units(scene)
         self.check_scene_layers(scene)
+        self.check_scene_profiles(scene)
         self.check_scene_references(scene)
         self.check_scene_order(scene)
         self.check_depth_ties(scene)
         self.check_scene_terminals(scene)
         self.check_scene_domain(scene)
+        self.check_scene_permittivities(scene)
 
         if self.strict:
             self.check_shapes(shapes_of_scene(scene))
@@ -333,6 +335,26 @@ class Validator:
                               f"{arm.split('_')[0].upper()} resistance",
                               source=layer)
 
+    def check_scene_profiles(self, scene: Any):
+        """The rules the resolver applies to the ground plane and the conformal films."""
+        from .resolver import conformal_thickness_problem
+
+        if scene.HasField('ground_plane'):
+            ground_plane = scene.ground_plane
+            if ground_plane.zhigh <= ground_plane.zlow:
+                self.diagnose('PEX25D-E0271',
+                              f"GROUND_PLANE '{ground_plane.name}' has z extent "
+                              f"[{ground_plane.zlow}, {ground_plane.zhigh}]",
+                              source=ground_plane)
+
+        kinds = pex25d_dielectric_pb2()
+        for dielectric in scene.dielectrics:
+            if dielectric.kind != kinds.DIELECTRIC_KIND_CONFORMAL:
+                continue
+            problem = conformal_thickness_problem(dielectric.name, dielectric)
+            if problem is not None:
+                self.diagnose('PEX25D-E0216', problem, source=dielectric)
+
     def check_scene_references(self, scene: Any) -> None:
         """
         Every name a resolved message states must be in the scene.
@@ -386,6 +408,18 @@ class Validator:
                 return
             previous = dielectric.wrap_depth
 
+    def check_scene_permittivities(self, scene: Any):
+        """The rule the resolver applies to the permittivities of the dielectrics."""
+        from .resolver import permittivity_problem
+
+        records = list(scene.dielectrics)
+        if scene.HasField('background'):
+            records.append(scene.background)
+        for record in records:
+            problem = permittivity_problem(record)
+            if problem is not None:
+                self.diagnose('PEX25D-E0217', problem, source=record)
+
     def check_scene_terminals(self, scene: Any) -> None:
         layers = {layer.name for layer in scene.layers}
         seen: Set[str] = set()
@@ -428,15 +462,21 @@ class Validator:
 
     def check_scene_domain(self, scene: Any):
         """The same rules the resolver applies to DOMAIN_BOX and DOMAIN_MARGIN."""
-        from .resolver import domain_box_problem, domain_margin_problem
+        from .resolver import domain_box_problem, domain_margin_problem, geometry_outside_problem
 
         if not scene.HasField('domain'):
             return
         domain = scene.domain
+        origins = pex25d_scene_pb2().ResolvedDomain
         if domain.HasField('box'):
             problem = domain_box_problem(domain.box, 'The domain box')
             if problem is not None:
                 self.diagnose('PEX25D-E0252', problem)
+            elif domain.origin == origins.ORIGIN_DOMAIN_BOX and domain.HasField('geometry_bounds'):
+                problem = geometry_outside_problem(domain.box, domain.geometry_bounds,
+                                                   'the domain box')
+                if problem is not None:
+                    self.diagnose('PEX25D-E0254', problem)
         if domain.HasField('applied_margin'):
             problem = domain_margin_problem(domain.applied_margin,
                                             'The applied domain margin')

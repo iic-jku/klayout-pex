@@ -122,7 +122,8 @@ class FormerOptionNameTest(unittest.TestCase):
     def test_former_names_store_as_the_new_ones_and_are_noted(self):
         args, _ = parse(parser_with_former_names(), '--output', 'x', '--cache_lvs', 'n', '--pre_flatten')
         self.assertEqual(('x', False, True), (args.output_path, args.cache_lvs, args.pre_flatten))
-        self.assertEqual([('--output', '--out-file'), ('--cache_lvs', '--cache-lvs'), ('--pre_flatten', '--pre-flatten')],
+        self.assertEqual([('--output', 'use --out-file'), ('--cache_lvs', 'use --cache-lvs'),
+                          ('--pre_flatten', 'use --pre-flatten')],
                          args.deprecated_options)
 
     def test_defaults_without_either_name(self):
