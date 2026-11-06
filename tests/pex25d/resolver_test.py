@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import allure
+import math
 from typing import *
 import unittest
 
@@ -359,3 +360,22 @@ class Pex25DResolverTest(unittest.TestCase):
                                    'METAL met2 Z_OFFSETS 2.0 2.4\n'
                                    'METAL diff Z_OFFSETS 0.0 0.1'))
         assert layer(scene, 'diff').zlow == 0
+
+    def test_e0217_a_permittivity_below_that_of_vacuum(self):
+        for record in ('DIELECTRIC_BACKGROUND air PERMITTIVITY 1.0',
+                       'DIELECTRIC_SIMPLE fox WRAPS subs PERMITTIVITY 3.9',
+                       'DIELECTRIC_CONFORMAL lint WRAPS met1 PERMITTIVITY 7.3'):
+            for permittivity in ('0.99', '0.0', '-1.0'):
+                changed = f"{record.rsplit(' ', 1)[0]} {permittivity}"
+                with self.subTest(record=changed):
+                    assert resolve_codes(replacing(record, changed)) == ['PEX25D-E0217']
+
+    def test_e0217_a_permittivity_that_is_not_finite(self):
+        # Which no PEX25D text spells, but binary protobuf and the Python API can
+        for permittivity in (math.nan, math.inf):
+            pex25d_file = read(MINIMAL)
+            pex25d_file.background.permittivity = permittivity
+            report = DiagnosticsReport()
+            with self.subTest(permittivity=permittivity), self.assertRaises(ResolveError):
+                resolve(pex25d_file, report=report)
+            assert codes(report) == ['PEX25D-E0217']

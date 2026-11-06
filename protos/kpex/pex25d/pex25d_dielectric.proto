@@ -66,7 +66,8 @@ message Dielectric {
     string name = 1;
     DielectricKind kind = 2;
 
-    // `PERMITTIVITY <k>` — relative, isotropic, frequency-independent.
+    // `PERMITTIVITY <k>` — relative, isotropic, frequency-independent, so
+    // finite and at least 1, that of vacuum (also for the background).
     // Conductor properties (conductivity, sheet resistance) are out of scope
     // for PEX25D 1.x.
     double permittivity = 3;

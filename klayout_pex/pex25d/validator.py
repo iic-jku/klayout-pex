@@ -125,6 +125,7 @@ class Validator:
         self.check_depth_ties(scene)
         self.check_scene_terminals(scene)
         self.check_scene_domain(scene)
+        self.check_scene_permittivities(scene)
 
         if self.strict:
             self.check_shapes(shapes_of_scene(scene))
@@ -385,6 +386,18 @@ class Validator:
                               source=dielectric)
                 return
             previous = dielectric.wrap_depth
+
+    def check_scene_permittivities(self, scene: Any):
+        """The rule the resolver applies to the permittivities of the dielectrics."""
+        from .resolver import permittivity_problem
+
+        records = list(scene.dielectrics)
+        if scene.HasField('background'):
+            records.append(scene.background)
+        for record in records:
+            problem = permittivity_problem(record)
+            if problem is not None:
+                self.diagnose('PEX25D-E0217', problem, source=record)
 
     def check_scene_terminals(self, scene: Any) -> None:
         layers = {layer.name for layer in scene.layers}
