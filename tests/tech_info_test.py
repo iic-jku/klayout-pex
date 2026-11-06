@@ -43,7 +43,7 @@ import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
-def tech_pbjson_paths() -> list[str]:
+def tech_pbjson_paths() -> List[str]:
     protobuf_dir = os.path.realpath(os.path.join(__file__, '..', '..',
                                                  'klayout_pex_protobuf'))
     return sorted(glob.glob(os.path.join(protobuf_dir, '*_tech.pb.json')))
