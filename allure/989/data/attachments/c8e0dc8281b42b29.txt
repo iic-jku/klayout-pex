@@ -1,0 +1,36 @@
+[14:00:21] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --lvsdb                                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+r_single_wire_li1.lvsdb.gz --out-dir                                            
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpr_5z3j1f --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:00:21] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:00:21] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:00:21] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1855
+[14:00:21] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:00:21] INFO     LVSDB: found 1pins                          extractor.py:482
+[14:00:21] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;840.533                                                                 
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpr_5z3j1f/r_single_wire_li1__
+r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpr_5z3j1f/r_single_wire_li1__
+r_single_wire_li1/r_single_wire_li1_k25d_pex_netlist.spice                      
+[14:00:21] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 1.1 GiB                                            
+[14:00:21] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 1.1 GiB                                                

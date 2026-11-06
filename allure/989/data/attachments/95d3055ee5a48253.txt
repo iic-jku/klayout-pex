@@ -1,0 +1,44 @@
+[13:57:11] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/sg13g2_pr__c
+mim/cmim.lvsdb.gz --out-dir                                                     
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:57:11] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:57:11] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 273.5 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:57:11] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1855
+[13:57:11] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1855
+[13:57:11] INFO     (67, 0) -> (metal5_cap metal5_n_cap)        kpex_cli.py:1855
+[13:57:11] INFO     (125, 10) -> (mim_via)                      kpex_cli.py:1855
+[13:57:11] INFO     (36, 0) -> (cmim_top)                       kpex_cli.py:1855
+[13:57:11] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1855
+[13:57:11] INFO     (67, 2) -> (metal5_pin_con)                 kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:57:11] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1363
+[13:57:11] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 273.5 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;$3;74.784;                                                                
+C2;$2;VSUBS;1.38;                                                               
+C3;$3;VSUBS;0.878;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmim__cmim/cmim_k25d
+_pex_netlist.csv                                                                
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+[13:57:11] INFO     Removing whiteboxed device $1         netlist_expander.py:83
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cmim__cmim/cmim_k25d
+_pex_netlist.spice                                                              
+[13:57:11] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 273.5 MiB                                          
+[13:57:11] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 273.5 MiB                                              
