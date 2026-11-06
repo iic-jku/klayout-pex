@@ -77,3 +77,25 @@ class Test(unittest.TestCase):
         os.environ[EnvVar.PDK.value] = 'invalid_pdk'
         env = Env.from_os_environ()
         self.assertIsNone(env.default_pdk)
+
+    def test_legacy_pdk_name_from_env(self):
+        os.environ[EnvVar.PDK.value] = 'ihp_sg13g2'
+        self.assertEqual(PDK.IHP_SG13G2, Env.from_os_environ().default_pdk)
+
+    def test_unset_pdk_has_no_default(self):
+        os.environ.pop(EnvVar.PDK.value, None)
+        self.assertIsNone(Env.from_os_environ().default_pdk)
+
+    def test_default_magicrc_path_needs_both_pdk_and_pdk_root(self):
+        for var in (EnvVar.PDK, EnvVar.PDK_ROOT):
+            os.environ.pop(var.value, None)
+        for values in ({}, {EnvVar.PDK.value: 'sky130A'}, {EnvVar.PDK_ROOT.value: 'pdks'}):
+            with self.subTest(values=values), mock.patch.dict(os.environ, values):
+                self.assertIsNone(Env.from_os_environ().default_magicrc_path)
+
+    def test_default_magicrc_path_is_absolute(self):
+        os.environ[EnvVar.PDK_ROOT.value] = os.path.join('test data', 'pdks')
+        os.environ[EnvVar.PDK.value] = 'sky130A'
+        self.assertEqual(os.path.abspath(os.path.join('test data', 'pdks', 'sky130A',
+                                                      'libs.tech', 'magic', 'sky130A.magicrc')),
+                         Env.from_os_environ().default_magicrc_path)

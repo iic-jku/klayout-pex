@@ -696,6 +696,8 @@ class Exclusions:
         self.labels_of_cut_cells: Set[Tuple[str, kdb.Point]] = {(label.text, label.position)
                                                                 for block in blocks for label in block.labels}
         self.labels_of_rest: Set[Tuple[str, kdb.Point]] = set()
+        # the labels on each net, of the whole hierarchy, by its name (see KLayoutExtractionContext.labels_of_nets)
+        self.labels_by_net_name: Mapping[NetName, Collection[str]] = {}
 
         # the parts of the nets the field solvers have as conductors, by the names of the conductors
         self.conductor_parts: Dict[str, ConductorPart] = {}
@@ -1032,11 +1034,14 @@ class Exclusions:
 
     def is_only_named_by_cut_cells(self, net_name: NetName) -> bool:
         """
-        :return: whether all labels that the net is named after (e.g. A,B) are labels of the cut cells only
+        :return: whether the net has labels, and all of them are labels of the cut cells only,
+                 by the labels on the net, rather than by its name, which keeps no label where it isn't unique
+                 (e.g. $2, the net of the label A of one of two instances of a cut cell, #417)
         """
+        labels = self.labels_by_net_name.get(net_name, ())
         texts_of_cut_cells = {text for text, _ in self.labels_of_cut_cells}
         texts_of_rest = {text for text, _ in self.labels_of_rest}
-        return all(text in texts_of_cut_cells and text not in texts_of_rest for text in net_name.split(','))
+        return bool(labels) and all(text in texts_of_cut_cells and text not in texts_of_rest for text in labels)
 
     def labels_at(self, block_index: int, layer_name: LayerName, box: kdb.Box) -> Dict[int, BlockLabel]:
         """

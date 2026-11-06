@@ -31,7 +31,13 @@ from typing import *
 import allure
 import pytest
 
-from klayout_pex.netlist.spice_syntax import SpiceLine, SpiceSyntaxError, spice_lines, strip_comment
+from klayout_pex.netlist.spice_syntax import (
+    SpiceLine,
+    SpiceSyntaxError,
+    read_subcircuit_ports,
+    spice_lines,
+    strip_comment,
+)
 
 parent_suite = "Unit Tests"
 tags = ("Netlist", "SPICE")
@@ -124,3 +130,18 @@ def test_continuation_without_a_line_to_continue_is_an_error(text: str, line_num
         spice_lines(text)
     assert exception_info.value.line_number == line_number
     assert str(exception_info.value) == f"line {line_number}: continuation line without a line to continue"
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('text, ports', [
+    (".SUBCKT inv A Y\nM1 Y A 0 0 nmos\n.ENDS inv\n", ['A', 'Y']),
+    # NOTE: after another subcircuit, regardless of case, across a comment line, up to the parameters
+    (".subckt other A\n.ends other\n.subckt INV A $ in\n* out\n+ Y PARAMS: w=1\nM1 Y A 0 0 nmos\n.ends INV\n",
+     ['A', 'Y']),
+    (".SUBCKT other A Y\n.ENDS other\n", None),
+], ids=['one line', 'continued', 'missing'])
+def test_ports_of_a_subcircuit_are_read_from_its_subckt_statement(text: str, ports: Optional[List[str]], tmp_path):
+    path = tmp_path / 'netlist.spice'
+    path.write_text(text, encoding='utf-8')
+    assert read_subcircuit_ports(str(path), 'inv') == ports

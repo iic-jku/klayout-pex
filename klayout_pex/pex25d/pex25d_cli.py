@@ -67,7 +67,6 @@ from ..log import (
     subproc,
 )
 from ..util.argparse_helpers import (
-    DELAUNAY_B_MAX,
     SectionedHelpFormatter,
     add_argument_with_former_name,
     add_help_subcommand,
@@ -81,6 +80,7 @@ from ..util.argparse_helpers import (
     true_or_false,
     warn_deprecated_options,
 )
+from ..util.number_range import DELAUNAY_B_MAX
 from ..version import __version__
 
 from .exporters import ExportError, ExporterExecutionError

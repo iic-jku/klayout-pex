@@ -124,6 +124,44 @@ To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 > The older flat form without a subcommand (`./kpex.sh --pdk sky130A --gds …`) still
 > works and is treated as `kpex extract …`, but it warns and will be removed.
 
+### Result file
+
+Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,
+and with `--out-result PATH` also to that path, so that scripts need neither the naming of the
+run directory nor the log. JSON in UTF-8, with absolute paths.
+
+It is written:
+- to `--out-result` once the command line is parsed (a path that can't be written fails the run
+  with exit code 2), into the run directory once the arguments are checked
+- at the start of each stage, so that a run killed by the OS (e.g. for its memory) leaves the
+  stage it was in, with `exit_code` `null`
+- when the run ends, also if it fails
+- not for `--help`, nor for a command line with an unknown option or an invalid value (exit code 2)
+
+Keys (`format_version` 1, which goes up when a key is removed or changes its meaning, not for new keys):
+- `format_version`, `kpex_version`
+- `command`: `extract` or `pex25d`, `arguments`: the command line after `kpex`
+- `pdk`, `cell`, `run_dir`: `null` until known
+- `engines`: e.g. `["KPEX/2.5D"]`, as the netlists name them, `mode`: the `--mode` of the 2.5D engine
+- `inputs`: `gds`, `lvsdb` and `schematic`, each a path or `null`
+- `stage`: the stage the run was in when it ended or was killed: `arguments`, `magic`, `lvs`,
+  `fastercap`, `fastcap2`, `2.5d` or `pex25d`, and `done` after exit code 0
+- `exit_code`: `null` until the run ends, so also of a run that is killed or interrupted
+- `halo_um`: the sidewall halo of the 2.5D engine (`--halo` or the tech info), `null` without capacitances
+- `devices`: the numbers of the devices of the cell that the netlists leave to their models,
+  `black_boxed` (with `--blackbox y`, e.g. MIM and MOM caps) and `excluded` (of `--cut`),
+  or remove, `white_boxed` (with `--blackbox n`, their capacitances extracted)
+- `check_problems`: what `--check` finds in the netlist of the 2.5D engine, also where it only warns
+- `peak_memory`: `process_bytes` and `largest_subprocess_bytes` (`null` on Windows), as logged
+- `files`: the outputs, in the order written, each with `kind`, `path` and `engine` (`null` for those
+  of the run, e.g. its log), the netlists also with `format` (`spice` or `vacask`), `reduced` and
+  `ports`, as the `.SUBCKT` line of the cell has them (`null` for VACASK, which names them differently)
+  - kinds: `netlist`, `out_netlist` (`--out-netlist`), `netlist_csv`, `capacitance_matrix`, `report`,
+    `lvsdb`, `log`, `pex25d_file` and `pex25d_scene`
+  - not the intermediate files, e.g. the layout dumps and the solver input
+- `warnings`, `errors`: as logged (`--log-level error` leaves out the warnings)
+- the keys of what a run didn't get to, e.g. `devices` before LVS, or `halo_um` of MAGIC, are `null`
+
 ## Exporter plugins
 
 Install plugins into the Python environment running KPEX. Register a zero-argument

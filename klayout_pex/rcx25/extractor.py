@@ -175,6 +175,7 @@ def prepare_exclusions(exclusions: Exclusions,
     if not exclusions.blocks:
         return
 
+    exclusions.labels_by_net_name = pex_context.labels_by_net_name
     exclusions.removed_device_blocks = devices_of_cut_cells(exclusions, pex_context, tech_info)
     if exclusions.removed_device_blocks:
         info(f"The netlist leaves out the {len(exclusions.removed_device_blocks)} devices of the cut cells")

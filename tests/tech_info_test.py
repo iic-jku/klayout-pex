@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 import glob
+import math
 import os
 import re
 import tempfile
@@ -36,7 +37,9 @@ import allure
 import google.protobuf.json_format
 
 from klayout_pex.tech_info import TechDefError, TechInfo
+from klayout_pex.util.multiple_choice import MultipleChoicePattern
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
@@ -94,6 +97,40 @@ def tech_with_metal_on_one_gds_pair(stack_layer_names: Sequence[str],
                                                                    drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=0)),
                                      process_layer_name=process_layer_name)
     return tech
+
+
+def tech_with_two_metals() -> tech_pb2.Technology:
+    """
+    met1 (1/0) and met2 (2/0), with the LVS layer met1_con (101/7) derived from met1,
+    in a stack of met1 (with via1 up to met2), its conformal liner, wrapped by the conformal coat,
+    ild, met2 and air
+    """
+    tech = tech_pb2.Technology(name='test')
+    for gds_layer, name in enumerate(('met1', 'met2'), start=1):
+        tech.layers.add(name=name, drw_gds_pair=tech_pb2.GDSPair(layer=gds_layer, datatype=0))
+    tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name='met1_con',
+                                                               drw_gds_pair=tech_pb2.GDSPair(layer=101, datatype=7)),
+                                 original_layer_name='met1')
+    LT = stack_pb2.ProcessStackInfo
+    stack = tech.process_stack
+    met1 = stack.layers.add(name='met1', layer_type=LT.LAYER_TYPE_METAL)
+    met1.metal_layer.z = 1.0
+    met1.metal_layer.thickness = 0.2
+    met1.metal_layer.contact_above.CopyFrom(LT.Contact(name='via1', layer_below='met1', metal_above='met2', width=0.2))
+    for name, reference, k in (('liner', 'met1', 4.0), ('coat', 'liner', 5.0)):
+        film = stack.layers.add(name=name, layer_type=LT.LAYER_TYPE_CONFORMAL_DIELECTRIC)
+        film.conformal_dielectric_layer.reference = reference
+        film.conformal_dielectric_layer.dielectric_k = k
+    stack.layers.add(name='ild', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 3.5
+    met2 = stack.layers.add(name='met2', layer_type=LT.LAYER_TYPE_METAL)
+    met2.metal_layer.z = 2.5
+    met2.metal_layer.thickness = 0.3
+    stack.layers.add(name='air', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 1.0
+    return tech
+
+
+def stack_layer(tech: tech_pb2.Technology, name: str) -> stack_pb2.ProcessStackInfo.LayerInfo:
+    return next(lyr for lyr in tech.process_stack.layers if lyr.name == name)
 
 
 @allure.parent_suite('Unit Tests')
@@ -364,6 +401,17 @@ class Test(unittest.TestCase):
                                                       r"  - the LVS computed layer met5_rfcap names the layer met4 "):
                 TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
+    def test_the_reader_refuses_a_side_halo_that_is_not_positive(self):
+        # NOTE: 0 failed the extraction with a ZeroDivisionError, -1 left out all capacitances (#424)
+        for side_halo in (0.0, -1.0, math.nan, math.inf):
+            tech = tech_pb2.Technology(name='test')
+            tech.process_parasitics.side_halo = side_halo
+            with self.subTest(side_halo=side_halo), tempfile.TemporaryDirectory() as tmp_dir:
+                with self.assertRaisesRegex(TechDefError, rf"process_parasitics\.side_halo has to be a finite number "
+                                                          rf"> 0 \(in µm\), but in .*test_tech\.pb\.json "
+                                                          rf"it is {side_halo:g}$"):
+                    TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
+
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
         stack = tech.process_stack
@@ -460,3 +508,104 @@ class Test(unittest.TestCase):
                           'capm': 'capm',
                           'via3_cap': 'via3_cap'},
                          TechInfo(tech, dielectric_filter=None).process_layer_name_by_lvs_layer_name)
+
+    def test_gds_pairs_of_the_drawn_and_lvs_layers(self):
+        tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=None)
+        self.assertEqual((1, 0), tech_info.gds_pair('met1'))
+        self.assertEqual((101, 7), tech_info.gds_pair('met1_con'))
+        self.assertIsNone(tech_info.gds_pair('missing'))
+        self.assertEqual({(101, 7): 'met1'}, tech_info.canonical_layer_name_by_gds_pair)
+        self.assertEqual('met1_con', tech_info.computed_layer_info_by_gds_pair[(101, 7)].layer_info.name)
+
+    def test_an_lvs_layer_comes_before_the_drawn_layer_of_its_name(self):
+        tech = tech_with_two_metals()
+        tech.lvs_computed_layers[0].layer_info.name = 'met1'
+        self.assertEqual((101, 7), TechInfo(tech, dielectric_filter=None).gds_pair('met1'))
+
+    def test_the_dielectric_filter_keeps_the_permittivities_of_the_dielectrics_it_includes(self):
+        for pattern, expected in (('all', {'liner': 4.0, 'coat': 5.0, 'ild': 3.5, 'air': 1.0}),
+                                  ('all,-coat,-air', {'liner': 4.0, 'ild': 3.5}),
+                                  ('none,+ild', {'ild': 3.5}),
+                                  ('none', {})):
+            with self.subTest(pattern=pattern):
+                tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=MultipleChoicePattern(pattern))
+                self.assertEqual(expected, tech_info.dielectric_by_name)
+                self.assertEqual(list(expected), [lyr.name for lyr in tech_info.filtered_dielectric_layers])
+
+    def test_conformal_dielectrics_wrap_each_other_in_a_chain(self):
+        tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=None)
+        self.assertEqual('liner', tech_info.conformal_dielectric_wrapping('met1').name)
+        self.assertEqual('coat', tech_info.conformal_dielectric_wrapping('liner').name)
+        self.assertIsNone(tech_info.conformal_dielectric_wrapping('coat'))
+
+    def test_an_excluded_conformal_dielectric_wraps_nothing(self):
+        tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=MultipleChoicePattern('all,-liner'))
+        self.assertIsNone(tech_info.conformal_dielectric_wrapping('met1'))
+
+    def test_two_conformal_dielectrics_wrapping_one_layer_are_an_error(self):
+        tech = tech_with_two_metals()
+        stack_layer(tech, 'coat').conformal_dielectric_layer.reference = 'met1'
+        with self.assertRaisesRegex(Exception, 'multiple conformal dielectric layers wrapping met1'):
+            TechInfo(tech, dielectric_filter=None).conformal_dielectric_wrapping('met1')
+
+    def test_the_simple_dielectric_above_a_metal_reaches_up_to_the_next_metal(self):
+        tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=None)
+        dielectric, height = tech_info.simple_dielectric_above_metal('met1')
+        self.assertEqual('ild', dielectric.name)
+        self.assertAlmostEqual(1.5, height)  # NOTE: from the bottom of met1 to the bottom of met2
+
+    def test_an_excluded_simple_dielectric_above_a_metal_is_none(self):
+        tech_info = TechInfo(tech_with_two_metals(), dielectric_filter=MultipleChoicePattern('all,-ild'))
+        self.assertEqual((None, 0.0), tech_info.simple_dielectric_above_metal('met1'))
+
+    def test_the_layers_of_a_via_are_by_the_lvs_layer_name_of_the_via(self):
+        # NOTE: e.g. sky130A via3, between met3 and met4, and between met3 and capm
+        tech = tech_with_two_metals()
+        stack_layer(tech, 'met2').metal_layer.contact_above.CopyFrom(
+            stack_pb2.ProcessStackInfo.Contact(name='via1_cap', layer_below='met2', metal_above='cap'))
+        self.assertEqual({'via1': ('met1', 'met2'), 'via1_cap': ('met2', 'cap')},
+                         TechInfo(tech, dielectric_filter=None).bottom_and_top_layer_name_by_via_computed_layer_name)
+
+    def test_contact_and_via_resistances_are_per_area_of_their_cuts(self):
+        # NOTE: the tech info has mΩ per cut, the R extraction wants Ω·µm² (cut resistance times cut area)
+        for width, milliohm, expected in ((0.2, 4500.0, 0.18), (0.4, 4500.0, 0.72), (0.2, 0.0, 0.0)):
+            with self.subTest(width=width, milliohm=milliohm):
+                contact = stack_pb2.ProcessStackInfo.Contact(width=width)
+                contact_resistance = parasitics_pb2.ResistanceInfo.ContactResistance(resistance=milliohm)
+                via_resistance = parasitics_pb2.ResistanceInfo.ViaResistance(resistance=milliohm)
+                self.assertAlmostEqual(milliohm / 1000.0, TechInfo.milliohm_to_ohm(milliohm))
+                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                    contact, contact_resistance))
+                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_via(
+                    contact, via_resistance))
+
+    def test_the_overlap_capacitances_have_those_to_the_substrate(self):
+        tech = tech_with_two_metals()
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='met1', area_capacitance=12.0, perimeter_capacitance=7.0)
+        caps.overlaps.add(top_layer_name='met2', bottom_layer_name='met1', capacitance=23.0)
+        caps.overlaps.add(top_layer_name='met2', bottom_layer_name='poly', capacitance=34.0)
+        caps.overlaps.add(top_layer_name='met1', bottom_layer_name='poly', capacitance=45.0)
+        serialized = tech.SerializeToString()
+        overlap_caps = TechInfo(tech, dielectric_filter=None).overlap_cap_by_layer_names
+        self.assertEqual({'met1': {'VSUBS': 12.0, 'poly': 45.0}, 'met2': {'met1': 23.0, 'poly': 34.0}},
+                         {top: {bottom: cap.capacitance for bottom, cap in caps_by_bottom.items()}
+                          for top, caps_by_bottom in overlap_caps.items()})
+        self.assertEqual(('met1', 'VSUBS'),
+                         (overlap_caps['met1']['VSUBS'].top_layer_name,
+                          overlap_caps['met1']['VSUBS'].bottom_layer_name))
+        self.assertEqual(serialized, tech.SerializeToString())
+
+    def test_the_side_overlap_capacitances_have_the_perimeter_capacitances_to_the_substrate(self):
+        tech = tech_with_two_metals()
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='met1', area_capacitance=12.0, perimeter_capacitance=7.0)
+        caps.substrates.add(layer_name='met2', area_capacitance=4.0, perimeter_capacitance=3.0)
+        caps.sideoverlaps.add(in_layer_name='met1', out_layer_name='met2', capacitance=8.0)
+        side_overlap_caps = TechInfo(tech, dielectric_filter=None).side_overlap_cap_by_layer_names
+        self.assertEqual({'met1': {'VSUBS': 7.0, 'met2': 8.0}, 'met2': {'VSUBS': 3.0}},
+                         {inside: {outside: cap.capacitance for outside, cap in caps_by_outside.items()}
+                          for inside, caps_by_outside in side_overlap_caps.items()})
+        self.assertEqual(('met1', 'VSUBS'),
+                         (side_overlap_caps['met1']['VSUBS'].in_layer_name,
+                          side_overlap_caps['met1']['VSUBS'].out_layer_name))
