@@ -39,8 +39,12 @@ from .multiple_choice import MultipleChoicePattern
 from .number_range import (
     DELAUNAY_B,
     NON_NEGATIVE_MICROMETERS,
+    NON_NEGATIVE_NUMBER,
     NON_NEGATIVE_SQUARE_MICROMETERS,
     POSITIVE_MICROMETERS,
+    POSITIVE_NUMBER,
+    RELATIVE_ERROR,
+    RELATIVE_PERMITTIVITY,
     NumberRange,
 )
 from .unit_formatter import parse_spice_number
@@ -205,6 +209,26 @@ def non_negative_micrometers(text: str) -> float:
 def non_negative_square_micrometers(text: str) -> float:
     """argparse type: a finite area >= 0 µm², e.g. '0' or '0.5'"""
     return _finite_number(text, NON_NEGATIVE_SQUARE_MICROMETERS)
+
+
+def positive_number(text: str) -> float:
+    """argparse type: a finite number > 0, e.g. '0.5'"""
+    return _finite_number(text, POSITIVE_NUMBER)
+
+
+def non_negative_number(text: str) -> float:
+    """argparse type: a finite number >= 0, e.g. '0' or '2'"""
+    return _finite_number(text, NON_NEGATIVE_NUMBER)
+
+
+def relative_error(text: str) -> float:
+    """argparse type: a finite relative error between 0 and 1, both excluded, e.g. '0.05' for 5 %"""
+    return _finite_number(text, RELATIVE_ERROR)
+
+
+def relative_permittivity(text: str) -> float:
+    """argparse type: a finite relative permittivity >= 1, that of vacuum, e.g. '3.9'"""
+    return _finite_number(text, RELATIVE_PERMITTIVITY)
 
 
 def delaunay_b(text: str) -> float:
