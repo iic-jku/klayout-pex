@@ -23,16 +23,33 @@
 #
 
 import os
+import sys
 import tempfile
 
 import allure
 import klayout.db as kdb
 import klayout.lay as klay
+from PIL import Image
 
 
-def attach_layout_preview(lyt_path: str, gds_path: str):
+def write_as_palette_png(png_path: str):
     """
-    Attaches a preview of the layout (4096 × 2160 px) to the allure report
+    Rewrites a PNG with a palette, if it has at most 256 colors: lossless, and for the layout previews
+    (up to ~20 colors) about a third of the size of KLayout's RGB PNG
+    """
+    with Image.open(png_path) as image:
+        rgb = image.convert('RGB')
+    colors = rgb.getcolors(maxcolors=256)
+    if colors is None:
+        return
+    palette = Image.new('P', (1, 1))
+    palette.putpalette([channel for _, color in colors for channel in color])
+    rgb.quantize(palette=palette, dither=Image.Dither.NONE).save(png_path, optimize=True)
+
+
+def render_layout_preview(lyt_path: str, gds_path: str, png_path: str):
+    """
+    Writes a preview of the layout (4096 × 2160 px), as KLayout renders it
 
     :param lyt_path: the KLayout technology, whose layer properties give the colors
     """
@@ -48,15 +65,28 @@ def attach_layout_preview(lyt_path: str, gds_path: str):
     lv.set_config('bitmap-oversampling', '1')
     lv.set_config('default-font-size', '4')
     lv.set_config('default-text-size', '0.1')
+    lv.save_image_with_options(
+        png_path,
+        width=4096, height=2160
+        # ,
+        # linewidth=2,
+        # resolution=0.25  # 4x as large fonts
+    )
+
+
+def attach_layout_preview(lyt_path: str, gds_path: str):
+    """
+    Attaches a preview of the layout to the allure report, on Linux only:
+    the other platforms would attach the same image again, to their results of the same test
+
+    :param lyt_path: the KLayout technology, whose layer properties give the colors
+    """
+    if sys.platform != 'linux':
+        return
 
     # NOTE: allure copies the file when attaching it, so the temporary directory takes it along
     with tempfile.TemporaryDirectory() as tmp_dir:
         preview_png_path = os.path.join(tmp_dir, 'layout_preview.png')
-        lv.save_image_with_options(
-            preview_png_path,
-            width=4096, height=2160
-            # ,
-            # linewidth=2,
-            # resolution=0.25  # 4x as large fonts
-        )
+        render_layout_preview(lyt_path, gds_path, preview_png_path)
+        write_as_palette_png(preview_png_path)
         allure.attach.file(preview_png_path, name='📸 layout_preview.png', attachment_type=allure.attachment_type.PNG)

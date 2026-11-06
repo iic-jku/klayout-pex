@@ -92,6 +92,7 @@ from .netlist.netlist_convert import convert_to_vacask
 from .netlist.netlist_format import NetlistFormat
 from .netlist.spice_hierarchy import SpiceEvaluationError
 from .netlist.spice_reader import SpiceReader, SpiceReaderError
+from .netlist.spice_syntax import read_subcircuit_ports
 from .netlist.vacask_writer import VacaskWriterError
 from .pex25d.artifact import (
     CANONICAL_SUFFIX,
@@ -139,6 +140,7 @@ from .rcx25.netlist_checks import (
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
+from .run_result import DeviceCounts, FileKind, RESULT_FILE_NAME, RunResult, Stage
 from .schematic_devices import schematic_devices
 from .device_models import DeviceModelError, DeviceModels
 from .tech_info import TechDefError, TechInfo
@@ -152,17 +154,26 @@ from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
+    add_deprecated_argument,
     add_help_subcommand,
     add_log_level_argument,
     add_subcommand_sections,
+    delaunay_b,
     handle_help_subcommand,
     multiple_choice_pattern,
+    non_negative_micrometers,
+    non_negative_number,
+    non_negative_square_micrometers,
     positive_micrometers,
+    positive_number,
     positive_spice_seconds,
+    relative_error,
+    relative_permittivity,
     render_enum_help,
     true_or_false,
     warn_deprecated_options,
 )
+from .util.number_range import DELAUNAY_B_MAX
 from .version import __version__
 
 
@@ -208,6 +219,9 @@ def halo_default_help(halo_by_pdk: Mapping[str, float]) -> str:
 
 
 class KpexCLI:
+    def __init__(self):
+        self.run_result = RunResult()  # NOTE: main starts one per run, this one is for methods called without main
+
     # ---------------------------------------------------------- argument groups
     #
     # Each group is attached to a *given* parser rather than to one flat parser,
@@ -255,6 +269,12 @@ class KpexCLI:
         add_argument_with_former_name(group_pex, "--out-dir", "--out_dir",
                                       dest="output_dir_base_path", default="output",
                                       help="Run directory path (default is '%(default)s')")
+        group_pex.add_argument("--out-result", dest="out_result_path", default=None, metavar='PATH',
+                               help=f"Optional additional path of the result file, which the run directory "
+                                    f"has as {RESULT_FILE_NAME}: JSON with the files written (with the ports of "
+                                    f"the netlists), the warnings and errors, the exit code and the stage reached, "
+                                    f"written at the start of each stage and when the run ends, also if it fails "
+                                    f"(see 'Result file' in DEVELOPMENT.md) (default is none)")
 
         if include_spice_output:
             add_argument_with_former_name(group_pex, "--out-netlist", "--out_netlist", "-o",
@@ -351,32 +371,34 @@ class KpexCLI:
     def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
         group_fastercap = parser.add_argument_group("FasterCap Options")
         add_argument_with_former_name(group_fastercap, "--k-void", "--k_void", "-k", dest="k_void",
-                                      type=float, default=3.9,
-                                      help="Dielectric constant of void (default is %(default)s)")
+                                      type=relative_permittivity, default=3.9,
+                                      help="Dielectric constant of void, >= 1 (default is %(default)s)")
 
-        # TODO: reflect that these are also now used by KPEX/2.5D engine!
+        # NOTE: these reach the FasterCap and FastCap2 input only, KPEX/2.5D triangulates with values of its own
         add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
-                                      type=float, default=50,
+                                      type=non_negative_square_micrometers, default=50,
                                       help="Delaunay triangulation maximum area (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--delaunay-b", "--delaunay_b", "-b", dest="delaunay_b",
-                                      type=float, default=0.5,
-                                      help="Delaunay triangulation b (default is %(default)s)")
+                                      type=delaunay_b, default=0.5,
+                                      help=f"Delaunay triangulation b = 2·sin(minimum angle), "
+                                           f"from 0 to {DELAUNAY_B_MAX:g} (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--geo-check", "--geo_check", dest="geometry_check",
                                       type=true_or_false, default=False,
                                       help=f"Validate geometries before passing to FasterCap "
                                            f"(default is False)")
         group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
-                                     type=float, default=0.05,
-                                     help="FasterCap -aX error tolerance (default is %(default)s)")
+                                     type=relative_error, default=0.05,
+                                     help="FasterCap -aX relative error tolerance, > 0 and < 1 (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--d-coeff", "--d_coeff", dest="fastercap_d_coeff",
-                                      type=float, default=0.5,
+                                      type=positive_number, default=0.5,
                                       help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
                                            f"(default is %(default)s)")
-        group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
-                                     type=float, default=0.5,
-                                     help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
+        add_deprecated_argument(group_fastercap, "--mesh", dest="fastercap_mesh_refinement_value",
+                                type=float, default=None,
+                                advice="it has no effect, as FasterCap's automatic refinement (--tolerance) overrides it",
+                                help="FasterCap -m mesh relative refinement value")
         group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
-                                     type=float, default=2,
+                                     type=non_negative_number, default=2,
                                      help="FasterCap -f out-of-core free memory to link memory condition "
                                           "(0 = don't go OOC, default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--auto-precond", "--auto_precond",
@@ -579,7 +601,7 @@ class KpexCLI:
                                     "an integer multiple of it, and it must divide the "
                                     "layout DBU exactly.")
         add_argument_with_former_name(group_out, "--domain-margin", "--domain_margin", dest='pex25d_domain_margin',
-                                      type=float, default=None, metavar='UM',
+                                      type=non_negative_micrometers, default=None, metavar='UM',
                                       help="Emit DOMAIN_MARGIN with this clearance in µm "
                                            "(default is none, leaving the domain unset for "
                                            "the solver adapter to choose)")
@@ -1036,6 +1058,21 @@ class KpexCLI:
         return NetlistPrinter(header=header,
                               device_models=tech_info.device_models)
 
+    def add_netlist(self,
+                    kind: FileKind,
+                    path: str,
+                    engine: ExtractionEngine,
+                    cell_name: str,
+                    netlist_format: NetlistFormat = NetlistFormat.SPICE,
+                    reduced: bool = False):
+        """
+        Notes a netlist the run wrote in the result file, a SPICE netlist with the ports of the cell as written
+        (a VACASK netlist has them in VACASK names)
+        """
+        ports = read_subcircuit_ports(path, cell_name) if netlist_format == NetlistFormat.SPICE else None
+        self.run_result.add_file(kind, path, engine=engine, netlist_format=netlist_format, reduced=reduced,
+                                 ports=ports)
+
     def build_fastercap_input(self,
                               args: argparse.Namespace,
                               pex_context: KLayoutExtractionContext,
@@ -1092,17 +1129,19 @@ class KpexCLI:
                       log_path=log_path,
                       tolerance=args.fastercap_tolerance,
                       d_coeff=args.fastercap_d_coeff,
-                      mesh_refinement_value=args.fastercap_mesh_refinement_value,
                       ooc_condition=args.fastercap_ooc_condition,
                       auto_preconditioner=args.fastercap_auto_preconditioner,
                       galerkin_scheme=args.fastercap_galerkin_scheme,
                       jacobi_preconditioner=args.fastercap_jacobi_preconditioner)
+        self.run_result.add_file(FileKind.LOG, log_path, engine=ExtractionEngine.FASTERCAP)
 
         cap_matrix = fastercap_parse_capacitance_matrix(log_path)
         cap_matrix.write_csv(raw_csv_path)
 
         cap_matrix = cap_matrix.averaged_off_diagonals()
         cap_matrix.write_csv(avg_csv_path)
+        for csv_path in (raw_csv_path, avg_csv_path):
+            self.run_result.add_file(FileKind.CAPACITANCE_MATRIX, csv_path, engine=ExtractionEngine.FASTERCAP)
 
         cap_matrix_interpreter = FasterCapOutputInterpreter()
 
@@ -1131,21 +1170,28 @@ class KpexCLI:
         rule()
 
         info(f"Wrote expanded netlist CSV to: {expanded_netlist_csv_path}")
+        self.run_result.add_file(FileKind.NETLIST_CSV, expanded_netlist_csv_path, engine=ExtractionEngine.FASTERCAP)
 
         netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTERCAP, pex_context.tech)
         netlist_printer.write(expanded_netlist, expanded_netlist_path)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
+        self.add_netlist(FileKind.NETLIST, expanded_netlist_path, ExtractionEngine.FASTERCAP,
+                         pex_context.annotated_top_cell.name)
 
         # FIXME: should this be already reduced?
         if args.output_netlist_path:
             netlist_printer.write(expanded_netlist, args.output_netlist_path)
             info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
+            self.add_netlist(FileKind.OUT_NETLIST, args.output_netlist_path, ExtractionEngine.FASTERCAP,
+                             pex_context.annotated_top_cell.name)
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
                                                  top_cell_name=pex_context.annotated_top_cell.name)
         netlist_printer.write(reduced_netlist, reduced_netlist_path)
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
+        self.add_netlist(FileKind.NETLIST, reduced_netlist_path, ExtractionEngine.FASTERCAP,
+                         pex_context.annotated_top_cell.name, reduced=True)
 
         self._fastercap_extracted_csv_path = expanded_netlist_csv_path
 
@@ -1202,6 +1248,7 @@ class KpexCLI:
                   magicrc_path=args.magicrc_path,
                   script_path=magic_script_path,
                   log_path=magic_log_path)
+        self.run_result.add_file(FileKind.LOG, magic_log_path, engine=ExtractionEngine.MAGIC)
 
         magic_pex_run = parse_magic_pex_run(Path(magic_run_dir))
 
@@ -1212,6 +1259,7 @@ class KpexCLI:
                                                   dbu=layout.dbu)
             magic_log_analyzer.analyze()
             write_output_file(report.save, report_db_path)
+            self.run_result.add_file(FileKind.REPORT, report_db_path, engine=ExtractionEngine.MAGIC)
 
         rule("Paths")
         if args.magic_analyze:
@@ -1219,9 +1267,12 @@ class KpexCLI:
         subproc(f"SPICE netlist saved at: {output_netlist_path}")
 
         if os.path.exists(output_netlist_path):
+            self.add_netlist(FileKind.NETLIST, output_netlist_path, ExtractionEngine.MAGIC, args.effective_cell_name)
             if args.output_netlist_path and os.path.exists(output_netlist_path):
                 shutil.copy(output_netlist_path, args.output_netlist_path)
                 info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
+                self.add_netlist(FileKind.OUT_NETLIST, args.output_netlist_path, ExtractionEngine.MAGIC,
+                                 args.effective_cell_name)
 
             rule("MAGIC PEX SPICE netlist")
             with open(output_netlist_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -1246,12 +1297,15 @@ class KpexCLI:
         run_fastcap(exe_path=args.fastcap_exe_path,
                     lst_file_path=lst_file,
                     log_path=log_path)
+        self.run_result.add_file(FileKind.LOG, log_path, engine=ExtractionEngine.FASTCAP2)
 
         cap_matrix = fastcap_parse_capacitance_matrix(log_path)
         cap_matrix.write_csv(raw_csv_path)
 
         cap_matrix = cap_matrix.averaged_off_diagonals()
         cap_matrix.write_csv(avg_csv_path)
+        for csv_path in (raw_csv_path, avg_csv_path):
+            self.run_result.add_file(FileKind.CAPACITANCE_MATRIX, csv_path, engine=ExtractionEngine.FASTCAP2)
 
         cap_matrix_interpreter = FastCapOutputInterpreter()
 
@@ -1270,11 +1324,15 @@ class KpexCLI:
         netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTCAP2, pex_context.tech)
         netlist_printer.write(expanded_netlist, expanded_netlist_path)
         info(f"Wrote expanded netlist to: {expanded_netlist_path}")
+        self.add_netlist(FileKind.NETLIST, expanded_netlist_path, ExtractionEngine.FASTCAP2,
+                         pex_context.annotated_top_cell.name)
 
         # FIXME: should this be already reduced?
         if args.output_netlist_path:
             netlist_printer.write(expanded_netlist, args.output_netlist_path)
             info(f"Copied expanded SPICE netlist to: {args.output_netlist_path}")
+            self.add_netlist(FileKind.OUT_NETLIST, args.output_netlist_path, ExtractionEngine.FASTCAP2,
+                             pex_context.annotated_top_cell.name)
 
         netlist_reducer = NetlistReducer()
         reduced_netlist = netlist_reducer.reduce(netlist=expanded_netlist,
@@ -1282,6 +1340,8 @@ class KpexCLI:
         netlist_printer.write(reduced_netlist, reduced_netlist_path)
 
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
+        self.add_netlist(FileKind.NETLIST, reduced_netlist_path, ExtractionEngine.FASTCAP2,
+                         pex_context.annotated_top_cell.name, reduced=True)
 
     @staticmethod
     def schematic_problems(schematic_path: str,
@@ -1360,6 +1420,23 @@ class KpexCLI:
         prepare_exclusions(exclusions, pex_context, tech_info)
         return exclusions
 
+    @staticmethod
+    def device_counts(pex_context: KLayoutExtractionContext,
+                      device_models: DeviceModels,
+                      blackbox_devices: bool,
+                      exclusions: Optional[Exclusions]) -> DeviceCounts:
+        """
+        :return: of the devices of the cell, those that the netlists of the 2.5D engine and the field solvers
+                 leave to models (black-boxed, excluded) or remove (white-boxed), see RCX25NetlistExpander
+        """
+        excluded_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
+        metal_capacitor_count = sum(1 for device in pex_context.top_circuit.each_device()
+                                    if device.id() not in excluded_ids and
+                                    RCX25NetlistExpander.is_whiteboxed(device.device_class(), device_models))
+        return DeviceCounts(black_boxed=metal_capacitor_count if blackbox_devices else 0,
+                            white_boxed=0 if blackbox_devices else metal_capacitor_count,
+                            excluded=len(excluded_ids))
+
     def run_kpex_2_5d_engine(self,
                              args: argparse.Namespace,
                              pex_context: KLayoutExtractionContext,
@@ -1376,6 +1453,7 @@ class KpexCLI:
         if args.pex_mode.need_capacitance():
             halo_source = '--halo' if args.halo is not None else f"tech info of {args.pdk}"
             info(f"Sidewall halo: {tech_info.tech.process_parasitics.side_halo:g} µm ({halo_source})")
+            self.run_result.halo_um = tech_info.tech.process_parasitics.side_halo
 
         extractor = RCX25Extractor(pex_context=pex_context,
                                    pex_mode=args.pex_mode,
@@ -1387,6 +1465,7 @@ class KpexCLI:
                                    report_caps=args.report_caps,
                                    exclusions=exclusions)
         extraction_results = extractor.extract()
+        self.run_result.add_file(FileKind.REPORT, report_path, engine=ExtractionEngine.K25D)
         removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
 
         if netlist_csv_path is not None:
@@ -1400,6 +1479,7 @@ class KpexCLI:
                     f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)};\n")
                 for idx, (key, res_value) in enumerate(sorted(summary.resistances.items())):
                     f.write(f"R{idx + 1};{key.net1};{key.net2};;{round(res_value, 3)}\n")
+            self.run_result.add_file(FileKind.NETLIST_CSV, netlist_csv_path, engine=ExtractionEngine.K25D)
 
             rule('kpex/2.5D extracted netlist (CSV format)')
             with open(netlist_csv_path, 'r', encoding='utf-8') as f:
@@ -1426,6 +1506,8 @@ class KpexCLI:
             netlist_printer.write(expanded_netlist, expanded_netlist_path)
             subproc(f"Wrote expanded netlist to: {expanded_netlist_path}")
             self._rcx25_netlist_paths = {NetlistFormat.SPICE: expanded_netlist_path}  # NOTE: store for test case
+            self.add_netlist(FileKind.NETLIST, expanded_netlist_path, ExtractionEngine.K25D,
+                             pex_context.annotated_top_cell.name)
 
             # NOTE: a defect of the RC netlist simulates to a plausible, but wrong number (#215)
             summary = extraction_results.summarize()
@@ -1454,6 +1536,7 @@ class KpexCLI:
             # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers
             check_fails_run = args.check_rc_netlist if args.check_rc_netlist is not None \
                               else args.pex_mode == PEXMode.RC
+            self.run_result.check_problems = self._rcx25_netlist_problems
             if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
@@ -1489,6 +1572,8 @@ class KpexCLI:
                     subproc(scope.describe())
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
+                self.add_netlist(FileKind.NETLIST, reduction.output_path, ExtractionEngine.K25D,
+                                 pex_context.annotated_top_cell.name, reduced=True)
                 log_peak_memory('the netlist reduction')
 
             # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
@@ -1502,11 +1587,17 @@ class KpexCLI:
                     subcircuits_with_m=tech_info.device_models.vacask_subcircuits_with_m)
                 info(f"Wrote {netlist_kind} VACASK netlist to: {netlist_path}")
                 self._rcx25_netlist_paths[NetlistFormat.VACASK] = netlist_path
+                self.add_netlist(FileKind.NETLIST, netlist_path, ExtractionEngine.K25D,
+                                 pex_context.annotated_top_cell.name, netlist_format=NetlistFormat.VACASK,
+                                 reduced=self._rcx25_reduced_netlist_path is not None)
 
             if args.output_netlist_path:
                 shutil.copyfile(netlist_path, args.output_netlist_path)
                 info(f"Copied {netlist_kind} {args.netlist_format.name} netlist to: "
                      f"{args.output_netlist_path}")
+                self.add_netlist(FileKind.OUT_NETLIST, args.output_netlist_path, ExtractionEngine.K25D,
+                                 pex_context.annotated_top_cell.name, netlist_format=args.netlist_format,
+                                 reduced=self._rcx25_reduced_netlist_path is not None)
 
         # NOTE: there was a KLayout bug that some of the categories were lost,
         #       so that the marker browser could not load the report file
@@ -1560,6 +1651,7 @@ class KpexCLI:
                 shutil.move(new_path, backup_path)
             log_path = shutil.move(log_path, new_path)
             register_log_file_handler(log_path, formatter)
+            self.run_result.add_file(FileKind.LOG, log_path)
 
         # setup preliminary logger
         cli_log_path_plain = os.path.join(args.output_dir_base_path, f"kpex_plain.log")
@@ -1632,11 +1724,14 @@ class KpexCLI:
                                                    netlist_path=lvs_netlist_path,
                                                    verbose=args.klayout_lvs_verbose)
                     except LVSError as e:
+                        self.run_result.add_file(FileKind.LOG, lvs_log_path)
                         error(str(e))
                         sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+                    self.run_result.add_file(FileKind.LOG, lvs_log_path)
                     if args.cache_lvs:
                         lvs_cache_entry.store(lvsdb_path=lvsdb_path, fingerprint=lvs_fingerprint)
 
+                self.run_result.add_file(FileKind.LVSDB, lvsdb_path)
                 lvsdb.read(lvsdb_path)
         return lvsdb
 
@@ -1698,9 +1793,31 @@ class KpexCLI:
         return any(previous in ('--out-file', '--out-scene', '--output_file', '--output_scene') and current == '-'
                    for previous, current in zip(argv, argv[1:]))
 
+    def identify_run(self,
+                     argv: List[str],
+                     args: argparse.Namespace):
+        """
+        Notes what identifies the run in its result file, as far as validate_args got
+        """
+        result = self.run_result
+        result.command = args.command
+        result.arguments = argv[1:]
+        result.pdk = str(args.pdk)
+        result.cell = getattr(args, 'effective_cell_name', None)
+        result.engines = [engine for engine, is_run in ((ExtractionEngine.MAGIC, args.run_magic),
+                                                        (ExtractionEngine.FASTERCAP, args.run_fastercap),
+                                                        (ExtractionEngine.FASTCAP2, args.run_fastcap),
+                                                        (ExtractionEngine.K25D, args.run_2_5D)) if is_run]
+        result.mode = str(args.pex_mode) if args.run_2_5D else None
+        result.inputs = {name: os.path.abspath(path) if path is not None else None
+                         for name, path in (('gds', args.gds_path), ('lvsdb', args.lvsdb_path),
+                                            ('schematic', args.schematic_path))}
+        run_dir = getattr(args, 'output_dir_path', None)
+        result.run_dir = os.path.abspath(run_dir) if run_dir is not None else None
+        result.out_result_path = args.out_result_path
+
     def main(self, argv: List[str]):
         env = Env.from_os_environ()
-        argv = self.normalize_argv(argv)
 
         # A PEX25D artifact may be destined for stdout, and in that case stdout
         # belongs to the artifact alone — one stray log line and whatever is on
@@ -1714,15 +1831,26 @@ class KpexCLI:
         with contextlib.ExitStack() as stack:
             if writes_to_stdout:
                 stack.enter_context(contextlib.redirect_stdout(sys.stderr))
+            # NOTE: before the log files, so that it writes the result file also of a run that fails in setup_logging
+            self.run_result = RunResult()
+            stack.enter_context(self.run_result.recording())
+            argv = self.normalize_argv(argv)  # NOTE: within, for its warning
 
             if not ({'-v', '--version', '-h', '--help'} & set(argv)) and argv[1:2] != ['help']:
                 rule('Command line arguments')
                 subproc(' '.join(map(shlex.quote, argv)))
 
             args = self.parse_args(arg_list=argv[1:], env=env)
+            self.identify_run(argv, args)
+            # NOTE: to --out-result, which so fails before the run, not after it
+            if not self.run_result.write(announce=False):
+                sys.exit(ExitCode.USAGE)
 
             os.makedirs(args.output_dir_base_path, exist_ok=True)
-            self.setup_logging(args, stack)
+            try:
+                self.setup_logging(args, stack)
+            finally:
+                self.identify_run(argv, args)  # NOTE: with the cell and the run directory, as far as they are known
             warn_deprecated_options(args)
             tech_info: TechInfo = args.tech_info  # NOTE: loaded by validate_args
 
@@ -1761,6 +1889,7 @@ class KpexCLI:
         report = DiagnosticsReport(warnings_are_errors=args.warnings_are_errors)
 
         rule('Prepare LVSDB')
+        self.run_result.enter(Stage.LVS)
         lvsdb = self.create_lvsdb(args)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(
@@ -1775,6 +1904,7 @@ class KpexCLI:
             info(f"{gds_pair} -> ({' '.join(names)})")
 
         rule('PEX25D Generation')
+        self.run_result.enter(Stage.PEX25D)
         try:
             pex25d_file = build_pex25d_file(
                 pex_context=pex_context,
@@ -1790,6 +1920,8 @@ class KpexCLI:
                 save_artifact(pex25d_file, args.pex25d_file_spec,
                               comments=args.pex25d_comments)
                 info(f"Wrote {args.pex25d_file_spec}")
+                if not args.pex25d_file_spec.is_stdio:
+                    self.run_result.add_file(FileKind.PEX25D_FILE, args.pex25d_file_spec.path)
 
             scene = None
             if args.pex25d_scene_spec is not None:
@@ -1800,6 +1932,8 @@ class KpexCLI:
                 save_artifact(scene, args.pex25d_scene_spec,
                               comments=args.pex25d_comments)
                 info(f"Wrote {args.pex25d_scene_spec}")
+                if not args.pex25d_scene_spec.is_stdio:
+                    self.run_result.add_file(FileKind.PEX25D_SCENE, args.pex25d_scene_spec.path)
 
             if args.pex25d_validate:
                 validate(pex25d_file, report=report, strict=args.strict,
@@ -1843,6 +1977,7 @@ class KpexCLI:
 
         if args.run_magic:
             rule('MAGIC')
+            self.run_result.enter(Stage.MAGIC)
             self.run_magic_extraction(args)
             log_peak_memory('MAGIC')
 
@@ -1851,6 +1986,7 @@ class KpexCLI:
             return
 
         rule('Prepare LVSDB')
+        self.run_result.enter(Stage.LVS)
         lvsdb = self.create_lvsdb(args)
 
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.effective_cell_name,
@@ -1903,8 +2039,11 @@ class KpexCLI:
             sys.exit(1)
 
         exclusions = self.exclusions_of(args, pex_context, tech_info)
+        self.run_result.devices = self.device_counts(pex_context, tech_info.device_models, args.blackbox_devices,
+                                                     exclusions)
 
         if args.run_fastcap or args.run_fastercap:
+            self.run_result.enter(Stage.FASTERCAP if args.run_fastercap else Stage.FASTCAP2)
             if exclusions is not None:
                 warn_of_ports_without_nodes(exclusions, "The netlist of a field solver")
             lst_file = self.build_fastercap_input(args=args,
@@ -1919,6 +2058,7 @@ class KpexCLI:
                                               exclusions=exclusions)
                 log_peak_memory('FasterCap')
             if args.run_fastcap:
+                self.run_result.enter(Stage.FASTCAP2)
                 self.run_fastcap_extraction(args=args,
                                             pex_context=pex_context,
                                             lst_file=lst_file,
@@ -1927,6 +2067,7 @@ class KpexCLI:
 
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")
+            self.run_result.enter(Stage.K25D)
             report_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_k25d_pex_report.rdb.gz")
             netlist_csv_path = os.path.abspath(os.path.join(args.output_dir_path,
                                                             f"{args.effective_cell_name}_k25d_pex_netlist.csv"))

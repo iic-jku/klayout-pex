@@ -28,6 +28,7 @@ The kpex command line tool, run more than once in a process (e.g. by tests or by
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 from pathlib import Path
@@ -46,12 +47,16 @@ from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.pex25d.reader import read_pex25d_text
+from klayout_pex.rcx25.r.r_extractor import RExtractionTechError
+from klayout_pex.run_result import RESULT_FILE_NAME
 from klayout_pex.tech_info import TechDefError, TechInfo
+from klayout_pex.version import __version__
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 from tests.common.cli_runner import run_cli
 from tests.common.device_model_mappings import NMOS, device_models
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.rcx25.rcx25_test_helpers import spice_netlist_ports
 
 
 NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1.gds.gz')
@@ -242,6 +247,35 @@ def test_dielectric_filter_naming_no_dielectric_is_reported_before_the_input_is_
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('command, option, value, expected', [
+    pytest.param(command, option, value, expected, id=f'{option}={value}')
+    for command, option, values, expected in (
+        ('extract', '--delaunay-amax', ('-1', 'nan', 'inf'), ">= 0 (in µm²)"),
+        ('extract', '--delaunay-b', ('-1', '1.5', 'nan', 'inf'), "from 0 to 1.1"),
+        ('extract', '--k-void', ('0.5', '0', '-1', 'nan', 'inf'), ">= 1"),
+        ('extract', '--tolerance', ('0', '1', '-1', 'nan', 'inf'), "> 0 and < 1"),
+        ('extract', '--d-coeff', ('0', '-1', 'nan', 'inf'), "> 0"),
+        ('extract', '--ooc', ('-1', 'nan', 'inf'), ">= 0"),
+        ('pex25d', '--domain-margin', ('-1', 'nan', 'inf'), ">= 0 (in µm)"),
+    )
+    for value in values
+])
+def test_number_out_of_range_is_a_usage_error(command: str, option: str, value: str, expected: str, tmp_path):
+    # NOTE: a --delaunay-b of 1.5 kept the triangulation from finishing, a negative --domain-margin
+    #       turned the domain inside out, the others were ignored or failed with a traceback (#432);
+    #       with a --tolerance of 0 FasterCap didn't finish, the other FasterCap options gave wrong
+    #       capacitances or failed FasterCap (#446)
+    code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A', f'{option}={value}',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert re.search(rf"argument {option}(/-\w)?: must be a finite number {re.escape(expected)}, got '{value}'",
+                     output), output
+    assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "PEX25D")
 @pytest.mark.parametrize('pattern', ['all,-topnit', '-topnit'])
 def test_dielectric_filter_leaves_out_the_excluded_dielectrics(pattern: str, tmp_path):
@@ -254,6 +288,22 @@ def test_dielectric_filter_leaves_out_the_excluded_dielectrics(pattern: str, tmp
     dielectric_names = [d.name for d in read_pex25d_text(output_path.read_bytes(), str(output_path)).dielectrics]
     # NOTE: without --diel, the film topnit wraps topox
     assert 'topox' in dielectric_names and 'topnit' not in dielectric_names, dielectric_names
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "FasterCap")
+def test_mesh_is_deprecated_as_it_has_no_effect(tmp_path):
+    # NOTE: FasterCap's automatic refinement (-a, which kpex always passes) overrides -m (#452)
+    advice = "it has no effect, as FasterCap's automatic refinement (--tolerance) overrides it"
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--help'])
+    assert code == 0, output
+    assert f"FasterCap -m mesh relative refinement value, deprecated: {advice}" in ' '.join(output.split()), output
+
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mesh', '0.1',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert f"--mesh is deprecated, {advice}" in output.splitlines(), output
 
 
 @allure.parent_suite("Unit Tests")
@@ -342,13 +392,10 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
 def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     # NOTE: the alignment with a schematic kept the cells it has as subcircuits, and the RC netlist
     #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
-    # NOTE: --check n, as the ports are the pins $1.D, $1.G and $1.S of the LVS netlist, which flattens SUBNFET
-    #       (#417), unlike the pins D, G and S of the schematic, which --check compares them with (#406)
     gds_path = NFET_IN_SUBCELL_GDS_PATH
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path,
                                             '--schematic', gds_path.replace('.gds.gz', '.spice'),
-                                            '--check', 'n',
                                             '--out-dir', str(tmp_path)])
     assert code == 0, output
     run_dir = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell'
@@ -357,6 +404,27 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     assert 'sky130_fd_pr__nfet_01v8' in netlist and 'SUBNFET' not in netlist, netlist
     with open(run_dir / 'nfet_li1_in_subcell_lvs.log', encoding='utf-8') as f:
         assert "Netlists don't match" not in f.read()
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic", "Pins")
+@pytest.mark.parametrize('mode', ['CC', 'R', 'RC'])
+def test_ports_of_labels_only_in_a_subcell_are_named_after_them(mode: str, tmp_path):
+    # NOTE: the PEX-LVS flattens SUBNFET, whose nets KLayout names after the subcircuit and the labels,
+    #       $1.D, $1.G and $1.S, unlike the pins D, G and S of the schematic, which --check compares the ports with
+    #       (#417), with a warning, as other tools make ports of the labels of the top cell only
+    gds_path = NFET_IN_SUBCELL_GDS_PATH
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', mode,
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', gds_path),
+                                            '--schematic', gds_path.replace('.gds.gz', '.spice'), '--check', 'y',
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    netlist_path = tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell' / 'nfet_li1_in_subcell_k25d_pex_netlist.spice'
+    with open(netlist_path, encoding='utf-8') as f:
+        netlist = f.read()
+    assert re.search(r'^\.SUBCKT nfet_li1_in_subcell D G S sky130_gnd$', netlist, re.MULTILINE), netlist
+    assert "Ports named after labels in subcells: D, G, S (label them in the top cell to name ports explicitly)" \
+           in output
 
 
 def schematic_problems(schematic_path: str, port_names: Sequence[str]) -> List[str]:
@@ -504,3 +572,129 @@ def test_pins_of_the_schematic_other_than_the_ports_fail_the_rc_run(tmp_path):
     assert "The extracted netlist is inconsistent with the LVS netlist (--check n to accept it):\n" \
            "  - the schematic has pins without port in the netlist: SRC\n" \
            "  - the netlist has ports without pin in the schematic: S" in output
+
+
+def run_result(run_dir: Path) -> Dict[str, Any]:
+    """
+    :return: the result file of the run in the run directory (see klayout_pex.run_result)
+    """
+    with open(run_dir / RESULT_FILE_NAME, encoding='utf-8') as f:
+        return json.load(f)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File")
+@pytest.mark.parametrize('mode', ['CC', 'RC'])
+def test_result_file_names_the_outputs_and_ports_of_the_run(mode: str, tmp_path):
+    out_result_path = tmp_path / 'results' / 'nfet_li1.json'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', mode,
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path), '--out-result', str(out_result_path)])
+    assert code == 0, output
+    run_dir = tmp_path / 'nfet_li1__nfet_li1'
+    result = run_result(run_dir)
+    for path in (run_dir / RESULT_FILE_NAME, out_result_path):
+        assert f"Wrote result file to: {path}" in output.splitlines()
+    with open(out_result_path, encoding='utf-8') as f:
+        assert json.load(f) == result
+    assert {key: result[key] for key in ('format_version', 'kpex_version', 'command', 'pdk', 'cell', 'engines',
+                                         'mode', 'inputs', 'run_dir', 'stage', 'exit_code', 'halo_um', 'devices',
+                                         'check_problems', 'errors')} == {
+        'format_version': 1, 'kpex_version': __version__, 'command': 'extract', 'pdk': 'sky130A', 'cell': 'nfet_li1',
+        'engines': ['KPEX/2.5D'], 'mode': mode,
+        'inputs': {'gds': None, 'lvsdb': os.path.abspath(lvsdb_fixture_path('sky130A', NFET_GDS_PATH)),
+                   'schematic': None},
+        'run_dir': str(run_dir), 'stage': 'done', 'exit_code': 0, 'halo_um': 8.0,
+        'devices': {'black_boxed': 0, 'white_boxed': 0, 'excluded': 0}, 'check_problems': [], 'errors': []}
+    assert result['peak_memory']['process_bytes'] > 0
+    assert [(written['kind'], written['engine'], os.path.basename(written['path']))
+            for written in result['files']] == [
+        ('log', None, 'kpex_plain.log'), ('log', None, 'kpex.log'),
+        ('report', 'KPEX/2.5D', 'nfet_li1_k25d_pex_report.rdb.gz'),
+        ('netlist_csv', 'KPEX/2.5D', 'nfet_li1_k25d_pex_netlist.csv'),
+        ('netlist', 'KPEX/2.5D', 'nfet_li1_k25d_pex_netlist.spice')]
+    assert all(os.path.isfile(written['path']) for written in result['files'])
+    netlist = result['files'][-1]
+    assert (netlist['format'], netlist['reduced']) == ('spice', False)
+    assert netlist['ports'] == spice_netlist_ports(netlist['path']) == ['D', 'G', 'S', 'sky130_gnd']
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File")
+def test_result_file_of_a_failed_run_has_its_stage_and_exit_code(tmp_path):
+    # NOTE: and while in the stage, the result file has it without exit code, which a run killed by the OS leaves
+    run_dir = tmp_path / 'nfet_li1__nfet_li1'
+    results_in_stage: List[Dict[str, Any]] = []
+    failure = RExtractionTechError("the tech info has no sheet resistance of li1")
+
+    def fail(**kwargs):
+        results_in_stage.append(run_result(run_dir))
+        raise failure
+
+    with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', side_effect=fail):
+        code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                                '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                                '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert [(result['stage'], result['exit_code']) for result in results_in_stage] == [('2.5d', None)]
+    result = run_result(run_dir)
+    assert (result['stage'], result['exit_code'], result['errors']) == ('2.5d', ExitCode.DIAGNOSTIC_ERRORS,
+                                                                        [str(failure)])
+    assert all(os.path.isfile(written['path']) for written in result['files'])
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File")
+def test_result_file_of_a_run_with_invalid_arguments_has_their_errors(tmp_path):
+    schematic_path = tmp_path / 'missing.spice'
+    code, output = rc_run_from_lvsdb(NFET_GDS_PATH, tmp_path, '--schematic', str(schematic_path))
+    assert code == 1, output
+    result = run_result(tmp_path / 'nfet_li1__nfet_li1')
+    assert (result['stage'], result['exit_code'], result['cell']) == ('arguments', 1, 'nfet_li1')
+    assert result['errors'] == [f"Can't read schematic at path {schematic_path}"]
+    # NOTE: no warning of what --schematic is checked for, as there is none to check (#425)
+    assert result['warnings'] == []
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File", "Schematic")
+def test_result_file_of_a_failed_check_has_its_problems(tmp_path):
+    schematic_path = edited_schematic_path(NFET_IN_SUBCELL_GDS_PATH, tmp_path, 'W=0.65', 'W=0.65 m=2')
+    code, output = rc_run_from_lvsdb(NFET_IN_SUBCELL_GDS_PATH, tmp_path, '--schematic', schematic_path)
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    result = run_result(tmp_path / 'nfet_li1_in_subcell__nfet_li1_in_subcell')
+    assert (result['stage'], result['exit_code']) == ('2.5d', ExitCode.DIAGNOSTIC_ERRORS)
+    assert "the schematic has Σ W = 1.3 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.65" \
+           in result['check_problems']
+    assert result['errors'] == ["The extracted netlist is inconsistent with the LVS netlist (--check n to accept it):\n" +
+                                '\n'.join(f"  - {problem}" for problem in result['check_problems'])]
+    assert SCHEMATIC_WARNING in result['warnings']
+    # NOTE: written before the check fails the run
+    assert 'netlist' in [written['kind'] for written in result['files']]
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File")
+def test_out_result_that_cannot_be_written_fails_before_the_run(tmp_path):
+    (tmp_path / 'file').write_text('', encoding='utf-8')
+    out_result_path = tmp_path / 'file' / 'result.json'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path / 'out'), '--out-result', str(out_result_path)])
+    assert code == ExitCode.USAGE, output
+    assert f"Can't write the result file to: {out_result_path}: " in output
+    assert not (tmp_path / 'out').exists()  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Result File", "PEX25D")
+def test_result_file_of_pex25d_names_its_outputs(tmp_path):
+    pex25d_path = tmp_path / 'nfet_li1.pex25d'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path), '--out-file', str(pex25d_path)])
+    assert code == 0, output
+    result = run_result(tmp_path / 'nfet_li1__nfet_li1')
+    assert (result['command'], result['engines'], result['stage'], result['exit_code']) == ('pex25d', [], 'done', 0)
+    assert [(written['kind'], written['path']) for written in result['files'] if written['kind'] != 'log'] == \
+           [('pex25d_file', str(pex25d_path))]

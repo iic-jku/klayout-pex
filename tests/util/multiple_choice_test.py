@@ -80,3 +80,30 @@ def test_invalid_pattern_is_an_error(pattern: str, message: str):
 ])
 def test_unknown_choices_are_the_names_of_no_choice(pattern: str, unknown_choices: List[str]):
     assert MultipleChoicePattern(pattern).unknown_choices(CHOICES) == unknown_choices
+
+
+
+@allure.parent_suite('Unit Tests')
+@allure.tag('Util', 'Dielectric Filter')
+class TestMultipleChoicePattern:
+    @pytest.mark.parametrize('pattern, expected', [
+        ('all', ['ild', 'nit', 'air', 'ild']),
+        ('none', []),
+        ('all,-nit', ['ild', 'air', 'ild']),
+        ('none,+air,+ild', ['ild', 'air', 'ild']),
+        (' ALL , -NIT ', ['ild', 'air', 'ild']),
+        ('none,+missing', []),
+        ('all,-missing', ['ild', 'nit', 'air', 'ild']),
+    ])
+    def test_filter_and_membership_agree_and_preserve_input_order(self, pattern: str, expected: List[str]):
+        choices = ['ild', 'nit', 'air', 'ild']
+        selector = MultipleChoicePattern(pattern)
+        assert selector.filter(choices) == expected
+        assert [choice for choice in choices if selector.is_included(choice)] == expected
+        assert choices == ['ild', 'nit', 'air', 'ild']
+        assert selector.filter([]) == []
+
+    @pytest.mark.parametrize('pattern', ['all,none', 'none,-ild', 'all,+ild'])
+    def test_conflicting_selectors_are_rejected(self, pattern: str):
+        with pytest.raises(ValueError, match='Multiple choice pattern'):
+            MultipleChoicePattern(pattern)
