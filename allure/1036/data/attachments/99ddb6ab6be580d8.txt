@@ -1,0 +1,20 @@
+WARNING  __kpex__:kpex_cli.py:1765 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\diode_dantenna_dpantenna.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\diode_dantenna_dpantenna__diode_dantenna_dpantenna\kpex_result.json
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.0 GiB
+INFO     __kpex__:kpex_cli.py:1993 (31, 0) -> (nwell_drw dpantenna_n)
+INFO     __kpex__:kpex_cli.py:1993 (46, 0) -> (pwell pwell_sub dantenna_p)
+INFO     __kpex__:kpex_cli.py:1993 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+WARNING  __kpex__:r_extractor.py:525 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS dpantenna_n)
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.0 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\diode_dantenna_dpantenna__diode_dantenna_dpantenna\diode_dantenna_dpantenna_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\diode_dantenna_dpantenna__diode_dantenna_dpantenna\diode_dantenna_dpantenna_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.0 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.0 GiB
+WARNING  __kpex__:lvsdb_extractor.py:424 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 8 of 8 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te

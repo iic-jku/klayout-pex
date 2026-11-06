@@ -1,0 +1,41 @@
+WARNING  __kpex__:kpex_cli.py:1765 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1828 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_nmos_diode2.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusion_nmos_diode2.gds.gz' --exclusion-markers ports
+INFO     __kpex__:kpex_cli.py:892 No explicit top cell specified, using top cell 'exclusion_nmos_diode2'
+INFO     __kpex__:kpex_cli.py:903 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_nmos_diode2__exclusion_nmos_diode2\kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:424 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 1 of 5 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:1989 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1993 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:1993 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:1993 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1993 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:1993 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:1993 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:1993 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1993 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1993 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:1993 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:1993 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:1993 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:1993 (30, 0) -> (metal3_n_mom)
+WARNING  __kpex__:extractor.py:235 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - VDD: GatPoly, Metal1, Metal2, Metal3, nSD
+  - VSS: Metal1, Metal2, nSD
+INFO     __kpex__:extractor.py:482 LVSDB: found 3pins
+INFO     __kpex__:r_extractor.py:1329 The metal of these nets goes on beside exclusion blocks, along their cuts, so it carries the current alone, with a short port for each model, as a port can't connect a model in parallel to it: VDD
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1474 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1474 R1;VDD;VDD__m0_1;;1.384
+SUBPROCESS __kpex__:kpex_cli.py:1474 R2;VDD.$0.Metal2;VDD.$1.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1474 R3;VDD.$0.Metal2;VDD__m0_2;;0.193
+SUBPROCESS __kpex__:kpex_cli.py:1474 R4;VDD.$0.Metal2;VDD__m0_3;;0.115
+SUBPROCESS __kpex__:kpex_cli.py:1474 R5;VDD.$1.Metal3;VDD__m0_1;;0.485
+SUBPROCESS __kpex__:kpex_cli.py:1474 R6;VDD__m0_0;VDD__m0_2;;0.308
+SUBPROCESS __kpex__:kpex_cli.py:1474 R7;VSS;VSS.$1.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1474 R8;VSS.$0.Metal2;VSS.$1.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1474 R9;VSS.$0.Metal2;VSS__m0_1;;2.287
+SUBPROCESS __kpex__:kpex_cli.py:1477 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_nmos_diode2__exclusion_nmos_diode2\exclusion_nmos_diode2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1494 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_nmos_diode2__exclusion_nmos_diode2\exclusion_nmos_diode2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1530 Peak memory (resident set size) after the netlist: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:1864 Peak memory (resident set size) after the run: 1.2 GiB

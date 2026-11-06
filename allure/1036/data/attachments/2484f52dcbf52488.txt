@@ -1,0 +1,51 @@
+[18:06:13] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_same_label_within.lvsdb.gz' --out-dir                                         
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_same_label_within.gds.gz' --exclusion-markers ports                         
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:06:13] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'exclusion_same_label_within'                         
+[18:06:13] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[18:06:14] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\exclusion_same_label_within__exclus                  
+                    ion_same_label_within\kpex_result.json                     
+[18:06:14] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.4 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:06:14] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[18:06:14] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+[18:06:14] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[18:06:14] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A: Metal3                                              
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:06:14] INFO     LVSDB: found 1pins                         extractor.py:482
+[18:06:14] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.4 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A__m0_0;;0.858                                                            
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_same_label_within__exc
+lusion_same_label_within\exclusion_same_label_within_k25d_pex_netlist.csv      
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_same_label_within__exc
+lusion_same_label_within\exclusion_same_label_within_k25d_pex_netlist.spice    
+[18:06:14] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.4 GiB                                           
+[18:06:14] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.4 GiB                                               
