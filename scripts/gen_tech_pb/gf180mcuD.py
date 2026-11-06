@@ -84,7 +84,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "contact_nsd_con",  (33, 4401),  "Contact", "contact_nsd_con",  "Computed layer for contact from nsd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_psd_con",  (33, 4402),  "Contact", "contact_psd_con",  "Computed layer for contact from psd to Metal1")
     add_computed_layer(tech, CONT,    KREG, "contact_poly_con", (33, 4403),  "Contact", "contact_poly_con", "Computed layer for contact from poly to Metal1")
-    add_computed_layer(tech, CONT,    KREG, "contact_ntap_con", (33, 4404),  "Contact", None,               "Computed layer for contact from ntap (the nwell below) to Metal1")
+    add_computed_layer(tech, CONT,    KREG, "contact_ntap_con", (33, 4404),  "Contact", "contact_ntap_con", "Computed layer for contact from ntap (the nwell below) to Metal1")
     # NOTE: part of their taps, as the substrate, the deep nwell and the isolated p-wells below are no conductors
     #       of the resistance network
     add_computed_layer(tech, PTAP,    KREG, "contact_ptap_con",    (33, 4405), "Contact", "contact_ptap_con", "Computed layer for contact from ptap (the substrate below) to Metal1")

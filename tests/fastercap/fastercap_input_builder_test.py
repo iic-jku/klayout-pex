@@ -192,6 +192,20 @@ def test_vias_and_contacts_of_a_net_across_a_block_are_conductors_of_its_parts()
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, cell_name, net_name, top', [
+    (PDKName.SKY130A, 'r_ntap_pair_nwell_li1_m1', '$1', 936),  # NOTE: licon_ntap_con up to li1
+    (PDKName.GF180MCUD, 'r_nwell_pfet_ntap_m1', 'VDD', 1230),  # NOTE: contact_ntap_con up to Metal1
+], ids=['sky130A', 'gf180mcuD'])
+def test_contacts_of_the_nwell_over_the_ntaps_are_conductors(pdk_name: PDKName, cell_name: str, net_name: str,
+                                                            top: int):
+    # NOTE: the contact of the nwell, where the resistance network lands it, from the silicon surface (#475)
+    pex_context, tech_info = context_of_layout(pdk_name, 'test_patterns', f"{cell_name}.gds.gz")
+    conductors = fastercap_input(pex_context, tech_info).clayers
+    assert [(bottom, upper) for _, bottom, upper in conductors[net_name] if bottom == 0] == [(0, 100), (0, top)]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_taps_without_contact_are_no_layers_without_gds_pair(caplog: pytest.LogCaptureFixture):
     # NOTE: the taps have no contact in the process stack, whose GDS pair of an empty name was looked up,
     #       with a warning per net and tap (#460)

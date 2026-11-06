@@ -362,7 +362,7 @@ class PEX25DBuilder:
         # leaves out: the diffusion is an empty profile, an anchor at the lower end of its contacts
         # (see Metal), as high as the tech info's contact is thick below the metal above,
         # and a terminal on the device is a node at that lower face (see TERMINAL_KIND_DEVICE_TERMINAL).
-        # Taps have no contact in the process stack, so they stay out.
+        # A tap whose contact is the nwell's (e.g. the sky130A n-taps), not its own, stays out (#475).
         for layer in self.tech_info.process_diffusion_layers:
             contact = layer.diffusion_layer.contact_above
             if not contact.name:

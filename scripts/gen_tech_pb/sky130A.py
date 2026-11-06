@@ -84,7 +84,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "licon_nsd_con",  (66, 4401), "licon1", "licon_nsd_con",  "Computed layer for contact from nsdm to li1")
     add_computed_layer(tech, CONT,    KREG, "licon_psd_con",  (66, 4402), "licon1", "licon_psd_con",  "Computed layer for contact from psdm to li1")
     add_computed_layer(tech, CONT,    KREG, "licon_poly_con", (66, 4403), "licon1", "licon_poly_con", "Computed layer for contact from poly to li1")
-    add_computed_layer(tech, CONT,    KREG, "licon_ntap_con", (66, 4404), "licon1", None,             "Computed layer for contact from ntap (the nwell below) to li1")
+    add_computed_layer(tech, CONT,    KREG, "licon_ntap_con", (66, 4404), "licon1", "licon_ntap_con", "Computed layer for contact from ntap (the nwell below) to li1")
     # NOTE: part of the p-tap, as the substrate below is no conductor of the resistance network (it's ideal)
     add_computed_layer(tech, PTAP,    KREG, "licon_ptap_con", (66, 4405), "licon1", "licon_ptap_con", "Computed layer for contact from ptap (the substrate below) to li1")
     add_computed_layer(tech, VIA,     KREG, "mcon_con",  (67, 44),    "mcon",      "mcon_con",       "Computed layer for contact between li1 and met1")

@@ -268,6 +268,22 @@ class FasterCapInputBuilder:
                                      shapes=shapes,
                                      z=0.0)
 
+            # NWELL: no conductor, but its contact, over the n-taps (e.g. sky130A licon_ntap_con, #475),
+            #        from the silicon surface as those of the diffusions
+            for nwell_layer in self.tech_info.process_nwell_layers:
+                if not nwell_layer.nwell_layer.HasField('contact_above'):
+                    continue
+                contact = nwell_layer.nwell_layer.contact_above
+                shapes = self.shapes_of_net(layer_name=contact.name, net=net)
+                if shapes and not shapes.is_empty():
+                    info(f"NWell {net_name}, contact {contact.name}, z={0}, height={contact.thickness}")
+                    self.add_via(model_builder,
+                                 net_name=net_name,
+                                 layer_below_name=nwell_layer.name,
+                                 contact=contact,
+                                 shapes=shapes,
+                                 z=0.0)
+
         enlarged_top_cell_bbox = self.top_cell_bbox().enlarged(math.floor(8 / self.dbu))  # 8µm fringe halo
 
         #
