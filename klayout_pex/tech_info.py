@@ -265,11 +265,17 @@ class TechInfo:
             match lyr.layer_type:
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION:
                     layer = lyr.diffusion_layer
+                    names = [lyr.name]
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
                     layer = lyr.metal_layer
+                    names = [lyr.name]
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_NWELL:
+                    # NOTE: its contact only (e.g. sky130A licon_ntap_con over the n-taps, #475),
+                    #       the nwell is no conductor of the capacitance extraction
+                    layer = lyr.nwell_layer
+                    names = []
                 case _:
                     continue
-            names = [lyr.name]
             if layer.HasField('contact_above'):
                 names.append(layer.contact_above.name)
             for name in names:
@@ -313,6 +319,11 @@ class TechInfo:
             filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
                    self.tech.process_stack.layers)
         )
+
+    @cached_property
+    def process_nwell_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        return [lyr for lyr in self.tech.process_stack.layers
+                if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_NWELL]
 
     @cached_property
     def process_diffusion_layer_names(self) -> List[CanonicalLayerName]:
