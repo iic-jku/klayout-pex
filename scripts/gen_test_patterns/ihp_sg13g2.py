@@ -774,6 +774,31 @@ def labels_in_child_cells() -> Pattern:
     return p
 
 
+def labels_without_pin_shapes() -> Pattern:
+    """
+    The design nmos_diode2 without its label VSS, with a Metal3 wire of 50 µm from the pin of VSS (the drain)
+    to the label OUT, and beside it a Metal3 wire without devices with the label W, both without pin shapes.
+    Below them, a Metal3 wire without devices with the pin P at its left end and the label Q at its right end,
+    and the label VDD on the Metal3 between the pin VDD and its Via2, both without pin shapes
+    """
+    p = pattern('labels_without_pin_shapes')
+    p.copy_design('ihp-sg13g2', 'nmos_diode2', 'nmos_diode2.gds.gz')
+    for layer_index in p.layout.layer_indexes():
+        for shape in list(p.top.shapes(layer_index).each(kdb.Shapes.STexts)):
+            if shape.text_string == 'VSS':
+                shape.delete()
+    vss = min(kdb.Region(p.top.begin_shapes_rec(p.layout.layer(*METAL3))).merged().each(),
+              key=lambda polygon: polygon.bbox().bottom).bbox()
+    for text, bottom in (('OUT', vss.bottom), ('W', vss.bottom - 2000)):
+        p.box(METAL3, vss.right - 100, bottom, vss.right + 50000, bottom + 300)
+        p.label(METAL3, text, vss.right + 49900, bottom + 150)
+    bottom = vss.bottom - 4000
+    metal3_wire(p, vss.right - 100, bottom, vss.right + 50000, bottom + 300, 'P')
+    p.label(METAL3, 'Q', vss.right + 49900, bottom + 150)
+    p.label(METAL3, 'VDD', 800, 1000)
+    return p
+
+
 def cut_block_beside_mos() -> Pattern:
     """
     The design nmos_diode2 twice, in the child cells block and kept, side by side
@@ -1527,6 +1552,7 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'label_in_child_cell': lambda: label_in_child_cell_pattern('label_in_child_cell'),
     'label_in_child_cell_within_marker': label_in_child_cell_within_marker,
     'labels_in_child_cells': labels_in_child_cells,
+    'labels_without_pin_shapes': labels_without_pin_shapes,
     'cut_inductor2_leads_in_top': cut_inductor2_leads_in_top,
     'exclusion_hairpin': lambda: exclusion_hairpin('exclusion_hairpin', 0, METAL3),
     'exclusion_hairpin_open': lambda: exclusion_hairpin('exclusion_hairpin_open', 1000, METAL3),

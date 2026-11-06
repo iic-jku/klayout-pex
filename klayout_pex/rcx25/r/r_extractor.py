@@ -594,6 +594,20 @@ class RExtractor:
         for pin_list in self.pex_context.pins_pb2_by_layer.values():
             rex_request.pins.MergeFrom(pin_list)
 
+        # NOTE: a label without a pin shape makes no port of its net (e.g. of a wire without devices),
+        #       but where the net has a port anyway (e.g. as it has devices), a label that names the net
+        #       is the node of that port, rather than a device terminal (#405).
+        #       It stands in for a missing pin label only: beside a pin label that names the net, it would short
+        #       the metal to that one (of its name) or be a port of its own (of another name)
+        top_circuit = self.pex_context.top_circuit
+        nets_named_by_pins = {pin.net_name for pin in rex_request.pins if label_names_net(pin.label, pin.net_name)}
+        for pin_list in self.pex_context.text_label_pins_pb2_by_layer.values():
+            for pin in pin_list:
+                net = top_circuit.net_by_name(pin.net_name) if pin.net_name else None
+                if net is not None and net.pin_count() > 0 and pin.net_name not in nets_named_by_pins and \
+                        label_names_net(pin.label, pin.net_name):
+                    rex_request.pins.add().CopyFrom(pin)
+
         net_request_by_name: Dict[NetName, pex_request_pb2.RNetExtractionRequest] = {}
         def get_or_create_net_request(net_name: str):
             v = net_request_by_name.get(net_name, None)
