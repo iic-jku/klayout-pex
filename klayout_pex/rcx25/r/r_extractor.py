@@ -471,7 +471,7 @@ class RExtractor:
                         via.bottom_conductor.id = self.pex_context.annotated_layout.layer(*bot_gds_pair)
                         via.top_conductor.id = self.pex_context.annotated_layout.layer(*top_gds_pair)
 
-                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                        via.resistance = self.pex_context.tech.milliohm_per_cut_to_ohm_um2_for_contact(
                             contact=contact,
                             contact_resistance=contact_resistance
                         )
@@ -506,7 +506,7 @@ class RExtractor:
 
                         contact = self.pex_context.tech.contact_by_contact_lvs_layer_name[via_name]
 
-                        via.resistance = self.pex_context.tech.milliohm_by_cnt_to_ohm_by_square_for_via(
+                        via.resistance = self.pex_context.tech.milliohm_per_cut_to_ohm_um2_for_via(
                             contact=contact,
                             via_resistance=via_resistance
                         )

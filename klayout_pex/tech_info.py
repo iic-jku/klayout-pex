@@ -505,25 +505,31 @@ class TechInfo:
 
     @staticmethod
     def milliohm_to_ohm(milliohm: float) -> float:
-        # NOTE: tech_pb2 has mΩ/µm^2
-        #       RExtractorTech.Conductor.resistance is in Ω/µm^2
+        # NOTE: tech_pb2 has mΩ/□
+        #       RExtractorTech.Conductor.resistance is in Ω/□
         return milliohm / 1000.0
 
     @staticmethod
-    def milliohm_by_cnt_to_ohm_by_square_for_contact(
+    def milliohm_per_cut_to_ohm_um2_for_contact(
             contact: process_stack_pb2.ProcessStackInfo.Contact,
             contact_resistance: process_parasitics_pb2.ResistanceInfo.ContactResistance) -> float:
-        # NOTE: ContactResistance ... mΩ/CNT
-        #
-        ohm_by_square = contact_resistance.resistance / 1000.0 * contact.width ** 2
-        return ohm_by_square
+        """
+        :return: the area resistance (Ω·µm²) of the contact, as KLayout's RExtractorTechVia wants it:
+                 the resistance of a cut (ContactResistance has mΩ/CNT) times its area
+        """
+        ohm_um2 = contact_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_um2
 
     @staticmethod
-    def milliohm_by_cnt_to_ohm_by_square_for_via(
+    def milliohm_per_cut_to_ohm_um2_for_via(
             contact: process_stack_pb2.ProcessStackInfo.Contact,
             via_resistance: process_parasitics_pb2.ResistanceInfo.ViaResistance) -> float:
-        ohm_by_square = via_resistance.resistance / 1000.0 * contact.width ** 2
-        return ohm_by_square
+        """
+        :return: the area resistance (Ω·µm²) of the via, as KLayout's RExtractorTechVia wants it:
+                 the resistance of a cut (ViaResistance has mΩ/CNT) times its area
+        """
+        ohm_um2 = via_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_um2
 
     #--------------------------------
 
