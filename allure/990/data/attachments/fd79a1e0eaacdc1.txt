@@ -1,0 +1,83 @@
+[14:04:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --lvsdb                                              
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+sideoverlap_simple_plates_li1_m1.lvsdb.gz --out-dir                             
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgjj1wb97 --2.5D --mode CC   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:04:14] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:04:14] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 194.4 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:04:14] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1862
+[14:04:14] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1862
+[14:04:14] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1862
+[14:04:14] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:04:14] INFO     Sidewall halo: 8 µm (tech info of sky130A)  kpex_cli.py:1370
+[14:04:14] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 194.4 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;li1;met1;0.13;                                                               
+C2;VSUBS;li1;7.932;                                                             
+C3;VSUBS;met1;248.874;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgjj1wb97/sideoverlap_simple_
+plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1
+_k25d_pex_netlist.csv                                                           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpgjj1wb97/sideoverlap_simple_
+plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1
+_k25d_pex_netlist.spice                                                         
+[14:04:14] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 194.6 MiB                                          
+[14:04:14] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 194.6 MiB                                              
+[14:04:14] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --lvsdb                                              
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+sideoverlap_simple_plates_li1_m1.lvsdb.gz --out-dir                             
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpe1f7d9zc --2.5D --mode CC   
+--report-caps y                                                                 
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:04:14] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:04:14] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 194.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:04:14] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1862
+[14:04:14] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1862
+[14:04:14] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1862
+[14:04:14] INFO     (68, 16) -> (met1_pin_con)                  kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:04:14] INFO     Sidewall halo: 8 µm (tech info of sky130A)  kpex_cli.py:1370
+[14:04:14] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 194.8 MiB                           
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;li1;met1;0.13;                                                               
+C2;VSUBS;li1;7.932;                                                             
+C3;VSUBS;met1;248.874;                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpe1f7d9zc/sideoverlap_simple_
+plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1
+_k25d_pex_netlist.csv                                                           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/n6/hn37q6pj7sj_9dmqqc2113800000gn/T/tmpe1f7d9zc/sideoverlap_simple_
+plates_li1_m1__sideoverlap_simple_plates_li1_m1/sideoverlap_simple_plates_li1_m1
+_k25d_pex_netlist.spice                                                         
+[14:04:14] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 195.1 MiB                                          
+[14:04:14] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 195.1 MiB                                              
