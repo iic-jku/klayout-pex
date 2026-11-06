@@ -130,6 +130,7 @@ from .rcx25.netlist_checks import (
     check_rc_netlist,
     check_schematic_device_classes,
     check_schematic_device_totals,
+    check_schematic_pins,
     first_names,
     RCNetlistCheckError,
     undriven_nets,
@@ -276,8 +277,9 @@ class KpexCLI:
         group_pex_input.add_argument("--gds", "-g", dest="gds_path", default=None,
                                      help="GDS path (for LVS)")
         group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                     help="Schematic SPICE netlist path (--check checks its device classes "
-                                          "and their totals only, use regular LVS to compare layout against schematic)")
+                                     help="Schematic SPICE netlist path (--check checks its device classes, "
+                                          "their totals and the pins of its top circuit only, use regular LVS "
+                                          "to compare layout against schematic)")
         # Developer shortcut, not a supported entry point. It exists so that a
         # PEX25D or engine run can be repeated without paying for LVS again while
         # working on the code downstream of it. An LVSDB is tied to the kpex
@@ -464,7 +466,10 @@ class KpexCLI:
                                     "inconsistent with the LVS netlist, e.g. a device terminal off the resistor "
                                     "network of its net, a port that touches nothing, or a lost capacitance, "
                                     "or if the LVS netlist lacks a device class of --schematic "
-                                    "or differs in its totals (e.g. Σ W·L of a MOS) "
+                                    "or differs in its totals (e.g. Σ W·L of a MOS), "
+                                    "or if the ports of the netlist differ from the pins of the top circuit "
+                                    "of --schematic, but the substrate, the pins that reach only bulk terminals "
+                                    "(unless a port has their name), and the ports for models "
                                     "(default is True for --mode RC, otherwise these are warnings)")
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -913,8 +918,8 @@ class KpexCLI:
                     if not os.path.isfile(args.schematic_path):
                         error(f"Can't read schematic at path {args.schematic_path}")
                         found_errors = True
-                    warning("--schematic is checked for its device classes and their totals only, "
-                            "use regular LVS to compare layout against schematic")
+                    warning("--schematic is checked for its device classes, their totals and the pins of its "
+                            "top circuit only, use regular LVS to compare layout against schematic")
                 args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                              f"{args.effective_cell_name}_dummy_schematic.spice")
                 LVSRunner.write_dummy_schematic(args.effective_schematic_path, args.effective_cell_name)
@@ -1263,28 +1268,36 @@ class KpexCLI:
         info(f"Wrote reduced netlist to: {reduced_netlist_path}")
 
     @staticmethod
-    def schematic_device_class_problems(schematic_path: str,
-                                        lvs_netlist: kdb.Netlist,
-                                        device_models: DeviceModels,
-                                        top_cell_name: str) -> List[str]:
+    def schematic_problems(schematic_path: str,
+                           lvs_netlist: kdb.Netlist,
+                           device_models: DeviceModels,
+                           top_cell_name: str,
+                           port_names: Sequence[str],
+                           left_out_names: Collection[str] = ()) -> List[str]:
         """
-        :return: the problems of check_schematic_device_classes and check_schematic_device_totals,
-                 or that the schematic can't be read or evaluated
+        :param port_names: of the netlist (see check_schematic_pins)
+        :param left_out_names: compared neither as pins nor as ports (see check_schematic_pins)
+        :return: the problems of check_schematic_pins, check_schematic_device_classes and
+                 check_schematic_device_totals, or that the schematic can't be read or evaluated
         """
         try:
             netlist = SpiceReader().read(schematic_path)
         except SpiceReaderError as e:
-            return [f"kpex can't read the schematic, so no device classes are compared: {e}"]
+            return [f"kpex can't read the schematic, so neither pins nor device classes are compared: {e}"]
+        problems = check_schematic_pins(schematic=netlist, top_cell_name=top_cell_name, port_names=port_names,
+                                        device_models=device_models, lvs_netlist=lvs_netlist,
+                                        left_out_names=left_out_names)
         try:
             schematic = schematic_devices(netlist=netlist, device_models=device_models, top_cell_name=top_cell_name)
         except SpiceEvaluationError as e:
-            return [f"kpex can't evaluate the schematic, so no device classes are compared: {schematic_path}: {e}"]
+            return problems + [f"kpex can't evaluate the schematic, so no device classes are compared: "
+                               f"{schematic_path}: {e}"]
         if schematic.device_names_by_unknown_model:
             warning("The device class check leaves out the devices of the schematic of models without device model "
                     "mapping:\n" +
                     '\n'.join(f"  - {model}: {first_names(names)}"
                                for model, names in sorted(schematic.device_names_by_unknown_model.items())))
-        return check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic) + \
+        return problems + check_schematic_device_classes(lvs_netlist=lvs_netlist, schematic=schematic) + \
                check_schematic_device_totals(lvs_netlist=lvs_netlist, schematic=schematic, device_models=device_models)
 
     @staticmethod
@@ -1411,11 +1424,16 @@ class KpexCLI:
                 removed_device_ids=removed_device_ids
             )
             if args.input_mode == InputMode.GDS and args.schematic_path:
-                self._rcx25_netlist_problems += self.schematic_device_class_problems(
+                top_circuit = expanded_netlist.circuit_by_name(pex_context.annotated_top_cell.name)
+                self._rcx25_netlist_problems += self.schematic_problems(
                     schematic_path=args.schematic_path,
                     lvs_netlist=pex_context.lvsdb.netlist(),
                     device_models=tech_info.device_models,
-                    top_cell_name=pex_context.annotated_top_cell.name
+                    top_cell_name=pex_context.annotated_top_cell.name,
+                    port_names=[pin.name() for pin in top_circuit.each_pin()],
+                    # NOTE: the substrate, which a schematic may leave global, and the ports for models
+                    left_out_names=[pex_context.substrate_net_name,
+                                    *(name for names in summary.exclusion_ports.values() for name in names)]
                 )
             # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers
             check_fails_run = args.check_rc_netlist if args.check_rc_netlist is not None \
