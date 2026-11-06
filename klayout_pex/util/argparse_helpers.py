@@ -248,25 +248,28 @@ def multiple_choice_pattern(text: str) -> MultipleChoicePattern:
 
 
 DEPRECATED_OPTIONS_DEST = 'deprecated_options'
-"""The namespace attribute with the former option names of the command line, see warn_deprecated_options"""
+"""
+The namespace attribute with the deprecated options of the command line and the advice of their warnings,
+e.g. ('--output', 'use --out-file'), see warn_deprecated_options
+"""
 
 
-class _FormerOptionName(argparse.Action):
+class _DeprecatedOption(argparse.Action):
     """
-    The former name of an option: stores the value as the option does, and notes the former name,
+    A deprecated option, e.g. the former name of an option: stores the value as the option does, and notes the option,
     as the warning must wait until the CLI decided where its output goes (e.g. stdout for an artifact)
     """
 
-    def __init__(self, option_strings: List[str], dest: str, option_name: str, **kwargs):
-        self.option_name = option_name
+    def __init__(self, option_strings: List[str], dest: str, advice: str, **kwargs):
+        self.advice = advice
         super().__init__(option_strings, dest, **kwargs)
 
     def __call__(self, parser: argparse.ArgumentParser, namespace: argparse.Namespace,
                  values: Any, option_string: Optional[str] = None):
         setattr(namespace, self.dest, self.const if self.nargs == 0 else values)
-        former_names = getattr(namespace, DEPRECATED_OPTIONS_DEST, None) or []
-        former_names.append((option_string, self.option_name))
-        setattr(namespace, DEPRECATED_OPTIONS_DEST, former_names)
+        deprecated_options = getattr(namespace, DEPRECATED_OPTIONS_DEST, None) or []
+        deprecated_options.append((option_string, self.advice))
+        setattr(namespace, DEPRECATED_OPTIONS_DEST, deprecated_options)
 
 
 def add_argument_with_former_name(container: argparse._ActionsContainer,
@@ -289,17 +292,35 @@ def add_argument_with_former_name(container: argparse._ActionsContainer,
         value_kwargs = dict(nargs=0, const=action.const)
     else:
         value_kwargs = dict(nargs=action.nargs, type=action.type, choices=action.choices, metavar=action.metavar)
-    names.add_argument(former_name, dest=action.dest, action=_FormerOptionName, option_name=name,
+    names.add_argument(former_name, dest=action.dest, action=_DeprecatedOption, advice=f"use {name}",
                        default=argparse.SUPPRESS, help=argparse.SUPPRESS, **value_kwargs)
     return action
 
 
+def add_deprecated_argument(container: argparse._ActionsContainer,
+                            name: str,
+                            advice: str,
+                            help: str,
+                            **kwargs) -> argparse.Action:
+    """
+    Adds an option that is deprecated, but still accepted, e.g. as it has no effect any more
+
+    :param container: a parser or an argument group
+    :param advice: the end of the warning and of the help, after '<name> is deprecated, ', e.g. 'it has no effect'
+    :param help: what the option is, the help says that it is deprecated
+    :param kwargs: those of add_argument, for an option that stores a value
+    :return: the action of the option
+    """
+    return container.add_argument(name, action=_DeprecatedOption, advice=advice,
+                                  help=f"{help}, deprecated: {advice}", **kwargs)
+
+
 def warn_deprecated_options(args: argparse.Namespace):
     """
-    Warns about each former option name of the command line (see add_argument_with_former_name)
+    Warns about each deprecated option of the command line (see add_argument_with_former_name, add_deprecated_argument)
     """
-    for former_name, name in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
-        warning(f"{former_name} is deprecated, use {name}")
+    for option_string, advice in getattr(args, DEPRECATED_OPTIONS_DEST, None) or []:
+        warning(f"{option_string} is deprecated, {advice}")
 
 
 def log_level_by_name(text: str) -> LogLevel:
