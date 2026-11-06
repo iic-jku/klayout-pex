@@ -309,6 +309,8 @@ def test_unreadable_schematic_is_a_check_problem(tmp_path):
         f"{schematic_path}: line 2: .include is not supported"]
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_schematic_without_value_is_a_check_problem(tmp_path):
     schematic_path = tmp_path / 'chip.spice'
     schematic_path.write_text('.subckt chip a b\nXM1 a b b b nmos w={w0*2}\n.ends chip\n', encoding='utf-8')
@@ -317,6 +319,8 @@ def test_schematic_without_value_is_a_check_problem(tmp_path):
         f"{schematic_path}: the parameter w = w0*2 of XM1: the parameter w0 is not defined"]
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_schematic_with_diode_of_three_nodes_is_no_check_problem(tmp_path):
     # NOTE: the reader took the third node as the model and the model as the area, which it couldn't evaluate (#368)
     schematic_path = tmp_path / 'chip.spice'
@@ -324,6 +328,8 @@ def test_schematic_with_diode_of_three_nodes_is_no_check_problem(tmp_path):
     assert schematic_problems(str(schematic_path), ['a', 'b', 'vss']) == []
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_pins_of_the_schematic_other_than_the_ports_are_check_problems(tmp_path):
     # NOTE: regardless of case, as SPICE reads names (#406)
     schematic_path = tmp_path / 'chip.spice'
@@ -333,6 +339,8 @@ def test_pins_of_the_schematic_other_than_the_ports_are_check_problems(tmp_path)
         "the netlist has ports without pin in the schematic: c"]
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
     # NOTE: e.g. a standard cell, which the schematic calls, but doesn't define
     schematic_path = tmp_path / 'chip.spice'
@@ -397,6 +405,21 @@ def test_missing_schematic_is_an_error_also_with_lvsdb_input(tmp_path):
     code, output = rc_run_from_lvsdb(NFET_GDS_PATH, tmp_path, '--schematic', str(schematic_path))
     assert code == 1, output
     assert f"Can't read schematic at path {schematic_path}" in output
+    assert SCHEMATIC_WARNING not in output  # NOTE: nothing is checked
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
+def test_missing_schematic_is_reported_before_the_input_is_read(tmp_path, caplog):
+    schematic_path = tmp_path / 'missing.spice'
+    lvsdb_path = tmp_path / 'missing.lvsdb.gz'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                            '--lvsdb', str(lvsdb_path), '--schematic', str(schematic_path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 1, output
+    assert [message for _, level, message in caplog.record_tuples if level == logging.ERROR] == [
+        f"Can't read schematic at path {schematic_path}",
+        f"Can't read KLayout LVSDB file at path {lvsdb_path}"], output
 
 
 @allure.parent_suite("Unit Tests")

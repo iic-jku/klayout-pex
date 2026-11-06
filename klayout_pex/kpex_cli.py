@@ -817,6 +817,14 @@ class KpexCLI:
                 error(str(e))
                 found_errors = True
 
+        if args.schematic_path:
+            if not os.path.isfile(args.schematic_path):
+                error(f"Can't read schematic at path {args.schematic_path}")
+                found_errors = True
+            else:
+                warning("--schematic is checked for its device classes, their totals and the pins of its "
+                        "top circuit only, use regular LVS to compare layout against schematic")
+
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
             if args.lvsdb_path is None:
@@ -914,12 +922,6 @@ class KpexCLI:
 
             args.output_dir_path = os.path.join(args.output_dir_base_path, run_dir_id)
             os.makedirs(args.output_dir_path, exist_ok=True)
-            if args.schematic_path:
-                if not os.path.isfile(args.schematic_path):
-                    error(f"Can't read schematic at path {args.schematic_path}")
-                    found_errors = True
-                warning("--schematic is checked for its device classes, their totals and the pins of its "
-                        "top circuit only, use regular LVS to compare layout against schematic")
             if args.input_mode == InputMode.GDS:
                 args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                              f"{args.effective_cell_name}_dummy_schematic.spice")
