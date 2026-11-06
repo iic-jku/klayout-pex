@@ -188,6 +188,19 @@ def test_log_names_the_halo_of_the_run(halo_args: List[str], logged_halo: str, t
 
 
 @allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
+@pytest.mark.parametrize('halo', ['0', '-1', 'nan', 'inf'])
+def test_halo_that_is_not_positive_is_a_usage_error(halo: str, tmp_path):
+    # NOTE: 0 failed the extraction with a ZeroDivisionError, -1 left out all capacitances (#419)
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', f'--halo={halo}',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert f"argument --halo: must be a finite number > 0 (in µm), got '{halo}'" in output
+    assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Windows")
 def test_klayout_writes_no_gzip_files(tmp_path):
     # NOTE: on Windows, KLayout leaks a C runtime stream with each gzip file it writes, of which a process has 512,

@@ -25,6 +25,7 @@
 
 import argparse
 from enum import Enum, StrEnum
+import math
 from typing import *
 
 import rich.console
@@ -169,6 +170,17 @@ def positive_spice_seconds(text: str) -> float:
         raise argparse.ArgumentTypeError(str(e))
     if value <= 0:
         raise argparse.ArgumentTypeError(f"must be > 0 s, got '{text}'")
+    return value
+
+
+def positive_micrometers(text: str) -> float:
+    """argparse type: a finite length > 0 µm, e.g. '2.5' or '1e3'"""
+    try:
+        value = float(text)
+    except ValueError:
+        value = math.nan
+    if not (math.isfinite(value) and value > 0):
+        raise argparse.ArgumentTypeError(f"must be a finite number > 0 (in µm), got '{text}'")
     return value
 
 
