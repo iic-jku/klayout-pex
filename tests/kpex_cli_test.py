@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 import re
 from typing import *
 from unittest import mock
@@ -53,6 +54,10 @@ from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1.gds.gz')
+NFET_IN_SUBCELL_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
+
+SCHEMATIC_WARNING = "--schematic is checked for its device classes, their totals and the pins of its top circuit " \
+                    "only, use regular LVS to compare layout against schematic"
 
 PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d+(\.\d)? (B|KiB|MiB|GiB)"
                               r"(, largest subprocess \d+(\.\d)? (B|KiB|MiB|GiB))?")
@@ -246,8 +251,7 @@ def test_schematic_is_no_input_of_the_pex_lvs(tmp_path, monkeypatch: pytest.Monk
                                             '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
                                             '--out-dir', str(tmp_path)])
     assert code == 1, output  # NOTE: no KLayout
-    assert "--schematic is checked for its device classes, their totals and the pins of its top circuit only, " \
-           "use regular LVS to compare layout against schematic" in output
+    assert SCHEMATIC_WARNING in output
     assert os.path.isfile(tmp_path / 'nfet_li1__nfet_li1' / 'nfet_li1_dummy_schematic.spice')
 
 
@@ -259,8 +263,7 @@ def test_pex_lvs_flattens_the_cells_a_schematic_has_as_subcircuits(tmp_path):
     #       called SUBNFET without defining it, its nfet cut off from the nets (#330)
     # NOTE: --check n, as the ports are the pins $1.D, $1.G and $1.S of the LVS netlist, which flattens SUBNFET
     #       (#417), unlike the pins D, G and S of the schematic, which --check compares them with (#406)
-    config = PDKTestConfig(PDKName.SKY130A)
-    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
+    gds_path = NFET_IN_SUBCELL_GDS_PATH
     code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
                                             '--gds', gds_path,
                                             '--schematic', gds_path.replace('.gds.gz', '.spice'),
@@ -327,48 +330,64 @@ def test_devices_of_models_without_mapping_are_a_warning(tmp_path, caplog):
             "mapping:\n  - sg13g2_inv_1: Xinv") in caplog.record_tuples
 
 
-@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
-@allure.tag("PEX", "2.5D", "Schematic")
-@pytest.mark.slow
-def test_device_class_of_the_schematic_missing_in_the_layout_fails_the_rc_run(tmp_path):
-    # NOTE: e.g. a device the PEX-LVS doesn't recognize, which the extraction then misses (#345)
-    config = PDKTestConfig(PDKName.SKY130A)
-    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
-    with open(gds_path.replace('.gds.gz', '.spice'), encoding='utf-8') as f:
+def rc_run_from_lvsdb(gds_path: str, tmp_path: Path, *args: str) -> Tuple[int, str]:
+    """
+    :return: the exit code and the output (see run_cli) of the RC extraction of the sky130A design
+             from its committed LVS database, with these further arguments
+    """
+    return run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                    '--lvsdb', lvsdb_fixture_path('sky130A', gds_path), *args,
+                                    '--out-dir', str(tmp_path)])
+
+
+def edited_schematic_path(gds_path: str, tmp_path: Path, old: str, new: str) -> str:
+    """
+    :return: the path of a copy of the schematic of the design (next to its layout), with old replaced by new
+    """
+    source_path = gds_path.replace('.gds.gz', '.spice')
+    with open(source_path, encoding='utf-8') as f:
         schematic = f.read()
-    schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
-    schematic_path.write_text(schematic.replace('.ends SUBNFET',
-                                                'XM2 S G D VNB sky130_fd_pr__pfet_01v8 L=0.15 W=0.65\n.ends SUBNFET'),
-                              encoding='utf-8')
-    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
-                                            '--gds', gds_path, '--schematic', str(schematic_path),
-                                            '--out-dir', str(tmp_path)])
+    schematic_path = tmp_path / os.path.basename(source_path)
+    schematic_path.write_text(schematic.replace(old, new), encoding='utf-8')
+    return str(schematic_path)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
+@pytest.mark.parametrize('gds_args', [[], ['--gds', NFET_IN_SUBCELL_GDS_PATH]], ids=['lvsdb', 'lvsdb and gds'])
+def test_device_class_of_the_schematic_missing_in_the_layout_fails_the_rc_run(gds_args: List[str], tmp_path):
+    # NOTE: e.g. a device the PEX-LVS doesn't recognize, which the extraction then misses (#345),
+    #       also from an LVSDB, which has the LVS netlist the checks compare with (#418)
+    schematic_path = edited_schematic_path(NFET_IN_SUBCELL_GDS_PATH, tmp_path, '.ends SUBNFET',
+                                           'XM2 S G D VNB sky130_fd_pr__pfet_01v8 L=0.15 W=0.65\n.ends SUBNFET')
+    code, output = rc_run_from_lvsdb(NFET_IN_SUBCELL_GDS_PATH, tmp_path, *gds_args, '--schematic', schematic_path)
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert SCHEMATIC_WARNING in output
     assert "the schematic has devices of class sky130_fd_pr__pfet_01v8 (X1.XM2), the LVS netlist none" in output
 
 
-@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
-@allure.tag("PEX", "2.5D", "Schematic")
-@pytest.mark.slow
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_device_totals_of_the_schematic_that_differ_from_the_layout_fail_the_rc_run(tmp_path):
     # NOTE: e.g. a device the PEX-LVS doesn't recognize in a class it recognizes otherwise (#345)
-    config = PDKTestConfig(PDKName.SKY130A)
-    gds_path = config.gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
-    with open(gds_path.replace('.gds.gz', '.spice'), encoding='utf-8') as f:
-        schematic = f.read()
-    schematic_path = tmp_path / 'nfet_li1_in_subcell.spice'
-    schematic_path.write_text(schematic.replace('W=0.65', 'W=0.65 m=2'), encoding='utf-8')
-    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
-                                            '--gds', gds_path, '--schematic', str(schematic_path),
-                                            '--out-dir', str(tmp_path)])
+    schematic_path = edited_schematic_path(NFET_IN_SUBCELL_GDS_PATH, tmp_path, 'W=0.65', 'W=0.65 m=2')
+    code, output = rc_run_from_lvsdb(NFET_IN_SUBCELL_GDS_PATH, tmp_path, '--schematic', schematic_path)
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert "the schematic has Σ W·L = 0.195 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.0975" in output
     assert "the schematic has Σ W = 1.3 of class sky130_fd_pr__nfet_01v8, the LVS netlist 0.65" in output
 
 
-@allure.parent_suite("kpex/2.5D Extraction Tests [PEX-LVS]")
-@allure.tag("PEX", "2.5D", "Schematic")
-@pytest.mark.slow
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
+def test_missing_schematic_is_an_error_also_with_lvsdb_input(tmp_path):
+    schematic_path = tmp_path / 'missing.spice'
+    code, output = rc_run_from_lvsdb(NFET_GDS_PATH, tmp_path, '--schematic', str(schematic_path))
+    assert code == 1, output
+    assert f"Can't read schematic at path {schematic_path}" in output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
 def test_pins_of_the_schematic_other_than_the_ports_fail_the_rc_run(tmp_path):
     # NOTE: e.g. a label of the layout other than the pin of the schematic, by which a netlist that replaces
     #       the schematic is connected (#406), but not the substrate sky130_gnd, which the schematic leaves global
@@ -376,9 +395,7 @@ def test_pins_of_the_schematic_other_than_the_ports_fail_the_rc_run(tmp_path):
     schematic_path.write_text('.subckt nfet_li1 D G SRC\n'
                               'XM1 SRC G D sky130_gnd sky130_fd_pr__nfet_01v8 L=0.15 W=0.65\n'
                               '.ends nfet_li1\n', encoding='utf-8')
-    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
-                                            '--gds', NFET_GDS_PATH, '--schematic', str(schematic_path),
-                                            '--out-dir', str(tmp_path)])
+    code, output = rc_run_from_lvsdb(NFET_GDS_PATH, tmp_path, '--schematic', str(schematic_path))
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert "The extracted netlist is inconsistent with the LVS netlist (--check n to accept it):\n" \
            "  - the schematic has pins without port in the netlist: SRC\n" \
