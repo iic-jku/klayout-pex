@@ -1159,7 +1159,11 @@ class RExtractor:
                             f"{listed_names(block_names)}, where they abut, so the netlist has no ports for their "
                             f"models there")
 
-            keep_pins_of_top_circuit(net_extraction_request.net_name, vertex_ports, vertex_port_pins)
+            # NOTE: by the name KLayout gave the net, rather than the one of its labels in subcells,
+            #       so that a net that the top cell joins has one port, at its first label (#404)
+            klayout_net_name = self.pex_context.klayout_net_names.get(net_extraction_request.net_name,
+                                                                      net_extraction_request.net_name)
+            keep_pins_of_top_circuit(klayout_net_name, vertex_ports, vertex_port_pins)
 
             rex = klp.RNetExtractor(self.pex_context.dbu)
             try:

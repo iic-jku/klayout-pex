@@ -225,6 +225,16 @@ class NetNameTest(unittest.TestCase):
         self.assertTrue(pex_context.shapes_of_net(gds_pair, 'no such net').is_empty())
 
 
+def pattern_lvsdb(pdk_name: PDKName, cell_name: str) -> kdb.LayoutVsSchematic:
+    """
+    :return: the committed LVS database of the test pattern
+    """
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(str(pdk_name), PDKTestConfig(pdk_name).gds_path('test_patterns',
+                                                                                  f"{cell_name}.gds.gz")))
+    return lvsdb
+
+
 def pattern_context(pdk_name: PDKName,
                     cell_name: str,
                     net_names: Mapping[NetName, NetName] = {}) -> Tuple[KLayoutExtractionContext, List[str]]:
@@ -232,9 +242,7 @@ def pattern_context(pdk_name: PDKName,
     :param net_names: new names of nets of the LVS netlist, given before the extraction
     :return: the extraction context of the test pattern, from its committed LVS database, and the warnings
     """
-    lvsdb = kdb.LayoutVsSchematic()
-    lvsdb.read(lvsdb_fixture_path(str(pdk_name), PDKTestConfig(pdk_name).gds_path('test_patterns',
-                                                                                  f"{cell_name}.gds.gz")))
+    lvsdb = pattern_lvsdb(pdk_name, cell_name)
     for old_name, new_name in net_names.items():
         lvsdb.netlist().circuit_by_name(cell_name).net_by_name(old_name).name = new_name
     tech = TechInfo.from_json(PDK.from_string(str(pdk_name)).config.tech_pb_json_path, dielectric_filter=None)
@@ -262,6 +270,11 @@ class SubcellLabelNameTest(unittest.TestCase):
                 ('$1.D', set(), None),
                 ('$1.D', {'G'}, None),
                 ('$1.A,B', {'A'}, None),
+                # NOTE: the names KLayout gives nets without a name
+                ('$I1', ['VDD', 'VDD', 'VDD'], 'VDD'),
+                ('$2', ['b', 'a'], 'a,b'),
+                ('$2', set(), None),
+                ('$1', {'$1'}, None),
         ):
             with self.subTest(net_name=net_name, labels=labels):
                 self.assertEqual(expected, subcell_label_name(net_name, labels))
@@ -286,6 +299,31 @@ class SubcellLabelNameTest(unittest.TestCase):
         pex_context, warnings = pattern_context(PDKName.IHP_SG13G2, 'label_only_in_child_cell')
         self.assertEqual(['inner'], [pin.name() for pin in pex_context.top_circuit.each_pin()])
         self.assertIn("Ports named after labels in subcells: inner "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+
+    def test_net_of_labels_in_subcells_that_the_top_cell_joins_is_a_port_of_their_name(self):
+        # NOTE: the VDD rails of 3 abutting standard cells, which KLayout leaves unnamed ($I1), as the top cell
+        #       joins them, and without a pin, which its make_top_level_pins makes of named nets only
+        lvsdb = pattern_lvsdb(PDKName.IHP_SG13G2, 'cut_abutting_std_cells')
+        KLayoutExtractionContext.make_net_names_unique(lvsdb.netlist())
+        klayout_net_names = KLayoutExtractionContext.name_nets_after_subcell_labels(
+            lvsdb, KLayoutExtractionContext.labels_of_nets(lvsdb))
+        self.assertEqual({'VDD': '$I1'}, klayout_net_names)
+        circuit = lvsdb.netlist().top_circuit()
+        self.assertEqual(['VDD'], [circuit.pin_by_id(ref.pin_id()).name()
+                                   for ref in circuit.net_by_name('VDD').each_pin()])
+
+        _, warnings = pattern_context(PDKName.IHP_SG13G2, 'cut_abutting_std_cells')
+        self.assertIn("Ports named after labels in subcells: VDD "
+                      "(label them in the top cell to name ports explicitly)", warnings)
+
+    def test_net_of_several_labels_in_subcells_is_named_after_all_of_them(self):
+        # NOTE: the wire of the top cell between the pins a and b of the child cells, like KLayout names the net
+        #       of several labels
+        pex_context, warnings = pattern_context(PDKName.IHP_SG13G2, 'labels_in_child_cells')
+        self.assertEqual(['a,b'], [pin.name() for pin in pex_context.top_circuit.each_pin()])
+        self.assertEqual({'a,b': '$2'}, pex_context.klayout_net_names)
+        self.assertIn("Ports named after labels in subcells: a,b "
                       "(label them in the top cell to name ports explicitly)", warnings)
 
     def test_labels_of_instances_of_a_cell_keep_their_paths(self):
