@@ -28,6 +28,7 @@ from typing import *
 from collections import Counter
 from fnmatch import fnmatchcase
 from functools import cached_property
+import math
 import google.protobuf.json_format
 
 from .device_models import DeviceModels
@@ -114,6 +115,12 @@ class TechInfo:
             raise TechDefError(
                 f"LVS computed layers have to name the layers of the process stack on their GDS pairs, "
                 f"but in {jsonpb_path}" + ''.join(f"\n  - {p}" for p in problems))
+        # NOTE: as --halo is, which overrides it: a halo of 0 divides by zero in the fringe, a negative one finds
+        #       no neighbors and so drops all capacitances, and an unset one reads as 0
+        side_halo = tech.process_parasitics.side_halo
+        if not (math.isfinite(side_halo) and side_halo > 0):
+            raise TechDefError(f"process_parasitics.side_halo has to be a finite number > 0 (in µm), "
+                               f"but in {jsonpb_path} it is {side_halo:g}")
         return tech
 
     @staticmethod
