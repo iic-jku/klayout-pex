@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 import glob
+import math
 import os
 import re
 import tempfile
@@ -363,6 +364,17 @@ class Test(unittest.TestCase):
             with self.assertRaisesRegex(TechDefError, r"but in .*test_tech\.pb\.json\n"
                                                       r"  - the LVS computed layer met5_rfcap names the layer met4 "):
                 TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
+
+    def test_the_reader_refuses_a_side_halo_that_is_not_positive(self):
+        # NOTE: 0 failed the extraction with a ZeroDivisionError, -1 left out all capacitances (#424)
+        for side_halo in (0.0, -1.0, math.nan, math.inf):
+            tech = tech_pb2.Technology(name='test')
+            tech.process_parasitics.side_halo = side_halo
+            with self.subTest(side_halo=side_halo), tempfile.TemporaryDirectory() as tmp_dir:
+                with self.assertRaisesRegex(TechDefError, rf"process_parasitics\.side_halo has to be a finite number "
+                                                          rf"> 0 \(in µm\), but in .*test_tech\.pb\.json "
+                                                          rf"it is {side_halo:g}$"):
+                    TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
