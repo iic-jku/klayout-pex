@@ -1,0 +1,48 @@
+[16:00:32] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/s
+idewall_100um_x_100um_distance_200nm_li1.lvsdb.gz --out-dir                     
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000    
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:00:32] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:00:32] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_sky130A/sidewall_100um_x_100um_dist                  
+                    ance_200nm_li1__sidewall_100um_x_100um_dis                  
+                    tance_200nm_li1/kpex_result.json                            
+[16:00:32] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.6 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:00:32] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1993
+[16:00:32] INFO     (67, 16) -> (li_pin_con)                    kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:00:32] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:00:32] INFO     LVSDB: found 2pins                          extractor.py:482
+[16:00:32] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.6 GiB                              
+[16:00:32] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.6 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;A;B;3.75;                                                                    
+C2;A;VSUBS;8.231;                                                               
+C3;B;VSUBS;8.231;                                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um_
+distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_1
+00um_distance_200nm_li1_k25d_pex_netlist.csv                                    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_sky130A/sidewall_100um_x_100um_
+distance_200nm_li1__sidewall_100um_x_100um_distance_200nm_li1/sidewall_100um_x_1
+00um_distance_200nm_li1_k25d_pex_netlist.spice                                  
+[16:00:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.6 GiB                                            
+[16:00:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.6 GiB                                                

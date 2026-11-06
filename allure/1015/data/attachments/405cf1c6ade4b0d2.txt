@@ -1,0 +1,46 @@
+[16:04:27] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/r_wire_over_nbulay_m1.lvsdb.gz --out-dir                                     
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:04:27] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:04:27] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_ihp-sg13g2/r_wire_over_nbulay_m1__                  
+                    r_wire_over_nbulay_m1/kpex_result.json                      
+[16:04:27] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 813.1 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:04:27] INFO     (32, 0) -> (nbulay_drw)                     kpex_cli.py:1993
+[16:04:27] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[16:04:27] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1993
+[16:04:27] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:04:27] INFO     LVSDB: found 1pins                          extractor.py:482
+[16:04:27] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 813.1 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;A;A,B;;0.001                                                                 
+R2;A;B;;2.09                                                                    
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/r_wire_over_nbulay_
+m1__r_wire_over_nbulay_m1/r_wire_over_nbulay_m1_k25d_pex_netlist.csv            
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/r_wire_over_nbulay_
+m1__r_wire_over_nbulay_m1/r_wire_over_nbulay_m1_k25d_pex_netlist.spice          
+[16:04:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 813.1 MiB                                          
+[16:04:27] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): $3                        
+[16:04:27] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 813.1 MiB                                              
