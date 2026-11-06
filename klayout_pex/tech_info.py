@@ -480,13 +480,16 @@ class TechInfo:
         for lyr in self.tech.process_stack.layers:
             match lyr.layer_type:
                 case LT.LAYER_TYPE_NWELL:
-                    d[lyr.nwell_layer.contact_above.name] = lyr.nwell_layer.contact_above
-
+                    layer = lyr.nwell_layer
                 case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
-                    d[lyr.diffusion_layer.contact_above.name] = lyr.diffusion_layer.contact_above
-
+                    layer = lyr.diffusion_layer
                 case LT.LAYER_TYPE_METAL:
-                    d[lyr.metal_layer.contact_above.name] = lyr.metal_layer.contact_above
+                    layer = lyr.metal_layer
+                case _:
+                    continue
+            # NOTE: not the unset contact of a layer without one, e.g. a tap, whose name is empty (#469)
+            if layer.HasField('contact_above'):
+                d[layer.contact_above.name] = layer.contact_above
         return d
 
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
