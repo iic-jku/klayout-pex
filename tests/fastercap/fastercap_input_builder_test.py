@@ -52,7 +52,7 @@ def context_of_layout(pdk_name: PDKName, *path_components) -> Tuple[KLayoutExtra
     """
     pdk = PDKTestConfig(pdk_name)
     with mock.patch.object(KpexCLI, 'run_kpex_2_5d_engine', autospec=True) as run_kpex_2_5d_engine:
-        KpexCLI().main(['main',
+        KpexCLI().main(['main', 'extract',
                         '--pdk', pdk.name,
                         '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                         '--out-dir', pdk.output_dir,
@@ -188,3 +188,14 @@ def test_vias_and_contacts_of_a_net_across_a_block_are_conductors_of_its_parts()
     #       up to the Metal1
     assert sorted((name, top) for name, layers in conductors.items() for _, bottom, top in layers if bottom == 0) == \
            [('VDD#x0', 100), ('VDD#x0', 1040), ('VSS#x0', 100), ('VSS#x0', 1040)]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_taps_without_contact_are_no_layers_without_gds_pair(caplog: pytest.LogCaptureFixture):
+    # NOTE: the taps have no contact in the process stack, whose GDS pair of an empty name was looked up,
+    #       with a warning per net and tap (#460)
+    pex_context, tech_info = context_of_layout(PDKName.SKY130A, 'test_patterns',
+                                               'single_plate_100um_x_100um_li1_over_substrate.gds.gz')
+    fastercap_input(pex_context, tech_info)
+    assert [message for message in caplog.messages if "Can't find GDS pair" in message] == []

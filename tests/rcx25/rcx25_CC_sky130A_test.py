@@ -26,6 +26,7 @@ import allure
 import pytest
 from unittest import mock
 
+from klayout_pex.pdk_config import PDK
 from klayout_pex.tech_info import TechInfo
 from klayout_pex.rcx25.pex_mode import PEXMode
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
@@ -313,6 +314,27 @@ C1;li1;met1;0.157;
 C2;VSUBS;li1;7.931;
 C3;VSUBS;met1;248.899;"""
         )
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sideoverlap_needs_no_substrate_capacitance_beyond_its_overlap_and_side_overlap():
+    # The fringe takes the overlap and side overlap capacitances, of the substrate too (as of TechInfo),
+    # but looked up the substrate capacitance of its layer as well, unused, which raised a KeyError without one
+    tech_info = TechInfo.from_json(PDK.SKY130A.config.tech_pb_json_path, dielectric_filter=None)
+    overlap_caps = tech_info.overlap_cap_by_layer_names
+    side_overlap_caps = tech_info.side_overlap_cap_by_layer_names
+    substrate_caps = {name: cap for name, cap in tech_info.substrate_cap_by_layer_name.items() if name != 'met1'}
+    with mock.patch.object(TechInfo, 'substrate_cap_by_layer_name', property(lambda _: substrate_caps)), \
+         mock.patch.object(TechInfo, 'overlap_cap_by_layer_names', property(lambda _: overlap_caps)), \
+         mock.patch.object(TechInfo, 'side_overlap_cap_by_layer_names', property(lambda _: side_overlap_caps)):
+        pex_whiteboxed.assert_expected_matches_obtained(
+            'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
+            expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+C1;li1;met1;0.157;
+C2;VSUBS;li1;7.931;
+C3;VSUBS;met1;248.899;"""
+            )
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
@@ -755,6 +777,30 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
         "  - capm over VSUBS\n"
         "  - capm over met3\n"
         "  - met4 over capm"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_sideoverlap_without_side_overlap_cap_is_an_error():
+    # Without the side overlap capacitance of li1 to met1 (and of met1 to the substrate),
+    # the fringe crashed the extraction with a KeyError
+    side_overlap_cap_by_layer_names = TechInfo.side_overlap_cap_by_layer_names.func
+
+    def without_li1_to_met1(tech_info: TechInfo):
+        caps = side_overlap_cap_by_layer_names(tech_info)
+        return {inside: {outside: soc for outside, soc in socs.items()
+                         if (inside, outside) not in (('li1', 'met1'), ('met1', 'VSUBS'))}
+                for inside, socs in caps.items()}
+
+    with mock.patch.object(TechInfo, 'side_overlap_cap_by_layer_names', property(without_li1_to_met1)), \
+         mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz')
+    assert [c.args[0] for c in error_mock.call_args_list if 'side overlap' in c.args[0]] == [
+        "The tech info has no side overlap capacitance for these layer pairs of the layout, "
+        "so the fringe from the edges of the first to the second can't be extracted:\n"
+        "  - li1 to met1\n"
+        "  - met1 to VSUBS"
     ]
 
 

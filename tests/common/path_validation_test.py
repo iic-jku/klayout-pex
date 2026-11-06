@@ -40,9 +40,10 @@ class TestFileValidation:
         empty = tmp_path / 'empty.bin'
         empty.touch()
         missing = tmp_path / 'missing.bin'
-        result = validate_files([first, missing, tmp_path, str(empty)])
-        assert [Path(p) for p in result.working_files] == [first, empty]
-        assert [(Path(failure.path), failure.reason) for failure in result.failures] == [
+        result = validate_files([first, str(missing), tmp_path, str(empty)])
+        # NOTE: the paths as Path, also those given as str
+        assert result.working_files == [first, empty]
+        assert [(failure.path, failure.reason) for failure in result.failures] == [
             (missing, 'File does not exist'), (tmp_path, 'Not a regular file')]
 
     @pytest.mark.parametrize('failure', [PermissionError('access denied'), OSError('read failed')])
@@ -54,7 +55,7 @@ class TestFileValidation:
             result = validate_files([path])
         assert result.working_files == []
         assert len(result.failures) == 1
-        assert Path(result.failures[0].path) == path
+        assert result.failures[0].path == path
         assert result.failures[0].reason == f'Unreadable: {failure}'
 
     def test_empty_input_has_no_failures(self):

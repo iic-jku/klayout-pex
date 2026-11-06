@@ -228,7 +228,7 @@ def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], messag
 def test_kpex_reduce_needs_the_2_5d_engine():
     pdk = extraction.pdk
     with mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
-        KpexCLI().main(['main', '--pdk', pdk.name, '--gds', pdk.gds_path('test_patterns', 'nfet_li1.gds.gz'),
+        KpexCLI().main(['main', 'extract', '--pdk', pdk.name, '--gds', pdk.gds_path('test_patterns', 'nfet_li1.gds.gz'),
                         '--out-dir', pdk.output_dir, '--reduce', 'floating'])
     assert "--reduce floating reduces the netlist of the 2.5D engine, it needs --2.5D" in \
            [c.args[0] for c in error_mock.call_args_list]

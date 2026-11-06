@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from fractions import Fraction
+import math
 from typing import *
 
 from .diagnostics import (Diagnostic, DiagnosticsReport, Severity, Tier,
@@ -137,6 +138,10 @@ class Resolver:
         """
         if self.file.HasField('ground_plane'):
             ground_plane = self.file.ground_plane
+            if ground_plane.zhigh <= ground_plane.zlow:
+                self.diagnose('PEX25D-E0211',
+                              f"GROUND_PLANE '{ground_plane.name}': zlow must be less "
+                              f"than zhigh", source=ground_plane)
             self.declare(Profile(ground_plane.name, ground_plane.zlow,
                                  ground_plane.zhigh, is_conductive=True),
                          ground_plane)
@@ -316,9 +321,19 @@ class Resolver:
                           f"once in the profile namespace",
                           source=self.file.background)
 
+    def check_permittivities(self):
+        records = list(self.file.dielectrics)
+        if self.file.HasField('background'):
+            records.append(self.file.background)
+        for record in records:
+            problem = permittivity_problem(record)
+            if problem is not None:
+                self.diagnose('PEX25D-E0217', problem, source=record)
+
     def resolve_dielectrics(self, scene: Any) -> None:
         kinds = pex25d_dielectric_pb2()
         self.declare_dielectric_names()
+        self.check_permittivities()
         self.dielectrics_by_name = {d.name: d for d in self.file.dielectrics}
 
         ordered = []
@@ -388,6 +403,9 @@ class Resolver:
             return below[0], above[0]
 
         if dielectric.kind == kinds.DIELECTRIC_KIND_CONFORMAL:
+            problem = conformal_thickness_problem(dielectric.name, dielectric.conformal)
+            if problem is not None:
+                self.diagnose('PEX25D-E0216', problem, source=dielectric)
             wrapped = self.wrapped_extent(dielectric.wraps)
             if wrapped is None:
                 return None
@@ -613,6 +631,11 @@ class Resolver:
             if problem is not None:
                 self.diagnose('PEX25D-E0252', problem, source=self.file.domain_box)
                 return
+            if bounds is not None:
+                problem = geometry_outside_problem(self.file.domain_box.box,
+                                                   scene.domain.geometry_bounds, 'DOMAIN_BOX')
+                if problem is not None:
+                    self.diagnose('PEX25D-E0254', problem, source=self.file.domain_box)
             scene.domain.box.CopyFrom(self.file.domain_box.box)
             scene.domain.origin = origins.ORIGIN_DOMAIN_BOX
             return
@@ -647,6 +670,23 @@ def lateral_of(dielectric: Any) -> int:
     if dielectric.kind == kinds.DIELECTRIC_KIND_CONFORMAL:
         return dielectric.conformal.thickness_beside_wrapped
     return 0
+
+
+def conformal_thickness_problem(name: str, film: Any) -> Optional[str]:
+    """
+    Why the thicknesses of a conformal film are invalid, or ``None``.
+
+    :param film: a ``ConformalDielectric`` or a ``ResolvedDielectric``, which
+        both carry the thicknesses; none of them may be negative
+    """
+    negative = [f"{keyword} {getattr(film, keyword.lower())}"
+                for keyword in ('THICKNESS_OVER_WRAPPED', 'THICKNESS_BESIDE_WRAPPED',
+                                'THICKNESS_ON_FIELD')
+                if getattr(film, keyword.lower()) < 0]
+    if not negative:
+        return None
+    return (f"DIELECTRIC_CONFORMAL '{name}' has a negative "
+            f"{' '.join(negative)} (grid units)")
 
 
 def polygon_bounds_tuple(polygon: Any) -> Tuple[int, int, int, int]:
@@ -733,6 +773,26 @@ def domain_box_problem(box: Any, what: str) -> Optional[str]:
             f"({ur.x}, {ur.y}, {ur.z}) in {', '.join(empty)}")
 
 
+def geometry_outside_problem(box: Any, geometry_bounds: Any, what: str) -> Optional[str]:
+    """
+    Why the finite geometry is not within a domain ``Box3D``, or ``None``.
+
+    The geometry may touch the faces of the box. What is not finite (the ground
+    plane, bands, films covering the field) is clipped to the box instead.
+    """
+    faces = []
+    for axis in 'xyz':
+        if getattr(geometry_bounds.lower_left, axis) < getattr(box.lower_left, axis):
+            faces.append(f"-{axis}")
+        if getattr(geometry_bounds.upper_right, axis) > getattr(box.upper_right, axis):
+            faces.append(f"+{axis}")
+    if not faces:
+        return None
+    ll, ur = geometry_bounds.lower_left, geometry_bounds.upper_right
+    return (f"The finite geometry, from ({ll.x}, {ll.y}, {ll.z}) to ({ur.x}, "
+            f"{ur.y}, {ur.z}), reaches beyond {what} in {', '.join(faces)}")
+
+
 def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
     """
     Intersect a polygon, including holes, with a box on the grid.
@@ -781,6 +841,21 @@ def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
                 box.upper_right.x, box.upper_right.y = right, high
                 boxes.append(box)
     return boxes
+
+
+def permittivity_problem(dielectric: Any) -> Optional[str]:
+    """
+    Why the permittivity of a dielectric or the background is invalid, or ``None``.
+
+    It is relative and frequency-independent, so it is at least 1, that of vacuum:
+    the static permittivity of a passive material exceeds 1 by an integral over
+    its losses, which are never negative (Kramers-Kronig).
+    """
+    permittivity = dielectric.permittivity
+    if math.isfinite(permittivity) and permittivity >= 1.0:
+        return None
+    return (f"'{dielectric.name}' has PERMITTIVITY {permittivity:g}, but a relative "
+            f"permittivity is a finite number of at least 1, that of vacuum")
 
 
 def resolve(pex25d_file: Any,

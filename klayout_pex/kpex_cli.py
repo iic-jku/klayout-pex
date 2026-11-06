@@ -150,25 +150,30 @@ from .tool_version_constraints import (
     VersionCheckMode,
     check_tool_versions
 )
-from .util.multiple_choice import MultipleChoicePattern
 from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
-    DELAUNAY_B_MAX,
     SectionedHelpFormatter,
     add_argument_with_former_name,
+    add_deprecated_argument,
     add_help_subcommand,
     add_log_level_argument,
     add_subcommand_sections,
     delaunay_b,
     handle_help_subcommand,
+    multiple_choice_pattern,
     non_negative_micrometers,
+    non_negative_number,
     non_negative_square_micrometers,
     positive_micrometers,
+    positive_number,
     positive_spice_seconds,
+    relative_error,
+    relative_permittivity,
     render_enum_help,
     true_or_false,
     warn_deprecated_options,
 )
+from .util.number_range import DELAUNAY_B_MAX
 from .version import __version__
 
 
@@ -274,7 +279,7 @@ class KpexCLI:
         if include_spice_output:
             add_argument_with_former_name(group_pex, "--out-netlist", "--out_netlist", "-o",
                                           dest="output_netlist_path", default=None,
-                                          help="Optional additional output path of the netlist, "
+                                          help="Optional additional output path of the netlist, of one engine only, "
                                                "in the --netlist-format (default is none)")
             # NOTE: deprecated, the name of --out-netlist before --netlist-format
             group_pex.add_argument("--out_spice", dest="output_spice_path", default=None, help=argparse.SUPPRESS)
@@ -356,19 +361,20 @@ class KpexCLI:
     def _add_tech_arguments(parser: argparse.ArgumentParser) -> None:
         group_tech = parser.add_argument_group("Technology Options")
         group_tech.add_argument("--diel", dest="dielectric_filter",
-                                type=str, default="all",
+                                type=multiple_choice_pattern, default="all",
                                 help=f"Comma separated list of dielectric filter patterns. "
-                                     f"Allowed patterns are: (none, all, -dielname1, +dielname2) "
-                                     f"(default is %(default)s)")
+                                     f"Allowed patterns are: (none, all, -dielname1, +dielname2), "
+                                     f"where -dielname1 alone means all,-dielname1 (give it as --diel=-dielname1) "
+                                     f"and +dielname2 alone none,+dielname2 (default is %(default)s)")
 
     @staticmethod
     def _add_fastercap_arguments(parser: argparse.ArgumentParser) -> None:
         group_fastercap = parser.add_argument_group("FasterCap Options")
         add_argument_with_former_name(group_fastercap, "--k-void", "--k_void", "-k", dest="k_void",
-                                      type=float, default=3.9,
-                                      help="Dielectric constant of void (default is %(default)s)")
+                                      type=relative_permittivity, default=3.9,
+                                      help="Dielectric constant of void, >= 1 (default is %(default)s)")
 
-        # TODO: reflect that these are also now used by KPEX/2.5D engine!
+        # NOTE: these reach the FasterCap and FastCap2 input only, KPEX/2.5D triangulates with values of its own
         add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
                                       type=non_negative_square_micrometers, default=50,
                                       help="Delaunay triangulation maximum area (default is %(default)s)")
@@ -381,17 +387,18 @@ class KpexCLI:
                                       help=f"Validate geometries before passing to FasterCap "
                                            f"(default is False)")
         group_fastercap.add_argument("--tolerance", dest="fastercap_tolerance",
-                                     type=float, default=0.05,
-                                     help="FasterCap -aX error tolerance (default is %(default)s)")
+                                     type=relative_error, default=0.05,
+                                     help="FasterCap -aX relative error tolerance, > 0 and < 1 (default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--d-coeff", "--d_coeff", dest="fastercap_d_coeff",
-                                      type=float, default=0.5,
+                                      type=positive_number, default=0.5,
                                       help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
                                            f"(default is %(default)s)")
-        group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
-                                     type=float, default=0.5,
-                                     help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
+        add_deprecated_argument(group_fastercap, "--mesh", dest="fastercap_mesh_refinement_value",
+                                type=float, default=None,
+                                advice="it has no effect, as FasterCap's automatic refinement (--tolerance) overrides it",
+                                help="FasterCap -m mesh relative refinement value")
         group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
-                                     type=float, default=2,
+                                     type=non_negative_number, default=2,
                                      help="FasterCap -f out-of-core free memory to link memory condition "
                                           "(0 = don't go OOC, default is %(default)s)")
         add_argument_with_former_name(group_fastercap, "--auto-precond", "--auto_precond",
@@ -724,6 +731,20 @@ class KpexCLI:
         if not os.path.isfile(args.tech_pbjson_path):
             error(f"Can't read technology file at path {args.tech_pbjson_path}")
             found_errors = True
+        else:
+            # NOTE: before the input is read, as --diel names dielectrics of the tech info
+            try:
+                args.tech_info = TechInfo.from_json(args.tech_pbjson_path, dielectric_filter=args.dielectric_filter)
+            except TechDefError as e:
+                error(str(e))
+                found_errors = True
+            else:
+                dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
+                unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
+                if unknown_names:
+                    error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
+                          f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
+                    found_errors = True
 
         if not os.path.isfile(args.lvs_script_path):
             error(f"Can't locate LVS script path at {args.lvs_script_path}")
@@ -794,12 +815,16 @@ class KpexCLI:
                     error(f"{exclusion_option} reads its shapes from the layout, so it needs --gds, also with --lvsdb")
                     found_errors = True
 
+            # NOTE: in the order they run
+            engine_names = [name for name, is_run in (('MAGIC', args.run_magic),
+                                                      ('FasterCap', args.run_fastercap),
+                                                      ('FastCap2', args.run_fastcap),
+                                                      ('2.5D', args.run_2_5D)) if is_run]
+
             args.netlist_format = NetlistFormat(args.netlist_format)
             if args.netlist_format != NetlistFormat.SPICE:
                 # NOTE: MAGIC writes its SPICE netlist itself, FasterCap and FastCap2 have no other format (yet)
-                other_engines = [name for name, is_run in (('MAGIC', args.run_magic),
-                                                           ('FastCap2', args.run_fastcap),
-                                                           ('FasterCap', args.run_fastercap)) if is_run]
+                other_engines = [name for name in engine_names if name != '2.5D']
                 if other_engines:
                     error(f"Only the 2.5D engine writes {args.netlist_format} netlists "
                           f"(--netlist-format {args.netlist_format}), not {', '.join(other_engines)}")
@@ -816,6 +841,13 @@ class KpexCLI:
                 else:
                     warning("--out_spice is deprecated, use --out-netlist")
                     args.output_netlist_path = args.output_spice_path
+
+            # NOTE: each engine writes its netlist to --out-netlist, the last one would overwrite the others (#449)
+            if args.output_netlist_path is not None and len(engine_names) > 1:
+                error(f"--out-netlist takes the netlist of one engine, not of {', '.join(engine_names)}, "
+                      f"which would overwrite each other: run them one at a time, "
+                      f"or take their netlists from the run directory")
+                found_errors = True
 
         # check if we find magicrc
         if args.run_magic:
@@ -947,13 +979,6 @@ class KpexCLI:
                 args.effective_schematic_path = os.path.join(args.output_dir_path,
                                                              f"{args.effective_cell_name}_dummy_schematic.spice")
                 LVSRunner.write_dummy_schematic(args.effective_schematic_path, args.effective_cell_name)
-
-        try:
-            pattern_string: str = args.dielectric_filter
-            args.dielectric_filter = MultipleChoicePattern(pattern=pattern_string)
-        except ValueError as e:
-            error("Failed to parse --diel arg", e)
-            found_errors = True
 
         if args.cache_dir_path is None:
             args.cache_dir_path = os.path.join(args.output_dir_base_path, '.kpex_cache')
@@ -1115,7 +1140,6 @@ class KpexCLI:
                       log_path=log_path,
                       tolerance=args.fastercap_tolerance,
                       d_coeff=args.fastercap_d_coeff,
-                      mesh_refinement_value=args.fastercap_mesh_refinement_value,
                       ooc_condition=args.fastercap_ooc_condition,
                       auto_preconditioner=args.fastercap_auto_preconditioner,
                       galerkin_scheme=args.fastercap_galerkin_scheme,
@@ -1839,13 +1863,7 @@ class KpexCLI:
             finally:
                 self.identify_run(argv, args)  # NOTE: with the cell and the run directory, as far as they are known
             warn_deprecated_options(args)
-
-            try:
-                tech_info = TechInfo.from_json(args.tech_pbjson_path,
-                                               dielectric_filter=args.dielectric_filter)
-            except TechDefError as e:
-                error(str(e))
-                sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            tech_info: TechInfo = args.tech_info  # NOTE: loaded by validate_args
 
             try:
                 match args.command:

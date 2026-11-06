@@ -44,31 +44,30 @@ def validate_files(file_paths: List[str | Path],
     """
     :param file_paths: paths to validate
     :param read_bytes: how much bytes to read from the file
-    :return: file validation result object
+    :return: file validation result object, with the paths as Path, also those given as str
 
     # Example usage
     files = ["file1.txt", "file2.txt", "missing_file.txt"]
     result = validate_files(files)
 
     print("Working files:", result.working_files)
-    print("Failed files:", result.failed_paths_and_reason)
+    print("Failed files:", result.failures)
     """
     result = FileValidationResult()
 
-    for path_str in file_paths:
-        path = Path(path_str)
+    for path in map(Path, file_paths):
         if not path.exists():
-            result.failures.append(FileValidationResult.Failure(path_str, "File does not exist"))
+            result.failures.append(FileValidationResult.Failure(path, "File does not exist"))
             continue
         if not path.is_file():
-            result.failures.append(FileValidationResult.Failure(path_str, "Not a regular file"))
+            result.failures.append(FileValidationResult.Failure(path, "Not a regular file"))
             continue
         try:
             with open(path, "rb") as f:
                 f.read(read_bytes)
-            result.working_files.append(path_str)
+            result.working_files.append(path)
         except Exception as e:
-            result.failures.append(FileValidationResult.Failure(path_str, f"Unreadable: {e}"))
+            result.failures.append(FileValidationResult.Failure(path, f"Unreadable: {e}"))
 
     return result
 

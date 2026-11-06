@@ -57,7 +57,6 @@ def run_fastercap(exe_path: str,
                   log_path: str,
                   tolerance: float,
                   d_coeff: float,
-                  mesh_refinement_value: float,
                   ooc_condition: Optional[int],
                   auto_preconditioner: bool,
                   galerkin_scheme: bool,
@@ -69,7 +68,7 @@ def run_fastercap(exe_path: str,
         '-v',                          # Verbose output
         f"-a{tolerance}",              # stop when relative error lower than threshold
         f"-d{d_coeff}",                # Direct potential interaction coefficient to mesh refinement ratio
-        f"-m{mesh_refinement_value}",  # Mesh relative refinement value
+        # NOTE: no -m (mesh relative refinement value), the automatic refinement (-a) overrides it
     ]
 
     if ooc_condition is not None:

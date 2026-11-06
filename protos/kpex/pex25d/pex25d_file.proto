@@ -121,7 +121,9 @@ message PEX25DFile {
     repeated Terminal terminals = 22;
 
     // Optional solver-adapter hint; DOMAIN_BOX takes precedence if both appear
-    // (which is itself a warning).
+    // (which is itself a warning). This message holds only one of them, so a
+    // reader of the text format applies the precedence. Each of the two
+    // records appears at most once.
     oneof domain {
         DomainMargin domain_margin = 30;
         DomainBox domain_box = 31;

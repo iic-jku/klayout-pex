@@ -76,6 +76,20 @@ class KpexNetlistFormatTest(unittest.TestCase):
             self.assertEqual(1, code)
             self.assertIn('--out_spice is the deprecated name of --out-netlist, give --out-netlist only', output)
 
+    def test_out_netlist_is_of_one_engine(self):
+        # NOTE: each engine wrote its netlist there, the last one overwrote the others (#449)
+        message = '--out-netlist takes the netlist of one engine'
+        with tempfile.TemporaryDirectory() as out_dir:
+            arguments = ['extract', '--pdk', 'ihp-sg13g2', '--gds', os.path.join(out_dir, 'x.gds'),
+                         '--out-netlist', os.path.join(out_dir, 'x.spice'), '--out-dir', out_dir]
+            code, output = run_kpex(*arguments, '--fastercap', '--2.5D')
+            self.assertEqual(1, code)
+            self.assertIn(f"{message}, not of FasterCap, 2.5D, which would overwrite each other: "
+                          f"run them one at a time, or take their netlists from the run directory", output)
+            code, output = run_kpex(*arguments, '--2.5D')
+            self.assertEqual(1, code)  # NOTE: no layout
+            self.assertNotIn(message, output)
+
     def test_deprecated_out_spice_is_hidden(self):
         code, output = run_kpex('extract', '--help')
         self.assertEqual(0, code)

@@ -42,7 +42,7 @@ GDS_PATH = os.path.realpath(os.path.join(__file__, '..', '..', '..', 'testdata',
 
 def report_category_names(*report_caps_args: str) -> List[str]:
     with tempfile.TemporaryDirectory() as out_dir:
-        KpexCLI().main(['main',
+        KpexCLI().main(['main', 'extract',
                         '--pdk', 'sky130A',
                         '--lvsdb', lvsdb_fixture_path('sky130A', GDS_PATH),
                         '--out-dir', out_dir,
@@ -70,5 +70,5 @@ def test_report_has_the_capacitances_only_with_report_caps():
 @allure.tag("PEX", "2.5D", "Report")
 def test_report_caps_rejects_an_invalid_value(capsys: pytest.CaptureFixture):
     with pytest.raises(SystemExit):
-        KpexCLI().main(['main', '--pdk', 'sky130A', '--gds', GDS_PATH, '--2.5D', '--report-caps', 'maybe'])
+        KpexCLI().main(['main', 'extract', '--pdk', 'sky130A', '--gds', GDS_PATH, '--2.5D', '--report-caps', 'maybe'])
     assert "argument --report-caps: Boolean value expected" in capsys.readouterr().err

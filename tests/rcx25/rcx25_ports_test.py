@@ -85,16 +85,27 @@ def test_labels_without_pin_shapes_make_no_ports_of_their_own(mode: PEXMode):
     ('label_in_child_cell.gds.gz', ['outer']),
     # NOTE: the pins VDD and VSS of the child cell are on the wires of the pins A and B of the top cell
     ('cut_block_with_mos.gds.gz', ['A', 'B', 'R']),
-    # NOTE: the wire of the top cell between the pins a and b of the child cells has no label, so KLayout names it
-    ('labels_in_child_cells.gds.gz', None),
+    # NOTE: the wire of the top cell between the pins a and b of the child cells has no label, so KLayout leaves it
+    #       unnamed, and kpex names it after both, like KLayout a net of several labels, one port at the first (#417)
+    ('labels_in_child_cells.gds.gz', ['a|b']),
 ])
-def test_labels_in_child_cells_are_no_ports_of_the_top_cell(gds_name: str, ports: Optional[List[str]]):
+def test_labels_in_child_cells_are_no_ports_of_the_top_cell(gds_name: str, ports: List[str]):
     def without_substrate(mode: PEXMode) -> List[str]:
         # NOTE: in R mode, the substrate only is a port of a netlist with devices on it
         return sorted(port for port in ports_of(PDKName.IHP_SG13G2, gds_name, mode) if port != 'sub!')
 
     ports_cc = without_substrate(PEXMode.CC)
-    if ports is not None:
-        assert ports_cc == ports
+    assert ports_cc == ports
     assert without_substrate(PEXMode.RC) == ports_cc
     assert without_substrate(PEXMode.R) == ports_cc
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.R, PEXMode.RC])
+def test_net_of_labels_in_child_cells_that_the_top_cell_joins_is_a_port_of_their_name(mode: PEXMode):
+    # NOTE: the VDD rails of 3 abutting standard cells, which KLayout leaves unnamed ($I1), and the labels X, A1, A2
+    #       and B1 of each cell, which keep the paths of their cells ($1.X), as their names aren't unique (#417)
+    ports = ports_of(PDKName.IHP_SG13G2, 'cut_abutting_std_cells.gds.gz', mode)
+    assert 'VDD' in ports, ports
+    assert sorted(port for port in ports if port.endswith('.X')) == [r'\$1.X', r'\$2.X', r'\$3.X']
