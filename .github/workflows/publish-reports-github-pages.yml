@@ -103,16 +103,33 @@ jobs:
             >> allure-history/allure/index.html
 
       # NOTE: not for pull requests from forks, nor for runs of Dependabot, whose token can't push to gh-pages
+      # NOTE: retried, as the push is rejected if another run pushed to gh-pages since the action cloned it;
+      #       twice, as each run pushes twice (test report, ~2 min later coverage report): the first retry
+      #       after the test report of another run often meets its coverage report
       - name: "Publish test report"
+        id: publish-test-report
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ always() && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        with:
+        continue-on-error: true
+        with: &publish-test-report
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-history
           destination_dir: ./
           # destination_dir: ./allure
           keep_files: true
+
+      - name: "Publish test report (retry 1)"
+        id: publish-test-report-retry
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ always() && steps.publish-test-report.outcome == 'failure' }}
+        continue-on-error: true
+        with: *publish-test-report
+
+      - name: "Publish test report (retry 2)"
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ always() && steps.publish-test-report-retry.outcome == 'failure' }}
+        with: *publish-test-report
 
   merge-coverage-reports:
     name: "Generate Coverage Report (Aggregated Suites)"
@@ -189,8 +206,8 @@ jobs:
   publish-coverage-reports:
     name: "Publish Coverage Report (Aggregated Suites)"
     runs-on: ubuntu-latest
-    # NOTE: after the Allure report, as both push to gh-pages, without retrying: the one that pushes second
-    #       fails if the other pushed after it cloned gh-pages
+    # NOTE: after the Allure report, as both push to gh-pages: the one that pushes second is rejected
+    #       if the other pushed after it cloned gh-pages; the retries below are for other runs
     needs: [merge-coverage-reports, allure-report]
     # NOTE: not for pull requests from forks, nor for runs of Dependabot, whose token can't push to gh-pages
     if: ${{ !cancelled() && needs.merge-coverage-reports.result == 'success' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
@@ -201,11 +218,26 @@ jobs:
           name: merged-coverage-report
           path: pycov   # destination
     
+      # NOTE: retried like the test report
       - name: "Publish coverage reports"
+        id: publish-coverage-reports
         uses: peaceiris/actions-gh-pages@v4
-        with:
+        continue-on-error: true
+        with: &publish-coverage-reports
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: pycov
           destination_dir: pycov
           keep_files: true
+
+      - name: "Publish coverage reports (retry 1)"
+        id: publish-coverage-reports-retry
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ steps.publish-coverage-reports.outcome == 'failure' }}
+        continue-on-error: true
+        with: *publish-coverage-reports
+
+      - name: "Publish coverage reports (retry 2)"
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ steps.publish-coverage-reports-retry.outcome == 'failure' }}
+        with: *publish-coverage-reports
