@@ -83,7 +83,7 @@ from ..util.argparse_helpers import (
 from ..util.number_range import DELAUNAY_B_MAX
 from ..version import __version__
 
-from .exporters import ExportError, ExporterExecutionError
+from .exporters import ExportError, ExporterExecutionError, InvalidSceneError
 from .importers import ImporterError, ImporterExecutionError
 from .artifact import (
     ArtifactFormat,
@@ -602,7 +602,7 @@ class Pex25DCLI:
         written = export_with_backend(
             exporter, message, target=args.exporter_name,
             output_dir_path=args.output_dir_path, prefix=args.prefix,
-            options=args.plugin_options, registry=registry)
+            options=args.plugin_options, registry=registry, report=report)
         for path in written:
             subproc(path)
         info(f"Wrote {len(written)} file(s) with '{args.exporter_name}' to {args.output_dir_path}")
@@ -702,14 +702,15 @@ class Pex25DCLI:
             debug("Plugin traceback", exc_info=True)
             self._emit_diagnostics(args, report)
             sys.exit(ExitCode.INTERNAL_ERROR)
+        except (ReadError, ResolveError, InvalidSceneError) as e:
+            # NOTE: before ExportError, which InvalidSceneError is
+            error(str(e))
+            self._emit_diagnostics(args, report)
+            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
         except (ExportError, ImporterError) as e:
             error(str(e))
             self._emit_diagnostics(args, report)
             sys.exit(ExitCode.USAGE)
-        except (ReadError, ResolveError) as e:
-            error(str(e))
-            self._emit_diagnostics(args, report)
-            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
         except ProtobufNotGeneratedError as e:
             error(str(e))
             sys.exit(ExitCode.USAGE)

@@ -44,10 +44,15 @@ from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporte
 if TYPE_CHECKING:
     from ..plugin.exporter_registry import ExporterRegistry
     from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
+    from .diagnostics import DiagnosticsReport
 
 
 class ExporterExecutionError(ExportError):
     """An exporter crashed; the original exception is preserved as the cause."""
+
+
+class InvalidSceneError(ExportError):
+    """The scene was not exported, as it is invalid; the report carries the reasons."""
 
 
 def export(scene: PEX25DScene,
@@ -56,7 +61,8 @@ def export(scene: PEX25DScene,
            prefix: str = '',
            options: Optional[Mapping[str, Any]] = None,
            *,
-           registry: Optional[ExporterRegistry] = None) -> List[str]:
+           registry: Optional[ExporterRegistry] = None,
+           report: Optional[DiagnosticsReport] = None) -> List[str]:
     """
     Export ``scene`` as native input for ``target`` into ``output_dir_path``.
 
@@ -67,13 +73,15 @@ def export(scene: PEX25DScene,
     Pass a registry to reuse its metadata snapshot across multiple exports.
     Without one, installed exporters are discovered for this call.
 
+    :param report: collects the diagnostics of validating the scene, see ``export_with_backend``
     :return: only paths written by this call, primary input first — for FasterCap
         the ``.lst``, its referenced surface files, and any requested STL files.
+    :raises InvalidSceneError: if validating the scene finds an error
     """
     registry = registry if registry is not None else exporter_registry()
     backend = registry.load(target)
     return export_with_backend(backend, scene, target, output_dir_path,
-                                prefix, options, registry=registry)
+                                prefix, options, registry=registry, report=report)
 
 
 def export_with_backend(backend: PEX25DSceneExporter,
@@ -83,8 +91,13 @@ def export_with_backend(backend: PEX25DSceneExporter,
                         prefix: str = '',
                         options: Optional[Mapping[str, Any]] = None,
                         *,
-                        registry: Optional[ExporterRegistry] = None) -> List[str]:
+                        registry: Optional[ExporterRegistry] = None,
+                        report: Optional[DiagnosticsReport] = None) -> List[str]:
     """Export with an already loaded backend, which need not be registered.
+
+    The scene is validated first, as ``validate`` does without ``strict``: a
+    backend gets only a scene without errors, whoever wrote it. The diagnostics
+    go to ``report``; an error raises InvalidSceneError and writes nothing.
 
     ``target`` identifies the backend in error messages. Only an unexpected
     exception triggers provider lookup; a supplied registry reuses its metadata
@@ -93,6 +106,16 @@ def export_with_backend(backend: PEX25DSceneExporter,
     and OSError pass through unchanged; unexpected exceptions become ExporterExecutionError
     with their original cause. Return paths follow the contract of ``export``.
     """
+    from .diagnostics import DiagnosticsReport
+    from .validator import validate
+
+    report = report if report is not None else DiagnosticsReport()
+    errors_before = report.num_errors
+    validate(scene, report=report)
+    errors = report.num_errors - errors_before
+    if errors:
+        raise InvalidSceneError(f"The scene has {errors} error(s), so it was not exported")
+
     try:
         return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
     except (ExportError, NotImplementedError, OSError):
