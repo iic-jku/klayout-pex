@@ -1,0 +1,44 @@
+[14:00:55] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode R --blackbox n --lvsdb                       
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_wires_wi
+th_label_like_numbered_port.lvsdb.gz' --out-dir                                
+'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n    
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\cut_wires_
+with_label_like_numbered_port.gds.gz' --exclusion-markers ignore --cut block=X 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[14:00:55] INFO     No explicit top cell specified, using top   kpex_cli.py:863
+                    cell                                                       
+                    'cut_wires_with_label_like_numbered_port'                  
+[14:00:55] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[14:00:55] INFO     Peak memory (resident set size) after      kpex_cli.py:1851
+                    preparing the LVSDB: 1.3 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:00:55] INFO     (68, 20) -> (met1_con)                     kpex_cli.py:1855
+[14:00:55] INFO     (68, 16) -> (met1_pin_con)                 kpex_cli.py:1855
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:00:55] INFO     LVSDB: found 1pins                         extractor.py:482
+[14:00:55] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.3 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;VDD;X__VDD_0;;0.823                                                         
+R2;VDD;X__VDD_1;;0.898                                                         
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wires_with_label_like_numbered_
+port__cut_wires_with_label_like_numbered_port\cut_wires_with_label_like_numbere
+d_port_k25d_pex_netlist.csv                                                    
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wires_with_label_like_numbered_
+port__cut_wires_with_label_like_numbered_port\cut_wires_with_label_like_numbere
+d_port_k25d_pex_netlist.spice                                                  
+[14:00:55] INFO     Peak memory (resident set size) after the  kpex_cli.py:1445
+                    netlist: 1.3 GiB                                           
+[14:00:55] INFO     Peak memory (resident set size) after the  kpex_cli.py:1734
+                    run: 1.3 GiB                                               

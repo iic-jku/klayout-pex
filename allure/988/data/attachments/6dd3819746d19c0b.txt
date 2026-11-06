@@ -1,0 +1,93 @@
+[13:56:08] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --lvsdb                                           
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_wire_end.lvsdb.gz --out-dir                                         
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --blackbox n 
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:56:08] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:56:08] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 184.4 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:56:08] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1855
+[13:56:08] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1855
+[13:56:08] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:56:08] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 184.6 MiB                                              
+[13:56:08] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[13:56:08] INFO     Delaunay b: 0.5             fastercap_model_generator.py:122
+[13:56:08] INFO     Delaunay area_max: 50       fastercap_model_generator.py:123
+[13:56:08] INFO     Conductor W, metal Metal3,    fastercap_input_builder.py:212
+                    z=3.03, height=0.49                                         
+[13:56:08] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[13:56:08] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[13:56:08] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[13:56:08] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[13:56:08] INFO     Substrate sub!, z=-0.28,      fastercap_input_builder.py:284
+                    height=0.28                                                 
+[13:56:08] INFO     Simple dielectric (field      fastercap_input_builder.py:310
+                    oxide) fox: z=0, height=0.4                                 
+[13:56:08] INFO     Simple dielectric ild0:       fastercap_input_builder.py:400
+                    z=0.4, height=0.64                                          
+[13:56:08] INFO     Simple dielectric ild1:       fastercap_input_builder.py:400
+                    z=1.04, height=0.96                                         
+[13:56:08] INFO     Simple dielectric ild2:       fastercap_input_builder.py:400
+                    z=2.0,                                                      
+                    height=1.0299999999999998                                   
+[13:56:08] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:386
+                    ild3: z=3.5199999999999996,                                 
+                    height=0.5399999999999998                                   
+[13:56:08] INFO     Simple dielectric ild3:       fastercap_input_builder.py:400
+                    z=3.03,                                                     
+                    height=1.0299999999999998                                   
+[13:56:08] INFO     Simple dielectric ild4:       fastercap_input_builder.py:400
+                    z=4.06,                                                     
+                    height=1.0300000000000002                                   
+[13:56:08] INFO     Simple dielectric ildtm1b:    fastercap_input_builder.py:400
+                    z=5.09,                                                     
+                    height=0.5300000000000002                                   
+[13:56:08] INFO     Simple dielectric ildtm1c:    fastercap_input_builder.py:400
+                    z=5.62,                                                     
+                    height=0.8099999999999996                                   
+[13:56:08] INFO     Simple dielectric ildtm2:     fastercap_input_builder.py:400
+                    z=6.43,                                                     
+                    height=4.800000000000001                                    
+[13:56:08] INFO     Simple dielectric air:        fastercap_input_builder.py:400
+                    z=11.23, height=5.0                                         
+[13:56:08] INFO     Checking …                  fastercap_model_generator.py:886
+[13:56:08] INFO     Material fox -> 406         fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:10] INFO     Material nitride -> 0       fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:10] INFO     Material ild0 -> 262        fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:11] INFO     Material ild1 -> 238        fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:12] INFO     Material ild2 -> 249        fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:12] INFO     Material ild3 -> 351        fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:14] INFO     Material ild4 -> 238        fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:14] INFO     Material ismim -> 0         fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:14] INFO     Material ildtm1b -> 358     fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:16] INFO     Material ildtm1c -> 262     fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:17] INFO     Material ildtm2 -> 142      fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:17] INFO     Material pass1 -> 0         fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:17] INFO     Material pass2 -> 0         fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:17] INFO     Material air -> 142         fastercap_model_generator.py:891
+                    triangles                                                   
+[13:56:17] INFO     Net 'W' -> 126 triangles    fastercap_model_generator.py:898
+[13:56:17] INFO     Net 'sub!' -> 406 triangles fastercap_model_generator.py:898
+[13:56:20] INFO       No errors found           fastercap_model_generator.py:902

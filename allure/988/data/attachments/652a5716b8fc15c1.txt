@@ -1,0 +1,26 @@
+WARNING  __kpex__:kpex_cli.py:1668 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1705 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/overlap_shield_same_net_100um_x_100um_li1_m1_m2.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:874 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1851 Peak memory (resident set size) after preparing the LVSDB: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1855 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1855 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:1855 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1855 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:1855 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1855 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:1363 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.1 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.1 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1392 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1392 C1;A;VSUBS;0.135;
+SUBPROCESS __kpex__:kpex_cli.py:1392 C2;A.$0.li1;VSUBS;386.043;
+SUBPROCESS __kpex__:kpex_cli.py:1392 C3;A.$1.met1;B;1338.6;
+SUBPROCESS __kpex__:kpex_cli.py:1392 C4;A.$1.met1;VSUBS;16.226;
+SUBPROCESS __kpex__:kpex_cli.py:1392 C5;B;VSUBS;15.101;
+SUBPROCESS __kpex__:kpex_cli.py:1392 R1;A;A.$0.li1;;0.113
+SUBPROCESS __kpex__:kpex_cli.py:1392 R2;A.$0.li1;A.$1.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1395 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overlap_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1412 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/overlap_shield_same_net_100um_x_100um_li1_m1_m2__overlap_shield_same_net_100um_x_100um_li1_m1_m2/overlap_shield_same_net_100um_x_100um_li1_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1445 Peak memory (resident set size) after the netlist: 1.1 GiB
+INFO     __kpex__:kpex_cli.py:1734 Peak memory (resident set size) after the run: 1.1 GiB

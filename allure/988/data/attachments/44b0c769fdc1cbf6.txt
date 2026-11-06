@@ -1,0 +1,92 @@
+[13:59:13] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode RC --blackbox n --lvsdb                       
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/
+sonosfet_star_w0p45_l0p22.lvsdb.gz --out-dir                                    
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000   
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[13:59:13] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[13:59:13] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[13:59:13] INFO     (64, 18) -> (dnwell)                        kpex_cli.py:1855
+[13:59:13] INFO     (65, 244) -> (ptap_conn)                    kpex_cli.py:1855
+[13:59:13] INFO     (66, 20) -> (poly_con)                      kpex_cli.py:1855
+[13:59:13] INFO     (67, 20) -> (li_con)                        kpex_cli.py:1855
+[13:59:13] INFO     (66, 4403) -> (licon_poly_con)              kpex_cli.py:1855
+[13:59:13] INFO     (66, 4405) -> (licon_ptap_con)              kpex_cli.py:1855
+[13:59:13] INFO     (67, 44) -> (mcon_con)                      kpex_cli.py:1855
+[13:59:13] INFO     (68, 20) -> (met1_con)                      kpex_cli.py:1855
+[13:59:13] INFO     (93, 44) -> (sonos_nsd)                     kpex_cli.py:1855
+[13:59:13] INFO     (66, 4401) -> (licon_nsd_con)               kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[13:59:13] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1363
+[13:59:13] INFO     LVSDB: found 4pins                          extractor.py:482
+[13:59:13] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+[13:59:13] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.1 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;B;D;0.017;                                                                   
+C2;B;D.$2.met1;0.005;                                                           
+C3;B;D.P0.nsdm;0.002;                                                           
+C4;B;G;0.015;                                                                   
+C5;B;G.$0.li1;0.015;                                                            
+C6;B;G.$4.met1;0.005;                                                           
+C7;B;G.$5.met1;0.005;                                                           
+C8;B;G.$6.poly;0.007;                                                           
+C9;B;G.$7.poly;0.007;                                                           
+C10;B;G.P0.poly;0.002;                                                          
+C11;B;S;0.017;                                                                  
+C12;B;S.$2.met1;0.005;                                                          
+C13;B;S.P0.nsdm;0.002;                                                          
+C14;B;VSUBS;0.428;                                                              
+C15;D;G.P0.poly;0.01;                                                           
+C16;D;S;0.015;                                                                  
+C17;D;VSUBS;0.007;                                                              
+C18;D.$2.met1;G.P0.poly;0.004;                                                  
+C19;D.$2.met1;S.$2.met1;0.02;                                                   
+C20;D.$2.met1;VSUBS;0.034;                                                      
+C21;G;VSUBS;0.005;                                                              
+C22;G.$0.li1;VSUBS;0.005;                                                       
+C23;G.$4.met1;VSUBS;0.029;                                                      
+C24;G.$5.met1;VSUBS;0.029;                                                      
+C25;G.$6.poly;VSUBS;0.072;                                                      
+C26;G.$7.poly;VSUBS;0.072;                                                      
+C27;G.P0.poly;S;0.01;                                                           
+C28;G.P0.poly;S.$2.met1;0.004;                                                  
+C29;G.P0.poly;VSUBS;0.006;                                                      
+C30;S;VSUBS;0.007;                                                              
+C31;S.$2.met1;VSUBS;0.034;                                                      
+R1;D;D.$2.met1;;9.3                                                             
+R2;D;D.P0.nsdm;;185.0                                                           
+R3;G;G.$5.met1;;9.3                                                             
+R4;G;G.$7.poly;;152.0                                                           
+R5;G.$0.li1;G.$4.met1;;9.3                                                      
+R6;G.$0.li1;G.$6.poly;;152.0                                                    
+R7;G.$6.poly;G.P0.poly;;73.395                                                  
+R8;G.$7.poly;G.P0.poly;;73.395                                                  
+R9;S;S.$2.met1;;9.3                                                             
+R10;S;S.P0.nsdm;;185.0                                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0
+p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.csv   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0
+p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.spice 
+[13:59:13] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 1.1 GiB                                            
+[13:59:13] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1462
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: B (0.531 fF), $6                   
+                    (0.000 fF)                                                  
+[13:59:13] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 1.1 GiB                                                
