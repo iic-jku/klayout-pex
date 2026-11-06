@@ -41,11 +41,9 @@ parent_suite = "kpex/PEX25D Generation Tests"
 tags = ("PEX", "PEX25D")
 
 
-def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[str, str]]:
+def pex25d_file_of(pdk_name: PDKName, *path_components) -> Any:
     """
-    The device terminals of the PEX25D file of a layout, as (terminal name, layer)
-
-    NOTE: without the names of the devices and nets, which depend on the LVS run (e.g. $1)
+    :return: the PEX25D file of a layout, from its committed LVS database
     """
     pdk = PDKTestConfig(pdk_name)
     output_path = os.path.join(pdk.output_dir, f"{path_components[-1].removesuffix('.gds.gz')}.pex25d")
@@ -56,7 +54,16 @@ def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[st
                     '--blackbox', 'n',
                     '--out-file', output_path])
     with open(output_path, 'rb') as f:
-        pex25d_file = read_pex25d_text(f.read(), output_path)
+        return read_pex25d_text(f.read(), output_path)
+
+
+def device_terminal_layers(pdk_name: PDKName, *path_components) -> List[Tuple[str, str]]:
+    """
+    The device terminals of the PEX25D file of a layout, as (terminal name, layer)
+
+    NOTE: without the names of the devices and nets, which depend on the LVS run (e.g. $1)
+    """
+    pex25d_file = pex25d_file_of(pdk_name, *path_components)
     return sorted((t.name.rsplit(':', 1)[1], t.layer) for t in pex25d_file.terminals
                   if t.kind == pex25d_terminal_pb2().TERMINAL_KIND_DEVICE_TERMINAL)
 
@@ -145,3 +152,23 @@ def test_mom_cap_terminals_of_ihp_sg13g2():
     #       so its terminals are on the metal of their net they overlap most, as in the R extraction
     assert device_terminal_layers(PDKName.IHP_SG13G2, 'cmomi_w5u_l5u_m1_m5', 'cmomi_w5u_l5u_m1_m5.gds.gz') == \
            [('mim_btm', 'metal5_n_cap'), ('mim_top', 'metal5_n_cap')]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk_name, cell_name, nwell, contact, metal, terminals', [
+    (PDKName.SKY130A, 'r_nwell_pfet_ntap_li1', 'nwell', 'licon_ntap_con', 'li1',
+     [('D', 'licon_psd_con'), ('G', 'poly'), ('S', 'licon_psd_con')]),
+    (PDKName.GF180MCUD, 'r_nwell_pfet_ntap_m1', 'Nwell', 'contact_ntap_con', 'Metal1',
+     [('D', 'contact_psd_con'), ('G', 'Poly2'), ('S', 'contact_psd_con')]),
+], ids=['sky130A', 'gf180mcuD'])
+def test_contact_of_the_nwell_over_its_ntap_is_no_device_contact(pdk_name: PDKName, cell_name: str, nwell: str,
+                                                                  contact: str, metal: str,
+                                                                  terminals: List[Tuple[str, str]]):
+    # NOTE: the n-tap's contact is the nwell's (where the resistance network lands it), anchored on it like
+    #       the contacts of the diffusions, but the bulk of the pfet, on the nwell, isn't on it (#489)
+    pex25d_file = pex25d_file_of(PDKName(pdk_name), 'test_patterns', f"{cell_name}.gds.gz")
+    assert [(via.connects_below, via.connects_above) for via in pex25d_file.vias if via.name == contact] == \
+           [(nwell, metal)]
+    assert [shape.conductor for shape in pex25d_file.shapes if shape.layer == contact]
+    assert device_terminal_layers(pdk_name, 'test_patterns', f"{cell_name}.gds.gz") == terminals

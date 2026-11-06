@@ -117,6 +117,9 @@ class PEX25DBuilder:
         self._profile_names: Set[str] = set()
         self._via_contacts: Dict[str, Any] = {}
         self._device_contact_by_diffusion: Dict[str, str] = {}
+        # NOTE: the contacts of the nwell over the n-taps (e.g. sky130A licon_ntap_con), which are
+        #       no contacts of devices: a terminal on the nwell (e.g. the bulk of a pfet) isn't on them
+        self._nwell_contacts: List[str] = []
         self._conductor_regions: Dict[str, Dict[str, kdb.Region]] = {}
         self._terminal_names: Set[str] = set()
 
@@ -362,9 +365,13 @@ class PEX25DBuilder:
         # leaves out: the diffusion is an empty profile, an anchor at the lower end of its contacts
         # (see Metal), as high as the tech info's contact is thick below the metal above,
         # and a terminal on the device is a node at that lower face (see TERMINAL_KIND_DEVICE_TERMINAL).
-        # A tap whose contact is the nwell's (e.g. the sky130A n-taps), not its own, stays out (#475).
-        for layer in self.tech_info.process_diffusion_layers:
-            contact = layer.diffusion_layer.contact_above
+        # The contact of an nwell over its n-taps (e.g. sky130A licon_ntap_con) is anchored on the nwell
+        # in the same way, but no device contact, so that a terminal on the nwell isn't on it (#489).
+        anchored = [(layer, layer.diffusion_layer.contact_above, True)
+                    for layer in self.tech_info.process_diffusion_layers] + \
+                   [(layer, layer.nwell_layer.contact_above, False)
+                    for layer in self.tech_info.process_nwell_layers]
+        for layer, contact, is_device_contact in anchored:
             if not contact.name:
                 continue
             context = f"Contact '{contact.name}'"
@@ -382,7 +389,10 @@ class PEX25DBuilder:
             debug(f"METAL {anchor.name}: z {anchor.zlow} … {anchor.zhigh}, anchor of {contact.name}")
 
             self._via_contacts[contact.name] = contact
-            self._device_contact_by_diffusion[layer.name] = contact.name
+            if is_device_contact:
+                self._device_contact_by_diffusion[layer.name] = contact.name
+            else:
+                self._nwell_contacts.append(contact.name)
             via = pex25d_file.vias.add()
             via.name = contact.name
             via.connects_below = layer.name
@@ -564,7 +574,7 @@ class PEX25DBuilder:
     @cached_property
     def shape_layers(self) -> List[str]:
         """Profiles that may carry drawn geometry: metals and vias, in stack order."""
-        names: List[str] = list(self._device_contact_by_diffusion.values())
+        names: List[str] = list(self._device_contact_by_diffusion.values()) + self._nwell_contacts
         for layer in self.tech_info.process_metal_layers:
             if layer.name in self._profile_names:
                 names.append(layer.name)
