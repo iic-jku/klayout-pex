@@ -390,6 +390,11 @@ class SidewallAndFringeExtractor:
             # NOTE: overlap scaling is 1/50  (see MAGIC ExtTech)
             alpha_scale_factor = 0.02 * 0.01 * 0.5 * 200.0
             alpha_c = overlap_cap_spec.capacitance * alpha_scale_factor
+            if alpha_c == 0.0:
+                # NOTE: without an overlap capacitance, none of the fringe is within any distance
+                #       (cnear and cfar are 0, like in MAGIC for an overlap multiplier of 0),
+                #       so there is none to scale to the halo either
+                return 0.0
 
             # see Magic ExtCouple.c L1164
             cnear = (2.0 / math.pi) * math.atan(alpha_c * distance_near_um)
