@@ -232,6 +232,15 @@ class Pex25DValidatorTest(unittest.TestCase):
         scene.domain.box.upper_right.z = scene.domain.box.lower_left.z
         assert 'PEX25D-E0252' in check_scene(scene)
 
+    def test_e0254_finite_geometry_outside_the_domain_box(self):
+        margin = 'DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0'
+        assert 'PEX25D-E0254' in check(
+            replacing(margin, 'DOMAIN_BOX LL 0.0 -1.0 -1.0 UR 5.0 5.0 5.0'))
+
+        scene = resolve(read(replacing(margin, 'DOMAIN_BOX LL -1.0 -1.0 -1.0 UR 5.0 5.0 5.0')))
+        scene.domain.box.upper_right.z = scene.domain.geometry_bounds.upper_right.z - 1
+        assert 'PEX25D-E0254' in check_scene(scene)
+
     # ------------------------------------------------------- geometric tier
 
     def test_the_geometric_tier_only_runs_under_strict(self):
