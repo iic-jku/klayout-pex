@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import allure
+import math
 from typing import *
 import unittest
 
@@ -197,6 +198,17 @@ class Pex25DValidatorTest(unittest.TestCase):
         scene = resolve(read(MINIMAL))
         scene.dielectrics[0].wraps = 'nowhere'
         assert 'PEX25D-E0275' in check_scene(scene)
+
+    def test_e0217_a_permittivity_below_that_of_vacuum(self):
+        assert 'PEX25D-E0217' in check(
+            replacing('DIELECTRIC_BACKGROUND air PERMITTIVITY 1.0',
+                      'DIELECTRIC_BACKGROUND air PERMITTIVITY 0.0'))
+
+        for permittivity in (0.5, math.nan):
+            scene = resolve(read(MINIMAL))
+            scene.dielectrics[0].permittivity = permittivity
+            with self.subTest(permittivity=permittivity):
+                assert check_scene(scene) == ['PEX25D-E0217']
 
     def test_e0276_a_terminal_on_a_layer_the_conductor_does_not_use(self):
         scene = resolve(read(MINIMAL))

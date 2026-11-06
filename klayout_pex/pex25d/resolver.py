@@ -28,6 +28,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from fractions import Fraction
+import math
 from typing import *
 
 from .diagnostics import (Diagnostic, DiagnosticsReport, Severity, Tier,
@@ -316,9 +317,19 @@ class Resolver:
                           f"once in the profile namespace",
                           source=self.file.background)
 
+    def check_permittivities(self):
+        records = list(self.file.dielectrics)
+        if self.file.HasField('background'):
+            records.append(self.file.background)
+        for record in records:
+            problem = permittivity_problem(record)
+            if problem is not None:
+                self.diagnose('PEX25D-E0217', problem, source=record)
+
     def resolve_dielectrics(self, scene: Any) -> None:
         kinds = pex25d_dielectric_pb2()
         self.declare_dielectric_names()
+        self.check_permittivities()
         self.dielectrics_by_name = {d.name: d for d in self.file.dielectrics}
 
         ordered = []
@@ -781,6 +792,21 @@ def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:
                 box.upper_right.x, box.upper_right.y = right, high
                 boxes.append(box)
     return boxes
+
+
+def permittivity_problem(dielectric: Any) -> Optional[str]:
+    """
+    Why the permittivity of a dielectric or the background is invalid, or ``None``.
+
+    It is relative and frequency-independent, so it is at least 1, that of vacuum:
+    the static permittivity of a passive material exceeds 1 by an integral over
+    its losses, which are never negative (Kramers-Kronig).
+    """
+    permittivity = dielectric.permittivity
+    if math.isfinite(permittivity) and permittivity >= 1.0:
+        return None
+    return (f"'{dielectric.name}' has PERMITTIVITY {permittivity:g}, but a relative "
+            f"permittivity is a finite number of at least 1, that of vacuum")
 
 
 def resolve(pex25d_file: Any,
