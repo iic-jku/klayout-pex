@@ -1,0 +1,56 @@
+[16:59:31] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/inductor3_w2u_d25u84_2_turns.lvsdb.gz --out-dir                              
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:59:31] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:59:31] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_ihp-sg13g2/inductor3_w2u_d25u84_2_                  
+                    turns__inductor3_w2u_d25u84_2_turns/kpex_r                  
+                    esult.json                                                  
+[16:59:31] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.2 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:59:31] INFO     (27, 2) -> (ind_pin)                        kpex_cli.py:1993
+[16:59:31] INFO     (46, 0) -> (pwell pwell_sub ind2_sub        kpex_cli.py:1993
+                    ind3_sub)                                                   
+[16:59:31] INFO     (126, 0) -> (topmetal1_con)                 kpex_cli.py:1993
+[16:59:31] INFO     (134, 0) -> (topmetal2_con)                 kpex_cli.py:1993
+[16:59:31] INFO     (134, 2) -> (topmetal2_pin_con)             kpex_cli.py:1993
+[16:59:31] INFO     (126, 2) -> (topmetal1_pin_con)             kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:59:31] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:59:31] INFO     LVSDB: found 4pins                          extractor.py:482
+[16:59:32] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.2 GiB                              
+[16:59:32] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.2 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;LA;LB;0.012;                                                                 
+C2;LA;LC;0.016;                                                                 
+C3;LA;VSUBS;0.213;                                                              
+C4;LB;LC;0.016;                                                                 
+C5;LB;VSUBS;0.213;                                                              
+C6;LC;VSUBS;0.188;                                                              
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/inductor3_w2u_d25u8
+4_2_turns__inductor3_w2u_d25u84_2_turns/inductor3_w2u_d25u84_2_turns_k25d_pex_ne
+tlist.csv                                                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/inductor3_w2u_d25u8
+4_2_turns__inductor3_w2u_d25u84_2_turns/inductor3_w2u_d25u84_2_turns_k25d_pex_ne
+tlist.spice                                                                     
+[16:59:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.2 GiB                                            
+[16:59:32] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.2 GiB                                                

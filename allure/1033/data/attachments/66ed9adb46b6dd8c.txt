@@ -1,0 +1,60 @@
+[16:58:59] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13cmos5l --mode R --lvsdb                              
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13cmos5l/inducto
+r3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns.lvsdb.gz --out-dir           
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpyq_qhba4 --2.5D --check n   
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:58:59] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:58:59] INFO     Wrote result file to:                      run_result.py:230
+                    /var/folders/h5/t85nd63d71x27_8gl5gw3l_w00                  
+                    00gn/T/tmpyq_qhba4/inductor3_w2u_d25u85_2_                  
+                    turns__inductor3_w2u_d25u85_2_turns/kpex_r                  
+                    esult.json                                                  
+[16:58:59] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:58:59] INFO     (27, 2) -> (ind_pin)                        kpex_cli.py:1993
+[16:58:59] INFO     (46, 0) -> (pwell pwell_sub ind3_sub        kpex_cli.py:1993
+                    ind2_sub)                                                   
+[16:58:59] INFO     (50, 2) -> (metal4_pin_con)                 kpex_cli.py:1993
+[16:58:59] INFO     (50, 0) -> (metal4_n_mom)                   kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:58:59] INFO     LVSDB: found 4pins                          extractor.py:482
+[16:58:59] WARNING  The resistance network has no nodes   lvsdb_extractor.py:792
+                    for these device terminals, as the                          
+                    tech info has no layer for their LVS                        
+                    layer, and they neither overlap nor                         
+                    abut a conductor of their net (e.g. a                       
+                    terminal on the substrate or a well):                       
+                      - inductor3 terminal inductor3_1 on                       
+                    LVS layer ind3_ports: $1                                    
+                      - inductor3 terminal inductor3_2 on                       
+                    LVS layer ind3_ports: $1                                    
+                      - inductor3 terminal inductor3_3 on                       
+                    LVS layer ind3_ports: $1                                    
+[16:58:59] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpyq_qhba4/inductor3_w2u_d25u8
+5_2_turns__inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns_k25d_pex_ne
+tlist.csv                                                                       
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpyq_qhba4/inductor3_w2u_d25u8
+5_2_turns__inductor3_w2u_d25u85_2_turns/inductor3_w2u_d25u85_2_turns_k25d_pex_ne
+tlist.spice                                                                     
+[16:58:59] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.1 GiB                                            
+[16:58:59] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): $5, $6,                   
+                    $7                                                          
+[16:58:59] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.1 GiB                                                

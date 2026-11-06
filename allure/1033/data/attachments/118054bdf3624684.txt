@@ -1,0 +1,97 @@
+[17:03:24] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_rotat
+ed_cell.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2'   
+--2.5D --halo 10000 --scale n                                                  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[17:03:24] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[17:03:24] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\cut_rotated_cell__cut_rotated_cell\                  
+                    kpex_result.json                                           
+[17:03:24] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.7 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:03:24] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[17:03:24] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[17:03:24] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:03:24] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[17:03:24] INFO     LVSDB: found 1pins                         extractor.py:482
+[17:03:24] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.7 GiB                             
+[17:03:24] WARNING  Side overlap, outside polygon           polygon_utils.py:41
+                    (577,0;0,999;0,5000;577,4001)                              
+                    props={'net'=>'A'} is not a box.                           
+                    Currently, only boxes are supported,                       
+                    will be using bounding box                                 
+                    (0,0;577,5000)                                             
+[17:03:24] WARNING  Side overlap, polygon  sidewall_and_fringe_extractor.py:520
+                    (0,0;0,999;577,0)                                          
+                    props={'net'=>'VSUBS'}                                     
+                    is not a box.                                              
+                    Currently, only boxes                                      
+                    are supported, will be                                     
+                    using bounding box                                         
+                    (0,0;577,999)                                              
+[17:03:24] WARNING  Side overlap, outside polygon           polygon_utils.py:41
+                    (0,0;0,666;288,500) props={'net'=>'A'}                     
+                    is not a box. Currently, only boxes are                    
+                    supported, will be using bounding box                      
+                    (0,0;288,666)                                              
+[17:03:24] WARNING  Side overlap, polygon  sidewall_and_fringe_extractor.py:520
+                    (0,0;288,500;288,0)                                        
+                    props={'net'=>'VSUBS'}                                     
+                    is not a box.                                              
+                    Currently, only boxes                                      
+                    are supported, will be                                     
+                    using bounding box                                         
+                    (0,0;288,500)                                              
+[17:03:24] WARNING  Side overlap, outside polygon           polygon_utils.py:41
+                    (1000,0;0,577;0,8268;1000,10000)                           
+                    props={'net'=>'A'} is not a box.                           
+                    Currently, only boxes are supported,                       
+                    will be using bounding box                                 
+                    (0,0;1000,10000)                                           
+[17:03:24] WARNING  Side overlap, polygon  sidewall_and_fringe_extractor.py:520
+                    (0,0;0,577;1000,0)                                         
+                    props={'net'=>'VSUBS'}                                     
+                    is not a box.                                              
+                    Currently, only boxes                                      
+                    are supported, will be                                     
+                    using bounding box                                         
+                    (0,0;1000,577)                                             
+[17:03:24] WARNING  Side overlap, outside polygon           polygon_utils.py:41
+                    (0,0;0,2000;866,500) props={'net'=>'A'}                    
+                    is not a box. Currently, only boxes are                    
+                    supported, will be using bounding box                      
+                    (0,0;866,2000)                                             
+[17:03:24] WARNING  Side overlap, polygon  sidewall_and_fringe_extractor.py:520
+                    (0,0;866,500;866,0)                                        
+                    props={'net'=>'VSUBS'}                                     
+                    is not a box.                                              
+                    Currently, only boxes                                      
+                    are supported, will be                                     
+                    using bounding box                                         
+                    (0,0;866,500)                                              
+[17:03:24] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.7 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;VSUBS;2.901;                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_rotated_cell__cut_rotated_ce
+ll\cut_rotated_cell_k25d_pex_netlist.csv                                       
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_rotated_cell__cut_rotated_ce
+ll\cut_rotated_cell_k25d_pex_netlist.spice                                     
+[17:03:24] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.7 GiB                                           
+[17:03:24] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.7 GiB                                               
