@@ -1,0 +1,24 @@
+WARNING  __kpex__:kpex_cli.py:1667 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1704 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/r_ptap_pair_m1_m2.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:873 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1850 Peak memory (resident set size) after preparing the LVSDB: 1.8 GiB
+INFO     __kpex__:kpex_cli.py:1854 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:1854 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:1854 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:1854 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:1854 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:kpex_cli.py:1362 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:536 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: SUB
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.8 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.8 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1391 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1391 C1;SUB;VSUBS;0.137;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C2;SUB.$2.Metal2;VSUBS;0.287;
+SUBPROCESS __kpex__:kpex_cli.py:1391 C3;SUB.$3.Metal2;VSUBS;0.287;
+SUBPROCESS __kpex__:kpex_cli.py:1391 R1;SUB;SUB.$2.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1391 R2;SUB;SUB.$3.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1394 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ptap_pair_m1_m2__r_ptap_pair_m1_m2/r_ptap_pair_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1411 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ptap_pair_m1_m2__r_ptap_pair_m1_m2/r_ptap_pair_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1444 Peak memory (resident set size) after the netlist: 1.8 GiB
+INFO     __kpex__:kpex_cli.py:1733 Peak memory (resident set size) after the run: 1.8 GiB
