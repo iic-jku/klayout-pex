@@ -1,0 +1,50 @@
+[17:11:50] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/cut_rotated_child.lvsdb.gz --out-dir                                         
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:11:50] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:11:50] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_ihp-sg13g2/cut_rotated_child__cut_                  
+                    rotated_child/kpex_result.json                              
+[17:11:50] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.2 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:11:50] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[17:11:50] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:11:50] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[17:11:50] INFO     LVSDB: found 0pins                          extractor.py:482
+[17:11:50] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.2 GiB                              
+[17:11:50] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.2 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;$I1;0.004;                                                                
+C2;$2;VSUBS;0.417;                                                              
+C3;$I1;VSUBS;1.788;                                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_rotated_child__
+cut_rotated_child/cut_rotated_child_k25d_pex_netlist.csv                        
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_rotated_child__
+cut_rotated_child/cut_rotated_child_k25d_pex_netlist.spice                      
+[17:11:50] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.2 GiB                                            
+[17:11:50] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: $I1 (1.793 fF), $2                 
+                    (0.421 fF)                                                  
+[17:11:50] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.2 GiB                                                
