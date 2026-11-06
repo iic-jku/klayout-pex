@@ -30,7 +30,7 @@ from unittest import mock
 import allure
 import klayout.db as kdb
 
-from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuildError
+from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, BuildError
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.protobuf import pex25d_file_pb2, pex25d_terminal_pb2
 from klayout_pex.pex25d.reader import read_pex25d_text
@@ -62,6 +62,7 @@ class TerminalFixture:
         self.device_class.name = 'nfet'
         self.netlist.add(self.device_class)
         self.geometry = {metal_names[0]: kdb.Region(kdb.Box(0, 0, 100, 20))}  # by LVS layer
+        self.geometry_by_other_net: Dict[str, Dict[str, kdb.Region]] = {}
         self.markers = {}
         self.labels = kdb.Texts()
         self.pins = kdb.Region(kdb.Box(0, 0, 100, 20))
@@ -109,11 +110,20 @@ class TerminalFixture:
                 shapes_of_terminal=lambda ref: self.markers[ref.device().expanded_name()]))
 
     def shapes_of_net(self, gds_pair, net, lvs_layer_names=None):
+        name = net.expanded_name()
+        geometry = self.geometry if name == self.net.expanded_name() else self.geometry_by_other_net[name]
         shapes = kdb.Region()
-        for lvs_layer_name, region in self.geometry.items():
+        for lvs_layer_name, region in geometry.items():
             if lvs_layer_names is None or lvs_layer_name in lvs_layer_names:
                 shapes += region
         return shapes
+
+    def add_net(self, name: str, geometry: Dict[str, kdb.Region]):
+        """
+        :param geometry: the shapes of the net by LVS layer, as self.geometry those of N
+        """
+        self.circuit.create_net(name)
+        self.geometry_by_other_net[name] = geometry
 
     def pin(self, label, x, y):
         self.labels.insert(kdb.Text(label, kdb.Trans(x, y)))
@@ -130,8 +140,8 @@ class TerminalFixture:
             self.lvs_layer_names.append(lvs_layer_name)
         self.markers[name] = {self.lvs_layer_names.index(lvs_layer_name): region}
 
-    def build(self):
-        return PEX25DBuilder(self.context, self.tech, 'test').build()
+    def build(self, options: Optional[BuilderOptions] = None):
+        return PEX25DBuilder(self.context, self.tech, 'test', options).build()
 
 
 @allure.parent_suite('Unit Tests')
@@ -174,6 +184,57 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         fixture = TerminalFixture()
         fixture.pin('A', 200, 10)
         assert not fixture.build().terminals
+
+    def test_one_label_twice_at_one_position_is_one_terminal(self):
+        fixture = TerminalFixture()
+        fixture.pin('A', 10, 10)
+        fixture.pin('A', 10, 10)
+        assert [t.name for t in fixture.build().terminals] == ['pin:A']
+
+    def test_two_labels_at_one_position_are_two_terminals(self):
+        fixture = TerminalFixture()
+        fixture.pin('A', 10, 10)
+        fixture.pin('B', 10, 10)
+        file = fixture.build()
+        assert [t.name for t in file.terminals] == ['pin:A', 'pin:B']
+        assert file.terminals[0].region == file.terminals[1].region
+
+    def test_a_pin_is_on_the_conductor_under_its_label(self):
+        fixture = TerminalFixture()
+        fixture.geometry['met1'] = kdb.Region(kdb.Box(0, 0, 40, 20))
+        fixture.add_net('OTHER', {'met1': kdb.Region(kdb.Box(60, 0, 100, 20))})
+        fixture.pin('A', 10, 10)
+        fixture.pin('B', 90, 10)
+        file = fixture.build()
+        assert {t.name: t.conductor for t in file.terminals} == {'pin:A': 'N', 'pin:B': 'OTHER'}
+        assert validate(file, strict=True).exit_code == 0
+
+    def test_a_pin_over_two_conductors_reports_a_build_error(self):
+        fixture = TerminalFixture()
+        fixture.add_net('OTHER', {'met1': kdb.Region(kdb.Box(0, 0, 20, 20))})
+        fixture.pin('A', 10, 10)
+        with self.assertRaisesRegex(BuildError, "Pin 'A'.*must select one conductor.*found 2"):
+            fixture.build()
+
+    def test_a_pin_in_a_hole_of_a_conductor_reports_a_build_error(self):
+        # NOTE: in the hole, though within the bounding box of the conductor
+        fixture = TerminalFixture()
+        fixture.geometry['met1'] -= kdb.Region(kdb.Box(40, 5, 60, 15))
+        fixture.pin('A', 50, 10)
+        with self.assertRaisesRegex(BuildError, 'must select one conductor.*found 0'):
+            fixture.build()
+
+    def test_terminal_names_escape_their_separators_and_round_trip(self):
+        fixture = TerminalFixture()
+        fixture.pin('block/A:B%[0]', 10, 10)
+        fixture.pin('block%2FA:B%[0]', 90, 10)  # NOTE: the first with its / escaped, no collision
+        fixture.device('block/M:1', kdb.Region(kdb.Box(50, 0, 60, 20)))
+        file = fixture.build()
+        expected = {'pin:block%2FA%3AB%25[0]', 'pin:block%252FA%3AB%25[0]', 'device:block%2FM%3A1:G'}
+        assert {t.name for t in file.terminals} == expected
+        round_tripped = read_pex25d_text(write_pex25d_text(file), '<generated>')
+        assert {t.name for t in round_tripped.terminals} == expected
+        assert validate(round_tripped, strict=True).exit_code == 0
 
     def test_a_pin_without_interconnect_reports_a_build_error(self):
         fixture = TerminalFixture()
@@ -261,6 +322,35 @@ class Pex25DBuilderTerminalTest(unittest.TestCase):
         assert len(scene.conductors[0].terminals) == 1
         assert len(scene.conductors[0].terminals[0].boxes) == 2
 
+    def test_a_device_terminal_off_the_metal_of_its_net_has_no_node(self):
+        for lvs_layer_name, marker in (('met2', kdb.Region(kdb.Box(10, 0, 20, 20))),  # NOTE: the net has no met2
+                                       ('met1', kdb.Region(kdb.Box(200, 0, 220, 20))),
+                                       ('met1', kdb.Region())):
+            with self.subTest(lvs_layer_name=lvs_layer_name, marker=str(marker)):
+                fixture = TerminalFixture()
+                fixture.tech.tech.layers.add(name='met2').drw_gds_pair.layer = 2
+                fixture.device('M1', marker, lvs_layer_name=lvs_layer_name)
+                file = fixture.build()
+                assert len(file.conductors) == 1
+                assert not file.terminals
+
+    def test_a_device_terminal_is_on_the_metal_of_its_own_net_only(self):
+        fixture = TerminalFixture()
+        fixture.add_net('OTHER', {'met1': kdb.Region(kdb.Box(200, 0, 220, 20))})
+        fixture.device('M1', kdb.Region(kdb.Box(200, 0, 220, 20)))  # NOTE: on N, over the met1 of OTHER
+        file = fixture.build()
+        assert len(file.conductors) == 2
+        assert not file.terminals
+
+    def test_a_net_without_interconnect_has_no_conductor_and_no_terminal(self):
+        fixture = TerminalFixture()
+        fixture.geometry.clear()
+        fixture.device('M1', kdb.Region(kdb.Box(10, 0, 20, 20)))
+        file = fixture.build()
+        assert not file.conductors
+        assert not file.shapes
+        assert not file.terminals
+
     def test_an_abutting_device_gets_only_a_boundary_strip(self):
         fixture = TerminalFixture()
         fixture.device('M1', kdb.Region(kdb.Box(-20, 0, 0, 20)))
@@ -314,6 +404,39 @@ class Pex25DBuilderMetalsSharingGDSPairTest(unittest.TestCase):
         fixture = self.fixture()
         fixture.device('C1', kdb.Region(kdb.Box(60, 0, 100, 20)), lvs_layer_name='met1_cap')
         assert [(t.name, t.layer) for t in fixture.build().terminals] == [('device:C1:G', 'met1_cap')]
+
+    def test_a_device_terminal_on_both_metals_reports_a_build_error(self):
+        # NOTE: a node is on one layer
+        fixture = self.fixture()
+        fixture.device('C1', kdb.Region(kdb.Box(50, 0, 60, 20)), lvs_layer_name='met1_ncap')
+        fixture.markers['C1'][fixture.lvs_layer_names.index('met1_cap')] = kdb.Region(kdb.Box(60, 0, 70, 20))
+        with self.assertRaisesRegex(BuildError, r"device:C1:G.*spans multiple profiles \(met1_ncap, met1_cap\)"):
+            fixture.build()
+
+
+@allure.parent_suite('Unit Tests')
+@allure.tag('PEX25D', 'Builder')
+class Pex25DBuilderGridTest(unittest.TestCase):
+    def test_a_grid_the_layout_dbu_is_no_multiple_of_reports_a_build_error(self):
+        with self.assertRaisesRegex(BuildError, r'layout DBU \(0\.001\) is not an integer multiple'):
+            TerminalFixture().build(BuilderOptions(grid_um='0.0003'))
+
+    def test_a_height_of_the_stack_off_the_grid_reports_a_build_error(self):
+        fixture = TerminalFixture()
+        fixture.tech.process_stack_layer_by_name['met1'].metal_layer.z = 1.00005
+        with self.assertRaisesRegex(BuildError, 'met1 bottom: 1.00005 µm is not an integer multiple of the grid'):
+            fixture.build()
+
+    def test_decimal_heights_of_the_stack_and_negative_coordinates_are_on_the_grid(self):
+        # NOTE: in binary floating point, 0.3262 % 0.0001 is 9.9999999999e-05
+        fixture = TerminalFixture()
+        fixture.tech.process_stack_layer_by_name['met1'].metal_layer.z = 0.3262
+        fixture.geometry['met1'] = kdb.Region(kdb.Box(-100, -20, 0, 0))
+        file = fixture.build()
+        assert (file.metals[0].zlow, file.metals[0].zhigh) == (3262, 4262)
+        assert (file.ground_plane.zlow, file.ground_plane.zhigh) == (-3000, -1000)
+        assert (file.shapes[0].box.lower_left.x, file.shapes[0].box.lower_left.y) == (-1000, -200)
+        assert validate(file, strict=True).exit_code == 0
 
 
 @allure.parent_suite('Unit Tests')
