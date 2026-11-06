@@ -32,12 +32,14 @@ import klayout.db as kdb
 
 from klayout_pex.klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, BuildError
 from klayout_pex.pdk_config import PDK
+from klayout_pex.pex25d.diagnostics import DiagnosticsReport, Severity
 from klayout_pex.pex25d.protobuf import pex25d_file_pb2, pex25d_terminal_pb2
 from klayout_pex.pex25d.reader import read_pex25d_text
 from klayout_pex.pex25d.resolver import resolve
 from klayout_pex.pex25d.validator import validate
 from klayout_pex.pex25d.writer import write_pex25d_text
 from klayout_pex.tech_info import TechInfo
+from klayout_pex.util.multiple_choice import MultipleChoicePattern
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
@@ -442,16 +444,35 @@ class Pex25DBuilderGridTest(unittest.TestCase):
 @allure.parent_suite('Unit Tests')
 @allure.tag('PEX25D', 'Builder')
 class Pex25DBuilderShippedStacksTest(unittest.TestCase):
+    @staticmethod
+    def stack(pdk: PDK, dielectric_filter: Optional[MultipleChoicePattern] = None) -> Any:
+        """
+        :return: the PEX25D file of the process stack of the PDK, without layout
+        """
+        tech_info = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=dielectric_filter)
+        builder = PEX25DBuilder(SimpleNamespace(dbu=0.001), tech_info, 'stack')
+        pex25d_file = pex25d_file_pb2().PEX25DFile()
+        for build_part in (builder.build_units, builder.build_ground_plane,
+                           builder.build_layers, builder.build_dielectrics):
+            build_part(pex25d_file)
+        return pex25d_file
+
     def test_no_simple_dielectric_band_is_empty(self):
         # NOTE: the FasterCap export skips an empty band with a warning, e.g. one between two metals at the same z
         #       (sg13g2's ildtm1, between the Metal5 without and with MIM cap)
         for pdk in PDK:
             with self.subTest(pdk=pdk.value):
-                tech_info = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None)
-                builder = PEX25DBuilder(SimpleNamespace(dbu=0.001), tech_info, 'stack')
-                pex25d_file = pex25d_file_pb2().PEX25DFile()
-                for build_part in (builder.build_units, builder.build_ground_plane,
-                                   builder.build_layers, builder.build_dielectrics):
-                    build_part(pex25d_file)
-                scene = resolve(pex25d_file)
+                scene = resolve(self.stack(pdk))
                 assert [d.name for d in scene.dielectrics if d.zhigh <= d.zlow] == []
+
+    def test_dielectric_filter_keeps_the_background(self):
+        # NOTE: PEX25D requires one, which fills whatever nothing else claims, --diel none left it out (#450)
+        for pdk in PDK:
+            background = self.stack(pdk).background
+            for pattern in ('none', f'all,-{background.name}'):
+                with self.subTest(pdk=pdk.value, pattern=pattern):
+                    pex25d_file = self.stack(pdk, MultipleChoicePattern(pattern))
+                    assert pex25d_file.background == background
+                    report = DiagnosticsReport()
+                    resolve(pex25d_file, report=report)
+                    assert [d.code for d in report.diagnostics if d.severity == Severity.ERROR] == []

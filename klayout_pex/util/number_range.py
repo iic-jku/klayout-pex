@@ -54,6 +54,12 @@ class NumberRange:
 POSITIVE_MICROMETERS = NumberRange(lambda value: value > 0, "> 0 (in µm)")
 NON_NEGATIVE_MICROMETERS = NumberRange(lambda value: value >= 0, ">= 0 (in µm)")
 NON_NEGATIVE_SQUARE_MICROMETERS = NumberRange(lambda value: value >= 0, ">= 0 (in µm²)")
+POSITIVE_NUMBER = NumberRange(lambda value: value > 0, "> 0")
+NON_NEGATIVE_NUMBER = NumberRange(lambda value: value >= 0, ">= 0")
+RELATIVE_ERROR = NumberRange(lambda value: 0 < value < 1, "> 0 and < 1")
+"""A relative error, e.g. 0.05 for 5 %"""
+RELATIVE_PERMITTIVITY = NumberRange(lambda value: value >= 1, ">= 1")
+"""A relative permittivity, at least that of vacuum"""
 
 DELAUNAY_B_MAX = 1.1
 """
