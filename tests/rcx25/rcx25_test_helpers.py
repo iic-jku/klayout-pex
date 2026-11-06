@@ -53,8 +53,15 @@ def netlist_path_of(cli: KpexCLI) -> str:
     return f"{os.path.splitext(cli.rcx25_extracted_csv_path)[0]}.spice"
 
 
+def spice_netlist_ports(netlist_path: str) -> List[str]:
+    """
+    :return: the ports of the first subcircuit of the SPICE netlist, as read by the netlist tools
+    """
+    return next(s for s in SpiceRCNetlist.read(netlist_path).scopes if s.name is not None).ports
+
+
 def netlist_ports(cli: KpexCLI) -> List[str]:
-    return next(s for s in SpiceRCNetlist.read(netlist_path_of(cli)).scopes if s.name is not None).ports
+    return spice_netlist_ports(netlist_path_of(cli))
 
 
 @dataclass
