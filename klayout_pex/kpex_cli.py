@@ -155,6 +155,7 @@ from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
+    add_deprecated_argument,
     add_help_subcommand,
     add_log_level_argument,
     add_subcommand_sections,
@@ -391,9 +392,10 @@ class KpexCLI:
                                       type=positive_number, default=0.5,
                                       help=f"FasterCap -d direct potential interaction coefficient to mesh refinement "
                                            f"(default is %(default)s)")
-        group_fastercap.add_argument("--mesh", dest="fastercap_mesh_refinement_value",
-                                     type=float, default=0.5,
-                                     help="FasterCap -m Mesh relative refinement value (default is %(default)s)")
+        add_deprecated_argument(group_fastercap, "--mesh", dest="fastercap_mesh_refinement_value",
+                                type=float, default=None,
+                                advice="it has no effect, as FasterCap's automatic refinement (--tolerance) overrides it",
+                                help="FasterCap -m mesh relative refinement value")
         group_fastercap.add_argument("--ooc", dest="fastercap_ooc_condition",
                                      type=non_negative_number, default=2,
                                      help="FasterCap -f out-of-core free memory to link memory condition "
@@ -1119,7 +1121,6 @@ class KpexCLI:
                       log_path=log_path,
                       tolerance=args.fastercap_tolerance,
                       d_coeff=args.fastercap_d_coeff,
-                      mesh_refinement_value=args.fastercap_mesh_refinement_value,
                       ooc_condition=args.fastercap_ooc_condition,
                       auto_preconditioner=args.fastercap_auto_preconditioner,
                       galerkin_scheme=args.fastercap_galerkin_scheme,
