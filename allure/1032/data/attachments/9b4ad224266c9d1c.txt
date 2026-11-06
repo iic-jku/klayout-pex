@@ -1,0 +1,199 @@
+[16:51:35] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/cut_cell_of_devices.lvsdb.gz --out-dir                                        
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:51:35] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:51:35] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_ihp-sg13g2/cut_cell_of_devices__cut                  
+                    _cell_of_devices/kpex_result.json                           
+[16:51:35] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 8 of 85 shapes                         
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con,                                
+                    cont_ntap_con, cont_ptap_con,                               
+                    cont_bjt_con, schottcky_p,                                  
+                    schottcky_n_con, diodevdd_4kv_te,                           
+                    diodevss_4kv_te                                             
+[16:51:35] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.7 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:51:35] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1993
+[16:51:35] INFO     (31, 0) -> (nwell_drw dpantenna_n)          kpex_cli.py:1993
+[16:51:35] INFO     (32, 0) -> (nbulay_drw isolbox_i)           kpex_cli.py:1993
+[16:51:35] INFO     (46, 0) -> (pwell iso_pwell pwell_sub       kpex_cli.py:1993
+                    isolbox_bn dantenna_p isolbox_s rppd_sub)                   
+[16:51:35] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1993
+[16:51:35] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1993
+[16:51:35] INFO     (10, 2) -> (metal2_pin_con)                 kpex_cli.py:1993
+[16:51:35] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1993
+[16:51:35] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1993
+[16:51:35] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1993
+[16:51:35] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1993
+[16:51:35] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1993
+[16:51:35] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1993
+[16:51:35] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1993
+[16:51:35] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1993
+[16:51:35] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:51:35] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:51:35] INFO     LVSDB: found 1pins                          extractor.py:482
+[16:51:35] WARNING  The resistance network leaves out these   r_extractor.py:525
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS dpantenna_n)                                 
+                      - NWell (LVS nwell_drw)                                   
+[16:51:35] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.7 GiB                              
+[16:51:36] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.7 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;$2;$I14;0.003;                                                               
+C2;$2;$I15.$6.Metal2;0.005;                                                     
+C3;$2;$I16;0.001;                                                               
+C4;$2;$I6;0.001;                                                                
+C5;$2;sub!.$2.Metal1;0.045;                                                     
+C6;$2;VSUBS;0.374;                                                              
+C7;$3;$I15.$11.Metal2;0.0;                                                      
+C8;$3;sub!.$2.Metal1;0.0;                                                       
+C9;$I10.$0.Metal1;$I8.$0.Metal1;0.012;                                          
+C10;$I10.$0.Metal1;$I9;0.002;                                                   
+C11;$I10.$0.Metal1;sub!.$0.Metal1;0.001;                                        
+C12;$I10.$0.Metal1;VSUBS;0.022;                                                 
+C13;$I11;$I12;0.001;                                                            
+C14;$I11;VSUBS;0.086;                                                           
+C15;$I12;$I7;0.024;                                                             
+C16;$I12;$I8.$0.Metal1;0.0;                                                     
+C17;$I12;sub!.$0.Metal1;0.0;                                                    
+C18;$I12;VSUBS;0.061;                                                           
+C19;$I13;$I4;0.006;                                                             
+C20;$I13;$I4.$1.Metal1;0.001;                                                   
+C21;$I13;$I5.$1.GatPoly;0.0;                                                    
+C22;$I13;VSUBS;0.09;                                                            
+C23;$I13.$1.Metal1;$I4;0.001;                                                   
+C24;$I13.$1.Metal1;$I4.$1.Metal1;0.009;                                         
+C25;$I13.$1.Metal1;$I7;0.0;                                                     
+C26;$I13.$1.Metal1;sub!.$0.Metal1;0.0;                                          
+C27;$I13.$1.Metal1;VSUBS;0.045;                                                 
+C28;$I14;$I15;0.006;                                                            
+C29;$I14;$I15.$0.Metal1;0.012;                                                  
+C30;$I14;$I15.$10.Metal2;0.003;                                                 
+C31;$I14;$I15.$11.Metal2;0.011;                                                 
+C32;$I14;$I15.$2.Metal1;0.012;                                                  
+C33;$I14;$I15.$6.Metal2;0.03;                                                   
+C34;$I14;$I6;0.169;                                                             
+C35;$I15;$I17;0.011;                                                            
+C36;$I15;$I6;0.029;                                                             
+C37;$I15.$0.Metal1;$I17;0.011;                                                  
+C38;$I15.$0.Metal1;$I6;0.024;                                                   
+C39;$I15.$0.Metal1;sub!.$2.Metal1;0.011;                                        
+C40;$I15.$0.Metal1;VSUBS;0.008;                                                 
+C41;$I15.$10.Metal2;$I6;0.006;                                                  
+C42;$I15.$10.Metal2;sub!.$2.Metal1;0.01;                                        
+C43;$I15.$10.Metal2;VSUBS;0.014;                                                
+C44;$I15.$11.Metal2;$I17;0.002;                                                 
+C45;$I15.$11.Metal2;$I6;0.038;                                                  
+C46;$I15.$11.Metal2;sub!.$2.Metal1;0.022;                                       
+C47;$I15.$11.Metal2;VSUBS;0.042;                                                
+C48;$I15.$2.Metal1;$I17;0.012;                                                  
+C49;$I15.$2.Metal1;$I6;0.038;                                                   
+C50;$I15.$6.Metal2;$I16;0.001;                                                  
+C51;$I15.$6.Metal2;$I17;0.003;                                                  
+C52;$I15.$6.Metal2;$I6;0.06;                                                    
+C53;$I15.$6.Metal2;sub!.$2.Metal1;0.173;                                        
+C54;$I15.$6.Metal2;VSUBS;0.189;                                                 
+C55;$I16;$I5.$0.GatPoly;0.0;                                                    
+C56;$I16;sub!.$2.Metal1;0.003;                                                  
+C57;$I17;$I6;0.012;                                                             
+C58;$I4;$I5.$0.GatPoly;0.0;                                                     
+C59;$I4;$I9;0.0;                                                                
+C60;$I4;VSUBS;0.089;                                                            
+C61;$I4.$1.Metal1;sub!.$0.Metal1;0.0;                                           
+C62;$I4.$1.Metal1;VSUBS;0.045;                                                  
+C63;$I5;sub!.$0.Metal1;0.026;                                                   
+C64;$I5;sub!.$2.Metal1;0.027;                                                   
+C65;$I5;VSUBS;0.072;                                                            
+C66;$I5.$0.GatPoly;$I9;0.0;                                                     
+C67;$I5.$0.GatPoly;sub!;0.005;                                                  
+C68;$I5.$0.GatPoly;sub!.$0.Metal1;0.007;                                        
+C69;$I5.$0.GatPoly;sub!.$2.Metal1;0.007;                                        
+C70;$I5.$0.GatPoly;VSUBS;0.126;                                                 
+C71;$I5.$1.GatPoly;sub!.$0.Metal1;0.002;                                        
+C72;$I5.$1.GatPoly;sub!.$2.Metal1;0.002;                                        
+C73;$I5.$1.GatPoly;VSUBS;0.14;                                                  
+C74;$I5.$10.Metal1;sub!;0.014;                                                  
+C75;$I5.$10.Metal1;sub!.$2.Metal1;0.007;                                        
+C76;$I5.$10.Metal1;VSUBS;0.004;                                                 
+C77;$I5.$11.Metal1;VSUBS;0.022;                                                 
+C78;$I5.$6.Metal1;sub!;0.014;                                                   
+C79;$I5.$6.Metal1;sub!.$0.Metal1;0.007;                                         
+C80;$I5.$6.Metal1;VSUBS;0.004;                                                  
+C81;$I5.$7.Metal1;VSUBS;0.022;                                                  
+C82;$I5.$8.Metal1;sub!;0.016;                                                   
+C83;$I5.$8.Metal1;VSUBS;0.002;                                                  
+C84;$I5.$9.Metal1;VSUBS;0.014;                                                  
+C85;$I6;sub!.$2.Metal1;0.51;                                                    
+C86;$I6;VSUBS;0.086;                                                            
+C87;$I8.$0.Metal1;$I9;0.002;                                                    
+C88;$I8.$0.Metal1;VSUBS;0.022;                                                  
+C89;$I9;VSUBS;0.043;                                                            
+C90;VSUBS;sub!;0.079;                                                           
+C91;VSUBS;sub!.$0.Metal1;0.146;                                                 
+C92;VSUBS;sub!.$2.Metal1;0.629;                                                 
+R1;$I10;$I10.$0.Metal1;;17.0                                                    
+R2;$I13;$I13.$1.Metal1;;6.667                                                   
+R3;$I15;$I15.$0.Metal1;;0.067                                                   
+R4;$I15;$I15.$10.Metal2;;4.5                                                    
+R5;$I15;$I15.$2.Metal1;;0.067                                                   
+R6;$I15.$0.Metal1;$I15.$6.Metal2;;4.5                                           
+R7;$I15.$10.Metal2;$I15.$11.Metal2;;0.061                                       
+R8;$I15.$10.Metal2;$I15.$6.Metal2;;0.061                                        
+R9;$I15.$11.Metal2;$I15.$2.Metal1;;4.5                                          
+R10;$I4;$I4.$1.Metal1;;6.667                                                    
+R11;$I5;$I5.$0.GatPoly;;5.04                                                    
+R12;$I5;$I5.$1.GatPoly;;5.04                                                    
+R13;$I5.$0.GatPoly;$I5.$10.Metal1;;15.0                                         
+R14;$I5.$0.GatPoly;$I5.$6.Metal1;;15.0                                          
+R15;$I5.$0.GatPoly;$I5.$8.Metal1;;15.0                                          
+R16;$I5.$1.GatPoly;$I5.$11.Metal1;;15.0                                         
+R17;$I5.$1.GatPoly;$I5.$7.Metal1;;15.0                                          
+R18;$I5.$1.GatPoly;$I5.$9.Metal1;;15.0                                          
+R19;$I5.$10.Metal1;$I5.$8.Metal1;;0.148                                         
+R20;$I5.$11.Metal1;$I5.$9.Metal1;;0.148                                         
+R21;$I5.$6.Metal1;$I5.$8.Metal1;;0.148                                          
+R22;$I5.$7.Metal1;$I5.$9.Metal1;;0.148                                          
+R23;$I8;$I8.$0.Metal1;;17.0                                                     
+R24;sub!;sub!.$0.Metal1;;0.018                                                  
+R25;sub!;sub!.$2.Metal1;;0.018                                                  
+R26;sub!.$0.Metal1;sub!.$4.nSD;;8.5                                             
+R27;sub!.$2.Metal1;sub!.$6.nSD;;8.5                                             
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices_
+_cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv                   
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_cell_of_devices_
+_cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice                 
+[16:51:37] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.7 GiB                                            
+[16:51:37] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: $2 (0.430 fF),                     
+                    $I14 (0.246 fF), $I17 (0.052 fF), $I16                      
+                    (0.005 fF), $I18 (0.000 fF)                                 
+[16:51:37] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.7 GiB                                                
