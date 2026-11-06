@@ -61,6 +61,19 @@ def context_of_layout(pdk_name: PDKName, *path_components) -> Tuple[KLayoutExtra
     return run_kpex_2_5d_engine.call_args.kwargs['pex_context'], run_kpex_2_5d_engine.call_args.kwargs['tech_info']
 
 
+def fastercap_input(pex_context: KLayoutExtractionContext,
+                    tech_info: TechInfo,
+                    exclusions: Optional[Exclusions] = None) -> FasterCapModelBuilder:
+    """
+    :return: the conductors and dielectrics of the FasterCap input of the layout, before it has their surfaces
+    """
+    with mock.patch.object(FasterCapModelBuilder, 'generate', autospec=True, side_effect=lambda builder: builder):
+        return FasterCapInputBuilder(pex_context=pex_context,
+                                     tech_info=tech_info,
+                                     substrate_net_name=pex_context.substrate_net_name,
+                                     exclusions=exclusions).build()
+
+
 def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float]:
     """
     The areas of the FasterCap input dielectrics of a layout (in µm², with the white-box devices),
@@ -69,16 +82,9 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
     pex_context, tech_info = context_of_layout(pdk_name, *path_components)
 
     regions_by_material: Dict[str, kdb.Region] = defaultdict(kdb.Region)
-    add_dielectric = FasterCapModelBuilder.add_dielectric
-
-    def add_and_collect_dielectric(self, material_name: str, layer: kdb.Region, z: float, height: float):
-        regions_by_material[material_name] += layer
-        add_dielectric(self, material_name=material_name, layer=layer, z=z, height=height)
-
-    with mock.patch.object(FasterCapModelBuilder, 'add_dielectric', add_and_collect_dielectric):
-        FasterCapInputBuilder(pex_context=pex_context,
-                              tech_info=tech_info,
-                              substrate_net_name=pex_context.substrate_net_name).build()
+    for material, layers in fastercap_input(pex_context, tech_info).dlayers.items():
+        for region, _, _ in layers:
+            regions_by_material[material] += region
 
     return {material: round(region.merged().area() * pex_context.dbu ** 2, 4)
             for material, region in regions_by_material.items()}
@@ -160,3 +166,25 @@ def test_any_angle_wire_across_a_block_has_no_slivers_to_the_dielectrics(ports: 
                                       delaunay_b=0.5,
                                       exclusions=exclusions).build()
     assert [name for name in generator.net_names if '#x' in name]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_vias_and_contacts_of_a_net_across_a_block_are_conductors_of_its_parts():
+    # NOTE: the block is over the MOS, the contacts on its source and drain, and the Via1 over them, not the Via2
+    pex_context, tech_info = context_of_layout(PDKName.IHP_SG13G2, 'nmos_diode2', 'nmos_diode2.gds.gz')
+    block = kdb.Region(kdb.Box(-500, -700, 500, 700))
+    exclusions = Exclusions.from_region(block, substrate_layer_name=tech_info.internal_substrate_layer_name)
+    conductors = fastercap_input(pex_context, tech_info, exclusions).clayers
+
+    # NOTE: on all layers, the conductors of the parts of the nets within the block are within it, the others outside
+    for name, layers in conductors.items():
+        part = exclusions.conductor_parts[name]
+        if not part.is_substrate:
+            for region, _, _ in layers:
+                assert (region - block if part.block_indexes else region & block).is_empty(), name
+
+    # NOTE: the conductors from z = 0, by their tops in nm: the source and the drain, and the contacts on them,
+    #       up to the Metal1
+    assert sorted((name, top) for name, layers in conductors.items() for _, bottom, top in layers if bottom == 0) == \
+           [('VDD#x0', 100), ('VDD#x0', 1040), ('VSS#x0', 100), ('VSS#x0', 1040)]
