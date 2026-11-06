@@ -1,0 +1,109 @@
+[16:15:41] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_via_stack.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2'
+--2.5D --halo 10000 --scale n --gds                                            
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_via_stack.gds.gz' --exclusion-markers tie                                   
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:15:41] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'exclusion_via_stack'                                 
+[16:15:41] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:15:41] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\exclusion_via_stack__exclusion_via_                  
+                    stack\kpex_result.json                                     
+[16:15:41] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:15:41] INFO     (29, 0) -> (via2_drw)                      kpex_cli.py:1993
+[16:15:41] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[16:15:41] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1993
+[16:15:41] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+[16:15:41] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1993
+[16:15:41] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A,B: Metal2, Metal3                                    
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:15:41] INFO     LVSDB: found 1pins                         extractor.py:482
+[16:15:41] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A,B;;0.418                                                                
+R2;A,B;B;;0.418                                                                
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_via_stack__exclusion_v
+ia_stack\exclusion_via_stack_k25d_pex_netlist.csv                              
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_via_stack__exclusion_v
+ia_stack\exclusion_via_stack_k25d_pex_netlist.spice                            
+[16:15:41] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.1 GiB                                           
+[16:15:41] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.1 GiB                                               
+[16:15:41] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_via_stack_no_marker.lvsdb.gz' --out-dir                                       
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_via_stack_no_marker.gds.gz' --exclusion-markers tie                         
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:15:41] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'exclusion_via_stack_no_marker'                       
+[16:15:41] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:15:41] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\exclusion_via_stack_no_marker__excl                  
+                    usion_via_stack_no_marker\kpex_result.jso                  
+                    n                                                          
+[16:15:41] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:15:41] INFO     (29, 0) -> (via2_drw)                      kpex_cli.py:1993
+[16:15:41] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[16:15:41] INFO     (10, 2) -> (metal2_pin_con)                kpex_cli.py:1993
+[16:15:41] INFO     (10, 0) -> (metal2_n_mom)                  kpex_cli.py:1993
+[16:15:41] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+[16:15:41] WARNING  The layout has no shapes on the exclusion  kpex_cli.py:1392
+                    markers, so the extraction leaves nothing                  
+                    out of them                                                
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:15:41] INFO     LVSDB: found 1pins                         extractor.py:482
+[16:15:41] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+R1;A;A,B;;0.568                                                                
+R2;A,B;A,B.$2.Metal3;;2.031                                                    
+R3;A,B.$1.Metal2;A,B.$3.Metal3;;2.031                                          
+R4;A,B.$1.Metal2;B;;0.532                                                      
+R5;A,B.$2.Metal3;A,B.$3.Metal3;;0.176                                          
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_via_stack_no_marker__e
+xclusion_via_stack_no_marker\exclusion_via_stack_no_marker_k25d_pex_netlist.csv
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_via_stack_no_marker__e
+xclusion_via_stack_no_marker\exclusion_via_stack_no_marker_k25d_pex_netlist.spi
+ce                                                                             
+[16:15:41] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.1 GiB                                           
+[16:15:41] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.1 GiB                                               
