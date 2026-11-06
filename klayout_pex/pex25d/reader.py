@@ -303,11 +303,17 @@ class Pex25DTextReader:
         if value is None:
             return None
         try:
-            return float(value)
+            double = float(value)
         except OverflowError:
             self.error('PEX25D-E0111',
                        f"{what}: {text} is beyond the range of a double", record)
             return None
+        if double == 0.0 and value != 0:
+            # NOTE: a subnormal one stays non-zero, and is read with what precision it has
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is too small for a double, which would make it 0", record)
+            return None
+        return double
 
     # --------------------------------------------------------------- driving
 
