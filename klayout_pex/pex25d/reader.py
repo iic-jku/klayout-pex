@@ -47,6 +47,9 @@ STDIO_NAME = '-'
 # ratios like '1/2' and digit separators like '1_0'.
 NUMBER = re.compile(r'[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?\Z')
 
+# Lengths are int64 grid units in the protobuf forms.
+INT64_MAX = 2 ** 63 - 1
+
 VERSION = re.compile(r'(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?\Z')
 
 LENGTH_UNITS = {'um': 1, 'nm': 2, 'm': 3}
@@ -219,6 +222,8 @@ class Pex25DTextReader:
         self.seen_header = False
         self.meta_keys: Dict[str, str] = {}
         self.include_stack: List[str] = []
+        self.domain_box_record: Optional[Record] = None
+        self.domain_margin_record: Optional[Record] = None
 
     # ---------------------------------------------------------- diagnostics
 
@@ -285,12 +290,30 @@ class Pex25DTextReader:
                        f"{what}: {text} is not an integer multiple of the grid",
                        record)
             return None
+        if abs(rounded) > INT64_MAX:
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is beyond the {INT64_MAX} grid units "
+                       f"a coordinate can have", record)
+            return None
         return int(rounded)
 
     def to_double(self, text: str, record: Record, what: str) -> Optional[float]:
         """Permittivities, resistances and temperatures are not grid-quantized."""
         value = self.to_fraction(text, record, what)
-        return None if value is None else float(value)
+        if value is None:
+            return None
+        try:
+            double = float(value)
+        except OverflowError:
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is beyond the range of a double", record)
+            return None
+        if double == 0.0 and value != 0:
+            # NOTE: a subnormal one stays non-zero, and is read with what precision it has
+            self.error('PEX25D-E0111',
+                       f"{what}: {text} is too small for a double, which would make it 0", record)
+            return None
+        return double
 
     # --------------------------------------------------------------- driving
 
@@ -772,8 +795,31 @@ class Pex25DTextReader:
                 return
             values[axis] = value
         cursor.end()
+        if self.domain_margin_record is not None:
+            self.repeated_domain_record(record, self.domain_margin_record)
+            return
+        self.domain_margin_record = record
+        if self.domain_box_record is not None:
+            self.ignore_domain_margin(record, self.domain_box_record)
+            return
         margin = self.file.domain_margin
         margin.x, margin.y, margin.z = values['X'], values['Y'], values['Z']
+
+    def repeated_domain_record(self, record: Record, first: Record):
+        """Like GROUND_PLANE, each is given at most once, and the first one is kept."""
+        self.error('PEX25D-E0255',
+                   f"{record.head} is already given in {first.file}:{first.line}",
+                   record, tier=Tier.SEMANTIC)
+
+    def ignore_domain_margin(self, margin_record: Record, box_record: Record):
+        """
+        DOMAIN_BOX takes precedence over DOMAIN_MARGIN, in whichever order they come (record
+        order is not significant). Setting the box drops the margin, as they are one oneof.
+        """
+        self.warn('PEX25D-W0253',
+                  f"DOMAIN_MARGIN is ignored, as the DOMAIN_BOX in "
+                  f"{box_record.file}:{box_record.line} takes precedence",
+                  margin_record, tier=Tier.SEMANTIC)
 
     def read_domain_box(self, record: Record) -> None:
         cursor = Cursor(record, self)
@@ -789,6 +835,13 @@ class Pex25DTextReader:
                 coordinates.append(value)
             corners[keyword] = coordinates
         cursor.end()
+
+        if self.domain_box_record is not None:
+            self.repeated_domain_record(record, self.domain_box_record)
+            return
+        self.domain_box_record = record
+        if self.domain_margin_record is not None:
+            self.ignore_domain_margin(self.domain_margin_record, record)
 
         box = self.file.domain_box.box
         box.lower_left.x, box.lower_left.y, box.lower_left.z = corners['LL']

@@ -70,7 +70,7 @@ def capacitances_by_net_pair(pex_mode: PEXMode, *path_components) -> Dict[NetCou
     pdk = PDKTestConfig(PDKName.SKY130A)
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', pdk.name, '--mode', pex_mode,
+        cli.main(['main', 'extract', '--pdk', pdk.name, '--mode', pex_mode,
                   '--lvsdb', lvsdb_fixture_path(pdk.name, pdk.gds_path(*path_components)),
                   '--out-dir', out_dir, '--2.5D'])
     results = list(cli.rcx25_extraction_results.cell_extraction_results.values())[0]

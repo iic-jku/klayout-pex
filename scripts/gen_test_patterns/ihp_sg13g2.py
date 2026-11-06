@@ -766,6 +766,28 @@ def label_in_child_cell_pattern(name: str) -> Pattern:
     return p
 
 
+def label_only_in_child_cell() -> Pattern:
+    """
+    A wire in a child cell with the pin inner, without devices, and nothing of the top cell on it
+    """
+    p = pattern('label_only_in_child_cell')
+    child = child_cell_with_wire(p, 'child', 'inner')
+    p.top.insert(kdb.CellInstArray(child.cell_index(), kdb.Trans()))
+    return p
+
+
+def cut_block_x2_wired_in_top() -> Pattern:
+    """
+    Two instances of a child cell block with a wire with the pin A, whose wires go on in the top cell, without labels
+    """
+    p = pattern('cut_block_x2_wired_in_top')
+    block = child_cell_with_wire(p, 'block', 'A')
+    for y in (0, 5000):
+        p.top.insert(kdb.CellInstArray(block.cell_index(), kdb.Trans(0, y)))
+        p.box(METAL3, 9000, y, 20000, y + 1000)
+    return p
+
+
 def label_in_child_cell_within_marker() -> Pattern:
     """
     label_in_child_cell with a marker over the left half of the wire, with the pin inner of the child cell
@@ -1565,6 +1587,8 @@ PATTERNS: Dict[str, Callable[[], Pattern]] = {
     'cut_block_beside_mos': cut_block_beside_mos,
     'label_in_child_cell': lambda: label_in_child_cell_pattern('label_in_child_cell'),
     'label_in_child_cell_within_marker': label_in_child_cell_within_marker,
+    'label_only_in_child_cell': label_only_in_child_cell,
+    'cut_block_x2_wired_in_top': cut_block_x2_wired_in_top,
     'labels_in_child_cells': labels_in_child_cells,
     'labels_without_pin_shapes': labels_without_pin_shapes,
     'cut_inductor2_leads_in_top': cut_inductor2_leads_in_top,

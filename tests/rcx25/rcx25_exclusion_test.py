@@ -1499,6 +1499,18 @@ def test_devices_of_a_cut_cell_on_other_layers_than_their_shapes_are_left_out(ce
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_nets_named_by_labels_of_instances_of_a_cut_cell_have_the_ports_of_the_model_only():
+    # NOTE: the label A of each instance names its net, but not uniquely, so the nets keep the names $2 and $3
+    #       (#417), which their pin labels make ports of, but where the cell is cut, the ports of the model are theirs
+    extraction = Extraction('cut_block_x2_wired_in_top', PEXMode.R)
+    assert sorted(netlist_ports(extraction.run(ExclusionMarkerMode.IGNORE))) == [r'\$2', r'\$3']
+    cut = extraction.run(ExclusionMarkerMode.IGNORE, '--cut', 'block=X')
+    assert cut.rcx25_netlist_problems == []
+    assert sorted(netlist_ports(cut)) == ['X_0__A', 'X_1__A']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_neighbor_under_the_overhang_of_a_cut_cell_has_no_ports():
     # NOTE: the nets of the rails enter the cell, the nets within its neighbors under its NWell and pSD don't
     extraction = Extraction('cut_abutting_std_cells', PEXMode.R, blackbox=True)

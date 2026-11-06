@@ -43,7 +43,7 @@ import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 
-def tech_pbjson_paths() -> list[str]:
+def tech_pbjson_paths() -> List[str]:
     protobuf_dir = os.path.realpath(os.path.join(__file__, '..', '..',
                                                  'klayout_pex_protobuf'))
     return sorted(glob.glob(os.path.join(protobuf_dir, '*_tech.pb.json')))
@@ -173,7 +173,8 @@ class Test(unittest.TestCase):
             'sky130A': {'nsd': 'licon_nsd_con', 'psd': 'licon_psd_con', 'ntap_conn': None,
                         'ptap_conn': 'licon_ptap_con'},
             'gf180mcuD': {'Nplus': 'contact_nsd_con', 'Pplus': 'contact_psd_con', 'ntap': None,
-                          'ptap': 'contact_ptap_con'},
+                          'ptap': 'contact_ptap_con', 'ntap_dw': 'contact_ntap_dw_con',
+                          'ptap_dw': 'contact_ptap_dw_con'},
             'ihp-sg13g2': ihp,
             'ihp-sg13cmos5l': ihp,
         }
@@ -188,6 +189,16 @@ class Test(unittest.TestCase):
                                             for lyr in tech_info.process_diffusion_layers})
                 self.assertEqual(1, len({(contact.metal_above, contact.thickness) for contact in contacts.values()}),
                                  contacts)
+
+    def test_contacts_by_lvs_layer_name_are_the_set_ones(self):
+        # NOTE: not the unset contact of a layer without one, e.g. a tap, under the empty name (#469)
+        paths = tech_pbjson_paths()
+        self.assertNotEqual([], paths, "No generated tech definition to check, "
+                                       "run the build first")
+        for path in paths:
+            with self.subTest(tech=os.path.basename(path)):
+                contacts = TechInfo.from_json(path, dielectric_filter=None).contact_by_contact_lvs_layer_name
+                self.assertNotIn('', contacts)
 
     def test_shipped_tech_definitions_have_tap_connections_of_their_layers(self):
         # NOTE: a tap on a layer of another name would leave its metal off its net, as the LVS layers are not checked
@@ -437,6 +448,28 @@ class Test(unittest.TestCase):
                                                           rf"it is {side_halo:g}$"):
                     TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
+    def test_the_reader_refuses_capacitances_that_are_negative_or_not_finite(self):
+        # NOTE: but not 0 (the perimeter capacitance of capm), nor a negative sidewall offset, which is a distance
+        tech = tech_pb2.Technology(name='test')
+        tech.process_parasitics.side_halo = 8.0
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='capm', area_capacitance=12.37, perimeter_capacitance=0.0)
+        caps.substrates.add(layer_name='met1', area_capacitance=math.nan, perimeter_capacitance=-1.0)
+        caps.overlaps.add(top_layer_name='met2', bottom_layer_name='met1', capacitance=-23.0)
+        caps.sidewalls.add(layer_name='met1', capacitance=math.inf, offset=-0.05)
+        caps.sideoverlaps.add(in_layer_name='met1', out_layer_name='met2', capacitance=-8.0)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaises(TechDefError) as refusal:
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
+        self.assertEqual(['  - the substrate area capacitance of met1 is nan',
+                          '  - the substrate perimeter capacitance of met1 is -1',
+                          '  - the overlap capacitance of met2 over met1 is -23',
+                          '  - the sidewall capacitance of met1 is inf',
+                          '  - the side overlap capacitance of met1 to met2 is -8'],
+                         str(refusal.exception).splitlines()[1:])
+        self.assertRegex(str(refusal.exception).splitlines()[0],
+                         r"^Capacitances have to be finite numbers ≥ 0, but in .*test_tech\.pb\.json$")
+
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
         stack = tech.process_stack
@@ -599,9 +632,9 @@ class Test(unittest.TestCase):
                 contact_resistance = parasitics_pb2.ResistanceInfo.ContactResistance(resistance=milliohm)
                 via_resistance = parasitics_pb2.ResistanceInfo.ViaResistance(resistance=milliohm)
                 self.assertAlmostEqual(milliohm / 1000.0, TechInfo.milliohm_to_ohm(milliohm))
-                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_contact(
+                self.assertAlmostEqual(expected, TechInfo.milliohm_per_cut_to_ohm_um2_for_contact(
                     contact, contact_resistance))
-                self.assertAlmostEqual(expected, TechInfo.milliohm_by_cnt_to_ohm_by_square_for_via(
+                self.assertAlmostEqual(expected, TechInfo.milliohm_per_cut_to_ohm_um2_for_via(
                     contact, via_resistance))
 
     def test_the_overlap_capacitances_have_those_to_the_substrate(self):
@@ -634,3 +667,14 @@ class Test(unittest.TestCase):
         self.assertEqual(('met1', 'VSUBS'),
                          (side_overlap_caps['met1']['VSUBS'].in_layer_name,
                           side_overlap_caps['met1']['VSUBS'].out_layer_name))
+
+    def test_the_side_overlap_capacitances_of_a_layer_without_substrate_capacitance(self):
+        # NOTE: as the overlap capacitances take it, which raised a KeyError here
+        tech = tech_with_two_metals()
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='met1', area_capacitance=12.0, perimeter_capacitance=7.0)
+        caps.sideoverlaps.add(in_layer_name='met2', out_layer_name='met1', capacitance=8.0)
+        side_overlap_caps = TechInfo(tech, dielectric_filter=None).side_overlap_cap_by_layer_names
+        self.assertEqual({'met1': {'VSUBS': 7.0}, 'met2': {'met1': 8.0}},
+                         {inside: {outside: cap.capacitance for outside, cap in caps_by_outside.items()}
+                          for inside, caps_by_outside in side_overlap_caps.items()})

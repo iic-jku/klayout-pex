@@ -254,17 +254,19 @@ class FasterCapInputBuilder:
                                        z=0,  # TODO
                                        height=0.1)  # TODO: diffusion_layer.z
 
-                contact = diffusion_layer.contact_above
-                shapes = self.shapes_of_net(layer_name=contact.name, net=net)
-                if shapes and not shapes.is_empty():
-                    info(f"Diffusion {net_name}, contact {contact.name}, "
-                         f"z={0}, height={contact.thickness}")
-                    self.add_via(model_builder,
-                                 net_name=net_name,
-                                 layer_below_name=diffusion_layer_name,
-                                 contact=contact,
-                                 shapes=shapes,
-                                 z=0.0)
+                # NOTE: the taps have no contact in the process stack (#460)
+                if diffusion_layer.HasField('contact_above'):
+                    contact = diffusion_layer.contact_above
+                    shapes = self.shapes_of_net(layer_name=contact.name, net=net)
+                    if shapes and not shapes.is_empty():
+                        info(f"Diffusion {net_name}, contact {contact.name}, "
+                             f"z={0}, height={contact.thickness}")
+                        self.add_via(model_builder,
+                                     net_name=net_name,
+                                     layer_below_name=diffusion_layer_name,
+                                     contact=contact,
+                                     shapes=shapes,
+                                     z=0.0)
 
             # NWELL: no conductor, but its contact, over the n-taps (e.g. sky130A licon_ntap_con, #475),
             #        from the silicon surface as those of the diffusions

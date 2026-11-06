@@ -31,11 +31,12 @@ The STL exporter builds its solids with :func:`build_fastercap_model` for now.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 import os
 from typing import TYPE_CHECKING, Any, ClassVar, List, Mapping, Optional
 
 from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter
+from ..util.number_range import DELAUNAY_B, NON_NEGATIVE_MICROMETERS, NON_NEGATIVE_SQUARE_MICROMETERS
 
 if TYPE_CHECKING:
     from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
@@ -45,15 +46,20 @@ if TYPE_CHECKING:
 
 @dataclass
 class FasterCapModelOptions:
-    """Geometry and meshing settings of the FasterCap model."""
+    """
+    Geometry and meshing settings of the FasterCap model.
 
-    delaunay_amax: float = 0.0
+    Raises TypeError for a value of the wrong type, and ValueError for a number out of
+    the ``range`` of its field's metadata, which the command line options check too.
+    """
+
+    delaunay_amax: float = field(default=0.0, metadata={'range': NON_NEGATIVE_SQUARE_MICROMETERS})
     """Maximum triangle area; 0 leaves it to the mesher."""
 
-    delaunay_b: float = 1.0
+    delaunay_b: float = field(default=1.0, metadata={'range': DELAUNAY_B})
     """Minimum mesh angle as b = 2·sin(angle); 1.0 is 30 degrees."""
 
-    field_margin_um: float = 8.0
+    field_margin_um: float = field(default=8.0, metadata={'range': NON_NEGATIVE_MICROMETERS})
     """
     How far the laterally unbounded materials — the simple bands, the films that
     cover the field, the background, the ground plane — are drawn beyond the
@@ -65,13 +71,16 @@ class FasterCapModelOptions:
     """Run the generator's own geometry validation before writing."""
 
     def __post_init__(self):
-        for field in fields(self):
-            value = getattr(self, field.name)
-            if field.type == 'bool' and not isinstance(value, bool):
-                raise TypeError(f"'{field.name}' must be a bool")
-            if field.type == 'float' and (isinstance(value, bool)
-                                          or not isinstance(value, (int, float))):
-                raise TypeError(f"'{field.name}' must be an int or float (not bool)")
+        for option in fields(self):
+            value = getattr(self, option.name)
+            if option.type == 'bool' and not isinstance(value, bool):
+                raise TypeError(f"'{option.name}' must be a bool")
+            if option.type == 'float' and (isinstance(value, bool)
+                                           or not isinstance(value, (int, float))):
+                raise TypeError(f"'{option.name}' must be an int or float (not bool)")
+            number_range = option.metadata.get('range')
+            if number_range is not None and value not in number_range:
+                raise ValueError(f"'{option.name}' {number_range.error_message(repr(value))}")
 
 
 @dataclass
@@ -114,7 +123,7 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
         """Build and write solver inputs, returning the primary list file first."""
         try:
             settings = FasterCapExporterOptions(**(options or {}))
-        except TypeError as exc:
+        except (TypeError, ValueError) as exc:
             raise ExportError(f"Invalid options for '{self.name}': {exc}") from exc
 
         generator = build_fastercap_model(scene, settings, self.name)

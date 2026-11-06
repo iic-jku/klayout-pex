@@ -103,7 +103,7 @@ def test_rc_netlist_is_consistent(pdk: PDK, gds: str, mode: str, request: pytest
         request.applymarker(pytest.mark.xfail(strict=True, reason=reason))
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
-        cli.main(['main',
+        cli.main(['main', 'extract',
                   '--pdk', pdk,
                   '--mode', mode,
                   '--lvsdb', lvsdb_fixture_path(pdk, os.path.join(TEST_DESIGNS_DIR, pdk, gds)),
@@ -127,7 +127,7 @@ def test_rc_netlist_with_blackboxed_devices_is_consistent(pdk: PDK, gds: str):
     # NOTE: the RC netlist keeps the MOM caps, which white-box mode removes
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
-        cli.main(['main',
+        cli.main(['main', 'extract',
                   '--pdk', pdk,
                   '--mode', 'RC',
                   '--blackbox', 'y',
@@ -183,8 +183,8 @@ def test_resistor_network_cut_off_from_its_net_is_reported(mode: str):
     gds = os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'test_patterns', 'r_ptap_li1_m1_and_floating_m1_m2.gds.gz')
     with tempfile.TemporaryDirectory() as out_dir:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', PDK.SKY130A, '--mode', mode, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, gds),
-                  '--out-dir', out_dir, '--2.5D', '--check', 'n'])
+        cli.main(['main', 'extract', '--pdk', PDK.SKY130A, '--mode', mode,
+                  '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, gds), '--out-dir', out_dir, '--2.5D', '--check', 'n'])
     assert cli.rcx25_netlist_problems == ['resistors of the nodes A.$11.met2, A.$5.met1 touch no net']
 
 
@@ -201,7 +201,7 @@ def test_inconsistent_rc_netlist_fails_the_run_after_writing_it():
          mock.patch('klayout_pex.kpex_cli.error') as error_mock, \
          pytest.raises(SystemExit) as exit_info:
         try:
-            KpexCLI().main(['main', '--pdk', PDK.SKY130A, '--mode', 'RC',
+            KpexCLI().main(['main', 'extract', '--pdk', PDK.SKY130A, '--mode', 'RC',
                             '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS), '--out-dir', out_dir, '--2.5D'])
         finally:
             netlists = glob.glob(os.path.join(out_dir, '*', '*_k25d_pex_netlist.spice'))
@@ -222,7 +222,7 @@ def test_inconsistent_netlist_only_warns_without_check(arguments: list):
          mock.patch('klayout_pex.kpex_cli.check_rc_netlist', return_value=PROBLEMS), \
          mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', PDK.SKY130A, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS),
+        cli.main(['main', 'extract', '--pdk', PDK.SKY130A, '--lvsdb', lvsdb_fixture_path(PDK.SKY130A, INV_1_GDS),
                   '--out-dir', out_dir, '--2.5D', *arguments])
     assert cli.rcx25_netlist_problems == PROBLEMS
     assert "The extracted netlist is inconsistent with the LVS netlist:\n  - port Y touches nothing" \
@@ -245,7 +245,7 @@ def test_nets_without_device_terminal_and_port_are_a_warning(mode: str, listed_n
     with tempfile.TemporaryDirectory() as out_dir, \
          mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
         cli = KpexCLI()
-        cli.main(['main', '--pdk', PDK.IHP_SG13G2, '--mode', mode,
+        cli.main(['main', 'extract', '--pdk', PDK.IHP_SG13G2, '--mode', mode,
                   '--lvsdb', lvsdb_fixture_path(PDK.IHP_SG13G2, WIRES_NO_PIN_GDS), '--out-dir', out_dir, '--2.5D'])
     assert cli.rcx25_netlist_problems == []
     warnings = [c.args[0] for c in warning_mock.call_args_list if c.args[0].startswith('Nothing drives these nets')]
