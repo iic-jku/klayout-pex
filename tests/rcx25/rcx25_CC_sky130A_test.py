@@ -760,6 +760,30 @@ def test_mim_cap__whiteboxed_without_overlap_caps_is_an_error():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_sideoverlap_without_side_overlap_cap_is_an_error():
+    # Without the side overlap capacitance of li1 to met1 (and of met1 to the substrate),
+    # the fringe crashed the extraction with a KeyError
+    side_overlap_cap_by_layer_names = TechInfo.side_overlap_cap_by_layer_names.func
+
+    def without_li1_to_met1(tech_info: TechInfo):
+        caps = side_overlap_cap_by_layer_names(tech_info)
+        return {inside: {outside: soc for outside, soc in socs.items()
+                         if (inside, outside) not in (('li1', 'met1'), ('met1', 'VSUBS'))}
+                for inside, socs in caps.items()}
+
+    with mock.patch.object(TechInfo, 'side_overlap_cap_by_layer_names', property(without_li1_to_met1)), \
+         mock.patch('klayout_pex.kpex_cli.error') as error_mock, pytest.raises(SystemExit):
+        pex_whiteboxed.run_rcx25d_single_cell('test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz')
+    assert [c.args[0] for c in error_mock.call_args_list if 'side overlap' in c.args[0]] == [
+        "The tech info has no side overlap capacitance for these layer pairs of the layout, "
+        "so the fringe from the edges of the first to the second can't be extracted:\n"
+        "  - li1 to met1\n"
+        "  - met1 to VSUBS"
+    ]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_mim_cap__blackboxed():
     results, _ = pex_blackboxed.run_rcx25d_single_cell('cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz')
     assert results.summarize().capacitances

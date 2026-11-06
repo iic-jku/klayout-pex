@@ -556,6 +556,23 @@ class RCX25Extractor:
                     "which --blackbox leaves to the device model):\n" +
                     '\n'.join(f"  - {pair}" for pair in missing_overlap_caps)
                 )
+            # NOTE: and the fringe from the edges of a layer to another without a side overlap capacitance
+            #       would fail the extraction (see SidewallAndFringeExtractor.emit_fringe)
+            missing_side_overlap_caps = [f"{inside_layer_name} to {outside_layer_name}"
+                                         for inside_layer_name in all_layer_names
+                                         if SidewallAndFringeExtractor.has_fringe(self.tech_info, inside_layer_name)
+                                         for outside_layer_name in all_layer_names
+                                         if outside_layer_name != inside_layer_name
+                                         and not self.tech_info.side_overlap_cap_by_layer_names
+                                                              .get(inside_layer_name, {}).get(outside_layer_name, None)
+                                         and not self.tech_info.is_device_capacitance(inside_layer_name,
+                                                                                      outside_layer_name)]
+            if missing_side_overlap_caps:
+                raise CExtractionTechError(
+                    "The tech info has no side overlap capacitance for these layer pairs of the layout, "
+                    "so the fringe from the edges of the first to the second can't be extracted:\n" +
+                    '\n'.join(f"  - {pair}" for pair in missing_side_overlap_caps)
+                )
 
             # NOTE: with --blackbox, the capacitances between the plates of a capacitor device
             #       (e.g. the fingers of a MOM cap) are left to its model,
