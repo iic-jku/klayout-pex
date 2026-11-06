@@ -1,0 +1,47 @@
+[18:04:49] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb                    
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\near_body_
+shield_m1_m2.lvsdb.gz' --out-dir                                               
+'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n  
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:04:49] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[18:04:49] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_gf180                  
+                    mcuD\near_body_shield_m1_m2__near_body_sh                  
+                    ield_m1_m2\kpex_result.json                                
+[18:04:49] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 2.0 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:04:49] INFO     (34, 0) -> (metal1_con)                    kpex_cli.py:1993
+[18:04:49] INFO     (36, 0) -> (metal2_con)                    kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:04:49] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[18:04:49] INFO     LVSDB: found 3pins                         extractor.py:482
+[18:04:49] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 2.0 GiB                             
+[18:04:49] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 2.0 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;BOTTOM;TOPA;114.352;                                                        
+C2;BOTTOM;TOPB;114.352;                                                        
+C3;BOTTOM;VSUBS;323.857;                                                       
+C4;TOPA;TOPB;0.265;                                                            
+C5;TOPA;VSUBS;0.419;                                                           
+C6;TOPB;VSUBS;0.419;                                                           
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\near_body_shield_m1_m2__near_body
+_shield_m1_m2\near_body_shield_m1_m2_k25d_pex_netlist.csv                      
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_gf180mcuD\near_body_shield_m1_m2__near_body
+_shield_m1_m2\near_body_shield_m1_m2_k25d_pex_netlist.spice                    
+[18:04:50] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 2.0 GiB                                           
+[18:04:50] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 2.0 GiB                                               

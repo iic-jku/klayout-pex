@@ -1,0 +1,115 @@
+[18:01:57] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_wire_through_octagon.lvsdb.gz' --out-dir                                      
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_wire_through_octagon.gds.gz' --exclusion-markers tie                        
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:01:57] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'exclusion_wire_through_octagon'                      
+[18:01:57] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[18:01:57] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\exclusion_wire_through_octagon__exc                  
+                    lusion_wire_through_octagon\kpex_result.j                  
+                    son                                                        
+[18:01:57] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:01:57] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[18:01:57] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[18:01:57] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+[18:01:57] WARNING  These nets are partly within exclusion     extractor.py:235
+                    markers, so the extraction leaves out                      
+                    their parasitics there, for the model of                   
+                    what the markers stand for (a wire across                  
+                    a marker loses them too):                                  
+                      - A,B: Metal3                                            
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:01:57] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[18:01:57] INFO     LVSDB: found 1pins                         extractor.py:482
+[18:01:57] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+[18:01:57] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.1 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;VSUBS;0.649;                                                              
+C2;A,B;VSUBS;0.826;                                                            
+C3;B;VSUBS;0.344;                                                              
+R1;A;A,B;;0.523                                                                
+R2;A,B;B;;0.242                                                                
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__
+exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.
+csv                                                                            
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__
+exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.
+spice                                                                          
+[18:01:57] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.1 GiB                                           
+[18:01:57] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.1 GiB                                               
+[18:01:57] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion
+_wire_through_octagon.lvsdb.gz' --out-dir                                      
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+--gds                                                                          
+'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusi
+on_wire_through_octagon.gds.gz' --exclusion-markers ignore                     
+──────────────────────────────── Input Layout ─────────────────────────────────
+[18:01:57] INFO     No explicit top cell specified, using top   kpex_cli.py:892
+                    cell 'exclusion_wire_through_octagon'                      
+[18:01:57] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[18:01:57] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\exclusion_wire_through_octagon__exc                  
+                    lusion_wire_through_octagon\kpex_result.j                  
+                    son                                                        
+[18:01:57] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[18:01:57] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[18:01:57] INFO     (30, 2) -> (metal3_pin_con)                kpex_cli.py:1993
+[18:01:57] INFO     (30, 0) -> (metal3_n_mom)                  kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[18:01:57] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[18:01:57] INFO     LVSDB: found 1pins                         extractor.py:482
+[18:01:57] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.1 GiB                             
+[18:01:57] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.1 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;A;VSUBS;2.155;                                                              
+C2;B;VSUBS;2.155;                                                              
+R1;A;A,B;;0.001                                                                
+R2;A;B;;1.496                                                                  
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__
+exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.
+csv                                                                            
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_wire_through_octagon__
+exclusion_wire_through_octagon\exclusion_wire_through_octagon_k25d_pex_netlist.
+spice                                                                          
+[18:01:57] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.1 GiB                                           
+[18:01:57] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.1 GiB                                               

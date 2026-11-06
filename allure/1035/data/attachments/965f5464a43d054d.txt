@@ -1,0 +1,92 @@
+[17:57:29] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --lvsdb                                            
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/r_nwell_pfet_ntap_m1.lvsdb.gz --out-dir                                        
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --blackbox n  
+───────────────────────────────── Input Layout ─────────────────────────────────
+[17:57:29] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[17:57:29] INFO     Wrote result file to:                      run_result.py:230
+                    /home/runner/work/klayout-pex/klayout-pex/                  
+                    output_gf180mcuD/r_nwell_pfet_ntap_m1__r_n                  
+                    well_pfet_ntap_m1/kpex_result.json                          
+[17:57:29] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 189.1 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[17:57:29] INFO     (31, 0) -> (psd)                            kpex_cli.py:1993
+[17:57:29] INFO     (22, 144) -> (ntap)                         kpex_cli.py:1993
+[17:57:29] INFO     (21, 0) -> (nwell_con)                      kpex_cli.py:1993
+[17:57:29] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1993
+[17:57:29] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1993
+[17:57:29] INFO     (33, 4404) -> (contact_ntap_con)            kpex_cli.py:1993
+[17:57:29] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[17:57:29] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 189.4 MiB                                              
+[17:57:29] INFO     DBU: 0.001                  fastercap_model_generator.py:121
+[17:57:29] INFO     Delaunay b: 1               fastercap_model_generator.py:122
+[17:57:29] INFO     Delaunay area_max: 0        fastercap_model_generator.py:123
+[17:57:29] INFO     Conductor G, metal Poly2,     fastercap_input_builder.py:212
+                    z=0.32, height=0.2                                          
+[17:57:29] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[17:57:29] INFO     Conductor S, metal Metal1,    fastercap_input_builder.py:212
+                    z=1.23, height=0.55                                         
+[17:57:29] INFO     Diffusion S, layer Pplus,     fastercap_input_builder.py:248
+                    z=0, height=0.1                                             
+[17:57:29] INFO     Diffusion S, contact          fastercap_input_builder.py:260
+                    contact_psd_con, z=0,                                       
+                    height=1.23                                                 
+[17:57:29] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[17:57:29] INFO     Conductor D, metal Metal1,    fastercap_input_builder.py:212
+                    z=1.23, height=0.55                                         
+[17:57:29] INFO     Diffusion D, layer Pplus,     fastercap_input_builder.py:248
+                    z=0, height=0.1                                             
+[17:57:29] INFO     Diffusion D, contact          fastercap_input_builder.py:260
+                    contact_psd_con, z=0,                                       
+                    height=1.23                                                 
+[17:57:29] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[17:57:29] INFO     Conductor VDD, metal Metal1,  fastercap_input_builder.py:212
+                    z=1.23, height=0.55                                         
+[17:57:29] INFO     Diffusion VDD, layer ntap,    fastercap_input_builder.py:248
+                    z=0, height=0.1                                             
+[17:57:29] WARNING  Can't find GDS pair for layer  fastercap_input_builder.py:87
+[17:57:29] INFO     NWell VDD, contact            fastercap_input_builder.py:277
+                    contact_ntap_con, z=0,                                      
+                    height=1.23                                                 
+[17:57:29] INFO     Substrate SUB, z=-0.33,       fastercap_input_builder.py:300
+                    height=0.33                                                 
+[17:57:29] INFO     Simple dielectric (field      fastercap_input_builder.py:326
+                    oxide) fox: z=0, height=0.32                                
+[17:57:29] INFO     Conformal dielectric          fastercap_input_builder.py:370
+                    (sidewall) nit: z=0.32,                                     
+                    height=0.25                                                 
+[17:57:29] INFO     Conformal dielectric (where   fastercap_input_builder.py:382
+                    no metal) nit: z=0.32,                                      
+                    height=0.05                                                 
+[17:57:29] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:402
+                    ild: z=0.5700000000000001,                                  
+                    height=0.6599999999999999                                   
+[17:57:29] INFO     Simple dielectric (no metal)  fastercap_input_builder.py:409
+                    ild: z=0.37,                                                
+                    height=0.8599999999999999                                   
+[17:57:29] INFO     Simple dielectric (sidewall)  fastercap_input_builder.py:402
+                    imd1: z=1.78,                                               
+                    height=0.5999999999999999                                   
+[17:57:29] INFO     Simple dielectric imd1:       fastercap_input_builder.py:416
+                    z=1.23, height=1.15                                         
+[17:57:29] INFO     Simple dielectric imd2:       fastercap_input_builder.py:416
+                    z=2.38, height=1.15                                         
+[17:57:29] INFO     Simple dielectric imd3:       fastercap_input_builder.py:416
+                    z=3.53, height=1.15                                         
+[17:57:29] INFO     Simple dielectric imd4:       fastercap_input_builder.py:416
+                    z=4.68,                                                     
+                    height=0.5920000000000005                                   
+[17:57:29] INFO     Simple dielectric imd4b:      fastercap_input_builder.py:416
+                    z=5.272,                                                    
+                    height=0.8579999999999997                                   
+[17:57:29] INFO     Simple dielectric pass:       fastercap_input_builder.py:416
+                    z=6.13, height=5.0                                          
