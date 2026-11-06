@@ -136,6 +136,19 @@ def top_cell_pin_labels(gds_path: str, tech: TechInfo) -> Set[str]:
     return labels
 
 
+def pin_labels_without_port(labels: Set[str], ports: List[str]) -> List[str]:
+    """
+    The pin labels without a port of their own, which each needs (#312), also on a net without devices:
+    of its name (e.g. A$1 if the name is taken), or the port of its net, where only labels without pin shapes
+    name the net too (e.g. P|Q of the pin P, #405), but not one of two pin labels (e.g. A|B)
+    """
+    def is_port_of(label: str, port: str) -> bool:
+        names = set(port.split('|'))
+        return port == label or port.startswith(f"{label}$") or (label in names and not (names - {label}) & labels)
+
+    return sorted(label for label in labels if not any(is_port_of(label, port) for port in ports))
+
+
 TEST_PATTERNS = [(pdk_name, name)
                  for pdk_name in PDKName
                  for name in sorted(os.listdir(PDKTestConfig(pdk_name).gds_path('test_patterns')))
@@ -188,10 +201,7 @@ def test_rc_netlist_of_test_pattern_is_read_alike_by_spice_simulators(pdk_name: 
         lines = f.read().replace('\n+', '').splitlines()
     ports = next(line for line in lines if line.startswith('.SUBCKT ')).split()[2:]
 
-    # NOTE: a port per pin label (e.g. A$1 if the name is taken), also of a net without devices (#312),
-    #       which is the one of its net where labels without pin shapes name the net too (e.g. P|Q, #405)
-    assert sorted(l for l in labels if not any(p == l or p.startswith(f"{l}$") or l in p.split('|')
-                                               for p in ports)) == []
+    assert pin_labels_without_port(labels, ports) == []
 
     # NOTE: SPICE reads names case-insensitively, names that differ in case only would be one node (#314)
     rc_elements = [line.split() for line in lines if line[:1] in 'RC' and len(line.split()) == 4]
