@@ -375,6 +375,12 @@ class SchematicPinsTest(unittest.TestCase):
         # NOTE: e.g. VNB of a cell, which the layout has on the substrate, without a port, also in the subcircuits
         self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS'], schematic=INVERTER_CHAIN_WITH_VNB))
 
+    def test_pin_of_bulks_only_regardless_of_case(self):
+        # NOTE: as SPICE reads names, the elements of the pin VNB on vnb
+        schematic = INVERTER_CHAIN_WITH_VNB.replace('VSS VNB nmos', 'VSS vnb nmos') \
+                                           .replace('VSS VNB inv', 'VSS Vnb inv')
+        self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS'], schematic=schematic))
+
     def test_pin_of_bulks_only_is_kept_where_a_port_has_its_name(self):
         # NOTE: e.g. a label VNB of the layout on its well
         self.assertEqual([], pin_problems(['IN', 'OUT', 'VDD', 'VSS', 'vnb'], schematic=INVERTER_CHAIN_WITH_VNB))

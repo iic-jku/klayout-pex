@@ -342,6 +342,9 @@ def bulk_only_pins(hierarchy: SpiceHierarchy,
                   calls: Tuple[str, ...]) -> Iterator[Tuple[SpiceElement, int]]:
         """
         :return: the elements on the node, with the index of their node, of a call those of its subcircuit
+
+        NOTE: the nodes compare exactly, as the reader writes each node of a subcircuit as it is first written
+              there, regardless of case (see SpiceElement), and the port of a call is of the subcircuit it calls
         """
         for element in subcircuit.elements:
             for index, element_node in enumerate(element.nodes):
@@ -366,8 +369,11 @@ def bulk_only_pins(hierarchy: SpiceHierarchy,
 
     pins: Set[str] = set()
     for pin in top.ports:
-        reached = list(terminals(top, pin, (top.name.casefold(),)))
-        if reached and all(is_bulk(element, index) for element, index in reached):
+        # NOTE: up to the first terminal that is no bulk (e.g. of a supply, which reaches the whole design),
+        #       and a pin that reaches nothing is compared
+        reached = terminals(top, pin, (top.name.casefold(),))
+        first = next(reached, None)
+        if first is not None and is_bulk(*first) and all(is_bulk(element, index) for element, index in reached):
             pins.add(pin)
     return pins
 
