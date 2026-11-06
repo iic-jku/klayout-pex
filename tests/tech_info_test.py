@@ -412,6 +412,28 @@ class Test(unittest.TestCase):
                                                           rf"it is {side_halo:g}$"):
                     TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
 
+    def test_the_reader_refuses_capacitances_that_are_negative_or_not_finite(self):
+        # NOTE: but not 0 (the perimeter capacitance of capm), nor a negative sidewall offset, which is a distance
+        tech = tech_pb2.Technology(name='test')
+        tech.process_parasitics.side_halo = 8.0
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='capm', area_capacitance=12.37, perimeter_capacitance=0.0)
+        caps.substrates.add(layer_name='met1', area_capacitance=math.nan, perimeter_capacitance=-1.0)
+        caps.overlaps.add(top_layer_name='met2', bottom_layer_name='met1', capacitance=-23.0)
+        caps.sidewalls.add(layer_name='met1', capacitance=math.inf, offset=-0.05)
+        caps.sideoverlaps.add(in_layer_name='met1', out_layer_name='met2', capacitance=-8.0)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with self.assertRaises(TechDefError) as refusal:
+                TechInfo.parse_tech_def(write_tech_def(tmp_dir, tech))
+        self.assertEqual(['  - the substrate area capacitance of met1 is nan',
+                          '  - the substrate perimeter capacitance of met1 is -1',
+                          '  - the overlap capacitance of met2 over met1 is -23',
+                          '  - the sidewall capacitance of met1 is inf',
+                          '  - the side overlap capacitance of met1 to met2 is -8'],
+                         str(refusal.exception).splitlines()[1:])
+        self.assertRegex(str(refusal.exception).splitlines()[0],
+                         r"^Capacitances have to be finite numbers ≥ 0, but in .*test_tech\.pb\.json$")
+
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
         stack = tech.process_stack
@@ -609,3 +631,14 @@ class Test(unittest.TestCase):
         self.assertEqual(('met1', 'VSUBS'),
                          (side_overlap_caps['met1']['VSUBS'].in_layer_name,
                           side_overlap_caps['met1']['VSUBS'].out_layer_name))
+
+    def test_the_side_overlap_capacitances_of_a_layer_without_substrate_capacitance(self):
+        # NOTE: as the overlap capacitances take it, which raised a KeyError here
+        tech = tech_with_two_metals()
+        caps = tech.process_parasitics.capacitance
+        caps.substrates.add(layer_name='met1', area_capacitance=12.0, perimeter_capacitance=7.0)
+        caps.sideoverlaps.add(in_layer_name='met2', out_layer_name='met1', capacitance=8.0)
+        side_overlap_caps = TechInfo(tech, dielectric_filter=None).side_overlap_cap_by_layer_names
+        self.assertEqual({'met1': {'VSUBS': 7.0}, 'met2': {'met1': 8.0}},
+                         {inside: {outside: cap.capacitance for outside, cap in caps_by_outside.items()}
+                          for inside, caps_by_outside in side_overlap_caps.items()})
