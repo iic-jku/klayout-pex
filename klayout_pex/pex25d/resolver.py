@@ -609,11 +609,19 @@ class Resolver:
             return
 
         if which == 'domain_box':
+            problem = domain_box_problem(self.file.domain_box.box, 'DOMAIN_BOX')
+            if problem is not None:
+                self.diagnose('PEX25D-E0252', problem, source=self.file.domain_box)
+                return
             scene.domain.box.CopyFrom(self.file.domain_box.box)
             scene.domain.origin = origins.ORIGIN_DOMAIN_BOX
             return
 
         margin = self.file.domain_margin
+        problem = domain_margin_problem(margin, 'DOMAIN_MARGIN')
+        if problem is not None:
+            self.diagnose('PEX25D-E0251', problem)
+            return
         if bounds is None:
             self.diagnose('PEX25D-E0250',
                           "DOMAIN_MARGIN was given but the file has no finite "
@@ -697,6 +705,32 @@ def extend(bounds: Optional[List[int]],
 def fill_box3d(box: Any, x0: int, y0: int, x1: int, y1: int, z0: int, z1: int) -> None:
     box.lower_left.x, box.lower_left.y, box.lower_left.z = x0, y0, z0
     box.upper_right.x, box.upper_right.y, box.upper_right.z = x1, y1, z1
+
+
+def domain_margin_problem(margin: Any, what: str) -> Optional[str]:
+    """
+    Why a ``DomainMargin`` is invalid, or ``None``.
+
+    A margin is a clearance between the finite geometry and the boundary: a
+    negative one would put geometry outside the domain, or turn it inside out.
+    """
+    negative = [f"{axis.upper()} {getattr(margin, axis)}" for axis in 'xyz'
+                if getattr(margin, axis) < 0]
+    if not negative:
+        return None
+    return (f"{what} {' '.join(negative)} (grid units) is negative; a margin is "
+            f"a clearance between the geometry and the domain boundary")
+
+
+def domain_box_problem(box: Any, what: str) -> Optional[str]:
+    """Why a domain ``Box3D`` is invalid, or ``None``: it must have a volume."""
+    empty = [axis for axis in 'xyz'
+             if getattr(box.lower_left, axis) >= getattr(box.upper_right, axis)]
+    if not empty:
+        return None
+    ll, ur = box.lower_left, box.upper_right
+    return (f"{what} is empty: LL ({ll.x}, {ll.y}, {ll.z}) is not below UR "
+            f"({ur.x}, {ur.y}, {ur.z}) in {', '.join(empty)}")
 
 
 def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:

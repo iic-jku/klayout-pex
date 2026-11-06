@@ -124,6 +124,7 @@ class Validator:
         self.check_scene_order(scene)
         self.check_depth_ties(scene)
         self.check_scene_terminals(scene)
+        self.check_scene_domain(scene)
 
         if self.strict:
             self.check_shapes(shapes_of_scene(scene))
@@ -424,6 +425,23 @@ class Validator:
                                   f"TERMINAL '{terminal.name}' has an empty "
                                   f"node: nothing was intersected",
                                   source=terminal)
+
+    def check_scene_domain(self, scene: Any):
+        """The same rules the resolver applies to DOMAIN_BOX and DOMAIN_MARGIN."""
+        from .resolver import domain_box_problem, domain_margin_problem
+
+        if not scene.HasField('domain'):
+            return
+        domain = scene.domain
+        if domain.HasField('box'):
+            problem = domain_box_problem(domain.box, 'The domain box')
+            if problem is not None:
+                self.diagnose('PEX25D-E0252', problem)
+        if domain.HasField('applied_margin'):
+            problem = domain_margin_problem(domain.applied_margin,
+                                            'The applied domain margin')
+            if problem is not None:
+                self.diagnose('PEX25D-E0251', problem)
 
     # ------------------------------------------------------------- geometric
 

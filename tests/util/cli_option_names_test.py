@@ -107,7 +107,7 @@ def test_netlist_reduce_reads_former_option_names_and_warns(tmp_path):
 def test_magic_log_analyzer_reads_former_option_names(tmp_path):
     args = magic_log_analyzer._parse_args(['--magic_log_dir', str(tmp_path), '--out', 'report.rdb.gz'])
     assert (args.magic_log_dir_path, args.output_rdb_path) == (str(tmp_path), 'report.rdb.gz')
-    assert args.deprecated_options == [('--magic_log_dir', '--magic-log-dir'), ('--out', '--out-rdb')]
+    assert args.deprecated_options == [('--magic_log_dir', 'use --magic-log-dir'), ('--out', 'use --out-rdb')]
 
 
 # ------------------------------------------------------------------------------- the options of all tools

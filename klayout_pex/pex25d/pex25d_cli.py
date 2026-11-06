@@ -72,11 +72,15 @@ from ..util.argparse_helpers import (
     add_help_subcommand,
     add_log_level_argument,
     add_subcommand_sections,
+    delaunay_b,
     handle_help_subcommand,
+    non_negative_micrometers,
+    non_negative_square_micrometers,
     render_enum_help,
     true_or_false,
     warn_deprecated_options,
 )
+from ..util.number_range import DELAUNAY_B_MAX
 from ..version import __version__
 
 from .exporters import ExportError, ExporterExecutionError
@@ -355,16 +359,16 @@ class Pex25DCLI:
                                    help="Prefix for the generated file names "
                                         "(default is the target's own)")
         add_argument_with_former_name(parser_export, "--field-margin", "--field_margin", dest='field_margin',
-                                      type=float, default=None, metavar='UM',
+                                      type=non_negative_micrometers, default=None, metavar='UM',
                                       help="How far to draw the laterally unbounded "
                                            "materials beyond the geometry, in µm. "
                                            "Ignored when the scene carries a DOMAIN_BOX.")
         add_argument_with_former_name(parser_export, "--delaunay-amax", "--delaunay_amax", dest='delaunay_amax',
-                                      type=float, default=None, metavar='AREA',
+                                      type=non_negative_square_micrometers, default=None, metavar='AREA',
                                       help="Maximum triangle area; 0 means unconstrained")
         add_argument_with_former_name(parser_export, "--delaunay-b", "--delaunay_b", dest='delaunay_b',
-                                      type=float, default=None, metavar='B',
-                                      help="Minimum mesh angle as b = 2·sin(angle)")
+                                      type=delaunay_b, default=None, metavar='B',
+                                      help=f"Minimum mesh angle as b = 2·sin(angle), from 0 to {DELAUNAY_B_MAX:g}")
         parser_export.add_argument("--stl", dest='write_stl',
                                    action='store_true', default=None,
                                    help="FasterCap / FastCap2: also dump the generated solids "
