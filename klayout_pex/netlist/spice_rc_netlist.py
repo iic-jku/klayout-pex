@@ -60,7 +60,7 @@ from typing import *
 from ..util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 from .rc_network import RCNetwork
 from .rc_reduction import GROUND_NODE_NAME, TIE_RESISTANCE
-from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines
+from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines, subcircuit_ports
 
 REDUCED_CAPACITOR_PREFIX = 'Cred_'
 REDUCED_RESISTOR_PREFIX = 'Rred_'
@@ -176,12 +176,7 @@ class SpiceRCNetlist:
             if keyword == '.subckt':
                 if len(tokens) < 2:
                     raise NetlistReadError(f"{source}:{number}: .SUBCKT without name")
-                ports = []
-                for token in tokens[2:]:
-                    if '=' in token or token.lower() == 'params:':
-                        break
-                    ports.append(token)
-                stack.append(SpiceScope(name=tokens[1], ports=ports))
+                stack.append(SpiceScope(name=tokens[1], ports=subcircuit_ports(tokens)))
                 items.append(verbatim)
                 continue
 

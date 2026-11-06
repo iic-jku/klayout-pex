@@ -120,3 +120,41 @@ def spice_lines(text: str) -> List[SpiceLine]:
             lines.append(statement)
     lines.extend(between)
     return lines
+
+
+def subcircuit_ports(tokens: Sequence[str]) -> List[str]:
+    """
+    :param tokens: of a .SUBCKT statement (see SpiceLine.text), e.g. ['.SUBCKT', 'inv', 'A', 'Y', 'PARAMS:', 'w=1']
+    :return: its ports, in their order, without its name and parameters, e.g. ['A', 'Y']
+    """
+    ports: List[str] = []
+    for token in tokens[2:]:
+        if '=' in token or token.lower() == 'params:':
+            break
+        ports.append(token)
+    return ports
+
+
+def read_subcircuit_ports(path: str, subcircuit_name: str) -> Optional[List[str]]:
+    """
+    Reads the netlist up to the end of the .SUBCKT statement of the subcircuit only, so also a large one
+
+    :param subcircuit_name: regardless of case, as SPICE reads names
+    :return: its ports as written (see subcircuit_ports), None if the netlist has no such subcircuit
+    """
+    statement: List[str] = []  # NOTE: its physical lines
+    with open(path, encoding='utf-8', errors='replace') as f:
+        for line in f:
+            if not statement:
+                tokens = line.split()
+                if len(tokens) >= 2 and tokens[0].lower() == '.subckt' \
+                        and tokens[1].casefold() == subcircuit_name.casefold():
+                    statement.append(line)
+                continue
+            stripped = strip_comment(line).strip()
+            if stripped and not stripped.startswith('+'):
+                break
+            statement.append(line)
+    if not statement:
+        return None
+    return subcircuit_ports(spice_lines(''.join(statement))[0].text.split())
