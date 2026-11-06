@@ -55,9 +55,10 @@ import "kpex/pex25d/pex25d_geometry.proto";
 // Minimum clearance from all finite geometry to the outer computational
 // boundary. X/Y expand the finite bounding box in -X/+X/-Y/+Y; Z expands only
 // above the highest finite geometry, because the ground plane forms the lower
-// boundary. An adapter may increase these margins but must not use smaller
-// ones. This is a hint: it prescribes no boundary condition, and each adapter
-// applies its native open-domain treatment.
+// boundary. No margin is negative; 0 lets the geometry touch the boundary.
+// An adapter may increase these margins but must not use smaller ones. This
+// is a hint: it prescribes no boundary condition, and each adapter applies
+// its native open-domain treatment.
 message DomainMargin {
     int64 x = 1;  // grid units
     int64 y = 2;  // grid units
@@ -66,9 +67,10 @@ message DomainMargin {
 
 // `DOMAIN_BOX LL <x> <y> <z> UR <x> <y> <z>`
 //
-// Explicit outer box; takes precedence over DOMAIN_MARGIN. All finite
-// non-ground-plane geometry must lie WITHIN it — faces may touch it. The
-// box's lower Z face normally coincides with the ground plane's zhigh.
+// Explicit outer box; takes precedence over DOMAIN_MARGIN. LL is below UR on
+// every axis. All finite non-ground-plane geometry must lie WITHIN it — faces
+// may touch it. The box's lower Z face normally coincides with the ground
+// plane's zhigh.
 message DomainBox {
     Box3D box = 1;
 

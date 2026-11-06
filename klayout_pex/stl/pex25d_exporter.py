@@ -63,7 +63,7 @@ class STLSceneExporter(PEX25DSceneExporter):
         """Build the solids and write them; there is no primary file."""
         try:
             settings = STLExporterOptions(**(options or {}))
-        except TypeError as exc:
+        except (TypeError, ValueError) as exc:
             raise ExportError(f"Invalid options for '{self.name}': {exc}") from exc
 
         generator = build_fastercap_model(scene, settings, self.name)

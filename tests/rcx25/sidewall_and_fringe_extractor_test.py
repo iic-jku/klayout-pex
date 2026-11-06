@@ -1,0 +1,85 @@
+#
+# --------------------------------------------------------------------------------
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+# Johannes Kepler University, Institute for Integrated Circuits.
+#
+# This file is part of KPEX
+# (see https://github.com/iic-jku/klayout-pex).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# --------------------------------------------------------------------------------
+#
+
+import allure
+import unittest
+
+import klayout.db as kdb
+
+from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
+from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
+from klayout_pex.rcx25.extraction_results import CellExtractionResults
+from klayout_pex.tech_info import TechInfo
+from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
+import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
+
+DBU = 0.001  # µm
+SIDE_HALO = 8.0  # µm
+SIDE_OVERLAP_CAPACITANCE = 40.0  # aF/µm
+
+
+def fringe_cap(overlap_capacitance: float,
+               scale_ratio_to_fit_halo: bool,
+               distance_near_um: float = 0.0,
+               distance_far_um: float = SIDE_HALO) -> float:
+    """
+    The fringe (in fF) of a 1 µm edge to the part of a layer from distance_near_um to distance_far_um beside it
+    """
+    tech = tech_pb2.Technology()
+    tech.process_parasitics.side_halo = SIDE_HALO
+    visitor = SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisitor(
+        all_layer_names=['inside', 'outside'],
+        inside_layer_index=0,
+        dbu=DBU,
+        tech_info=TechInfo(tech=tech, dielectric_filter=None),
+        scale_ratio_to_fit_halo=scale_ratio_to_fit_halo,
+        device_capacitor_plates=DeviceCapacitorPlates(),
+        mos_channels=kdb.Shapes(),
+        results=CellExtractionResults(cell_name='TOP'),
+        report=ExtractionReporter(cell_name='TOP', dbu=DBU, report_caps=False))
+    return visitor.fringe_cap(edge_interval_length=round(1.0 / DBU),
+                              distance_near=round(distance_near_um / DBU),
+                              distance_far=round(distance_far_um / DBU),
+                              overlap_cap_spec=CapacitanceInfo.OverlapCapacitance(capacitance=overlap_capacitance),
+                              sideoverlap_cap_spec=CapacitanceInfo.SideOverlapCapacitance(
+                                  capacitance=SIDE_OVERLAP_CAPACITANCE))
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Capacitance", "Fringe")
+class FringeCapTest(unittest.TestCase):
+    def test_scaled_fringe_over_the_halo_is_the_side_overlap_capacitance(self):
+        self.assertAlmostEqual(fringe_cap(overlap_capacitance=30.0, scale_ratio_to_fit_halo=True),
+                               SIDE_OVERLAP_CAPACITANCE / 1000.0)
+
+    def test_no_fringe_without_an_overlap_capacitance(self):
+        # The overlap capacitance sets how fast the fringe reaches the layer (MAGIC's overlap multiplier):
+        # without one, none of it is within any distance, so there is nothing to scale to the halo either
+        for scale_ratio_to_fit_halo in (True, False):
+            with self.subTest(scale_ratio_to_fit_halo=scale_ratio_to_fit_halo):
+                assert fringe_cap(overlap_capacitance=0.0,
+                                  scale_ratio_to_fit_halo=scale_ratio_to_fit_halo,
+                                  distance_near_um=1.0,
+                                  distance_far_um=2.0) == 0.0

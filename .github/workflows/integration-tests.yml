@@ -157,15 +157,9 @@ jobs:
         retention-days: 1
         if-no-files-found: error
 
-  # NOTE: only when run on its own; ci-cd.yml publishes after all of its suites
-  call-publish-reports-github-pages:
-    name: "Publish reports to GitHub Pages"
-    needs: run-tests
-    if: github.event_name == 'workflow_dispatch'
-    concurrency:
-      group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-publish-reports-github-pages
-      cancel-in-progress: true
-    uses: ./.github/workflows/publish-reports-github-pages.yml
+  # NOTE: no reports on GitHub Pages when run on its own, only from ci-cd.yml after all of its suites:
+  #       the run numbers of this workflow would mix with those of ci-cd.yml, and the coverage report
+  #       needs ci-cd.yml's python-dist artifact; the results stay artifacts of the run
        
   # run-inside-docker:
   #   name: "Run tests"
