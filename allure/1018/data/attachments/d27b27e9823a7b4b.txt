@@ -1,0 +1,135 @@
+[16:08:59] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patter
+ns/labels_without_pin_shapes.lvsdb.gz --out-dir                                 
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[16:08:59] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[16:08:59] INFO     Wrote result file to:                      run_result.py:230
+                    /Users/runner/work/klayout-pex/klayout-pex                  
+                    /output_ihp-sg13g2/labels_without_pin_shap                  
+                    es__labels_without_pin_shapes/kpex_result.                  
+                    json                                                        
+[16:08:59] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 1 of 5 shapes                          
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con,                                
+                    cont_ntap_con, cont_ptap_con,                               
+                    cont_bjt_con, schottcky_p,                                  
+                    schottcky_n_con, diodevdd_4kv_te,                           
+                    diodevss_4kv_te                                             
+[16:08:59] INFO     Peak memory (resident set size) after       kpex_cli.py:1989
+                    preparing the LVSDB: 1.1 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:08:59] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1993
+[16:08:59] INFO     (29, 0) -> (via2_drw)                       kpex_cli.py:1993
+[16:08:59] INFO     (5, 0) -> (poly_con)                        kpex_cli.py:1993
+[16:08:59] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1993
+[16:08:59] INFO     (7, 0) -> (nsd_fet)                         kpex_cli.py:1993
+[16:08:59] INFO     (5, 2) -> (poly_pin_con)                    kpex_cli.py:1993
+[16:08:59] INFO     (8, 2) -> (metal1_pin_con)                  kpex_cli.py:1993
+[16:08:59] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1993
+[16:08:59] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1993
+[16:08:59] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1993
+[16:08:59] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1993
+[16:08:59] INFO     (6, 4403) -> (cont_poly_con)                kpex_cli.py:1993
+[16:08:59] INFO     (6, 4401) -> (cont_nsd_con)                 kpex_cli.py:1993
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:08:59] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1442
+[16:08:59] INFO     LVSDB: found 4pins                          extractor.py:482
+[16:08:59] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.1 GiB                              
+[16:08:59] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.1 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;OUT;VSUBS;1.113;                                                             
+C2;OUT;W;0.295;                                                                 
+C3;OUT.$0.Metal1;VDD.$2.Metal1;0.019;                                           
+C4;OUT.$0.Metal1;VDD.$4.Metal1;0.002;                                           
+C5;OUT.$0.Metal1;VDD.$5.Metal1;0.003;                                           
+C6;OUT.$0.Metal1;VDD.P0.GatPoly;0.003;                                          
+C7;OUT.$0.Metal1;VSUBS;0.009;                                                   
+C8;OUT.$1.Metal1;VDD.$13.Metal3;0.002;                                          
+C9;OUT.$1.Metal1;VDD.P0.GatPoly;0.004;                                          
+C10;OUT.$1.Metal1;VSUBS;0.074;                                                  
+C11;OUT.$2.Metal2;VDD.$13.Metal3;0.012;                                         
+C12;OUT.$2.Metal2;VDD.$8.Metal2;0.012;                                          
+C13;OUT.$2.Metal2;VDD.$9.Metal2;0.058;                                          
+C14;OUT.$2.Metal2;VSUBS;0.12;                                                   
+C15;OUT.$3.Metal2;VDD;0.054;                                                    
+C16;OUT.$3.Metal2;VDD.$10.Metal2;0.059;                                         
+C17;OUT.$3.Metal2;VDD.$11.Metal2;0.014;                                         
+C18;OUT.$3.Metal2;VDD.$12.Metal2;0.04;                                          
+C19;OUT.$3.Metal2;VDD.$13.Metal3;0.054;                                         
+C20;OUT.$3.Metal2;VDD.$5.Metal1;0.002;                                          
+C21;OUT.$3.Metal2;VDD.$8.Metal2;0.031;                                          
+C22;OUT.$3.Metal2;VDD.$9.Metal2;0.005;                                          
+C23;OUT.$3.Metal2;VSUBS;0.321;                                                  
+C24;OUT.$4.Metal3;VDD;0.006;                                                    
+C25;OUT.$4.Metal3;VDD.$11.Metal2;0.007;                                         
+C26;OUT.$4.Metal3;VDD.$13.Metal3;0.175;                                         
+C27;OUT.$4.Metal3;VDD.$9.Metal2;0.001;                                          
+C28;OUT.$4.Metal3;VSUBS;1.093;                                                  
+C29;OUT.$4.Metal3;W;0.276;                                                      
+C30;P,Q;VSUBS;2.156;                                                            
+C31;P,Q;W;0.57;                                                                 
+C32;VDD;VSUBS;0.109;                                                            
+C33;VDD.$0.GatPoly;VSUBS;0.046;                                                 
+C34;VDD.$1.GatPoly;VSUBS;0.046;                                                 
+C35;VDD.$10.Metal2;VSUBS;0.001;                                                 
+C36;VDD.$11.Metal2;VSUBS;0.048;                                                 
+C37;VDD.$11.Metal2;W;0.0;                                                       
+C38;VDD.$12.Metal2;VSUBS;0.008;                                                 
+C39;VDD.$13.Metal3;VSUBS;0.15;                                                  
+C40;VDD.$2.Metal1;VSUBS;0.026;                                                  
+C41;VDD.$4.Metal1;VSUBS;0.029;                                                  
+C42;VDD.$5.Metal1;VSUBS;0.029;                                                  
+C43;VDD.$8.Metal2;VSUBS;0.011;                                                  
+C44;VDD.$9.Metal2;VSUBS;0.029;                                                  
+C45;VDD.P0.GatPoly;VSUBS;0.04;                                                  
+C46;VSUBS;W;0.973;                                                              
+R1;OUT;OUT.$4.Metal3;;15.121                                                    
+R2;OUT.$0.Metal1;OUT.$1.Metal1;;0.02                                            
+R3;OUT.$0.Metal1;OUT.$3.Metal2;;9.0                                             
+R4;OUT.$1.Metal1;OUT.P0.nSD;;17.0                                               
+R5;OUT.$2.Metal2;OUT.$3.Metal2;;2.375                                           
+R6;OUT.$2.Metal2;OUT.$4.Metal3;;9.0                                             
+R7;VDD;VDD.$13.Metal3;;2.141                                                    
+R8;VDD.$0.GatPoly;VDD.$4.Metal1;;15.0                                           
+R9;VDD.$0.GatPoly;VDD.P0.GatPoly;;23.676                                        
+R10;VDD.$1.GatPoly;VDD.$5.Metal1;;15.0                                          
+R11;VDD.$1.GatPoly;VDD.P0.GatPoly;;23.676                                       
+R12;VDD.$10.Metal2;VDD.$2.Metal1;;9.0                                           
+R13;VDD.$10.Metal2;VDD.$9.Metal2;;0.117                                         
+R14;VDD.$11.Metal2;VDD.$4.Metal1;;9.0                                           
+R15;VDD.$11.Metal2;VDD.$9.Metal2;;0.437                                         
+R16;VDD.$12.Metal2;VDD.$5.Metal1;;9.0                                           
+R17;VDD.$12.Metal2;VDD.$8.Metal2;;0.244                                         
+R18;VDD.$13.Metal3;VDD.$8.Metal2;;9.0                                           
+R19;VDD.$2.Metal1;VDD.P0.nSD;;17.0                                              
+R20;VDD.$8.Metal2;VDD.$9.Metal2;;0.193                                          
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/labels_without_pin_
+shapes__labels_without_pin_shapes/labels_without_pin_shapes_k25d_pex_netlist.csv
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/labels_without_pin_
+shapes__labels_without_pin_shapes/labels_without_pin_shapes_k25d_pex_netlist.spi
+ce                                                                              
+[16:08:59] INFO     Peak memory (resident set size) after the   kpex_cli.py:1530
+                    netlist: 1.1 GiB                                            
+[16:08:59] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill), so                        
+                    simulators stop on them: W (2.114 fF)                       
+[16:08:59] INFO     Peak memory (resident set size) after the   kpex_cli.py:1864
+                    run: 1.1 GiB                                                

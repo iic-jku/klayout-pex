@@ -1,0 +1,52 @@
+[16:07:17] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk sky130A --mode CC --blackbox n --lvsdb                      
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\inductor_substrate_pin\ind
+uctor_substrate_pin.lvsdb.gz' --out-dir                                        
+'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n    
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:07:17] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:07:17] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_sky13                  
+                    0A\inductor_substrate_pin__inductor_subst                  
+                    rate_pin\kpex_result.json                                  
+[16:07:17] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 940.6 MiB                             
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:07:17] INFO     (93, 44) -> (nsd)                          kpex_cli.py:1993
+[16:07:17] INFO     (66, 20) -> (poly_con)                     kpex_cli.py:1993
+[16:07:17] INFO     (67, 20) -> (li_con)                       kpex_cli.py:1993
+[16:07:17] INFO     (66, 4403) -> (licon_poly_con)             kpex_cli.py:1993
+[16:07:17] INFO     (68, 20) -> (met1_con)                     kpex_cli.py:1993
+[16:07:17] INFO     (67, 16) -> (li_pin_con)                   kpex_cli.py:1993
+[16:07:17] INFO     (68, 16) -> (met1_pin_con)                 kpex_cli.py:1993
+[16:07:17] INFO     (66, 4401) -> (licon_nsd_con)              kpex_cli.py:1993
+[16:07:17] INFO     (64, 44) -> (inductor_sub)                 kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:07:17] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[16:07:17] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 940.6 MiB                          
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;D;G;0.024;                                                                  
+C2;D;S;0.019;                                                                  
+C3;D;VSUBS;0.069;                                                              
+C4;G;S;0.01;                                                                   
+C5;G;VSUBS;0.109;                                                              
+C6;PLATE;VSUBS;4.201;                                                          
+C7;S;VSUBS;0.075;                                                              
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_sky130A\inductor_substrate_pin__inductor_su
+bstrate_pin\inductor_substrate_pin_k25d_pex_netlist.csv                        
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_sky130A\inductor_substrate_pin__inductor_su
+bstrate_pin\inductor_substrate_pin_k25d_pex_netlist.spice                      
+[16:07:17] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 940.6 MiB                                         
+[16:07:17] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 940.6 MiB                                             

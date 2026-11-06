@@ -1,0 +1,49 @@
+[16:11:34] WARNING  Calling kpex without a subcommand is       kpex_cli.py:1765
+                    deprecated; treating this run as 'kpex                     
+                    extract …'. See 'kpex --help' for the                      
+                    available subcommands.                                     
+─────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                   
+'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\sidewall_
+net_uturn_m1_redux.lvsdb.gz' --out-dir                                         
+'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n 
+──────────────────────────────── Input Layout ─────────────────────────────────
+[16:11:34] INFO     LVSDB input file passed, bypassing LVS      kpex_cli.py:903
+──────────────────────────────── Prepare LVSDB ────────────────────────────────
+[16:11:34] INFO     Wrote result file to:                     run_result.py:230
+                    D:\a\klayout-pex\klayout-pex\output_ihp-s                  
+                    g13g2\sidewall_net_uturn_m1_redux__sidewa                  
+                    ll_net_uturn_m1_redux\kpex_result.json                     
+[16:11:34] INFO     Peak memory (resident set size) after      kpex_cli.py:1989
+                    preparing the LVSDB: 1.9 GiB                               
+────────────────────── Non-empty layers in LVS database ───────────────────────
+[16:11:34] INFO     (46, 0) -> (pwell pwell_sub)               kpex_cli.py:1993
+[16:11:34] INFO     (8, 0) -> (metal1_n_mom)                   kpex_cli.py:1993
+──────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[16:11:34] INFO     Sidewall halo: 10000 µm (--halo)           kpex_cli.py:1442
+[16:11:34] INFO     LVSDB: found 0pins                         extractor.py:482
+[16:11:34] INFO     Peak memory (resident set size) after the  extractor.py:539
+                    resistance extraction: 1.9 GiB                             
+[16:11:34] INFO     Peak memory (resident set size) after the  extractor.py:593
+                    capacitance extraction: 1.9 GiB                            
+────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                               
+C1;C0;C1;1.141;                                                                
+C2;C0;VSUBS;36.359;                                                            
+C3;C1;VSUBS;11.944;                                                            
+──────────────────────────── Extracted netlist CSV ────────────────────────────
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\sidewall_net_uturn_m1_redux__sid
+ewall_net_uturn_m1_redux\sidewall_net_uturn_m1_redux_k25d_pex_netlist.csv      
+───────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                     
+D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\sidewall_net_uturn_m1_redux__sid
+ewall_net_uturn_m1_redux\sidewall_net_uturn_m1_redux_k25d_pex_netlist.spice    
+[16:11:34] INFO     Peak memory (resident set size) after the  kpex_cli.py:1530
+                    netlist: 1.9 GiB                                           
+[16:11:34] WARNING  Nothing drives these nets, as they have no kpex_cli.py:1547
+                    device terminal and no port (e.g. a rail                   
+                    under a wrong net name, or fill), so                       
+                    simulators stop on them: C0 (37.500 fF),                   
+                    C1 (13.085 fF)                                             
+[16:11:34] INFO     Peak memory (resident set size) after the  kpex_cli.py:1864
+                    run: 1.9 GiB                                               
