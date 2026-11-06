@@ -294,6 +294,29 @@ class Pex25DResolverTest(unittest.TestCase):
         assert scene.domain.origin == origins.ORIGIN_DOMAIN_BOX
         assert scene.domain.box.upper_right.x == 50000
 
+    def test_e0251_a_negative_domain_margin(self):
+        # Rejected even where the box would still enclose something: a margin
+        # is a clearance, and a negative one leaves geometry outside.
+        for margin in ('X -0.1 Y 4.0 Z 2.0', 'X 4.0 Y -0.1 Z 2.0', 'X 4.0 Y 4.0 Z -0.1'):
+            with self.subTest(margin=margin):
+                assert 'PEX25D-E0251' in resolve_codes(
+                    replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0', f"DOMAIN_MARGIN {margin}"))
+
+    def test_a_zero_domain_margin_is_the_geometry_bounds(self):
+        scene = resolved(replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0',
+                                   'DOMAIN_MARGIN X 0.0 Y 0.0 Z 0.0'))
+        box, bounds = scene.domain.box, scene.domain.geometry_bounds
+        assert (box.lower_left.x, box.upper_right.x, box.upper_right.z) == \
+            (bounds.lower_left.x, bounds.upper_right.x, bounds.upper_right.z)
+
+    def test_e0252_a_domain_box_without_volume(self):
+        for box in ('LL 5.0 -1.0 -1.0 UR -1.0 5.0 5.0',   # inverted in x
+                    'LL -1.0 5.0 -1.0 UR 5.0 5.0 5.0',    # flat in y
+                    'LL -1.0 -1.0 6.0 UR 5.0 5.0 5.0'):   # inverted in z
+            with self.subTest(box=box):
+                assert 'PEX25D-E0252' in resolve_codes(
+                    replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0', f"DOMAIN_BOX {box}"))
+
     # ------------------------------------------------------------- structure
 
     def test_conductors_carry_their_geometry_grouped_by_layer(self):

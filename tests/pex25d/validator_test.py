@@ -215,6 +215,23 @@ class Pex25DValidatorTest(unittest.TestCase):
         scene.conductors[0].regions[0].layer = 'nowhere'
         assert 'PEX25D-E0279' in check_scene(scene)
 
+    def test_e0251_a_negative_domain_margin(self):
+        assert 'PEX25D-E0251' in check(
+            replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0', 'DOMAIN_MARGIN X -1.0 Y 4.0 Z 2.0'))
+
+        scene = resolve(read(MINIMAL))
+        scene.domain.applied_margin.y = -1
+        assert 'PEX25D-E0251' in check_scene(scene)
+
+    def test_e0252_a_domain_box_without_volume(self):
+        assert 'PEX25D-E0252' in check(
+            replacing('DOMAIN_MARGIN X 4.0 Y 4.0 Z 2.0',
+                      'DOMAIN_BOX LL 5.0 -1.0 -1.0 UR -1.0 5.0 5.0'))
+
+        scene = resolve(read(MINIMAL))
+        scene.domain.box.upper_right.z = scene.domain.box.lower_left.z
+        assert 'PEX25D-E0252' in check_scene(scene)
+
     # ------------------------------------------------------- geometric tier
 
     def test_the_geometric_tier_only_runs_under_strict(self):
