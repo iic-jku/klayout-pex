@@ -22,6 +22,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 --------------------------------------------------------------------------------
 -->
 [![PyPi](https://img.shields.io/pypi/v/klayout-pex)](https://pypi.org/project/klayout-pex/)
+[![CI](https://github.com/iic-jku/klayout-pex/actions/workflows/ci-cd.yml/badge.svg?branch=main&event=push)](https://github.com/iic-jku/klayout-pex/actions/workflows/ci-cd.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/badge/coverage-report-blue.svg)](https://iic-jku.github.io/klayout-pex/pycov/)
 [![GitHub issues](https://img.shields.io/badge/issue_tracking-github-blue.svg)](https://github.com/iic-jku/klayout-pex/issues)
 [![DOI](https://zenodo.org/badge/897408519.svg)](https://doi.org/10.5281/zenodo.17822625)
 
