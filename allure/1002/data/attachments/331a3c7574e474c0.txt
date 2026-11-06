@@ -1,0 +1,53 @@
+[15:27:03] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb                     
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/diode_dantenna_dpantenna.lvsdb.gz --out-dir                                   
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:27:03] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:27:03] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 968.6 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:27:03] INFO     (31, 0) -> (nwell_drw dpantenna_n)          kpex_cli.py:1862
+[15:27:03] INFO     (46, 0) -> (pwell pwell_sub dantenna_p)     kpex_cli.py:1862
+[15:27:03] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:27:03] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:27:03] WARNING  The resistance network leaves out these   r_extractor.py:525
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - NWell (LVS dpantenna_n)                                 
+                      - NWell (LVS nwell_drw)                                   
+[15:27:03] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 968.6 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/diode_dantenna_dpant
+enna__diode_dantenna_dpantenna/diode_dantenna_dpantenna_k25d_pex_netlist.csv    
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/diode_dantenna_dpant
+enna__diode_dantenna_dpantenna/diode_dantenna_dpantenna_k25d_pex_netlist.spice  
+[15:27:03] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 968.6 MiB                                          
+[15:27:03] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 968.6 MiB                                              
+[15:27:03] WARNING  The extraction leaves out these LVS   lvsdb_extractor.py:424
+                    layers, as the tech info doesn't know                       
+                    them:                                                       
+                      - cont_drw (Cont): 8 of 8 shapes                          
+                    are not within cont_nsd_con,                                
+                    cont_psd_con, cont_poly_con,                                
+                    cont_ntap_con, cont_ptap_con,                               
+                    cont_bjt_con, schottcky_p,                                  
+                    schottcky_n_con, diodevdd_4kv_te,                           
+                    diodevss_4kv_te                                             

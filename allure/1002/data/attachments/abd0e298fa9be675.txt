@@ -1,0 +1,57 @@
+[15:29:45] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb                    
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_pattern
+s/exclusion_tap_wire_through.lvsdb.gz --out-dir                                 
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[15:29:45] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[15:29:45] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 1.7 GiB                                
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[15:29:45] INFO     (19, 0) -> (via1_drw)                       kpex_cli.py:1862
+[15:29:45] INFO     (46, 0) -> (pwell pwell_sub)                kpex_cli.py:1862
+[15:29:45] INFO     (65, 244) -> (ptap)                         kpex_cli.py:1862
+[15:29:45] INFO     (30, 0) -> (metal3_n_mom)                   kpex_cli.py:1862
+[15:29:45] INFO     (6, 4405) -> (cont_ptap_con)                kpex_cli.py:1862
+[15:29:45] INFO     (8, 0) -> (metal1_n_mom)                    kpex_cli.py:1862
+[15:29:45] INFO     (10, 0) -> (metal2_n_mom)                   kpex_cli.py:1862
+[15:29:45] INFO     (30, 2) -> (metal3_pin_con)                 kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[15:29:45] INFO     Sidewall halo: 10000 µm (--halo)            kpex_cli.py:1370
+[15:29:45] INFO     LVSDB: found 1pins                          extractor.py:482
+[15:29:45] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 1.7 GiB                              
+[15:29:45] INFO     Peak memory (resident set size) after the   extractor.py:593
+                    capacitance extraction: 1.7 GiB                             
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+C1;VSUBS;sub!;0.201;                                                            
+C2;VSUBS;sub!.$1.Metal1;0.201;                                                  
+C3;VSUBS;sub!.$2.Metal2;2.781;                                                  
+C4;VSUBS;sub!.$3.Metal2;0.18;                                                   
+C5;VSUBS;W;3.554;                                                               
+C6;W;sub!.$1.Metal1;0.002;                                                      
+C7;W;sub!.$2.Metal2;0.031;                                                      
+R1;sub!;sub!.$1.Metal1;;1.467                                                   
+R2;sub!;sub!.$2.Metal2;;9.0                                                     
+R3;sub!.$1.Metal1;sub!.$3.Metal2;;9.0                                           
+R4;sub!.$2.Metal2;sub!.$3.Metal2;;1.027                                         
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_tap_wire_t
+hrough__exclusion_tap_wire_through/exclusion_tap_wire_through_k25d_pex_netlist.c
+sv                                                                              
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_tap_wire_t
+hrough__exclusion_tap_wire_through/exclusion_tap_wire_through_k25d_pex_netlist.s
+pice                                                                            
+[15:29:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 1.7 GiB                                            
+[15:29:45] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 1.7 GiB                                                
