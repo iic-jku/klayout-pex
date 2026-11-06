@@ -100,18 +100,19 @@ def test_plates_over_isolated_pwell_and_dnwell():
     # The isolated p-well (LVPWELL within DNWELL) is a net of its own, W by its p-tap, and so is the DNWELL
     # around it, D by its n-tap: the plates couple to the wells below them, their fringes to the other well
     # and, beyond the DNWELL, to the substrate (VSUBS). It was the substrate: A–VSUBS 2.402 fF, B–VSUBS 2.172 fF (#337)
+    # The taps of the wells are diffusion of the stack, which couples a bit more: A–W 2.114 fF, D–W 0.014 fF (#475)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'plates_m1_over_isolated_pwell_and_dnwell.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;A;B;0.055;
 C2;A;D;0.204;
 C3;A;VSUBS;0.086;
-C4;A;W;2.114;
+C4;A;W;2.115;
 C5;B;D;1.707;
 C6;B;VSUBS;0.313;
 C7;B;W;0.152;
 C8;D;VSUBS;0.013;
-C9;D;W;0.014;
+C9;D;W;0.015;
 C10;VSUBS;W;0.004;"""
     )
 

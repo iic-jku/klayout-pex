@@ -173,7 +173,8 @@ class Test(unittest.TestCase):
             'sky130A': {'nsd': 'licon_nsd_con', 'psd': 'licon_psd_con', 'ntap_conn': None,
                         'ptap_conn': 'licon_ptap_con'},
             'gf180mcuD': {'Nplus': 'contact_nsd_con', 'Pplus': 'contact_psd_con', 'ntap': None,
-                          'ptap': 'contact_ptap_con'},
+                          'ptap': 'contact_ptap_con', 'ntap_dw': 'contact_ntap_dw_con',
+                          'ptap_dw': 'contact_ptap_dw_con'},
             'ihp-sg13g2': ihp,
             'ihp-sg13cmos5l': ihp,
         }

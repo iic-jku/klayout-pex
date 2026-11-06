@@ -75,6 +75,9 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, PIMP,    KREG, "pd_ldmos",    (31, 0),     "Pplus",     "Pplus",            "P+ drain of the LDPMOS, the same p+ diffusion as psd")
     add_computed_layer(tech, NTAP,    KREG, "ntap",        (22, 144),   "COMP",      "ntap",             "N+ tap (COMP within nwell)")
     add_computed_layer(tech, PTAP,    KREG, "ptap",        (22, 244),   "COMP",      "ptap",             "P+ tap (COMP outside nwell)")
+    # NOTE: the GDS pairs of the taps are those of KPEX, not of the PDK, as those of ntap and ptap
+    add_computed_layer(tech, NTAP,    KREG, "ntap_dw",     (22, 344),   "COMP",      "ntap_dw",          "N+ tap of the deep nwell (COMP within DNWELL, outside LVPWELL)")
+    add_computed_layer(tech, PTAP,    KREG, "ptap_dw",     (22, 444),   "COMP",      "ptap_dw",          "P+ tap of an isolated p-well (COMP within LVPWELL within DNWELL)")
     add_computed_layer(tech, METAL,   KREG, "poly2_con",   (30, 0),     "Poly2",     "Poly2",            "Computed layer for poly")
     add_computed_layer(tech, METAL,   KREG, "metal1_con",  (34, 0),     "Metal1",    "Metal1",           "Computed layer for met1")
     add_computed_layer(tech, METAL,   KREG, "metal2_con",  (36, 0),     "Metal2",    "Metal2",           "Computed layer for met2")
@@ -88,8 +91,8 @@ def build_lvs_computed_layers(tech: Technology):
     # NOTE: part of their taps, as the substrate, the deep nwell and the isolated p-wells below are no conductors
     #       of the resistance network
     add_computed_layer(tech, PTAP,    KREG, "contact_ptap_con",    (33, 4405), "Contact", "contact_ptap_con", "Computed layer for contact from ptap (the substrate below) to Metal1")
-    add_computed_layer(tech, NTAP,    KREG, "contact_ntap_dw_con", (33, 4406), "Contact", None,               "Computed layer for contact from ntap_dw (the deep nwell below) to Metal1")
-    add_computed_layer(tech, PTAP,    KREG, "contact_ptap_dw_con", (33, 4407), "Contact", None,               "Computed layer for contact from the p-diffusion of an isolated p-well to Metal1")
+    add_computed_layer(tech, NTAP,    KREG, "contact_ntap_dw_con", (33, 4406), "Contact", "contact_ntap_dw_con","Computed layer for contact from ntap_dw (the deep nwell below) to Metal1")
+    add_computed_layer(tech, PTAP,    KREG, "contact_ptap_dw_con", (33, 4407), "Contact", "contact_ptap_dw_con","Computed layer for contact from the p-diffusion of an isolated p-well to Metal1")
     # NOTE: within the diffusion resistors (nplus_u, nplus_s, pplus_u, pplus_s), whose models have terminal resistors
     #       (rt1, rt2: e.g. 6 Ω·µm over the width of nplus_s, whose contact abuts its body),
     #       so their terminals are on the Metal1 over them
@@ -152,6 +155,9 @@ def build_process_stack_info(psi: ProcessStackInfo):
     # NOTE: the taps are diffusion too, the same stack as the source/drain
     add_diffusion_layer(psi,         "ntap",  0.312,  "fox")
     ptap = add_diffusion_layer(psi,  "ptap",  0.312,  "fox")
+    # NOTE: and the taps of the deep nwell and of the isolated p-wells within it
+    ntap_dw = add_diffusion_layer(psi, "ntap_dw", 0.312, "fox")
+    ptap_dw = add_diffusion_layer(psi, "ptap_dw", 0.312, "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
@@ -242,6 +248,8 @@ def build_process_stack_info(psi: ProcessStackInfo):
     m1pp = pdiff.contact_above
     m1po = poly.contact_above
     m1pt = ptap.contact_above  # contact over ptap
+    m1ntdw = ntap_dw.contact_above
+    m1ptdw = ptap_dw.contact_above
     via1 = met1.contact_above
     via2 = met2.contact_above
     via3 = met3.contact_above
@@ -258,6 +266,8 @@ def build_process_stack_info(psi: ProcessStackInfo):
     set_contact(m1np,     "contact_nsd_con",  "Nplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1pp,     "contact_psd_con",  "Pplus",     "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1pt,     "contact_ptap_con", "ptap",      "Metal1",    met1.z,                               0.22,  0.25,    0.005)
+    set_contact(m1ntdw,   "contact_ntap_dw_con", "ntap_dw", "Metal1",    met1.z,                               0.22,  0.25,    0.005)
+    set_contact(m1ptdw,   "contact_ptap_dw_con", "ptap_dw", "Metal1",    met1.z,                               0.22,  0.25,    0.005)
     set_contact(m1po,     "contact_poly_con", "Poly2",     "Metal1",    met1.z - (poly.z + poly.thickness),   0.22,  0.25,    0.005)
     set_contact(via1,     "via1",             "Metal1",    "Metal2",    met2.z - (met1.z + met1.thickness),   0.26,  0.26,    0.01)
     set_contact(via2,     "via2_n_cap",       "Metal2",    "Metal3",    met3.z - (met2.z + met2.thickness),   0.26,  0.26,    0.01)
