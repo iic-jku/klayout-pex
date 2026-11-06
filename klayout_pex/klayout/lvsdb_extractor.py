@@ -172,6 +172,8 @@ class KLayoutExtractionContext:
     # the names KLayout gave the nets named after labels in subcells, by their names
     # (see name_nets_after_subcell_labels)
     klayout_net_names: Dict[NetName, NetName] = field(default_factory=dict)
+    # the labels on each net of the top circuit, of the whole hierarchy, by its name (see labels_of_nets)
+    labels_by_net_name: Dict[NetName, Set[Label]] = field(default_factory=dict)
     # (device abstract cell index, terminal ID) -> shapes by LVS layer index, see shapes_of_terminal
     terminal_shapes_by_abstract: Dict[Tuple[int, int], Dict[int, kdb.Region]] = field(default_factory=dict,
                                                                                        init=False, repr=False)
@@ -191,7 +193,10 @@ class KLayoutExtractionContext:
                     f"{', '.join(extra_top_cells)}")
 
         cls.make_net_names_unique(lvsdb.netlist())
-        klayout_net_names = cls.name_nets_after_subcell_labels(lvsdb, cls.labels_of_nets(lvsdb))
+        labels_by_net_name = cls.labels_of_nets(lvsdb)
+        klayout_net_names = cls.name_nets_after_subcell_labels(lvsdb, labels_by_net_name)
+        new_net_names = {klayout_name: name for name, klayout_name in klayout_net_names.items()}
+        labels_by_net_name = {new_net_names.get(name, name): labels for name, labels in labels_by_net_name.items()}
 
         dbu = lvsdb.internal_layout().dbu
         annotated_layout = kdb.Layout()
@@ -254,7 +259,8 @@ class KLayoutExtractionContext:
             unnamed_layers=nonempty_layers.unnamed_layers,
             unmodeled_layers=nonempty_layers.unmodeled_layers,
             blackbox_devices=blackbox_devices,
-            klayout_net_names=klayout_net_names
+            klayout_net_names=klayout_net_names,
+            labels_by_net_name=labels_by_net_name
         )
         context.make_pins_of_pin_labels()
 
