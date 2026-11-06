@@ -1,0 +1,45 @@
+[14:10:17] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1675
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                      
+/Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_pattern
+s/r_ptap_pair_m1_m2.lvsdb.gz --out-dir                                          
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:10:17] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:887
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:10:17] INFO     Peak memory (resident set size) after       kpex_cli.py:1858
+                    preparing the LVSDB: 877.3 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:10:17] INFO     (35, 0) -> (via1)                           kpex_cli.py:1862
+[14:10:17] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1862
+[14:10:17] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1862
+[14:10:17] INFO     (36, 0) -> (metal2_con)                     kpex_cli.py:1862
+[14:10:17] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1862
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:10:17] INFO     LVSDB: found 0pins                          extractor.py:482
+[14:10:17] WARNING  Only the substrate, a well or a tap joins   extractor.py:536
+                    pieces of the metal of these nets, which                    
+                    the resistance network has no resistance                    
+                    for, so the pieces are ideally on their                     
+                    nets: SUB                                                   
+[14:10:17] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 877.3 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;SUB;SUB.$2.Metal2;;4.5                                                       
+R2;SUB;SUB.$3.Metal2;;4.5                                                       
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ptap_pair_m1_m2__r
+_ptap_pair_m1_m2/r_ptap_pair_m1_m2_k25d_pex_netlist.csv                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ptap_pair_m1_m2__r
+_ptap_pair_m1_m2/r_ptap_pair_m1_m2_k25d_pex_netlist.spice                       
+[14:10:17] INFO     Peak memory (resident set size) after the   kpex_cli.py:1452
+                    netlist: 877.3 MiB                                          
+[14:10:17] INFO     Peak memory (resident set size) after the   kpex_cli.py:1741
+                    run: 877.3 MiB                                              

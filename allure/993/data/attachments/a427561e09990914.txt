@@ -1,0 +1,20 @@
+WARNING  __kpex__:kpex_cli.py:1675 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1712 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_hairpin.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:887 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:kpex_cli.py:1858 Peak memory (resident set size) after preparing the LVSDB: 1.7 GiB
+INFO     __kpex__:kpex_cli.py:1862 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:1862 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1862 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:1370 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:482 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:539 Peak memory (resident set size) after the resistance extraction: 1.7 GiB
+INFO     __kpex__:extractor.py:593 Peak memory (resident set size) after the capacitance extraction: 1.7 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1399 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1399 C1;A;VSUBS;2.443;
+SUBPROCESS __kpex__:kpex_cli.py:1399 C2;B;VSUBS;2.443;
+SUBPROCESS __kpex__:kpex_cli.py:1399 R1;A;A,B;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1399 R2;A;B;;3.192
+SUBPROCESS __kpex__:kpex_cli.py:1402 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin__exclusion_hairpin/exclusion_hairpin_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1419 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_hairpin__exclusion_hairpin/exclusion_hairpin_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1452 Peak memory (resident set size) after the netlist: 1.7 GiB
+INFO     __kpex__:kpex_cli.py:1741 Peak memory (resident set size) after the run: 1.7 GiB
