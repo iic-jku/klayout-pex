@@ -341,7 +341,7 @@ class ExtractionReporter:
             self.report.create_category(
                 cat_conductors,
                 f"{c.layer.id}: {c.layer.canonical_layer_name} (LVS {c.layer.lvs_layer_name}), "
-                f"{round(c.resistance, 3)} mΩ/µm^2"
+                f"{round(c.resistance, 3)} Ω/□"
             )
         for v in tech.vias:
             bot = layer_by_id[v.bottom_conductor.id].canonical_layer_name
@@ -350,7 +350,7 @@ class ExtractionReporter:
                 cat_vias,
                 f"{v.layer.id}: {v.layer.canonical_layer_name} (LVS {v.layer.lvs_layer_name}, "
                 f"{bot}↔︎{top}), "
-                f"{round(v.resistance, 3)} mΩ/µm^2"
+                f"{round(v.resistance, 3)} Ω·µm²"
             )
 
     def output_net_extraction_request(self, request: pex_request_pb2.RNetExtractionRequest):

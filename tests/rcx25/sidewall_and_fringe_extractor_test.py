@@ -28,7 +28,7 @@ import unittest
 import klayout.db as kdb
 
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
-from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
+from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.tech_info import TechInfo
@@ -83,3 +83,18 @@ class FringeCapTest(unittest.TestCase):
                                   scale_ratio_to_fit_halo=scale_ratio_to_fit_halo,
                                   distance_near_um=1.0,
                                   distance_far_um=2.0) == 0.0
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("RCX25", "Capacitance", "Sidewall")
+class SidewallSeparationTest(unittest.TestCase):
+    def test_the_fit_where_it_is_valid(self):
+        # Poly2 of gf180mcuD at its minimum space, and an offset > 0
+        self.assertAlmostEqual(sidewall_separation(0.24, -0.082), 0.158)
+        self.assertAlmostEqual(sidewall_separation(0.1, 0.3), 0.4)
+
+    def test_half_the_distance_where_the_fit_diverges_or_turns_negative(self):
+        # From twice -offset down, where the fit gives 0, then negative separations
+        for distance in (0.164, 0.1, 0.082, 0.05):
+            with self.subTest(distance=distance):
+                self.assertAlmostEqual(sidewall_separation(distance, -0.082), distance / 2.0)

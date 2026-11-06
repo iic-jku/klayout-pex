@@ -89,7 +89,7 @@ class RCX25Extraction:
         :return: the CLI, e.g. for the paths it wrote
         """
         cli = KpexCLI()
-        cli.main(['main',
+        cli.main(['main', 'extract',
                   '--pdk', self.pdk.name,
                   '--mode', self.pex_mode,
                   '--blackbox', 'y' if self.blackbox else 'n',

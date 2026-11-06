@@ -42,7 +42,7 @@ sky130a = PDKTestConfig(PDKName.SKY130A)
 
 def _extract_single_cell(*path_components) -> str:
     cli = KpexCLI()
-    cli.main(['main',
+    cli.main(['main', 'extract',
               '--pdk', sky130a.name,
               '--lvsdb', lvsdb_fixture_path(sky130a.name, sky130a.gds_path(*path_components)),
               '--out-dir', sky130a.output_dir,

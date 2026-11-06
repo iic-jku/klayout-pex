@@ -69,6 +69,20 @@ class Test(unittest.TestCase):
                      self.assertRaises(FasterCapError) as cm:
                     run_fastercap(exe_path='FasterCap', lst_file_path='plate.lst',
                                   log_path=os.path.join(tmp_dir, 'FasterCap_Output.txt'),
-                                  tolerance=0.01, d_coeff=0.5, mesh_refinement_value=0.5, ooc_condition=None,
+                                  tolerance=0.01, d_coeff=0.5, ooc_condition=None,
                                   auto_preconditioner=False, galerkin_scheme=False, jacobi_preconditioner=False)
                 self.assertIn(expected_message, str(cm.exception))
+
+    def test_mesh_refinement_is_left_to_the_automatic_refinement(self):
+        # NOTE: -a overrides -m (#452)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            process = mock.Mock(returncode=0, stdout=io.StringIO("Capacitance matrix is:\n"))
+            with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen',
+                            return_value=process) as popen:
+                run_fastercap(exe_path='FasterCap', lst_file_path='plate.lst',
+                              log_path=os.path.join(tmp_dir, 'FasterCap_Output.txt'),
+                              tolerance=0.01, d_coeff=0.5, ooc_condition=None,
+                              auto_preconditioner=False, galerkin_scheme=False, jacobi_preconditioner=False)
+        arguments = popen.call_args.args[0]
+        self.assertIn('-a0.01', arguments)
+        self.assertEqual([], [argument for argument in arguments if argument.startswith('-m')])

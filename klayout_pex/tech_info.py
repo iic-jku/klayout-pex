@@ -121,7 +121,35 @@ class TechInfo:
         if not (math.isfinite(side_halo) and side_halo > 0):
             raise TechDefError(f"process_parasitics.side_halo has to be a finite number > 0 (in µm), "
                                f"but in {jsonpb_path} it is {side_halo:g}")
+        # NOTE: a negative one gives negative capacitances, NaN or infinity spreads into the totals of the nets,
+        #       while 0 is legal (e.g. the perimeter capacitance of a MIM plate)
+        problems = TechInfo.capacitance_problems(tech)
+        if problems:
+            raise TechDefError(
+                f"Capacitances have to be finite numbers ≥ 0, but in {jsonpb_path}"
+                + ''.join(f"\n  - {p}" for p in problems))
         return tech
+
+    @staticmethod
+    def capacitance_problems(tech: tech_pb2.Technology) -> List[str]:
+        """
+        Report every capacitance of the process parasitics that isn't a finite number ≥ 0
+        """
+        capacitance = tech.process_parasitics.capacitance
+        values = [
+            *((f"the substrate area capacitance of {c.layer_name}", c.area_capacitance)
+              for c in capacitance.substrates),
+            *((f"the substrate perimeter capacitance of {c.layer_name}", c.perimeter_capacitance)
+              for c in capacitance.substrates),
+            *((f"the overlap capacitance of {c.top_layer_name} over {c.bottom_layer_name}", c.capacitance)
+              for c in capacitance.overlaps),
+            *((f"the sidewall capacitance of {c.layer_name}", c.capacitance)
+              for c in capacitance.sidewalls),
+            *((f"the side overlap capacitance of {c.in_layer_name} to {c.out_layer_name}", c.capacitance)
+              for c in capacitance.sideoverlaps),
+        ]
+        return [f"{what} is {value:g}" for what, value in values
+                if not (math.isfinite(value) and value >= 0)]
 
     @staticmethod
     def process_layer_problems(tech: tech_pb2.Technology) -> List[str]:
@@ -380,15 +408,17 @@ class TechInfo:
         )
 
     @cached_property
+    def filterable_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
+        """
+        The dielectrics that the dielectric filter selects from: the simple and conformal ones, not the field oxide
+        """
+        return [pl for pl in self.tech.process_stack.layers
+                if pl.layer_type in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC,
+                                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC)]
+
+    @cached_property
     def filtered_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
-        layers = []
-        for pl in self.tech.process_stack.layers:
-            match pl.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC | \
-                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
-                    if self.dielectric_filter.is_included(pl.name):
-                        layers.append(pl)
-        return layers
+        return [pl for pl in self.filterable_dielectric_layers if self.dielectric_filter.is_included(pl.name)]
 
     @cached_property
     def dielectric_by_name(self) -> Dict[str, float]:
@@ -461,13 +491,16 @@ class TechInfo:
         for lyr in self.tech.process_stack.layers:
             match lyr.layer_type:
                 case LT.LAYER_TYPE_NWELL:
-                    d[lyr.nwell_layer.contact_above.name] = lyr.nwell_layer.contact_above
-
+                    layer = lyr.nwell_layer
                 case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
-                    d[lyr.diffusion_layer.contact_above.name] = lyr.diffusion_layer.contact_above
-
+                    layer = lyr.diffusion_layer
                 case LT.LAYER_TYPE_METAL:
-                    d[lyr.metal_layer.contact_above.name] = lyr.metal_layer.contact_above
+                    layer = lyr.metal_layer
+                case _:
+                    continue
+            # NOTE: not the unset contact of a layer without one, e.g. a tap, whose name is empty (#469)
+            if layer.HasField('contact_above'):
+                d[layer.contact_above.name] = layer.contact_above
         return d
 
     def gds_pair(self, layer_name) -> Optional[GDSPair]:
@@ -514,25 +547,31 @@ class TechInfo:
 
     @staticmethod
     def milliohm_to_ohm(milliohm: float) -> float:
-        # NOTE: tech_pb2 has mΩ/µm^2
-        #       RExtractorTech.Conductor.resistance is in Ω/µm^2
+        # NOTE: tech_pb2 has mΩ/□
+        #       RExtractorTech.Conductor.resistance is in Ω/□
         return milliohm / 1000.0
 
     @staticmethod
-    def milliohm_by_cnt_to_ohm_by_square_for_contact(
+    def milliohm_per_cut_to_ohm_um2_for_contact(
             contact: process_stack_pb2.ProcessStackInfo.Contact,
             contact_resistance: process_parasitics_pb2.ResistanceInfo.ContactResistance) -> float:
-        # NOTE: ContactResistance ... mΩ/CNT
-        #
-        ohm_by_square = contact_resistance.resistance / 1000.0 * contact.width ** 2
-        return ohm_by_square
+        """
+        :return: the area resistance (Ω·µm²) of the contact, as KLayout's RExtractorTechVia wants it:
+                 the resistance of a cut (ContactResistance has mΩ/CNT) times its area
+        """
+        ohm_um2 = contact_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_um2
 
     @staticmethod
-    def milliohm_by_cnt_to_ohm_by_square_for_via(
+    def milliohm_per_cut_to_ohm_um2_for_via(
             contact: process_stack_pb2.ProcessStackInfo.Contact,
             via_resistance: process_parasitics_pb2.ResistanceInfo.ViaResistance) -> float:
-        ohm_by_square = via_resistance.resistance / 1000.0 * contact.width ** 2
-        return ohm_by_square
+        """
+        :return: the area resistance (Ω·µm²) of the via, as KLayout's RExtractorTechVia wants it:
+                 the resistance of a cut (ViaResistance has mΩ/CNT) times its area
+        """
+        ohm_um2 = via_resistance.resistance / 1000.0 * contact.width ** 2
+        return ohm_um2
 
     #--------------------------------
 
@@ -614,7 +653,7 @@ class TechInfo:
 
         for k1, ve in d2.items():
             for k2, v in ve.items():
-                d[k1][k2] = v
+                d.setdefault(k1, {})[k2] = v
 
         return d
 
