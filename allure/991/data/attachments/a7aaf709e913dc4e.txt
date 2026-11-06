@@ -1,0 +1,51 @@
+[14:11:50] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/diode_pw2dw_dw2ps_03v3_w2_l4.lvsdb.gz --out-dir                                
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:11:50] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:11:50] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 960.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:11:50] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1855
+[14:11:50] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1855
+[14:11:50] INFO     (204, 0) -> (lvpwell_dw_con)                kpex_cli.py:1855
+[14:11:50] INFO     (33, 4405) -> (contact_ptap_con)            kpex_cli.py:1855
+[14:11:50] INFO     (33, 4407) -> (contact_ptap_dw_con)         kpex_cli.py:1855
+[14:11:50] INFO     (33, 4406) -> (contact_ntap_dw_con)         kpex_cli.py:1855
+[14:11:50] INFO     (22, 244) -> (ptap)                         kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:11:50] INFO     LVSDB: found 4pins                          extractor.py:482
+[14:11:50] WARNING  The resistance network leaves out these   r_extractor.py:525
+                    wells, as the tech info has no sheet                        
+                    resistance for them, so the device                          
+                    terminals on them (e.g. the PMOS bulks)                     
+                    are ideally on their nets:                                  
+                      - LVPWELL (LVS lvpwell_dw_con)                            
+[14:11:50] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 960.8 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.csv                                                                         
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/diode_pw2dw_dw2ps_03v
+3_w2_l4__diode_pw2dw_dw2ps_03v3_w2_l4/diode_pw2dw_dw2ps_03v3_w2_l4_k25d_pex_netl
+ist.spice                                                                       
+[14:11:50] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 960.8 MiB                                          
+[14:11:50] WARNING  Nothing drives these nets, as they have no  kpex_cli.py:1462
+                    device terminal and no port (e.g. a rail                    
+                    under a wrong net name, or fill): $4                        
+[14:11:50] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 960.8 MiB                                              

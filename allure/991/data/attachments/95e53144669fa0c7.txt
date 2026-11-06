@@ -1,0 +1,188 @@
+[14:11:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/pfet_10v0_asym_pair_m1.lvsdb.gz --out-dir                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:11:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:11:49] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 960.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:11:49] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1855
+[14:11:49] INFO     (31, 0) -> (psd_dw pd_ldmos)                kpex_cli.py:1855
+[14:11:49] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1855
+[14:11:49] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1855
+[14:11:49] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:1855
+[14:11:49] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:11:49] INFO     LVSDB: found 5pins                          extractor.py:482
+[14:11:49] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 960.8 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.$1.Metal1;;0.123                                                         
+R2;D;D.P0.Pplus;;5.2                                                            
+R3;D.$1.Metal1;D.$2.Metal1;;0.123                                               
+R4;D.$1.Metal1;D.P0.Pplus;;5.2                                                  
+R5;D.$2.Metal1;D.$3.Metal1;;0.123                                               
+R6;D.$2.Metal1;D.P0.Pplus;;5.2                                                  
+R7;D.$3.Metal1;D.$4.Metal1;;0.123                                               
+R8;D.$3.Metal1;D.P0.Pplus;;5.2                                                  
+R9;D.$4.Metal1;D.$5.Metal1;;0.123                                               
+R10;D.$4.Metal1;D.P0.Pplus;;5.2                                                 
+R11;D.$5.Metal1;D.$6.Metal1;;0.123                                              
+R12;D.$5.Metal1;D.P0.Pplus;;5.2                                                 
+R13;D.$6.Metal1;D.$7.Metal1;;0.123                                              
+R14;D.$6.Metal1;D.P0.Pplus;;5.2                                                 
+R15;D.$7.Metal1;D.P0.Pplus;;5.2                                                 
+R16;G1;G1.$0.Metal1;;0.099                                                      
+R17;G1;G1.$1.Metal1;;0.099                                                      
+R18;G1.$0.Metal1;G1.$2.Poly2;;5.9                                               
+R19;G1.$1.Metal1;G1.$2.Poly2;;5.9                                               
+R20;G1.$2.Poly2;G1.P0.Poly2;;18.797                                             
+R21;G2;G2.$0.Metal1;;0.099                                                      
+R22;G2;G2.$1.Metal1;;0.099                                                      
+R23;G2.$0.Metal1;G2.$2.Poly2;;5.9                                               
+R24;G2.$1.Metal1;G2.$2.Poly2;;5.9                                               
+R25;G2.$2.Poly2;G2.P0.Poly2;;18.797                                             
+R26;S1;S1.$1.Metal1;;0.123                                                      
+R27;S1;S1.P0.Pplus;;5.2                                                         
+R28;S1.$1.Metal1;S1.$2.Metal1;;0.123                                            
+R29;S1.$1.Metal1;S1.P0.Pplus;;5.2                                               
+R30;S1.$2.Metal1;S1.$3.Metal1;;0.123                                            
+R31;S1.$2.Metal1;S1.P0.Pplus;;5.2                                               
+R32;S1.$3.Metal1;S1.$4.Metal1;;0.123                                            
+R33;S1.$3.Metal1;S1.P0.Pplus;;5.2                                               
+R34;S1.$4.Metal1;S1.$5.Metal1;;0.123                                            
+R35;S1.$4.Metal1;S1.P0.Pplus;;5.2                                               
+R36;S1.$5.Metal1;S1.$6.Metal1;;0.123                                            
+R37;S1.$5.Metal1;S1.P0.Pplus;;5.2                                               
+R38;S1.$6.Metal1;S1.$7.Metal1;;0.123                                            
+R39;S1.$6.Metal1;S1.P0.Pplus;;5.2                                               
+R40;S1.$7.Metal1;S1.P0.Pplus;;5.2                                               
+R41;S2;S2.$1.Metal1;;0.123                                                      
+R42;S2;S2.P0.Pplus;;5.2                                                         
+R43;S2.$1.Metal1;S2.$2.Metal1;;0.123                                            
+R44;S2.$1.Metal1;S2.P0.Pplus;;5.2                                               
+R45;S2.$2.Metal1;S2.$3.Metal1;;0.123                                            
+R46;S2.$2.Metal1;S2.P0.Pplus;;5.2                                               
+R47;S2.$3.Metal1;S2.$4.Metal1;;0.123                                            
+R48;S2.$3.Metal1;S2.P0.Pplus;;5.2                                               
+R49;S2.$4.Metal1;S2.$5.Metal1;;0.123                                            
+R50;S2.$4.Metal1;S2.P0.Pplus;;5.2                                               
+R51;S2.$5.Metal1;S2.$6.Metal1;;0.123                                            
+R52;S2.$5.Metal1;S2.P0.Pplus;;5.2                                               
+R53;S2.$6.Metal1;S2.$7.Metal1;;0.123                                            
+R54;S2.$6.Metal1;S2.P0.Pplus;;5.2                                               
+R55;S2.$7.Metal1;S2.P0.Pplus;;5.2                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.csv           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.spice         
+[14:11:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 960.8 MiB                                          
+[14:11:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 960.8 MiB                                              
+[14:11:49] WARNING  Calling kpex without a subcommand is        kpex_cli.py:1668
+                    deprecated; treating this run as 'kpex                      
+                    extract …'. See 'kpex --help' for the                       
+                    available subcommands.                                      
+──────────────────────────── Command line arguments ────────────────────────────
+main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb                      
+/home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns
+/pfet_10v0_asym_pair_m1.lvsdb.gz --out-dir                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000  
+--scale n                                                                       
+───────────────────────────────── Input Layout ─────────────────────────────────
+[14:11:49] INFO     LVSDB input file passed, bypassing LVS       kpex_cli.py:874
+──────────────────────────────── Prepare LVSDB ─────────────────────────────────
+[14:11:49] INFO     Peak memory (resident set size) after       kpex_cli.py:1851
+                    preparing the LVSDB: 960.8 MiB                              
+─────────────────────── Non-empty layers in LVS database ───────────────────────
+[14:11:49] INFO     (12, 0) -> (dnwell)                         kpex_cli.py:1855
+[14:11:49] INFO     (31, 0) -> (psd_dw pd_ldmos)                kpex_cli.py:1855
+[14:11:49] INFO     (30, 0) -> (poly2_con)                      kpex_cli.py:1855
+[14:11:49] INFO     (34, 0) -> (metal1_con)                     kpex_cli.py:1855
+[14:11:49] INFO     (33, 4403) -> (contact_poly_con)            kpex_cli.py:1855
+[14:11:49] INFO     (33, 4402) -> (contact_psd_con)             kpex_cli.py:1855
+───────────────────────────── kpex/2.5D PEX Engine ─────────────────────────────
+[14:11:49] INFO     LVSDB: found 5pins                          extractor.py:482
+[14:11:49] INFO     Peak memory (resident set size) after the   extractor.py:539
+                    resistance extraction: 960.8 MiB                            
+─────────────────── kpex/2.5D extracted netlist (CSV format) ───────────────────
+Device;Net1;Net2;Capacitance [fF];Resistance [Ω]                                
+R1;D;D.$1.Metal1;;0.123                                                         
+R2;D;D.P0.Pplus;;5.2                                                            
+R3;D.$1.Metal1;D.$2.Metal1;;0.123                                               
+R4;D.$1.Metal1;D.P0.Pplus;;5.2                                                  
+R5;D.$2.Metal1;D.$3.Metal1;;0.123                                               
+R6;D.$2.Metal1;D.P0.Pplus;;5.2                                                  
+R7;D.$3.Metal1;D.$4.Metal1;;0.123                                               
+R8;D.$3.Metal1;D.P0.Pplus;;5.2                                                  
+R9;D.$4.Metal1;D.$5.Metal1;;0.123                                               
+R10;D.$4.Metal1;D.P0.Pplus;;5.2                                                 
+R11;D.$5.Metal1;D.$6.Metal1;;0.123                                              
+R12;D.$5.Metal1;D.P0.Pplus;;5.2                                                 
+R13;D.$6.Metal1;D.$7.Metal1;;0.123                                              
+R14;D.$6.Metal1;D.P0.Pplus;;5.2                                                 
+R15;D.$7.Metal1;D.P0.Pplus;;5.2                                                 
+R16;G1;G1.$0.Metal1;;0.099                                                      
+R17;G1;G1.$1.Metal1;;0.099                                                      
+R18;G1.$0.Metal1;G1.$2.Poly2;;5.9                                               
+R19;G1.$1.Metal1;G1.$2.Poly2;;5.9                                               
+R20;G1.$2.Poly2;G1.P0.Poly2;;18.797                                             
+R21;G2;G2.$0.Metal1;;0.099                                                      
+R22;G2;G2.$1.Metal1;;0.099                                                      
+R23;G2.$0.Metal1;G2.$2.Poly2;;5.9                                               
+R24;G2.$1.Metal1;G2.$2.Poly2;;5.9                                               
+R25;G2.$2.Poly2;G2.P0.Poly2;;18.797                                             
+R26;S1;S1.$1.Metal1;;0.123                                                      
+R27;S1;S1.P0.Pplus;;5.2                                                         
+R28;S1.$1.Metal1;S1.$2.Metal1;;0.123                                            
+R29;S1.$1.Metal1;S1.P0.Pplus;;5.2                                               
+R30;S1.$2.Metal1;S1.$3.Metal1;;0.123                                            
+R31;S1.$2.Metal1;S1.P0.Pplus;;5.2                                               
+R32;S1.$3.Metal1;S1.$4.Metal1;;0.123                                            
+R33;S1.$3.Metal1;S1.P0.Pplus;;5.2                                               
+R34;S1.$4.Metal1;S1.$5.Metal1;;0.123                                            
+R35;S1.$4.Metal1;S1.P0.Pplus;;5.2                                               
+R36;S1.$5.Metal1;S1.$6.Metal1;;0.123                                            
+R37;S1.$5.Metal1;S1.P0.Pplus;;5.2                                               
+R38;S1.$6.Metal1;S1.$7.Metal1;;0.123                                            
+R39;S1.$6.Metal1;S1.P0.Pplus;;5.2                                               
+R40;S1.$7.Metal1;S1.P0.Pplus;;5.2                                               
+R41;S2;S2.$1.Metal1;;0.123                                                      
+R42;S2;S2.P0.Pplus;;5.2                                                         
+R43;S2.$1.Metal1;S2.$2.Metal1;;0.123                                            
+R44;S2.$1.Metal1;S2.P0.Pplus;;5.2                                               
+R45;S2.$2.Metal1;S2.$3.Metal1;;0.123                                            
+R46;S2.$2.Metal1;S2.P0.Pplus;;5.2                                               
+R47;S2.$3.Metal1;S2.$4.Metal1;;0.123                                            
+R48;S2.$3.Metal1;S2.P0.Pplus;;5.2                                               
+R49;S2.$4.Metal1;S2.$5.Metal1;;0.123                                            
+R50;S2.$4.Metal1;S2.P0.Pplus;;5.2                                               
+R51;S2.$5.Metal1;S2.$6.Metal1;;0.123                                            
+R52;S2.$5.Metal1;S2.P0.Pplus;;5.2                                               
+R53;S2.$6.Metal1;S2.$7.Metal1;;0.123                                            
+R54;S2.$6.Metal1;S2.P0.Pplus;;5.2                                               
+R55;S2.$7.Metal1;S2.P0.Pplus;;5.2                                               
+──────────────────────────── Extracted netlist CSV ─────────────────────────────
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.csv           
+────────────────── kpex/2.5D extracted netlist (SPICE format) ──────────────────
+Wrote expanded netlist to:                                                      
+/home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/pfet_10v0_asym_pair_m
+1__pfet_10v0_asym_pair_m1/pfet_10v0_asym_pair_m1_k25d_pex_netlist.spice         
+[14:11:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1445
+                    netlist: 960.8 MiB                                          
+[14:11:49] INFO     Peak memory (resident set size) after the   kpex_cli.py:1734
+                    run: 960.8 MiB                                              
