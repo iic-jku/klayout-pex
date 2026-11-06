@@ -1,0 +1,17 @@
+WARNING  __kpex__:kpex_cli.py:1778 Calling kpex without a subcommand is deprecated; treating this run as 'kpex extract …'. See 'kpex --help' for the available subcommands.
+SUBPROCESS __kpex__:kpex_cli.py:1841 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/lateral_fringe_shield_by_same_polygon_l1.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:924 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/lateral_fringe_shield_by_same_polygon_l1__lateral_fringe_shield_by_same_polygon_l1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:1996 Peak memory (resident set size) after preparing the LVSDB: 1.7 GiB
+INFO     __kpex__:kpex_cli.py:2000 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:1455 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 0pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 1.7 GiB
+INFO     __kpex__:extractor.py:594 Peak memory (resident set size) after the capacitance extraction: 1.7 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1487 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1487 C1;C0;VSUBS;6.414;
+SUBPROCESS __kpex__:kpex_cli.py:1490 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/lateral_fringe_shield_by_same_polygon_l1__lateral_fringe_shield_by_same_polygon_l1/lateral_fringe_shield_by_same_polygon_l1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1507 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/lateral_fringe_shield_by_same_polygon_l1__lateral_fringe_shield_by_same_polygon_l1/lateral_fringe_shield_by_same_polygon_l1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1543 Peak memory (resident set size) after the netlist: 1.7 GiB
+WARNING  __kpex__:kpex_cli.py:1560 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: C0 (6.414 fF)
+INFO     __kpex__:kpex_cli.py:1871 Peak memory (resident set size) after the run: 1.7 GiB
