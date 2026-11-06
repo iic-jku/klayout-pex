@@ -1,0 +1,33 @@
+INFO     __kpex__:pex25d_builder.py:322 GROUND_PLANE subs: z -3300 … 0
+DEBUG    __kpex__:pex25d_builder.py:334 METAL Poly2: z 3200 … 5200
+DEBUG    __kpex__:pex25d_builder.py:334 METAL Metal1: z 12300 … 17800
+DEBUG    __kpex__:pex25d_builder.py:334 METAL Metal2: z 23800 … 29300
+DEBUG    __kpex__:pex25d_builder.py:334 METAL Metal3: z 35300 … 40800
+DEBUG    __kpex__:pex25d_builder.py:334 METAL metal4_n_cap: z 46800 … 52300
+DEBUG    __kpex__:pex25d_builder.py:334 METAL metal4_cap: z 46800 … 52300
+DEBUG    __kpex__:pex25d_builder.py:334 METAL FuseTop: z 52720 … 55670
+DEBUG    __kpex__:pex25d_builder.py:334 METAL Metal5: z 61300 … 73225
+DEBUG    __kpex__:pex25d_builder.py:359 VIA contact_poly_con: connects Poly2 → Metal1
+DEBUG    __kpex__:pex25d_builder.py:359 VIA via1: connects Metal1 → Metal2
+DEBUG    __kpex__:pex25d_builder.py:359 VIA via2_n_cap: connects Metal2 → Metal3
+DEBUG    __kpex__:pex25d_builder.py:238 Contact 'via3_n_cap': no metal layer 'Metal4' in the process stack, using 'metal4_n_cap' for canonical layer 'Metal4'; candidates were metal4_n_cap, metal4_cap
+DEBUG    __kpex__:pex25d_builder.py:359 VIA via3_n_cap: connects Metal3 → metal4_n_cap
+DEBUG    __kpex__:pex25d_builder.py:238 Contact 'via4_n_cap': no metal layer 'Metal4' in the process stack, using 'metal4_n_cap' for canonical layer 'Metal4'; candidates were metal4_n_cap, metal4_cap
+DEBUG    __kpex__:pex25d_builder.py:359 VIA via4_n_cap: connects metal4_n_cap → Metal5
+DEBUG    __kpex__:pex25d_builder.py:359 VIA top_via_cap: connects FuseTop → Metal5
+DEBUG    __kpex__:pex25d_builder.py:382 METAL Nplus: z -1 … 0, anchor of contact_nsd_con
+DEBUG    __kpex__:pex25d_builder.py:390 VIA contact_nsd_con: connects Nplus → Metal1
+DEBUG    __kpex__:pex25d_builder.py:382 METAL Pplus: z -1 … 0, anchor of contact_psd_con
+DEBUG    __kpex__:pex25d_builder.py:390 VIA contact_psd_con: connects Pplus → Metal1
+DEBUG    __kpex__:pex25d_builder.py:382 METAL ptap: z -1 … 0, anchor of contact_ptap_con
+DEBUG    __kpex__:pex25d_builder.py:390 VIA contact_ptap_con: connects ptap → Metal1
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE fox: k=4.0 wraps subs between subs Poly2
+DEBUG    __kpex__:pex25d_builder.py:559 DIELECTRIC_CONFORMAL nit: k=7.0 wraps Poly2 over=500 beside=500 on_field=500
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE ild: k=4.0 wraps nit between Poly2 Metal1
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE imd1: k=4.0 wraps Metal1 between Metal1 Metal2
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE imd2: k=4.0 wraps Metal2 between Metal2 Metal3
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE imd3: k=4.0 wraps Metal3 between Metal3 metal4_n_cap
+DEBUG    __kpex__:pex25d_builder.py:559 DIELECTRIC_CONFORMAL capild: k=9.44 wraps metal4_cap over=420 beside=0 on_field=0
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE imd4: k=4.0 wraps capild between metal4_cap FuseTop
+DEBUG    __kpex__:pex25d_builder.py:535 DIELECTRIC_SIMPLE imd4b: k=4.0 wraps FuseTop between FuseTop Metal5
+INFO     __kpex__:pex25d_builder.py:487 DIELECTRIC_BACKGROUND air: k=1.0
