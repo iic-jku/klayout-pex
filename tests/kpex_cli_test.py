@@ -46,6 +46,7 @@ from klayout_pex.fastercap.fastercap_error import FasterCapError
 from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
+from klayout_pex.pex25d.reader import read_pex25d_text
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError
 from klayout_pex.run_result import RESULT_FILE_NAME
 from klayout_pex.tech_info import TechDefError, TechInfo
@@ -207,6 +208,23 @@ def test_halo_that_is_not_positive_is_a_usage_error(halo: str, tmp_path):
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI")
+@pytest.mark.parametrize('command_args', [['extract', '--2.5D'], ['pex25d', '--out-file', 'x.pex25d']],
+                         ids=['extract', 'pex25d'])
+def test_invalid_dielectric_filter_is_a_usage_error(command_args: List[str], tmp_path):
+    # NOTE: the message of the pattern only showed in a traceback, after the input was read (#431)
+    code, output = run_cli(KpexCLI().main, ['kpex', *command_args, '--pdk', 'sky130A', '--diel', 'all,none',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert ("argument --diel: Multiple choice pattern can't have both subpatterns all and none, got 'all,none': "
+            "give all, optionally with -name subpatterns to exclude, or none, optionally with +name subpatterns "
+            "to include, e.g. 'all,-name1,-name2' or 'none,+name1'") in output
+    assert 'Traceback' not in output
+    assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI")
 @pytest.mark.parametrize('command, option, value, expected', [
     pytest.param(command, option, value, expected, id=f'{option}={value}')
     for command, option, values, expected in (
@@ -232,6 +250,19 @@ def test_number_out_of_range_is_a_usage_error(command: str, option: str, value: 
     assert re.search(rf"argument {option}(/-\w)?: must be a finite number {re.escape(expected)}, got '{value}'",
                      output), output
     assert list(tmp_path.iterdir()) == []  # NOTE: before the run, which writes its logs into --out-dir
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX25D")
+def test_dielectric_filter_leaves_out_the_excluded_dielectrics(tmp_path):
+    output_path = tmp_path / 'nfet_li1.pex25d'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'sky130A', '--diel', 'all,-topnit',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path), '--out-file', str(output_path)])
+    assert code == 0, output
+    dielectric_names = [d.name for d in read_pex25d_text(output_path.read_bytes(), str(output_path)).dielectrics]
+    # NOTE: without --diel, the film topnit wraps topox
+    assert 'topox' in dielectric_names and 'topnit' not in dielectric_names, dielectric_names
 
 
 @allure.parent_suite("Unit Tests")
