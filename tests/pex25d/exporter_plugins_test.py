@@ -30,6 +30,7 @@ import ast
 import errno
 import json
 import logging
+import math
 from importlib import metadata
 from pathlib import Path
 import subprocess
@@ -231,6 +232,36 @@ def test_cli_rejects_export_flags_out_of_range_before_loading(
     error = capsys.readouterr().err
     assert completion.value.code == ExitCode.USAGE, error
     assert f"argument {option}: must be a finite number {expected}, got '{value}'" in error
+    assert not (tmp_path / 'deck').exists()
+
+
+@pytest.mark.parametrize('option, expected', [
+    pytest.param(option, expected, id=option)
+    for option, expected in (
+        ('delaunay_b=1.5', "'delaunay_b' must be a finite number from 0 to 1.1, got 1.5"),
+        ('delaunay_amax=-1', "'delaunay_amax' must be a finite number >= 0 (in µm²), got -1"),
+        ('field_margin_um=NaN', "'field_margin_um' must be a finite number >= 0 (in µm), got nan"),
+    )
+])
+def test_cli_rejects_export_options_out_of_range_before_building(
+        monkeypatch: pytest.MonkeyPatch, tmp_path: Path, caplog: pytest.LogCaptureFixture,
+        option: str, expected: str):
+    # NOTE: --option skipped the ranges of the export flags, a delaunay_b of 1.5 kept the triangulation
+    #       from finishing (#441)
+    from klayout_pex.fastercap.pex25d_model_builder import PEX25DFasterCapModelBuilder
+    from klayout_pex.pex25d.diagnostics import ExitCode
+    from klayout_pex.pex25d.pex25d_cli import Pex25DCLI
+
+    build = Mock(side_effect=AssertionError('options out of range must not reach meshing'))
+    monkeypatch.setattr(PEX25DFasterCapModelBuilder, 'build', build)
+    input_path = tmp_path / 'cell.pex25d'
+    input_path.write_text(MINIMAL, encoding='utf-8')
+    with pytest.raises(SystemExit) as completion:
+        Pex25DCLI().main(['pex25d', 'export', str(input_path), '--to', 'fastercap',
+                          '--out-dir', str(tmp_path / 'deck'), '--option', option])
+    assert completion.value.code == ExitCode.USAGE, caplog.text
+    assert f"Invalid options for 'fastercap': {expected}" in caplog.text
+    build.assert_not_called()
     assert not (tmp_path / 'deck').exists()
 
 
@@ -483,8 +514,8 @@ def test_empty_geometry_writers_return_only_files_written(tmp_path: Path):
 ] + [
     (name, value)
     for name in ('delaunay_amax', 'delaunay_b', 'field_margin_um')
-    for value in ('8', True, None)
-])
+    for value in ('8', True, None, -1, math.nan, math.inf)
+] + [('delaunay_b', 1.5)])
 @pytest.mark.parametrize('target', ['fastercap', 'stl'])
 def test_builtin_rejects_invalid_option_values_before_building(
         install_exporter: Callable[..., str], monkeypatch: pytest.MonkeyPatch,
@@ -501,7 +532,7 @@ def test_builtin_rejects_invalid_option_values_before_building(
     assert not output.exists()
 
 
-@pytest.mark.parametrize('number', [8, 8.0])
+@pytest.mark.parametrize('number', [1, 1.0])
 def test_builtin_numeric_options_accept_ints_and_floats(number: float):
     from klayout_pex.fastercap.pex25d_exporter import FasterCapExporterOptions
 

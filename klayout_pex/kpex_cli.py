@@ -151,7 +151,6 @@ from .tool_version_constraints import (
 from .util.multiple_choice import MultipleChoicePattern
 from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
-    DELAUNAY_B_MAX,
     SectionedHelpFormatter,
     add_argument_with_former_name,
     add_help_subcommand,
@@ -167,6 +166,7 @@ from .util.argparse_helpers import (
     true_or_false,
     warn_deprecated_options,
 )
+from .util.number_range import DELAUNAY_B_MAX
 from .version import __version__
 
 
@@ -352,7 +352,7 @@ class KpexCLI:
                                       type=float, default=3.9,
                                       help="Dielectric constant of void (default is %(default)s)")
 
-        # TODO: reflect that these are also now used by KPEX/2.5D engine!
+        # NOTE: these reach the FasterCap and FastCap2 input only, KPEX/2.5D triangulates with values of its own
         add_argument_with_former_name(group_fastercap, "--delaunay-amax", "--delaunay_amax", "-a", dest="delaunay_amax",
                                       type=non_negative_square_micrometers, default=50,
                                       help="Delaunay triangulation maximum area (default is %(default)s)")
