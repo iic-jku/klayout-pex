@@ -164,6 +164,31 @@ class Test(unittest.TestCase):
                     self.assertNotEqual('', layer.contact_above.name,
                                         "contact_above is set, but has no name")
 
+    def test_shipped_diffusions_have_alike_contacts(self):
+        # NOTE: the taps too, the same stack as the source/drain, whose contacts the FasterCap input
+        #       and the PEX25D scenes left out without them (#475)
+        #       (the n-taps of sky130A and gf180mcuD have the contact of the nwell, which the resistance network has)
+        ihp = {'nSD': 'cont_nsd_con', 'pSD': 'cont_psd_con', 'ntap': 'cont_ntap_con', 'ptap': 'cont_ptap_con'}
+        expected_by_tech = {
+            'sky130A': {'nsd': 'licon_nsd_con', 'psd': 'licon_psd_con', 'ntap_conn': None,
+                        'ptap_conn': 'licon_ptap_con'},
+            'gf180mcuD': {'Nplus': 'contact_nsd_con', 'Pplus': 'contact_psd_con', 'ntap': None,
+                          'ptap': 'contact_ptap_con'},
+            'ihp-sg13g2': ihp,
+            'ihp-sg13cmos5l': ihp,
+        }
+        paths_by_tech = {os.path.basename(path).removesuffix('_tech.pb.json'): path for path in tech_pbjson_paths()}
+        for tech_name, expected in expected_by_tech.items():
+            with self.subTest(tech=tech_name):
+                tech_info = TechInfo.from_json(paths_by_tech[tech_name], dielectric_filter=None)
+                contacts = {lyr.name: lyr.diffusion_layer.contact_above
+                            for lyr in tech_info.process_diffusion_layers
+                            if lyr.diffusion_layer.HasField('contact_above')}
+                self.assertEqual(expected, {lyr.name: contacts[lyr.name].name if lyr.name in contacts else None
+                                            for lyr in tech_info.process_diffusion_layers})
+                self.assertEqual(1, len({(contact.metal_above, contact.thickness) for contact in contacts.values()}),
+                                 contacts)
+
     def test_shipped_tech_definitions_have_tap_connections_of_their_layers(self):
         # NOTE: a tap on a layer of another name would leave its metal off its net, as the LVS layers are not checked
         paths = tech_pbjson_paths()

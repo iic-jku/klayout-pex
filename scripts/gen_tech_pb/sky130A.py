@@ -86,7 +86,7 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "licon_poly_con", (66, 4403), "licon1", "licon_poly_con", "Computed layer for contact from poly to li1")
     add_computed_layer(tech, CONT,    KREG, "licon_ntap_con", (66, 4404), "licon1", None,             "Computed layer for contact from ntap (the nwell below) to li1")
     # NOTE: part of the p-tap, as the substrate below is no conductor of the resistance network (it's ideal)
-    add_computed_layer(tech, PTAP,    KREG, "licon_ptap_con", (66, 4405), "licon1", None,             "Computed layer for contact from ptap (the substrate below) to li1")
+    add_computed_layer(tech, PTAP,    KREG, "licon_ptap_con", (66, 4405), "licon1", "licon_ptap_con", "Computed layer for contact from ptap (the substrate below) to li1")
     add_computed_layer(tech, VIA,     KREG, "mcon_con",  (67, 44),    "mcon",      "mcon_con",       "Computed layer for contact between li1 and met1")
     add_computed_layer(tech, VIA,     KREG, "via1_con",  (68, 44),    "via",       "via1_con",       "Computed layer for contact between met1 and met2")
     add_computed_layer(tech, VIA,     KREG, "via2_con",  (69, 44),    "via2",      "via2_con",       "Computed layer for contact between met2 and met3")
@@ -167,7 +167,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     pdiff = add_diffusion_layer(psi,    "psd",   -0.12,  "fox")
     # NOTE: the taps are diffusion too, the same stack as the source/drain
     add_diffusion_layer(psi,            "ntap_conn", -0.12, "fox")
-    add_diffusion_layer(psi,            "ptap_conn", -0.12, "fox")
+    ptap = add_diffusion_layer(psi,     "ptap_conn", -0.12, "fox")
 
     # FOX:                      name     dielectric_k
     #-----------------------------------------------------------------------------------------------
@@ -305,6 +305,8 @@ def build_process_stack_info(psi: ProcessStackInfo):
     licon1n = ndiff.contact_above     # licon over nsdm
     licon1p = pdiff.contact_above     # licon over nsdm
     licon1poly = poly.contact_above   # licon over poly
+    # NOTE: the licon over ntap is the contact of the nwell, which the resistance network has below it
+    liconptap = ptap.contact_above    # licon over ptap
     mcon = li1.contact_above
     via = met1.contact_above
     via2 = met2.contact_above
@@ -320,6 +322,7 @@ def build_process_stack_info(psi: ProcessStackInfo):
     set_contact(licon1n,     "licon_nsd_con",  "nsdm",      "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(licon1p,     "licon_psd_con",  "psdm",      "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(licon1poly,  "licon_poly_con", "poly",      "li1",       0.4299,                  0.17,  0.17,    0.0)
+    set_contact(liconptap,   "licon_ptap_con", "ptap_conn", "li1",       0.9361,                  0.17,  0.17,    0.0)
     set_contact(mcon,        "mcon_con",       "li1",       "met1",      1.3761 - (0.9361 + 0.1), 0.17,  0.19,    0.0)
     set_contact(via,         "via1_con",       "met1",      "met2",      0.27,                    0.15,  0.17,    0.055)
     set_contact(via2,        "via2_con",       "met2",      "met3",      0.42,                    0.20,  0.20,    0.04)
