@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import glob
 import os
+import re
 import tempfile
 from typing import *
 from unittest import mock
@@ -226,3 +227,27 @@ def test_inconsistent_netlist_only_warns_without_check(arguments: list):
     assert cli.rcx25_netlist_problems == PROBLEMS
     assert "The extracted netlist is inconsistent with the LVS netlist:\n  - port Y touches nothing" \
            in [c.args[0] for c in warning_mock.call_args_list]
+
+
+WIRES_NO_PIN_GDS = os.path.join(TEST_DESIGNS_DIR, PDK.IHP_SG13G2, 'test_patterns', 'wires_no_pin.gds.gz')
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D")
+@pytest.mark.parametrize('mode, listed_nets', [
+    ('CC', r"A \(\d+\.\d{3} fF\), B \(\d+\.\d{3} fF\)"),
+    ('R', "A, B"),
+    ('RC', r"A \(\d+\.\d{3} fF\), B \(\d+\.\d{3} fF\)"),
+])
+def test_nets_without_device_terminal_and_port_are_a_warning(mode: str, listed_nets: str):
+    # NOTE: nothing drives the wires A and B, with labels on the text layer only (#407), nor the substrate sub!
+    #       (without taps), which the warning leaves out, and --check passes (on by default in RC mode)
+    with tempfile.TemporaryDirectory() as out_dir, \
+         mock.patch('klayout_pex.kpex_cli.warning') as warning_mock:
+        cli = KpexCLI()
+        cli.main(['main', '--pdk', PDK.IHP_SG13G2, '--mode', mode,
+                  '--lvsdb', lvsdb_fixture_path(PDK.IHP_SG13G2, WIRES_NO_PIN_GDS), '--out-dir', out_dir, '--2.5D'])
+    assert cli.rcx25_netlist_problems == []
+    warnings = [c.args[0] for c in warning_mock.call_args_list if c.args[0].startswith('Nothing drives these nets')]
+    assert len(warnings) == 1 and re.fullmatch(f"Nothing drives these nets, .*: {listed_nets}", warnings[0]), \
+           warnings

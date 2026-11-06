@@ -107,6 +107,7 @@ class CellExtractionResultsTest(unittest.TestCase):
         self.assertEqual(set(expected), set(summary.capacitances))
         for key, capacitance in expected.items():
             self.assertAlmostEqual(capacitance, summary.capacitances[key], places=12)
+        self.assertEqual({'W': 'W', 'W.$1.met1': 'W'}, summary.net_by_node)
 
 
     def test_summarize_keeps_the_capacitance_between_each_pair_of_nets(self):
@@ -723,3 +724,10 @@ class ExtractionSummaryTest(unittest.TestCase):
         self.assertEqual({NetCoupleKey('A', 'B'): 3.0}, dict(summary.capacitances))
         self.assertEqual({NetCoupleKey('A', 'B'): 75.0,
                           NetCoupleKey('B', 'C'): 10.0}, summary.resistances)
+
+    def test_merged_nets_of_the_nodes(self):
+        summary = ExtractionSummary.merged([
+            ExtractionSummary(capacitances={}, resistances={}, net_by_node={'A': 'A', 'A.$1.met1': 'A'}),
+            ExtractionSummary(capacitances={}, resistances={}, net_by_node={'B.$1.met1': 'B'}),
+        ])
+        self.assertEqual({'A': 'A', 'A.$1.met1': 'A', 'B.$1.met1': 'B'}, summary.net_by_node)
