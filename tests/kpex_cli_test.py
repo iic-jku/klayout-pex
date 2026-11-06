@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from typing import *
 from unittest import mock
 
@@ -52,6 +53,16 @@ from tests.common.pdk_test_config import PDKName, PDKTestConfig
 
 
 NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1.gds.gz')
+
+PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d+(\.\d)? (B|KiB|MiB|GiB)"
+                              r"(, largest subprocess \d+(\.\d)? (B|KiB|MiB|GiB))?")
+
+
+def logged_peak_memory_stages(output: str) -> List[str]:
+    """
+    :return: the stages that the output of run_cli logs the peak memory after
+    """
+    return [match.group(1) for match in map(PEAK_MEMORY_LINE.fullmatch, output.splitlines()) if match]
 
 
 @allure.parent_suite("Unit Tests")
@@ -90,6 +101,32 @@ def test_written_netlist_csv_is_logged_as_written(tmp_path):
         with open(tmp_path / 'nfet_li1__nfet_li1' / log_name, encoding='utf-8') as f:
             log_lines = f.read().splitlines()
         assert any(line.endswith(header) for line in log_lines), log_lines
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Logging")
+def test_log_names_the_peak_memory_after_each_stage(tmp_path):
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', 'RC',
+                                            '--reduce', 'floating',
+                                            '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert logged_peak_memory_stages(output) == ['preparing the LVSDB', 'the resistance extraction',
+                                                 'the capacitance extraction', 'the netlist', 'the netlist reduction',
+                                                 'the run'], output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Logging")
+def test_log_names_the_peak_memory_of_a_failed_run(tmp_path):
+    # NOTE: e.g. to size the next run
+    failure = FasterCapError("FasterCap failed with exit code 75 (GMRES didn't converge) after 1s, see log file: x")
+    with mock.patch.object(KpexCLI, 'run_extraction', side_effect=failure):
+        code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D',
+                                                '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                                '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert logged_peak_memory_stages(output) == ['the run'], output
 
 
 @allure.parent_suite("Unit Tests")

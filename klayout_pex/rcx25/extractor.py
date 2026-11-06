@@ -36,6 +36,7 @@ from ..log import (
 )
 from ..tech_info import TechInfo
 from ..types import GDSPair, LVSLayerName
+from ..util.peak_memory import log_peak_memory
 from .extraction_results import *
 from .extraction_reporter import ExtractionReporter
 from .exclusion import BlockKind, CutLayers, ExcludedBlock, Exclusions, listed_names
@@ -535,6 +536,7 @@ class RCX25Extractor:
                 warning("Only the substrate, a well or a tap joins pieces of the metal of these nets, which the "
                         "resistance network has no resistance for, so the pieces are ideally on their nets: " +
                         ', '.join(nets_joined_by_substrate))
+            log_peak_memory('the resistance extraction')
 
         # ------------------------------------------------------------------------
         if self.pex_mode.need_capacitance():
@@ -588,5 +590,6 @@ class RCX25Extractor:
                 report=report
             )
             sidewall_and_fringe_extractor.extract()
+            log_peak_memory('the capacitance extraction')
 
         return results

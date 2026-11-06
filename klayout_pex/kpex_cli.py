@@ -146,6 +146,7 @@ from .tool_version_constraints import (
     check_tool_versions
 )
 from .util.multiple_choice import MultipleChoicePattern
+from .util.peak_memory import log_peak_memory
 from .util.argparse_helpers import (
     SectionedHelpFormatter,
     add_argument_with_former_name,
@@ -1419,6 +1420,7 @@ class KpexCLI:
             if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+            log_peak_memory('the netlist')
 
             # NOTE: the reduction reads the netlist as written, the checks above ran on the full one
             self._rcx25_reduced_netlist_path = None
@@ -1432,6 +1434,7 @@ class KpexCLI:
                     subproc(scope.describe())
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
+                log_peak_memory('the netlist reduction')
 
             # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
             #       which is converted from the SPICE netlist (as 'netlist convert' does)
@@ -1674,17 +1677,21 @@ class KpexCLI:
                 error(str(e))
                 sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
 
-            match args.command:
-                case 'pex25d':
-                    self.run_pex25d_generation(args=args, tech_info=tech_info)
-                case _:
-                    try:
-                        self.run_extraction(args=args, tech_info=tech_info)
-                    except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
-                            RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
-                            ExclusionError) as e:
-                        error(str(e))
-                        sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            try:
+                match args.command:
+                    case 'pex25d':
+                        self.run_pex25d_generation(args=args, tech_info=tech_info)
+                    case _:
+                        try:
+                            self.run_extraction(args=args, tech_info=tech_info)
+                        except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
+                                RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
+                                ExclusionError) as e:
+                            error(str(e))
+                            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
+            finally:
+                # NOTE: also of a failed run, e.g. to size the next one
+                log_peak_memory('the run')
 
     def run_pex25d_generation(self,
                               args: argparse.Namespace,
@@ -1788,6 +1795,7 @@ class KpexCLI:
         if args.run_magic:
             rule('MAGIC')
             self.run_magic_extraction(args)
+            log_peak_memory('MAGIC')
 
         # no need to run LVS etc if only running magic engine
         if not (args.run_fastcap or args.run_fastercap or args.run_2_5D):
@@ -1800,6 +1808,7 @@ class KpexCLI:
                                                                   lvsdb=lvsdb,
                                                                   tech=tech_info,
                                                                   blackbox_devices=args.blackbox_devices)
+        log_peak_memory('preparing the LVSDB')
         rule('Non-empty layers in LVS database')
         for gds_pair, layer_info in pex_context.extracted_layers.items():
             names = [l.lvs_layer_name for l in layer_info.source_layers]
@@ -1853,16 +1862,19 @@ class KpexCLI:
                                                   pex_context=pex_context,
                                                   tech_info=tech_info,
                                                   exclusions=exclusions)
+            log_peak_memory('the FasterCap input')
             if args.run_fastercap:
                 self.run_fastercap_extraction(args=args,
                                               pex_context=pex_context,
                                               lst_file=lst_file,
                                               exclusions=exclusions)
+                log_peak_memory('FasterCap')
             if args.run_fastcap:
                 self.run_fastcap_extraction(args=args,
                                             pex_context=pex_context,
                                             lst_file=lst_file,
                                             exclusions=exclusions)
+                log_peak_memory('FastCap2')
 
         if args.run_2_5D:
             rule("kpex/2.5D PEX Engine")
