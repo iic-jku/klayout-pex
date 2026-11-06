@@ -613,6 +613,11 @@ class Resolver:
             if problem is not None:
                 self.diagnose('PEX25D-E0252', problem, source=self.file.domain_box)
                 return
+            if bounds is not None:
+                problem = geometry_outside_problem(self.file.domain_box.box,
+                                                   scene.domain.geometry_bounds, 'DOMAIN_BOX')
+                if problem is not None:
+                    self.diagnose('PEX25D-E0254', problem, source=self.file.domain_box)
             scene.domain.box.CopyFrom(self.file.domain_box.box)
             scene.domain.origin = origins.ORIGIN_DOMAIN_BOX
             return
@@ -731,6 +736,26 @@ def domain_box_problem(box: Any, what: str) -> Optional[str]:
     ll, ur = box.lower_left, box.upper_right
     return (f"{what} is empty: LL ({ll.x}, {ll.y}, {ll.z}) is not below UR "
             f"({ur.x}, {ur.y}, {ur.z}) in {', '.join(empty)}")
+
+
+def geometry_outside_problem(box: Any, geometry_bounds: Any, what: str) -> Optional[str]:
+    """
+    Why the finite geometry is not within a domain ``Box3D``, or ``None``.
+
+    The geometry may touch the faces of the box. What is not finite (the ground
+    plane, bands, films covering the field) is clipped to the box instead.
+    """
+    faces = []
+    for axis in 'xyz':
+        if getattr(geometry_bounds.lower_left, axis) < getattr(box.lower_left, axis):
+            faces.append(f"-{axis}")
+        if getattr(geometry_bounds.upper_right, axis) > getattr(box.upper_right, axis):
+            faces.append(f"+{axis}")
+    if not faces:
+        return None
+    ll, ur = geometry_bounds.lower_left, geometry_bounds.upper_right
+    return (f"The finite geometry, from ({ll.x}, {ll.y}, {ll.z}) to ({ur.x}, "
+            f"{ur.y}, {ur.z}), reaches beyond {what} in {', '.join(faces)}")
 
 
 def clip_polygon(polygon: Any, region: Any) -> Optional[List[Any]]:

@@ -428,15 +428,21 @@ class Validator:
 
     def check_scene_domain(self, scene: Any):
         """The same rules the resolver applies to DOMAIN_BOX and DOMAIN_MARGIN."""
-        from .resolver import domain_box_problem, domain_margin_problem
+        from .resolver import domain_box_problem, domain_margin_problem, geometry_outside_problem
 
         if not scene.HasField('domain'):
             return
         domain = scene.domain
+        origins = pex25d_scene_pb2().ResolvedDomain
         if domain.HasField('box'):
             problem = domain_box_problem(domain.box, 'The domain box')
             if problem is not None:
                 self.diagnose('PEX25D-E0252', problem)
+            elif domain.origin == origins.ORIGIN_DOMAIN_BOX and domain.HasField('geometry_bounds'):
+                problem = geometry_outside_problem(domain.box, domain.geometry_bounds,
+                                                   'the domain box')
+                if problem is not None:
+                    self.diagnose('PEX25D-E0254', problem)
         if domain.HasField('applied_margin'):
             problem = domain_margin_problem(domain.applied_margin,
                                             'The applied domain margin')
