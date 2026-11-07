@@ -1,0 +1,27 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/sideoverlap_complex_m1_m2.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_complex_m1_m2__sideoverlap_complex_m1_m2/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 840.2 MiB
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2011 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:1466 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 840.3 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 840.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 C1;Complex_Shape_B;UPPER;0.966;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C2;Complex_Shape_B;VSUBS;3.064;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C3;Complex_Shape_L;UPPER;0.22;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C4;Complex_Shape_L;VSUBS;3.064;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C5;Complex_Shape_R;UPPER;0.1;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C6;Complex_Shape_R;VSUBS;3.064;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C7;Complex_Shape_T;UPPER;0.089;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C8;Complex_Shape_T;VSUBS;3.064;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C9;UPPER;VSUBS;9.625;
+SUBPROCESS __kpex__:kpex_cli.py:1501 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_complex_m1_m2__sideoverlap_complex_m1_m2/sideoverlap_complex_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/sideoverlap_complex_m1_m2__sideoverlap_complex_m1_m2/sideoverlap_complex_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 840.6 MiB
+WARNING  __kpex__:kpex_cli.py:1571 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: Complex_Shape_B (4.030 fF), Complex_Shape_L (3.284 fF), Complex_Shape_R (3.165 fF), Complex_Shape_T (3.153 fF)
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 840.6 MiB
