@@ -243,12 +243,22 @@ Register a zero-argument factory returning a `PEX25DImporter` from
 
 Selectors, collisions and discovery work as for exporters.
 
-The built-in `openrcx-uf` is a stub for OpenRCX Universal Pattern Format (UF) input:
-- `pex25d import --from openrcx-uf` exits 3 (not implemented yet)
-- `OpenRCXUFImporter.placeholder_file()` in `klayout_pex/openrcx/pex25d_importer.py`
-  is the template:
-  it fills every part of a `PEX25DFile` with placeholders, each `TODO(UF)` names what
-  the Universal Pattern Format input has to provide
+The built-in `openrcx-uf` imports OpenRCX Universal Pattern Format (UF) 3D patterns:
+- rectangular wires with `LENGTH` and exactly one `GROUND_PLANE`
+- other input raises `ImporterError`
+- one `METAL` per wire-name prefix (`M1_w2` → `M1`), one conductor and box per wire
+- the domain is `WINDOW_BBOX` extended by `SIM_WIN_EXT`, starting at the top of the
+  ground plane
+- dielectrics and the window below the top of the ground plane are cut off there, so
+  heights from the substrate (`gen_solver_patterns -version 1`, the default) and heights
+  from the top of the plane (`-version 2`) import alike
+- each UF dielectric except the topmost becomes a `DIELECTRIC_SIMPLE` between anchor
+  profiles at its bottom and top: an existing ground plane or metal bottom face where
+  one lies at that height, otherwise a shape-less 1-grid-unit `METAL` `uf_anchor_<i>`,
+  listed in `META uf_anchors`
+- the topmost UF dielectric becomes the background
+- `OpenRCXUFImporter.placeholder_file()` is a template for new importers: it fills
+  every part of a `PEX25DFile` with placeholders
 
 ```bash
 pex25d importers
