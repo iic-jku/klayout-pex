@@ -211,6 +211,9 @@ The built-in `openrcx-uf` imports OpenRCX Universal Pattern Format (UF) 3D patte
 - one `METAL` per wire-name prefix (`M1_w2` → `M1`), one conductor and box per wire
 - the domain is `WINDOW_BBOX` extended by `SIM_WIN_EXT`, starting at the top of the
   ground plane
+- dielectrics and the window below the top of the ground plane are cut off there, so
+  heights from the substrate (`gen_solver_patterns -version 1`, the default) and heights
+  from the top of the plane (`-version 2`) import alike
 - each UF dielectric except the topmost becomes a `DIELECTRIC_SIMPLE` between anchor
   profiles at its bottom and top: an existing ground plane or metal bottom face where
   one lies at that height, otherwise a shape-less 1-grid-unit `METAL` `uf_anchor_<i>`,

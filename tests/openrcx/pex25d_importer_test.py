@@ -138,6 +138,42 @@ def test_import_uf_dielectric_stack(tmp_path: Path):
     assert (simple['m1_1'].source.file, simple['m1_1'].source.line) == (source, 4)
 
 
+# Absolute heights (gen_solver_patterns -version 1): the plane, a lower metal, lies above 0,
+# while the dielectrics start at 0. Below the plane top at 0.5: sub is dropped, ild cut to 0.5.
+UF_ABSOLUTE_GROUND_PLANE = ('GROUND_PLANE 0 M0_w0  HEIGHT 0.0 0.0  THICKNESS 0.0',
+                            'GROUND_PLANE 1 M0_w0  HEIGHT 0.400 0.500  THICKNESS 0.100')
+UF_ABSOLUTE_DIELECTRIC_STACK = """\
+DIELECTRIC sub HEIGHT 0.000 0.300 EPSILON 4.1
+DIELECTRIC ild HEIGHT 0.300 0.650 EPSILON 7.0
+DIELECTRIC imd HEIGHT 0.650 1.000 EPSILON 4.3
+DIELECTRIC air_2 HEIGHT 1.000 13.930 EPSILON 2.9
+"""
+
+
+def test_import_uf_absolute_heights(tmp_path: Path):
+    source = str(write_uf_pattern(tmp_path, UF_ABSOLUTE_DIELECTRIC_STACK,
+                                  replace=UF_ABSOLUTE_GROUND_PLANE))
+    pex25d_file = pex25d.import_file(source, 'openrcx-uf')
+    assert_valid(pex25d_file)
+
+    assert (pex25d_file.ground_plane.zlow, pex25d_file.ground_plane.zhigh) == (400, 500)
+    assert pex25d_file.domain_box.box.lower_left.z == 500
+    z = {metal.name: (metal.zlow, metal.zhigh) for metal in pex25d_file.metals}
+    assert z == {'M1': (650, 900), 'uf_anchor_0': (1000, 1001)}
+    assert [(dielectric.name, dielectric.simple.between_below, dielectric.simple.between_above)
+            for dielectric in pex25d_file.dielectrics] == [('ild', 'M0_w0', 'M1'),
+                                                           ('imd', 'M1', 'uf_anchor_0')]
+    assert pex25d_file.background.name == 'air_2'
+
+
+def test_import_uf_rejects_dielectrics_below_ground_plane_only(tmp_path: Path):
+    source = write_uf_pattern(tmp_path, 'DIELECTRIC sub HEIGHT 0.000 0.500 EPSILON 4.1\n',
+                              replace=UF_ABSOLUTE_GROUND_PLANE)
+    with pytest.raises(pex25d.ImporterError,
+                       match='no DIELECTRIC above the top of the ground plane, 0.5 µm'):
+        pex25d.import_file(str(source), 'openrcx-uf')
+
+
 @pytest.mark.parametrize('dielectrics, message', [
     ('', 'no DIELECTRIC'),
     ('DIELECTRIC d1 HEIGHT 0.100 13.930 EPSILON 4.1\n', 'd1 starts at 0.1 µm, not at 0.0 µm'),
@@ -176,7 +212,9 @@ def test_import_uf_rejects_dielectric_stack(tmp_path: Path, dielectrics: str, me
      'pattern.uf:2: GROUND_PLANE M0_w0 has HEIGHT 0.0 … 0.5 µm, but THICKNESS 0.0 µm'),
     ('WINDOW_BBOX  LL -0.280 0.000', 'WINDOW_BBOX  LL -0.280 0.200',
      r'pattern.uf:6: the window \(WINDOW_BBOX and SIM_WIN_EXT\) starts at z 0.2 µm, '
-     r'not at the top of the ground plane, 0.0 µm'),
+     r'above the top of the ground plane, 0.0 µm'),
+    ('HEIGHT 0.0 0.0  THICKNESS 0.0', 'HEIGHT 0.600 0.700  THICKNESS 0.100',
+     'pattern.uf:4: wire M1_w1 starts at z 0.65 µm, below the top of the ground plane, 0.7 µm'),
 ])
 def test_import_uf_rejects_pattern(tmp_path: Path, old: str, new: str, message: str):
     with pytest.raises(pex25d.ImporterError, match=message):

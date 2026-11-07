@@ -286,7 +286,8 @@ def _set_ground_plane(pex25d_file: PEX25DFile, uf_ground_plane: _UFGroundPlane,
 def _set_domain(pex25d_file: PEX25DFile, pattern: _UFPattern, input_file_path: str):
     """
     x and z from WINDOW_BBOX, y from 0 to its LENGTH; SIM_WIN_EXT is added to every bound.
-    The lower z face is the ground plane's top (pex25d_domain.proto): the window must start there.
+    The lower z face is the ground plane's top (pex25d_domain.proto): a window starting below
+    it is cut off there, as nothing below the plane couples to the wires.
     """
     window, ext = pattern.window, pattern.window_ext
     x1, z1, x2, z2 = window.x1, window.z1, window.x2, window.z2
@@ -296,10 +297,10 @@ def _set_domain(pex25d_file: PEX25DFile, pattern: _UFPattern, input_file_path: s
         y1, y2 = y1 + ext.min_y, y2 + ext.max_y
     where = _where(input_file_path, window.line)
     zlow = pex25d_file.ground_plane.zhigh
-    if _to_grid(z1, where) != zlow:
+    if _to_grid(z1, where) > zlow:
         raise pex25d.ImporterError(
             f"{where}: the window (WINDOW_BBOX and SIM_WIN_EXT) starts at z {z1:g} µm, "
-            f"not at the top of the ground plane, {_to_um(zlow)} µm")
+            f"above the top of the ground plane, {_to_um(zlow)} µm")
     box = pex25d_file.domain_box.box
     box.lower_left.x = _to_grid(x1, where)
     box.lower_left.y = _to_grid(y1, where)
@@ -318,22 +319,31 @@ def _build_dielectric_stack(pex25d_file: PEX25DFile, pattern: _UFPattern, input_
     dielectric, as it occupies everything below its own top. A metal anchors the height of
     its bottom face. Every other height gets a shape-less 1-grid-unit METAL 'uf_anchor_<i>'.
     The topmost UF dielectric becomes the background.
+
+    Nothing below the ground plane couples to the wires: dielectrics below its top are
+    dropped, and one reaching across it starts there. So both absolute heights (from the
+    substrate) and heights normalized to the top of the plane import alike.
     """
     if not pattern.dielectrics:
         raise pex25d.ImporterError(f"{input_file_path}: no DIELECTRIC")
 
     ground_plane = pex25d_file.ground_plane
     heights: List[Tuple[int, int]] = []
-    previous_zhigh = ground_plane.zhigh
+    previous_zhigh: Optional[int] = None
 
     for uf_dielectric in pattern.dielectrics:
         where = _where(input_file_path, uf_dielectric.line)
         zlow = _to_grid(uf_dielectric.zlow, where)
         zhigh = _to_grid(uf_dielectric.zhigh, where)
-        if zlow != previous_zhigh:
+        # the lowest dielectric may start below the top of the ground plane, not above it
+        if previous_zhigh is None:
+            expected_zlow, gap = ground_plane.zhigh, zlow > ground_plane.zhigh
+        else:
+            expected_zlow, gap = previous_zhigh, zlow != previous_zhigh
+        if gap:
             raise pex25d.ImporterError(
                 f"{where}: dielectric {uf_dielectric.name} starts at {uf_dielectric.zlow} µm, "
-                f"not at {_to_um(previous_zhigh)} µm where the ground plane or the "
+                f"not at {_to_um(expected_zlow)} µm where the ground plane or the "
                 f"dielectric below it ends")
         if zhigh <= zlow:
             raise pex25d.ImporterError(
@@ -341,7 +351,16 @@ def _build_dielectric_stack(pex25d_file: PEX25DFile, pattern: _UFPattern, input_
         heights.append((zlow, zhigh))
         previous_zhigh = zhigh
 
-    top = pattern.dielectrics[-1]
+    # (UF dielectric, its z range above the top of the ground plane)
+    kept = [(uf_dielectric, (max(zlow, ground_plane.zhigh), zhigh))
+            for uf_dielectric, (zlow, zhigh) in zip(pattern.dielectrics, heights)
+            if zhigh > ground_plane.zhigh]
+    if not kept:
+        raise pex25d.ImporterError(
+            f"{input_file_path}: no DIELECTRIC above the top of the ground plane, "
+            f"{_to_um(ground_plane.zhigh)} µm")
+
+    top = kept[-1][0]
     background = pex25d_file.background
     background.name = top.name
     background.permittivity = top.epsilon
@@ -349,7 +368,7 @@ def _build_dielectric_stack(pex25d_file: PEX25DFile, pattern: _UFPattern, input_
     anchors: Dict[int, str] = {ground_plane.zhigh: ground_plane.name}
     anchors.update({metal.zlow: metal.name for metal in pex25d_file.metals})
     anchor_names: List[str] = []
-    for uf_dielectric, (zlow, zhigh) in zip(pattern.dielectrics[:-1], heights):
+    for uf_dielectric, (zlow, zhigh) in kept[:-1]:
         for z in (zlow, zhigh):
             if z not in anchors:
                 metal = pex25d_file.metals.add()
@@ -410,6 +429,10 @@ class OpenRCXUFImporter(PEX25DImporter):
                     f"{where}: wire {wire.name} spans z {_to_um(z[0])} … {_to_um(z[1])} µm, "
                     f"other wires of layer {layer} span "
                     f"{_to_um(metal_z[layer][0])} … {_to_um(metal_z[layer][1])} µm")
+            if z[0] < pex25d_file.ground_plane.zhigh:
+                raise pex25d.ImporterError(
+                    f"{where}: wire {wire.name} starts at z {_to_um(z[0])} µm, below the top "
+                    f"of the ground plane, {_to_um(pex25d_file.ground_plane.zhigh)} µm")
         for layer, (zlow, zhigh) in metal_z.items():
             metal = pex25d_file.metals.add()
             metal.name = layer
