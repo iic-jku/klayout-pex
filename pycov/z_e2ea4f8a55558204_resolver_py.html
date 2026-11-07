@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">497 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">477<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">20<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">479<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">18<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_e2ea4f8a55558204_show_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -286,7 +286,7 @@
     <p class="run"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">        <span class="nam">scene</span><span class="op">.</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">zlow</span> <span class="op">=</span> <span class="nam">ground_plane</span><span class="op">.</span><span class="nam">zlow</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t205" href="#t205">205</a></span><span class="t">        <span class="nam">scene</span><span class="op">.</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">zhigh</span> <span class="op">=</span> <span class="nam">ground_plane</span><span class="op">.</span><span class="nam">zhigh</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t206" href="#t206">206</a></span><span class="t">        <span class="key">if</span> <span class="nam">ground_plane</span><span class="op">.</span><span class="nam">HasField</span><span class="op">(</span><span class="str">&#x27;source&#x27;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t">            <span class="nam">scene</span><span class="op">.</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">source</span><span class="op">.</span><span class="nam">CopyFrom</span><span class="op">(</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t">            <span class="nam">scene</span><span class="op">.</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">source</span><span class="op">.</span><span class="nam">CopyFrom</span><span class="op">(</span><span class="nam">ground_plane</span><span class="op">.</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t208" href="#t208">208</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t209" href="#t209">209</a></span><span class="t">    <span class="key">def</span> <span class="nam">resolve_layers</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">scene</span><span class="op">:</span> <span class="nam">Any</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t210" href="#t210">210</a></span><span class="t">        <span class="nam">kinds</span> <span class="op">=</span> <span class="nam">pex25d_scene_pb2</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">ResolvedLayer</span>&nbsp;</span><span class="r"></span></p>
@@ -453,7 +453,7 @@
     <p class="run"><span class="n"><a id="t371" href="#t371">371</a></span><span class="t">                <span class="nam">resolved</span><span class="op">.</span><span class="nam">between_above</span> <span class="op">=</span> <span class="nam">dielectric</span><span class="op">.</span><span class="nam">simple</span><span class="op">.</span><span class="nam">between_above</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t372" href="#t372">372</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t373" href="#t373">373</a></span><span class="t">            <span class="key">if</span> <span class="nam">dielectric</span><span class="op">.</span><span class="nam">HasField</span><span class="op">(</span><span class="str">&#x27;source&#x27;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t374" href="#t374">374</a></span><span class="t">                <span class="nam">resolved</span><span class="op">.</span><span class="nam">source</span><span class="op">.</span><span class="nam">CopyFrom</span><span class="op">(</span><span class="nam">dielectric</span><span class="op">.</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t374" href="#t374">374</a></span><span class="t">                <span class="nam">resolved</span><span class="op">.</span><span class="nam">source</span><span class="op">.</span><span class="nam">CopyFrom</span><span class="op">(</span><span class="nam">dielectric</span><span class="op">.</span><span class="nam">source</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t375" href="#t375">375</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t376" href="#t376">376</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">HasField</span><span class="op">(</span><span class="str">&#x27;background&#x27;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t377" href="#t377">377</a></span><span class="t">            <span class="nam">scene</span><span class="op">.</span><span class="nam">background</span><span class="op">.</span><span class="nam">name</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">background</span><span class="op">.</span><span class="nam">name</span>&nbsp;</span><span class="r"></span></p>
@@ -965,7 +965,7 @@
             <a class="nav" href="z_e2ea4f8a55558204_show_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
     </div>
 </footer>

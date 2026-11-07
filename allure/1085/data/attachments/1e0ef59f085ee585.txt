@@ -1,0 +1,32 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_tap_wire_through.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_tap_wire_through__exclusion_tap_wire_through\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 824.7 MiB
+INFO     __kpex__:kpex_cli.py:2011 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2011 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2011 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2011 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2011 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1466 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 824.7 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 824.7 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 C1;VSUBS;sub!;0.201;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C2;VSUBS;sub!.$1.Metal1;0.201;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C3;VSUBS;sub!.$2.Metal2;2.781;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C4;VSUBS;sub!.$3.Metal2;0.18;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C5;VSUBS;W;3.554;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C6;W;sub!.$1.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1498 C7;W;sub!.$2.Metal2;0.031;
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;sub!;sub!.$1.Metal1;;1.467
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;sub!;sub!.$2.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;sub!.$1.Metal1;sub!.$3.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;sub!.$2.Metal2;sub!.$3.Metal2;;1.027
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_tap_wire_through__exclusion_tap_wire_through\exclusion_tap_wire_through_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_tap_wire_through__exclusion_tap_wire_through\exclusion_tap_wire_through_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 824.7 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 824.7 MiB

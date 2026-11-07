@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/pex25d/pex25d_cli.py: 96%</title>
+    <title>Coverage for klayout_pex/pex25d/pex25d_cli.py: 95%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>pex25d<span class="sep">/</span>pex25d_cli.py</b>:
-            <span class="pc_cov">96%</span>
+            <span class="pc_cov">95%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">339 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">325<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">14<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">323<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">16<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_e2ea4f8a55558204_protobuf_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -774,8 +774,8 @@
     <p class="run"><span class="n"><a id="t692" href="#t692">692</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t693" href="#t693">693</a></span><span class="t">            <span class="nam">note</span> <span class="op">=</span> <span class="nam">handler</span><span class="op">(</span><span class="nam">args</span><span class="op">,</span> <span class="nam">report</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t694" href="#t694">694</a></span><span class="t">        <span class="key">except</span> <span class="nam">NotImplementedError</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t695" href="#t695">695</a></span><span class="t">            <span class="nam">error</span><span class="op">(</span><span class="nam">str</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t696" href="#t696">696</a></span><span class="t">            <span class="nam">sys</span><span class="op">.</span><span class="nam">exit</span><span class="op">(</span><span class="nam">ExitCode</span><span class="op">.</span><span class="nam">NOT_IMPLEMENTED</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t695" href="#t695">695</a></span><span class="t">            <span class="nam">error</span><span class="op">(</span><span class="nam">str</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t696" href="#t696">696</a></span><span class="t">            <span class="nam">sys</span><span class="op">.</span><span class="nam">exit</span><span class="op">(</span><span class="nam">ExitCode</span><span class="op">.</span><span class="nam">NOT_IMPLEMENTED</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t697" href="#t697">697</a></span><span class="t">        <span class="key">except</span> <span class="nam">ArgumentValidationError</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t698" href="#t698">698</a></span><span class="t">            <span class="nam">error</span><span class="op">(</span><span class="nam">str</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t699" href="#t699">699</a></span><span class="t">            <span class="nam">sys</span><span class="op">.</span><span class="nam">exit</span><span class="op">(</span><span class="nam">ExitCode</span><span class="op">.</span><span class="nam">USAGE</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -841,7 +841,7 @@
             <a class="nav" href="z_e2ea4f8a55558204_protobuf_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
     </div>
 </footer>

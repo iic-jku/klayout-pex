@@ -1,0 +1,19 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_inductor2_leads_in_top.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_inductor2_leads_in_top.gds.gz' --exclusion-markers ignore --cut ind=xind
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'cut_inductor2_leads_in_top'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_inductor2_leads_in_top__cut_inductor2_leads_in_top\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 612.0 MiB
+INFO     __kpex__:kpex_cli.py:2011 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:2011 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2011 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:extractor.py:181 The netlist leaves out the 1 devices of the cut cells
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 612.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;A;xind__inductor_1;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;B;xind__inductor_2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_inductor2_leads_in_top__cut_inductor2_leads_in_top\cut_inductor2_leads_in_top_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_inductor2_leads_in_top__cut_inductor2_leads_in_top\cut_inductor2_leads_in_top_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 612.5 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 612.5 MiB

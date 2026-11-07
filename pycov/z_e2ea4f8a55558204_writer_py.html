@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/pex25d/writer.py: 90%</title>
+    <title>Coverage for klayout_pex/pex25d/writer.py: 91%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>pex25d<span class="sep">/</span>writer.py</b>:
-            <span class="pc_cov">90%</span>
+            <span class="pc_cov">91%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">242 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">218<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">24<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">220<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">22<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_9ff007ef64f33569___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -539,14 +539,14 @@
     <p class="run"><span class="n"><a id="t457" href="#t457">457</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">emit</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">DOMAIN_MARGIN X </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">margin</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t458" href="#t458">458</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="fst">Y </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">margin</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span><span class="op">}</span><span class="fst"> Z </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">margin</span><span class="op">.</span><span class="nam">z</span><span class="op">)</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t459" href="#t459">459</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t460" href="#t460">460</a></span><span class="t">            <span class="nam">box</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">domain_box</span><span class="op">.</span><span class="nam">box</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t461" href="#t461">461</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">emit</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">DOMAIN_BOX </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t462" href="#t462">462</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="fst">LL </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t463" href="#t463">463</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t464" href="#t464">464</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">z</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t465" href="#t465">465</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="fst">UR </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t466" href="#t466">466</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t467" href="#t467">467</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">z</span><span class="op">)</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t460" href="#t460">460</a></span><span class="t">            <span class="nam">box</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">domain_box</span><span class="op">.</span><span class="nam">box</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t461" href="#t461">461</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">emit</span><span class="op">(</span><span class="fst">f&quot;</span><span class="fst">DOMAIN_BOX </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t462" href="#t462">462</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="fst">LL </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t463" href="#t463">463</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t464" href="#t464">464</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">lower_left</span><span class="op">.</span><span class="nam">z</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t465" href="#t465">465</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="fst">UR </span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t466" href="#t466">466</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span><span class="op">}</span><span class="fst"> </span><span class="fst">&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t467" href="#t467">467</a></span><span class="t">                      <span class="fst">f&quot;</span><span class="op">{</span><span class="nam">self</span><span class="op">.</span><span class="nam">length</span><span class="op">(</span><span class="nam">box</span><span class="op">.</span><span class="nam">upper_right</span><span class="op">.</span><span class="nam">z</span><span class="op">)</span><span class="op">}</span><span class="fst">&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t468" href="#t468">468</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t469" href="#t469">469</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t470" href="#t470">470</a></span><span class="t"><span class="key">def</span> <span class="nam">write_pex25d_text</span><span class="op">(</span><span class="nam">message</span><span class="op">:</span> <span class="nam">Any</span><span class="op">,</span> <span class="nam">comments</span><span class="op">:</span> <span class="nam">bool</span> <span class="op">=</span> <span class="key">False</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">bytes</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -565,7 +565,7 @@
             <a class="nav" href="z_9ff007ef64f33569___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-06 20:53 +0000
+            created at 2026-11-07 09:52 +0000
         </p>
     </div>
 </footer>
