@@ -109,6 +109,13 @@ message DeviceModelParameter {
     //
     // e.g. IHP cap_cmomi, whose array has whole unit cells: w = 5 µm is 5 rows of 0.89 µm, so 4.45 µm
     optional double lvs_parameter_floor_pitch = 21;
+
+    // Overrides of `lvs_parameter_factor` when reading a schematic, by uppercase SPICE instance prefix.
+    // Export still uses `lvs_parameter_factor`. An unlisted prefix uses that factor too.
+    //
+    // e.g. a model whose `X` calls take micrometres, while native `M` lines take metres:
+    // {"M": 1e-6} for lengths and {"M": 1e-12} for areas, from LVS values in µm and µm².
+    map<string, double> schematic_parameter_factors = 22;
 }
 
 // A side of the rectangle with the area and perimeter of a device,

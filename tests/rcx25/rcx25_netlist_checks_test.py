@@ -27,6 +27,7 @@ import glob
 import os
 import re
 import tempfile
+from pathlib import Path
 from typing import *
 from unittest import mock
 
@@ -172,6 +173,44 @@ def test_device_totals_of_a_cmomi_are_those_of_its_array(w: str, l: str, problem
 def test_device_totals_of_a_cmomi_as_xschem_writes_it():
     # NOTE: double is a .param of the model library, which the schematic doesn't include (#399)
     assert cmomi_device_totals_problems('w=5e-6 l=5e-6 mmin=1 mmax=5 feed=double subblock=0 m=1 mm_ok=1') == []
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.parametrize('prefix, suffix, matches_layout', [
+    ('M', 'u', True),
+    ('M', '', False),
+    ('XM', '', True),
+])
+def test_schematic_mos_units(prefix: str, suffix: str, matches_layout: bool, tmp_path: Path):
+    # NOTE: native `M` dimensions are in metres, while these simulation subcircuits take micrometres (#497)
+    classes = ['sky130_fd_pr__nfet_01v8_lvt', 'sky130_fd_pr__pfet_01v8_lvt']
+    source = '* inv\n.subckt inv\n' + '\n'.join(
+        f'{prefix}{index} a b c d {name} L=0.45{suffix} W=1.5{suffix} m=6'
+        for index, name in enumerate(classes, start=1)) + '\n.ends\n'
+    models = TechInfo.from_json(PDK.SKY130A.config.tech_pb_json_path, dielectric_filter=None).device_models
+    schematic = schematic_devices(netlist=SpiceReader().parse(source), device_models=models, top_cell_name='inv')
+    lvsdb = kdb.LayoutVsSchematic()
+    lvsdb.read(lvsdb_fixture_path(PDK.SKY130A, os.path.join(TEST_DESIGNS_DIR, PDK.SKY130A, 'inv/inv.gds.gz')))
+    expected = [] if matches_layout else [
+        f'the schematic has Σ {quantity} = {total} of class {name}, the LVS netlist {layout_total}'
+        for name in classes
+        for quantity, total, layout_total in [('W·L', '4.05e+12', '4.05'), ('W', '9000000', '9')]
+    ]
+    assert check_schematic_device_totals(lvsdb.netlist(), schematic, models) == expected
+
+    if prefix == 'M':
+        path = tmp_path / 'inv.cdl'
+        path.write_text(source, encoding='utf-8')
+        reference = kdb.Netlist()
+        reference.read(str(path), kdb.NetlistSpiceReader())
+        devices = list(reference.top_circuit().each_device())
+        assert sorted(device.device_class().name.lower() for device in devices) == classes
+        for device in devices:
+            schematic_device = schematic.devices_by_class_name[device.device_class().name.lower()][0]
+            # NOTE: `KLayout` folds `m` into the MOS width, KPEX keeps it separate for the totals
+            assert schematic_device.lvs_parameters['W'] * schematic_device.m == pytest.approx(device.parameter('W'))
+            assert schematic_device.lvs_parameters['L'] == pytest.approx(device.parameter('L'))
 
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")

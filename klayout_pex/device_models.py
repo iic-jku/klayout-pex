@@ -129,7 +129,8 @@ class DeviceModels:
         """
         The LVS parameters of a device of a schematic, the reverse of the mapping's parameters
         (e.g. W = 1, in µm, of w=1u of an IHP MOS), floored as by its model (see lvs_parameter_floor_pitch),
-        and the area and perimeter of the rectangle of a model's sides
+        and the area and perimeter of the rectangle of a model's sides.
+        A `schematic_parameter_factors` entry for the element's prefix overrides the export factor.
 
         :param element: with its parameters as numbers (e.g. of SpiceHierarchy)
         :return: by LVS parameter name, without those whose model parameters the device doesn't give
@@ -142,6 +143,7 @@ class DeviceModels:
             if value is None:
                 continue
             factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
+            factor = p.schematic_parameter_factors.get(element.kind, factor)
             match p.WhichOneof('value'):
                 case 'lvs_parameter_name':
                     value /= factor

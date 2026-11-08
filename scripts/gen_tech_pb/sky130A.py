@@ -541,9 +541,10 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #       as the LVS device classes store them.
     #       The terminal order of each model is the one of the LVS netlist reader,
     #       i.e. KLayout's standard one, and VPP caps with 4 terminals are read as MOS4 (see sky130.lvs)
-    mos = [lvs_param('l', 'L'), lvs_param('w', 'W'),
-           lvs_param('as', 'AS'), lvs_param('ad', 'AD'),
-           lvs_param('ps', 'PS'), lvs_param('pd', 'PD')]
+    # Native `M` lines use SI dimensions in `KLayout`'s SPICE reader, unlike the simulation `X` calls (#497).
+    mos = [lvs_param(name, name.upper(), schematic_factors={'M': factor})
+           for name, factor in (('l', 1e-6), ('w', 1e-6), ('as', 1e-12), ('ad', 1e-12),
+                                ('ps', 1e-6), ('pd', 1e-6))]
     for fet in ('nfet_01v8', 'nfet_01v8_lvt', 'nfet_03v3_nvt', 'nfet_05v0_nvt', 'nfet_g5v0d10v5',
                 'pfet_01v8', 'pfet_01v8_hvt', 'pfet_01v8_lvt', 'pfet_g5v0d10v5'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__{fet}", "X", ["D", "G", "S", "B"], mos)
