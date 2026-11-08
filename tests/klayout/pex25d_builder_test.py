@@ -103,6 +103,7 @@ class TerminalFixture:
         air.simple_dielectric_layer.dielectric_k = 1.0
         self.tech = TechInfo(tech, None)
         self.context = SimpleNamespace(
+            port_label_keys=None,
             dbu=0.001, top_circuit=self.circuit,
             shapes_of_net=self.shapes_of_net,
             pins_of_layer=lambda pair: self.pins,

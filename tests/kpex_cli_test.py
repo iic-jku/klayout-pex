@@ -69,6 +69,41 @@ PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d
                               r"(, largest subprocess \d+(\.\d)? (B|KiB|MiB|GiB))?")
 
 
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Ports")
+@pytest.mark.parametrize('command', ['extract', 'pex25d'])
+@pytest.mark.parametrize('policy, message', [
+    ('unknown', "invalid choice: 'unknown' (choose from 'auto', 'top')"),
+    ('top', '--port-labels top needs --gds'),
+])
+def test_port_policy_is_validated_before_loading_inputs(command: str, policy: str, message: str, tmp_path: Path):
+    with mock.patch.object(kdb.LayoutVsSchematic, 'read', side_effect=AssertionError('must not load LVSDB')):
+        code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A',
+                                                '--lvsdb', '/nonexistent/layout.lvsdb',
+                                                '--port-labels', policy, '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert message in ' '.join(output.split()), output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX25D", "Ports")
+@pytest.mark.parametrize('pattern, policy, pin_names', [
+    ('internal_child_labels', 'auto', ['pin:outer']),
+    ('label_only_in_child_cell', 'auto', ['pin:inner']),
+    ('label_only_in_child_cell', 'top', []),
+])
+def test_pex25d_terminals_follow_the_port_label_policy(pattern: str, policy: str, pin_names: List[str], tmp_path: Path):
+    gds = PDKTestConfig(PDKName.IHP_SG13G2).gds_path('test_patterns', f'{pattern}.gds.gz')
+    path = tmp_path / 'ports.pex25d'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'ihp-sg13g2',
+                                            '--lvsdb', lvsdb_fixture_path('ihp-sg13g2', gds), '--gds', gds,
+                                            '--port-labels', policy, '--out-file', str(path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    scene = read_pex25d_text(path.read_bytes(), str(path))
+    assert sorted(terminal.name for terminal in scene.terminals if terminal.name.startswith('pin:')) == pin_names
+
+
 def logged_peak_memory_stages(output: str) -> List[str]:
     """
     :return: the stages that the output of run_cli logs the peak memory after

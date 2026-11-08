@@ -58,7 +58,7 @@ from .fastcap.fastcap_runner import run_fastcap, fastcap_parse_capacitance_matri
 from .fastcap.output_interpreter import FastCapOutputInterpreter
 from .klayout.lvs_cache import LVSCacheEntry, LVSInputFingerprint, lvs_input_fingerprint
 from .klayout.lvs_runner import LVSError, LVSRunner
-from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError
+from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError, PORT_LABEL_MODES
 from .klayout.netlist_expander import NetlistExpander
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_printer import NetlistHeader, NetlistPrinter
@@ -320,6 +320,11 @@ class KpexCLI:
                                           "interchange format — use PEX25D for that")
         group_pex_input.add_argument("--cell", "-c", dest="cell_name", default=None,
                                      help="Cell (default is the top cell)")
+        group_pex_input.add_argument("--port-labels", choices=PORT_LABEL_MODES, default='auto',
+                                     help="Port labels: auto uses top-level labels when the top has a pin label, "
+                                          "otherwise labels of the whole hierarchy; top always uses top-level "
+                                          "labels. Needs --gds to identify top-level labels; with --lvsdb alone, "
+                                          "auto keeps hierarchical labels (default is %(default)s)")
 
         group_pex_input.add_argument("--cache-lvs", dest="cache_lvs",
                                      type=true_or_false, default=True,
@@ -701,6 +706,10 @@ class KpexCLI:
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
+        if args.port_labels == 'top' and args.gds_path is None:
+            parser = parser_extract if args.command == 'extract' else parser_pex25d
+            parser.error("--port-labels top needs --gds, also with --lvsdb, "
+                         "as the LVS database has flattened its labels")
 
         # The engine switches only exist on 'extract'. Defaulting them here keeps
         # the shared validation and logging paths free of subcommand checks.
@@ -1907,7 +1916,9 @@ class KpexCLI:
             top_cell=args.effective_cell_name,
             lvsdb=lvsdb,
             tech=tech_info,
-            blackbox_devices=args.blackbox_devices)
+            blackbox_devices=args.blackbox_devices,
+            source_top_cell=args.layout.cell(args.effective_cell_name) if args.gds_path else None,
+            port_labels=args.port_labels)
 
         rule('Non-empty layers in LVS database')
         for gds_pair, layer_info in pex_context.extracted_layers.items():
@@ -2003,7 +2014,10 @@ class KpexCLI:
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=args.effective_cell_name,
                                                                   lvsdb=lvsdb,
                                                                   tech=tech_info,
-                                                                  blackbox_devices=args.blackbox_devices)
+                                                                  blackbox_devices=args.blackbox_devices,
+                                                                  source_top_cell=args.layout.cell(args.effective_cell_name)
+                                                                      if args.gds_path else None,
+                                                                  port_labels=args.port_labels)
         log_peak_memory('preparing the LVSDB')
         rule('Non-empty layers in LVS database')
         for gds_pair, layer_info in pex_context.extracted_layers.items():
