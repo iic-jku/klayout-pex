@@ -1,0 +1,69 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_rail_between_taps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_rail_between_taps.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_rail_between_taps'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 734.6 MiB
+INFO     __kpex__:kpex_cli.py:2011 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2011 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:2011 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2011 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 734.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;A;A,B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;A;B;;44.97
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;A,B;A,B.$2.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;A,B.$1.Metal1;A,B.$3.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R5;A,B.$1.Metal1;B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 734.8 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 734.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_rail_between_taps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_rail_between_taps.gds.gz' --exclusion-markers tie --exclusion-marker-layer 200/0
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_rail_between_taps'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 734.9 MiB
+INFO     __kpex__:kpex_cli.py:2011 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2011 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:2011 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2011 (33, 4404) -> (contact_ntap_con)
+WARNING  __kpex__:extractor.py:236 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal1
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 735.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;A;A,B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;A;A,B.P0.Metal1;;20.985
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;A,B;A,B.$2.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;A,B.$1.Metal1;A,B.$3.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R5;A,B.$1.Metal1;B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1498 R6;A,B.P0.Metal1;B;;20.985
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 735.0 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 735.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk gf180mcuD --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_rail_between_taps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\gf180mcuD\test_patterns\exclusion_rail_between_taps.gds.gz' --exclusion-markers ports --exclusion-marker-layer 200/0
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_rail_between_taps'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 735.1 MiB
+INFO     __kpex__:kpex_cli.py:2011 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2011 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:2011 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2011 (33, 4404) -> (contact_ntap_con)
+WARNING  __kpex__:extractor.py:236 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - A,B: Metal1
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 735.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;A;A,B.$0.Metal1;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;A;A_B__m0_0;;20.985
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;A,B;A,B.$0.Metal1;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;A,B.$1.Metal1;A,B.$3.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1498 R5;A,B.$1.Metal1;B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1498 R6;A_B__m0_1;B;;20.985
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1518 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 735.4 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 735.4 MiB
