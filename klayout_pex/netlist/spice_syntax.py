@@ -26,7 +26,7 @@
 The lines of a SPICE netlist as ngspice reads them, for the netlist tools:
     - a statement continues on the lines starting with '+', also across comment and blank lines
     - comments: lines starting with '*', and end-of-line comments from '$' or '//' at the start of a word,
-      or from ';' (KLayout writes the net $1 as \\$1)
+      or from ';' (KLayout writes the net $1 as \\$1), except the CDL annotations `$[model]` and `$SUB=net`
     - the first line of a deck (a netlist with .end) is its title
     - ground: the nodes '0' and 'gnd'
 
@@ -44,7 +44,7 @@ GROUND_NODE_NAMES = ('0', 'gnd')
 """Ground in SPICE: '0', and 'gnd', which ngspice reads as '0'"""
 
 _END = re.compile(r'\s*\.end\s*$', re.IGNORECASE)
-_END_OF_LINE_COMMENT = re.compile(r'(^|\s)(\$|//)|;')
+_END_OF_LINE_COMMENT = re.compile(r'(^|\s)(\$(?!\[|SUB\s*=)|//)|;', re.IGNORECASE)
 
 
 class SpiceSyntaxError(Exception):
@@ -79,7 +79,7 @@ def strip_comment(line: str) -> str:
     """
     :return: the physical line without its comment, '' for a comment line
     """
-    if line.lstrip().startswith('*'):
+    if line.lstrip().startswith(('*', '$')):
         return ''
     match = _END_OF_LINE_COMMENT.search(line)
     return line if match is None else line[:match.start()]

@@ -197,6 +197,20 @@ def test_end_of_line_comments_are_no_part_of_the_elements():
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
+def test_cdl_resistor_is_kept_and_its_substrate_is_protected():
+    resistor = 'Rmodel a b 80.146k $SUB=body $[rpoly] w=0.5u l=27u'
+    netlist = SpiceRCNetlist.parse(f'.subckt cell a b\n{resistor}\n'
+                                   'Rwire a body 1k\nRbody body far 2k\nC1 far 0 1f\n.ends\n')
+    scope = scope_named(netlist, 'cell')
+    assert scope.resistors_read == 2
+    assert scope.other_element_names == {'rmodel'}
+    assert protected_names(scope.network) == ['0', 'a', 'body']
+    reduce_network(scope.network, ReductionOptions(ticer_tau=1e-9))
+    assert resistor in netlist.format().splitlines()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
 def test_title_of_a_deck_is_no_element():
     netlist = SpiceRCNetlist.parse("R1 a b 1k\nR2 a b 2k\n.end\n")
     scope = scope_named(netlist, None)
