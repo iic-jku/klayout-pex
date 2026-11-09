@@ -47,6 +47,7 @@ from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.pex25d.reader import read_pex25d_text
+from klayout_pex.rcx25.extraction_results import ExtractionResults, ExtractionSummary
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError
 from klayout_pex.run_result import RESULT_FILE_NAME
 from klayout_pex.tech_info import TechDefError, TechInfo
@@ -147,6 +148,29 @@ def test_written_netlist_csv_is_logged_as_written(tmp_path):
         with open(tmp_path / 'nfet_li1__nfet_li1' / log_name, encoding='utf-8') as f:
             log_lines = f.read().splitlines()
         assert any(line.endswith(header) for line in log_lines), log_lines
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX", "2.5D")
+@pytest.mark.parametrize('mode', ['CC', 'R', 'RC'])
+def test_extraction_summary_is_computed_once_for_all_netlist_outputs(mode: str, tmp_path: Path):
+    summarize = ExtractionResults.summarize
+    summaries: List[ExtractionSummary] = []
+
+    def record_summary(results: ExtractionResults) -> ExtractionSummary:
+        summary = summarize(results)
+        summaries.append(summary)
+        return summary
+
+    cli = KpexCLI()
+    with mock.patch.object(ExtractionResults, 'summarize', autospec=True, side_effect=record_summary) as summarize_mock:
+        code, output = run_cli(cli.main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', mode,
+                                         '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                         '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert summarize_mock.call_count == 1
+    # NOTE: CSV writing, expansion and checks leave the shared summary's values unchanged, bit for bit
+    assert summaries[0] == cli.rcx25_extraction_results.summarize()
 
 
 @allure.parent_suite("Unit Tests")

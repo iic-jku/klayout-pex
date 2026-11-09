@@ -1487,13 +1487,13 @@ class KpexCLI:
         extraction_results = extractor.extract()
         self.run_result.add_file(FileKind.REPORT, report_path, engine=ExtractionEngine.K25D)
         removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
+        summary = extraction_results.summarize() \
+            if netlist_csv_path is not None or expanded_netlist_path is not None else None
 
         if netlist_csv_path is not None:
             # TODO: merge this with klayout_pex/klayout/netlist_csv.py
 
             with open(netlist_csv_path, 'w', encoding='utf-8') as f:
-                summary = extraction_results.summarize()
-
                 f.write('Device;Net1;Net2;Capacitance [fF];Resistance [Ω]\n')
                 for idx, (key, cap_value) in enumerate(sorted(summary.capacitances.items())):
                     f.write(f"C{idx + 1};{key.net1};{key.net2};{round(cap_value, 3)};\n")
@@ -1519,7 +1519,8 @@ class KpexCLI:
                 blackbox_devices=args.blackbox_devices,
                 device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name,
-                removed_device_ids=removed_device_ids
+                removed_device_ids=removed_device_ids,
+                summary=summary
             )
 
             netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D, tech_info)
@@ -1530,7 +1531,6 @@ class KpexCLI:
                              pex_context.annotated_top_cell.name)
 
             # NOTE: a defect of the RC netlist simulates to a plausible, but wrong number (#215)
-            summary = extraction_results.summarize()
             self._rcx25_netlist_problems = check_rc_netlist(  # NOTE: store for test case
                 lvs_netlist=pex_context.lvsdb.netlist(),
                 rc_netlist=expanded_netlist,
