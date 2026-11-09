@@ -25,10 +25,12 @@
 import allure
 import unittest
 from typing import List
+from unittest import mock
 
 import klayout.db as kdb
 
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
@@ -40,6 +42,14 @@ import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 DBU = 0.001  # µm
 SIDE_HALO = 8.0  # µm
 SIDE_OVERLAP_CAPACITANCE = 40.0  # aF/µm
+
+
+def comb_region(teeth: int, margin: int = 0) -> kdb.Region:
+    region = kdb.Region(kdb.Box(0, 0, teeth * 20 + margin, 10))
+    for index in range(teeth):
+        x = margin + index * 20
+        region.insert(kdb.Box(x, 10, x + 10, 100))
+    return region.merged()
 
 
 def neighborhoods(primary: kdb.Region, secondary: kdb.Region) -> List[str]:
@@ -60,16 +70,14 @@ def neighborhoods(primary: kdb.Region, secondary: kdb.Region) -> List[str]:
     return sorted(recorded)
 
 
-def fringe_cap(overlap_capacitance: float,
-               scale_ratio_to_fit_halo: bool,
-               distance_near_um: float = 0.0,
-               distance_far_um: float = SIDE_HALO) -> float:
-    """
-    The fringe (in fF) of a 1 µm edge to the part of a layer from distance_near_um to distance_far_um beside it
-    """
+def fringe_visitor(overlap_capacitance: float,
+                   scale_ratio_to_fit_halo: bool) -> SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisitor:
     tech = tech_pb2.Technology()
     tech.process_parasitics.side_halo = SIDE_HALO
-    visitor = SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisitor(
+    caps = tech.process_parasitics.capacitance
+    caps.overlaps.add(top_layer_name='inside', bottom_layer_name='outside', capacitance=overlap_capacitance)
+    caps.sideoverlaps.add(in_layer_name='inside', out_layer_name='outside', capacitance=SIDE_OVERLAP_CAPACITANCE)
+    return SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisitor(
         all_layer_names=['inside', 'outside'],
         inside_layer_index=0,
         dbu=DBU,
@@ -79,6 +87,16 @@ def fringe_cap(overlap_capacitance: float,
         mos_channels=kdb.Shapes(),
         results=CellExtractionResults(cell_name='TOP'),
         report=ExtractionReporter(cell_name='TOP', dbu=DBU, report_caps=False))
+
+
+def fringe_cap(overlap_capacitance: float,
+               scale_ratio_to_fit_halo: bool,
+               distance_near_um: float = 0.0,
+               distance_far_um: float = SIDE_HALO) -> float:
+    """
+    The fringe (in fF) of a 1 µm edge to the part of a layer from distance_near_um to distance_far_um beside it
+    """
+    visitor = fringe_visitor(overlap_capacitance, scale_ratio_to_fit_halo)
     return visitor.fringe_cap(edge_interval_length=round(1.0 / DBU),
                               distance_near=round(distance_near_um / DBU),
                               distance_far=round(distance_far_um / DBU),
@@ -90,10 +108,95 @@ def fringe_cap(overlap_capacitance: float,
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance", "Fringe")
 class FringeCapTest(unittest.TestCase):
+    def test_intervening_shields_stay_between_layers_and_within_their_interval(self):
+        visitor = fringe_visitor(30.0, True)
+        visitor.all_layer_names = ['bottom', 'lower', 'inside', 'upper', 'top']
+        visitor.inside_layer_index = 2
+        visitor.emit_fringe = mock.Mock()
+        edge = kdb.EdgeWithProperties(kdb.Edge(0, 0, 4000, 0), {'net': 'inside_net'})
+        lower = kdb.Box(0, 1000, 2000, 1500)
+        upper = kdb.Box(0, 500, 2000, 1000)
+        neighborhood = [((0, 2000), {
+            idx: [kdb.PolygonWithProperties(box, {'net': str(idx)})]
+            for idx, box in ((0, kdb.Box(0, 100, 2000, 2000)), (1, lower),
+                             (3, upper), (4, kdb.Box(0, 100, 2000, 2000)))}),
+            ((2000, 4000), {4: [kdb.PolygonWithProperties(kdb.Box(2000, 100, 4000, 2000), {'net': '4'})]})]
+        # An opposing part of the source polygon shields both directions, in
+        # addition to their separate intervening layers, only in this interval.
+        neighborhood[0][1][len(visitor.all_layer_names)] = [
+            kdb.PolygonWithProperties(kdb.Box(0, 1800, 2000, 2000), {'net': 'inside_net'})]
+        layout = kdb.Layout()
+        with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+                        wraps=kdb.Region) as region_factory:
+            visitor.on_edge(layout, layout.create_cell('TOP'), edge, neighborhood)
+        # Two empty-region constructions per interval suffice for the running
+        # shields. Reconstructing every layer and target shield was costly.
+        assert region_factory.call_count <= 4
+        expected = {'bottom': kdb.Region(lower), 'lower': kdb.Region(),
+                    'upper': kdb.Region(), 'top': kdb.Region(upper)}
+        for shield in expected.values():
+            shield.insert(kdb.Box(0, 1800, 2000, 18000))
+        calls = visitor.emit_fringe.call_args_list
+        assert len(calls) == 5
+        for call in calls[:4]:
+            assert (call.kwargs['shield'] ^ expected[call.kwargs['outside_layer_name']]).is_empty()
+        # A later interval must not inherit any of the previous interval's shields.
+        assert calls[-1].kwargs['shield'].is_empty()
+
+    def test_shielding_preserves_source_polygons_and_net_ownership(self):
+        # Touching polygons on one net must not merge, and coincident polygons on
+        # different nets must not lose their owner during shield subtraction.
+        visitor = fringe_visitor(30.0, True)
+        visitor.report = mock.Mock(spec=ExtractionReporter)
+        polygons = [kdb.PolygonWithProperties(kdb.Box(0, near, 2000, far), {'net': net})
+                    for net, near, far in [('A', 100, 2000), ('A', 2000, 4000),
+                                          ('B', 100, 2000), ('hidden', 600, 900),
+                                          ('inside_net', 100, 2000)]]
+        visitor.emit_fringe('inside', 'outside',
+                            kdb.EdgeWithProperties(kdb.Edge(0, 0, 2000, 0), {'net': 'inside_net'}),
+                            (0, 2000), polygons, kdb.Region(kdb.Box(0, 500, 2000, 1000)),
+                            None, GeometryRestorer(kdb.IMatrix3d()))
+        obtained = [(call.kwargs['sideoverlap_cap'].key.net_outside,
+                     str(call.kwargs['outside_polygon'].bbox()))
+                    for call in visitor.report.output_sideoverlap.call_args_list]
+        assert obtained == [('A', '(0,100;2000,500)'), ('A', '(0,1000;2000,2000)'),
+                            ('A', '(0,2000;2000,4000)'),
+                            ('B', '(0,100;2000,500)'), ('B', '(0,1000;2000,2000)')]
+
+    def test_shield_boundary_leaves_only_the_uncovered_part(self):
+        # One grid step below, at, and above complete coverage catches lost slivers
+        # and shapes incorrectly retained when a shield exactly covers them.
+        for shield_top, expected in ((999, ['(0,999;200000,1000)']), (1000, []), (1001, [])):
+            with self.subTest(shield_top=shield_top):
+                visitor = fringe_visitor(30.0, True)
+                visitor.report = mock.Mock(spec=ExtractionReporter)
+                visitor.emit_fringe('inside', 'outside',
+                                    kdb.EdgeWithProperties(kdb.Edge(0, 0, 200000, 0), {'net': 'inside_net'}),
+                                    (0, 200000),
+                                    [kdb.PolygonWithProperties(kdb.Box(0, 100, 200000, 1000), {'net': 'A'})],
+                                    kdb.Region(kdb.Box(0, 0, 200000, shield_top)),
+                                    None, GeometryRestorer(kdb.IMatrix3d()))
+                assert [str(call.kwargs['outside_polygon'].bbox())
+                        for call in visitor.report.output_sideoverlap.call_args_list] == expected
+
+    def test_adjacent_contributions_keep_their_individual_cutoff(self):
+        # At this edge length both pieces fall below the 0.0001 fF cutoff, while
+        # their union exceeds it. Shielding must not create that extra capacitor.
+        for intervals, count in (([(0, 1000), (1000, 8000)], 0), ([(0, 8000)], 1)):
+            with self.subTest(intervals=intervals):
+                visitor = fringe_visitor(30.0, True)
+                visitor.report = mock.Mock(spec=ExtractionReporter)
+                visitor.emit_fringe('inside', 'outside',
+                                    kdb.EdgeWithProperties(kdb.Edge(0, 0, 3, 0), {'net': 'inside_net'}),
+                                    (0, 3),
+                                    [kdb.PolygonWithProperties(kdb.Box(0, near, 3, far), {'net': 'A'})
+                                     for near, far in intervals],
+                                    kdb.Region(kdb.Box(10, 0, 20, 8000)),
+                                    None, GeometryRestorer(kdb.IMatrix3d()))
+                assert visitor.report.output_sideoverlap.call_count == count
+
     def test_large_neighbors_are_split_without_changing_geometry_or_properties(self):
-        comb = kdb.Region(kdb.Box(0, 0, 2560, 10))
-        for x in range(0, 2560, 20):
-            comb.insert(kdb.Box(x, 10, x + 10, 100))
+        comb = comb_region(128)
         region = kdb.Region()
         region.enable_properties()
         for polygon in comb.merged().each():
@@ -102,11 +205,29 @@ class FringeCapTest(unittest.TestCase):
         self.assertGreater(neighbors.size(), region.size())
         self.assertTrue((neighbors ^ region).is_empty())
         self.assertFalse(neighbors.merged_semantics)
-        self.assertTrue(all(polygon.num_points() <= 256 for polygon in neighbors.each()))
+        self.assertTrue(all(polygon.num_points() <= 64 for polygon in neighbors.each()))
         self.assertTrue(all(polygon.properties() == {'net': 'VSS', 'device_capacitor_plate': 7}
                             for polygon in neighbors.each()))
         primary = kdb.Region(kdb.Box(10, 110, 2500, 130))
         self.assertEqual(neighborhoods(primary, region), neighborhoods(primary, neighbors))
+
+    def test_neighbor_chunk_limit_keeps_small_polygons_whole(self):
+        # These rectilinear combs have 60, 64 and 68 vertices: the valid shapes
+        # immediately around the limit. Splitting must preserve net properties.
+        for teeth in (14, 15, 16):
+            with self.subTest(teeth=teeth):
+                polygon, = list(comb_region(teeth, margin=1).each())
+                assert polygon.num_points() == 4 * teeth + 4
+                region = kdb.Region(kdb.PolygonWithProperties(polygon, {'net': 'N'}))
+                region.enable_properties()
+                neighbors = SidewallAndFringeExtractor.bounded_neighbors(region)
+                if teeth <= 15:
+                    assert neighbors is region
+                else:
+                    assert neighbors.size() > 1
+                    assert all(part.num_points() <= 64 for part in neighbors.each())
+                assert (neighbors ^ region).is_empty()
+                assert all(part.property('net') == 'N' for part in neighbors.each())
 
     def test_slanted_neighbors_are_not_split(self):
         points = [kdb.Point(0, 0), kdb.Point(2560, 0)]
