@@ -22,6 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 import os
+from pathlib import Path
 import tempfile
 from typing import *
 import unittest
@@ -29,6 +30,8 @@ import unittest
 import allure
 
 from klayout_pex.netlist.netlist_cli import NetlistCLI
+from klayout_pex.netlist.netlist_convert import convert_to_vacask
+from klayout_pex.netlist.vacask_writer import VacaskWriterError
 from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import (
     assert_netlist_cli_loads_neither_klayout_nor_protobuf,
@@ -137,6 +140,57 @@ class NetlistConvertTest(unittest.TestCase):
         self.assertEqual(ExitCode.OK, code, output)
         self.assertTrue(os.path.isfile(workspace.path('divider.inc')), output)
 
+    def test_scale_options_are_written_reported_and_reset_on_reconversion(self):
+        workspace = self.workspace('.option scale=1u\nM1 d g s b nmos w=4 l=2 ad=3\n')
+        output_path = workspace.path('custom name.sim')
+        options_path = workspace.path('custom name.options.inc')
+        code, output = workspace.run('convert', '--to', 'vacask', workspace.input_path, '-o', output_path)
+        self.assertEqual(ExitCode.OK, code, output)
+        self.assertIn(output_path, output)
+        self.assertIn(options_path, output)
+        self.assertIn('existing control block', output)
+        self.assertIn('options scale=1e-06', Path(options_path).read_text(encoding='utf-8'))
+        self.assertIn('M1 (d g s b) nmos w=4 l=2 ad=3', Path(output_path).read_text(encoding='utf-8'))
+
+        # NOTE: the testbench may still include the companion from an earlier conversion.
+        # A default-scale rerun must overwrite it, not leave the previous scale active.
+        Path(workspace.input_path).write_text('M1 d g s b nmos w=4u l=2u ad=3p\n', encoding='utf-8')
+        paths = convert_to_vacask(workspace.input_path, output_path, ())
+        self.assertEqual((output_path, options_path), paths)
+        self.assertIn('options scale=1.0', Path(options_path).read_text(encoding='utf-8'))
+
+    def test_companion_cannot_overwrite_input_or_alias_circuit_output(self):
+        workspace = self.workspace()
+        input_path = workspace.path('cell.options.inc')
+        Path(input_path).write_text('invalid input must not be parsed', encoding='utf-8')
+        code, output = workspace.run('convert', '--to', 'vacask', input_path, '-o', workspace.path('cell.inc'))
+        self.assertEqual(ExitCode.USAGE, code, output)
+        self.assertIn('same file', output)
+        self.assertEqual('invalid input must not be parsed', Path(input_path).read_text(encoding='utf-8'))
+        self.assertFalse(Path(workspace.path('cell.inc')).exists())
+        with self.assertRaises(VacaskWriterError):
+            convert_to_vacask(input_path, workspace.path('cell.inc'), ())
+
+        # NOTE: different names can still refer to one existing file (also on Windows).
+        first = Path(workspace.path('alias.inc'))
+        second = Path(workspace.path('alias.options.inc'))
+        first.write_text('keep this content', encoding='utf-8')
+        os.link(first, second)
+        code, output = workspace.run('convert', '--to', 'vacask', workspace.input_path, '-o', str(first))
+        self.assertEqual(ExitCode.USAGE, code, output)
+        self.assertIn('same file', output)
+        self.assertEqual('keep this content', first.read_text(encoding='utf-8'))
+
+    def test_invalid_scaled_netlist_preserves_both_previous_outputs(self):
+        workspace = self.workspace('.options scale=1u\nR1 a b {unknown}\n')
+        for name in ('divider.inc', 'divider.options.inc'):
+            Path(workspace.path(name)).write_text(name, encoding='utf-8')
+        code, output = workspace.run('convert', '--to', 'vacask', workspace.input_path)
+        self.assertEqual(ExitCode.DIAGNOSTIC_ERRORS, code, output)
+        self.assertIn('expression unknown', output)
+        for name in ('divider.inc', 'divider.options.inc'):
+            self.assertEqual(name, workspace.read(name))
+
     def test_format_is_required_and_validated(self):
         workspace = self.workspace()
         code, output = workspace.run('convert', workspace.input_path)
@@ -202,7 +256,7 @@ class NetlistConvertTest(unittest.TestCase):
         self.assertEqual(ExitCode.USAGE, result.returncode, result.stdout + result.stderr)
 
     def test_conversion_needs_neither_klayout_nor_generated_protobuf(self):
-        workspace = self.workspace()
+        workspace = self.workspace('.options scale=1u\nM1 d g s b nmos w=4 l=2\n')
         assert_netlist_cli_loads_neither_klayout_nor_protobuf(
             ['netlist', 'convert', '--to', 'vacask', workspace.input_path, '-o', workspace.path('out.inc')])
         self.assertTrue(os.path.isfile(workspace.path('out.inc')))

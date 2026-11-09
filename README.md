@@ -53,6 +53,34 @@ Labels in child cells still name internal nets and ports of excluded device mode
 The default is `auto`. Supply `--gds` alongside `--lvsdb` to identify top-level labels: the LVS database has
 flattened them. With `--lvsdb` alone, `auto` retains hierarchical labels, and `top` reports an error.
 
+## VACASK conversion
+
+`netlist convert --to vacask circuit.spice` writes two files:
+
+- `circuit.inc` contains the circuit, with instance parameters unchanged
+- `circuit.options.inc` sets the global geometry scale from `.option` or `.options scale`
+
+Include the circuit at the top level and its options inside the testbench's existing `control` block:
+
+```text
+include "circuit.inc"
+
+control
+  include "circuit.options.inc"
+  analysis op1 op
+endc
+```
+
+The scale applies to the entire simulation through compatible models, including those inside external
+`X` wrappers. A later `options scale` command overrides it. Do not combine fragments requiring different
+scales without first normalizing their model interfaces. The companion is rewritten even at the default
+`scale=1`, so reconversion cannot leave an earlier scale active.
+
+`--out-netlist` derives the companion name from the chosen output path. `kpex --netlist-format vacask`
+also writes and reports both files. Numeric SPICE suffixes are converted to plain numbers because the
+simulators interpret some suffixes differently. Parameter expressions and model libraries remain outside
+the converter's supported input.
+
 ## Acknowledgements
 
 This project is funded by the JKU/SAL [IWS Lab](https://research.jku.at/de/projects/jku-lit-sal-intelligent-wireless-systems-lab-iws-lab/), a collaboration of [Johannes Kepler University](https://jku.at) and [Silicon Austria Labs](https://silicon-austria-labs.com).

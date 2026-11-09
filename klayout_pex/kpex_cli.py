@@ -1601,17 +1601,24 @@ class KpexCLI:
             netlist_kind = 'reduced' if self._rcx25_reduced_netlist_path is not None else 'expanded'
             netlist_path = self._rcx25_reduced_netlist_path or expanded_netlist_path
             if args.netlist_format == NetlistFormat.VACASK:
-                netlist_path = convert_to_vacask(
-                    input_path=netlist_path,
-                    output_path=os.path.splitext(netlist_path)[0] + NetlistFormat.VACASK.file_extension,
-                    subcircuits_with_m=tech_info.device_models.vacask_subcircuits_with_m)
-                info(f"Wrote {netlist_kind} VACASK netlist to: {netlist_path}")
-                self._rcx25_netlist_paths[NetlistFormat.VACASK] = netlist_path
-                self.add_netlist(FileKind.NETLIST, netlist_path, ExtractionEngine.K25D,
-                                 pex_context.annotated_top_cell.name, netlist_format=NetlistFormat.VACASK,
-                                 reduced=self._rcx25_reduced_netlist_path is not None)
+                destinations = [(FileKind.NETLIST,
+                                 os.path.splitext(netlist_path)[0] + NetlistFormat.VACASK.file_extension)]
+                if args.output_netlist_path:
+                    destinations.append((FileKind.OUT_NETLIST, args.output_netlist_path))
+                for kind, destination in destinations:
+                    circuit_path, options_path = convert_to_vacask(
+                        input_path=netlist_path, output_path=destination,
+                        subcircuits_with_m=tech_info.device_models.vacask_subcircuits_with_m)
+                    info(f"Wrote {netlist_kind} VACASK netlist to: {circuit_path}")
+                    info(f"Wrote {options_path}: include inside the testbench's existing control block before analyses")
+                    if kind == FileKind.NETLIST:
+                        self._rcx25_netlist_paths[NetlistFormat.VACASK] = circuit_path
+                    self.add_netlist(kind, circuit_path, ExtractionEngine.K25D,
+                                     pex_context.annotated_top_cell.name, netlist_format=NetlistFormat.VACASK,
+                                     reduced=self._rcx25_reduced_netlist_path is not None)
+                    self.run_result.add_file(FileKind.NETLIST_OPTIONS, options_path, engine=ExtractionEngine.K25D)
 
-            if args.output_netlist_path:
+            elif args.output_netlist_path:
                 shutil.copyfile(netlist_path, args.output_netlist_path)
                 info(f"Copied {netlist_kind} {args.netlist_format.name} netlist to: "
                      f"{args.output_netlist_path}")

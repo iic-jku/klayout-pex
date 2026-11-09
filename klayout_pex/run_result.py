@@ -74,6 +74,7 @@ class Stage(StrEnum):
 class FileKind(StrEnum):
     NETLIST = 'netlist'
     OUT_NETLIST = 'out_netlist'  # --out-netlist
+    NETLIST_OPTIONS = 'netlist_options'  # companion for the simulator's control block
     NETLIST_CSV = 'netlist_csv'
     CAPACITANCE_MATRIX = 'capacitance_matrix'
     REPORT = 'report'  # KLayout report database

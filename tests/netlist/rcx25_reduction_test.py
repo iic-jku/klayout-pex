@@ -43,6 +43,7 @@ from klayout_pex.netlist.rc_network import RCNetwork
 from klayout_pex.netlist.rc_reduction import ReductionOptions
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
+from klayout_pex.run_result import FileKind
 from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import (
     approx,
@@ -191,6 +192,13 @@ def test_kpex_reduce_converts_the_reduced_netlist_to_vacask(tmp_path):
     assert code == 0, output
     assert read_text(vacask_path) == read_text(expected_path)
     assert read_text(out_netlist) == read_text(expected_path)
+    options_paths = [f.path for f in cli.run_result.files if f.kind == FileKind.NETLIST_OPTIONS]
+    assert set(options_paths) == {os.path.splitext(vacask_path)[0] + '.options.inc',
+                                 os.path.join(str(tmp_path), 'out.options.inc')}
+    for path in options_paths:
+        assert 'options scale=1.0' in read_text(path)
+    assert all(f.to_json()['kind'] == 'netlist_options' for f in cli.run_result.files
+               if f.kind == FileKind.NETLIST_OPTIONS)
 
 
 @allure.parent_suite(parent_suite)

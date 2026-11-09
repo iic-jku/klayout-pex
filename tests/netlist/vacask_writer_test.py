@@ -21,6 +21,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
+import math
+from pathlib import Path
+import sys
+import tempfile
 from typing import *
 import unittest
 
@@ -313,13 +317,57 @@ class VacaskWriterTest(unittest.TestCase):
             instance_lines(cell(ports=['a', 'a']))
         self.assertEqual("The port 'a' of subcircuit 'cell' is there twice", str(ctx.exception))
 
-    def test_nondefault_scale_is_not_silently_lost(self):
+    def test_text_cannot_silently_drop_nondefault_scale(self):
         netlist = SpiceReader().parse('.option scale=1u\nM1 d g s b nmos w=2 l=1\n')
         with self.assertRaises(VacaskWriterError) as ctx:
             VacaskWriter().text(netlist)
-        self.assertEqual('SPICE scale=1e-06 is not supported by the VACASK writer', str(ctx.exception))
+        self.assertEqual('SPICE scale=1e-06 requires a companion options file: use VacaskWriter.write',
+                         str(ctx.exception))
         self.assertEqual(['R1 (a b) resistor r=1000'],
                          instance_lines(SpiceReader().parse('.options scale=1\nR1 a b 1k\n')))
+
+    def test_write_preserves_global_scale_and_native_and_wrapper_arguments(self):
+        # NOTE: values around 1 detect rounded-away options; the finite endpoints must not
+        # become zero or infinity when serialized. Geometry belongs to the model, including
+        # inside external wrappers, so neither lengths nor areas are multiplied here.
+        for scale in (1.0, 1e-6, 1e-3, math.nextafter(1.0, 0.0), math.nextafter(1.0, math.inf),
+                      math.ulp(0.0), sys.float_info.max):
+            with self.subTest(scale=scale), tempfile.TemporaryDirectory() as directory:
+                netlist = SpiceReader().parse(
+                    '.subckt local d g s b\nMlocal d g s b nmos w=4 l=2 ad=3 as=0 pd=7 ps=0\n.ends\n'
+                    'M1 d g s b nmos w=4 l=2 ad=3 as=0 pd=7 ps=0 m=2\n'
+                    'Xlocal d g s b local\nXexternal d g s b external w=4 l=2 ad=3 m=2\nR1 d s 1k\n')
+                netlist.scale = scale
+                output_path = str(Path(directory) / 'cell.inc')
+                writer = VacaskWriter(subcircuits_with_m={'external'})
+                paths = writer.write(netlist, output_path)
+                self.assertEqual((output_path, str(Path(directory) / 'cell.options.inc')), paths)
+                circuit = Path(paths[0]).read_text(encoding='utf-8')
+                options = Path(paths[1]).read_text(encoding='utf-8')
+                self.assertIn('M1 (d g s b) nmos w=4 l=2 ad=3 as=0 pd=7 ps=0 $mfactor=2', circuit)
+                self.assertIn('Mlocal (d g s b) nmos w=4 l=2 ad=3 as=0 pd=7 ps=0', circuit)
+                self.assertIn('Xexternal (d g s b) external w=4 l=2 ad=3 m=2', circuit)
+                self.assertIn('R1 (d s) resistor r=1000', circuit)
+                commands = [line for line in options.splitlines() if line and not line.startswith('//')]
+                self.assertEqual(1, len(commands))
+                self.assertTrue(commands[0].startswith('options scale='), options)
+                self.assertEqual(scale, float(commands[0].partition('=')[2]))
+                self.assertFalse(any(line.strip() in ('control', 'endc')
+                                     for line in (circuit + options).splitlines()))
+                self.assertEqual(paths, writer.write(netlist, output_path))
+                self.assertEqual(circuit, Path(paths[0]).read_text(encoding='utf-8'))
+                self.assertEqual(4, netlist.elements[0].parameters['w'])
+                self.assertEqual(scale, netlist.scale)
+
+    def test_write_rejects_invalid_scale_before_creating_either_file(self):
+        # NOTE: the in-memory API must reject invalid factors too, without relying on the reader.
+        for scale in (0.0, -1.0, math.inf, -math.inf, math.nan):
+            with self.subTest(scale=scale), tempfile.TemporaryDirectory() as directory:
+                netlist = cell(SpiceElement('R1', ['a', 'b'], value=1.0))
+                netlist.scale = scale
+                with self.assertRaises(VacaskWriterError):
+                    VacaskWriter().write(netlist, Path(directory) / 'cell.inc')
+                self.assertEqual([], list(Path(directory).iterdir()))
 
     def test_parameters_and_expressions_are_errors(self):
         # NOTE: VACASK has them too, but the writer writes numbers only
