@@ -106,6 +106,39 @@ class SpiceReaderTest(unittest.TestCase):
                         'R3 a b 1k\n')
         self.assertEqual(['R2'], [e.name for e in netlist.elements])
 
+    def test_scale_is_a_netlist_option_with_spice_suffixes(self):
+        self.assertEqual(1.0, parse('R1 a b 1k\n').scale)
+        for card in ('.option', '.OPTIONS'):
+            for text, expected in (('1e-6', 1e-6), ('1.0U', 1e-6), ('2n', 2e-9),
+                                   ('1M', 1e-3), ('1meg', 1e6), ('1', 1.0)):
+                with self.subTest(card=card, value=text):
+                    netlist = parse(f'{card}\n+ ScAlE = {text}\nM1 a b c d n w=2 l=1\n')
+                    self.assertEqual(expected, netlist.scale)
+                    self.assertEqual({'w': 2.0, 'l': 1.0}, netlist.elements[0].parameters)
+
+    def test_scale_is_global_even_inside_a_subcircuit(self):
+        netlist = parse('M1 a b c d n w=2 l=1\n.subckt wrapper a b\n'
+                        '.option scale=1u\n.ends\n.options scale=1e-6\n')
+        self.assertEqual(1e-6, netlist.scale)
+
+    def test_invalid_scale_options_name_the_line(self):
+        for value in ('0', '-1u', '1e309', '1e-999', 'nan', 'inf', '{1u}', 's'):
+            with self.subTest(value=value):
+                self.assertEqual(f'line 2: scale={value} must be a finite positive SPICE number',
+                                 parse_error(f'R1 a b 1k\n.option scale={value}\n'))
+        for option in ('reltol=1u', 'temp=25', 'brief'):
+            with self.subTest(option=option):
+                name = option.split('=')[0]
+                self.assertEqual(f'line 1: the option {name} is not supported (supported: scale)',
+                                 parse_error(f'.options scale=1u {option}\n'))
+        for card in ('.option', '.options'):
+            with self.subTest(card=card):
+                self.assertEqual('line 1: expected scale=<positive SPICE number>', parse_error(card + '\n'))
+                self.assertEqual('line 1: expected scale=<positive SPICE number>',
+                                 parse_error(card + ' scale\n'))
+        self.assertEqual('line 2: conflicting scale options (previous value 1e-06)',
+                         parse_error('.option scale=1u\n.options scale=1n\n'))
+
     # ------------------------------------------------------------ case
 
     def test_node_is_written_as_first_in_its_subcircuit(self):

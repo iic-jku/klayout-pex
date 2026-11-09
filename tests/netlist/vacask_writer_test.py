@@ -313,6 +313,14 @@ class VacaskWriterTest(unittest.TestCase):
             instance_lines(cell(ports=['a', 'a']))
         self.assertEqual("The port 'a' of subcircuit 'cell' is there twice", str(ctx.exception))
 
+    def test_nondefault_scale_is_not_silently_lost(self):
+        netlist = SpiceReader().parse('.option scale=1u\nM1 d g s b nmos w=2 l=1\n')
+        with self.assertRaises(VacaskWriterError) as ctx:
+            VacaskWriter().text(netlist)
+        self.assertEqual('SPICE scale=1e-06 is not supported by the VACASK writer', str(ctx.exception))
+        self.assertEqual(['R1 (a b) resistor r=1000'],
+                         instance_lines(SpiceReader().parse('.options scale=1\nR1 a b 1k\n')))
+
     def test_parameters_and_expressions_are_errors(self):
         # NOTE: VACASK has them too, but the writer writes numbers only
         errors = {

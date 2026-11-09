@@ -27,7 +27,7 @@ Reads a SPICE netlist (e.g. an extracted netlist, or a simple testbench) as ngsp
 
 Reads:
     - the elements R, C, L, K, D, M, V, I, E, F, G, H and X, the subcircuits (.subckt, .ends),
-      .global, .param and .end
+      .global, .param, .option/.options scale and .end
     - diodes with a third node (e.g. a substrate), told from the area of a two-terminal diode by it being no value:
       D1 a k sub dmod is a diode with three nodes, D1 a k dmod 2 (or {...}, '...') one with an area
     - CDL annotations on `R`, `C` and `L`: `$[model]` names the model, `$SUB=net` adds the substrate terminal
@@ -46,7 +46,11 @@ SPICE is case-insensitive:
     - a subcircuit call has the name of the subcircuit's definition (if in the netlist)
     - the parameter names are lowercase
 
-Doesn't read (an error naming the line): .model, .include, .lib, .func, .option, analyses, .control,
+The `scale` option is one finite positive SPICE number, also with a suffix (e.g. `1u`).
+It applies to the whole netlist, including when declared inside a subcircuit or after devices.
+Repeated identical values are accepted. Conflicting values are rejected.
+
+Doesn't read (an error naming the line): .model, .include, .lib, .func, other options, analyses, .control,
 expressions in sources, the elements B, Q, J, ...
 
 NOTE: imports neither KLayout nor generated protobuf code, so that format-only paths can use it
@@ -55,6 +59,7 @@ NOTE: imports neither KLayout nor generated protobuf code, so that format-only p
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
+import math
 import re
 from typing import *
 
@@ -160,6 +165,7 @@ class SpiceReader:
 
     def parse(self, text: str) -> SpiceNetlist:
         netlist = SpiceNetlist()
+        scale: Optional[float] = None
         global_nodes: Dict[str, str] = {}
         top_scope = _Scope('the top level', global_nodes)
         scope = top_scope
@@ -187,6 +193,15 @@ class SpiceReader:
                             for token in line.tokens[1:]:
                                 name, value = self._parameter(token)
                                 parameters[name] = value
+                        case '.option' | '.options':
+                            if len(line.tokens) == 1:
+                                raise SpiceReaderError("expected scale=<positive SPICE number>")
+                            for token in line.tokens[1:]:
+                                value = self._scale_option(token)
+                                if scale is not None and value != scale:
+                                    raise SpiceReaderError(f"conflicting scale options (previous value {scale:g})")
+                                scale = value
+                                netlist.scale = value
                         case '.global':
                             for name in line.tokens[1:]:
                                 if name.casefold() not in global_nodes:
@@ -257,6 +272,18 @@ class SpiceReader:
             else:
                 tokens.append(piece)
         return tokens
+
+    @staticmethod
+    def _scale_option(token: str) -> float:
+        name, separator, text = token.partition('=')
+        if name.lower() != 'scale':
+            raise SpiceReaderError(f"the option {name} is not supported (supported: scale)")
+        if not separator or not text:
+            raise SpiceReaderError("expected scale=<positive SPICE number>")
+        value = _optional_number(text)
+        if value is None or not math.isfinite(value) or value <= 0:
+            raise SpiceReaderError(f"scale={text} must be a finite positive SPICE number")
+        return value
 
     def _parameter(self, token: str) -> Tuple[str, NumberOrExpression]:
         name, _, text = token.partition('=')

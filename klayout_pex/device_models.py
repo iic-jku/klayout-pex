@@ -131,6 +131,8 @@ class DeviceModels:
         (e.g. W = 1, in µm, of w=1u of an IHP MOS), floored as by its model (see lvs_parameter_floor_pitch),
         and the area and perimeter of the rectangle of a model's sides.
         A `schematic_parameter_factors` entry for the element's prefix overrides the export factor.
+        `SpiceHierarchy` has already applied the netlist's geometry scale. The mapping's factors
+        convert the resulting parameter units to LVS units.
 
         :param element: with its parameters as numbers (e.g. of SpiceHierarchy)
         :return: by LVS parameter name, without those whose model parameters the device doesn't give

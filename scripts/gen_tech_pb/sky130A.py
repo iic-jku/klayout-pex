@@ -541,7 +541,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
     #       as the LVS device classes store them.
     #       The terminal order of each model is the one of the LVS netlist reader,
     #       i.e. KLayout's standard one, and VPP caps with 4 terminals are read as MOS4 (see sky130.lvs)
-    # Native `M` lines use SI dimensions in `KLayout`'s SPICE reader, unlike the simulation `X` calls (#497).
+    # Native `M` geometry is normalized to SI before applying these factors, unlike `X` arguments (#497).
     mos = [lvs_param(name, name.upper(), schematic_factors={'M': factor})
            for name, factor in (('l', 1e-6), ('w', 1e-6), ('as', 1e-12), ('ad', 1e-12),
                                 ('ps', 1e-6), ('pd', 1e-6))]
@@ -568,7 +568,7 @@ def build_device_models_info(dmi: DeviceModelsInfo):
         add_device_model_mapping(dmi, f"sky130_fd_pr__{pnp}", "X", ["C", "B", "E"], bjt)
 
     # metal (and local interconnect) resistors are resistor models, the others subcircuits
-    w_l = [lvs_param('w', 'W'), lvs_param('l', 'L')]
+    w_l = [lvs_param(name, name.upper(), schematic_factors={'R': 1e-6}) for name in ('w', 'l')]
     for layer in ('l1', 'm1', 'm2', 'm3', 'm4', 'm5'):
         add_device_model_mapping(dmi, f"sky130_fd_pr__res_generic_{layer}", "R", ["A", "B"], w_l)
     add_device_model_mapping(dmi, "sky130_fd_pr__res_generic_po", "X", ["A", "B"], w_l)

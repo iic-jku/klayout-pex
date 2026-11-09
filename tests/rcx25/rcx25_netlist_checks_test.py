@@ -177,17 +177,28 @@ def test_device_totals_of_a_cmomi_as_xschem_writes_it():
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
 @allure.tag("PEX", "2.5D", "Schematic")
-@pytest.mark.parametrize('prefix, suffix, matches_layout', [
-    ('M', 'u', True),
-    ('M', '', False),
-    ('XM', '', True),
+@pytest.mark.parametrize('instance, suffix, option, matches_layout', [
+    ('native', 'u', '', True),
+    ('native', '', '', False),
+    ('external', '', '', True),
+    *[(instance, '', option, True)
+      for instance in ('native', 'wrapper', 'external')
+      for option in ('.option scale=1u', '.OPTIONS SCALE = 1.0U', '.options scale=1e-6')],
 ])
-def test_schematic_mos_units(prefix: str, suffix: str, matches_layout: bool, tmp_path: Path):
-    # NOTE: native `M` dimensions are in metres, while these simulation subcircuits take micrometres (#497)
+def test_schematic_mos_units(instance: str, suffix: str, option: str, matches_layout: bool, tmp_path: Path):
+    # NOTE: native `M` uses metres at `scale=1`, while external `X` calls keep their mapped interface units (#497).
     classes = ['sky130_fd_pr__nfet_01v8_lvt', 'sky130_fd_pr__pfet_01v8_lvt']
-    source = '* inv\n.subckt inv\n' + '\n'.join(
-        f'{prefix}{index} a b c d {name} L=0.45{suffix} W=1.5{suffix} m=6'
-        for index, name in enumerate(classes, start=1)) + '\n.ends\n'
+    lines = ['* inv', option, '.subckt inv']
+    for index, name in enumerate(classes):
+        prefix = 'M' if instance == 'native' else 'X'
+        model = f'wrapper{index}' if instance == 'wrapper' else name
+        lines.append(f'{prefix}{index} a b c d {model} L=0.45{suffix} W=1.5{suffix} m=6')
+    lines.append('.ends')
+    if instance == 'wrapper':
+        for index, name in enumerate(classes):
+            lines += [f'.subckt wrapper{index} d g s b l=1 w=1 m=1',
+                      f'M1 d g s b {name} l={{l}} w={{w}} m={{m}}', '.ends']
+    source = '\n'.join(lines) + '\n'
     models = TechInfo.from_json(PDK.SKY130A.config.tech_pb_json_path, dielectric_filter=None).device_models
     schematic = schematic_devices(netlist=SpiceReader().parse(source), device_models=models, top_cell_name='inv')
     lvsdb = kdb.LayoutVsSchematic()
@@ -199,7 +210,8 @@ def test_schematic_mos_units(prefix: str, suffix: str, matches_layout: bool, tmp
     ]
     assert check_schematic_device_totals(lvsdb.netlist(), schematic, models) == expected
 
-    if prefix == 'M':
+    # NOTE: `KLayout` 0.30.13 accepts the numeric plural option, but not its singular or suffixed forms.
+    if instance == 'native' and option in ('', '.options scale=1e-6'):
         path = tmp_path / 'inv.cdl'
         path.write_text(source, encoding='utf-8')
         reference = kdb.Netlist()
@@ -211,6 +223,30 @@ def test_schematic_mos_units(prefix: str, suffix: str, matches_layout: bool, tmp
             # NOTE: `KLayout` folds `m` into the MOS width, KPEX keeps it separate for the totals
             assert schematic_device.lvs_parameters['W'] * schematic_device.m == pytest.approx(device.parameter('W'))
             assert schematic_device.lvs_parameters['L'] == pytest.approx(device.parameter('L'))
+
+
+@allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")
+@allure.tag("PEX", "2.5D", "Schematic")
+@pytest.mark.parametrize('option, suffix', [('', 'u'), ('.options scale=1u', '')])
+def test_native_resistor_geometry_uses_scaled_si_units(option: str, suffix: str):
+    name = 'sky130_fd_pr__res_generic_m1'
+    source = f'* resistor\n{option}\n.subckt cell a b\nR1 a b {name} w=1.5{suffix} l=0.45{suffix}\n.ends\n'
+    models = TechInfo.from_json(PDK.SKY130A.config.tech_pb_json_path, dielectric_filter=None).device_models
+    schematic = schematic_devices(netlist=SpiceReader().parse(source), device_models=models, top_cell_name='cell')
+    assert schematic.devices_by_class_name[name][0].lvs_parameters == pytest.approx({'W': 1.5, 'L': 0.45})
+
+    # NOTE: wrong length units become a false area mismatch in `--check`, not just different stored values.
+    reference = kdb.Netlist()
+    device_class = kdb.DeviceClassResistor()
+    device_class.name = name
+    reference.add(device_class)
+    circuit = kdb.Circuit()
+    circuit.name = 'cell'
+    reference.add(circuit)
+    device = circuit.create_device(device_class, '1')
+    device.set_parameter('W', 1.5)
+    device.set_parameter('L', 0.45)
+    assert check_schematic_device_totals(reference, schematic, models) == []
 
 
 @allure.parent_suite("kpex/2.5D Extraction Tests [RC netlist checks]")

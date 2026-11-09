@@ -229,6 +229,9 @@ class VacaskWriter:
         """
         :raises VacaskWriterError: if the netlist has no VACASK equivalent
         """
+        if netlist.scale != 1.0:
+            # NOTE: dropping this global setting can also change devices inside external model wrappers.
+            raise VacaskWriterError(f"SPICE scale={netlist.scale:g} is not supported by the VACASK writer")
         self._check_numbers(netlist)
         self._check_subcircuit_names(netlist)
 
