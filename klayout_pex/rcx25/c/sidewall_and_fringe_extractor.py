@@ -155,8 +155,8 @@ class SidewallAndFringeExtractor:
         bounded.enable_properties()
         changed = False
         for polygon in region.each_merged():
-            if polygon.num_points() > 256 and polygon.is_rectilinear():
-                for part in polygon.break_(256, 0):
+            if polygon.num_points() > 64 and polygon.is_rectilinear():
+                for part in polygon.break_(64, 0):
                     bounded.insert(kdb.PolygonWithProperties(part, polygon.properties()))
                 changed = True
             else:
@@ -246,11 +246,6 @@ class SidewallAndFringeExtractor:
                           f"expected to be dropped due to bext/eext parameters, skipping…")
                     continue
 
-                layer_fringe_shields = [kdb.Region() for _ in self.all_layer_names]
-                for child_index, polygons in polygons_by_child.items():
-                    if child_index < len(self.all_layer_names):
-                        layer_fringe_shields[child_index].insert(polygons)
-
                 # NOTE: lateral fringe shielding, can be caused by
                 #         - sidewall (other net)
                 #         - same net "sidewall" (other polygons)
@@ -313,22 +308,23 @@ class SidewallAndFringeExtractor:
                         kdb.Point(nearest_lateral_edge.p2.x, (self.side_halo + 10) / self.dbu),
                     ])
 
+                # Accumulate the intervening layers once in each direction. The
+                # current outside layer becomes a shield only for layers beyond it.
+                fringe_shields: Dict[int, kdb.Region] = {}
+                for indices in (range(self.inside_layer_index - 1, -1, -1),
+                                range(self.inside_layer_index + 1, len(self.all_layer_names))):
+                    shield = kdb.Region()
+                    if lateral_shield is not None:
+                        shield.insert(lateral_shield)
+                    for idx in indices:
+                        if idx in polygons_by_child:
+                            fringe_shields[idx] = shield.dup()
+                            shield.insert(polygons_by_child[idx])
+
                 for child_index, polygons in polygons_by_child.items():
                     if self.inside_layer_index == child_index:
                         continue  # already handled above
                     elif child_index < len(self.all_layer_names): # FRINGE!
-                        fringe_shield = kdb.Region()
-                        if lateral_shield is not None:
-                            fringe_shield.insert(lateral_shield)
-                        if child_index < self.inside_layer_index:
-                            r = range(child_index + 1, self.inside_layer_index)
-                            for idx in r:
-                                fringe_shield += layer_fringe_shields[idx]
-                        elif self.inside_layer_index < child_index:
-                            r = range(self.inside_layer_index + 1, child_index)
-                            for idx in r:
-                                fringe_shield += layer_fringe_shields[idx]
-
                         # NOTE:
                         #    polygons can have different nets
                         #    polygons can be segmented after shield is applied
@@ -339,7 +335,7 @@ class SidewallAndFringeExtractor:
                             edge=edge,
                             edge_interval=edge_interval,
                             outside_polygons=polygons,
-                            shield=fringe_shield,
+                            shield=fringe_shields[child_index],
                             lateral_shield=lateral_shield,
                             geometry_restorer=geometry_restorer)
 
@@ -497,16 +493,19 @@ class SidewallAndFringeExtractor:
             #          - could be segmented by a shield into multiple polygons
             #            each with different near/far regions
 
-            outside_net_names = [p.property('net') for p in outside_polygons]
-
             # NOTE: the model of a device has the capacitance between its plates, so they are like one net,
             #       with the fringe from the edge of a plate to the other plate beyond it
             # NOTE: and the parts of a net that are apart in the netlist are like nets of their own
-            same_net_markers = [
-                (inside_net_name == outside_net_name and not self.results.has_net_pieces(inside_net_name)) or
-                self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net_name)
-                for outside_net_name in outside_net_names
-            ]
+            candidates: List[Tuple[NetName, kdb.PolygonWithProperties]] = []
+            for polygon in outside_polygons:
+                outside_net = polygon.property('net')
+                if inside_net_name == outside_net and not self.results.has_net_pieces(inside_net_name):
+                    continue
+                if self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net):
+                    continue
+                candidates.append((outside_net, polygon))
+            if not candidates:
+                return
 
             # NOTE: overlap_cap_by_layer_names is top/bot (dict is not symmetric)
             overlap_cap_spec = self.tech_info.overlap_cap_by_layer_names[inside_layer_name].get(outside_layer_name,
@@ -519,14 +518,7 @@ class SidewallAndFringeExtractor:
 
             polygons_by_net: Dict[NetName, List[kdb.PolygonWithProperties]] = defaultdict(list)
 
-            for idx, p in enumerate(outside_polygons):
-                outside_net = outside_net_names[idx]
-                is_same_net = same_net_markers[idx]
-
-                if is_same_net:
-                    # TODO: log?
-                    continue
-
+            for outside_net, p in candidates:
                 if shield.is_empty():
                     polygons_by_net[outside_net].append(p)
                 else:
