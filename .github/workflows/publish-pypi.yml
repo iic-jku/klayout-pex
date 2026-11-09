@@ -33,6 +33,7 @@ on:
 jobs:
   publish-test-pypi:
     name: "Publish distribution 📦s to TestPyPI"
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     continue-on-error: true
 
@@ -57,11 +58,11 @@ jobs:
         run: find dist
       
       - uses: pypa/gh-action-pypi-publish@release/v1
-        # continue-on-error: true   # might fail if we don't bump the version
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
           attestations: false
 
   publish-production-pypi:
