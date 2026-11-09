@@ -1,0 +1,24 @@
+SUBPROCESS __kpex__:kpex_cli.py:1861 main extract --pdk sky130A --mode R --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/nfet_li1_redux.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux__nfet_li1_redux/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - licon (licon1): 4 of 5 shapes are not within licon_nsd_con, licon_psd_con, licon_poly_con, licon_ntap_con, licon_ptap_con
+INFO     __kpex__:kpex_cli.py:2021 Peak memory (resident set size) after preparing the LVSDB: 519.4 MiB
+INFO     __kpex__:kpex_cli.py:2025 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2025 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2025 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2025 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2025 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2025 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 519.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1507 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1507 R1;$2;$2.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1507 R2;$3;$3.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1507 R3;G;G.$0.li1;;2.418
+SUBPROCESS __kpex__:kpex_cli.py:1507 R4;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1507 R5;G.$1.poly;G.P0.poly;;316.321
+SUBPROCESS __kpex__:kpex_cli.py:1510 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1528 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/nfet_li1_redux__nfet_li1_redux/nfet_li1_redux_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1563 Peak memory (resident set size) after the netlist: 519.4 MiB
+INFO     __kpex__:kpex_cli.py:1891 Peak memory (resident set size) after the run: 519.4 MiB
