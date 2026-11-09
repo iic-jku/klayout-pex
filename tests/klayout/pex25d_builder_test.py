@@ -479,11 +479,42 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
                     assert [d.code for d in report.diagnostics if d.severity == Severity.ERROR] == []
 
     def test_simple_dielectrics_between_the_top_metal_and_the_background_are_reported(self):
-        # NOTE: no metal above bounds them, so they have no extent; gf180mcuD's pass and sin became the background
-        #       in turn, silently, until air replaced them (#470)
+        # Unbounded films must still warn after the shipped stack has been corrected (#470).
+        fixture = TerminalFixture()
+        layers = fixture.tech.tech.process_stack.layers
+        del layers[-1]  # Replace the background with two unbounded films followed by air.
+        for name in ('oxide', 'nitride', 'air'):
+            layer = layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
+            layer.simple_dielectric_layer.dielectric_k = 1.0 if name == 'air' else 4.0
         with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
-            pex25d_file = self.stack(PDK.GF180MCUD)
+            pex25d_file = fixture.build()
         assert pex25d_file.background.name == 'air'
         assert [c.args[0] for c in warning_mock.call_args_list] == [
             f"Simple dielectric '{name}' has no metal above it in the process stack to bound it; skipping"
-            for name in ('pass', 'sin')]
+            for name in ('oxide', 'nitride')]
+
+    def test_gf180_passivation_reaches_the_documented_interfaces_on_metal_and_field(self):
+        # The `1P5M/11KA/MIM-B` cross-section measures oxide from the metal bottom,
+        # not its top. The nitride's field height must include the oxide below it.
+        # Checking both profiles catches an air gap beside `Metal5` or a film that
+        # becomes 1.1925 um too thick by counting the metal twice (#470).
+        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+            file = self.stack(PDK.GF180MCUD)
+        warning_mock.assert_not_called()
+        scene = resolve(file)
+        metal = next(layer for layer in scene.layers if layer.name == 'Metal5')
+        assert (metal.zlow, metal.zhigh) == (61300, 73225)
+        films = {film.name: film for film in scene.dielectrics}
+        for name, wraps, over, on_field, top, permittivity in (
+                ('pass', 'Metal5', 12000, 23925, 85225, 4.0),
+                ('sin', 'pass', 3000, 26925, 88225, 7.0)):
+            with self.subTest(film=name):
+                film = films[name]
+                assert (film.wraps, film.root) == (wraps, 'Metal5')
+                assert film.thickness_over_wrapped == over
+                assert film.thickness_on_field == on_field
+                assert film.thickness_beside_wrapped == 0
+                assert film.permittivity == permittivity
+                assert (film.zlow, film.zhigh) == (metal.zlow, top)
+                assert metal.zlow + film.thickness_on_field == top
+        assert (scene.background.name, scene.background.permittivity) == ('air', 1.0)

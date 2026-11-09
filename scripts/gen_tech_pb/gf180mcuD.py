@@ -231,13 +231,24 @@ def build_process_stack_info(psi: ProcessStackInfo):
     #-----------------------------------------------------------------------------------------------
     met5 = add_metal_layer(psi,     "Metal5", 6.13,   1.1925)
 
-    # DIELECTRIC (simple)        name,     dielectric_k, ref
+    # The `1P5M/11KA/MIM-B` cross-section specifies a planar oxide surface:
+    # 2.3925 um from the `Metal5` bottom, leaving 1.2 um over its 1.1925 um thickness.
+    # The `1P4M/11KA/MIM-B` and `1P5M/11KA/no-MIM` drawings give the same dimensions.
+    # Community-maintained source, checked at 25ed9c64b64b8e1b93cc4d2d5cade4cd82383a9a:
+    # https://github.com/fossi-foundation/gf180mcu-pdk/blob/25ed9c64b64b8e1b93cc4d2d5cade4cd82383a9a/docs/analog/layout/inter_specs/images/2_cross_section_43.png
+    # NOTE: table 2.2 instead lists `Oxd_pasvn (11KA)` as 2.3 um; use the detailed
+    #       cross-section consistently with the `Metal5` thickness already taken from it.
+    #       Table 2.2 gives `Nit_pasvn` as 0.3 um with k=7:
+    # https://github.com/fossi-foundation/gf180mcu-pdk/blob/25ed9c64b64b8e1b93cc4d2d5cade4cd82383a9a/docs/analog/layout/inter_specs/tables_clear/4_General_Dielectric.csv
+    # Field heights are measured from the wrapped profile's bottom, so `sin` includes
+    # the oxide height. Zero sidewall growth preserves the planar interfaces.
+    pass_field = 2.3925
+    sin_thickness = 0.3
+    # DIELECTRIC (conformal)        name,   dielectric_k, thickness,              thickness,                 thickness, ref
+    #                                                   over metal,             where no metal,            sidewall
     #-----------------------------------------------------------------------------------------------
-    add_simple_dielectric(psi,   "pass",   4.0,          "imd4")
-
-    # DIELECTRIC (simple)        name,     dielectric_k, ref
-    #-----------------------------------------------------------------------------------------------
-    add_simple_dielectric(psi,   "sin",    8.5225,       "pass")
+    add_conformal_dielectric(psi,   "pass", 4.0,          1.2,                    pass_field,                0.0,       "Metal5")
+    add_conformal_dielectric(psi,   "sin",  7.0,          sin_thickness,          pass_field + sin_thickness, 0.0,       "pass")
 
     # DIELECTRIC (simple)        name,     dielectric_k, ref
     #-----------------------------------------------------------------------------------------------
