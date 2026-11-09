@@ -45,8 +45,8 @@ from klayout_pex.rcx25.netlist_checks import (
     undriven_nets,
     undriven_nets_warning,
 )
-from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices
-from tests.common.device_model_mappings import NMOS, device_models
+from klayout_pex.schematic_devices import SchematicDevice, SchematicDevices, schematic_devices
+from tests.common.device_model_mappings import NMOS, RPPD, device_models
 import klayout_pex_protobuf.kpex.tech.device_models_pb2 as device_models_pb2
 
 
@@ -318,6 +318,15 @@ def schematic(**device_names_by_class_name: List[str]) -> SchematicDevices:
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Netlist Checks")
 class SchematicDeviceClassesTest(unittest.TestCase):
+    def test_cdl_resistor_class_missing_in_lvs_is_reported(self):
+        for other_device in ('', 'XM1 D G S B nmos w=1u l=0.13u\n'):
+            with self.subTest(other_device=other_device):
+                netlist = SpiceReader().parse(f'.subckt chip D G S B\n{other_device}'
+                                             'R1 D S 1k $SUB=B $[rppd] w=0.5u l=27u\n.ends\n')
+                devices = schematic_devices(netlist, device_models(NMOS, RPPD), 'chip')
+                self.assertEqual(['the schematic has devices of class rppd (R1), the LVS netlist none'],
+                                 check_schematic_device_classes(lvs_netlist(), devices))
+
     def test_classes_of_the_schematic_in_the_lvs_netlist(self):
         devices = schematic(nmos=['XM1'])
         self.assertEqual([], check_schematic_device_classes(lvs_netlist(), devices))

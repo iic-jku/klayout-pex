@@ -32,9 +32,12 @@ import unittest
 
 import allure
 
+from klayout_pex.device_totals import DeviceTotalParameters
 from klayout_pex.netlist.spice_hierarchy import SpiceEvaluationError
 from klayout_pex.netlist.spice_reader import SpiceReader
+from klayout_pex.pdk_config import PDK
 from klayout_pex.schematic_devices import schematic_devices
+from klayout_pex.tech_info import TechInfo
 from tests.common.device_model_mappings import NMOS, RPPD, W_L, device_models
 
 DEVICE_MODELS = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'}, RPPD)
@@ -43,6 +46,24 @@ DEVICE_MODELS = device_models({**NMOS, 'model_name': 'sg13_lv_nmos'}, RPPD)
 @allure.parent_suite("Unit Tests")
 @allure.tag("Netlist", "Schematic")
 class SchematicDevicesTest(unittest.TestCase):
+    def test_cdl_resistors_have_the_same_totals_as_subcircuit_calls(self):
+        models = TechInfo.from_json(PDK.IHP_SG13G2.config.tech_pb_json_path, dielectric_filter=None).device_models
+        for model in ('rhigh', 'rppd', 'rsil'):
+            for multiplier in ('', ' m=2'):
+                with self.subTest(model=model, multiplier=multiplier):
+                    netlist = SpiceReader().parse(f'.subckt chip a b VSS\n'
+                                                 f'R1 a b 80.146k $SUB=VSS $[{model}] '
+                                                 f'w=0.5e-6 l=27e-6 b=0{multiplier}\n'
+                                                 f'X1 a b VSS {model} w=0.5e-6 l=27e-6 b=0{multiplier}\n.ends\n')
+                    schematic = schematic_devices(netlist, models, 'chip')
+                    self.assertEqual({model: ['R1', 'X1']}, schematic.device_names_by_class_name)
+                    resistor, call = schematic.devices_by_class_name[model]
+                    self.assertEqual(resistor.lvs_parameters, call.lvs_parameters)
+                    self.assertEqual(resistor.m, call.m)
+                    totals = DeviceTotalParameters.of(None, models.mapping_by_lvs_device_class_name[model])
+                    self.assertEqual({'w·l': 27.0 if multiplier else 13.5, 'm': 2.0 if multiplier else 1.0},
+                                     totals.quantities(resistor.lvs_parameters, resistor.m))
+
     def test_devices_of_the_subcircuit_of_the_cell_and_its_subcircuits(self):
         # NOTE: not the elements outside of subcircuits, e.g. of a testbench
         netlist = SpiceReader().parse("""\

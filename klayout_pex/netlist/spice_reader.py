@@ -30,6 +30,7 @@ Reads:
       .global, .param and .end
     - diodes with a third node (e.g. a substrate), told from the area of a two-terminal diode by it being no value:
       D1 a k sub dmod is a diode with three nodes, D1 a k dmod 2 (or {...}, '...') one with an area
+    - CDL annotations on `R`, `C` and `L`: `$[model]` names the model, `$SUB=net` adds the substrate terminal
     - the lines as ngspice reads them (see spice_syntax): continuation lines, also across comment lines,
       comments, the title of a deck
     - numbers with SI suffix: T, G, MEG, K, M (milli), MIL (25.4 µ), U, N, P, F, A,
@@ -324,7 +325,26 @@ class SpiceReader:
         match kind:
             case 'R' | 'C' | 'L':
                 element = SpiceElement(name=name, nodes=nodes(2))
-                rest = tokens[3:]
+                rest: List[str] = []
+                cdl_model: Optional[str] = None
+                substrate: Optional[str] = None
+                for token in tokens[3:]:
+                    if token.startswith('$['):
+                        annotation = re.fullmatch(r'\$\[([^\[\]\s=]+)\]', token)
+                        if annotation is None:
+                            raise SpiceReaderError(f"the element {name} has invalid CDL model annotation {token}")
+                        if cdl_model is not None:
+                            raise SpiceReaderError(f"the element {name} has two models")
+                        cdl_model = annotation.group(1)
+                    elif token.lower().startswith('$sub='):
+                        node = token[5:]
+                        if not node or '=' in node or node.startswith('$['):
+                            raise SpiceReaderError(f"the element {name} has invalid CDL substrate annotation {token}")
+                        if substrate is not None:
+                            raise SpiceReaderError(f"the element {name} has two substrates")
+                        substrate = scope.node(node)
+                    else:
+                        rest.append(token)
                 while rest and '=' not in rest[0]:
                     if _is_value(rest[0]) and element.value is None and element.model is None:
                         element.value = self._value(rest[0], f"value of {name}")
@@ -333,6 +353,12 @@ class SpiceReader:
                     else:
                         raise SpiceReaderError(f"the element {name} has {rest[0]} where a parameter is expected")
                     rest = rest[1:]
+                if cdl_model is not None:
+                    if element.model is not None:
+                        raise SpiceReaderError(f"the element {name} has two models")
+                    element.model = cdl_model
+                if substrate is not None:
+                    element.nodes.append(substrate)
                 element.parameters = parameters(rest)
                 value_parameter = kind.lower()
                 if value_parameter in element.parameters:

@@ -181,6 +181,37 @@ class SpiceReaderTest(unittest.TestCase):
                           SpiceElement('M1', ['d', 'g', 's', 'b'], model='nmos', parameters={'w': 1e-6, 'l': 1.3e-7})],
                          netlist.elements)
 
+    def test_cdl_passive_model_and_substrate_annotations(self):
+        for kind in ('R', 'C', 'L'):
+            for annotations in ('$SUB=vss $[passive]', '$[passive] $sub = vss'):
+                with self.subTest(kind=kind, annotations=annotations):
+                    netlist = parse(f'.subckt cell A B VSS\n{kind}1 a b 1k\n'
+                                    f'+ {annotations} w=0.5u m=2 $ comment\n.ends\n')
+                    self.assertEqual([SpiceElement(f'{kind}1', ['A', 'B', 'VSS'], model='passive', value=1e3,
+                                                   parameters={'w': 0.5e-6, 'm': 2.0})],
+                                     netlist.subcircuits[0].elements)
+
+    def test_cdl_model_without_substrate_and_annotations_after_parameters(self):
+        netlist = parse('R1 a b 1k $[rpoly] w=1u\n'
+                        'R2 a b r=2k w=2u $[rpoly] $SUB=gnd\n')
+        self.assertEqual([SpiceElement('R1', ['a', 'b'], model='rpoly', value=1e3, parameters={'w': 1e-6}),
+                          SpiceElement('R2', ['a', 'b', '0'], model='rpoly', value=2e3,
+                                       parameters={'w': 2e-6})], netlist.elements)
+
+    def test_invalid_cdl_annotations_are_errors(self):
+        for annotations, message in (
+                ('$[]', 'invalid CDL model annotation'),
+                ('$[rpoly', 'invalid CDL model annotation'),
+                ('$[rpoly]]', 'invalid CDL model annotation'),
+                ('$[rpoly] $[other]', 'two models'),
+                ('rpoly $[other]', 'two models'),
+                ('$SUB=', 'invalid CDL substrate annotation'),
+                ('$SUB= $[rpoly]', 'invalid CDL substrate annotation'),
+                ('$SUB=vss $sub=vdd', 'two substrates')):
+            with self.subTest(annotations=annotations):
+                self.assertIn(f'line 1: the element R1 has {message}',
+                              parse_error(f'R1 a b 1k {annotations}\n'))
+
     def test_diode_with_three_nodes(self):
         # NOTE: a name after the model of a two-terminal diode, where its area is, is the model of one
         #       with three nodes, e.g. IHP's schottky_nbl1 as its CDL has it (#368)
