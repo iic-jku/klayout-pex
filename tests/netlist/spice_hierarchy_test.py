@@ -74,6 +74,24 @@ RESISTANCES = {
 }
 
 
+# NOTE: the same raw width is used for geometry and a resistance inside the wrapper.
+GEOMETRY = """\
+.param width=2
+.subckt wrapper d g w=1 l=1
+Mwrapped d g 0 0 n w={w*2} l={l} as={w*l} ad={w*l/2} ps={w+l} pd={2*(w+l)} m=3
+Rraw d 0 {w}
+.ends
+X1 d g wrapper w={width} l=0.5
+Mtop d g 0 0 n w=2 l=1 as=3 ad=4 ps=5 pd=6 m=2
+Msuffixed d g 0 0 n w=2u l=1u
+Rgeometry d 0 1k w=4 l=3
+Cgeometry d 0 2p w=6 l=5
+Rparam d 0 {width}
+Vd d 0 1.8
+Vg g 0 1
+"""
+
+
 def flat_elements(text: str, subcircuit_name: Optional[str] = None) -> Dict[str, SpiceElement]:
     hierarchy = SpiceHierarchy(SpiceReader().parse(text))
     subcircuit = hierarchy.subcircuit(subcircuit_name) if subcircuit_name else None
@@ -105,6 +123,80 @@ class SpiceHierarchyTest(unittest.TestCase):
         for path, resistance in RESISTANCES.items():
             self.assertTrue(math.isclose(resistance, values[vector(path)], rel_tol=1e-6),
                             f"{path}: {resistance} here, {values[vector(path)]} in ngspice")
+
+    def test_scale_applies_once_to_native_geometry_after_evaluating_expressions(self):
+        sources = ['.option scale=1u\n' + GEOMETRY,
+                   GEOMETRY + '.options scale=1e-6\n',
+                   GEOMETRY.replace('.subckt wrapper d g w=1 l=1\n',
+                                    '.subckt wrapper d g w=1 l=1\n.options scale=1.0U\n')]
+        expected = {
+            'Mtop': {'w': 2e-6, 'l': 1e-6, 'as': 3e-12, 'ad': 4e-12, 'ps': 5e-6, 'pd': 6e-6, 'm': 2.0},
+            'Msuffixed': {'w': 2e-12, 'l': 1e-12},
+            'X1.Mwrapped': {'w': 4e-6, 'l': 0.5e-6, 'as': 1e-12, 'ad': 0.5e-12,
+                            'ps': 2.5e-6, 'pd': 5e-6, 'm': 3.0},
+            'Rgeometry': {'w': 4e-6, 'l': 3e-6},
+            'Cgeometry': {'w': 6e-6, 'l': 5e-6},
+        }
+        for source in sources:
+            with self.subTest(source=source):
+                elements = flat_elements(source)
+                for path, parameters in expected.items():
+                    self.assertEqual(parameters.keys(), elements[path].parameters.keys())
+                    for name, value in parameters.items():
+                        self.assertTrue(math.isclose(value, elements[path].parameters[name], rel_tol=1e-12),
+                                        f'{path}.{name}: {elements[path].parameters[name]} != {value}')
+                self.assertEqual(1e3, elements['Rgeometry'].value)
+                self.assertEqual(2e-12, elements['Cgeometry'].value)
+                self.assertEqual(2.0, elements['X1.Rraw'].value)
+                self.assertEqual(2.0, elements['Rparam'].value)
+                self.assertEqual(1.8, elements['Vd'].source.dc)
+
+    def test_scale_preserves_representable_results_at_numeric_limits(self):
+        # NOTE: forming `scale²` first can overflow/underflow even when the scaled area is representable.
+        cases = [('1e-200', 'ad', '1e300', 1e-100),
+                 ('1e200', 'ad', '1e-300', 1e100),
+                 ('1e200', 'ad', '0', 0.0),
+                 ('1e308', 'w', '1', 1e308)]
+        for scale, parameter, value, expected in cases:
+            with self.subTest(scale=scale, parameter=parameter, value=value):
+                element = flat_elements(f'.options scale={scale}\nM1 d g s b n {parameter}={value}\n')['M1']
+                self.assertTrue(math.isclose(expected, element.parameters[parameter], rel_tol=1e-12),
+                                f'{element.parameters[parameter]} != {expected}')
+        self.assertEqual('the scaled parameter w of M1 has no finite value',
+                         evaluation_error('.options scale=1e308\nM1 d g s b n w=2\n'))
+
+    def test_repeated_hierarchy_traversals_do_not_scale_the_input_again(self):
+        # NOTE: schematic checks can traverse the same parsed netlist more than once.
+        netlist = SpiceReader().parse('.option scale=1u\nM1 d g s b n w=2\n')
+        hierarchy = SpiceHierarchy(netlist)
+        for _ in range(2):
+            self.assertEqual(2e-6, next(hierarchy.flat_elements()).element.parameters['w'])
+        self.assertEqual(2.0, netlist.elements[0].parameters['w'])
+
+    def test_scale_does_not_guess_units_of_external_subcircuit_arguments(self):
+        elements = flat_elements('.option scale=1u\nX1 d g s b external w=2 l=1 as=3 m=4\n')
+        self.assertEqual({'w': 2.0, 'l': 1.0, 'as': 3.0, 'm': 4.0}, elements['X1'].parameters)
+
+    @requires_ngspice
+    def test_scaled_geometry_matches_ngspice(self):
+        source = GEOMETRY + '.option scale=1u\n'
+        elements = flat_elements(source)
+        expected = {'v(d)': 1.8, '@n[tox]': 10e-9, '@n[ld]': 20e-9}
+        for path, element in elements.items():
+            if element.kind not in ('M', 'R', 'C'):
+                continue
+            prefix = element.kind.lower() + '.' if '.' in path else ''
+            instance = prefix + path.lower()
+            expected.update({f'@{instance}[{name}]': value for name, value in element.parameters.items()})
+            if element.kind in ('R', 'C'):
+                value_name = 'resistance' if element.kind == 'R' else 'capacitance'
+                expected[f'@{instance}[{value_name}]'] = element.value
+        with tempfile.TemporaryDirectory() as work_dir:
+            values = ngspice_operating_point(source + '.model n nmos level=1 vto=0.7 kp=50u tox=10n ld=20n\n',
+                                             list(expected), work_dir)
+        for vector, value in expected.items():
+            self.assertTrue(math.isclose(value, values[vector], rel_tol=1e-6),
+                            f'{vector}: {value} here, {values[vector]} in ngspice')
 
     def test_parameterized_subcircuits_as_bag_writes_them(self):
         elements = flat_elements("""\

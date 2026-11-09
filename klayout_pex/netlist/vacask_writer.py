@@ -46,7 +46,9 @@ NOTE: imports neither KLayout nor generated protobuf code, so that format-only p
 
 from __future__ import annotations
 from dataclasses import dataclass
+from itertools import combinations
 import math
+import os
 from pathlib import Path
 import re
 from typing import *
@@ -61,6 +63,19 @@ class VacaskWriterError(Exception):
     or the writer doesn't write it, e.g. an expression
     """
     pass
+
+
+def vacask_output_paths(output_path: str | Path) -> Tuple[str, str]:
+    """The circuit include and its companion for the testbench's existing control block."""
+    path = str(output_path)
+    return path, os.path.splitext(path)[0] + '.options.inc'
+
+
+def check_distinct_paths(*paths: str | Path):
+    """Reject overwriting another input/output, including symbolic and hard-link aliases."""
+    for first, second in combinations((Path(path) for path in paths), 2):
+        if first.resolve() == second.resolve() or (first.exists() and second.exists() and first.samefile(second)):
+            raise VacaskWriterError(f"The paths {str(first)!r} and {str(second)!r} refer to the same file")
 
 
 ParameterValue = Union[float, str, List[float]]
@@ -217,18 +232,49 @@ class VacaskWriter:
 
     def write(self,
               netlist: SpiceNetlist,
-              output_path: str | Path):
+              output_path: str | Path) -> Tuple[str, str]:
         """
-        :raises VacaskWriterError: if the netlist has no VACASK equivalent
+        Writes a circuit include and a companion .options.inc for the testbench's control block.
+        The options apply to the entire simulation, including devices inside external wrappers.
+        Instance parameters stay unchanged: compatible models apply scale exactly once.
+
+        :return: the circuit path and options path written
+        :raises VacaskWriterError: if the paths overlap or the netlist has no VACASK equivalent
+                                  (neither file is written then)
         """
-        text = self.text(netlist)  # NOTE: before opening the file, so that an error writes none
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(text)
+        paths = vacask_output_paths(output_path)
+        check_distinct_paths(*paths)
+        self._check_scale(netlist)
+        # NOTE: render both before opening either file, so an unsupported netlist preserves old outputs.
+        text = self._text(netlist, companion_options=True)
+        # NOTE: preserve the float exactly, including values next to 1 and the finite endpoints.
+        options = ("// Include inside the testbench's existing control block, before analyses.\n"
+                   "// This scale applies to the entire simulation.\n"
+                   f"options scale={netlist.scale}\n")
+        for path, content in zip(paths, (text, options)):
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+        return paths
 
     def text(self, netlist: SpiceNetlist) -> str:
         """
-        :raises VacaskWriterError: if the netlist has no VACASK equivalent
+        The circuit alone, without a companion options fragment.
+
+        :raises VacaskWriterError: if the netlist has no VACASK equivalent or needs nondefault scale
+                                  (use write to preserve it in the companion options file)
         """
+        self._check_scale(netlist)
+        if netlist.scale != 1.0:
+            raise VacaskWriterError(f"SPICE scale={netlist.scale:g} requires a companion options file: "
+                                    "use VacaskWriter.write")
+        return self._text(netlist)
+
+    @staticmethod
+    def _check_scale(netlist: SpiceNetlist):
+        if not math.isfinite(netlist.scale) or netlist.scale <= 0:
+            raise VacaskWriterError(f"SPICE scale must be finite and positive, got {netlist.scale}")
+
+    def _text(self, netlist: SpiceNetlist, companion_options: bool = False) -> str:
         self._check_numbers(netlist)
         self._check_subcircuit_names(netlist)
 
@@ -252,6 +298,8 @@ class VacaskWriter:
             body.append('')
 
         lines = [f"// {line}".rstrip() for line in self.header]
+        if companion_options:
+            lines.append("// Include the companion .options.inc inside the testbench's existing control block.")
         if lines:
             lines.append('')
         osdi_files = sorted({d.osdi_file for d in used_devices if d.osdi_file})

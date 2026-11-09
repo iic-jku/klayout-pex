@@ -153,12 +153,25 @@ class Test(unittest.TestCase):
         self.assertIsNone(models.lvs_device_class_name(SpiceElement(name='R1', value=1e3)))
 
     def test_lvs_parameters_of_a_schematic_device(self):
-        values = DeviceModels.lvs_parameter_values(
-            device_models(NMOS).mapping_by_lvs_device_class_name['nmos'],
-            SpiceElement(name='XM1', model='nmos', parameters={'w': 2e-6, 'l': 0.13e-6, 'ng': 2}))
-        self.assertEqual(['L', 'W'], sorted(values))
-        self.assertAlmostEqual(2.0, values['W'], places=12)
-        self.assertAlmostEqual(0.13, values['L'], places=12)
+        for name in ('XM1', 'M1'):
+            with self.subTest(name=name):
+                values = DeviceModels.lvs_parameter_values(
+                    device_models(NMOS).mapping_by_lvs_device_class_name['nmos'],
+                    SpiceElement(name=name, model='nmos', parameters={'w': 2e-6, 'l': 0.13e-6, 'ng': 2}))
+                self.assertEqual(['L', 'W'], sorted(values))
+                self.assertAlmostEqual(2.0, values['W'], places=12)
+                self.assertAlmostEqual(0.13, values['L'], places=12)
+
+    def test_schematic_parameter_factors_override_only_the_given_prefix(self):
+        models = device_models({**NMOS, 'parameters': [
+            {'name': 'w', 'lvs_parameter_name': 'W', 'schematic_parameter_factors': {'M': 1e-6}},
+            {'name': 'ad', 'lvs_parameter_name': 'AD', 'schematic_parameter_factors': {'M': 1e-12}},
+        ]})
+        mapping = models.mapping_by_lvs_device_class_name['nmos']
+        for name, parameters in (('m1', {'w': 2e-6, 'ad': 3e-12}), ('X1', {'w': 2.0, 'ad': 3.0})):
+            with self.subTest(name=name):
+                values = DeviceModels.lvs_parameter_values(mapping, SpiceElement(name=name, parameters=parameters))
+                self.assertEqual({'W': 2.0, 'AD': 3.0}, values)
 
     def test_lvs_parameters_of_a_schematic_device_are_floored_as_by_its_model(self):
         mapping = device_models(MOM).mapping_by_lvs_device_class_name['mom']

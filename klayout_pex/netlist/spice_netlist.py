@@ -116,3 +116,7 @@ class SpiceNetlist:
 
     # of the .param lines outside of subcircuits
     parameters: Dict[str, NumberOrExpression] = field(default_factory=dict)
+
+    # Circuit-wide `.option`/`.options scale`, applied to supported native geometry by `SpiceHierarchy`.
+    # Subcircuit arguments and generic parameters keep their values until used by a native device.
+    scale: float = 1.0

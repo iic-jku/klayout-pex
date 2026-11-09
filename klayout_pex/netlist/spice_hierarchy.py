@@ -31,6 +31,12 @@ in the scopes of parameters as ngspice has them (as of ngspice-46):
     - then the scope of its caller, e.g. of the call of the calling subcircuit, up to the .param lines
       of the top level
     - the values of another element refer to the scope of its subcircuit call
+    - the netlist's `scale` multiplies native `M` lengths/perimeters and `R`/`C` lengths after evaluation
+    - native `M` areas receive `scale²` after evaluation
+    - `X` arguments, generic parameters, electrical values and multipliers are unchanged
+
+Defined wrappers therefore scale at their native devices. External wrappers keep their interface's units
+(the reader does not load model libraries).
 
 NOTE: imports neither KLayout nor generated protobuf code, so that format-only paths can use it
 """
@@ -39,11 +45,21 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from functools import partial
 from itertools import chain
+import math
 from typing import *
 
 from .expression.nodes import ExpressionError, NumberOrExpression
 from .expression.scope import ParameterScope
 from .spice_netlist import SpiceElement, SpiceNetlist, SpiceSubcircuit
+
+
+# NOTE: these native instance parameters scale independently of the model library.
+# Other parameters that describe geometry can have model-specific semantics, e.g. diode area factors.
+_GEOMETRY_SCALE_EXPONENTS: Dict[str, Dict[str, int]] = {
+    'M': {'l': 1, 'w': 1, 'ps': 1, 'pd': 1, 'as': 2, 'ad': 2},
+    'R': {'l': 1, 'w': 1},
+    'C': {'l': 1, 'w': 1},
+}
 
 
 class SpiceEvaluationError(Exception):
@@ -141,8 +157,8 @@ class SpiceHierarchy:
             yield from self._flat_elements(subcircuit.elements, call_scope, f"{name}.", calls + (key,),
                                            parameter_names)
 
-    @staticmethod
-    def _evaluated(element: SpiceElement,
+    def _evaluated(self,
+                   element: SpiceElement,
                    scope: ParameterScope,
                    path: str,
                    parameter_names: Optional[Callable[[SpiceElement], Collection[str]]]) -> SpiceElement:
@@ -164,6 +180,15 @@ class SpiceHierarchy:
         else:
             parameters = {n: evaluate(f"parameter {n} =", v, partial(scope.evaluate, v))
                           for n, v in to_evaluate.items()}
+        if self.netlist.scale != 1.0:
+            for name, exponent in _GEOMETRY_SCALE_EXPONENTS.get(element.kind, {}).items():
+                if name not in parameters:
+                    continue
+                # NOTE: `scale²` can overflow or underflow before multiplication even when the result fits.
+                for _ in range(exponent):
+                    parameters[name] *= self.netlist.scale
+                if not math.isfinite(parameters[name]):
+                    raise SpiceEvaluationError(f"the scaled parameter {name} of {path} has no finite value")
         value = None
         if parameter_names is None and element.value is not None:
             value = evaluate('value', element.value, partial(scope.evaluate, element.value))

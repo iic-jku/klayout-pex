@@ -45,13 +45,14 @@ from ..util.argparse_helpers import add_argument_with_former_name
 from ..version import __version__
 from .netlist_format import NetlistFormat
 from .spice_reader import SpiceReader, SpiceReaderError
-from .vacask_writer import VacaskWriter, VacaskWriterError
+from .vacask_writer import VacaskWriter, VacaskWriterError, check_distinct_paths, vacask_output_paths
 
 
 CONVERSION_FORMATS: Dict[NetlistFormat, str] = {
     NetlistFormat.VACASK: "to be included by a VACASK testbench. A subcircuit call with m = N becomes N calls, "
                           "unless the subcircuit declares m: `--pdk` tells which of the PDK's models do "
-                          "(e.g. the MOS)",
+                          "(e.g. the MOS). The companion `.options.inc` sets the global geometry scale: "
+                          "include it inside the testbench's existing control block before analyses",
 }
 """The formats a SPICE netlist converts to, with what the help says about each"""
 
@@ -68,7 +69,7 @@ def add_convert_subcommand(subparsers: argparse._SubParsersAction):
         help="Convert a SPICE netlist to the netlist format of another simulator",
         description="Convert a SPICE netlist (e.g. an extracted one) to the netlist format of another simulator. "
                     "Reads the elements R, C, L, K, D, M, V, I, E, F, G, H and X, "
-                    "subcircuits and .global, with numbers as values "
+                    "subcircuits, .global and .option/.options scale, with numbers as values "
                     "(no parameters, expressions, models, includes or analyses)",
         epilog=_formats_epilog(),
         formatter_class=RichHelpFormatter)
@@ -98,6 +99,12 @@ def run_convert(args: argparse.Namespace) -> ExitCode:
         error(f"The output path is the input path {input_path}, give another one with --out-netlist")
         return ExitCode.USAGE
 
+    try:
+        check_distinct_paths(input_path, *vacask_output_paths(output_path))
+    except VacaskWriterError as e:
+        error(str(e))
+        return ExitCode.USAGE
+
     subcircuits_with_m: Set[str] = set()
     if args.pdk is not None:
         from ..tech_info import TechInfo  # NOTE: imports generated protobuf code (and KLayout)
@@ -106,7 +113,7 @@ def run_convert(args: argparse.Namespace) -> ExitCode:
         subcircuits_with_m = tech_info.device_models.vacask_subcircuits_with_m
 
     try:
-        convert_to_vacask(input_path, output_path, subcircuits_with_m)
+        netlist_path, options_path = convert_to_vacask(input_path, output_path, subcircuits_with_m)
     except SpiceReaderError as e:
         error(f"Can't read the SPICE netlist {e}")
         return ExitCode.DIAGNOSTIC_ERRORS
@@ -114,24 +121,25 @@ def run_convert(args: argparse.Namespace) -> ExitCode:
         error(f"Can't write the SPICE netlist {input_path} as VACASK netlist: {e}")
         return ExitCode.DIAGNOSTIC_ERRORS
 
-    info(f"Wrote {output_path}")
+    info(f"Wrote {netlist_path}")
+    info(f"Wrote {options_path}: include inside the testbench's existing control block before analyses")
     return ExitCode.OK
 
 
 def convert_to_vacask(input_path: str,
                       output_path: str,
-                      subcircuits_with_m: Collection[str]) -> str:
+                      subcircuits_with_m: Collection[str]) -> Tuple[str, str]:
     """
     Converts a SPICE netlist to a VACASK netlist, for netlist convert and kpex --netlist-format vacask
 
     :param subcircuits_with_m: see VacaskWriter
-    :return: the path written
+    :return: the circuit include and companion options paths written
     :raises SpiceReaderError: if the SPICE netlist can't be read
     :raises VacaskWriterError: if it has no VACASK equivalent (nothing is written then)
     """
+    check_distinct_paths(input_path, *vacask_output_paths(output_path))
     netlist = SpiceReader().read(input_path)
     writer = VacaskWriter(subcircuits_with_m=subcircuits_with_m,
                           header=[f"VACASK netlist converted by KLayout-PEX {__version__}",
                                   f"from the SPICE netlist {os.path.basename(input_path)}"])
-    writer.write(netlist, output_path)
-    return output_path
+    return writer.write(netlist, output_path)
