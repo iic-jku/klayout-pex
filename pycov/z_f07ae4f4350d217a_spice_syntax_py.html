@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_f07ae4f4350d217a_vacask_writer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-09 11:50 +0000
+            created at 2026-11-09 16:29 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -108,7 +108,7 @@
     <p class="pln"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t"><span class="str">The lines of a SPICE netlist as ngspice reads them, for the netlist tools:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="str">    - a statement continues on the lines starting with &#x27;+&#x27;, also across comment and blank lines</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t"><span class="str">    - comments: lines starting with &#x27;*&#x27;, and end-of-line comments from &#x27;$&#x27; or &#x27;//&#x27; at the start of a word,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t"><span class="str">      or from &#x27;;&#x27; (KLayout writes the net $1 as \\$1)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t"><span class="str">      or from &#x27;;&#x27; (KLayout writes the net $1 as \\$1), except the CDL annotations `$[model]` and `$SUB=net`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t"><span class="str">    - the first line of a deck (a netlist with .end) is its title</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t"><span class="str">    - ground: the nodes &#x27;0&#x27; and &#x27;gnd&#x27;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -126,7 +126,7 @@
     <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t"><span class="str">&quot;&quot;&quot;Ground in SPICE: &#x27;0&#x27;, and &#x27;gnd&#x27;, which ngspice reads as &#x27;0&#x27;&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t"><span class="nam">_END</span> <span class="op">=</span> <span class="nam">re</span><span class="op">.</span><span class="nam">compile</span><span class="op">(</span><span class="str">r&#x27;\s*\.end\s*$&#x27;</span><span class="op">,</span> <span class="nam">re</span><span class="op">.</span><span class="nam">IGNORECASE</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t"><span class="nam">_END_OF_LINE_COMMENT</span> <span class="op">=</span> <span class="nam">re</span><span class="op">.</span><span class="nam">compile</span><span class="op">(</span><span class="str">r&#x27;(^|\s)(\$|//)|;&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t"><span class="nam">_END_OF_LINE_COMMENT</span> <span class="op">=</span> <span class="nam">re</span><span class="op">.</span><span class="nam">compile</span><span class="op">(</span><span class="str">r&#x27;(^|\s)(\$(?!\[|SUB\s*=)|//)|;&#x27;</span><span class="op">,</span> <span class="nam">re</span><span class="op">.</span><span class="nam">IGNORECASE</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t"><span class="key">class</span> <span class="nam">SpiceSyntaxError</span><span class="op">(</span><span class="nam">Exception</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -161,7 +161,7 @@
     <p class="pln"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">    <span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t"><span class="str">    :return: the physical line without its comment, &#x27;&#x27; for a comment line</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="key">if</span> <span class="nam">line</span><span class="op">.</span><span class="nam">lstrip</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">startswith</span><span class="op">(</span><span class="str">&#x27;*&#x27;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="key">if</span> <span class="nam">line</span><span class="op">.</span><span class="nam">lstrip</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">startswith</span><span class="op">(</span><span class="op">(</span><span class="str">&#x27;*&#x27;</span><span class="op">,</span> <span class="str">&#x27;$&#x27;</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="key">return</span> <span class="str">&#x27;&#x27;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">    <span class="nam">match</span> <span class="op">=</span> <span class="nam">_END_OF_LINE_COMMENT</span><span class="op">.</span><span class="nam">search</span><span class="op">(</span><span class="nam">line</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="key">return</span> <span class="nam">line</span> <span class="key">if</span> <span class="nam">match</span> <span class="key">is</span> <span class="key">None</span> <span class="key">else</span> <span class="nam">line</span><span class="op">[</span><span class="op">:</span><span class="nam">match</span><span class="op">.</span><span class="nam">start</span><span class="op">(</span><span class="op">)</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -249,7 +249,7 @@
             <a class="nav" href="z_f07ae4f4350d217a_vacask_writer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.2">coverage.py v7.17.2</a>,
-            created at 2026-11-09 11:50 +0000
+            created at 2026-11-09 16:29 +0000
         </p>
     </div>
 </footer>
