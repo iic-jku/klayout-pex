@@ -21,8 +21,10 @@
 
 ## Scope
 
-- One concern per branch; report unrelated findings instead of fixing them. FasterCap
-  changes get their own PR. PDK fix branches stay data-only.
+- One concern per branch. File verified user-facing defects as issues after checking for
+  duplicates. Fix unrelated defects in separate PRs. Closely related defects may share a PR
+  when they need the same change. Reference every issue and use `Fixes #N` for each resolved
+  issue. FasterCap changes get their own PR. PDK fix branches stay data-only.
 - No public API (protocols, entry-point groups, options, modules) without a caller and a
   test. Plugin API `v1` is provisional (colleagues are testing it) and may still change;
   once Martin declares it stable, breaking changes need a `v2`.
@@ -78,8 +80,21 @@
   executable), on Linux, macOS and Windows: before handing over a PR, also run them with
   Python 3.12 (e.g. in IIC-OSIC-TOOLS) and with `KPEX_KLAYOUT_EXE=/nonexistent`. CI's
   `PYTHONWARNDEFAULTENCODING=1` makes text I/O without encoding fail the tests on every platform.
-- Each bug fix gets a test that fails without it. A test that needs a workaround means the
-  code is wrong: fix the code.
+- Each issue resolved by a fix gets a regression test that fails without the fix, including
+  when several related issues share a PR. Exercise the observable user problem rather than
+  reproducing the implementation. A test that needs a workaround means the code is wrong:
+  fix the code.
+- Plan test cases from the contract before implementation. Identify valid and invalid
+  equivalence classes, then use boundary-value analysis (Grenzwertanalyse): test just below,
+  at and just above relevant limits. Consider empty inputs, zero, signs, minimum/maximum
+  sizes, numeric precision, overflow and underflow where they affect the contract.
+- Consider interactions and sequence effects as well as isolated inputs. Use decision tables
+  for interacting options, state-transition or ordering tests for stateful behavior, and
+  invariants or independent reference results where appropriate. Choose cases by risk and
+  expected behavior, not by mirroring branches in the implementation.
+- Explain why the selected corner cases matter in test comments or the review notes. Keep
+  that reasoning concise and specific to the failure modes. Do not add a generic checklist
+  or irrelevant edge cases to every test.
 - No loosened tolerances or re-baselined numbers without a physical explanation.
 - Subprocess tests put the child's stderr in the assertion message.
 
