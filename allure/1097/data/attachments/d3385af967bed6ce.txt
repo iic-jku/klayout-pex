@@ -1,0 +1,19 @@
+SUBPROCESS __kpex__:kpex_cli.py:1861 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/label_only_in_child_cell.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/label_only_in_child_cell.gds.gz --port-labels auto
+INFO     __kpex__:kpex_cli.py:933 No explicit top cell specified, using top cell 'label_only_in_child_cell'
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/label_only_in_child_cell__label_only_in_child_cell/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:284 Ports named after labels in subcells: inner (label them in the top cell to name ports explicitly)
+INFO     __kpex__:kpex_cli.py:2021 Peak memory (resident set size) after preparing the LVSDB: 740.4 MiB
+INFO     __kpex__:kpex_cli.py:2025 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2025 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2025 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1475 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 740.4 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 740.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1507 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1507 C1;VSUBS;inner;0.81;
+SUBPROCESS __kpex__:kpex_cli.py:1510 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/label_only_in_child_cell__label_only_in_child_cell/label_only_in_child_cell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1528 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/label_only_in_child_cell__label_only_in_child_cell/label_only_in_child_cell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1563 Peak memory (resident set size) after the netlist: 740.4 MiB
+INFO     __kpex__:kpex_cli.py:1891 Peak memory (resident set size) after the run: 740.4 MiB
