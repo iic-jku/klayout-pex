@@ -47,6 +47,7 @@ from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.pex25d.reader import read_pex25d_text
+from klayout_pex.rcx25.extraction_results import ExtractionResults, ExtractionSummary
 from klayout_pex.rcx25.r.r_extractor import RExtractionTechError
 from klayout_pex.run_result import RESULT_FILE_NAME
 from klayout_pex.tech_info import TechDefError, TechInfo
@@ -67,6 +68,41 @@ SCHEMATIC_WARNING = "--schematic is checked for its device classes, their totals
 
 PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d+(\.\d)? (B|KiB|MiB|GiB)"
                               r"(, largest subprocess \d+(\.\d)? (B|KiB|MiB|GiB))?")
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Ports")
+@pytest.mark.parametrize('command', ['extract', 'pex25d'])
+@pytest.mark.parametrize('policy, message', [
+    ('unknown', r"invalid choice: 'unknown' \(choose from '?auto'?, '?top'?\)"),
+    ('top', '--port-labels top needs --gds'),
+])
+def test_port_policy_is_validated_before_loading_inputs(command: str, policy: str, message: str, tmp_path: Path):
+    with mock.patch.object(kdb.LayoutVsSchematic, 'read', side_effect=AssertionError('must not load LVSDB')):
+        code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A',
+                                                '--lvsdb', '/nonexistent/layout.lvsdb',
+                                                '--port-labels', policy, '--out-dir', str(tmp_path)])
+    assert code == ExitCode.USAGE, output
+    assert re.search(message, ' '.join(output.split())), output
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX25D", "Ports")
+@pytest.mark.parametrize('pattern, policy, pin_names', [
+    ('internal_child_labels', 'auto', ['pin:outer']),
+    ('label_only_in_child_cell', 'auto', ['pin:inner']),
+    ('label_only_in_child_cell', 'top', []),
+])
+def test_pex25d_terminals_follow_the_port_label_policy(pattern: str, policy: str, pin_names: List[str], tmp_path: Path):
+    gds = PDKTestConfig(PDKName.IHP_SG13G2).gds_path('test_patterns', f'{pattern}.gds.gz')
+    path = tmp_path / 'ports.pex25d'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'pex25d', '--pdk', 'ihp-sg13g2',
+                                            '--lvsdb', lvsdb_fixture_path('ihp-sg13g2', gds), '--gds', gds,
+                                            '--port-labels', policy, '--out-file', str(path),
+                                            '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    scene = read_pex25d_text(path.read_bytes(), str(path))
+    assert sorted(terminal.name for terminal in scene.terminals if terminal.name.startswith('pin:')) == pin_names
 
 
 def logged_peak_memory_stages(output: str) -> List[str]:
@@ -112,6 +148,29 @@ def test_written_netlist_csv_is_logged_as_written(tmp_path):
         with open(tmp_path / 'nfet_li1__nfet_li1' / log_name, encoding='utf-8') as f:
             log_lines = f.read().splitlines()
         assert any(line.endswith(header) for line in log_lines), log_lines
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "PEX", "2.5D")
+@pytest.mark.parametrize('mode', ['CC', 'R', 'RC'])
+def test_extraction_summary_is_computed_once_for_all_netlist_outputs(mode: str, tmp_path: Path):
+    summarize = ExtractionResults.summarize
+    summaries: List[ExtractionSummary] = []
+
+    def record_summary(results: ExtractionResults) -> ExtractionSummary:
+        summary = summarize(results)
+        summaries.append(summary)
+        return summary
+
+    cli = KpexCLI()
+    with mock.patch.object(ExtractionResults, 'summarize', autospec=True, side_effect=record_summary) as summarize_mock:
+        code, output = run_cli(cli.main, ['kpex', 'extract', '--pdk', 'sky130A', '--2.5D', '--mode', mode,
+                                         '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH),
+                                         '--out-dir', str(tmp_path)])
+    assert code == 0, output
+    assert summarize_mock.call_count == 1
+    # NOTE: CSV writing, expansion and checks leave the shared summary's values unchanged, bit for bit
+    assert summaries[0] == cli.rcx25_extraction_results.summarize()
 
 
 @allure.parent_suite("Unit Tests")

@@ -681,6 +681,11 @@ class PEX25DBuilder:
 
     def build_terminals(self, pex25d_file: Any) -> None:
         kinds = pex25d_terminal_pb2()
+        selected_labels: Optional[Set[Tuple[GDSPair, str, int, int]]] = None
+        if self.pex_context.port_label_keys is not None:
+            selected_labels = {(gds_pair, pin.label, pin.label_point.x, pin.label_point.y)
+                               for gds_pair, pins in self.pex_context.pins_pb2_by_layer.items() for pin in pins
+                               if self.pex_context.pin_can_be_port(pin)}
         # Metals can share their drawn layer (e.g. sky130A met3_ncap and met3_cap, without and with
         # a MiM cap above), whose pins are then on the one under each label.
         metal_names_by_gds_pair: Dict[GDSPair, List[str]] = {}
@@ -700,6 +705,8 @@ class PEX25DBuilder:
             for label in labels:
                 point = label.position()
                 key = (label.string, point.x, point.y)
+                if selected_labels is not None and (gds_pair, *key) not in selected_labels:
+                    continue
                 if key in seen:
                     continue
                 seen.add(key)

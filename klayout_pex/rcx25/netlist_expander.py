@@ -32,7 +32,7 @@ from ..log import (
     info,
     warning,
 )
-from .extraction_results import ExtractionResults
+from .extraction_results import ExtractionResults, ExtractionSummary
 from ..device_models import DeviceModels
 from ..klayout.netlist_expander import remove_devices
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
@@ -63,12 +63,14 @@ class RCX25NetlistExpander:
                blackbox_devices: bool,
                device_models: DeviceModels,
                substrate_net_name: Optional[str] = None,
-               removed_device_ids: Collection[int] = ()) -> kdb.Netlist:
+               removed_device_ids: Collection[int] = (),
+               summary: Optional[ExtractionSummary] = None) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, which tell the whiteboxed devices
         :param substrate_net_name: the net the capacitances to the substrate go to (VSUBS if not given),
                                    created if the netlist has none, and a port if it has no pin
         :param removed_device_ids: the devices to leave out, as a model has them (of cut cells)
+        :param summary: already computed from `extraction_results`, shared with other netlist outputs and checks
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
@@ -99,7 +101,8 @@ class RCX25NetlistExpander:
 
         fc_gnd_net = top_circuit.create_net('FC_GND')  # create GROUND net
 
-        summary = extraction_results.summarize()
+        if summary is None:
+            summary = extraction_results.summarize()
         cap_items = sorted(summary.capacitances.items())
         res_items = sorted(summary.resistances.items())
 

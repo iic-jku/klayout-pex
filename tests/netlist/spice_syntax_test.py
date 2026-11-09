@@ -88,6 +88,8 @@ def test_comment_and_blank_lines_are_lines_without_text():
     ('R1 a b 1k // comment', 'R1 a b 1k'),
     ('R1 a b 1k; comment', 'R1 a b 1k'),           # NOTE: ; anywhere
     ('$ comment', ''),
+    ('  $[comment] with brackets', ''),
+    ('$SUB=body in a comment line', ''),
     ('R1 a \\$1 1k', 'R1 a \\$1 1k'),             # NOTE: KLayout writes the net $1 as \\$1
     ('R1 a$b c 1k', 'R1 a$b c 1k'),
     ('R1 a//b c 1k', 'R1 a//b c 1k'),
@@ -101,6 +103,15 @@ def test_end_of_line_comments(line: str, stripped: str):
 @allure.tag(*tags)
 def test_statements_are_read_without_their_end_of_line_comments():
     assert texts("X1 a $ one\n+ b ; two\n+ model // three\n") == ['X1 a b model']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('annotation', ['$SUB=VSS $[rpoly]', '$[rpoly] $sub = VSS'])
+def test_cdl_annotations_are_not_comments(annotation: str):
+    line = f'R1 a b 1k {annotation} w=1u l=2u'
+    assert strip_comment(line + ' $ comment') == line
+    assert texts(f'R1 a b 1k\n+ {annotation} w=1u l=2u $ comment\n') == [line]
 
 
 @allure.parent_suite(parent_suite)

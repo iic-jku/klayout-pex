@@ -104,14 +104,14 @@ class SidewallAndFringeExtractor:
             layer_name not in tech_info.process_diffusion_layer_names
 
     def extract(self):
+        bounded_neighbors = [self.bounded_neighbors(region) for region in self.all_layer_regions]
         for idx, (layer_name, layer_region) in enumerate(self.layer_regions_by_name.items()):
             if not self.has_fringe(self.tech_info, layer_name):
                 continue
 
-            other_layer_regions = [
-                r for ln, r in self.layer_regions_by_name.items()
-                if ln != layer_name
-            ]
+            # NOTE: rotating split polygons for a slanted source edge can round the new vertices differently.
+            #       For rectilinear source edges, splitting rectilinear neighbors preserves their geometry exactly.
+            neighbors = bounded_neighbors if layer_region.non_rectilinear().is_empty() else self.all_layer_regions
 
             en_visitor = self.PEXEdgeNeighborhoodVisitor(
                 all_layer_names=self.all_layer_names,
@@ -126,7 +126,7 @@ class SidewallAndFringeExtractor:
             )
 
             en_children = [kdb.CompoundRegionOperationNode.new_secondary(r)
-                           for r in self.all_layer_regions]
+                           for r in neighbors]
             en_children[idx] = kdb.CompoundRegionOperationNode.new_foreign()  # sidewall of other nets on the same layer
             en_children.append(kdb.CompoundRegionOperationNode.new_primary()) # opposing structures of the same polygon
 
@@ -143,6 +143,29 @@ class SidewallAndFringeExtractor:
             )
 
             layer_region.complex_op(en_node)
+
+    @staticmethod
+    def bounded_neighbors(region: kdb.Region) -> kdb.Region:
+        """
+        Splits large rectilinear neighbor polygons so that an edge visits only their nearby parts.
+        KLayout merges the parts by their properties when clipping the edge neighborhood, so no artificial
+        edges reach the visitor. The source polygons stay whole, including their opposing edges.
+        """
+        bounded = kdb.Region()
+        bounded.enable_properties()
+        changed = False
+        for polygon in region.each_merged():
+            if polygon.num_points() > 256 and polygon.is_rectilinear():
+                for part in polygon.break_(256, 0):
+                    bounded.insert(kdb.PolygonWithProperties(part, polygon.properties()))
+                changed = True
+            else:
+                bounded.insert(polygon)
+        if not changed:
+            return region
+        # NOTE: otherwise complex_op merges these parts back before looking up an edge's neighbors
+        bounded.merged_semantics = False
+        return bounded
 
     # ------------------------------------------------------------------------
 

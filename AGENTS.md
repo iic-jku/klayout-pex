@@ -91,6 +91,8 @@
   asked; never commit scratch files.
 - Martin keeps WIP stashes: never chain `git stash push`/`pop`. Test staged changes via
   `git checkout-index -a --prefix=<dir>/` or a temporary worktree.
+- Branch names describe the change. Do not include identifiers of the assistant, model,
+  provider, or automation used to produce it, whether as a prefix, suffix, or elsewhere.
 - Commit subject: `Area: verb phrase`, 6–12 words, no articles, e.g. `R Extractor: fix
   handling of resistance units`. Area is a component, file or PDK (`kpex CLI`, `KPEX/2.5D`,
   `sky130A LVS`); a short reason may go in parentheses. Usually no body; one or two lines
@@ -115,14 +117,17 @@
 - Aim for the sweet spot, not minimal length: too terse makes the reader guess the why;
   repetition and self-justification make the reader parse and check sentences that add
   nothing.
-- In commit bodies, PR texts, issues, comments and docs, prefer bullet lists to long
-  sentences chained with semicolons: one fact per bullet, under a short lead-in such as
-  `New commands:`. No period at the end of a bullet.
+- In replies, commit bodies, PR texts, issues, comments and docs, use short paragraphs
+  for explanations and bullet lists for separate facts or steps. Do not pack several
+  points into one long line separated by semicolons or periods. Keep one fact per bullet,
+  under a short lead-in such as `New commands:`. No period at the end of a bullet.
 - Mark identifiers as code with backticks: files, code, command line tools and their
   arguments, and the names of layers, device classes and models, PDKs and their variants,
   e.g. `tests/common/ngspice.py`, `convert_to_vacask`, `kpex --netlist-format vacask`,
   `TopMetal1`, `inductor3`, `sg13cmos5l`. Tick every mention, not only the first.
-- No AI attribution: no `Co-Authored-By` trailer, no "Generated with …" line.
+- No AI attribution in branch names, commit metadata, code, docs, PRs, issues or comments.
+  Do not name the assistants, models or providers used to produce the work. No
+  `Co-Authored-By` trailer or "Generated with …" line.
 - Don't name proprietary solvers or protected company and product names, in code, docs,
   commit, PR and issue texts or comments: write "commercial tool A", "commercial tool B".
 - Before handing over, re-read your diff against `main` and check it against this file.

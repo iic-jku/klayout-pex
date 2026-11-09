@@ -43,6 +43,16 @@ Check out the [documentation website](https://iic-jku.github.io/klayout-pex-webs
 
 After that, you should be able to run `kpex --help`.
 
+## Port labels
+
+`kpex extract --port-labels auto` uses top-level labels for ports when the top cell has a label on a pin shape.
+Otherwise, it retains ports from labels in child cells. `--port-labels top` always uses top-level labels.
+Both preserve existing ports named by top-level text labels without pin shapes, and the substrate port.
+Labels in child cells still name internal nets and ports of excluded device models.
+
+The default is `auto`. Supply `--gds` alongside `--lvsdb` to identify top-level labels: the LVS database has
+flattened them. With `--lvsdb` alone, `auto` retains hierarchical labels, and `top` reports an error.
+
 ## Acknowledgements
 
 This project is funded by the JKU/SAL [IWS Lab](https://research.jku.at/de/projects/jku-lit-sal-intelligent-wireless-systems-lab-iws-lab/), a collaboration of [Johannes Kepler University](https://jku.at) and [Silicon Austria Labs](https://silicon-austria-labs.com).

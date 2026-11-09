@@ -243,14 +243,29 @@ class Area:
         """
         sx, sy = sites[index].x - origin.x, sites[index].y - origin.y
         contours = self.contours
+        bounds: Optional[Tuple[float, float, float, float]] = None
         for j, other in enumerate(sites):
+            if not contours:
+                break
             if j == index:
                 continue
             ox, oy = other.x - origin.x, other.y - origin.y
             # NOTE: |x - s|² ≤ |x - o|²  ⇔  (o - s)·x ≤ (|o|² - |s|²) / 2
             nx, ny, c = ox - sx, oy - sy, (ox * ox + oy * oy - sx * sx - sy * sy) / 2.0
+            if bounds is None:
+                xs, ys = zip(*(point for contour, _ in contours for point in contour))
+                bounds = min(xs), min(ys), max(xs), max(ys)
+            # NOTE: a linear form reaches its maximum over a box at a corner. If even that corner is
+            #       inside the half-plane, clip would return every vertex unchanged. Keep the order of the
+            #       remaining cuts: sorting by distance can change floating-point intersections and tip
+            #       the later merging of small capacitances (#500).
+            x = bounds[2] if nx >= 0 else bounds[0]
+            y = bounds[3] if ny >= 0 else bounds[1]
+            if nx * x + ny * y - c <= 0.0:
+                continue
             contours = [(clipped, sign) for contour, sign in contours
                         if len(clipped := clip(contour, nx, ny, c)) >= 3]
+            bounds = None
         return Area(contours)
 
 

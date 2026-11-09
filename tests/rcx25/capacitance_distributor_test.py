@@ -26,14 +26,17 @@ from __future__ import annotations
 import allure
 from typing import *
 import unittest
+from unittest import mock
 
 import klayout.db as kdb
 
 from klayout_pex.rcx25.capacitance_distributor import (
     CapacitanceDistributor,
+    Area,
     NodeSite,
     NodeSites,
     edge_parts,
+    clip,
 )
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
 import klayout_pex_protobuf.kpex.r.r_network_pb2 as r_network_pb2
@@ -71,6 +74,17 @@ def network(net_name: str, nodes: List[Tuple[str, str, int, int]]) -> Tuple[r_ne
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance Distribution")
 class Test(unittest.TestCase):
+    def test_voronoi_cell_skips_cuts_beyond_its_shrinking_bounds(self):
+        # The second site bisects the square at x=5; every later bisector is beyond the remaining half.
+        area = Area([([(0, 0), (0, 10), (10, 10), (10, 0)], -1.0)])
+        sites = [NodeSite(0, 5, 'A'), NodeSite(10, 5, 'B')]
+        sites.extend(NodeSite(x, 5, str(x)) for x in range(11, 101))
+        with mock.patch('klayout_pex.rcx25.capacitance_distributor.clip', wraps=clip) as clipping:
+            cell = area.clipped_to_cell(sites, 0, kdb.Point())
+        self.assertEqual([([(5.0, 0.0), (0, 0), (0, 10), (5.0, 10.0)], -1.0)], cell.contours)
+        self.assertEqual(50, cell.area())
+        self.assertEqual(1, clipping.call_count)
+
     # a wire of 100 µm x 1 µm (DBU 1 nm) on met1, with a node at each end
     WIRE = kdb.Box(0, 0, 100000, 1000)
     WIRE_SITES = {('W', 'met1'): [(0, 500, 'W'), (100000, 500, 'W.$1.met1')]}

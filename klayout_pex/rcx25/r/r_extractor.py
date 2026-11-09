@@ -38,7 +38,7 @@ from klayout_pex.log import (
 from klayout_pex.types import DeviceID, GDSPair, Label, LayerName, NetName, TerminalID
 
 from klayout_pex.klayout.shapes_pb2_converter import ShapesConverter
-from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
+from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext, PortLabelKey
 from klayout_pex.klayout.rex_core import klayout_r_extractor_tech
 from klayout_pex.rcx25.exclusion import (
     BlockKind,
@@ -215,7 +215,8 @@ def label_names_net(label: Label, net_name: NetName) -> bool:
 
 def keep_pins_of_top_circuit(net_name: NetName,
                              vertex_ports: Dict[int, List[kdb.Point]],
-                             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]]):
+                             vertex_port_pins: Dict[int, List[Tuple[Label, NetName]]],
+                             port_label_keys: Optional[Set[PortLabelKey]] = None):
     """
     Keeps the labels of the hierarchy that are pins of the top circuit, like the ports of its LVS netlist:
     a label in a subcell is none on a net that KLayout named after the labels of its own circuit (#403),
@@ -224,6 +225,14 @@ def keep_pins_of_top_circuit(net_name: NetName,
     NOTE: after the split at the exclusions, as a label within a marker names the port of the model there,
           also in a subcell (e.g. of an inductor)
     """
+    if port_label_keys is not None:
+        for layer_id in list(vertex_port_pins):
+            # NOTE: exclusion markers can move a pin to an ideal copy of its conductor layer
+            original_layer_id = layer_id % IDEAL_LAYER_ID_OFFSET
+            kept = [(point, pin) for point, pin in zip(vertex_ports[layer_id], vertex_port_pins[layer_id])
+                    if (original_layer_id, point.x, point.y, pin[0]) in port_label_keys]
+            vertex_ports[layer_id] = [point for point, _ in kept]
+            vertex_port_pins[layer_id] = [pin for _, pin in kept]
     labels = {pin[0] for pins in vertex_port_pins.values() for pin in pins}
     if not labels:
         return
@@ -601,7 +610,8 @@ class RExtractor:
         #       It stands in for a missing pin label only: beside a pin label that names the net, it would short
         #       the metal to that one (of its name) or be a port of its own (of another name)
         top_circuit = self.pex_context.top_circuit
-        nets_named_by_pins = {pin.net_name for pin in rex_request.pins if label_names_net(pin.label, pin.net_name)}
+        nets_named_by_pins = {pin.net_name for pin in rex_request.pins
+                             if self.pex_context.pin_can_be_port(pin) and label_names_net(pin.label, pin.net_name)}
         for pin_list in self.pex_context.text_label_pins_pb2_by_layer.values():
             for pin in pin_list:
                 net = top_circuit.net_by_name(pin.net_name) if pin.net_name else None
@@ -1163,7 +1173,8 @@ class RExtractor:
             #       so that a net that the top cell joins has one port, at its first label (#404)
             klayout_net_name = self.pex_context.klayout_net_names.get(net_extraction_request.net_name,
                                                                       net_extraction_request.net_name)
-            keep_pins_of_top_circuit(klayout_net_name, vertex_ports, vertex_port_pins)
+            keep_pins_of_top_circuit(klayout_net_name, vertex_ports, vertex_port_pins,
+                                     self.pex_context.port_label_keys)
 
             rex = klp.RNetExtractor(self.pex_context.dbu)
             try:
