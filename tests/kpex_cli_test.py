@@ -73,7 +73,7 @@ PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d
 @allure.tag("CLI", "Ports")
 @pytest.mark.parametrize('command', ['extract', 'pex25d'])
 @pytest.mark.parametrize('policy, message', [
-    ('unknown', "invalid choice: 'unknown' (choose from 'auto', 'top')"),
+    ('unknown', r"invalid choice: 'unknown' \(choose from '?auto'?, '?top'?\)"),
     ('top', '--port-labels top needs --gds'),
 ])
 def test_port_policy_is_validated_before_loading_inputs(command: str, policy: str, message: str, tmp_path: Path):
@@ -82,7 +82,7 @@ def test_port_policy_is_validated_before_loading_inputs(command: str, policy: st
                                                 '--lvsdb', '/nonexistent/layout.lvsdb',
                                                 '--port-labels', policy, '--out-dir', str(tmp_path)])
     assert code == ExitCode.USAGE, output
-    assert message in ' '.join(output.split()), output
+    assert re.search(message, ' '.join(output.split())), output
 
 
 @allure.parent_suite("Unit Tests")
