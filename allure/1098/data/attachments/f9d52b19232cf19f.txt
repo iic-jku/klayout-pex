@@ -1,0 +1,15 @@
+SUBPROCESS __kpex__:kpex_cli.py:1861 kpex extract --pdk ihp-sg13g2 --out-dir /tmp/pytest-of-runner/pytest-0/test_unknown_kept_net_is_an_er0 --2.5D --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_coil.gds.gz --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_coil.lvsdb.gz --cut coil --cut-keep-net nope
+INFO     __kpex__:kpex_cli.py:933 No explicit top cell specified, using top cell 'cut_coil'
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_unknown_kept_net_is_an_er0/cut_coil__cut_coil/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2021 Peak memory (resident set size) after preparing the LVSDB: 773.4 MiB
+INFO     __kpex__:kpex_cli.py:2025 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2025 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2025 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2025 (133, 0) -> (topvia2_drw)
+INFO     __kpex__:kpex_cli.py:2025 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2025 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2025 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2025 (134, 2) -> (topmetal2_pin_con)
+ERROR    __kpex__:kpex_cli.py:1887 --cut-keep-net nope: no such net, the nets are: OSCN,OSCP,VCT, VC, VDD, sub!
+INFO     __kpex__:kpex_cli.py:1891 Peak memory (resident set size) after the run: 773.5 MiB
