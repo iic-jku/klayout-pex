@@ -1,0 +1,16 @@
+SUBPROCESS __kpex__:kpex_cli.py:1861 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\internal_child_label.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\internal_child_label.gds.gz'
+INFO     __kpex__:kpex_cli.py:933 No explicit top cell specified, using top cell 'internal_child_label'
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2021 Peak memory (resident set size) after preparing the LVSDB: 763.5 MiB
+INFO     __kpex__:kpex_cli.py:2025 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2025 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2025 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 764.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1507 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1510 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\internal_child_label_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1527 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\internal_child_label_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1563 Peak memory (resident set size) after the netlist: 764.0 MiB
+WARNING  __kpex__:kpex_cli.py:1580 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): inner
+INFO     __kpex__:kpex_cli.py:1891 Peak memory (resident set size) after the run: 764.0 MiB
