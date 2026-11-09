@@ -1,0 +1,47 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_inductor2_wire_under.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusion_inductor2_wire_under.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_inductor2_wire_under'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 442.1 MiB
+INFO     __kpex__:kpex_cli.py:2011 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:2011 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2011 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2011 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 442.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;LA;LA.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;LB;LB.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;Y1;Y1,Y2;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;Y1;Y2;;4.356
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\exclusion_inductor2_wire_under_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1519 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\exclusion_inductor2_wire_under_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 442.5 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 442.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk ihp-sg13g2 --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\exclusion_inductor2_wire_under.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\exclusion_inductor2_wire_under.gds.gz' --exclusion-markers ports
+INFO     __kpex__:kpex_cli.py:924 No explicit top cell specified, using top cell 'exclusion_inductor2_wire_under'
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 442.8 MiB
+INFO     __kpex__:kpex_cli.py:2011 (27, 2) -> (ind_pin)
+INFO     __kpex__:kpex_cli.py:2011 (46, 0) -> (pwell pwell_sub ind2_sub)
+INFO     __kpex__:kpex_cli.py:2011 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2011 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2011 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (134, 2) -> (topmetal2_pin_con)
+WARNING  __kpex__:extractor.py:236 These nets are partly within exclusion markers, so the extraction leaves out their parasitics there, for the model of what the markers stand for (a wire across a marker loses them too):
+  - Y1,Y2: Metal5
+INFO     __kpex__:extractor.py:483 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 443.1 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;LA;LA.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;LB;LB.P0.TopMetal2;;0.275
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;Y1;Y1,Y2;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1498 R4;Y1;Y1_Y2__m0_0;;0.429
+SUBPROCESS __kpex__:kpex_cli.py:1498 R5;Y1_Y2__m0_1;Y2;;0.429
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\exclusion_inductor2_wire_under_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1519 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\exclusion_inductor2_wire_under__exclusion_inductor2_wire_under\exclusion_inductor2_wire_under_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 443.3 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 443.3 MiB

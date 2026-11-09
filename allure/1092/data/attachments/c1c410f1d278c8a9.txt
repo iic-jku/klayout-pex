@@ -1,0 +1,23 @@
+SUBPROCESS __kpex__:kpex_cli.py:1852 main extract --pdk sky130A --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cap_mim_m3_20um_x_20um_over_m2_wire.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:935 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:230 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_sky130A\cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2007 Peak memory (resident set size) after preparing the LVSDB: 837.9 MiB
+INFO     __kpex__:kpex_cli.py:2011 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:2011 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:2011 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:2011 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:2011 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:2011 (71, 20) -> (met4_ncap)
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 838.6 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1498 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1498 R1;A;A.P0.met3;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1498 R2;B;B.$1.met4;;0.019
+SUBPROCESS __kpex__:kpex_cli.py:1498 R3;B.$1.met4;B.P0.capm;;3.41
+SUBPROCESS __kpex__:kpex_cli.py:1501 D:\a\klayout-pex\klayout-pex\output_sky130A\cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire\cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:85 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1519 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire\cap_mim_m3_20um_x_20um_over_m2_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1554 Peak memory (resident set size) after the netlist: 838.6 MiB
+INFO     __kpex__:kpex_cli.py:1882 Peak memory (resident set size) after the run: 838.6 MiB
