@@ -237,7 +237,9 @@ def pattern_lvsdb(pdk_name: PDKName, cell_name: str) -> kdb.LayoutVsSchematic:
 
 def pattern_context(pdk_name: PDKName,
                     cell_name: str,
-                    net_names: Mapping[NetName, NetName] = {}) -> Tuple[KLayoutExtractionContext, List[str]]:
+                    net_names: Mapping[NetName, NetName] = {},
+                    port_labels: Optional[str] = None,
+                    source_dbu: Optional[float] = None) -> Tuple[KLayoutExtractionContext, List[str]]:
     """
     :param net_names: new names of nets of the LVS netlist, given before the extraction
     :return: the extraction context of the test pattern, from its committed LVS database, and the warnings
@@ -246,9 +248,21 @@ def pattern_context(pdk_name: PDKName,
     for old_name, new_name in net_names.items():
         lvsdb.netlist().circuit_by_name(cell_name).net_by_name(old_name).name = new_name
     tech = TechInfo.from_json(PDK.from_string(str(pdk_name)).config.tech_pb_json_path, dielectric_filter=None)
+    source_top_cell = None
+    if port_labels is not None:
+        layout = kdb.Layout()
+        if source_dbu is None:
+            layout.read(PDKTestConfig(pdk_name).gds_path('test_patterns', f"{cell_name}.gds.gz"))
+        else:
+            options = kdb.LoadLayoutOptions()
+            options.dbu = source_dbu
+            layout.read(PDKTestConfig(pdk_name).gds_path('test_patterns', f"{cell_name}.gds.gz"), options)
+        source_top_cell = layout.cell(cell_name)
     with mock.patch('klayout_pex.klayout.lvsdb_extractor.warning') as warning:
         pex_context = KLayoutExtractionContext.prepare_extraction(top_cell=cell_name, lvsdb=lvsdb, tech=tech,
-                                                                  blackbox_devices=False)
+                                                                  blackbox_devices=False,
+                                                                  source_top_cell=source_top_cell,
+                                                                  port_labels=port_labels or 'auto')
     return pex_context, [call.args[0] for call in warning.call_args_list]
 
 
@@ -354,6 +368,23 @@ class SubcellLabelNameTest(unittest.TestCase):
 @allure.parent_suite("Unit Tests")
 @allure.tag("LVS", "LVSDB", "Pins")
 class PinsTest(unittest.TestCase):
+    def test_top_labels_keep_internal_net_names_without_ports(self):
+        context, warnings = pattern_context(PDKName.SKY130A, 'cap_vpp_routing_across', port_labels='auto')
+        pins = {pin.name() for pin in context.top_circuit.each_pin()}
+        self.assertEqual({f"X{index}" for index in range(1, 12)} | {'sky130_gnd'}, pins)
+        self.assertIsNotNone(context.top_circuit.net_by_name('MET4'))
+        self.assertFalse([message for message in warnings if 'Ports named after labels in subcells' in message])
+
+    def test_original_layout_dbu_can_differ_from_lvs_database(self):
+        context, _ = pattern_context(PDKName.IHP_SG13G2, 'internal_child_labels',
+                                     port_labels='auto', source_dbu=0.0005)
+        self.assertEqual(['outer'], [pin.name() for pin in context.top_circuit.each_pin()])
+
+    def test_top_policy_requires_original_layout(self):
+        with self.assertRaisesRegex(LVSDBError, 'needs the original layout'):
+            KLayoutExtractionContext.prepare_extraction(pattern_lvsdb(PDKName.IHP_SG13G2, 'internal_child_label'),
+                                                          'internal_child_label', None, False, port_labels='top')
+
     def test_the_pins_of_a_pin_layer_with_several_lvs_layers(self):
         # NOTE: e.g. gf180mcuD, which has no pin layers (the pins are labels on the drawn layers),
         #       and splits Metal4 into the bottom plates of the MIM caps and the rest

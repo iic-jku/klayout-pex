@@ -42,14 +42,36 @@ parent_suite = "kpex/2.5D netlist ports"
 tags = ("PEX", "2.5D", "Ports")
 
 
-def ports_of(pdk_name: PDKName, gds_name: str, mode: PEXMode) -> List[str]:
+def ports_of(pdk_name: PDKName, gds_name: str, mode: PEXMode,
+             extra_args: Sequence[str] = ()) -> List[str]:
     """
     :return: the ports of the netlist of the test pattern, which has to pass the checks of the netlist
     """
-    cli = RCX25Extraction(pdk=PDKTestConfig(pdk_name), pex_mode=mode, blackbox=False) \
-        .run_kpex('test_patterns', gds_name)
+    pdk = PDKTestConfig(pdk_name)
+    cli = RCX25Extraction(pdk=pdk, pex_mode=mode, blackbox=False) \
+        .run_kpex('test_patterns', gds_name,
+                  extra_args=['--gds', pdk.gds_path('test_patterns', gds_name), *extra_args])
     assert cli.rcx25_netlist_problems == []
     return netlist_ports(cli)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.R, PEXMode.RC])
+@pytest.mark.parametrize('gds_name', ['internal_child_label.gds.gz', 'internal_child_labels.gds.gz'])
+def test_top_pin_keeps_disconnected_child_labels_internal(gds_name: str, mode: PEXMode):
+    ports = ports_of(PDKName.IHP_SG13G2, gds_name, mode)
+    assert sorted(port for port in ports if port != 'sub!') == ['outer']
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.R, PEXMode.RC])
+@pytest.mark.parametrize('policy, expected', [('auto', ['inner']), ('top', [])])
+def test_child_only_ports_can_be_disabled(mode: PEXMode, policy: str, expected: List[str]):
+    ports = ports_of(PDKName.IHP_SG13G2, 'label_only_in_child_cell.gds.gz', mode,
+                     ['--port-labels', policy])
+    assert sorted(port for port in ports if port != 'sub!') == expected
 
 
 @allure.parent_suite(parent_suite)
@@ -71,11 +93,13 @@ def test_nets_without_devices_have_the_ports_of_their_pins(gds_name: str, mode: 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.parametrize('mode', [PEXMode.CC, PEXMode.R, PEXMode.RC])
-def test_labels_without_pin_shapes_make_no_ports_of_their_own(mode: PEXMode):
+@pytest.mark.parametrize('policy', ['auto', 'top'])
+def test_labels_without_pin_shapes_make_no_ports_of_their_own(mode: PEXMode, policy: str):
     # NOTE: the label W names its wire, which has no devices, without making it a port, like a label of the text
     #       layer of Magic, and the label Q names the wire of the pin P with it, one port P|Q, as in CC mode,
     #       while the label OUT names the net of the drain of the MOS, which has a port anyway, but no pin label (#405)
-    assert ports_of(PDKName.IHP_SG13G2, 'labels_without_pin_shapes.gds.gz', mode) == ['OUT', 'VDD', 'sub!', 'P|Q']
+    assert ports_of(PDKName.IHP_SG13G2, 'labels_without_pin_shapes.gds.gz', mode,
+                     ['--port-labels', policy]) == ['OUT', 'VDD', 'sub!', 'P|Q']
 
 
 @allure.parent_suite(parent_suite)

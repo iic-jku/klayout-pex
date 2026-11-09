@@ -36,6 +36,7 @@ from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.rcx25.r.r_extractor import (
     RExtractionTechError,
     RExtractor,
+    ideal_layer_id,
     keep_pins_of_top_circuit,
     label_names_net
 )
@@ -79,6 +80,14 @@ def r_extractor(tech: tech_pb2.Technology,
 @allure.parent_suite("Unit Tests")
 @allure.tag("R", "RExtractor")
 class RExtractorPinsOfTopCircuitTest(unittest.TestCase):
+    def test_top_labels_are_identified_by_layer_and_position_after_exclusions(self):
+        layer = ideal_layer_id(2)
+        vertex_ports = {layer: [kdb.Point(10, 20), kdb.Point(30, 40)], 3: [kdb.Point(10, 20)]}
+        vertex_pins = {layer: [('A', 'A'), ('A', 'A')], 3: [('A', 'A')]}
+        keep_pins_of_top_circuit('A', vertex_ports, vertex_pins, {(2, 10, 20, 'A')})
+        self.assertEqual({layer: [kdb.Point(10, 20)]}, vertex_ports)
+        self.assertEqual({layer: [('A', 'A')]}, vertex_pins)
+
     def test_label_names_net(self):
         for label, net_name, expected in (
                 ('A', 'A', True),

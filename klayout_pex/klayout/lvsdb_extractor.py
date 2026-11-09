@@ -56,6 +56,8 @@ import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
 LayerIndexMap = Dict[int, int]  # maps layer indexes of LVSDB to annotated_layout
 LVSDBRegions = Dict[int, kdb.Region]  # maps layer index of annotated_layout to LVSDB region
+PortLabelKey = Tuple[int, int, int, Label]  # annotated layer ID, x, y, label, in extraction DBU
+PORT_LABEL_MODES = ('auto', 'top')
 
 # the property of the shapes of the plates of a device capacitor (see KLayoutExtractionContext.shapes_of_layer)
 DEVICE_CAPACITOR_PLATE_PROPERTY = 'device_capacitor_plate'
@@ -174,6 +176,8 @@ class KLayoutExtractionContext:
     klayout_net_names: Dict[NetName, NetName] = field(default_factory=dict)
     # the labels on each net of the top circuit, of the whole hierarchy, by its name (see labels_of_nets)
     labels_by_net_name: Dict[NetName, Set[Label]] = field(default_factory=dict)
+    # None allows labels of the whole hierarchy, otherwise only these top-level labels can be ports
+    port_label_keys: Optional[Set[PortLabelKey]] = None
     # (device abstract cell index, terminal ID) -> shapes by LVS layer index, see shapes_of_terminal
     terminal_shapes_by_abstract: Dict[Tuple[int, int], Dict[int, kdb.Region]] = field(default_factory=dict,
                                                                                        init=False, repr=False)
@@ -183,7 +187,14 @@ class KLayoutExtractionContext:
                            lvsdb: kdb.LayoutToNetlist,
                            top_cell: str,
                            tech: TechInfo,
-                           blackbox_devices: bool) -> KLayoutExtractionContext:
+                           blackbox_devices: bool,
+                           source_top_cell: Optional[kdb.Cell] = None,
+                           port_labels: str = 'auto') -> KLayoutExtractionContext:
+        if port_labels not in PORT_LABEL_MODES:
+            raise LVSDBError(f"Unknown port-label policy {port_labels!r}, choose from: {', '.join(PORT_LABEL_MODES)}")
+        if port_labels == 'top' and source_top_cell is None:
+            raise LVSDBError("The top port-label policy needs the original layout (--gds), "
+                            "as the LVS database has flattened its labels")
         # NOTE: e.g. the abstract of a device the LVS script removed from the netlist is left as a top cell
         internal_top_cell = lvsdb.internal_top_cell()
         extra_top_cells = [c.name for c in lvsdb.internal_layout().top_cells()
@@ -262,6 +273,7 @@ class KLayoutExtractionContext:
             klayout_net_names=klayout_net_names,
             labels_by_net_name=labels_by_net_name
         )
+        context.select_port_labels(source_top_cell, port_labels)
         context.make_pins_of_pin_labels()
 
         # NOTE: a warning, as other tools (e.g. Magic, SPEF writers, commercial ones) make ports of the labels
@@ -273,13 +285,60 @@ class KLayoutExtractionContext:
                     f"(label them in the top cell to name ports explicitly)")
         return context
 
+    def select_port_labels(self, source_top_cell: Optional[kdb.Cell], policy: str):
+        """
+        Keeps ports of top-level labels, always for top, or for auto if the top has a pin label.
+        Without the original layout, auto retains the labels of the whole hierarchy: the LVS database
+        has flattened them and no longer records which cell they came from.
+        Text-only labels preserve existing ports, but don't create ports of their own.
+        """
+        if source_top_cell is None:
+            return
+        source_layout = source_top_cell.layout()
+        scale = kdb.ICplxTrans(source_layout.dbu / self.dbu)
+        top_texts_by_layer: Dict[GDSPair, Set[Tuple[int, int, Label]]] = {}
+        for gds_pair, _ in self.label_layers():
+            if gds_pair in top_texts_by_layer:
+                continue
+            label_pair = self.tech.layer_info_by_gds_pair[gds_pair].label_gds_pair
+            index = source_layout.find_layer(label_pair.layer, label_pair.datatype)
+            texts: Set[Tuple[int, int, Label]] = set()
+            if index is not None:
+                for shape in source_top_cell.shapes(index).each(kdb.Shapes.STexts):
+                    point = scale * shape.text.position()
+                    texts.add((point.x, point.y, shape.text_string))
+            top_texts_by_layer[gds_pair] = texts
+
+        top_pins: List[pin_pb2.Pin] = []
+        top_text_pins: List[pin_pb2.Pin] = []
+        for by_layer, selected in ((self.pins_pb2_by_layer, top_pins),
+                                   (self.text_label_pins_pb2_by_layer, top_text_pins)):
+            for gds_pair, pins in by_layer.items():
+                selected.extend(pin for pin in pins
+                                if (pin.label_point.x, pin.label_point.y, pin.label) in top_texts_by_layer[gds_pair])
+        if policy == 'auto' and not top_pins:
+            return
+        self.port_label_keys = {self.pin_label_key(pin) for pin in (*top_pins, *top_text_pins)}
+        port_net_names = {pin.net_name for pin in (*top_pins, *top_text_pins)} | {self.substrate_net_name}
+        for pin in list(self.top_circuit.each_pin()):
+            if self.top_circuit.net_for_pin(pin.id()).name not in port_net_names:
+                self.top_circuit.remove_pin(pin.id())
+
+    @staticmethod
+    def pin_label_key(pin: pin_pb2.Pin) -> PortLabelKey:
+        return pin.layer.id, pin.label_point.x, pin.label_point.y, pin.label
+
+    def pin_can_be_port(self, pin: pin_pb2.Pin) -> bool:
+        return self.port_label_keys is None or self.pin_label_key(pin) in self.port_label_keys
+
     def make_pins_of_pin_labels(self):
         """
         Gives each net of the top circuit with a label on a pin shape a pin, if it has none,
         as KLayout's make_top_level_pins makes none for a net without devices (e.g. a wire between two pins)
         """
         circuit = self.top_circuit
-        net_names = {pin.net_name for pins in self.pins_pb2_by_layer.values() for pin in pins if pin.net_name}
+        net_names = {pin.net_name for pins in self.pins_pb2_by_layer.values() for pin in pins
+                     if pin.net_name and self.pin_can_be_port(pin)}
         for name in sorted(net_names):
             net = circuit.net_by_name(name)
             if net is not None and net.pin_count() == 0:
