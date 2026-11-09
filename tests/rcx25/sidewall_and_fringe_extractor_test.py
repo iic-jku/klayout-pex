@@ -24,6 +24,7 @@
 
 import allure
 import unittest
+from typing import List
 
 import klayout.db as kdb
 
@@ -31,6 +32,7 @@ from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
+from klayout_pex.rcx25.types import EdgeNeighborhood
 from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
@@ -38,6 +40,24 @@ import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 DBU = 0.001  # µm
 SIDE_HALO = 8.0  # µm
 SIDE_OVERLAP_CAPACITANCE = 40.0  # aF/µm
+
+
+def neighborhoods(primary: kdb.Region, secondary: kdb.Region) -> List[str]:
+    """The exact geometry and properties received by an edge visitor, independent of callback order."""
+    recorded: List[str] = []
+
+    class Visitor(kdb.EdgeNeighborhoodVisitor):
+        def on_edge(self, layout: kdb.Layout, cell: kdb.Cell, edge: kdb.EdgeWithProperties,
+                     neighborhood: EdgeNeighborhood):
+            for interval, by_child in neighborhood:
+                for child, polygons in by_child.items():
+                    recorded.append(f"{edge} {interval} {child} {sorted(str(polygon) for polygon in polygons)}")
+
+    visitor = Visitor()
+    primary.complex_op(kdb.CompoundRegionOperationNode.new_edge_neighborhood(
+        children=[kdb.CompoundRegionOperationNode.new_secondary(secondary)],
+        visitor=visitor, bext=-1, eext=-1, din=-1, dout=200))
+    return sorted(recorded)
 
 
 def fringe_cap(overlap_capacitance: float,
@@ -70,6 +90,33 @@ def fringe_cap(overlap_capacitance: float,
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance", "Fringe")
 class FringeCapTest(unittest.TestCase):
+    def test_large_neighbors_are_split_without_changing_geometry_or_properties(self):
+        comb = kdb.Region(kdb.Box(0, 0, 2560, 10))
+        for x in range(0, 2560, 20):
+            comb.insert(kdb.Box(x, 10, x + 10, 100))
+        region = kdb.Region()
+        region.enable_properties()
+        for polygon in comb.merged().each():
+            region.insert(kdb.PolygonWithProperties(polygon, {'net': 'VSS', 'device_capacitor_plate': 7}))
+        neighbors = SidewallAndFringeExtractor.bounded_neighbors(region)
+        self.assertGreater(neighbors.size(), region.size())
+        self.assertTrue((neighbors ^ region).is_empty())
+        self.assertFalse(neighbors.merged_semantics)
+        self.assertTrue(all(polygon.num_points() <= 256 for polygon in neighbors.each()))
+        self.assertTrue(all(polygon.properties() == {'net': 'VSS', 'device_capacitor_plate': 7}
+                            for polygon in neighbors.each()))
+        primary = kdb.Region(kdb.Box(10, 110, 2500, 130))
+        self.assertEqual(neighborhoods(primary, region), neighborhoods(primary, neighbors))
+
+    def test_slanted_neighbors_are_not_split(self):
+        points = [kdb.Point(0, 0), kdb.Point(2560, 0)]
+        points.extend(kdb.Point(x, 100 + x % 20) for x in range(2560, -1, -5))
+        polygon = kdb.Polygon(points)
+        self.assertGreater(polygon.num_points(), 256)
+        self.assertFalse(polygon.is_rectilinear())
+        region = kdb.Region(polygon)
+        self.assertIs(region, SidewallAndFringeExtractor.bounded_neighbors(region))
+
     def test_scaled_fringe_over_the_halo_is_the_side_overlap_capacitance(self):
         self.assertAlmostEqual(fringe_cap(overlap_capacitance=30.0, scale_ratio_to_fit_halo=True),
                                SIDE_OVERLAP_CAPACITANCE / 1000.0)
