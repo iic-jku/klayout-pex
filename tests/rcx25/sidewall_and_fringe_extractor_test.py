@@ -508,6 +508,43 @@ class FringeCapTest(unittest.TestCase):
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance", "Sidewall")
 class SidewallSeparationTest(unittest.TestCase):
+    def test_facing_edges_sum_to_the_full_pair_capacitance(self):
+        # Both directed edges contribute half of the pair fit, including after
+        # rotation, reordering and discarding geometry for C-only extraction.
+        # The 199/200/201 nm gaps straddle the negative-offset clamp boundary.
+        for coefficient, offset, gap in ((50.0, 0.1, 200),
+                                         (50.0, -0.1, 199), (50.0, -0.1, 200), (50.0, -0.1, 201),
+                                         (0.0, 0.1, 200), (1e-12, 0.1, 200)):
+            tech = tech_pb2.Technology()
+            tech.process_parasitics.side_halo = SIDE_HALO
+            tech.process_parasitics.capacitance.sidewalls.add(
+                layer_name='wire', capacitance=coefficient, offset=offset)
+            expected = coefficient * 50.0 / max(gap * DBU + offset, gap * DBU / 2) / 1000.0
+            wires = [('A', kdb.Box(0, 0, 50000, 500)),
+                     ('B', kdb.Box(0, 500 + gap, 50000, 1000 + gap))]
+            for rotation, reverse, keep_geometry in ((0, False, False), (0, True, True),
+                                                      (1, False, True), (1, True, False)):
+                with self.subTest(coefficient=coefficient, offset=offset, gap=gap,
+                                  rotation=rotation, reverse=reverse, keep_geometry=keep_geometry):
+                    region = kdb.Region()
+                    region.enable_properties()
+                    for net, box in reversed(wires) if reverse else wires:
+                        polygon = kdb.Polygon(box.transformed(kdb.Trans(rotation, False, 1000, 2000)))
+                        region.insert(kdb.PolygonWithProperties(polygon, {'net': net}))
+                    results = CellExtractionResults(cell_name='TOP', keep_capacitance_geometry=keep_geometry)
+                    extractor = SidewallAndFringeExtractor(
+                        ['wire'], {'wire': region}, DBU, False, TechInfo(tech, None),
+                        DeviceCapacitorPlates(), kdb.Region(), results, mock.Mock(spec=ExtractionReporter))
+                    extractor.extract()
+                    contributions = [cap for caps in results.sidewall_table.values() for cap in caps]
+                    self.assertEqual({('A', 'B'), ('B', 'A')},
+                                     {(cap.key.net1, cap.key.net2) for cap in contributions})
+                    self.assertEqual(2, len(contributions))
+                    for cap in contributions:
+                        self.assertAlmostEqual(cap.cap_value, expected / 2, delta=expected * 1e-12)
+                    total, = results.summarize().capacitances.values()
+                    self.assertAlmostEqual(total, expected, delta=expected * 1e-12)
+
     def test_sloping_sidewall_matches_integrated_separation(self):
         # Include constant separation, both slope signs, and crossings of the
         # negative-offset fit boundary at d=-2*offset, including either endpoint.
@@ -527,7 +564,8 @@ class SidewallSeparationTest(unittest.TestCase):
                     visitor.emit_sidewall('inside',
                                           kdb.EdgeWithProperties(kdb.Edge(0, 0, 4000, 0), {'net': 'inside_net'}),
                                           (0, 4000), polygon, GeometryRestorer(kdb.IMatrix3d()))
-                    contribution = lambda x: DBU * 50.0 / 4000.0 / sidewall_separation(
+                    # A directed edge carries half the full pair fit in aF.
+                    contribution = lambda x: DBU * 50.0 / 2000.0 / sidewall_separation(
                         (start + (end - start) * x / 4000) * DBU, offset)
                     intervals = [0.0, 4000.0]
                     if start != end:

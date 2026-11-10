@@ -32,6 +32,10 @@ from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode CC]"
 tags = ("PEX", "2.5D")
 
+# Sidewall expectations use the full pair fit (#390). Relative to the former
+# totals, only the old sidewall contribution is added; overlap and fringe stay
+# unchanged. The parallel-wire regression checks the pair fit independently.
+
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.CC, blackbox=False)
 pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.CC, blackbox=True)
@@ -151,7 +155,7 @@ def test_mom_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;MINUS;PLUS;205.148;
+C1;MINUS;PLUS;397.857;
 C2;MINUS;VSUBS;6.757;
 C3;MINUS;X;1.716;
 C4;PLUS;VSUBS;6.829;
@@ -200,6 +204,6 @@ def test_single_plate_over_isolated_pwell():
 C1;$3;A;0.274;
 C2;$3;W;0.008;
 C3;A;VSUBS;0.261;
-C4;A;W;2.247;
+C4;A;W;2.25;
 C5;VSUBS;W;0.012;"""
     )

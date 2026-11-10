@@ -35,6 +35,10 @@ from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode CC]"
 tags = ("PEX", "2.5D", "MAGIC")
 
+# Sidewall expectations use the full pair fit (#390). Relative to the former
+# totals, only the old sidewall contribution is added; overlap and fringe stay
+# unchanged. The parallel-wire regression checks the pair fit independently.
+
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.CC, blackbox=False)
 pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.CC, blackbox=True)
@@ -206,7 +210,7 @@ def test_sidewall_100um_x_100um_distance_200nm_li1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;3.75;
+C1;A;B;7.5;
 C2;A;VSUBS;8.231;
 C3;B;VSUBS;8.231;"""
         )
@@ -226,7 +230,7 @@ def test_sidewall_net_uturn_l1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.937;
+C1;C0;C1;1.874;
 C2;C0;VSUBS;38.125;
 C3;C1;VSUBS;12.588;"""
         )
@@ -246,7 +250,7 @@ def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.143;
+C1;C0;C1;0.286;
 C2;C0;VSUBS;0.3;
 C3;C1;VSUBS;0.087;"""
         )
@@ -273,7 +277,7 @@ def test_near_body_shield_li1_m1():
 C1;BOTTOM;TOPA;215.972;
 C2;BOTTOM;TOPB;215.972;
 C3;BOTTOM;VSUBS;405.081;
-C4;TOPA;TOPB;0.251;
+C4;TOPA;TOPB;0.503;
 C5;TOPA;VSUBS;0.299;
 C6;TOPB;VSUBS;0.299;"""
     )
@@ -395,14 +399,14 @@ def test_sideoverlap_plates_li1_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.063;
-C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.05;
-C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.0;
-C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.124;
+C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;
+C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;
+C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
+C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;
 C5;LOWER_FullHaloOverlap;UPPER;262.817;
 C6;LOWER_FullHaloOverlap;VSUBS;177.601;
-C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.031;
-C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.032;
+C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;
+C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;
 C9;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;
 C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;
 C11;LOWER_OutsideHalo;UPPER;0.076;
@@ -455,11 +459,11 @@ def test_sideoverlap_fingered_li1_m1():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.002;
-C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.008;
+C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.003;
+C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.016;
 C3;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.244;
 C4;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.884;
-C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.001;
+C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.002;
 C6;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.466;
 C7;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;8.16;
 C8;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.159;
@@ -539,7 +543,7 @@ def test_met1_over_drain_li1():
         'test_patterns', 'nfet_li1_met1_over_drain.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;D;G;0.002;
-C2;D;S;0.006;
+C2;D;S;0.007;
 C3;D;VSUBS;0.029;
 C4;D;W;0.377;
 C5;G;S;0.004;
@@ -581,19 +585,19 @@ def test_inverter_over_nwell():
     pex_whiteboxed.assert_expected_matches_obtained(
         'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;VGND;0.04;
+C1;A;VGND;0.051;
 C2;A;VPB;0.037;
-C3;A;VPWR;0.041;
+C3;A;VPWR;0.051;
 C4;A;VSUBS;0.126;
-C5;A;Y;0.051;
+C5;A;Y;0.061;
 C6;VGND;VPB;0.012;
-C7;VGND;VPWR;0.018;
+C7;VGND;VPWR;0.034;
 C8;VGND;VSUBS;0.248;
-C9;VGND;Y;0.06;
+C9;VGND;Y;0.101;
 C10;VPB;VPWR;0.062;
 C11;VPB;Y;0.018;
 C12;VPWR;VSUBS;0.211;
-C13;VPWR;Y;0.074;
+C13;VPWR;Y;0.128;
 C14;VSUBS;Y;0.096;"""
         )
 
@@ -634,7 +638,7 @@ def test_mom_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;7.709;
+C1;C0;C1;13.887;
 C2;C0;VSUBS;2.827;
 C3;C1;VSUBS;0.765;"""
         )
@@ -656,7 +660,7 @@ def test_mom_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.134;
+C1;C0;C1;0.211;
 C2;C0;VSUBS;2.203;
 C3;C1;VSUBS;0.091;"""
         )
@@ -675,11 +679,11 @@ def test_mom_cap_beside_m2_wire__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;7.709;
+C1;C0;C1;13.887;
 C2;C0;VSUBS;2.684;
-C3;C0;X;0.294;
+C3;C0;X;0.463;
 C4;C1;VSUBS;0.736;
-C5;C1;X;0.022;
+C5;C1;X;0.041;
 C6;VSUBS;X;0.385;"""
     )
 
@@ -692,11 +696,11 @@ def test_mom_cap_beside_m2_wire__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.134;
+C1;C0;C1;0.211;
 C2;C0;VSUBS;2.061;
-C3;C0;X;0.294;
+C3;C0;X;0.463;
 C4;C1;VSUBS;0.068;
-C5;C1;X;0.022;
+C5;C1;X;0.041;
 C6;VSUBS;X;0.385;"""
     )
 
@@ -750,7 +754,7 @@ def test_mim_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;mimcap_bot;mimcap_top;204.88;
+C1;mimcap_bot;mimcap_top;207.106;
 C2;VSUBS;mimcap_bot;4.353;
 C3;VSUBS;mimcap_top;2.942;"""
         )
