@@ -64,7 +64,7 @@ from tests.rcx25.rcx25_test_helpers import spice_netlist_ports
 NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1.gds.gz')
 NFET_IN_SUBCELL_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
 
-SCHEMATIC_WARNING = "--schematic supplies matched device names for 2.5D output. --check checks device " \
+SCHEMATIC_WARNING = "--schematic supplies matched device names and port order for 2.5D output. --check checks device " \
                     "classes, totals and top pins. Use regular LVS for full verification"
 
 PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d+(\.\d)? (B|KiB|MiB|GiB)"
@@ -586,8 +586,8 @@ def edited_schematic_path(gds_path: str, tmp_path: Path, old: str, new: str) -> 
 @pytest.mark.parametrize('mode', ['CC', 'RC'])
 @pytest.mark.parametrize('hierarchical', [False, True])
 def test_schematic_names_reach_the_extracted_netlist(mode: str, hierarchical: bool, tmp_path: Path):
-    # The output must retain its RC nodes, geometry and port order when the name
-    # changes. Child labels exercise the difference between LVS pins and ports.
+    # Schematic naming and port ordering must retain the RC nodes and geometry.
+    # Child labels exercise the difference between LVS pins and ports.
     gds_path = NFET_IN_SUBCELL_GDS_PATH if hierarchical else NFET_GDS_PATH
     if hierarchical:
         schematic_path = edited_schematic_path(gds_path, tmp_path, 'XM1', 'Xtail')
@@ -612,7 +612,10 @@ def test_schematic_names_reach_the_extracted_netlist(mode: str, hierarchical: bo
     old_device = next(device for device in before.subcircuits[0].elements if device.kind == 'X')
     new_device = next(device for device in after.subcircuits[0].elements if device.kind == 'X')
     assert new_device.name == expected_name, after
+    assert after.subcircuits[0].ports[:3] == (['D', 'G', 'S'] if hierarchical else ['S', 'G', 'D'])
+    assert set(before.subcircuits[0].ports) == set(after.subcircuits[0].ports)
     new_device.name = old_device.name
+    after.subcircuits[0].ports = before.subcircuits[0].ports
     assert before == after
 
 
@@ -819,3 +822,50 @@ def test_lvsdb_input_checks_python_module_without_needing_executable(version: st
         KpexCLI.validate_args(args)
     messages = [call.args[0] for call in warn.call_args_list]
     assert any('KLayout Python module' in message and '0.30.13' in message for message in messages) == expected_warning
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Ports")
+@pytest.mark.parametrize('mode,reduction', [
+    ('CC', 'none'), ('R', 'none'), ('R', 'floating'), ('RC', 'none'), ('RC', 'floating'),
+])
+@pytest.mark.parametrize('output_format', ['spice', 'vacask'])
+def test_schematic_port_order_reaches_exports_and_result_metadata(
+        mode: str, reduction: str, output_format: str, tmp_path: Path):
+    from tests.common.vacask import read_vacask_subcircuits
+    schematic = tmp_path / 'ordered.spice'
+    schematic.write_text('.subckt nfet_li1 s G d\n'
+                          'XM1 s G d sky130_gnd sky130_fd_pr__nfet_01v8 L=0.15 W=0.65\n'
+                          '.ends\n', encoding='utf-8')
+    destination = tmp_path / ('export.spice' if output_format == 'spice' else 'export.inc')
+    code, output = rc_run_from_lvsdb(
+        NFET_GDS_PATH, tmp_path, '--mode', mode, '--schematic', str(schematic),
+        '--reduce', reduction, '--netlist-format', output_format, '--out-netlist', str(destination))
+    assert code == 0, output
+    expected = ['S', 'G', 'D', 'sky130_gnd']
+    result = run_result(tmp_path / 'nfet_li1__nfet_li1')
+    assert result['check_problems'] == []
+    exported = [item for item in result['files'] if item['kind'] in ('netlist', 'out_netlist')]
+    assert exported
+    assert any(item['reduced'] for item in exported) == (reduction != 'none')
+    for item in exported:
+        if item['format'] == 'spice':
+            assert item['ports'] == spice_netlist_ports(item['path']) == expected
+        else:
+            text = Path(item['path']).read_text(encoding='utf-8')
+            assert read_vacask_subcircuits(text)['nfet_li1'].ports == expected
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Ports")
+def test_unreadable_schematic_retains_sorted_output_and_existing_check_problem(tmp_path: Path):
+    schematic = tmp_path / 'unsupported.spice'
+    schematic.write_text('.include models.lib\n', encoding='utf-8')
+    destination = tmp_path / 'export.spice'
+    code, output = rc_run_from_lvsdb(
+        NFET_GDS_PATH, tmp_path, '--schematic', str(schematic), '--check', 'n', '--out-netlist', str(destination))
+    assert code == 0, output
+    assert "Can't read schematic for port order and device names" in output
+    assert spice_netlist_ports(str(destination)) == ['D', 'G', 'S', 'sky130_gnd']
+    assert any("can't read the schematic" in problem
+               for problem in run_result(tmp_path / 'nfet_li1__nfet_li1')['check_problems'])

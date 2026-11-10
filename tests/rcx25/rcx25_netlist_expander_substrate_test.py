@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         # NOTE: the capacitance of B to the substrate is shorted, as B is the substrate net
         self.assertEqual({frozenset(('D', 'B')): 1.0}, capacitances(expanded))
         self.assertIsNone(circuit.net_by_name('VSUBS'))
-        self.assertEqual(['D', 'B'], [p.name() for p in circuit.each_pin()])
+        self.assertEqual(['B', 'D'], [p.name() for p in circuit.each_pin()])
 
     def test_substrate_without_net_is_a_port(self):
         # e.g. a metal test pattern, without taps or transistors
@@ -87,7 +87,7 @@ class Test(unittest.TestCase):
         circuit = expanded.circuit_by_name('chip')
         self.assertEqual({frozenset(('D', 'sky130_gnd')): 1.0, frozenset(('B', 'sky130_gnd')): 2.0},
                          capacitances(expanded))
-        self.assertEqual(['D', 'B', 'sky130_gnd'], [p.name() for p in circuit.each_pin()])
+        self.assertEqual(['B', 'D', 'sky130_gnd'], [p.name() for p in circuit.each_pin()])
         self.assertEqual('sky130_gnd', circuit.net_for_pin(circuit.pin_by_name('sky130_gnd').id()).name)
 
     def test_substrate_net_without_pin_is_a_port(self):
@@ -100,6 +100,6 @@ class Test(unittest.TestCase):
         circuit = expanded.circuit_by_name('chip')
         self.assertEqual({frozenset(('D', 'sub!')): 1.0, frozenset(('B', 'sub!')): 2.0},
                          capacitances(expanded))
-        self.assertEqual(['D', 'B', 'sub!'], [p.name() for p in circuit.each_pin()])
+        self.assertEqual(['B', 'D', 'sub!'], [p.name() for p in circuit.each_pin()])
         self.assertEqual('sub!', circuit.net_for_pin(circuit.pin_by_name('sub!').id()).name)
         self.assertEqual(1, len([n for n in circuit.each_net() if n.name == 'sub!']))

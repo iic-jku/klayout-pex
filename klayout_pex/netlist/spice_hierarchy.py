@@ -96,6 +96,14 @@ class SpiceHierarchy:
         called = {e.model.casefold() for e in elements if e.kind == 'X' and e.model is not None}
         return [s for s in self.netlist.subcircuits if s.name.casefold() not in called]
 
+    def top_subcircuit(self, name: str) -> Optional[SpiceSubcircuit]:
+        """The named circuit, or the sole uncalled circuit, otherwise no unambiguous top."""
+        top = self.subcircuit(name)
+        if top is not None:
+            return top
+        uncalled = self.uncalled_subcircuits()
+        return uncalled[0] if len(uncalled) == 1 else None
+
     def flat_elements(self,
                       subcircuit: Optional[SpiceSubcircuit] = None,
                       parameter_names: Optional[Callable[[SpiceElement], Collection[str]]] = None,
