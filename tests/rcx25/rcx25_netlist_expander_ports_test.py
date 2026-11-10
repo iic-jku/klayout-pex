@@ -75,8 +75,8 @@ class Test(unittest.TestCase):
                                                device_models=DeviceModels(device_models_pb2.DeviceModelsInfo()))
         circuit = expanded.circuit_by_name('chip')
 
-        # NOTE: the pin of D,X is replaced by the ports D and X, in its place
-        self.assertEqual([('D', 'D'), ('X', 'X'), ('G', 'G'), ('S', 'S')],
+        # NOTE: the pin of D,X is replaced by D and X, then all ports are sorted by name
+        self.assertEqual([('D', 'D'), ('G', 'G'), ('S', 'S'), ('X', 'X')],
                          [(pin.name(), circuit.net_for_pin(pin.id()).name) for pin in circuit.each_pin()])
         self.assertEqual('D,X', circuit.device_by_name('M1').net_for_terminal('D').name)
         # NOTE: no port touches nothing (a port the labels had lost, which the parent connected, dangled)

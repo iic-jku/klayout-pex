@@ -99,7 +99,7 @@ def test_labels_without_pin_shapes_make_no_ports_of_their_own(mode: PEXMode, pol
     #       layer of Magic, and the label Q names the wire of the pin P with it, one port P|Q, as in CC mode,
     #       while the label OUT names the net of the drain of the MOS, which has a port anyway, but no pin label (#405)
     assert ports_of(PDKName.IHP_SG13G2, 'labels_without_pin_shapes.gds.gz', mode,
-                     ['--port-labels', policy]) == ['OUT', 'VDD', 'sub!', 'P|Q']
+                     ['--port-labels', policy]) == ['OUT', 'P|Q', 'sub!', 'VDD']
 
 
 @allure.parent_suite(parent_suite)

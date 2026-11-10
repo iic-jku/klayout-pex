@@ -34,6 +34,8 @@ from ..log import (
 )
 from .extraction_results import ExtractionResults, ExtractionSummary
 from ..device_models import DeviceModels
+from ..netlist.spice_hierarchy import SpiceHierarchy
+from ..netlist.spice_netlist import SpiceNetlist
 from ..klayout.netlist_expander import remove_devices
 from ..klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME, PARASITIC_RESISTOR_CLASS_NAME
 
@@ -64,12 +66,15 @@ class RCX25NetlistExpander:
                device_models: DeviceModels,
                substrate_net_name: Optional[str] = None,
                removed_device_ids: Collection[int] = (),
-               summary: Optional[ExtractionSummary] = None) -> kdb.Netlist:
+               summary: Optional[ExtractionSummary] = None,
+               schematic: Optional[SpiceNetlist] = None) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, which tell the whiteboxed devices
         :param substrate_net_name: the net the capacitances to the substrate go to (VSUBS if not given),
                                    created if the netlist has none, and a port if it has no pin
         :param removed_device_ids: the devices to leave out, as a model has them (of cut cells)
+        :param schematic: preferred top-level port order, with unmatched ports sorted afterward
+                          (without one, sort by name, ignoring case then comparing exact spelling)
         :param summary: already computed from `extraction_results`, shared with other netlist outputs and checks
         """
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
@@ -145,7 +150,7 @@ class RCX25NetlistExpander:
             add_net_if_needed(node_name)
             device.connect_terminal(key.terminal_id, name2net[node_name])
 
-        # the pin of a net of several labels (e.g. A,B) becomes a port per label, in its place (#211 §11)
+        # the pin of a net of several labels (e.g. A,B) becomes a port per label (#211 §11)
         if summary.label_ports:
             ports: List[Tuple[str, Optional[kdb.Net]]] = []
             nets_with_pin: Set[str] = set()
@@ -175,12 +180,32 @@ class RCX25NetlistExpander:
                     for port_name in summary.label_ports[net_name]:
                         add_net_if_needed(port_name)
                         ports.append((port_name, name2net[port_name]))
-            for pin in list(top_circuit.each_pin()):
-                top_circuit.remove_pin(pin.id())
-            for port_name, net in ports:
-                pin = top_circuit.create_pin(port_name)
-                if net is not None:
-                    top_circuit.connect_pin(pin, net)
+        else:
+            ports = [(pin.name(), top_circuit.net_for_pin(pin.id())) for pin in top_circuit.each_pin()]
+
+        preferred: Dict[str, int] = {}
+        if schematic is not None:
+            top = SpiceHierarchy(schematic).top_subcircuit(top_cell_name)
+            if top is None:
+                warning(f"No unambiguous schematic circuit for {top_cell_name}. Sorting extracted ports by name")
+            else:
+                for name in top.ports:
+                    preferred.setdefault(name.casefold(), len(preferred))
+
+        def port_key(port: Tuple[str, Optional[kdb.Net]]) -> Tuple[int, str, str, str]:
+            pin_name, net = port
+            # The SPICE writer emits net names, which may differ from KLayout pin names.
+            name = net.expanded_name() if net is not None else pin_name
+            # In CC mode several layout labels can remain a single exported port.
+            rank = min(preferred.get(alias.casefold(), len(preferred)) for alias in (name, *name.split(',')))
+            return rank, name.casefold(), name, pin_name
+
+        for pin in list(top_circuit.each_pin()):
+            top_circuit.remove_pin(pin.id())
+        for port_name, net in sorted(ports, key=port_key):
+            pin = top_circuit.create_pin(port_name)
+            if net is not None:
+                top_circuit.connect_pin(pin, net)
 
         for idx, (key, cap_value_femto) in enumerate(cap_items):
             net1 = name2net[key.net1]

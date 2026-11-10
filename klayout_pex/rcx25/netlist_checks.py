@@ -462,14 +462,11 @@ def check_schematic_pins(schematic: SpiceNetlist,
     :return: the problems: the pins without port, and the ports without pin
     """
     hierarchy = SpiceHierarchy(schematic)
-    top = hierarchy.subcircuit(top_cell_name)
+    top = hierarchy.top_subcircuit(top_cell_name)
     if top is None:
-        uncalled = hierarchy.uncalled_subcircuits()
-        if len(uncalled) != 1:
-            names = [subcircuit.name for subcircuit in uncalled]
-            return [f"the schematic has no subcircuit {top_cell_name}, and {len(names)} that no element calls"
-                    f"{f' ({first_names(names)})' if names else ''}, so no pins are compared"]
-        top = uncalled[0]
+        names = [subcircuit.name for subcircuit in hierarchy.uncalled_subcircuits()]
+        return [f"the schematic has no subcircuit {top_cell_name}, and {len(names)} that no element calls"
+                f"{f' ({first_names(names)})' if names else ''}, so no pins are compared"]
 
     left_out = {name.casefold() for name in left_out_names}
     ports = [name for port_name in port_names for name in port_name.split(',') if name.casefold() not in left_out]
