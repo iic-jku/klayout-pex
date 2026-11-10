@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import *
 
 import allure
@@ -172,3 +173,56 @@ def test_console_script_runs_as_a_process(line_netlist: str, tmp_path):
 def test_reduce_loads_neither_klayout_nor_the_protobuf(line_netlist: str, tmp_path):
     assert_netlist_cli_loads_neither_klayout_nor_protobuf(
         ['netlist', 'reduce', line_netlist, '-o', os.path.join(str(tmp_path), 'out.spice')])
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_requested_admittance_check_rejects_excessive_error_but_keeps_output(tmp_path: Path):
+    # Removing this series resistor changes Y by omega*R*C = 0.628 at 1 GHz.
+    source = '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n'
+    input_path = write(str(tmp_path), 'series.spice', source)
+    output_path = str(tmp_path / 'checked.spice')
+    code, output = run(input_path, '-o', output_path, '--ticer-tau', '1n', '--check-frequency', '1G')
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert 'relative Frobenius error 0.628319, limit 0.01' in output
+    assert Path(output_path).is_file()
+    assert Path(input_path).read_text(encoding='utf-8') == source
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('frequency', ['0', '1Meg'])
+def test_requested_admittance_check_accepts_accurate_reduction(line_netlist: str, frequency: str):
+    code, output = run(line_netlist, '--check-frequency', frequency)
+    assert code == ExitCode.OK, output
+    assert 'relative Frobenius error' in output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('arguments', [
+    ['--check-frequency=-1'], ['--check-frequency', 'nan'], ['--check-frequency', 'inf'],
+    ['--check-frequency', '1e999'], ['--check-frequency', 'invalid'],
+    ['--check-frequency', '1G', '--check-max-relative-error', '0'],
+    ['--check-frequency', '1G', '--check-max-relative-error', '1'],
+    ['--check-frequency', '1G', '--check-max-relative-error', 'nan'],
+    ['--check-frequency', '1G', '--check-max-relative-error', 'inf'],
+    ['--check-max-relative-error', '0.1'],
+])
+def test_invalid_admittance_options_fail_before_reading_input(tmp_path: Path, arguments: List[str]):
+    code, output = run(str(tmp_path / 'missing.spice'), *arguments)
+    assert code == ExitCode.USAGE
+    assert 'Input netlist not found' not in output
+    assert '--check-' in output
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_checked_reduction_is_format_only_and_reports_process_failure(line_netlist: str, tmp_path: Path):
+    assert_netlist_cli_loads_neither_klayout_nor_protobuf(
+        ['netlist', 'reduce', line_netlist, '-o', str(tmp_path / 'checked.spice'), '--check-frequency', '1Meg'])
+    source = '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n'
+    path = write(str(tmp_path), 'series.spice', source)
+    result = run_cli_process('klayout_pex.netlist', ['reduce', path, '--ticer-tau', '1n', '--check-frequency', '1G'])
+    assert result.returncode == ExitCode.DIAGNOSTIC_ERRORS, result.stderr
+    assert 'relative Frobenius error 0.628319' in result.stdout + result.stderr, result.stderr

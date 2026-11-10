@@ -27,14 +27,18 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
+from typing import Callable, Tuple
 
 import allure
 import numpy as np
 import pytest
 
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
+from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions
 from klayout_pex.netlist.rc_reduction import ReductionOptions
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
+from tests.common.xyce import xyce_port_admittance, requires_xyce
 from tests.common.rc_networks import port_admittance, random_extracted_network, spice_subcircuit, write
 
 parent_suite = "kpex/netlist reduce"
@@ -66,3 +70,23 @@ def test_reduced_netlist_has_the_ac_response_of_the_original(tmp_path, seed: int
         # NOTE: the error bound of TICER, see rc_reduction_test.test_reduction_error_at_the_ports_is_below_omega_tau
         error = np.linalg.norm(y_reduced_f - y_f) / np.linalg.norm(y_f)
         assert error <= 2 * math.pi * f * tau, f
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('simulate', [pytest.param(ngspice_port_admittance, marks=requires_ngspice, id='ngspice'),
+                                     pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce')])
+def test_requested_check_error_matches_independent_simulation(
+        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]]):
+    original = write(str(tmp_path), 'series.spice', '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n')
+    reduced = str(tmp_path / 'reduced.spice')
+    result = reduce_spice_netlist(original, reduced, ReductionOptions(ticer_tau=1e-9),
+                                  check_options=AdmittanceCheckOptions(1e9))
+    frequencies, before = simulate(original, 'cell', ['A', 'B'], (9, 9), str(tmp_path))
+    _, after = simulate(reduced, 'cell', ['A', 'B'], (9, 9), str(tmp_path))
+    assert frequencies == pytest.approx([1e9])
+    observed = np.linalg.norm(after[0] - before[0]) / np.linalg.norm(before[0])
+    check, = result.admittance_checks
+    assert not check.passed
+    assert check.relative_error == pytest.approx(observed, rel=1e-7)
