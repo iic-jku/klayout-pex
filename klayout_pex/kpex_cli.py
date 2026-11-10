@@ -308,10 +308,10 @@ class KpexCLI:
                                      help="GDS path (for LVS)")
         if include_schematic:
             group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                         help="Schematic SPICE netlist path (2.5D output uses unambiguously matched "
-                                              "device names, parallel MOS fingers get _0, _1, ... suffixes. "
-                                              "--check checks device classes, totals and top pins, "
-                                              "use regular LVS for full verification)")
+                                         help="Schematic SPICE netlist path. 2.5D output follows its top port order "
+                                              "and uses unambiguously matched device names. Parallel MOS "
+                                              "fingers get _0, _1, ... suffixes. --check checks device classes, "
+                                              "totals and top pins. Use regular LVS for full verification")
         else:
             # NOTE: a schematic is checked against the extracted netlist, which this command doesn't write
             parser.set_defaults(schematic_path=None)
@@ -919,7 +919,7 @@ class KpexCLI:
                 error(f"Can't read schematic at path {args.schematic_path}")
                 found_errors = True
             else:
-                warning("--schematic supplies matched device names for 2.5D output. --check checks device "
+                warning("--schematic supplies matched device names and port order for 2.5D output. --check checks device "
                         "classes, totals and top pins. Use regular LVS for full verification")
 
         # input mode: LVS or existing LVSDB?
@@ -1574,6 +1574,12 @@ class KpexCLI:
         if expanded_netlist_path is not None:
             reduction_problems: List[str] = []
             rule('kpex/2.5D extracted netlist (SPICE format)')
+            schematic = None
+            if args.schematic_path:
+                try:
+                    schematic = SpiceReader().read(args.schematic_path)
+                except SpiceReaderError as exc:
+                    warning(f"Can't read schematic for port order and device names: {exc}")
             netlist_expander = RCX25NetlistExpander()
             expanded_netlist = netlist_expander.expand(
                 extracted_netlist=pex_context.lvsdb.netlist(),
@@ -1583,19 +1589,20 @@ class KpexCLI:
                 device_models=tech_info.device_models,
                 substrate_net_name=pex_context.substrate_net_name,
                 removed_device_ids=removed_device_ids,
-                summary=summary
+                summary=summary,
+                schematic=schematic
             )
 
-            if args.schematic_path:
+            if schematic is not None:
                 try:
                     naming_warnings = use_schematic_device_names(
                         lvs_netlist=pex_context.lvsdb.netlist(),
                         rc_netlist=expanded_netlist,
-                        schematic=SpiceReader().read(args.schematic_path),
+                        schematic=schematic,
                         device_models=tech_info.device_models,
                         top_cell_name=pex_context.annotated_top_cell.name,
                         label_ports=summary.label_ports)
-                except (SpiceReaderError, SchematicDeviceNameError) as exc:
+                except SchematicDeviceNameError as exc:
                     naming_warnings = [f'Schematic device names retained from layout: {exc}']
                 for message in naming_warnings:
                     warning(message)

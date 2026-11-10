@@ -166,6 +166,28 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
 - `warnings`, `errors`: as logged (`--log-level error` leaves out the warnings)
 - the keys of what a run didn't get to, e.g. `devices` before LVS, or `halo_um` of MAGIC, are `null`
 
+### Top-level port order
+
+The `KPEX/2.5D` interface follows a defined order:
+
+- With `--schematic`, existing ports follow the selected schematic's `.SUBCKT` declaration
+- Extracted ports absent from that declaration follow afterward, sorted by name
+- Without a readable, unambiguous schematic, all extracted ports are sorted by name
+
+Schematic selection uses the circuit named by the layout cell, ignoring case, or the sole
+subcircuit that no element calls. Ambiguous selection emits a warning and the existing
+schematic checks still report the problem. Names match ignoring case. Sorting compares
+case-insensitive names first, then exact spelling as a tie-breaker.
+
+Ordering preserves port membership, spelling and electrical connections. Coalesced labels
+in `CC` mode occupy the earliest matching schematic position. Missing schematic pins remain
+check problems rather than becoming disconnected ports. Added substrate and exclusion ports
+participate in the same ordering rule.
+
+Expanded, reduced and converted VACASK netlists retain this order. The result JSON records
+the actual SPICE interface. This replaces the order inherited from KLayout, so positional
+calls to earlier netlists need to be regenerated from the new `.SUBCKT` interface.
+
 ### Device capacitance comparisons
 
 `kpex extract --check-device-caps` compares the coupling within metal capacitor recognition
