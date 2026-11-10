@@ -325,6 +325,27 @@ class Test(unittest.TestCase):
         self.assertEqual(57.285, tech.side_overlap_cap_by_layer_names['met2']['met1'].capacitance)
         self.assertEqual(47.240, tech.side_overlap_cap_by_layer_names['met1']['met2'].capacitance)
 
+    def test_gf180mcuD_nominal_capacitances_match_the_maintained_tables(self):
+        # Nominal `gf180mcu/magic/gf180mcu-extract.tech` rows at OpenPDKs revision
+        # `5740c4a81c42f9fe4af5ef2ee258a99151053d28`, with `METALS5`, `MIM`, `THICKMET1P1`, `HRPOLY1K`.
+        tech = self.assert_nominal_capacitances('gf180mcuD', {
+            'Poly2': (110.670, 50.695, 11.156, -0.082),
+            'Metal1': (29.304, 40.002, 33.896, 0.034),
+            'Metal2': (15.016, 33.938, 45.790, 0.116),
+            'Metal3': (10.094, 30.707, 54.507, 0.188),
+            'Metal4': (7.602, 28.614, 61.684, 0.250),
+            'Metal5': (5.798, 30.791, 99.669, 0.250),
+        }, ('Metal1', ('Nplus', 'Pplus', 'COMP'), 39.502, 43.384),
+           (('FuseTop', 'Metal4', 1990.0, 238.3),))
+        # Equal metal gaps keep equal area coefficients, despite different substrate heights.
+        for top, bottom in (('Metal2', 'Metal1'), ('Metal3', 'Metal2'), ('Metal4', 'Metal3')):
+            self.assertEqual(59.027, tech.overlap_cap_by_layer_names[top][bottom].capacitance)
+        # `Poly2` -> `Metal4` previously had 8.557, also its overlap value in aF/µm².
+        # The updated fringe is 4.443 aF/µm, while the reverse direction is independently 29.435.
+        self.assertEqual(8.557, tech.overlap_cap_by_layer_names['Metal4']['Poly2'].capacitance)
+        self.assertEqual(4.443, tech.side_overlap_cap_by_layer_names['Poly2']['Metal4'].capacitance)
+        self.assertEqual(29.435, tech.side_overlap_cap_by_layer_names['Metal4']['Poly2'].capacitance)
+
     def test_shipped_tech_definitions_have_the_resistances_of_their_conductors_and_vias(self):
         # The resistance extraction looks them up by their canonical layer name,
         # and stops at a layer without one (e.g. at the top plates of the MIM caps)

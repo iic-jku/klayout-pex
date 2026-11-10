@@ -329,14 +329,21 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
 
     ci = ex.capacitance
 
+    # Nominal capacitances from the maintained OpenPDKs MAGIC extraction table (#523):
+    # https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/gf180mcu/magic/gf180mcu-extract.tech
+    # Nominal build selection: `METALS5`, `MIM`, `THICKMET1P1`, `HRPOLY1K`
+    # Updated by https://github.com/fossi-foundation/open-pdks/pull/568
+    # Keep the diffusion projection and MIM device-model values below
+    # Resistance coefficients retain their independent sources and overrides
+
     #                    layer,      area_cap,  perimeter_cap
     # add_substrate_cap(ci, "dnwell", 120.0,     0.0)  # TODO
-    add_substrate_cap(ci, "Poly2",    110.67,    50.72)
-    add_substrate_cap(ci, "Metal1",   29.304,    39.431)
-    add_substrate_cap(ci, "Metal2",   15.016,    33.298)
-    add_substrate_cap(ci, "Metal3",   10.094,    30.021)
-    add_substrate_cap(ci, "Metal4",   7.602,     28.153)
-    add_substrate_cap(ci, "Metal5",   5.798,     30.386)
+    add_substrate_cap(ci, "Poly2", 110.670, 50.695)
+    add_substrate_cap(ci, "Metal1", 29.304, 40.002)
+    add_substrate_cap(ci, "Metal2", 15.016, 33.938)
+    add_substrate_cap(ci, "Metal3", 10.094, 30.707)
+    add_substrate_cap(ci, "Metal4",  7.602, 28.614)
+    add_substrate_cap(ci, "Metal5",  5.798, 30.791)
 
     diff_nonfet = "COMP"   # allactivenonfet, the source/drain (see below)
     poly_nonres = "Poly2"  # TODO: poly must be non-res!
@@ -348,7 +355,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_overlap_cap(ci, "Poly2",     "LVPWELL",      110.67)
     add_overlap_cap(ci, "Metal1",    "LVPWELL",      29.304)
     add_overlap_cap(ci, "Metal1",    "Nwell",        29.304)
-    add_overlap_cap(ci, "Metal1",    diff_nonfet,    30.502)  # TODO: lv vs mv?
+    add_overlap_cap(ci, "Metal1",    diff_nonfet,    39.502)  # TODO: lv vs mv?
     add_overlap_cap(ci, "Metal1",    "Poly2",        51.434)
     add_overlap_cap(ci, "Metal2",    "LVPWELL",      15.016)
     add_overlap_cap(ci, "Metal2",    "Nwell",        15.016)
@@ -378,61 +385,61 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     add_overlap_cap(ci, "Metal5",    "Metal4",       39.351)
 
     #                   layer_name, cap,     offset
-    add_sidewall_cap(ci, "Poly2",    11.098, -0.082)
-    add_sidewall_cap(ci, "Metal1",   40.512, -0.053)
-    add_sidewall_cap(ci, "Metal2",   46.736,  0.289)
-    add_sidewall_cap(ci, "Metal3",   70.675,  0.534)
-    add_sidewall_cap(ci, "Metal4",   77.388,  0.611)
-    add_sidewall_cap(ci, "Metal5",   114.86,  0.025)
+    add_sidewall_cap(ci, "Poly2",   11.156, -0.082)
+    add_sidewall_cap(ci, "Metal1",  33.896,  0.034)
+    add_sidewall_cap(ci, "Metal2",  45.790,  0.116)
+    add_sidewall_cap(ci, "Metal3",  54.507,  0.188)
+    add_sidewall_cap(ci, "Metal4",  61.684,  0.250)
+    add_sidewall_cap(ci, "Metal5",  99.669,  0.250)
 
     #                           in_layer,    out_layer,   cap
-    add_sidewall_overlap_cap(ci, "Poly2",     "Nwell",     50.72)
-    add_sidewall_overlap_cap(ci, "Poly2",     "LVPWELL",   50.72)
-    add_sidewall_overlap_cap(ci, "Metal1",    "Nwell",     39.431)
-    add_sidewall_overlap_cap(ci, "Metal1",    "LVPWELL",   39.431)
-    add_sidewall_overlap_cap(ci, "Metal1",    diff_nonfet, 43.406)  # TODO: lv vs mv?
-    add_sidewall_overlap_cap(ci, "Metal1",    poly_nonres, 46.700)
-    add_sidewall_overlap_cap(ci, "Poly2",     "Metal1",    17.946)
-    add_sidewall_overlap_cap(ci, "Metal2",    "Nwell",     33.298)
-    add_sidewall_overlap_cap(ci, "Metal2",    "LVPWELL",   33.298)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Nwell",     50.695)
+    add_sidewall_overlap_cap(ci, "Poly2",     "LVPWELL",   50.695)
+    add_sidewall_overlap_cap(ci, "Metal1",    "Nwell",     40.002)
+    add_sidewall_overlap_cap(ci, "Metal1",    "LVPWELL",   40.002)
+    add_sidewall_overlap_cap(ci, "Metal1",    diff_nonfet, 43.384)  # TODO: lv vs mv?
+    add_sidewall_overlap_cap(ci, "Metal1",    poly_nonres, 46.685)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Metal1",    17.958)
+    add_sidewall_overlap_cap(ci, "Metal2",    "Nwell",     33.938)
+    add_sidewall_overlap_cap(ci, "Metal2",    "LVPWELL",   33.938)
     add_sidewall_overlap_cap(ci, "Metal2",    diff_nonfet, 35.189)  # TODO: lv vs mv?
-    add_sidewall_overlap_cap(ci, "Metal2",    poly_nonres, 36.169)
-    add_sidewall_overlap_cap(ci, "Poly2",     "Metal2",    8.706)
-    add_sidewall_overlap_cap(ci, "Metal2",    "Metal1",    47.566)
-    add_sidewall_overlap_cap(ci, "Metal1",    "Metal2",    32.048)
-    add_sidewall_overlap_cap(ci, "Metal3",    "Nwell",     30.021)
-    add_sidewall_overlap_cap(ci, "Metal3",    "LVPWELL",   30.021)
-    add_sidewall_overlap_cap(ci, "Metal3",    diff_nonfet, 31.40)  # TODO: lv vs mv?
-    add_sidewall_overlap_cap(ci, "Metal3",    poly_nonres, 31.927)
-    add_sidewall_overlap_cap(ci, "Poly2",     "Metal3",    5.895)
-    add_sidewall_overlap_cap(ci, "Metal3",    "Metal1",    36.609)
-    add_sidewall_overlap_cap(ci, "Metal1",    "Metal3",    18.135)
-    add_sidewall_overlap_cap(ci, "Metal3",    "Metal2",    49.011)
-    add_sidewall_overlap_cap(ci, "Metal2",    "Metal3",    36.626)
-    add_sidewall_overlap_cap(ci, "Metal4",    "Nwell",     28.153)
-    add_sidewall_overlap_cap(ci, "Metal4",    "LVPWELL",   28.153)
-    add_sidewall_overlap_cap(ci, "Metal4",    diff_nonfet, 29.065)
-    add_sidewall_overlap_cap(ci, "Metal4",    poly_nonres, 29.407)
-    add_sidewall_overlap_cap(ci, "Poly2",     "Metal4",    8.557)
-    add_sidewall_overlap_cap(ci, "Metal4",    "Metal1",    32.104)
-    add_sidewall_overlap_cap(ci, "Metal1",    "Metal4",    13.159)
-    add_sidewall_overlap_cap(ci, "Metal4",    "Metal2",    36.563)
-    add_sidewall_overlap_cap(ci, "Metal2",    "Metal4",    22.405)
-    add_sidewall_overlap_cap(ci, "Metal4",    "Metal3",    47.871)
-    add_sidewall_overlap_cap(ci, "Metal3",    "Metal4",    39.964)
-    add_sidewall_overlap_cap(ci, "Metal5",    "Nwell",     30.386)
-    add_sidewall_overlap_cap(ci, "Metal5",    "LVPWELL",   30.386)
-    add_sidewall_overlap_cap(ci, "Metal5",    diff_nonfet, 31.165)
-    add_sidewall_overlap_cap(ci, "Metal5",    poly_nonres, 31.458)
-    add_sidewall_overlap_cap(ci, "Poly2",     "Metal5",    3.365)
-    add_sidewall_overlap_cap(ci, "Metal5",    "Metal1",    33.316)
-    add_sidewall_overlap_cap(ci, "Metal1",    "Metal5",    9.825)
-    add_sidewall_overlap_cap(ci, "Metal5",    "Metal2",    36.591)
-    add_sidewall_overlap_cap(ci, "Metal2",    "Metal5",    15.764)
-    add_sidewall_overlap_cap(ci, "Metal5",    "Metal3",    41.466)
-    add_sidewall_overlap_cap(ci, "Metal3",    "Metal5",    22.988)
-    add_sidewall_overlap_cap(ci, "Metal5",    "Metal4",    52.692)
-    add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    34.954)
+    add_sidewall_overlap_cap(ci, "Metal2",    poly_nonres, 36.179)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Metal2",    8.801)
+    add_sidewall_overlap_cap(ci, "Metal2",    "Metal1",    49.021)
+    add_sidewall_overlap_cap(ci, "Metal1",    "Metal2",    32.918)
+    add_sidewall_overlap_cap(ci, "Metal3",    "Nwell",     30.707)
+    add_sidewall_overlap_cap(ci, "Metal3",    "LVPWELL",   30.707)
+    add_sidewall_overlap_cap(ci, "Metal3",    diff_nonfet, 31.415)  # TODO: lv vs mv?
+    add_sidewall_overlap_cap(ci, "Metal3",    poly_nonres, 31.943)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Metal3",    5.897)
+    add_sidewall_overlap_cap(ci, "Metal3",    "Metal1",    36.619)
+    add_sidewall_overlap_cap(ci, "Metal1",    "Metal3",    18.424)
+    add_sidewall_overlap_cap(ci, "Metal3",    "Metal2",    49.006)
+    add_sidewall_overlap_cap(ci, "Metal2",    "Metal3",    37.604)
+    add_sidewall_overlap_cap(ci, "Metal4",    "Nwell",     28.614)
+    add_sidewall_overlap_cap(ci, "Metal4",    "LVPWELL",   28.614)
+    add_sidewall_overlap_cap(ci, "Metal4",    diff_nonfet, 29.090)
+    add_sidewall_overlap_cap(ci, "Metal4",    poly_nonres, 29.435)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Metal4",    4.443)
+    add_sidewall_overlap_cap(ci, "Metal4",    "Metal1",    32.121)
+    add_sidewall_overlap_cap(ci, "Metal1",    "Metal4",    13.241)
+    add_sidewall_overlap_cap(ci, "Metal4",    "Metal2",    36.571)
+    add_sidewall_overlap_cap(ci, "Metal2",    "Metal4",    22.562)
+    add_sidewall_overlap_cap(ci, "Metal4",    "Metal3",    48.976)
+    add_sidewall_overlap_cap(ci, "Metal3",    "Metal4",    40.114)
+    add_sidewall_overlap_cap(ci, "Metal5",    "Nwell",     30.791)
+    add_sidewall_overlap_cap(ci, "Metal5",    "LVPWELL",   30.791)
+    add_sidewall_overlap_cap(ci, "Metal5",    diff_nonfet, 31.213)
+    add_sidewall_overlap_cap(ci, "Metal5",    poly_nonres, 31.513)
+    add_sidewall_overlap_cap(ci, "Poly2",     "Metal5",    3.393)
+    add_sidewall_overlap_cap(ci, "Metal5",    "Metal1",    33.682)
+    add_sidewall_overlap_cap(ci, "Metal1",    "Metal5",    9.878)
+    add_sidewall_overlap_cap(ci, "Metal5",    "Metal2",    36.632)
+    add_sidewall_overlap_cap(ci, "Metal2",    "Metal5",    15.854)
+    add_sidewall_overlap_cap(ci, "Metal5",    "Metal3",    41.531)
+    add_sidewall_overlap_cap(ci, "Metal3",    "Metal5",    23.133)
+    add_sidewall_overlap_cap(ci, "Metal5",    "Metal4",    52.667)
+    add_sidewall_overlap_cap(ci, "Metal4",    "Metal5",    35.678)
 
     # NOTE: the extraction has the diffusion as the source/drain of the LVS deck,
     #       nsd and psd (the LVS layers of Nplus and Pplus), like the resistance extraction,
