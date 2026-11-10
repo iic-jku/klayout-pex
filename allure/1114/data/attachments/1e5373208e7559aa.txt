@@ -1,0 +1,18 @@
+SUBPROCESS __kpex__:kpex_cli.py:1868 main extract --pdk sky130A --mode CC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/plate_20um_x_20um_li1_over_ntap.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/plate_20um_x_20um_li1_over_ntap__plate_20um_x_20um_li1_over_ntap/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2028 Peak memory (resident set size) after preparing the LVSDB: 382.7 MiB
+INFO     __kpex__:kpex_cli.py:2032 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2032 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2032 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2032 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:1475 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 382.7 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1507 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1507 C1;A;VSUBS;0.232;
+SUBPROCESS __kpex__:kpex_cli.py:1507 C2;A;W;25.504;
+SUBPROCESS __kpex__:kpex_cli.py:1510 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/plate_20um_x_20um_li1_over_ntap__plate_20um_x_20um_li1_over_ntap/plate_20um_x_20um_li1_over_ntap_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1528 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/plate_20um_x_20um_li1_over_ntap__plate_20um_x_20um_li1_over_ntap/plate_20um_x_20um_li1_over_ntap_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1563 Peak memory (resident set size) after the netlist: 382.7 MiB
+WARNING  __kpex__:kpex_cli.py:1580 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: W (25.504 fF)
+INFO     __kpex__:kpex_cli.py:1898 Peak memory (resident set size) after the run: 382.7 MiB

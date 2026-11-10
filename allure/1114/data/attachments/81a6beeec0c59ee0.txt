@@ -1,0 +1,19 @@
+SUBPROCESS __kpex__:kpex_cli.py:1868 main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\internal_child_label.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\internal_child_label.gds.gz'
+INFO     __kpex__:kpex_cli.py:933 No explicit top cell specified, using top cell 'internal_child_label'
+INFO     __kpex__:kpex_cli.py:944 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2028 Peak memory (resident set size) after preparing the LVSDB: 803.0 MiB
+INFO     __kpex__:kpex_cli.py:2032 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2032 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2032 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1475 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 803.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1507 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1507 C1;inner;outer;0.096;
+SUBPROCESS __kpex__:kpex_cli.py:1507 C2;VSUBS;inner;0.585;
+SUBPROCESS __kpex__:kpex_cli.py:1507 C3;VSUBS;outer;0.585;
+SUBPROCESS __kpex__:kpex_cli.py:1510 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\internal_child_label_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1528 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\internal_child_label__internal_child_label\internal_child_label_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1563 Peak memory (resident set size) after the netlist: 803.6 MiB
+WARNING  __kpex__:kpex_cli.py:1580 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: inner (0.682 fF)
+INFO     __kpex__:kpex_cli.py:1898 Peak memory (resident set size) after the run: 803.6 MiB
