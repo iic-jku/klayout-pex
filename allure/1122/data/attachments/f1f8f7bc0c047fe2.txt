@@ -1,0 +1,33 @@
+SUBPROCESS __kpex__:kpex_cli.py:1961 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/r_ntap_pair_two_nwells_over_dnwell_m1_m2.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:285 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:285 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwells_over_dnwell_m1_m2/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2121 Peak memory (resident set size) after preparing the LVSDB: 1.2 GiB
+INFO     __kpex__:kpex_cli.py:2125 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:2125 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:2125 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2125 (22, 344) -> (ntap_dw)
+INFO     __kpex__:kpex_cli.py:2125 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:2125 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2125 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:2125 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:kpex_cli.py:2125 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:kpex_cli.py:1511 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:545 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: $1
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 1.2 GiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 1.2 GiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 C1;$1;VSUBS;0.051;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C2;$1.$4.Metal2;VSUBS;0.141;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C3;$1.$5.Metal2;VSUBS;0.141;
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;$1;$1.$4.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;$1;$1.$5.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1569 R3;$1;$1.$6.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R4;$1;$1.$7.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1572 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwells_over_dnwell_m1_m2/r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1605 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_ntap_pair_two_nwells_over_dnwell_m1_m2__r_ntap_pair_two_nwells_over_dnwell_m1_m2/r_ntap_pair_two_nwells_over_dnwell_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1640 Peak memory (resident set size) after the netlist: 1.2 GiB
+WARNING  __kpex__:kpex_cli.py:1657 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $1 (0.334 fF)
+INFO     __kpex__:kpex_cli.py:1991 Peak memory (resident set size) after the run: 1.2 GiB
