@@ -30,12 +30,13 @@ and :mod:`.spice_rc_netlist` for what is read, protected and written.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 import os
 from typing import *
 
 from .rc_network import RCNetwork
+from .admittance_check import AdmittanceCheck, AdmittanceCheckOptions, check_reduction_admittance
 from .rc_reduction import ReductionOptions, ReductionStatistics, reduce_network
 from .spice_rc_netlist import SpiceRCNetlist
 
@@ -128,6 +129,11 @@ class NetlistReduction:
     """the path written"""
     scopes: List[ScopeReduction]
     """the scopes with R or C elements, in the order of the netlist"""
+    admittance_checks: List[AdmittanceCheck] = field(default_factory=list)
+
+    @property
+    def check_problems(self) -> List[str]:
+        return [check.describe() for check in self.admittance_checks if not check.passed]
 
 
 def _describe_options(options: ReductionOptions) -> str:
@@ -141,18 +147,25 @@ def _describe_options(options: ReductionOptions) -> str:
 
 def reduce_spice_netlist(input_path: str,
                          output_path: str,
-                         options: ReductionOptions,
-                         keep: Sequence[str] = ()) -> NetlistReduction:
+                         reduction_options: ReductionOptions,
+                         keep: Sequence[str] = (),
+                         check_options: Optional[AdmittanceCheckOptions] = None) -> NetlistReduction:
     """
     Reduce the RC network of every scope of a SPICE netlist and write the result
     (creating the output's directory if needed).
 
+    :param reduction_options: passes and thresholds used to reduce each scope
     :param keep: nodes to keep in addition to the protected ones (case-insensitive),
                  each must be a node of at least one network
+    :param check_options: compare the written RC admittance with the input at the requested frequencies;
+                          failed checks are returned in ``check_problems``, keeping the output for inspection
     :raises OSError: if the input can't be read or the output can't be written
     :raises NetlistReadError: if the netlist's .SUBCKT and .ENDS don't match
     :raises UnknownNodesError: if a node to keep is in none of the networks (nothing is written then)
+    :raises ValueError: if a checked reduction would overwrite its input
     """
+    if check_options is not None and os.path.exists(output_path) and os.path.samefile(input_path, output_path):
+        raise ValueError('A checked reduction must not overwrite its input netlist')
     netlist = SpiceRCNetlist.read(input_path)
     scopes = [s for s in netlist.scopes if s.resistors_read or s.capacitors_read]
 
@@ -171,9 +184,9 @@ def reduce_spice_netlist(input_path: str,
             if node is not None:
                 network.protect(node)
         before = NetworkSize.of(network)
-        statistics = reduce_network(network, options)
+        statistics = reduce_network(network, reduction_options)
         after = NetworkSize.of(network)
-        scope.comment_lines.append(f"* netlist reduce ({_describe_options(options)}): "
+        scope.comment_lines.append(f"* netlist reduce ({_describe_options(reduction_options)}): "
                                    f"{before} -> {after}")
         reductions.append(ScopeReduction(scope=scope.title,
                                          resistors_read=scope.resistors_read,
@@ -185,4 +198,7 @@ def reduce_spice_netlist(input_path: str,
     output_directory = os.path.dirname(output_path)
     if output_directory:
         os.makedirs(output_directory, exist_ok=True)
-    return NetlistReduction(output_path=netlist.write(output_path), scopes=reductions)
+    written_path = netlist.write(output_path)
+    checks = check_reduction_admittance(input_path, written_path, check_options, keep) \
+        if check_options is not None else []
+    return NetlistReduction(output_path=written_path, scopes=reductions, admittance_checks=checks)

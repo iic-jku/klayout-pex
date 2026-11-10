@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 import os
+from pathlib import Path
 from typing import *
 from unittest import mock
 
@@ -40,10 +41,11 @@ from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.netlist.netlist_format import NetlistFormat
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist, reduced_netlist_path
 from klayout_pex.netlist.rc_network import RCNetwork
-from klayout_pex.netlist.rc_reduction import ReductionOptions
+from klayout_pex.netlist.rc_reduction import ReductionOptions, ReductionStatistics, reduce_network
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from klayout_pex.rcx25.pex_mode import PEXMode
 from klayout_pex.run_result import FileKind
+from klayout_pex.pex25d.diagnostics import ExitCode
 from tests.common.cli_runner import run_cli
 from tests.common.rc_networks import (
     approx,
@@ -221,6 +223,10 @@ def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: 
      "--reduce-tau applies to --reduce ticer only, not to --reduce floating"),
     (PEXMode.RC, ['--reduce-tau', '1f'],
      "--reduce-tau applies to --reduce ticer only, not to --reduce none"),
+    (PEXMode.RC, ['--check-frequency', '1G'],
+     "--check-frequency needs --reduce floating or --reduce ticer"),
+    (PEXMode.RC, ['--check-frequency-range', '1Meg', '1G'],
+     "--check-frequency-range needs --reduce floating or --reduce ticer"),
 ])
 def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], message: str):
     # NOTE: found by the argument validation, before LVS
@@ -248,6 +254,8 @@ def test_kpex_reduce_needs_the_2_5d_engine():
     # NOTE: newer Pythons quote the choices in the message, older ones don't
     (['--reduce', 'all'], ["argument --reduce: invalid choice: 'all' (choose from", 'none', 'floating', 'ticer']),
     (['--reduce', 'ticer', '--reduce-tau', '0'], ["argument --reduce-tau: must be > 0 s, got '0'"]),
+    (['--reduce', 'ticer', '--check-frequency', '1e999'],
+     ["argument --check-frequency: must be a finite number of Hz"]),
 ])
 def test_kpex_reduce_invalid_values_are_usage_errors(reduce_args: List[str], messages: List[str],
                                                      capsys: pytest.CaptureFixture):
@@ -256,3 +264,61 @@ def test_kpex_reduce_invalid_values_are_usage_errors(reduce_args: List[str], mes
     assert exit_info.value.code == 2
     stderr = capsys.readouterr().err
     assert all(message in stderr for message in messages), stderr
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('check_args', [
+    ['--check-frequency', '1G'],
+    ['--check-frequency-range', '1Meg', '1G', '--check-points-per-decade', '2', '--check-include-dc'],
+])
+def test_extraction_can_check_its_reduced_admittance(check_args: List[str]):
+    cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
+                              extra_args=['--reduce', 'ticer', '--reduce-tau', '1f', *check_args])
+    assert cli.run_result.check_problems == []
+    assert Path(cli.rcx25_reduced_netlist_path).is_file()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('check_args', [
+    ['--check-frequency', '0'], ['--check-frequency-range', '1', '10', '--check-include-dc'],
+])
+def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disabled(tmp_path: Path,
+                                                                                 check_args: List[str]):
+    # Inject a real circuit error after reduction, not a mocked check result.
+    # Doubling every conductance doubles the DC terminal-admittance matrix.
+    def faulty_reduction(network: RCNetwork, options: ReductionOptions) -> ReductionStatistics:
+        statistics = reduce_network(network, options)
+        for _, _, branch in network.edges():
+            branch.conductance *= 2
+        return statistics
+
+    cli = KpexCLI()
+    fixture = extraction.lvsdb_fixture('test_patterns', 'nfet_li1.gds.gz').up_to_date_lvsdb_path()
+    with mock.patch('klayout_pex.netlist.netlist_reduction.reduce_network', side_effect=faulty_reduction):
+        code, output = run_cli(cli.main, ['main', 'extract', '--pdk', extraction.pdk.name,
+                                          '--mode', 'RC', '--lvsdb', fixture, '--out-dir', str(tmp_path),
+                                          '--2.5D', '--reduce', 'ticer', '--check', 'n', *check_args])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert 'reduced netlist failed its requested admittance check' in output
+    assert any('relative Frobenius error 1' in problem for problem in cli.run_result.check_problems)
+    assert Path(cli.rcx25_reduced_netlist_path).is_file()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('check_args', [
+    ['--check-points-per-decade', '10'], ['--check-include-dc'],
+    ['--check-max-relative-error', '0.1'], ['--check-frequency-range', '1G', '1Meg'],
+    ['--check-frequency-range', '0', '1G'],
+    ['--check-frequency-range', '1', '10', '--check-points-per-decade', '1001'],
+])
+def test_invalid_extraction_check_options_fail_before_loading_technology(check_args: List[str], tmp_path: Path):
+    with mock.patch('klayout_pex.kpex_cli.TechInfo.from_json') as load_technology:
+        code, output = run_cli(KpexCLI().main, ['main', 'extract', '--pdk', extraction.pdk.name,
+                                               '--gds', str(tmp_path / 'missing.gds'), '--2.5D',
+                                               '--mode', 'RC', '--reduce', 'ticer', *check_args])
+    assert code == ExitCode.USAGE, output
+    assert '--check-' in output
+    load_technology.assert_not_called()

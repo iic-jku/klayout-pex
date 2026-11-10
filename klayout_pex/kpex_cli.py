@@ -106,6 +106,7 @@ from .klayout.pex25d_builder import DEFAULT_GRID_UM
 from .pex25d.diagnostics import DiagnosticsReport, ExitCode, diagnostics_stream
 from .pex25d.pex25d_cli import Pex25DCLI
 from .netlist.netlist_reduction import ReductionMode, reduce_spice_netlist, reduced_netlist_path
+from .netlist.reduce_subcommand import add_admittance_check_arguments, admittance_check_options
 from .netlist.rc_reduction import ReductionOptions
 from .pdk_config import PDK, PDKConfig
 from .rcx25.exclusion import (
@@ -520,6 +521,7 @@ class KpexCLI:
                                       type=positive_spice_seconds, default=None,
                                       help=f"TICER's time constant threshold in s for --reduce ticer, a SPICE number "
                                            f"like '0.1p' (default is {ReductionOptions().ticer_tau * 1e12:g}p)")
+        add_admittance_check_arguments(group_25d)
         add_argument_with_former_name(group_25d, "--report-caps", "--report_caps", dest="report_caps",
                                       type=true_or_false, default=False,
                                       help="Write each capacitance contribution with its shapes into the report "
@@ -708,6 +710,11 @@ class KpexCLI:
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
+        if args.command == 'extract':
+            try:
+                args.admittance_check_options = admittance_check_options(args)
+            except ValueError as exc:
+                parser_extract.error(str(exc))
         if args.port_labels == 'top' and args.gds_path is None:
             parser = parser_extract if args.command == 'extract' else parser_pex25d
             parser.error("--port-labels top needs --gds, also with --lvsdb, "
@@ -800,6 +807,10 @@ class KpexCLI:
                     found_errors = True
             if args.reduce_tau is not None and args.reduce_mode != ReductionMode.TICER:
                 error(f"--reduce-tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
+                found_errors = True
+            if args.admittance_check_options is not None and args.reduce_mode == ReductionMode.NONE:
+                option = '--check-frequency-range' if args.check_frequency_range is not None else '--check-frequency'
+                error(f'{option} needs --reduce floating or --reduce ticer')
                 found_errors = True
 
             if args.exclusion_marker_layers and args.exclusion_marker_mode == ExclusionMarkerMode.IGNORE:
@@ -1512,6 +1523,7 @@ class KpexCLI:
             subproc(f"{netlist_csv_path}")
 
         if expanded_netlist_path is not None:
+            reduction_problems: List[str] = []
             rule('kpex/2.5D extracted netlist (SPICE format)')
             netlist_expander = RCX25NetlistExpander()
             expanded_netlist = netlist_expander.expand(
@@ -1603,13 +1615,19 @@ class KpexCLI:
                 rule('kpex/2.5D netlist reduction')
                 reduction = reduce_spice_netlist(input_path=expanded_netlist_path,
                                                  output_path=reduced_netlist_path(expanded_netlist_path),
-                                                 options=reduction_options)
+                                                 reduction_options=reduction_options,
+                                                 check_options=args.admittance_check_options)
                 for scope in reduction.scopes:
                     subproc(scope.describe())
                 info(f"Wrote reduced netlist to: {reduction.output_path}")
                 self._rcx25_reduced_netlist_path = reduction.output_path
                 self.add_netlist(FileKind.NETLIST, reduction.output_path, ExtractionEngine.K25D,
                                  pex_context.annotated_top_cell.name, reduced=True)
+                for check in reduction.admittance_checks:
+                    if check.passed:
+                        info(check.describe())
+                reduction_problems = reduction.check_problems
+                self.run_result.check_problems = self._rcx25_netlist_problems + reduction_problems
                 log_peak_memory('the netlist reduction')
 
             # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
@@ -1656,6 +1674,9 @@ class KpexCLI:
             raise RCNetlistCheckError("The extracted netlist is inconsistent with the LVS netlist "
                                       "(--check n to accept it):\n" +
                                       '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+        if expanded_netlist_path is not None and reduction_problems:
+            raise RCNetlistCheckError("The reduced netlist failed its requested admittance check:\n" +
+                                     '\n'.join(f"  - {problem}" for problem in reduction_problems))
 
         return extraction_results
 

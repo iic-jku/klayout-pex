@@ -69,9 +69,9 @@ def run_ngspice(deck_path: str) -> str:
     """
     result = subprocess.run([ngspice_executable(), '-b', os.path.basename(deck_path)],
                             cwd=os.path.dirname(deck_path), capture_output=True, text=True, encoding='utf-8',
-                            timeout=600)
+                            errors='replace', timeout=600)
     assert result.returncode == 0, f"ngspice failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
-    return result.stdout
+    return result.stdout + '\n' + result.stderr
 
 
 def ngspice_operating_point(netlist: str,
@@ -121,17 +121,19 @@ def ngspice_port_admittance(netlist_path: str,
     bench_path = os.path.join(work_dir, f"{name}_ac.cir")
     data_path = os.path.join(work_dir, f"{name}_ac.txt")
     lines, sources = port_admittance_bench(os.path.abspath(netlist_path), subcircuit, count)
+    # A logarithmic sweep with equal endpoints yields no data in ngspice 42.
+    sweep = 'lin' if decades[0] == decades[1] else 'dec'
     lines += [".control",
               "set wr_singlescale",
-              f"ac dec 1 1e{decades[0]} 1e{decades[1]}",
+              f"ac {sweep} 1 1e{decades[0]} 1e{decades[1]}",
               f"wrdata {data_path} {' '.join(f'{source}#branch' for source in sources)}",
               ".endc",
               ".end"]
     with open(bench_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(lines) + '\n')
 
-    run_ngspice(bench_path)
-    assert os.path.exists(data_path), f"ngspice wrote no {data_path}"
+    output = run_ngspice(bench_path)
+    assert os.path.exists(data_path), f"ngspice wrote no {data_path}:\n{output}"
 
     data = np.loadtxt(data_path, ndmin=2, encoding='utf-8')
     frequencies = data[:, 0]

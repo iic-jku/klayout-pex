@@ -125,21 +125,26 @@ class SpiceRCNetlist:
     # ----------------------------------------------------------------------------------------- reading
 
     @classmethod
-    def read(cls, path: str) -> SpiceRCNetlist:
+    def read(cls, path: str, *, recognize_ties: bool = True) -> SpiceRCNetlist:
         """
         :raises OSError: if the file can't be read
         :raises NetlistReadError: if its .SUBCKT and .ENDS don't match
+        :param recognize_ties: False reads the actual tie resistors for circuit verification
         """
+        if not isinstance(recognize_ties, bool):
+            raise ValueError(f"recognize_ties must be True or False, got {recognize_ties!r}")
         # NOTE: bytes that are no UTF-8 (e.g. in comments) are written back as they were,
         #       and so are the line endings (newline='')
         with open(path, encoding='utf-8', errors='surrogateescape', newline='') as f:
-            return cls.parse(f.read(), source=path)
+            return cls.parse(f.read(), source=path, recognize_ties=recognize_ties)
 
     @classmethod
-    def parse(cls, text: str, source: str = '<text>') -> SpiceRCNetlist:
+    def parse(cls, text: str, source: str = '<text>', *, recognize_ties: bool = True) -> SpiceRCNetlist:
         """
         :raises NetlistReadError: if the .SUBCKT and .ENDS don't match, or ngspice can't read the lines
         """
+        if not isinstance(recognize_ties, bool):
+            raise ValueError(f"recognize_ties must be True or False, got {recognize_ties!r}")
         try:
             lines = spice_lines(text)
         except SpiceSyntaxError as e:
@@ -200,7 +205,7 @@ class SpiceRCNetlist:
                 if value is not None:
                     scope = stack[-1]
                     network = scope.network
-                    tied_name = cls._tied_node_name(tokens)
+                    tied_name = cls._tied_node_name(tokens) if recognize_ties else None
                     if tied_name is not None:
                         network.tie(network.node(tied_name))
                     elif keyword[0] == 'r':

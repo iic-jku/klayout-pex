@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 import os
+from pathlib import Path
 import textwrap
 from typing import *
 
@@ -36,6 +37,7 @@ import numpy as np
 import pytest
 
 from klayout_pex.netlist.netlist_reduction import NetworkSize, UnknownNodesError, reduce_spice_netlist
+from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions
 from klayout_pex.netlist.rc_reduction import ReductionOptions, ReductionStatistics
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist
 from tests.common.rc_networks import (
@@ -58,7 +60,8 @@ def test_reduces_writes_and_returns_the_path(tmp_path):
     input_path = write(str(tmp_path), 'line.spice', LINE_NETLIST)
     output_path = str(tmp_path / 'line_reduced.spice')
 
-    reduction = reduce_spice_netlist(input_path, output_path, ReductionOptions(ticer_tau=1e-12))
+    reduction = reduce_spice_netlist(input_path, output_path,
+                                      reduction_options=ReductionOptions(ticer_tau=1e-12))
 
     assert reduction.output_path == output_path
     assert [s.scope for s in reduction.scopes] == ['.SUBCKT line']
@@ -134,3 +137,27 @@ def test_written_netlist_has_the_response_of_the_reduced_network(tmp_path, seed:
         y_reduced = port_admittance(reduced, ports, frequency)
         error = np.linalg.norm(y_reduced - y) / np.linalg.norm(y)
         assert error <= 2 * math.pi * frequency * tau, frequency
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_admittance_check_includes_writer_rounding(tmp_path: Path):
+    # The pass itself changes nothing, but the writer rounds C to six significant digits.
+    path = write(str(tmp_path), 'precise.spice', '.SUBCKT cell A B\nC1 A B 1.23456789f\n.ENDS cell\n')
+    result = reduce_spice_netlist(path, str(tmp_path / 'reduced.spice'),
+                                  reduction_options=ReductionOptions(ticer=False),
+                                  check_options=AdmittanceCheckOptions(1e9, 1e-7))
+    check, = result.admittance_checks
+    assert not check.passed
+    assert check.relative_error == pytest.approx(abs(1.23457 / 1.23456789 - 1), rel=1e-9)
+    assert result.check_problems == [check.describe()]
+    assert Path(result.output_path).is_file()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+def test_checked_reduction_cannot_overwrite_its_reference(tmp_path: Path):
+    path = write(str(tmp_path), 'line.spice', LINE_NETLIST)
+    with pytest.raises(ValueError, match='must not overwrite'):
+        reduce_spice_netlist(path, path, ReductionOptions(), check_options=AdmittanceCheckOptions(1e9))
+    assert Path(path).read_text(encoding='utf-8') == LINE_NETLIST

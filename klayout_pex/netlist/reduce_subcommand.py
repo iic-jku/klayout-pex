@@ -29,6 +29,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import os
 from typing import *
 
@@ -39,8 +40,9 @@ from rich_argparse import RichHelpFormatter
 
 from ..log import error, info, rule
 from ..pex25d.diagnostics import ExitCode
-from ..util.argparse_helpers import add_argument_with_former_name, positive_spice_seconds, true_or_false
-from ..util.unit_formatter import format_spice_number
+from ..util.argparse_helpers import add_argument_with_former_name, positive_spice_seconds, relative_error, true_or_false
+from ..util.unit_formatter import format_spice_number, parse_spice_number
+from .admittance_check import AdmittanceCheckOptions
 from .netlist_reduction import UnknownNodesError, reduce_spice_netlist, reduced_netlist_path
 from .rc_reduction import TIE_RESISTANCE, ReductionOptions
 from .spice_rc_netlist import NetlistReadError
@@ -69,10 +71,30 @@ line that is no plain R or C (device and subcircuit terminals, sources, control 
 given with `--keep`. Plain R and C elements have two nodes and a number as value; all other lines are
 written as they are. The reduced R and C elements are named `Rred_<n>` and `Cred_<n>`, the ties `Rtie_<n>`.
 
+With `--check-frequency HZ` or `--check-frequency-range START STOP`, compare the written plain R/C
+network with the original at every protected terminal and the global reference `0`. SPICE suffixes
+are accepted, e.g. `--check-frequency-range 1Meg 10G --check-points-per-decade 10`.
+
+- A single frequency may be zero for DC
+- A range needs `0 < START ≤ STOP`, includes both endpoints, and samples logarithmically at
+  `--check-points-per-decade` points per decade (default 10)
+- Equal endpoints give one sample, and `--check-include-dc` adds a separate DC sample to a range
+- Every sampled error must pass `--check-max-relative-error` (default 0.01, inclusive)
+
+The error is `||Y_reduced - Y_original||_F / ||Y_original||_F`, including writer rounding and tie
+resistors. Zero versus zero has error zero. A nonzero result against a zero reference has infinite
+error. No absolute-error floor hides small capacitances. The report gives the worst sampled error
+and its frequency. Passing covers the sampled frequencies only, without a bound on Q or between samples.
+
+Checks accept at most 1,001 frequency points, including endpoints and DC. Each network evaluation is
+bounded to 100,000 nodes/coupling entries and 1,000,000 coupling updates. A cumulative limit of
+10,000,000 graph entries and coupling updates covers both networks, all scopes and every frequency.
+An unevaluable sample or exceeded limit fails the check. The output remains available for inspection.
+
 | Exit code | Meaning |
 | --------- | ------- |
 | 0 | success |
-| 1 | the netlist can't be split into subcircuits (`.SUBCKT` and `.ENDS` do not match) |
+| 1 | the netlist can't be split into subcircuits, or the requested admittance check fails |
 | 2 | the command line is wrong, or a file could not be read or written |
 """
 
@@ -86,6 +108,56 @@ def _degree(text: str) -> int:
     if value < 1:
         raise argparse.ArgumentTypeError(f"must be an integer ≥ 1, got '{text}'")
     return value
+
+
+def _frequency(text: str) -> float:
+    try:
+        value = parse_spice_number(text)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    if not math.isfinite(value) or value < 0:
+        raise argparse.ArgumentTypeError(f"must be a finite number of Hz ≥ 0, got '{text}'")
+    return value
+
+
+def add_admittance_check_arguments(parser: argparse._ActionsContainer):
+    """Shared options of standalone reduction and extraction's reduction path."""
+    frequencies = parser.add_mutually_exclusive_group()
+    frequencies.add_argument('--check-frequency', type=_frequency, metavar='HZ', default=None,
+                             help='Check full versus written reduced RC admittance at this frequency, '
+                                  "a SPICE number such as '1G' (0 for DC, disabled by default)")
+    frequencies.add_argument('--check-frequency-range', type=_frequency, nargs=2, metavar=('START', 'STOP'),
+                             default=None, help='Check logarithmically sampled RC admittance from START to STOP Hz '
+                                                '(positive inclusive bounds, SPICE suffixes accepted)')
+    parser.add_argument('--check-points-per-decade', type=_degree, metavar='N', default=None,
+                        help='Logarithmic sampling density for --check-frequency-range (default is 10)')
+    parser.add_argument('--check-include-dc', action='store_true',
+                        help='Also check DC with --check-frequency-range')
+    parser.add_argument('--check-max-relative-error', type=relative_error, metavar='ERROR', default=None,
+                        help='Inclusive relative Frobenius-error limit at every requested frequency '
+                             '(between 0 and 1, default is 0.01)')
+
+
+def admittance_check_options(args: argparse.Namespace) -> Optional[AdmittanceCheckOptions]:
+    if args.check_frequency_range is None:
+        if args.check_points_per_decade is not None:
+            raise ValueError('--check-points-per-decade needs --check-frequency-range')
+        if args.check_include_dc:
+            raise ValueError('--check-include-dc needs --check-frequency-range')
+        if args.check_frequency is None:
+            if args.check_max_relative_error is not None:
+                raise ValueError('--check-max-relative-error needs --check-frequency or --check-frequency-range')
+            return None
+    try:
+        return AdmittanceCheckOptions(
+            frequency=args.check_frequency,
+            max_relative_error=0.01 if args.check_max_relative_error is None else args.check_max_relative_error,
+            frequency_range=None if args.check_frequency_range is None else tuple(args.check_frequency_range),
+            points_per_decade=args.check_points_per_decade,
+            include_dc=args.check_include_dc)
+    except ValueError as exc:
+        option = '--check-frequency-range' if args.check_frequency_range is not None else '--check-frequency'
+        raise ValueError(f'{option}: {exc}') from exc
 
 
 def add_reduce_subcommand(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
@@ -130,6 +202,7 @@ def add_reduce_subcommand(subparsers: argparse._SubParsersAction) -> argparse.Ar
                                   default=DEFAULTS.floating_max_degree,
                                   help="Tie capacitor-only nodes with more capacitors than this to ground instead "
                                        "(an integer ≥ 1, default is %(default)s)")
+    add_admittance_check_arguments(parser.add_argument_group('Admittance check'))
     return parser
 
 
@@ -140,11 +213,12 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     :return: the exit code (see the epilog)
     """
     try:
-        options = ReductionOptions(ticer=args.ticer,
-                                   ticer_tau=args.ticer_tau,
-                                   ticer_max_degree=args.ticer_max_degree,
-                                   floating=args.floating,
-                                   floating_max_degree=args.floating_max_degree)
+        reduction_options = ReductionOptions(ticer=args.ticer,
+                                             ticer_tau=args.ticer_tau,
+                                             ticer_max_degree=args.ticer_max_degree,
+                                             floating=args.floating,
+                                             floating_max_degree=args.floating_max_degree)
+        check_options = admittance_check_options(args)
     except ValueError as e:
         error(f"Invalid reduction options: {e}")
         return ExitCode.USAGE
@@ -162,8 +236,9 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     try:
         reduction = reduce_spice_netlist(input_path=input_path,
                                          output_path=output_path,
-                                         options=options,
-                                         keep=args.keep_nodes)
+                                         reduction_options=reduction_options,
+                                         keep=args.keep_nodes,
+                                         check_options=check_options)
     except UnknownNodesError as e:
         error(str(e))
         return ExitCode.USAGE
@@ -177,4 +252,8 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     for scope in reduction.scopes:
         info(scope.describe())
     info(f"Wrote reduced netlist to {reduction.output_path}")
+    for check in reduction.admittance_checks:
+        (info if check.passed else error)(check.describe())
+    if reduction.check_problems:
+        return ExitCode.DIAGNOSTIC_ERRORS
     return ExitCode.OK
