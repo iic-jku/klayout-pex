@@ -201,3 +201,21 @@ class Test(unittest.TestCase):
         mappings = device_models(NMOS, NPN).mapping_by_lvs_device_class_name
         self.assertEqual('NE', DeviceModels.multiplier_lvs_parameter_name(mappings['npn']))
         self.assertIsNone(DeviceModels.multiplier_lvs_parameter_name(mappings['nmos']))
+
+    def test_model_parameters_reuse_units_constants_and_rectangle_sides(self):
+        nl = netlist()
+        device = next(nl.circuit_by_name('TOP').each_device())
+        device.set_parameter('W', 10)
+        device.set_parameter('L', 2)
+        models = device_models({**NMOS, 'parameters': [*NMOS['parameters'], {'name': 'm', 'constant': 3}]})
+        values = models.model_parameter_values(models.mapping_by_lvs_device_class_name['nmos'], device)
+        self.assertAlmostEqual(values['w'], 10e-6, delta=1e-20)
+        self.assertAlmostEqual(values['l'], 2e-6, delta=1e-20)
+        self.assertEqual(values['m'], 3)
+        resistor = nl.circuit_by_name('TOP').device_by_name('R1')
+        resistor.set_parameter('A', 12)
+        resistor.set_parameter('P', 14)
+        models = device_models(MIM)
+        values = models.model_parameter_values(models.mapping_by_lvs_device_class_name['mim'], resistor)
+        self.assertAlmostEqual(values['w'], 4e-6, delta=1e-20)
+        self.assertAlmostEqual(values['l'], 3e-6, delta=1e-20)

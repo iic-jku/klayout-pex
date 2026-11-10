@@ -75,6 +75,28 @@ message DeviceModelMapping {
     //     NOTE: VACASK rejects a parameter that a subcircuit doesn't declare,
     //           so the VACASK netlist writes a device with m = N of another subcircuit as N devices
     bool vacask_declares_m = 50;
+
+    // Independent nominal model references for marker-internal coupling checks.
+    // Only for KIND_METAL_CAPACITOR. Unlisted terminal pairs are unchecked.
+    repeated DeviceCapacitanceModel capacitance_references = 60;
+}
+
+message DeviceCapacitanceModel {
+    // Two distinct LVS terminals, an unordered pair, both with local capacitor-plate geometry.
+    repeated string terminal_names = 1;
+
+    // Positive mutual capacitance in F, including the instance multiplier exactly once.
+    // ngspice expression syntax, evaluated in the mapped model parameters (their exported units),
+    // with the local parameters below. No simulator, model-library parsing or LVS C placeholder.
+    string capacitance = 2;
+    map<string, string> parameters = 3;  // derived local expressions, case-insensitive unique names
+
+    // Optional domain predicate: zero rejects this instance before extraction.
+    string valid_when = 4;
+
+    // Required provenance and nominal assumptions (bias, temperature, corner, frequency limit).
+    string source = 5;
+    string description = 6;
 }
 
 message DeviceModelParameter {

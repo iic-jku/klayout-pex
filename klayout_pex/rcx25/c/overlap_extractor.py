@@ -162,6 +162,9 @@ class OverlapExtractor:
                     # NOTE: the model of a device has the capacitance between its plates,
                     #       but the plate above still shields the one below from the layers further above
                     if self.device_capacitor_plates.are_plates_of_a_device(polygon, net_bot, polygon_above, net_top):
+                        if self.device_capacitor_plates.checks is not None:
+                            self.device_capacitor_plates.checks.record(
+                                polygon, net_bot, polygon_above, net_top, 'overlap', cap_femto)
                         cap_femto = 0.0
 
                     if cap_femto > 0.0:

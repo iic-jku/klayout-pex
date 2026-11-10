@@ -141,6 +141,12 @@ from .rcx25.netlist_checks import (
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
+from .rcx25.c.device_capacitance_checks import (
+    DeviceCapacitanceChecks, describe_device_capacitance_check,
+)
+from .rcx25.c.device_capacitance_references import (
+    DeviceCapacitanceCheckError, read_device_capacitance_references, tech_device_capacitance_references,
+)
 from .rcx25.schematic_device_names import SchematicDeviceNameError, use_schematic_device_names
 from .run_result import DeviceCounts, FileKind, RESULT_FILE_NAME, RunResult, Stage
 from .schematic_devices import schematic_devices
@@ -508,6 +514,12 @@ class KpexCLI:
                                     "of --schematic, but the substrate, the pins that reach only bulk terminals "
                                     "(unless a port has their name), and the ports for models "
                                     "(default is True for --mode RC, otherwise these are warnings)")
+        group_25d.add_argument('--check-device-caps', dest='device_capacitance_reference_path', metavar='JSON',
+                               nargs='?', const='',
+                               help='Compare marker-internal capacitor-plate coupling with nominal tech-info '
+                                    'model references. An optional JSON file replaces the selection with explicit '
+                                    'references and ratio bounds. Needs --gds, --2.5D, --blackbox y and --mode CC or RC. '
+                                    'Reports only referenced device/terminal pairs, without default ratio bounds')
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
                                help="Reduce the netlist of --mode R or RC, with the passes of 'netlist reduce': "
@@ -710,11 +722,21 @@ class KpexCLI:
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
+        args.device_capacitance_references = None
         if args.command == 'extract':
             try:
                 args.admittance_check_options = admittance_check_options(args)
             except ValueError as exc:
                 parser_extract.error(str(exc))
+            if args.device_capacitance_reference_path is not None:
+                if not args.run_2_5D or not args.blackbox_devices or not args.pex_mode.need_capacitance() or not args.gds_path:
+                    parser_extract.error('--check-device-caps needs --gds, --2.5D, --blackbox y and --mode CC or RC')
+                try:
+                    if args.device_capacitance_reference_path:
+                        args.device_capacitance_references = read_device_capacitance_references(
+                            args.device_capacitance_reference_path)
+                except DeviceCapacitanceCheckError as exc:
+                    parser_extract.error(str(exc))
         if args.port_labels == 'top' and args.gds_path is None:
             parser = parser_extract if args.command == 'extract' else parser_pex25d
             parser.error("--port-labels top needs --gds, also with --lvsdb, "
@@ -1488,6 +1510,20 @@ class KpexCLI:
             info(f"Sidewall halo: {tech_info.tech.process_parasitics.side_halo:g} µm ({halo_source})")
             self.run_result.halo_um = tech_info.tech.process_parasitics.side_halo
 
+        device_capacitance_checks = None
+        device_capacitance_problems: List[str] = []
+        if args.device_capacitance_reference_path is not None:
+            if args.device_capacitance_reference_path:
+                self.run_result.inputs['device_capacitance_references'] = os.path.abspath(
+                    args.device_capacitance_reference_path)
+                references = args.device_capacitance_references
+            else:
+                references, unchecked = tech_device_capacitance_references(pex_context)
+                if unchecked:
+                    warning('No tech-info capacitance reference for: ' + ', '.join(unchecked))
+            device_capacitance_checks = DeviceCapacitanceChecks.prepare(
+                references, pex_context, args.layout.cell(args.effective_cell_name))
+
         extractor = RCX25Extractor(pex_context=pex_context,
                                    pex_mode=args.pex_mode,
                                    delaunay_amax=args.rcx25d_delaunay_amax,
@@ -1496,8 +1532,20 @@ class KpexCLI:
                                    tech_info=tech_info,
                                    report_path=report_path,
                                    report_caps=args.report_caps,
-                                   exclusions=exclusions)
+                                   exclusions=exclusions,
+                                   device_capacitance_checks=device_capacitance_checks)
         extraction_results = extractor.extract()
+        if device_capacitance_checks is not None:
+            records = device_capacitance_checks.records()
+            self.run_result.device_capacitance_checks = records
+            rule('Device capacitance comparisons (unlisted terminal pairs are unchecked)')
+            for record in records:
+                message = describe_device_capacitance_check(record)
+                if record['status'] in ('failed', 'unevaluable'):
+                    device_capacitance_problems.append(message)
+                else:
+                    info(message)
+            self.run_result.check_problems = device_capacitance_problems
         self.run_result.add_file(FileKind.REPORT, report_path, engine=ExtractionEngine.K25D)
         removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
         summary = extraction_results.summarize() \
@@ -1584,7 +1632,7 @@ class KpexCLI:
             # NOTE: on by default for RC netlists, as their defects simulate to plausible, but wrong numbers
             check_fails_run = args.check_rc_netlist if args.check_rc_netlist is not None \
                               else args.pex_mode == PEXMode.RC
-            self.run_result.check_problems = self._rcx25_netlist_problems
+            self.run_result.check_problems = self._rcx25_netlist_problems + device_capacitance_problems
             if self._rcx25_netlist_problems and not check_fails_run:
                 warning("The extracted netlist is inconsistent with the LVS netlist:\n" +
                         '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
@@ -1627,7 +1675,8 @@ class KpexCLI:
                     if check.passed:
                         info(check.describe())
                 reduction_problems = reduction.check_problems
-                self.run_result.check_problems = self._rcx25_netlist_problems + reduction_problems
+                self.run_result.check_problems = (self._rcx25_netlist_problems + device_capacitance_problems +
+                                                  reduction_problems)
                 log_peak_memory('the netlist reduction')
 
             # NOTE: --out-netlist gets the reduced netlist with --reduce, in the --netlist-format,
@@ -1670,13 +1719,19 @@ class KpexCLI:
             warning(f"Detected KLayout bug: RDB can't be loaded due to exception {e}")
             repair_rdb(report_path)
 
+        failed_checks: List[str] = []
         if expanded_netlist_path is not None and self._rcx25_netlist_problems and check_fails_run:
-            raise RCNetlistCheckError("The extracted netlist is inconsistent with the LVS netlist "
-                                      "(--check n to accept it):\n" +
-                                      '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+            failed_checks.append("The extracted netlist is inconsistent with the LVS netlist "
+                                 "(--check n to accept it):\n" +
+                                 '\n'.join(f"  - {problem}" for problem in self._rcx25_netlist_problems))
+        if device_capacitance_problems:
+            failed_checks.append('The requested device capacitance comparison failed:\n' +
+                                 '\n'.join(f'  - {problem}' for problem in device_capacitance_problems))
         if expanded_netlist_path is not None and reduction_problems:
-            raise RCNetlistCheckError("The reduced netlist failed its requested admittance check:\n" +
-                                     '\n'.join(f"  - {problem}" for problem in reduction_problems))
+            failed_checks.append("The reduced netlist failed its requested admittance check:\n" +
+                                 '\n'.join(f"  - {problem}" for problem in reduction_problems))
+        if failed_checks:
+            raise RCNetlistCheckError('\n'.join(failed_checks))
 
         return extraction_results
 
@@ -1927,7 +1982,7 @@ class KpexCLI:
                             self.run_extraction(args=args, tech_info=tech_info)
                         except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
                                 RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
-                                ExclusionError) as e:
+                                ExclusionError, DeviceCapacitanceCheckError) as e:
                             error(str(e))
                             sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
             finally:

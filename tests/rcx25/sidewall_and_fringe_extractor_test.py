@@ -25,12 +25,17 @@
 import allure
 import math
 import unittest
-from typing import Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from unittest import mock
 
 import klayout.db as kdb
 
+from klayout_pex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.device_capacitance_references import DeviceCapacitanceReference
+from klayout_pex.rcx25.c.device_capacitance_checks import (
+    CHECK_DEVICE_PROPERTY, DeviceCapacitanceChecks, _DeviceMarker,
+)
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor, sidewall_separation
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
@@ -118,11 +123,12 @@ def integrate_strips(function: Callable[[float], float], start: float, stop: flo
 
 def emitted_fringe(visitor: SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisitor,
                    polygon: kdb.Polygon,
-                   shield: Optional[kdb.Region] = None) -> float:
+                   shield: Optional[kdb.Region] = None,
+                   properties: Optional[Dict[str, Any]] = None) -> float:
     visitor.report = mock.Mock(spec=ExtractionReporter)
     visitor.emit_fringe('inside', 'outside',
-                        kdb.EdgeWithProperties(kdb.Edge(0, 0, 4000, 0), {'net': 'inside_net'}),
-                        (0, 4000), [kdb.PolygonWithProperties(polygon, {'net': 'outside_net'})],
+                        kdb.EdgeWithProperties(kdb.Edge(0, 0, 4000, 0), {'net': 'inside_net', **(properties or {})}),
+                        (0, 4000), [kdb.PolygonWithProperties(polygon, {'net': 'outside_net', **(properties or {})})],
                         shield if shield is not None else kdb.Region(),
                         None, GeometryRestorer(kdb.IMatrix3d()))
     return math.fsum(call.kwargs['sideoverlap_cap'].cap_value
@@ -132,6 +138,44 @@ def emitted_fringe(visitor: SidewallAndFringeExtractor.PEXEdgeNeighborhoodVisito
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance", "Fringe")
 class FringeCapTest(unittest.TestCase):
+    def test_device_fringe_observes_integrated_polygons_without_exporting_them(self):
+        # The same geometry must produce the same measurement after blackboxing.
+        # Shield cuts and decomposition must retain the device's ownership, and
+        # a polygon above the cutoff must keep pieces below that cutoff.
+        rectangle = kdb.Polygon(kdb.Box(0, 500, 4000, 6500))
+        triangle = kdb.Polygon([kdb.Point(0, 1000), kdb.Point(4000, 5000), kdb.Point(4000, 1000)])
+        hole = kdb.Region(kdb.Polygon([kdb.Point(1000, 1500), kdb.Point(3000, 3500), kdb.Point(3000, 1500)]))
+        slanted_shield = kdb.Region(kdb.Polygon([kdb.Point(0, 0), kdb.Point(0, 6000),
+                                               kdb.Point(4000, 6000), kdb.Point(4000, 4000)]))
+        narrow = kdb.Polygon([kdb.Point(0, 0), kdb.Point(0, 5000), kdb.Point(2, 5000),
+                              kdb.Point(2, 2500), kdb.Point(4, 2500), kdb.Point(4, 5000),
+                              kdb.Point(6, 5000), kdb.Point(6, 0)])
+        for polygon, shield, coefficient in ((rectangle, None, 30), (triangle, None, 30),
+                                             (rectangle, hole, 30), (rectangle, slanted_shield, 30),
+                                             (narrow, None, 1e-12)):
+            for scale in (False, True):
+                with self.subTest(polygon=str(polygon), shield=str(shield), scale=scale):
+                    expected = emitted_fringe(fringe_visitor(coefficient, scale), polygon, shield)
+                    checks = DeviceCapacitanceChecks(
+                        [DeviceCapacitanceReference('$1', 'metal_cap', ('A', 'B'), 1e-15)],
+                        [_DeviceMarker(1, '$1', kdb.Region(kdb.Box(-1000, -2000, 5000, 9000)))],
+                        [1], [frozenset(('inside_net', 'outside_net'))])
+                    for net, shape in (('inside_net', kdb.Polygon(kdb.Box(0, -1000, 4000, 0))),
+                                       ('outside_net', polygon)):
+                        checks.marked_plates(kdb.Region(kdb.PolygonWithProperties(
+                            shape, {'net': net, DEVICE_CAPACITOR_PLATE_PROPERTY: True})))
+                    visitor = fringe_visitor(coefficient, scale)
+                    visitor.device_capacitor_plates = DeviceCapacitorPlates(
+                        {frozenset(('inside_net', 'outside_net'))}, checks)
+                    exported = emitted_fringe(visitor, polygon, shield,
+                                               {DEVICE_CAPACITOR_PLATE_PROPERTY: True, CHECK_DEVICE_PROPERTY: 1})
+                    self.assertEqual(exported, 0)
+                    self.assertFalse(visitor.results.sideoverlap_table)
+                    record, = checks.records()
+                    self.assertEqual(record['status'], 'informational')
+                    self.assertAlmostEqual(record['extracted_capacitance_f'], expected * 1e-15,
+                                           delta=expected * 1e-27)
+
     def test_rotated_edge_neighborhoods_match_the_integrated_model(self):
         # Exercise real neighborhood callbacks, including diagonal source edges.
         # A fine grid bounds rotation rounding independently of the model error.

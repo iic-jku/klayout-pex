@@ -43,6 +43,7 @@ from .exclusion import BlockKind, CutLayers, ExcludedBlock, Exclusions, listed_n
 from .netlist_expander import RCX25NetlistExpander
 from .pex_mode import PEXMode
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.device_capacitance_checks import DeviceCapacitanceChecks
 from klayout_pex.rcx25.c.overlap_extractor import OverlapExtractor
 from klayout_pex.rcx25.c.sidewall_and_fringe_extractor import SidewallAndFringeExtractor
 from klayout_pex.rcx25.r.r_extractor import RExtractor
@@ -299,7 +300,8 @@ class RCX25Extractor:
                  tech_info: TechInfo,
                  report_path: str,
                  report_caps: bool,
-                 exclusions: Optional[Exclusions] = None):
+                 exclusions: Optional[Exclusions] = None,
+                 device_capacitance_checks: Optional[DeviceCapacitanceChecks] = None):
         """
         :param report_caps: the report has each capacitance contribution with its shapes (see ExtractionReporter)
         :param exclusions: what a model has the parasitics of (see exclusion.py), after prepare_exclusions
@@ -313,6 +315,7 @@ class RCX25Extractor:
         self.report_path = report_path
         self.report_caps = report_caps
         self.exclusions = exclusions
+        self.device_capacitance_checks = device_capacitance_checks
 
         if "PolygonWithProperties" not in kdb.__all__:
             raise Exception("KLayout version does not support properties (needs 0.30 at least)")
@@ -476,6 +479,11 @@ class RCX25Extractor:
 
         all_layer_names = list(layer_regions_by_name.keys())
 
+        if self.device_capacitance_checks is not None:
+            layer_regions_by_name = {
+                name: self.device_capacitance_checks.marked_plates(region)
+                for name, region in layer_regions_by_name.items()}
+
         # ------------------------------------------------------------------------
         # NOTE: before the capacitances, which go by the pieces of the nets with ports at exclusion markers (NetPiece)
         if self.pex_mode.need_resistance():
@@ -582,7 +590,8 @@ class RCX25Extractor:
                 circuit=self.pex_context.top_circuit,
                 device_class_names=self.tech_info.device_models.metal_capacitor_class_names,
                 substrate_net_name=self.pex_context.substrate_net_name,
-                substrate_shapes_net_name=self.tech_info.internal_substrate_layer_name
+                substrate_shapes_net_name=self.tech_info.internal_substrate_layer_name,
+                checks=self.device_capacitance_checks
             ) if self.pex_context.blackbox_devices else DeviceCapacitorPlates()
 
             overlap_extractor = OverlapExtractor(
