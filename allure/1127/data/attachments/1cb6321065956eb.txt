@@ -1,0 +1,42 @@
+SUBPROCESS __kpex__:kpex_cli.py:1968 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_metal5_routes_in_cells.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:285 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:285 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_metal5_routes_in_cells__cap_cmim_20um_x_20um_metal5_routes_in_cells/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2128 Peak memory (resident set size) after preparing the LVSDB: 722.3 MiB
+INFO     __kpex__:kpex_cli.py:2132 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2132 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2132 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:2132 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:2132 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:2132 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:kpex_cli.py:2132 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:2132 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2132 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1511 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 722.3 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 722.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 C1;A;B.$1.TopMetal1;0.61;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C2;A;B.P0.MIM;51.158;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C3;A;D;0.374;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C4;A;VSUBS;1.177;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C5;A.P0.Metal5;B;0.789;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C6;A.P0.Metal5;B.$1.TopMetal1;1.261;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C7;A.P0.Metal5;B.P0.MIM;552.008;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C8;A.P0.Metal5;D;4.969;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C9;A.P0.Metal5;VSUBS;5.165;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C10;B;D;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C11;B;VSUBS;0.682;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C12;B.$1.TopMetal1;D;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C13;B.$1.TopMetal1;VSUBS;1.662;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C14;D;VSUBS;3.462;
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;A;A.P0.Metal5;;0.043
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;B;B.$1.TopMetal1;;0.007
+SUBPROCESS __kpex__:kpex_cli.py:1569 R3;B.$1.TopMetal1;B.P0.MIM;;2.2
+SUBPROCESS __kpex__:kpex_cli.py:1572 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_metal5_routes_in_cells__cap_cmim_20um_x_20um_metal5_routes_in_cells/cap_cmim_20um_x_20um_metal5_routes_in_cells_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:90 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1612 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cap_cmim_20um_x_20um_metal5_routes_in_cells__cap_cmim_20um_x_20um_metal5_routes_in_cells/cap_cmim_20um_x_20um_metal5_routes_in_cells_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1647 Peak memory (resident set size) after the netlist: 722.3 MiB
+INFO     __kpex__:kpex_cli.py:1998 Peak memory (resident set size) after the run: 722.3 MiB

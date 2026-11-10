@@ -1,0 +1,28 @@
+SUBPROCESS __kpex__:kpex_cli.py:1968 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cut_resistors_in_series.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:285 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:285 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_resistors_in_series__cut_resistors_in_series/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2128 Peak memory (resident set size) after preparing the LVSDB: 994.7 MiB
+INFO     __kpex__:kpex_cli.py:2132 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2132 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1511 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 994.8 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 994.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 C1;$3;$4;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C2;$3;B.P0.met1;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C3;$3;VSUBS;0.303;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C4;$4;A.P0.met1;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C5;$4;VSUBS;0.303;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C6;A;VSUBS;0.072;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C7;A.P0.met1;VSUBS;0.147;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C8;B;VSUBS;0.072;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C9;B.P0.met1;VSUBS;0.147;
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;A;A.P0.met1;;0.225
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;B;B.P0.met1;;0.225
+SUBPROCESS __kpex__:kpex_cli.py:1572 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_resistors_in_series__cut_resistors_in_series/cut_resistors_in_series_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1612 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_resistors_in_series__cut_resistors_in_series/cut_resistors_in_series_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1647 Peak memory (resident set size) after the netlist: 995.0 MiB
+INFO     __kpex__:kpex_cli.py:1998 Peak memory (resident set size) after the run: 995.0 MiB
