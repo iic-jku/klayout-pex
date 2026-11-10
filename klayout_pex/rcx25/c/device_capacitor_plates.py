@@ -31,6 +31,9 @@ import klayout.db as kdb
 from klayout_pex.klayout.lvsdb_extractor import DEVICE_CAPACITOR_PLATE_PROPERTY
 from klayout_pex.types import NetName
 
+if TYPE_CHECKING:
+    from .device_capacitance_checks import DeviceCapacitanceChecks
+
 Shape = Union[kdb.PolygonWithProperties, kdb.EdgeWithProperties]
 
 
@@ -48,13 +51,15 @@ class DeviceCapacitorPlates:
 
     # the nets of the terminals of each device
     terminal_net_pairs: Set[FrozenSet[NetName]] = field(default_factory=set)
+    checks: Optional[DeviceCapacitanceChecks] = None
 
     @classmethod
     def from_circuit(cls,
                      circuit: kdb.Circuit,
                      device_class_names: Set[str],
                      substrate_net_name: NetName,
-                     substrate_shapes_net_name: NetName) -> DeviceCapacitorPlates:
+                     substrate_shapes_net_name: NetName,
+                     checks: Optional[DeviceCapacitanceChecks] = None) -> DeviceCapacitorPlates:
         """
         :param device_class_names: the device classes of the capacitors (e.g. the metal capacitors)
         :param substrate_net_name: the substrate net of the LVS netlist (e.g. sky130_gnd)
@@ -73,7 +78,7 @@ class DeviceCapacitorPlates:
             terminal_net_pairs.update(frozenset(substrate_shapes_net_name if n == substrate_net_name else n
                                                 for n in net_pair)
                                       for net_pair in net_pairs if substrate_net_name in net_pair)
-        return DeviceCapacitorPlates(terminal_net_pairs=terminal_net_pairs)
+        return DeviceCapacitorPlates(terminal_net_pairs=terminal_net_pairs, checks=checks)
 
     def are_plates_of_a_device(self, shape1: Shape, net1: NetName, shape2: Shape, net2: NetName) -> bool:
         """

@@ -37,6 +37,7 @@ from klayout_pex.log import (
 from klayout_pex.tech_info import TechInfo
 
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.device_capacitance_checks import CHECK_DEVICE_PROPERTY
 from klayout_pex.rcx25.c.capacitance_integrals import (
     EdgeCapacitanceProfile, fringe_alpha, fringe_capacitance, fringe_normalization,
     sidewall_capacitance, sidewall_separation
@@ -342,7 +343,9 @@ class SidewallAndFringeExtractor:
                 return
 
             # NOTE: the model of a device has the capacitance between its plates
-            if self.device_capacitor_plates.are_plates_of_a_device(edge, net1, polygon, net2):
+            modeled = self.device_capacitor_plates.are_plates_of_a_device(edge, net1, polygon, net2)
+            checks = self.device_capacitor_plates.checks
+            if modeled and (checks is None or not checks.indexes_for(edge, net1, polygon, net2)):
                 return
 
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name[layer_name]
@@ -369,6 +372,10 @@ class SidewallAndFringeExtractor:
             if first_um != last_um and (self.results.keep_capacitance_geometry or self.results.exclusions is not None):
                 profile = EdgeCapacitanceProfile(partial(sidewall_capacitance, length_um, first_um, last_um,
                                                          sidewall_cap_spec.capacitance, sidewall_cap_spec.offset))
+
+            if modeled:
+                checks.record(edge, net1, polygon, net2, 'sidewall', cap_femto)
+                return
 
             # info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
@@ -469,11 +476,13 @@ class SidewallAndFringeExtractor:
             #       with the fringe from the edge of a plate to the other plate beyond it
             # NOTE: and the parts of a net that are apart in the netlist are like nets of their own
             candidates: List[Tuple[NetName, kdb.PolygonWithProperties]] = []
+            checks = self.device_capacitor_plates.checks
             for polygon in outside_polygons:
                 outside_net = polygon.property('net')
                 if inside_net_name == outside_net and not self.results.has_net_pieces(inside_net_name):
                     continue
-                if self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net):
+                if self.device_capacitor_plates.is_plate_edge_of_a_device(edge, inside_net_name, outside_net) and \
+                        (checks is None or not checks.indexes_for(edge, inside_net_name, polygon, outside_net)):
                     continue
                 candidates.append((outside_net, polygon))
             if not candidates:
@@ -502,7 +511,10 @@ class SidewallAndFringeExtractor:
                         continue
 
                     for up in unshielded_region.each():
-                        up = kdb.PolygonWithProperties(up, {'net': outside_net})
+                        properties = {'net': outside_net}
+                        if checks is not None and p.property(CHECK_DEVICE_PROPERTY) is not None:
+                            properties[CHECK_DEVICE_PROPERTY] = p.property(CHECK_DEVICE_PROPERTY)
+                        up = kdb.PolygonWithProperties(up, properties)
                         polygons_by_net[outside_net].append(up)
                         # if p != up:
                         #    print(f"Unshieleded polygon {up}, differs from original polygon {p}")
@@ -518,7 +530,7 @@ class SidewallAndFringeExtractor:
                         cap_femto = self.fringe_cap(bbox.width(), near, far, overlap_cap_spec, sideoverlap_cap_spec)
                         if cap_femto > 0.0001:
                             middle = (near + far) // 2
-                            self._record_fringe(key, cap_femto, p, (bbox.left, bbox.right),
+                            self._record_fringe(key, edge, cap_femto, p, (bbox.left, bbox.right),
                                                 kdb.Edge(bbox.left, near, bbox.right, near),
                                                 kdb.Edge(bbox.left, middle, bbox.right, middle),
                                                 None, lateral_shield, geometry_restorer)
@@ -543,17 +555,24 @@ class SidewallAndFringeExtractor:
                         if self.results.keep_capacitance_geometry or self.results.exclusions is not None:
                             profile = EdgeCapacitanceProfile(integral)
                         self._record_fringe(
-                            key, cap_femto, trapezoid.polygon(), (trapezoid.left, trapezoid.right),
+                            key, edge, cap_femto, kdb.PolygonWithProperties(trapezoid.polygon(), p.properties()),
+                            (trapezoid.left, trapezoid.right),
                             kdb.Edge(trapezoid.left, trapezoid.near_left,
                                       trapezoid.right, trapezoid.near_right),
                             kdb.Edge(trapezoid.left, (trapezoid.near_left + trapezoid.far_left) / 2,
                                       trapezoid.right, (trapezoid.near_right + trapezoid.far_right) / 2),
                             profile, lateral_shield, geometry_restorer)
 
-        def _record_fringe(self, key: SideOverlapKey, cap_femto: float, polygon: kdb.Polygon,
+        def _record_fringe(self, key: SideOverlapKey, edge: kdb.EdgeWithProperties,
+                           cap_femto: float, polygon: kdb.PolygonWithProperties,
                            interval: EdgeInterval, near_edge: kdb.Edge, outside_edge: kdb.Edge,
                            profile: Optional[EdgeCapacitanceProfile], lateral_shield: Optional[kdb.Polygon],
                            geometry_restorer: GeometryRestorer):
+            if self.device_capacitor_plates.is_plate_edge_of_a_device(edge, key.net_inside, key.net_outside):
+                checks = self.device_capacitor_plates.checks
+                if checks is not None:
+                    checks.record(edge, key.net_inside, polygon, key.net_outside, 'fringe', cap_femto)
+                return
             inside_edge = geometry_restorer.restore_edge_interval(interval)
             cap = SideOverlapCap(key=key, cap_value=cap_femto, inside_edge=inside_edge,
                                  outside_edge=geometry_restorer.restore_edge(outside_edge),
