@@ -1,0 +1,38 @@
+SUBPROCESS __kpex__:kpex_cli.py:1908 main extract --pdk ihp-sg13g2 --mode RC --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/nmos_pair_abutting_ptaps.lvsdb.gz --out-dir /tmp/tmpurnsh7dg --2.5D --check n
+INFO     __kpex__:kpex_cli.py:961 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:233 Wrote result file to: /tmp/tmpurnsh7dg/nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2068 Peak memory (resident set size) after preparing the LVSDB: 835.5 MiB
+INFO     __kpex__:kpex_cli.py:2072 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2072 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2072 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2072 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2072 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2072 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2072 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2072 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1492 Sidewall halo: 8 µm (tech info of ihp-sg13g2)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+WARNING  __kpex__:extractor.py:545 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: sub!
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 835.8 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 835.9 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1544 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1544 C1;$1.$0.Metal1;$4;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C2;$1.$0.Metal1;sub!.$0.Metal1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C3;$1.$0.Metal1;VSUBS;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C4;$3.$0.Metal1;$5;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C5;$3.$0.Metal1;sub!.$1.Metal1;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C6;$3.$0.Metal1;VSUBS;0.022;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C7;$4;sub!.$0.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C8;$4;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C9;$5;sub!.$1.Metal1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C10;$5;VSUBS;0.042;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C11;VSUBS;sub!.$0.Metal1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1544 C12;VSUBS;sub!.$1.Metal1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1544 R1;$1;$1.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1544 R2;$3;$3.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1544 R3;sub!;sub!.$0.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1544 R4;sub!;sub!.$1.Metal1;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1547 /tmp/tmpurnsh7dg/nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps/nmos_pair_abutting_ptaps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1565 Wrote expanded netlist to: /tmp/tmpurnsh7dg/nmos_pair_abutting_ptaps__nmos_pair_abutting_ptaps/nmos_pair_abutting_ptaps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1600 Peak memory (resident set size) after the netlist: 836.0 MiB
+INFO     __kpex__:kpex_cli.py:1938 Peak memory (resident set size) after the run: 836.1 MiB
