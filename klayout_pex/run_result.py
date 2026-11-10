@@ -147,6 +147,7 @@ class RunResult:
     halo_um: Optional[float] = None
     devices: Optional[DeviceCounts] = None
     check_problems: Optional[List[str]] = None
+    device_capacitance_checks: Optional[List[Dict[str, Any]]] = None
     files: List[WrittenFile] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     errors: List[str] = field(default_factory=list)
@@ -197,6 +198,7 @@ class RunResult:
             'halo_um': self.halo_um,
             'devices': dataclasses.asdict(self.devices) if self.devices is not None else None,
             'check_problems': self.check_problems,
+            'device_capacitance_checks': self.device_capacitance_checks,
             'peak_memory': {'process_bytes': memory.process, 'largest_subprocess_bytes': memory.largest_subprocess},
             'files': [written.to_json() for written in self.files],
             'warnings': self.warnings,

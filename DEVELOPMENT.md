@@ -143,7 +143,8 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
 - `command`: `extract` or `pex25d`, `arguments`: the command line after `kpex`
 - `pdk`, `cell`, `run_dir`: `null` until known
 - `engines`: e.g. `["KPEX/2.5D"]`, as the netlists name them, `mode`: the `--mode` of the 2.5D engine
-- `inputs`: `gds`, `lvsdb` and `schematic`, each a path or `null`
+- `inputs`: `gds`, `lvsdb` and `schematic`, each a path or `null`, and
+  `device_capacitance_references` when `--check-device-caps` is requested
 - `stage`: the stage the run was in when it ended or was killed: `arguments`, `magic`, `lvs`,
   `fastercap`, `fastcap2`, `2.5d` or `pex25d`, and `done` after exit code 0
 - `exit_code`: `null` until the run ends, so also of a run that is killed or interrupted
@@ -151,7 +152,10 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
 - `devices`: the numbers of the devices of the cell that the netlists leave to their models,
   `black_boxed` (with `--blackbox y`, e.g. MIM and MOM caps) and `excluded` (of `--cut`),
   or remove, `white_boxed` (with `--blackbox n`, their capacitances extracted)
-- `check_problems`: what `--check` finds in the netlist of the 2.5D engine, also where it only warns
+- `check_problems`: what `--check` finds in the netlist of the 2.5D engine, also where it only warns,
+  plus failed or unevaluable comparisons requested with `--check-device-caps`
+- `device_capacitance_checks`: the requested device/terminal-pair comparisons, or `null` without
+  `--check-device-caps`, as described below
 - `peak_memory`: `process_bytes` and `largest_subprocess_bytes` (`null` on Windows), as logged
 - `files`: the outputs, in the order written, each with `kind`, `path` and `engine` (`null` for those
   of the run, e.g. its log), the netlists also with `format` (`spice` or `vacask`), `reduced` and
@@ -161,6 +165,96 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
   - not the intermediate files, e.g. the layout dumps and the solver input
 - `warnings`, `errors`: as logged (`--log-level error` leaves out the warnings)
 - the keys of what a run didn't get to, e.g. `devices` before LVS, or `halo_um` of MAGIC, are `null`
+
+### Device capacitance comparisons
+
+`kpex extract --check-device-caps` compares the coupling within metal capacitor recognition
+markers against nominal model values from the tech info's device mappings. Devices without a
+reference are named in warnings. A layout without any supported device is an error.
+`--check-device-caps references.json` instead selects only the file's device/terminal pairs,
+overriding the automatic selection with explicit references and optional ratio bounds. It needs `--2.5D`, `--blackbox y`,
+`--mode CC` or `--mode RC`, and the original `--gds`. Adding `--gds` to `--lvsdb` supplies the
+recognition markers without rerunning LVS. Device abstracts in an LVS database can contain only
+terminal pins, so their bounding boxes do not define the recognition markers.
+
+A tech-info `DeviceCapacitanceModel` names two LVS terminals and evaluates a capacitance in
+farads using the existing mapping's exported model parameters. Its `capacitance`, local
+`parameters` and optional `valid_when` predicate use ngspice expression syntax, including
+SPICE suffixes. Local names cannot shadow model parameters. The formula must include the
+instance multiplier exactly once. `source` and `description` record the model provenance
+and nominal assumptions. Invalid expressions, unsupported parameter values and nonpositive
+or nonfinite results fail before extraction. This needs no installed simulator or model library.
+
+Bundled references cover `cap_cmomf` and `cap_cmomi` in `ihp-sg13g2` and `ihp-sg13cmos5l`.
+They reproduce the nominal low-frequency mutual model capacitance, including finger-grid
+rounding, feed style and instance multiplier. Substrate shunts and series resistance/inductance
+are excluded. These engineering models do not characterize corner or mismatch variation.
+
+Tech references have no default acceptance bounds: the comparison is informational.
+They must come from the device model, independently of the extraction coefficients.
+Add a model-admittance regression test when adding a formula or changing its source model.
+
+The optional reference file is UTF-8 JSON:
+
+```json
+{
+  "format_version": 1,
+  "references": [
+    {
+      "device": "$1",
+      "device_class": "cap_cmomf",
+      "terminals": ["mim_top", "mim_btm"],
+      "capacitance": "228.75f",
+      "min_ratio": 0.7,
+      "max_ratio": 1.0
+    }
+  ]
+}
+```
+
+Reference semantics:
+
+- `device` is the exact expanded LVS device name, before any output renaming
+- `device_class` guards against selecting a device of another class
+- `terminals` names an unordered pair of distinct, connected terminals on different nets
+- `capacitance` is the positive nominal low-frequency mutual model capacitance for that instance,
+  including its multiplier, in farads as a number or with SPICE suffixes as a string
+- The reference must use the intended model corner, temperature and bias, with other terminals
+  held at their reference potentials when obtaining mutual capacitance from an admittance matrix
+- `min_ratio` and `max_ratio` are optional inclusive bounds on extracted/reference capacitance
+- Without either bound, the comparison is informational, not a passed check
+- The example bounds are chosen for this example, not a universal acceptance range
+- Unlisted devices and terminal pairs are unchecked
+
+The measurement observes overlap, sidewall and fringe contributions suppressed by blackboxing
+between the selected terminal nets' capacitor plates inside one recognition marker. Surrounding
+conductors still shield them. Coupling to routing outside that marker, unrelated nets and other
+devices is not included. The extraction's coefficients, halo, normalization and fringe cutoff
+remain in effect. Enabling the comparison does not add the measured coupling to the netlist.
+The measurement precedes exclusion filtering: `--exclude-net`, `--cut` and exclusion markers
+affect the exported netlist, not the selected device's full marker-internal comparison.
+
+Both terminals need capacitor-plate geometry wholly within a unique marker. Missing markers,
+markers shared by devices, combined devices spanning markers, partial plate geometry and missing
+plate geometry for either terminal cannot be evaluated. In particular, a substrate terminal whose geometry
+extends beyond the marker is not silently treated as a local plate. LVS parameters named `C`
+are not used as model references, because some decks store placeholders there.
+
+Each `device_capacitance_checks` entry contains the device, class, terminals, nets, reference and
+extracted capacitance in farads, their ratio, optional bounds, and `status`. Status is
+`informational`, `passed`, `failed` or `unevaluable`. The `contributions` object separates
+`overlap_f`, `sidewall_f` and `fringe_f`. Unevaluable measurements have an `error` and `null`
+measurement values.
+
+Automatic comparison records also include `reference_source` and `reference_description`.
+These fields are null for an explicit reference file, whose path is in `inputs`.
+
+Failure behavior:
+
+- Invalid reference files or incompatible options return exit code `2` before loading the layout
+- Invalid device or marker selections return exit code `1` before extraction
+- Failed bounds or unevaluable measurements return exit code `1` after writing the netlist,
+  including with `--check n`
 
 ## Exporter plugins
 
