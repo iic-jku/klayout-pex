@@ -760,6 +760,39 @@ class TechBuilder:
         add_device_model_mapping(dmi, "ptap1",            "X",   ["TIE", "WELL"],              [])  # fixed R
         add_device_model_mapping(dmi, "cap_cmomf",        "X",   ["mim_top", "mim_btm"],       mom_cap,    kind=METAL_CAP)
         add_device_model_mapping(dmi, "cap_cmomi",        "X",   ["mim_top", "mim_btm"],       cmomi,      kind=METAL_CAP)
+        # Nominal mutual capacitance from the device models, independently of PEX coefficients.
+        # Keep the same density for sibling variants with identical thin-metal stacks.
+        source_root = ('https://github.com/IHP-GmbH/IHP-Open-PDK/blob/'
+                       '5e6d592e4002946a4616f798c357f0f3c06cf3b6/')
+        max_metal = 5 if self.is_g2 else 4
+        domain = ('w>0 && l>0 && m>0 && mmin>=1 && mmax>=mmin && '
+                  f'mmax<={max_metal} && floor(mmin)==mmin && floor(mmax)==mmax')
+        mappings = {mapping.lvs_device_class_name: mapping for mapping in dmi.device_model_mappings}
+        mappings['cap_cmomf'].capacitance_references.add(
+            terminal_names=['mim_top', 'mim_btm'],
+            capacitance='density * (l*1e6) * (w*1e6) * 1f * m',
+            parameters={'layers': 'mmax-mmin+1',
+                        'density': '(mmin==1 ? 0.372 : 0.305) + (layers-1)*0.305'},
+            valid_when=domain,
+            source=source_root + self.variant.value + '/libs.tech/verilog-a/cap_cmomf/cap_cmomf.va',
+            description='Nominal low-frequency mutual capacitance, bias and temperature independent. '
+                        'No corner or mismatch variation. Engineering density estimate, not silicon-validated.')
+        mappings['cap_cmomi'].capacitance_references.add(
+            terminal_names=['mim_top', 'mim_btm'],
+            capacitance='(density*active_area + feed_cap)*1f*m',
+            parameters={'layers': 'mmax-mmin+1',
+                        'nx': 'max(1, floor(l*1e6/0.84 + 1e-6))',
+                        'ny': 'max(2, floor(w*1e6/0.89 + 1e-6))',
+                        'active_area': 'nx*ny*0.84*0.89',
+                        'pad_length': 'ny*0.89+0.42',
+                        'density': 'layers<=2 ? 0.55 : layers==3 ? 0.82 : layers==4 ? 1.09 : 1.36',
+                        'feed_cap': 'feed==1 ? 0.1625*pad_length+0.0916 : feed==2 ? 0.152*pad_length : 0'},
+            valid_when=domain + ' && mmax>mmin && (feed==0 || feed==1 || feed==2)',
+            source=source_root + self.variant.value + '/libs.tech/verilog-a/cap_cmomi/cap_cmomi.va',
+            description='Nominal low-frequency mutual capacitance, excluding substrate shunts and series R/L. '
+                        'No corner or mismatch variation. '
+                        + ('The two-layer density is extrapolated.' if self.is_g2 else
+                           'Densities for more than two layers are derived from the sibling stack.'))
         add_device_model_mapping(dmi, "sg13_hv_svaricap", "X",   ["G1", "W", "G2", "SUB"],
                                  [lvs_param('w', 'w', um), lvs_param('l', 'l', um), lvs_param('Nx', 'Nx')])
         add_device_model_mapping(dmi, "sg13_moscap_n",    "X",   ["G", "SUB"],
