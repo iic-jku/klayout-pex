@@ -29,6 +29,7 @@ import unittest
 from unittest import mock
 
 import klayout.db as kdb
+from klayout_pex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
 
 from klayout_pex.rcx25.capacitance_distributor import (
     CapacitanceDistributor,
@@ -174,6 +175,24 @@ class Test(unittest.TestCase):
         fractions = distributor({}).edge_fractions('W', 'met1', kdb.Edge(0, 1000, 100000, 1000),
                                                    'V', 'met1', kdb.Edge(0, 3000, 100000, 3000))
         self.assertEqual({('W', 'V'): 1.0}, fractions)
+
+    def test_edge_distribution_integrates_nonuniform_capacitance(self):
+        # A linearly increasing density puts one quarter of the capacitance in
+        # the first half, even though the two node intervals have equal length.
+        sites = {('A', 'metal'): [(0, 0, 'A0'), (100, 0, 'A1')]}
+        profile = EdgeCapacitanceProfile(lambda start, stop: stop ** 2 - start ** 2)
+        fractions = distributor(sites).edge_fractions(
+            'A', 'metal', kdb.Edge(0, 0, 100, 0), 'B', 'metal', kdb.Edge(0, 10, 100, 10), profile)
+        self.assertFractions({('A0', 'B'): 0.25, ('A1', 'B'): 0.75}, fractions)
+
+    def test_distribution_after_clipping_uses_original_profile_coordinates(self):
+        # Clipping to the middle half then distributing its halves must measure
+        # [0.25,0.5] and [0.5,0.75] of the original, not restart the density at zero.
+        sites = {('A', 'metal'): [(25, 0, 'A0'), (75, 0, 'A1')]}
+        profile = EdgeCapacitanceProfile(lambda start, stop: stop ** 2 - start ** 2).part(0.25, 0.75)
+        fractions = distributor(sites).edge_fractions(
+            'A', 'metal', kdb.Edge(25, 0, 75, 0), 'B', 'metal', kdb.Edge(25, 10, 75, 10), profile)
+        self.assertFractions({('A0', 'B'): 0.375, ('A1', 'B'): 0.625}, fractions)
 
     def test_capacitance_without_geometry_stays_on_the_nets(self):
         self.assertEqual({('W', 'VSUBS'): 1.0},

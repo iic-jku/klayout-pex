@@ -30,6 +30,7 @@ from typing import *
 import klayout.db as kdb
 
 from .capacitance_distributor import CapacitanceDistributor, NodePair
+from .c.capacitance_integrals import EdgeCapacitanceProfile
 from .exclusion import Exclusions, edge_part
 from ..types import CellName, LayerName, NetName
 from ..klayout.lvsdb_extractor import unique_name
@@ -68,6 +69,7 @@ class SidewallCap:  # see Magic EdgeCap, extractInt.c L444
     # the edge of net1, and the one of net2 facing it (same direction), to distribute the capacitance (in DBU)
     inside_edge: Optional[kdb.Edge] = None
     outside_edge: Optional[kdb.Edge] = None
+    profile: Optional[EdgeCapacitanceProfile] = None
 
 
 @dataclass(frozen=True)
@@ -125,6 +127,7 @@ class SideOverlapCap:
     # the near side of that polygon along it, which tells the part of the outside net at exclusion blocks,
     # as the fringe mostly ends there, also of a polygon that goes on across a block (see kept_edge_caps)
     near_edge: Optional[kdb.Edge] = None
+    profile: Optional[EdgeCapacitanceProfile] = None
 
     def __str__(self) -> str:
         return f"(Side Overlap): {self.key} = {round(self.cap_value, 6)}fF"
@@ -537,7 +540,9 @@ class CellExtractionResults:
                     if interval[0] < interval[1] and net_inside != net_outside and \
                             self.are_apart(inside_net_name, part_inside, outside_net_name, part_outside):
                         parts.append((replace(cap,
-                                              cap_value=cap.cap_value * (interval[1] - interval[0]),
+                                              cap_value=cap.profile.between(*interval) if cap.profile is not None else
+                                              cap.cap_value * (interval[1] - interval[0]),
+                                              profile=cap.profile.part(*interval) if cap.profile is not None else None,
                                               inside_edge=edge_part(cap.inside_edge, interval),
                                               outside_edge=edge_part(cap.outside_edge, interval)),
                                       net_inside, net_outside))
@@ -551,6 +556,7 @@ class CellExtractionResults:
                 part.key = replace(part.key, net1=net1, net2=net2)
             if not self.keep_capacitance_geometry:
                 part.inside_edge = part.outside_edge = None
+                part.profile = None
             self.sidewall_table[part.key].append(part)
 
     def add_sideoverlap_cap(self, cap: SideOverlapCap):
@@ -563,6 +569,7 @@ class CellExtractionResults:
             part.near_edge = None
             if not self.keep_capacitance_geometry:
                 part.inside_edge = part.outside_edge = None
+                part.profile = None
             self.sideoverlap_table[part.key].append(part)
 
     def label_port_names(self) -> Dict[NetName, Dict[str, NetName]]:
@@ -640,7 +647,8 @@ class CellExtractionResults:
                 for e in entries:
                     add_distributed_capacitance(normalized_sidewall_table, e.cap_value,
                                                 distributor.edge_fractions(key.net1, key.layer, e.inside_edge,
-                                                                           key.net2, key.layer, e.outside_edge))
+                                                                           key.net2, key.layer, e.outside_edge,
+                                                                           e.profile))
                 continue
             normalized_key = NetCoupleKey(key.net1, key.net2).normed()
             normalized_sidewall_table[normalized_key] += sum((e.cap_value for e in entries))
@@ -655,7 +663,7 @@ class CellExtractionResults:
                                                 distributor.edge_fractions(key.net_inside, key.layer_inside,
                                                                            e.inside_edge,
                                                                            key.net_outside, key.layer_outside,
-                                                                           e.outside_edge))
+                                                                           e.outside_edge, e.profile))
                 continue
             normalized_key = NetCoupleKey(key.net_inside, key.net_outside).normed()
             normalized_sideoverlap_table[normalized_key] += sum((e.cap_value for e in entries))

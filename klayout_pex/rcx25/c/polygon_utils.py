@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
@@ -23,6 +23,7 @@
 # --------------------------------------------------------------------------------
 #
 
+from dataclasses import dataclass
 from typing import *
 import math
 
@@ -30,21 +31,16 @@ import klayout.db as kdb
 from klayout.dbcore import EdgeWithProperties
 
 from klayout_pex.rcx25.types import EdgeDistance
-from klayout_pex.log import warning
 
 
 # NOTE: first lateral nearby shape blocks everything beyond (like sidewall situation) up to halo
 def nearest_edge_distance(polygon: kdb.Polygon) -> float:
-    bbox: kdb.Box = polygon.bbox()
-
-    if not polygon.is_box():
-        warning(f"Side overlap, outside polygon {polygon} is not a box. "
-                f"Currently, only boxes are supported, will be using bounding box {bbox}")
-    ## distance_near = (bbox.p1.y + bbox.p2.y) / 2.0
-    distance_near = min(bbox.p1.y, bbox.p2.y)
-    if distance_near < 0:
-        distance_near = 0
-    return distance_near
+    if polygon.is_box():
+        return max(0, polygon.bbox().bottom)
+    # Neighborhood trapezoids span the same interval. Their facing boundaries
+    # cannot cross without the polygons touching, so compare them at its middle.
+    edge = _facing_edge(polygon)
+    return max(0.0, (edge.p1.y + edge.p2.y) / 2.0)
 
 
 def find_polygon_with_nearest_edge(polygons_on_same_layer: List[kdb.PolygonWithProperties]) -> Tuple[EdgeDistance, kdb.PolygonWithProperties]:
@@ -59,5 +55,46 @@ def find_polygon_with_nearest_edge(polygons_on_same_layer: List[kdb.PolygonWithP
 
 
 def nearest_edge(polygon: kdb.PolygonWithProperties) -> EdgeWithProperties:
-    edge = [e for e in polygon.each_edge() if e.d().x < 0][-1]
+    edge = _facing_edge(polygon)
     return kdb.EdgeWithProperties(edge, properties={'net': polygon.property('net')})
+
+
+def _facing_edge(polygon: kdb.Polygon) -> kdb.Edge:
+    return next(edge for edge in polygon.each_edge() if edge.d().x < 0)
+
+
+@dataclass(frozen=True)
+class Trapezoid:
+    left: float
+    right: float
+    near_left: float
+    near_right: float
+    far_left: float
+    far_right: float
+
+    def polygon(self) -> kdb.Polygon:
+        # Only report geometry is rounded back to the layout grid. Capacitance
+        # uses the floating-point intersections below without added grid error.
+        return kdb.Polygon([kdb.Point(self.left, self.near_left),
+                            kdb.Point(self.left, self.far_left),
+                            kdb.Point(self.right, self.far_right),
+                            kdb.Point(self.right, self.near_right)])
+
+
+def vertical_trapezoids(polygon: kdb.Polygon) -> Iterator[Trapezoid]:
+    """Partition a polygon, including holes, without rounding new intersections."""
+    edges = [edge for edge in polygon.each_edge() if edge.p1.x != edge.p2.x]
+    xs = sorted({point.x for edge in edges for point in (edge.p1, edge.p2)})
+    for left, right in zip(xs, xs[1:]):
+        middle = (left + right) / 2.0
+        boundaries = []
+        for edge in edges:
+            if min(edge.p1.x, edge.p2.x) < middle < max(edge.p1.x, edge.p2.x):
+                slope = (edge.p2.y - edge.p1.y) / (edge.p2.x - edge.p1.x)
+                first = edge.p1.y + (left - edge.p1.x) * slope
+                last = edge.p1.y + (right - edge.p1.x) * slope
+                boundaries.append((first, last))
+        boundaries.sort(key=lambda pair: pair[0] + pair[1])
+        # Even/odd fill pairs both the hull and holes at this vertical slice.
+        for near, far in zip(boundaries[::2], boundaries[1::2]):
+            yield Trapezoid(left, right, near[0], near[1], far[0], far[1])

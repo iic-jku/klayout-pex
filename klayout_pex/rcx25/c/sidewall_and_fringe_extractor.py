@@ -23,7 +23,7 @@
 # --------------------------------------------------------------------------------
 #
 
-from functools import cached_property
+from functools import cached_property, partial
 import math
 
 import klayout.db as kdb
@@ -31,33 +31,22 @@ import klayout.db as kdb
 from klayout_pex.log import (
     debug,
     info,
-    warning,
     get_log_level,
     LogLevel
 )
 from klayout_pex.tech_info import TechInfo
 
 from klayout_pex.rcx25.c.device_capacitor_plates import DeviceCapacitorPlates
+from klayout_pex.rcx25.c.capacitance_integrals import (
+    EdgeCapacitanceProfile, fringe_alpha, fringe_capacitance, fringe_normalization,
+    sidewall_capacitance, sidewall_separation
+)
 from klayout_pex.rcx25.c.geometry_restorer import GeometryRestorer
 from klayout_pex.rcx25.extraction_results import *
 from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
-from klayout_pex.rcx25.c.polygon_utils import find_polygon_with_nearest_edge, nearest_edge
+from klayout_pex.rcx25.c.polygon_utils import find_polygon_with_nearest_edge, nearest_edge, vertical_trapezoids
 from klayout_pex.rcx25.types import EdgeInterval, EdgeNeighborhood
 from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
-
-
-def sidewall_separation(distance_um: float, offset_um: float) -> float:
-    """
-    The separation that the sidewall capacitance of two facing edges is inversely proportional to:
-    their distance plus the offset of the tech info (MAGIC's fit), but at least half the distance
-
-    NOTE: with a negative offset, the fit diverges at a distance of -offset and turns negative below,
-          while the capacitance of two facing sidewalls grows like 1 / distance. Below twice -offset,
-          where the two meet, it goes on as 1 / (distance / 2): continuous, finite and positive for
-          every distance > 0. The shipped tech infos have negative offsets of at most 0.082 µm,
-          for layers whose minimum space is at least 0.18 µm, so a DRC-clean layout doesn't get there.
-    """
-    return max(distance_um + offset_um, distance_um / 2.0)
 
 
 class SidewallAndFringeExtractor:
@@ -358,25 +347,11 @@ class SidewallAndFringeExtractor:
 
             sidewall_cap_spec = self.tech_info.sidewall_cap_by_layer_name[layer_name]
 
-            # TODO!
-
-            # NOTE: this method is always called for a single nearest edge (line), so the
-            #       polygons have 4 points.
-            #       Polygons points are sorted clockwise, so the edge
-            #       that goes from right-to-left is the nearest edge
-            # nearby_opposing_edge = [e for e in nearest_lateral_shape[1].each_edge() if e.d().x < 0][-1]
-            # nearby_opposing_edge_trans = geometry_restorer.restore_edge(edge) * nearby_opposing_edge
-
-            # C = Csidewall * l * t / s
-            # C = Csidewall * l / s
-
-            avg_length = edge_interval[1] - edge_interval[0]
-            avg_distance = min(polygon.bbox().p1.y, polygon.bbox().p2.y)
-
             outside_edge = nearest_edge(polygon)
-
-            length_um = avg_length * self.dbu
-            distance_um = avg_distance * self.dbu
+            first_um = outside_edge.p2.y * self.dbu
+            last_um = outside_edge.p1.y * self.dbu
+            length_um = (edge_interval[1] - edge_interval[0]) * self.dbu
+            distance_um = (first_um + last_um) / 2.0
 
             # NOTE: dividing by 2 (like MAGIC this not bidirectional),
             #       but we count 2 sidewall contributions (one for each side of the cap).
@@ -388,11 +363,12 @@ class SidewallAndFringeExtractor:
             #       coefficients stay as the PDK states them, and the factor
             #       lives here, see
             #       https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
-            cap_femto = ((length_um * sidewall_cap_spec.capacitance)
-                         / sidewall_separation(distance_um, sidewall_cap_spec.offset)
-                         / 2.0  # non-bidirectional (half)
-                         / 2.0  # the coefficient is the value for both edges
-                         / 1000.0)  # aF -> fF
+            cap_femto = sidewall_capacitance(length_um, first_um, last_um,
+                                             sidewall_cap_spec.capacitance, sidewall_cap_spec.offset)
+            profile = None
+            if first_um != last_um and (self.results.keep_capacitance_geometry or self.results.exclusions is not None):
+                profile = EdgeCapacitanceProfile(partial(sidewall_capacitance, length_um, first_um, last_um,
+                                                         sidewall_cap_spec.capacitance, sidewall_cap_spec.offset))
 
             # info(f"(Sidewall) layer {layer_name}: Nets {net1} <-> {net2}: {round(cap_femto, 5)} fF")
 
@@ -406,10 +382,8 @@ class SidewallAndFringeExtractor:
                                  tech_spec=sidewall_cap_spec,
                                  inside_edge=inside_edge,
                                  # NOTE: the part of the other net facing the edge interval
-                                 outside_edge=geometry_restorer.restore_edge(
-                                     kdb.Edge(kdb.Point(edge_interval[0], avg_distance),
-                                              kdb.Point(edge_interval[1], avg_distance))
-                                 ))
+                                 outside_edge=geometry_restorer.restore_edge(kdb.Edge(outside_edge.p2, outside_edge.p1)),
+                                 profile=profile)
             self.results.add_sidewall_cap(sw_cap)
 
             self.report.output_sidewall(
@@ -428,9 +402,7 @@ class SidewallAndFringeExtractor:
             distance_far_um = distance_far * self.dbu
             edge_interval_length_um = edge_interval_length * self.dbu
 
-            # NOTE: overlap scaling is 1/50  (see MAGIC ExtTech)
-            alpha_scale_factor = 0.02 * 0.01 * 0.5 * 200.0
-            alpha_c = overlap_cap_spec.capacitance * alpha_scale_factor
+            alpha_c = fringe_alpha(overlap_cap_spec.capacitance)
             if alpha_c == 0.0:
                 # NOTE: without an overlap capacitance, none of the fringe is within any distance
                 #       (cnear and cfar are 0, like in MAGIC for an overlap multiplier of 0),
@@ -442,7 +414,7 @@ class SidewallAndFringeExtractor:
             cfar = (2.0 / math.pi) * math.atan(alpha_c * distance_far_um)
 
             if self.scale_ratio_to_fit_halo:
-                full_halo_ratio = (2.0 / math.pi) * math.atan(alpha_c * self.side_halo)
+                full_halo_ratio = fringe_normalization(alpha_c, self.side_halo, True)
                 # NOTE: for a large enough halo, full_halo would be 1,
                 #       but it is smaller, so we compensate
                 if full_halo_ratio < 1.0:
@@ -535,70 +507,60 @@ class SidewallAndFringeExtractor:
                         # if p != up:
                         #    print(f"Unshieleded polygon {up}, differs from original polygon {p}")
 
+            alpha = fringe_alpha(overlap_cap_spec.capacitance)
+            normalization = fringe_normalization(alpha, self.side_halo, self.scale_ratio_to_fit_halo)
             for outside_net_name, polygons in polygons_by_net.items():
+                key = SideOverlapKey(inside_layer_name, inside_net_name, outside_layer_name, outside_net_name)
                 for p in polygons:
-                    bbox = p.bbox()
-                    if not p.is_box():
-                        warning(f"Side overlap, polygon {p} is not a box. "
-                                f"Currently, only boxes are supported, will be using bounding box {bbox}")
+                    if p.is_box():
+                        bbox = p.bbox()
+                        near, far = max(0, bbox.bottom), max(0, bbox.top)
+                        cap_femto = self.fringe_cap(bbox.width(), near, far, overlap_cap_spec, sideoverlap_cap_spec)
+                        if cap_femto > 0.0001:
+                            middle = (near + far) // 2
+                            self._record_fringe(key, cap_femto, p, (bbox.left, bbox.right),
+                                                kdb.Edge(bbox.left, near, bbox.right, near),
+                                                kdb.Edge(bbox.left, middle, bbox.right, middle),
+                                                None, lateral_shield, geometry_restorer)
+                        continue
 
-                    distance_near = bbox.p1.y  # + 1
-                    if distance_near < 0:
-                        distance_near = 0
-                    distance_far = bbox.p2.y  # - 2
-                    if distance_far < 0:
-                        distance_far = 0
-                    try:
-                        assert distance_near >= 0
-                        assert distance_far >= distance_near
-                    except AssertionError:
-                        print()
-                        raise
+                    # Shield subtraction can leave concave polygons and holes.
+                    # Keep the cutoff on each original polygon, not on its pieces.
+                    parts = []
+                    for trapezoid in vertical_trapezoids(p):
+                        integral = partial(fringe_capacitance,
+                                           (trapezoid.right - trapezoid.left) * self.dbu,
+                                           trapezoid.near_left * self.dbu, trapezoid.near_right * self.dbu,
+                                           trapezoid.far_left * self.dbu, trapezoid.far_right * self.dbu,
+                                           alpha, sideoverlap_cap_spec.capacitance, normalization)
+                        parts.append((trapezoid, integral, integral(0.0, 1.0)))
+                    if math.fsum(cap for _, _, cap in parts) <= 0.0001:
+                        continue
+                    for trapezoid, integral, cap_femto in parts:
+                        if cap_femto <= 0.0:
+                            continue
+                        profile = None
+                        if self.results.keep_capacitance_geometry or self.results.exclusions is not None:
+                            profile = EdgeCapacitanceProfile(integral)
+                        self._record_fringe(
+                            key, cap_femto, trapezoid.polygon(), (trapezoid.left, trapezoid.right),
+                            kdb.Edge(trapezoid.left, trapezoid.near_left,
+                                      trapezoid.right, trapezoid.near_right),
+                            kdb.Edge(trapezoid.left, (trapezoid.near_left + trapezoid.far_left) / 2,
+                                      trapezoid.right, (trapezoid.near_right + trapezoid.far_right) / 2),
+                            profile, lateral_shield, geometry_restorer)
 
-                    if distance_far == distance_near:
-                        return
-
-                    edge_interval_length = edge_interval[1] - edge_interval[0]
-                    edge_interval_length_um = edge_interval_length * self.dbu
-
-                    cap_femto = self.fringe_cap(edge_interval_length=edge_interval_length,
-                                                distance_near=distance_near,
-                                                distance_far=distance_far,
-                                                overlap_cap_spec=overlap_cap_spec,
-                                                sideoverlap_cap_spec=sideoverlap_cap_spec)
-
-                    if cap_femto > 0.0001:  # TODO: configurable threshold, but keeping accumulation might also be nice
-                        # info(f"(Side Overlap) "
-                        #      f"{inside_layer_name}({inside_net_name})-{outside_layer_name}({outside_net_name}): "
-                        #      f"{round(cap_femto, 5)} fF, "
-                        #      f"edge interval length = {round(edge_interval_length_um, 2)} µm")
-
-                        inside_edge = geometry_restorer.restore_edge_interval(edge_interval)
-                        # NOTE: the fringe ends on the polygon from its near to its far side,
-                        #       so the middle of it along the edge interval stands for it
-                        distance_middle = (distance_near + distance_far) // 2
-
-                        sok = SideOverlapKey(layer_inside=inside_layer_name,
-                                             net_inside=inside_net_name,
-                                             layer_outside=outside_layer_name,
-                                             net_outside=outside_net_name)
-                        soc = SideOverlapCap(key=sok,
-                                             cap_value=cap_femto,
-                                             inside_edge=inside_edge,
-                                             outside_edge=geometry_restorer.restore_edge(
-                                                 kdb.Edge(kdb.Point(edge_interval[0], distance_middle),
-                                                          kdb.Point(edge_interval[1], distance_middle))
-                                             ),
-                                             near_edge=geometry_restorer.restore_edge(
-                                                 kdb.Edge(kdb.Point(edge_interval[0], distance_near),
-                                                          kdb.Point(edge_interval[1], distance_near))
-                                             ))
-                        self.results.add_sideoverlap_cap(soc)
-
-                        self.report.output_sideoverlap(
-                            sideoverlap_cap=soc,
-                            inside_edge=inside_edge,
-                            outside_polygon=geometry_restorer.restore_polygon(p),
-                            lateral_shield=geometry_restorer.restore_polygon(lateral_shield) \
-                                           if lateral_shield is not None else None
-                        )
+        def _record_fringe(self, key: SideOverlapKey, cap_femto: float, polygon: kdb.Polygon,
+                           interval: EdgeInterval, near_edge: kdb.Edge, outside_edge: kdb.Edge,
+                           profile: Optional[EdgeCapacitanceProfile], lateral_shield: Optional[kdb.Polygon],
+                           geometry_restorer: GeometryRestorer):
+            inside_edge = geometry_restorer.restore_edge_interval(interval)
+            cap = SideOverlapCap(key=key, cap_value=cap_femto, inside_edge=inside_edge,
+                                 outside_edge=geometry_restorer.restore_edge(outside_edge),
+                                 near_edge=geometry_restorer.restore_edge(near_edge), profile=profile)
+            self.results.add_sideoverlap_cap(cap)
+            self.report.output_sideoverlap(
+                sideoverlap_cap=cap, inside_edge=inside_edge,
+                outside_polygon=geometry_restorer.restore_polygon(polygon),
+                lateral_shield=geometry_restorer.restore_polygon(lateral_shield)
+                if lateral_shield is not None else None)
