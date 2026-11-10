@@ -35,9 +35,10 @@ from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 parent_suite = "kpex/2.5D Extraction Tests [PDK sky130A | mode CC]"
 tags = ("PEX", "2.5D", "MAGIC")
 
-# Sidewall expectations use the full pair fit (#390). Relative to the former
-# totals, only the old sidewall contribution is added; overlap and fringe stay
-# unchanged. The parallel-wire regression checks the pair fit independently.
+# Expectations use the pinned nominal OpenPDKs tables in the generator (#523).
+# Overlap follows the area coefficient. Fringe uses its directional coefficient
+# and the overlap-dependent spreading. Sidewall uses the full pair fit (#390)
+# with the updated offset. Geometry and resistance values are unchanged.
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PEXMode.CC, blackbox=False)
@@ -47,276 +48,182 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_single_plate_100um_x_100um_li1_over_substrate():
-    # MAGIC GIVES (8.3 revision 485):
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C0 PLATE VSUBS 0.38618p
+    # `li1`: 10000 µm² * 36.888 aF/µm² = 368.880 fF, plus the four-edge fringe
+    # of 400 µm * 35.149 aF/µm, limited by the 10000 µm halo, gives 382.938 fF
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;PLATE;VSUBS;386.179;"""
+C1;PLATE;VSUBS;382.938;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_overlap_plates_100um_x_100um_li1_m1():
-    # MAGIC GIVES (8.3 revision 485):
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C2 LOWER VSUBS 0.38618p
-    # C0 UPPER LOWER 0.294756p
-    # C1 UPPER VSUBS 0.205833p
-    #_______________________________ NOTE: with halo=50µm __________________________________
-    # C2 LOWER VSUBS 0.38618p
-    # C0 LOWER UPPER 0.294867p
-    # C1 UPPER VSUBS 0.205621p
-    # NOTE: magic with --magic-halo=50 (µm) gives UPPER-VSUBS of 0.205621p
-    #       which is due to the handling of https://github.com/martinjankoehler/magic/issues/1
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER;UPPER;294.867;
-C2;LOWER;VSUBS;386.179;
-C3;UPPER;VSUBS;205.619;"""
+C1;LOWER;UPPER;301.287;
+C2;LOWER;VSUBS;382.938;
+C3;UPPER;VSUBS;206.03;"""
     )
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_overlap_plates_100um_x_100um_li1_m1_m2_m3():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C7 li1 VSUBS 0.38618p
-    # C6 met1 VSUBS 0.205833p
-    # C5 met2 VSUBS 52.151802f
-    # C4 met3 VSUBS 0.136643p
-    # C3 li1 met1 0.294756p
-    # C0 met1 met2 0.680652p
-    # C2 li1 met2 99.3128f
-    # C1 li1 met3 5.59194f
-    #_______________________________ NOTE: with halo=50µm __________________________________
-    # C9 li1 VSUBS 0.38618p
-    # C8 met1 VSUBS 0.205621p
-    # C7 met2 VSUBS 51.5767f
-    # C6 met3 VSUBS 0.136103p
-    # C5 li1 met1 0.294867p
-    # C4 li1 met2 99.518005f
-    # C2 met1 met2 0.680769p
-    # C3 li1 met3 6.01281f
-    # C1 met1 met3 0.012287f
-    # C0 met2 met3 0.0422f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'overlap_plates_100um_x_100um_li1_m1_m2_m3.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;li1;met1;294.867;
-C2;li1;met2;99.518;
-C3;li1;met3;6.013;
-C4;met1;met2;680.769;
-C5;met1;met3;0.016;
-C6;met2;met3;0.056;
-C7;VSUBS;li1;386.179;
-C8;VSUBS;met1;205.619;
-C9;VSUBS;met2;51.574;
-C10;VSUBS;met3;136.063;"""
+C1;li1;met1;301.287;
+C2;li1;met2;107.601;
+C3;li1;met3;5.425;
+C4;met1;met2;748.257;
+C5;met1;met3;0.015;
+C6;met2;met3;0.049;
+C7;VSUBS;li1;382.938;
+C8;VSUBS;met1;206.03;
+C9;VSUBS;met2;52.885;
+C10;VSUBS;met3;143.916;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_overlap_shield_same_net_100um_x_100um_li1_m1_m2():
-    # MAGIC GIVES (8.3 revision 681):
-    # C0 A B 1.3386p
-    # C1 B VSUBS 15.104f
-    # C2 A VSUBS 0.40241p
-    #
-    # The met1 of net A shields the li1 of net A below it from the met2 of net B above, so A–B is
-    # met2–met1 only, 133.86 aF/µm² * 100 µm * 100 µm = 1338.6 fF, without met2–li1 (375.6 fF, #299)
+    # `met1` of net `A` shields its `li1` from `met2` of net `B`, so `A`–`B` is
+    # `met2`–`met1` only: 147.570 aF/µm² * 100 µm * 100 µm = 1475.7 fF (#299)
+    # Counting the shielded `met2`–`li1` area would add another 410.47 fF
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'overlap_shield_same_net_100um_x_100um_li1_m1_m2.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;1338.6;
-C2;A;VSUBS;402.405;
-C3;B;VSUBS;15.101;"""
+C1;A;B;1475.7;
+C2;A;VSUBS;397.438;
+C3;B;VSUBS;13.168;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_overlap_shield_same_net_half_100um_x_100um_li1_m1_m2():
-    # MAGIC GIVES (8.3 revision 681):
-    # C0 A B 0.86178p
-    # C1 B VSUBS 15.104f
-    # C2 A VSUBS 0.39491p
-    #
-    # The met1 of net A covers the left half of the li1 of net A, so A–B is met2–met1 there (669.3 fF),
-    # met2–li1 over the right half (187.8 fF) and the fringe at the edge of met1, without met2–li1
-    # under met1 (187.8 fF, #299)
+    # `met1` of net `A` covers half its `li1`, so `A`–`B` has 737.85 fF of `met2`–`met1`
+    # over the left half, 205.235 fF of `met2`–`li1` over the right half, and edge fringe
+    # The `met2`–`li1` area under `met1` stays shielded (#299)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'overlap_shield_same_net_half_100um_x_100um_li1_m1_m2.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;861.896;
-C2;A;VSUBS;394.391;
-C3;B;VSUBS;15.101;"""
+C1;A;B;947.789;
+C2;A;VSUBS;390.276;
+C3;B;VSUBS;13.168;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_plate_20um_x_20um_li1_over_ntap():
-    # MAGIC GIVES (8.3 revision 681):
-    # C0 W A 25.5042f
-    # C1 A VSUBS 0.2326f
-    # C2 W VSUBS 0.23232p
-    #
     # The n-tap is diffusion, the same stack as the source/drain, so A–W is li1 over diffusion,
-    # 55.3 aF/µm² * 20 µm * 20 µm = 22.12 fF, plus the fringe, rather than li1 over the nwell (36.99 aF/µm², #301).
+    # 56.321 aF/µm² * 20 µm * 20 µm = 22.5284 fF, plus fringe, rather than `li1` over `nwell`
+    # at 36.888 aF/µm² (#301)
     # The nwell has no capacitance to the substrate (the PDKs model it as a diode)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'plate_20um_x_20um_li1_over_ntap.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;VSUBS;0.232;
-C2;A;W;25.504;"""
+C1;A;VSUBS;0.201;
+C2;A;W;25.532;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_plate_20um_x_20um_li1_over_ptap():
-    # MAGIC GIVES (8.3 revision 681):
-    # C0 A VSS 18.3132f
-    #
     # The p-tap is diffusion, the same stack as the source/drain, so A–VSS (the net of the tap) is li1 over diffusion,
-    # 55.3 aF/µm² * 20 µm * 20 µm = 22.12 fF, plus the fringe (#301). magic has the p-tap as part of its substrate node,
-    # whose area gets the field's 36.99 aF/µm² (but its fringe the diffusion's)
+    # 56.321 aF/µm² * 20 µm * 20 µm = 22.5284 fF, plus fringe (#301)
+    # Using the field area coefficient would incorrectly substitute 36.888 aF/µm²
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'plate_20um_x_20um_li1_over_ptap.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;VSS;25.458;
-C2;A;VSUBS;0.278;
-C3;VSS;VSUBS;0.13;"""
+C1;A;VSS;25.492;
+C2;A;VSUBS;0.241;
+C3;VSS;VSUBS;0.112;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sidewall_100um_x_100um_distance_200nm_li1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C0 A B 7.5f
-    # C1 B VSUBS 8.231f
-    # C2 A VSUBS 8.231f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # (same!)
+    # The full facing-edge pair gives 18.194 aF * 100 µm / (0.2 + 0.038) µm = 7.645 fF
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_100um_x_100um_distance_200nm_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;7.5;
-C2;A;VSUBS;8.231;
-C3;B;VSUBS;8.231;"""
+C1;A;B;7.645;
+C2;A;VSUBS;7.601;
+C3;B;VSUBS;7.601;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sidewall_net_uturn_l1_redux():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C1 C1 VSUBS 12.5876f
-    # C2 C0 VSUBS 38.1255f
-    # C0 C0 C1 1.87386f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # (same!)
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_net_uturn_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;1.874;
-C2;C0;VSUBS;38.125;
-C3;C1;VSUBS;12.588;"""
+C1;C0;C1;1.391;
+C2;C0;VSUBS;36.034;
+C3;C1;VSUBS;11.815;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sidewall_cap_vpp_04p4x04p6_l1_redux():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C1 C1 VSUBS 0.086832f
-    # C2 C0 VSUBS 0.300359f
-    # C0 C0 C1 0.286226f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # (same!)
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sidewall_cap_vpp_04p4x04p6_l1_redux.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.286;
-C2;C0;VSUBS;0.3;
-C3;C1;VSUBS;0.087;"""
+C1;C0;C1;0.3;
+C2;C0;VSUBS;0.266;
+C3;C1;VSUBS;0.077;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_near_body_shield_li1_m1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C5 BOTTOM VSUBS 0.405082p
-    # C1 BOTTOM TOPB 0.215823p   # DIFFERS marginally <0,1fF
-    # C2 BOTTOM TOPA 0.215823p   # DIFFERS marginally <0,1fF
-    # C0 TOPA TOPB 0.502857f
-    # C3 TOPB VSUBS 0.737292f   # DIFFERS, but that's a MAGIC issue (see test_overlap_plates_100um_x_100um_li1_m1)
-    # C4 TOPA VSUBS 0.737292f   # DIFFERS, but that's a MAGIC issue (see test_overlap_plates_100um_x_100um_li1_m1)
-    #_______________________________ NOTE: with halo=50µm __________________________________
-    # NOTE: with halo=50µm, C3/C4 becomes 0.29976f
-    # see https://github.com/martinjankoehler/magic/issues/2
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'near_body_shield_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;BOTTOM;TOPA;215.972;
-C2;BOTTOM;TOPB;215.972;
-C3;BOTTOM;VSUBS;405.081;
-C4;TOPA;TOPB;0.503;
-C5;TOPA;VSUBS;0.299;
-C6;TOPB;VSUBS;0.299;"""
+C1;BOTTOM;TOPA;220.071;
+C2;BOTTOM;TOPB;220.071;
+C3;BOTTOM;VSUBS;401.734;
+C4;TOPA;TOPB;0.519;
+C5;TOPA;VSUBS;0.265;
+C6;TOPB;VSUBS;0.265;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_lateral_fringe_shield_by_same_polygon_li1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C0 C0 VSUBS 6.41431f $ **FLOATING
-    #_______________________________ NOTE: with halo=50µm __________________________________
-    # C0 C0 VSUBS 6.41431f $ **FLOATING
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'lateral_fringe_shield_by_same_polygon_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;VSUBS;6.414;"""
+C1;C0;VSUBS;5.973;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_simple_plates_li1_m1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C2 li1 VSUBS 7.931799f
-    # C1 met1 VSUBS 0.248901p
-    # C0 li1 met1 0.143335f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C2 li1 VSUBS 7.931799f
-    # C1 met1 VSUBS 0.248901p
-    # C0 li1 met1 0.156859f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;li1;met1;0.157;
-C2;VSUBS;li1;7.931;
-C3;VSUBS;met1;248.899;"""
+C1;li1;met1;0.149;
+C2;VSUBS;li1;7.344;
+C3;VSUBS;met1;249.165;"""
         )
 
 
@@ -335,173 +242,107 @@ def test_sideoverlap_needs_no_substrate_capacitance_beyond_its_overlap_and_side_
         pex_whiteboxed.assert_expected_matches_obtained(
             'test_patterns', 'sideoverlap_simple_plates_li1_m1.gds.gz',
             expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;li1;met1;0.157;
-C2;VSUBS;li1;7.931;
-C3;VSUBS;met1;248.899;"""
+C1;li1;met1;0.149;
+C2;VSUBS;li1;7.344;
+C3;VSUBS;met1;249.165;"""
             )
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_shielding_simple_plates_li1_m1_m2():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C5 li1 VSUBS 11.7936f
-    # C4 met1 VSUBS 57.990803f
-    # C2 li1 met1 15.661301f
-    # C0 met1 met2 0.257488p
-    # C3 met2 VSUBS 5.29197f
-    # C1 li1 met2 0.151641f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C5 li1 VSUBS 11.7936f
-    # C4 met1 VSUBS 57.990803f
-    # C2 li1 met1 15.709599f
-    # C0 met1 met2 0.257488p
-    # C3 met2 VSUBS 5.29197f
-    # C1 li1 met2 0.151641f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_shielding_simple_plates_li1_m1_m2.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;li1;met1;15.71;
-C2;li1;met2;0.152;
-C3;met1;met2;257.488;
-C4;VSUBS;li1;11.793;
-C5;VSUBS;met1;57.99;
-C6;VSUBS;met2;5.291;"""
+C1;li1;met1;15.797;
+C2;li1;met2;0.123;
+C3;met1;met2;283.093;
+C4;VSUBS;li1;11.173;
+C5;VSUBS;met1;57.759;
+C6;VSUBS;met2;4.593;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_plates_li1_m1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C15 LOWER_NoHaloOverlap_InsideTop VSUBS 51.9938f
-    # C12 LOWER_OutsideHalo VSUBS 73.274605f
-    # C17 LOWER_PartialSideHaloOverlap_Separated VSUBS 90.6184f
-    # C13 LOWER_PartialSideHaloOverlap_BothSides_separated VSUBS 7.93086f
-    # C14 LOWER_PartialSideHaloOverlap_Touching VSUBS 13.637f
-    # C16 LOWER_FullHaloOverlap VSUBS 0.177602p
-    # C11 UPPER VSUBS 0.214853p
-    # C8 LOWER_NoHaloOverlap_InsideTop UPPER 0.146991p
-    # C7 LOWER_PartialSideHaloOverlap_Touching UPPER 32.1587f
-    # C10 LOWER_FullHaloOverlap UPPER 0.262817p
-    # C3 LOWER_FullHaloOverlap LOWER_NoHaloOverlap_InsideTop 0.12574f
-    # C2 LOWER_NoHaloOverlap_InsideTop LOWER_PartialSideHaloOverlap_Touching 0.063307f
-    # C9 LOWER_NoHaloOverlap_InsideTop LOWER_OutsideHalo 0.06287f
-    # C1 LOWER_FullHaloOverlap LOWER_OutsideHalo 0.100592f
-    # C4 LOWER_PartialSideHaloOverlap_Separated LOWER_FullHaloOverlap 0.248054f
-    # C5 LOWER_OutsideHalo UPPER 0.076223f
-    # C6 LOWER_PartialSideHaloOverlap_BothSides_separated UPPER 0.261432f
-    # C0 LOWER_PartialSideHaloOverlap_Separated UPPER 0.148834f
-    #
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_plates_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.126;
-C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.101;
-C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.001;
-C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.248;
-C5;LOWER_FullHaloOverlap;UPPER;262.817;
-C6;LOWER_FullHaloOverlap;VSUBS;177.601;
-C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.063;
-C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.063;
-C9;LOWER_NoHaloOverlap_InsideTop;UPPER;146.991;
-C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.994;
-C11;LOWER_OutsideHalo;UPPER;0.076;
-C12;LOWER_OutsideHalo;VSUBS;73.274;
-C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.261;
-C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.931;
-C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.149;
-C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;90.618;
-C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.159;
-C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.637;
-C19;UPPER;VSUBS;214.85;"""
+C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.091;
+C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.073;
+C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.0;
+C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.181;
+C5;LOWER_FullHaloOverlap;UPPER;268.816;
+C6;LOWER_FullHaloOverlap;VSUBS;175.62;
+C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.045;
+C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.045;
+C9;LOWER_NoHaloOverlap_InsideTop;UPPER;150.468;
+C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.08;
+C11;LOWER_OutsideHalo;UPPER;0.07;
+C12;LOWER_OutsideHalo;VSUBS;72.177;
+C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.248;
+C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.343;
+C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.133;
+C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;89.38;
+C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.879;
+C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.012;
+C19;UPPER;VSUBS;214.731;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_fingered_li1_m1_patternA():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    #
-    # C2 LOWER VSUBS 5.89976f
-    # C1 UPPER VSUBS 72.328f
-    # C0 LOWER UPPER 0.357768f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1_patternA.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER;UPPER;0.358;
-C2;LOWER;VSUBS;5.9;
-C3;UPPER;VSUBS;72.327;"""
+C1;LOWER;UPPER;0.338;
+C2;LOWER;VSUBS;5.395;
+C3;UPPER;VSUBS;72.061;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_fingered_li1_m1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    #
-    # C6 LOWER_PartialSideHaloOverlap_Fingered2 VSUBS 8.15974f
-    # C8 LOWER_PartialSideHaloOverlap_Fingered3 VSUBS 8.16395f
-    # C7 LOWER_PartialSideHaloOverlap_Fingered1 VSUBS 5.8844f
-    # C5 LOWER_PartialSideHaloOverlap_Fingered4 VSUBS 5.88862f
-    # C4 UPPER VSUBS 0.215283p
-    # C0 LOWER_PartialSideHaloOverlap_Fingered3 UPPER 0.158769f
-    # C2 LOWER_PartialSideHaloOverlap_Fingered2 UPPER 2.46581f
-    # C1 LOWER_PartialSideHaloOverlap_Fingered4 UPPER 0.35839f
-    # C3 LOWER_PartialSideHaloOverlap_Fingered1 UPPER 0.244356f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_fingered_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.003;
-C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.016;
-C3;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.244;
-C4;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.884;
-C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.002;
-C6;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.466;
-C7;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;8.16;
-C8;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.159;
-C9;LOWER_PartialSideHaloOverlap_Fingered3;VSUBS;8.164;
-C10;LOWER_PartialSideHaloOverlap_Fingered4;UPPER;0.358;
-C11;LOWER_PartialSideHaloOverlap_Fingered4;VSUBS;5.889;
-C12;UPPER;VSUBS;215.281;"""
+C1;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered2;0.002;
+C2;LOWER_PartialSideHaloOverlap_Fingered1;LOWER_PartialSideHaloOverlap_Fingered4;0.011;
+C3;LOWER_PartialSideHaloOverlap_Fingered1;UPPER;0.231;
+C4;LOWER_PartialSideHaloOverlap_Fingered1;VSUBS;5.382;
+C5;LOWER_PartialSideHaloOverlap_Fingered2;LOWER_PartialSideHaloOverlap_Fingered3;0.001;
+C6;LOWER_PartialSideHaloOverlap_Fingered2;UPPER;2.364;
+C7;LOWER_PartialSideHaloOverlap_Fingered2;VSUBS;7.498;
+C8;LOWER_PartialSideHaloOverlap_Fingered3;UPPER;0.15;
+C9;LOWER_PartialSideHaloOverlap_Fingered3;VSUBS;7.502;
+C10;LOWER_PartialSideHaloOverlap_Fingered4;UPPER;0.338;
+C11;LOWER_PartialSideHaloOverlap_Fingered4;VSUBS;5.385;
+C12;UPPER;VSUBS;215.556;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_sideoverlap_complex_li1_m1():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    #
-    # C6 Complex_Shape_L VSUBS 3.19991f
-    # C8 Complex_Shape_T VSUBS 3.19991f
-    # C7 Complex_Shape_R VSUBS 3.19991f
-    # C5 Complex_Shape_B VSUBS 3.19991f
-    # C4 UPPER VSUBS 13.0192f
-    # C0 Complex_Shape_B UPPER 1.34751f
-    # C3 Complex_Shape_T UPPER 0.064969f
-    # C2 Complex_Shape_R UPPER 0.089357f
-    # C1 Complex_Shape_L UPPER 0.24889f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'sideoverlap_complex_li1_m1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;Complex_Shape_B;UPPER;1.348;
-C2;Complex_Shape_B;VSUBS;3.2;
-C3;Complex_Shape_L;UPPER;0.249;
-C4;Complex_Shape_L;VSUBS;3.2;
-C5;Complex_Shape_R;UPPER;0.089;
-C6;Complex_Shape_R;VSUBS;3.2;
-C7;Complex_Shape_T;UPPER;0.065;
-C8;Complex_Shape_T;VSUBS;3.2;
-C9;UPPER;VSUBS;13.019;"""
+C1;Complex_Shape_B;UPPER;1.333;
+C2;Complex_Shape_B;VSUBS;2.922;
+C3;Complex_Shape_L;UPPER;0.237;
+C4;Complex_Shape_L;VSUBS;2.922;
+C5;Complex_Shape_R;UPPER;0.085;
+C6;Complex_Shape_R;VSUBS;2.922;
+C7;Complex_Shape_T;UPPER;0.061;
+C8;Complex_Shape_T;VSUBS;2.922;
+C9;UPPER;VSUBS;12.807;"""
         )
 
 
@@ -509,49 +350,24 @@ C9;UPPER;VSUBS;13.019;"""
 @allure.tag(*tags)
 def test_met1_over_drain_li1():
     # The met1 plate W (4 µm x 2 µm) is over the drain diffusion of the nfet (W = 2 µm, L = 0.15 µm),
-    # 33.6 aF/µm² * 8 µm² = 268.8 aF to D, plus the fringe to the drain beyond the plate.
-    # The diffusion used to be no part of the extraction, so W had 25.78 aF/µm² to the substrate instead
-    # (D-W 0.002 fF, VSUBS-W 0.69 fF).
+    # 34.371 aF/µm² * 8 µm² = 274.968 aF to `D`, plus fringe to the drain beyond the plate
+    # Omitting diffusion incorrectly assigns that area capacitance to the substrate instead
     # The gate poly has no capacitance to the substrate over its channel, nor from its edges along it,
     # as the transistor model has these, like with MAGIC (G-VSUBS 0.235 fF before, #290)
-    #
-    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm __________________________________
-    # C2 G D 0.00247f
-    # C1 S D 0.00581f
-    # C7 D VSUBS 0.03027f
-    # C4 D W 0.37655f
-    # C3 G S 0.00323f
-    # C9 G VSUBS 0.18508f
-    # C0 G W 0.0014f
-    # C8 S VSUBS 0.03027f
-    # C5 S W 0.01027f
-    # C6 W VSUBS 0.38766f
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C4 G D 0.00247f
-    # C3 S D 0.00645f
-    # C7 D VSUBS 0.02884f
-    # C0 D W 0.37655f
-    # C5 G S 0.00323f
-    # C9 G VSUBS 0.18508f
-    # C2 G W 0.0014f
-    # C8 S VSUBS 0.02884f
-    # C1 S W 0.01027f
-    # C6 W VSUBS 0.38766f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nfet_li1_met1_over_drain.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
 C1;D;G;0.002;
-C2;D;S;0.007;
-C3;D;VSUBS;0.029;
-C4;D;W;0.377;
+C2;D;S;0.006;
+C3;D;VSUBS;0.025;
+C4;D;W;0.374;
 C5;G;S;0.004;
-C6;G;VSUBS;0.178;
+C6;G;VSUBS;0.155;
 C7;G;W;0.007;
-C8;S;VSUBS;0.029;
-C9;S;W;0.01;
-C10;VSUBS;W;0.388;"""
+C8;S;VSUBS;0.025;
+C9;S;W;0.009;
+C10;VSUBS;W;0.346;"""
         )
 
 
@@ -559,46 +375,28 @@ C10;VSUBS;W;0.388;"""
 @allure.tag(*tags)
 def test_inverter_over_nwell():
     # The capacitances of the shapes over the nwell go to its net VPB, the others to the substrate.
-    # They all used to go to the substrate (e.g. VPWR-VSUBS 0.273 fF, which is 0.211 fF and VPB-VPWR 0.062 fF now).
+    # Assigning the well area to the substrate instead loses its coupling to `VPB`
     # The gate poly has no capacitance to the substrate or well over its channel, nor from its edges along it,
     # as the transistor model has these, like with MAGIC (A-VSUBS 0.222 and A-VPB 0.091 fF before, #290).
     # VPB-VNB (VSUBS) is the capacitance of the nwell itself, which MAGIC has, but the tech info doesn't
-    #
-    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=8µm and halo=50µm _____________________
-    # C2 A VGND 0.03709f
-    # C8 VPB A 0.04506f
-    # C6 A VPWR 0.03629f
-    # C13 A VNB 0.13301f
-    # C4 A Y 0.03773f
-    # C3 VPB VGND 0.01319f
-    # C0 VPWR VGND 0.01841f
-    # C10 VGND VNB 0.24421f
-    # C9 Y VGND 0.05975f
-    # C7 VPB VPWR 0.06649f
-    # C5 VPB Y 0.01774f
-    # C12 VPWR VNB 0.20582f
-    # C1 VPWR Y 0.07413f
-    # C11 Y VNB 0.0961f
-    # C14 VPB VNB 0.33898f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'sky130_fd_sc_hd__inv_1', 'sky130_fd_sc_hd__inv_1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;VGND;0.051;
-C2;A;VPB;0.037;
-C3;A;VPWR;0.051;
-C4;A;VSUBS;0.126;
-C5;A;Y;0.061;
-C6;VGND;VPB;0.012;
-C7;VGND;VPWR;0.034;
-C8;VGND;VSUBS;0.248;
-C9;VGND;Y;0.101;
-C10;VPB;VPWR;0.062;
-C11;VPB;Y;0.018;
-C12;VPWR;VSUBS;0.211;
-C13;VPWR;Y;0.128;
-C14;VSUBS;Y;0.096;"""
+C1;A;VGND;0.049;
+C2;A;VPB;0.032;
+C3;A;VPWR;0.048;
+C4;A;VSUBS;0.11;
+C5;A;Y;0.059;
+C6;VGND;VPB;0.011;
+C7;VGND;VPWR;0.032;
+C8;VGND;VSUBS;0.22;
+C9;VGND;Y;0.104;
+C10;VPB;VPWR;0.057;
+C11;VPB;Y;0.016;
+C12;VPWR;VSUBS;0.185;
+C13;VPWR;Y;0.133;
+C14;VSUBS;Y;0.083;"""
         )
 
 
@@ -610,49 +408,32 @@ def test_met2_over_met1_over_nwell_of_its_net():
     # The fringe of X beyond the met1 plate ends at the nwell (VDD), and beyond that, at the substrate.
     # The nwell used to be the substrate (VDD-VSUBS 3.003 fF, VDD-X 3.088 fF, VSUBS-X 0.369 fF).
     # MAGIC has the capacitance of the nwell itself too (100 µm² * 120 aF/µm² = 12 fF), which the tech info hasn't
-    #
-    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C2 VDD VSUBS 12.9206f
-    # C0 VDD X 3.16499f
-    # C1 X VSUBS 0.29271f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'nwell_met1_met2_plates.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;VDD;VSUBS;0.923;
-C2;VDD;X;3.165;
-C3;VSUBS;X;0.293;"""
+C1;VDD;VSUBS;0.821;
+C2;VDD;X;3.247;
+C3;VSUBS;X;0.246;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_mom_cap__whiteboxed():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C0 C0 C1 13.4653f
-    # C1 C1 SUB 0.77621f
-    # C2 C0 SUB 2.83686f
 
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;13.887;
-C2;C0;VSUBS;2.827;
-C3;C1;VSUBS;0.765;"""
+C1;C0;C1;13.852;
+C2;C0;VSUBS;2.516;
+C3;C1;VSUBS;0.696;"""
         )
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_mom_cap__blackboxed():
-    # MAGIC GIVES (8.3 revision 485): (sorting changed to match order)
-    # _______________________________ NOTE: with halo=50µm __________________________________
-    # C0 C0 C1 13.4653f
-    # C1 C1 SUB 0.77621f
-    # C2 C0 SUB 2.83686f
 
-    #
     # The fingers of the VPP cap (the metal within its marker) are plates, and its model has their capacitances
     # to each other and to the substrate (c0_sub 1.528 fF, c1_sub 0.44 fF), its terminal B, so these are left out.
     # What's left is the metal around the marker (0.17 µm wide), whose inner edges fringed to the substrate
@@ -660,31 +441,24 @@ def test_mom_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'cap_vpp_04p4x04p6_l1m1m2_noshield', 'cap_vpp_04p4x04p6_l1m1m2_noshield.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.211;
-C2;C0;VSUBS;2.203;
-C3;C1;VSUBS;0.091;"""
+C1;C0;C1;0.21;
+C2;C0;VSUBS;1.945;
+C3;C1;VSUBS;0.08;"""
         )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_mom_cap_beside_m2_wire__whiteboxed():
-    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
-    # C2 C0 C1 7.51226f
-    # C5 C0 SUB 2.69447f
-    # C1 C0 X 0.29419f
-    # C4 C1 SUB 0.74769f
-    # C0 C1 X 0.02239f
-    # C3 X SUB 0.38603f
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;13.887;
-C2;C0;VSUBS;2.684;
-C3;C0;X;0.463;
-C4;C1;VSUBS;0.736;
+C1;C0;C1;13.852;
+C2;C0;VSUBS;2.392;
+C3;C0;X;0.452;
+C4;C1;VSUBS;0.671;
 C5;C1;X;0.041;
-C6;VSUBS;X;0.385;"""
+C6;VSUBS;X;0.352;"""
     )
 
 
@@ -696,12 +470,12 @@ def test_mom_cap_beside_m2_wire__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_vpp_04p4x04p6_l1m1m2_noshield_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;C0;C1;0.211;
-C2;C0;VSUBS;2.061;
-C3;C0;X;0.463;
-C4;C1;VSUBS;0.068;
+C1;C0;C1;0.21;
+C2;C0;VSUBS;1.821;
+C3;C0;X;0.452;
+C4;C1;VSUBS;0.061;
 C5;C1;X;0.041;
-C6;VSUBS;X;0.385;"""
+C6;VSUBS;X;0.352;"""
     )
 
 
@@ -754,9 +528,9 @@ def test_mim_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'cap_mim_m3_w18p9_l5p1', 'cap_mim_m3_w18p9_l5p1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;mimcap_bot;mimcap_top;207.106;
-C2;VSUBS;mimcap_bot;4.353;
-C3;VSUBS;mimcap_top;2.942;"""
+C1;mimcap_bot;mimcap_top;207.336;
+C2;VSUBS;mimcap_bot;4.184;
+C3;VSUBS;mimcap_top;2.694;"""
         )
 
 
@@ -820,44 +594,35 @@ def test_mim_cap__blackboxed():
 def test_mim_cap_over_m2_wire__whiteboxed():
     # The device model gives camimc 2.0 fF/µm² * 20 µm * 20 µm = 800 fF (capm over met3)
     # plus cpmimc 0.19 fF/µm * 80 µm = 15.2 fF, the fringe to the bottom plate around the top plate
-    # (15.079 fF from capm to met3 here). A–B has the fringe from met4 to the met3 around the capm too (4.603 fF)
+    # (15.079 fF from capm to met3 here). A–B has the fringe from met4 to the met3 around the capm too (4.142 fF)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;819.682;
-C2;A;D;6.467;
-C3;A;VSUBS;10.342;
-C4;B;D;0.081;
-C5;B;VSUBS;2.253;
-C6;D;VSUBS;5.013;"""
+C1;A;B;819.221;
+C2;A;D;6.343;
+C3;A;VSUBS;10.406;
+C4;B;D;0.07;
+C5;B;VSUBS;1.959;
+C6;D;VSUBS;4.651;"""
     )
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_mim_cap_over_m2_wire__blackboxed():
-    # MAGIC GIVES (8.3 revision 681): (sorting changed to match order)
-    # C0 A B 38.2149f
-    # C2 D A 6.46725f
-    # C4 A VSUBS 10.3425f
-    # C1 D B 0.08101f
-    # C3 B VSUBS 2.25408f
-    # C5 D VSUBS 5.01392f
-    #
     # The plates of the MIM cap are conductors, the bottom plate shields the wire D and the substrate below it
     # from the top plate and the met4 above. Only the capacitance of the device model is left out, the overlap
     # of capm over met3 and the fringe from its edge, so A–B is the fringe from met4 to the met3 around the capm,
     # and the rest is the same as in white-box mode. Without the plates, D coupled to B through the hole (1.636 fF).
-    # MAGIC's A–B has met4 over met3 through the capm (84.03 aF/µm² * 400 µm² = 33.6 fF), as its mimcap doesn't shield
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_mim_m3_20um_x_20um_over_m2_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;4.603;
-C2;A;D;6.467;
-C3;A;VSUBS;10.342;
-C4;B;D;0.081;
-C5;B;VSUBS;2.253;
-C6;D;VSUBS;5.013;"""
+C1;A;B;4.142;
+C2;A;D;6.343;
+C3;A;VSUBS;10.406;
+C4;B;D;0.07;
+C5;B;VSUBS;1.959;
+C6;D;VSUBS;4.651;"""
     )
 
 
