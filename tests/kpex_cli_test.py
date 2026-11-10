@@ -44,6 +44,7 @@ import klayout.rdb as rdb
 
 from klayout_pex.fastercap.fastercap_error import FasterCapError
 from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
+from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.pex25d.reader import read_pex25d_text
@@ -63,8 +64,8 @@ from tests.rcx25.rcx25_test_helpers import spice_netlist_ports
 NFET_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1.gds.gz')
 NFET_IN_SUBCELL_GDS_PATH = PDKTestConfig(PDKName.SKY130A).gds_path('test_patterns', 'nfet_li1_in_subcell.gds.gz')
 
-SCHEMATIC_WARNING = "--schematic is checked for its device classes, their totals and the pins of its top circuit " \
-                    "only, use regular LVS to compare layout against schematic"
+SCHEMATIC_WARNING = "--schematic supplies matched device names for 2.5D output. --check checks device " \
+                    "classes, totals and top pins. Use regular LVS for full verification"
 
 PEAK_MEMORY_LINE = re.compile(r"Peak memory \(resident set size\) after (.+): \d+(\.\d)? (B|KiB|MiB|GiB)"
                               r"(, largest subprocess \d+(\.\d)? (B|KiB|MiB|GiB))?")
@@ -578,6 +579,41 @@ def edited_schematic_path(gds_path: str, tmp_path: Path, old: str, new: str) -> 
     schematic_path = tmp_path / os.path.basename(source_path)
     schematic_path.write_text(schematic.replace(old, new), encoding='utf-8')
     return str(schematic_path)
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Schematic")
+@pytest.mark.parametrize('mode', ['CC', 'RC'])
+@pytest.mark.parametrize('hierarchical', [False, True])
+def test_schematic_names_reach_the_extracted_netlist(mode: str, hierarchical: bool, tmp_path: Path):
+    # The output must retain its RC nodes, geometry and port order when the name
+    # changes. Child labels exercise the difference between LVS pins and ports.
+    gds_path = NFET_IN_SUBCELL_GDS_PATH if hierarchical else NFET_GDS_PATH
+    if hierarchical:
+        schematic_path = edited_schematic_path(gds_path, tmp_path, 'XM1', 'Xtail')
+        expected_name = 'X1.Xtail'
+    else:
+        schematic_path = str(tmp_path / 'schematic.spice')
+        Path(schematic_path).write_text('.subckt nfet_li1 S G D\n'
+                                        'Xtail S G D sky130_gnd sky130_fd_pr__nfet_01v8 L=0.15 W=0.65\n'
+                                        '.ends\n', encoding='utf-8')
+        expected_name = 'Xtail'
+    outputs = []
+    for with_schematic in (False, True):
+        destination = tmp_path / f'extracted_{with_schematic}.spice'
+        args = ['--mode', mode, '--out-netlist', str(destination)]
+        if with_schematic:
+            args += ['--schematic', schematic_path]
+        code, output = rc_run_from_lvsdb(gds_path, tmp_path / str(with_schematic), *args)
+        assert code == 0, output
+        assert 'Schematic device names retained from layout' not in output, output
+        outputs.append(SpiceReader().read(str(destination)))
+    before, after = outputs
+    old_device = next(device for device in before.subcircuits[0].elements if device.kind == 'X')
+    new_device = next(device for device in after.subcircuits[0].elements if device.kind == 'X')
+    assert new_device.name == expected_name, after
+    new_device.name = old_device.name
+    assert before == after
 
 
 @allure.parent_suite("Unit Tests")

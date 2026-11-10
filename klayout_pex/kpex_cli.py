@@ -140,6 +140,7 @@ from .rcx25.netlist_checks import (
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
 from .rcx25.r.r_extractor import RExtractionTechError
+from .rcx25.schematic_device_names import SchematicDeviceNameError, use_schematic_device_names
 from .run_result import DeviceCounts, FileKind, RESULT_FILE_NAME, RunResult, Stage
 from .schematic_devices import schematic_devices
 from .device_models import DeviceModelError, DeviceModels
@@ -300,9 +301,10 @@ class KpexCLI:
                                      help="GDS path (for LVS)")
         if include_schematic:
             group_pex_input.add_argument("--schematic", "-s", dest="schematic_path",
-                                         help="Schematic SPICE netlist path (--check checks its device classes, "
-                                              "their totals and the pins of its top circuit only, use regular LVS "
-                                              "to compare layout against schematic)")
+                                         help="Schematic SPICE netlist path (2.5D output uses unambiguously matched "
+                                              "device names, parallel MOS fingers get _0, _1, ... suffixes. "
+                                              "--check checks device classes, totals and top pins, "
+                                              "use regular LVS for full verification)")
         else:
             # NOTE: a schematic is checked against the extracted netlist, which this command doesn't write
             parser.set_defaults(schematic_path=None)
@@ -884,8 +886,8 @@ class KpexCLI:
                 error(f"Can't read schematic at path {args.schematic_path}")
                 found_errors = True
             else:
-                warning("--schematic is checked for its device classes, their totals and the pins of its "
-                        "top circuit only, use regular LVS to compare layout against schematic")
+                warning("--schematic supplies matched device names for 2.5D output. --check checks device "
+                        "classes, totals and top pins. Use regular LVS for full verification")
 
         # input mode: LVS or existing LVSDB?
         if args.gds_path:
@@ -1522,6 +1524,20 @@ class KpexCLI:
                 removed_device_ids=removed_device_ids,
                 summary=summary
             )
+
+            if args.schematic_path:
+                try:
+                    naming_warnings = use_schematic_device_names(
+                        lvs_netlist=pex_context.lvsdb.netlist(),
+                        rc_netlist=expanded_netlist,
+                        schematic=SpiceReader().read(args.schematic_path),
+                        device_models=tech_info.device_models,
+                        top_cell_name=pex_context.annotated_top_cell.name,
+                        label_ports=summary.label_ports)
+                except (SpiceReaderError, SchematicDeviceNameError) as exc:
+                    naming_warnings = [f'Schematic device names retained from layout: {exc}']
+                for message in naming_warnings:
+                    warning(message)
 
             netlist_printer = self.create_netlist_printer(args, ExtractionEngine.K25D, tech_info)
             netlist_printer.write(expanded_netlist, expanded_netlist_path)
