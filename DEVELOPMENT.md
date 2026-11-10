@@ -256,6 +256,25 @@ Failure behavior:
 - Failed bounds or unevaluable measurements return exit code `1` after writing the netlist,
   including with `--check n`
 
+### Tool version checks
+
+The Python package dependency remains `klayout>=0.30.12`. KLayout `0.30.13` or later
+is recommended for terminal-lookup performance, neighborhood-visitor memory leaks
+and resistance-extraction crash fixes. Older supported versions emit a warning
+and extraction continues.
+
+Extraction commands check the loaded `klayout` Python module separately from the
+KLayout executable used for LVS. With `--lvsdb`, the executable is not needed or
+checked. The report distinguishes required versions from recommendations.
+Format-only netlist commands do not load KLayout for these checks.
+
+`--tool-version-checks on` retains each constraint's severity, `warn` downgrades
+errors to warnings, and `off` disables detection and reporting. An unknown version
+is reported as unchecked and does not block the run.
+
+The `0.30.13` recommendation does not resolve #364: retaining all polygons of a
+device terminal is still tracked in [KLayout #2541](https://github.com/KLayout/klayout/issues/2541).
+
 ## Exporter plugins
 
 Install plugins into the Python environment running KPEX. Register a zero-argument
