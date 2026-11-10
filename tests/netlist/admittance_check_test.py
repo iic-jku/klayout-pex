@@ -26,7 +26,7 @@
 
 import math
 from pathlib import Path
-from typing import Any, List, Sequence
+from typing import Any, Dict, List, Sequence, Tuple
 
 import allure
 import numpy as np
@@ -103,16 +103,18 @@ def test_zero_reference_and_tiny_capacitances_have_no_absolute_error_floor(tmp_p
     assert check.passed == (expected == 0)
 
 
-def test_error_limit_is_inclusive_at_the_floating_point_boundary(tmp_path: Path):
+@pytest.mark.parametrize('frequency_options', [{'frequency': 1e9}, {'frequency_range': (1e8, 1e10)}])
+def test_error_limit_is_inclusive_at_the_floating_point_boundary(tmp_path: Path,
+                                                               frequency_options: Dict[str, Any]):
     source = '.SUBCKT cell A B\nC1 A B 1p\n.ENDS cell\n'
     changed = source.replace('1p', '1.25p')
-    check, = compare(tmp_path, source, changed, AdmittanceCheckOptions(1e9, 0.5))
+    check, = compare(tmp_path, source, changed, AdmittanceCheckOptions(**frequency_options, max_relative_error=0.5))
     # Adjacent representable limits distinguish the inclusive boundary without
     # depending on decimal rounding in the matrix calculation.
     error = check.relative_error
     for limit, passed in ((math.nextafter(error, 0), False), (error, True),
                            (math.nextafter(error, 1), True)):
-        check, = compare(tmp_path, source, changed, AdmittanceCheckOptions(1e9, limit))
+        check, = compare(tmp_path, source, changed, AdmittanceCheckOptions(**frequency_options, max_relative_error=limit))
         assert check.passed == passed
 
 
@@ -215,3 +217,157 @@ def test_unrepresentable_admittance_fails_instead_of_becoming_zero(tmp_path: Pat
     check, = compare(tmp_path, source, source, AdmittanceCheckOptions(1e-308))
     assert not check.passed
     assert 'underflow' in check.error
+
+
+def test_default_frequency_range_has_exact_endpoints_and_logarithmic_spacing():
+    options = AdmittanceCheckOptions(frequency_range=(1e6, 1e10))
+    assert len(options.frequencies) == 41
+    assert options.frequencies[0] == 1e6
+    assert options.frequencies[-1] == 1e10
+    ratios = [right / left for left, right in zip(options.frequencies, options.frequencies[1:])]
+    assert ratios == pytest.approx([10 ** 0.1] * 40, rel=1e-14, abs=0)
+
+
+@pytest.mark.parametrize('bounds, density, expected', [
+    ((3, 30), 1, (3, 30)),
+    ((1, 20), 1, (1, 10, 20)),
+    ((1, 10), 2, (1, math.sqrt(10), 10)),
+    ((1, 1), 10, (1,)),
+    ((1, math.nextafter(1, math.inf)), 10, (1, math.nextafter(1, math.inf))),
+])
+def test_frequency_range_keeps_partial_decades_and_degenerate_endpoints(
+        bounds: Tuple[float, float], density: int, expected: Tuple[float, ...]):
+    options = AdmittanceCheckOptions(frequency_range=bounds, points_per_decade=density)
+    assert options.frequencies == pytest.approx(expected, rel=1e-14, abs=0)
+    assert options.frequencies[0] == bounds[0]
+    assert options.frequencies[-1] == bounds[1]
+    assert all(left < right for left, right in zip(options.frequencies, options.frequencies[1:]))
+
+
+@pytest.mark.parametrize('bounds', [(1e-300, 1e300), (math.nextafter(0, 1), 1e308)])
+def test_wide_frequency_ranges_do_not_overflow_the_frequency_ratio(bounds: Tuple[float, float]):
+    # stop/start overflows, although every requested frequency is representable.
+    options = AdmittanceCheckOptions(frequency_range=bounds, points_per_decade=1)
+    assert options.frequencies[0] == bounds[0]
+    assert options.frequencies[-1] == bounds[1]
+    assert all(math.isfinite(value) and value > 0 for value in options.frequencies)
+    assert all(left < right for left, right in zip(options.frequencies, options.frequencies[1:]))
+
+
+@pytest.mark.parametrize('arguments', [
+    {}, {'frequency': 1, 'frequency_range': (1, 2)},
+    {'frequency_range': (0, 1)}, {'frequency_range': (-1, 1)}, {'frequency_range': (2, 1)},
+    {'frequency_range': (1, math.inf)}, {'frequency_range': (math.nan, 1)},
+    {'frequency_range': (True, 2)}, {'frequency_range': (1,)}, {'frequency_range': (1, 2, 3)},
+    {'frequency_range': '1:2'},
+    {'frequency': 1, 'points_per_decade': 10}, {'frequency': 1, 'include_dc': True},
+    {'frequency_range': (1, 2), 'points_per_decade': 0},
+    {'frequency_range': (1, 2), 'points_per_decade': -1},
+    {'frequency_range': (1, 2), 'points_per_decade': True},
+    {'frequency_range': (1, 2), 'points_per_decade': 1.5},
+    {'frequency_range': (1, 2), 'points_per_decade': '10'},
+    {'frequency_range': (1, 2), 'include_dc': 'false'},
+    {'frequency_range': (1, 2), 'include_dc': 0},
+])
+def test_invalid_frequency_modes_and_modifiers_are_rejected(arguments: Dict[str, Any]):
+    with pytest.raises(ValueError):
+        AdmittanceCheckOptions(**arguments)
+
+
+@pytest.mark.parametrize('density, include_dc, allowed', [
+    (999, False, True), (1000, False, True), (1001, False, False),
+    (999, True, True), (1000, True, False),
+])
+def test_frequency_point_limit_includes_both_endpoints_and_optional_dc(
+        density: int, include_dc: bool, allowed: bool):
+    # One decade needs density + 1 points, with a further point for DC.
+    arguments = dict(frequency_range=(1, 10), points_per_decade=density, include_dc=include_dc)
+    if not allowed:
+        with pytest.raises(ValueError, match='frequency points'):
+            AdmittanceCheckOptions(**arguments)
+    else:
+        options = AdmittanceCheckOptions(**arguments)
+        assert len(options.frequencies) == density + 1 + int(include_dc)
+        assert options.frequencies[0] == (0 if include_dc else 1)
+        assert options.frequencies[-1] == 10
+
+
+@pytest.mark.parametrize('bounds, density', [
+    ((math.nextafter(0, 1), 1e-320), 10), ((1, 2), 10 ** 100),
+])
+def test_unrepresentable_frequency_grids_are_rejected(bounds: Tuple[float, float], density: int):
+    with pytest.raises(ValueError, match='distinct'):
+        AdmittanceCheckOptions(frequency_range=bounds, points_per_decade=density)
+
+
+def test_frequency_sweep_detects_an_interior_error_that_both_endpoints_miss(tmp_path: Path):
+    original = '.SUBCKT cell A B\nRbase A B 100\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n'
+    changed = original.replace('1p', '2p')
+    for frequency in (1e6, 1e11):
+        endpoint, = compare(tmp_path, original, changed, AdmittanceCheckOptions(frequency))
+        assert endpoint.passed
+    options = AdmittanceCheckOptions(frequency_range=(1e6, 1e11))
+    check, = compare(tmp_path, original, changed, options)
+    # For R || (R + C), doubling C gives relative error x/(1+4*x*x), x=2*pi*f*R*C.
+    errors = [(math.tau * frequency * 1e-10) / (1 + 4 * (math.tau * frequency * 1e-10) ** 2)
+              for frequency in options.frequencies]
+    index = max(range(len(errors)), key=errors.__getitem__)
+    assert check.relative_error == pytest.approx(errors[index], rel=1e-13, abs=0)
+    assert check.relative_error > 0.249
+    assert check.worst_frequency == options.frequencies[index]
+    assert check.checked_points == len(options.frequencies)
+    assert not check.passed
+    assert 'sampled frequencies' in check.describe()
+    assert 'worst relative Frobenius error' in check.describe()
+
+
+def test_optional_dc_detects_a_path_that_is_negligible_in_the_ac_range(tmp_path: Path):
+    original = '.SUBCKT cell A B\nC1 A B 1p\n.ENDS cell\n'
+    changed = original.replace('.ENDS', 'Rleak A B 1G\n.ENDS')
+    ac_only, = compare(tmp_path, original, changed, AdmittanceCheckOptions(frequency_range=(1e9, 1e10)))
+    with_dc, = compare(tmp_path, original, changed,
+                       AdmittanceCheckOptions(frequency_range=(1e9, 1e10), include_dc=True))
+    assert ac_only.passed
+    assert not with_dc.passed
+    assert math.isinf(with_dc.relative_error)
+    assert with_dc.worst_frequency == 0
+    assert with_dc.checked_points == ac_only.checked_points + 1
+
+
+@pytest.mark.parametrize('limit, passed', [(19, False), (20, True), (21, True)])
+def test_total_work_limit_covers_both_networks_at_every_frequency(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, limit: int, passed: bool):
+    # Two terminals + reference + two directed couplings cost 5 per network.
+    # Both networks at two frequencies cost exactly 20 work units.
+    monkeypatch.setattr(admittance_check, '_MAX_TOTAL_WORK', limit)
+    source = '.SUBCKT cell A B\nR1 A B 100\n.ENDS cell\n'
+    check, = compare(tmp_path, source, source,
+                      AdmittanceCheckOptions(frequency_range=(1, 10), points_per_decade=1))
+    assert check.passed == passed
+    if not passed:
+        assert 'total work limit' in check.error
+        assert check.checked_points == 1
+        assert check.error_frequency == 10
+        assert check.relative_error is None
+
+
+def test_total_work_limit_is_shared_between_scopes_without_silently_skipping(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(admittance_check, '_MAX_TOTAL_WORK', 19)
+    source = ''.join(f'.SUBCKT cell{i} A B\nR1 A B 100\n.ENDS cell{i}\n' for i in range(3))
+    checks = compare(tmp_path, source, source, AdmittanceCheckOptions(frequency_range=(1, 1)))
+    assert [check.passed for check in checks] == [True, False, False]
+    assert all('total work limit' in check.error for check in checks[1:])
+    assert [check.checked_points for check in checks] == [1, 0, 0]
+
+
+def test_unevaluable_frequency_cannot_turn_a_partial_sweep_into_a_pass(tmp_path: Path):
+    source = '.SUBCKT cell A B\nC1 A B 1\n.ENDS cell\n'
+    check, = compare(tmp_path, source, source,
+                      AdmittanceCheckOptions(frequency_range=(1e307, 1e308), points_per_decade=1))
+    assert not check.passed
+    assert check.checked_points == 1
+    assert check.error_frequency == 1e308
+    assert check.relative_error is None
+    assert check.worst_frequency is None
+    assert 'non-finite' in check.error
