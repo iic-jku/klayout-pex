@@ -124,6 +124,29 @@ class DeviceModels:
         return {p.name.lower(): p.constant for p in mapping.parameters if p.WhichOneof('value') == 'constant'}
 
     @staticmethod
+    def model_parameter_values(mapping: device_models_pb2.DeviceModelMapping,
+                               device: kdb.Device) -> Dict[str, float]:
+        """Model parameters in export order and units, shared by netlist output and model checks."""
+        values: Dict[str, float] = {}
+        for p in mapping.parameters:
+            factor = p.lvs_parameter_factor if p.HasField('lvs_parameter_factor') else 1.0
+            match p.WhichOneof('value'):
+                case 'lvs_parameter_name':
+                    value = device.parameter(p.lvs_parameter_name) * factor
+                case 'lvs_area_perimeter_side':
+                    side = p.lvs_area_perimeter_side
+                    long_side, short_side = rectangle_sides(area=device.parameter(side.area_parameter_name),
+                                                            perimeter=device.parameter(side.perimeter_parameter_name))
+                    is_long = side.side == device_models_pb2.LVSAreaPerimeterSide.SIDE_LONG
+                    value = (long_side if is_long else short_side) * factor
+                case 'constant':
+                    value = p.constant
+                case _:
+                    raise DeviceModelError(f'{mapping.lvs_device_class_name}: parameter {p.name!r} has no value')
+            values[p.name] = value
+        return values
+
+    @staticmethod
     def lvs_parameter_values(mapping: device_models_pb2.DeviceModelMapping,
                              element: SpiceElement) -> Dict[str, float]:
         """
