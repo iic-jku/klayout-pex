@@ -77,16 +77,21 @@ def test_reduced_netlist_has_the_ac_response_of_the_original(tmp_path, seed: int
 @pytest.mark.slow
 @pytest.mark.parametrize('simulate', [pytest.param(ngspice_port_admittance, marks=requires_ngspice, id='ngspice'),
                                      pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce')])
+@pytest.mark.parametrize('decades', [(9, 9), (8, 9), (9, 10)])
 def test_requested_check_error_matches_independent_simulation(
-        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]]):
+        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]], decades: Tuple[int, int]):
     original = write(str(tmp_path), 'series.spice', '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n')
     reduced = str(tmp_path / 'reduced.spice')
     result = reduce_spice_netlist(original, reduced, ReductionOptions(ticer_tau=1e-9),
                                   check_options=AdmittanceCheckOptions(1e9))
-    frequencies, before = simulate(original, 'cell', ['A', 'B'], (9, 9), str(tmp_path))
-    _, after = simulate(reduced, 'cell', ['A', 'B'], (9, 9), str(tmp_path))
-    assert frequencies == pytest.approx([1e9])
-    observed = np.linalg.norm(after[0] - before[0]) / np.linalg.norm(before[0])
+    # The requested frequency may be the only point or either endpoint of a sweep.
+    frequencies, before = simulate(original, 'cell', ['A', 'B'], decades, str(tmp_path))
+    after_frequencies, after = simulate(reduced, 'cell', ['A', 'B'], decades, str(tmp_path))
+    expected = np.array([10.0 ** decade for decade in range(decades[0], decades[1] + 1)])
+    assert frequencies == pytest.approx(expected)
+    assert after_frequencies == pytest.approx(expected)
+    index = 9 - decades[0]
+    observed = np.linalg.norm(after[index] - before[index]) / np.linalg.norm(before[index])
     check, = result.admittance_checks
     assert not check.passed
     assert check.relative_error == pytest.approx(observed, rel=1e-7)
