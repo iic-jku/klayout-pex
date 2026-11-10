@@ -498,19 +498,23 @@ class SidewallAndFringeExtractor:
                 outside_layer_name]
 
             polygons_by_net: Dict[NetName, List[kdb.PolygonWithProperties]] = defaultdict(list)
+            shield_is_empty = shield.is_empty()
+            shield_intervals = self._full_width_shield_intervals(shield, edge_interval) if not shield_is_empty else None
 
             for outside_net, p in candidates:
-                if shield.is_empty():
+                if shield_is_empty:
                     polygons_by_net[outside_net].append(p)
                 else:
-                    unshielded_region = kdb.Region(p)
-                    unshielded_region.enable_properties()
-                    unshielded_region -= shield
-                    if unshielded_region.is_empty():
-                        # TODO: log?
-                        continue
+                    box = p.bbox() if shield_intervals is not None and p.is_box() else None
+                    if box is not None and edge_interval[0] <= box.left and box.right <= edge_interval[1]:
+                        unshielded_polygons = self._unshielded_boxes(box, shield_intervals)
+                    else:
+                        unshielded_region = kdb.Region(p)
+                        unshielded_region.enable_properties()
+                        unshielded_region -= shield
+                        unshielded_polygons = unshielded_region.each()
 
-                    for up in unshielded_region.each():
+                    for up in unshielded_polygons:
                         properties = {'net': outside_net}
                         if checks is not None and p.property(CHECK_DEVICE_PROPERTY) is not None:
                             properties[CHECK_DEVICE_PROPERTY] = p.property(CHECK_DEVICE_PROPERTY)
@@ -562,6 +566,38 @@ class SidewallAndFringeExtractor:
                             kdb.Edge(trapezoid.left, (trapezoid.near_left + trapezoid.far_left) / 2,
                                       trapezoid.right, (trapezoid.near_right + trapezoid.far_right) / 2),
                             profile, lateral_shield, geometry_restorer)
+
+        @staticmethod
+        def _full_width_shield_intervals(shield: kdb.Region,
+                                         edge_interval: EdgeInterval) -> Optional[List[Tuple[int, int]]]:
+            # Rectilinear edge neighborhoods contain boxes spanning the whole
+            # interval. Their union only cuts the vertical extent of a box, so
+            # subtraction needs no general polygon operation per candidate.
+            intervals = []
+            for polygon in shield.each():
+                if not polygon.is_box():
+                    return None
+                box = polygon.bbox()
+                if box.left > edge_interval[0] or box.right < edge_interval[1]:
+                    return None
+                intervals.append((box.bottom, box.top))
+            return sorted(intervals)
+
+        @staticmethod
+        def _unshielded_boxes(box: kdb.Box, shield_intervals: List[Tuple[int, int]]) -> Iterator[kdb.Box]:
+            near = box.bottom
+            for bottom, top in shield_intervals:
+                if top <= near:
+                    continue
+                if bottom >= box.top:
+                    break
+                if bottom > near:
+                    yield kdb.Box(box.left, near, box.right, bottom)
+                near = max(near, top)
+                if near >= box.top:
+                    return
+            if near < box.top:
+                yield kdb.Box(box.left, near, box.right, box.top)
 
         def _record_fringe(self, key: SideOverlapKey, edge: kdb.EdgeWithProperties,
                            cap_femto: float, polygon: kdb.PolygonWithProperties,

@@ -349,6 +349,69 @@ class FringeCapTest(unittest.TestCase):
                             ('A', '(0,2000;2000,4000)'),
                             ('B', '(0,100;2000,500)'), ('B', '(0,1000;2000,2000)')]
 
+    def test_rectangular_shields_preserve_exact_subtraction_and_cutoffs(self):
+        # A one-grid-step sliver must survive at both ends. Overlapping, nested,
+        # touching and repeated shields must act as their union, in either order.
+        target = kdb.Box(0, 100, 200000, 1000)
+        cases = [[(0, end)] for end in (99, 100, 101, 999, 1000, 1001)]
+        cases += [[(start, 1100)] for start in (99, 100, 101, 999, 1000, 1001)]
+        cases += [[(200, 400), (300, 500)], [(200, 500), (300, 400)],
+                  [(200, 400), (400, 600)], [(200, 400), (200, 400)],
+                  [(200, 400), (600, 800)], [(-100, 1100)], []]
+        for intervals in cases:
+            for reverse in (False, True):
+                with self.subTest(intervals=intervals, reverse=reverse):
+                    ordered = list(reversed(intervals)) if reverse else intervals
+                    shield = kdb.Region([kdb.Box(-1, near, 200001, far) for near, far in ordered])
+                    reference = kdb.Region(target) - shield
+                    visitor = fringe_visitor(30.0, True)
+                    visitor.report = mock.Mock(spec=ExtractionReporter)
+                    overlap = visitor.tech_info.overlap_cap_by_layer_names['inside']['outside']
+                    side = visitor.tech_info.side_overlap_cap_by_layer_names['inside']['outside']
+                    expected = []
+                    for polygon in reference.each():
+                        box = polygon.bbox()
+                        value = visitor.fringe_cap(box.width(), box.bottom, box.top, overlap, side)
+                        if value > 0.0001:
+                            expected.append((str(box), value))
+                    # A full-width rectangular shield only cuts the vertical
+                    # interval. It must not allocate a general polygon region
+                    # for every candidate in a large edge neighborhood (#501).
+                    with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+                                    wraps=kdb.Region) as region_factory:
+                        visitor.emit_fringe('inside', 'outside',
+                                            kdb.EdgeWithProperties(kdb.Edge(0, 0, 200000, 0), {'net': 'inside_net'}),
+                                            (0, 200000),
+                                            [kdb.PolygonWithProperties(target, {'net': 'A'})], shield,
+                                            None, GeometryRestorer(kdb.IMatrix3d()))
+                    actual = [(str(call.kwargs['outside_polygon'].bbox()),
+                               call.kwargs['sideoverlap_cap'].cap_value)
+                              for call in visitor.report.output_sideoverlap.call_args_list]
+                    self.assertEqual(actual, expected)
+                    self.assertEqual(region_factory.call_count, 0)
+
+    def test_partial_width_and_slanted_shields_keep_general_subtraction(self):
+        # A shield that stops one grid step short, or has a diagonal boundary,
+        # cannot be represented by full-width vertical intervals.
+        polygon = kdb.Polygon(kdb.Box(0, 100, 4000, 6000))
+        cases = [(polygon, kdb.Region(kdb.Box(1, 500, 4000, 1500))),
+                 (polygon, kdb.Region(kdb.Box(0, 500, 3999, 1500))),
+                 (polygon, kdb.Region(kdb.Polygon([kdb.Point(0, 500), kdb.Point(0, 1500), kdb.Point(4000, 500)]))),
+                 (kdb.Polygon([kdb.Point(0, 100), kdb.Point(0, 6000), kdb.Point(4000, 6000)]),
+                  kdb.Region(kdb.Box(0, 500, 4000, 1500))),
+                 (kdb.Polygon(kdb.Box(-1, 100, 4000, 6000)), kdb.Region(kdb.Box(0, 500, 4000, 1500))),
+                 (kdb.Polygon(kdb.Box(0, 100, 4001, 6000)), kdb.Region(kdb.Box(0, 500, 4000, 1500)))]
+        for polygon, shield in cases:
+            with self.subTest(polygon=str(polygon), shield=str(shield)):
+                reference = kdb.Region(polygon) - shield
+                expected = math.fsum(emitted_fringe(fringe_visitor(30.0, True), part)
+                                     for part in reference.each())
+                with mock.patch('klayout_pex.rcx25.c.sidewall_and_fringe_extractor.kdb.Region',
+                                wraps=kdb.Region) as region_factory:
+                    actual = emitted_fringe(fringe_visitor(30.0, True), polygon, shield)
+                self.assertAlmostEqual(actual, expected, delta=expected * 1e-14)
+                self.assertGreater(region_factory.call_count, 0)
+
     def test_shield_boundary_leaves_only_the_uncovered_part(self):
         # One grid step below, at, and above complete coverage catches lost slivers
         # and shapes incorrectly retained when a shield exactly covers them.
@@ -369,17 +432,20 @@ class FringeCapTest(unittest.TestCase):
         # At this edge length both pieces fall below the 0.0001 fF cutoff, while
         # their union exceeds it. Shielding must not create that extra capacitor.
         for intervals, count in (([(0, 1000), (1000, 8000)], 0), ([(0, 8000)], 1)):
-            with self.subTest(intervals=intervals):
-                visitor = fringe_visitor(30.0, True)
-                visitor.report = mock.Mock(spec=ExtractionReporter)
-                visitor.emit_fringe('inside', 'outside',
-                                    kdb.EdgeWithProperties(kdb.Edge(0, 0, 3, 0), {'net': 'inside_net'}),
-                                    (0, 3),
-                                    [kdb.PolygonWithProperties(kdb.Box(0, near, 3, far), {'net': 'A'})
-                                     for near, far in intervals],
-                                    kdb.Region(kdb.Box(10, 0, 20, 8000)),
-                                    None, GeometryRestorer(kdb.IMatrix3d()))
-                assert visitor.report.output_sideoverlap.call_count == count
+            # Both the general subtraction and full-width interval path must
+            # preserve each source polygon's cutoff, even for touching shapes.
+            for shield in (kdb.Box(10, 0, 20, 8000), kdb.Box(0, -2, 3, -1)):
+                with self.subTest(intervals=intervals, shield=str(shield)):
+                    visitor = fringe_visitor(30.0, True)
+                    visitor.report = mock.Mock(spec=ExtractionReporter)
+                    visitor.emit_fringe('inside', 'outside',
+                                        kdb.EdgeWithProperties(kdb.Edge(0, 0, 3, 0), {'net': 'inside_net'}),
+                                        (0, 3),
+                                        [kdb.PolygonWithProperties(kdb.Box(0, near, 3, far), {'net': 'A'})
+                                         for near, far in intervals],
+                                        kdb.Region(shield),
+                                        None, GeometryRestorer(kdb.IMatrix3d()))
+                    assert visitor.report.output_sideoverlap.call_count == count
 
     def test_large_neighbors_are_split_without_changing_geometry_or_properties(self):
         comb = comb_region(128)
