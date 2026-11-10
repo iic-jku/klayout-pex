@@ -157,7 +157,7 @@ def reduce_spice_netlist(input_path: str,
     :param reduction_options: passes and thresholds used to reduce each scope
     :param keep: nodes to keep in addition to the protected ones (case-insensitive),
                  each must be a node of at least one network
-    :param check_options: compare the written RC admittance with the input at this frequency;
+    :param check_options: compare the written RC admittance with the input at the requested frequencies;
                           failed checks are returned in ``check_problems``, keeping the output for inspection
     :raises OSError: if the input can't be read or the output can't be written
     :raises NetlistReadError: if the netlist's .SUBCKT and .ENDS don't match

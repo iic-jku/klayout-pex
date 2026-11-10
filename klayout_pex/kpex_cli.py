@@ -708,6 +708,11 @@ class KpexCLI:
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
+        if args.command == 'extract':
+            try:
+                args.admittance_check_options = admittance_check_options(args)
+            except ValueError as exc:
+                parser_extract.error(str(exc))
         if args.port_labels == 'top' and args.gds_path is None:
             parser = parser_extract if args.command == 'extract' else parser_pex25d
             parser.error("--port-labels top needs --gds, also with --lvsdb, "
@@ -801,13 +806,9 @@ class KpexCLI:
             if args.reduce_tau is not None and args.reduce_mode != ReductionMode.TICER:
                 error(f"--reduce-tau applies to --reduce ticer only, not to --reduce {args.reduce_mode}")
                 found_errors = True
-            try:
-                args.admittance_check_options = admittance_check_options(args)
-                if args.admittance_check_options is not None and args.reduce_mode == ReductionMode.NONE:
-                    error('--check-frequency needs --reduce floating or --reduce ticer')
-                    found_errors = True
-            except ValueError as exc:
-                error(str(exc))
+            if args.admittance_check_options is not None and args.reduce_mode == ReductionMode.NONE:
+                option = '--check-frequency-range' if args.check_frequency_range is not None else '--check-frequency'
+                error(f'{option} needs --reduce floating or --reduce ticer')
                 found_errors = True
 
             if args.exclusion_marker_layers and args.exclusion_marker_mode == ExclusionMarkerMode.IGNORE:

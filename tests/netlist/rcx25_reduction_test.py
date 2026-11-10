@@ -225,6 +225,8 @@ def test_kpex_without_reduce_writes_the_full_netlist_to_out_netlist(out_option: 
      "--reduce-tau applies to --reduce ticer only, not to --reduce none"),
     (PEXMode.RC, ['--check-frequency', '1G'],
      "--check-frequency needs --reduce floating or --reduce ticer"),
+    (PEXMode.RC, ['--check-frequency-range', '1Meg', '1G'],
+     "--check-frequency-range needs --reduce floating or --reduce ticer"),
 ])
 def test_kpex_reduce_option_errors(mode: PEXMode, reduce_args: List[str], message: str):
     # NOTE: found by the argument validation, before LVS
@@ -266,16 +268,24 @@ def test_kpex_reduce_invalid_values_are_usage_errors(reduce_args: List[str], mes
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_extraction_can_check_its_reduced_admittance():
+@pytest.mark.parametrize('check_args', [
+    ['--check-frequency', '1G'],
+    ['--check-frequency-range', '1Meg', '1G', '--check-points-per-decade', '2', '--check-include-dc'],
+])
+def test_extraction_can_check_its_reduced_admittance(check_args: List[str]):
     cli = extraction.run_kpex('test_patterns', 'nfet_li1.gds.gz',
-                              extra_args=['--reduce', 'ticer', '--reduce-tau', '1f', '--check-frequency', '1G'])
+                              extra_args=['--reduce', 'ticer', '--reduce-tau', '1f', *check_args])
     assert cli.run_result.check_problems == []
     assert Path(cli.rcx25_reduced_netlist_path).is_file()
 
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disabled(tmp_path: Path):
+@pytest.mark.parametrize('check_args', [
+    ['--check-frequency', '0'], ['--check-frequency-range', '1', '10', '--check-include-dc'],
+])
+def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disabled(tmp_path: Path,
+                                                                                 check_args: List[str]):
     # Inject a real circuit error after reduction, not a mocked check result.
     # Doubling every conductance doubles the DC terminal-admittance matrix.
     def faulty_reduction(network: RCNetwork, options: ReductionOptions) -> ReductionStatistics:
@@ -289,8 +299,26 @@ def test_requested_reduction_check_detects_a_bad_reducer_even_with_check_disable
     with mock.patch('klayout_pex.netlist.netlist_reduction.reduce_network', side_effect=faulty_reduction):
         code, output = run_cli(cli.main, ['main', 'extract', '--pdk', extraction.pdk.name,
                                           '--mode', 'RC', '--lvsdb', fixture, '--out-dir', str(tmp_path),
-                                          '--2.5D', '--reduce', 'ticer', '--check', 'n', '--check-frequency', '0'])
+                                          '--2.5D', '--reduce', 'ticer', '--check', 'n', *check_args])
     assert code == ExitCode.DIAGNOSTIC_ERRORS, output
     assert 'reduced netlist failed its requested admittance check' in output
-    assert any('relative Frobenius error 1,' in problem for problem in cli.run_result.check_problems)
+    assert any('relative Frobenius error 1' in problem for problem in cli.run_result.check_problems)
     assert Path(cli.rcx25_reduced_netlist_path).is_file()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('check_args', [
+    ['--check-points-per-decade', '10'], ['--check-include-dc'],
+    ['--check-max-relative-error', '0.1'], ['--check-frequency-range', '1G', '1Meg'],
+    ['--check-frequency-range', '0', '1G'],
+    ['--check-frequency-range', '1', '10', '--check-points-per-decade', '1001'],
+])
+def test_invalid_extraction_check_options_fail_before_loading_technology(check_args: List[str], tmp_path: Path):
+    with mock.patch('klayout_pex.kpex_cli.TechInfo.from_json') as load_technology:
+        code, output = run_cli(KpexCLI().main, ['main', 'extract', '--pdk', extraction.pdk.name,
+                                               '--gds', str(tmp_path / 'missing.gds'), '--2.5D',
+                                               '--mode', 'RC', '--reduce', 'ticer', *check_args])
+    assert code == ExitCode.USAGE, output
+    assert '--check-' in output
+    load_technology.assert_not_called()

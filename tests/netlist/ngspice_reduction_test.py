@@ -35,7 +35,7 @@ import numpy as np
 import pytest
 
 from klayout_pex.netlist.netlist_reduction import reduce_spice_netlist
-from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions
+from klayout_pex.netlist.admittance_check import AdmittanceCheckOptions, check_reduction_admittance
 from klayout_pex.netlist.rc_reduction import ReductionOptions
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.xyce import xyce_port_admittance, requires_xyce
@@ -43,6 +43,8 @@ from tests.common.rc_networks import port_admittance, random_extracted_network, 
 
 parent_suite = "kpex/netlist reduce"
 tags = ("Netlist", "Reduction", "ngspice")
+SIMULATORS = [pytest.param(ngspice_port_admittance, marks=requires_ngspice, id='ngspice'),
+              pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce')]
 
 
 @allure.parent_suite(parent_suite)
@@ -75,23 +77,53 @@ def test_reduced_netlist_has_the_ac_response_of_the_original(tmp_path, seed: int
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 @pytest.mark.slow
-@pytest.mark.parametrize('simulate', [pytest.param(ngspice_port_admittance, marks=requires_ngspice, id='ngspice'),
-                                     pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce')])
+@pytest.mark.parametrize('simulate', SIMULATORS)
+@pytest.mark.parametrize('range_mode', [False, True])
 @pytest.mark.parametrize('decades', [(9, 9), (8, 9), (9, 10)])
 def test_requested_check_error_matches_independent_simulation(
-        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]], decades: Tuple[int, int]):
+        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]], decades: Tuple[int, int],
+        range_mode: bool):
     original = write(str(tmp_path), 'series.spice', '.SUBCKT cell A B\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n')
     reduced = str(tmp_path / 'reduced.spice')
-    result = reduce_spice_netlist(original, reduced, ReductionOptions(ticer_tau=1e-9),
-                                  check_options=AdmittanceCheckOptions(1e9))
+    options = (AdmittanceCheckOptions(frequency_range=(10.0 ** decades[0], 10.0 ** decades[1]),
+                                      points_per_decade=1) if range_mode else AdmittanceCheckOptions(1e9))
+    result = reduce_spice_netlist(original, reduced, ReductionOptions(ticer_tau=1e-9), check_options=options)
     # The requested frequency may be the only point or either endpoint of a sweep.
     frequencies, before = simulate(original, 'cell', ['A', 'B'], decades, str(tmp_path))
     after_frequencies, after = simulate(reduced, 'cell', ['A', 'B'], decades, str(tmp_path))
     expected = np.array([10.0 ** decade for decade in range(decades[0], decades[1] + 1)])
     assert frequencies == pytest.approx(expected)
     assert after_frequencies == pytest.approx(expected)
-    index = 9 - decades[0]
-    observed = np.linalg.norm(after[index] - before[index]) / np.linalg.norm(before[index])
+    observed_errors = np.linalg.norm(after - before, axis=(1, 2)) / np.linalg.norm(before, axis=(1, 2))
+    index = int(np.argmax(observed_errors)) if range_mode else 9 - decades[0]
+    observed = observed_errors[index]
     check, = result.admittance_checks
     assert not check.passed
     assert check.relative_error == pytest.approx(observed, rel=1e-7)
+    assert check.worst_frequency == pytest.approx(frequencies[index])
+    assert check.checked_points == (len(frequencies) if range_mode else 1)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.slow
+@pytest.mark.parametrize('simulate', SIMULATORS)
+def test_frequency_range_interior_peak_matches_independent_simulation(
+        tmp_path: Path, simulate: Callable[..., Tuple[np.ndarray, np.ndarray]]):
+    # Both ends pass 1%, but the parallel resistor makes the interior error peak.
+    source = '.SUBCKT cell A B\nRbase A B 100\nR1 A n 100\nC1 n B 1p\n.ENDS cell\n'
+    original = write(str(tmp_path), 'original.spice', source)
+    changed = write(str(tmp_path), 'changed.spice', source.replace('1p', '2p'))
+    options = AdmittanceCheckOptions(frequency_range=(1e6, 1e11), points_per_decade=1)
+    check, = check_reduction_admittance(original, changed, options)
+    frequencies, before = simulate(original, 'cell', ['A', 'B'], (6, 11), str(tmp_path))
+    after_frequencies, after = simulate(changed, 'cell', ['A', 'B'], (6, 11), str(tmp_path))
+    assert frequencies == pytest.approx(options.frequencies)
+    assert after_frequencies == pytest.approx(options.frequencies)
+    observed_errors = np.linalg.norm(after - before, axis=(1, 2)) / np.linalg.norm(before, axis=(1, 2))
+    worst = int(np.argmax(observed_errors))
+    assert observed_errors[0] < 0.01 and observed_errors[-1] < 0.01
+    assert 0 < worst < len(frequencies) - 1
+    assert not check.passed
+    assert check.relative_error == pytest.approx(observed_errors[worst], rel=1e-7)
+    assert check.worst_frequency == pytest.approx(frequencies[worst])
