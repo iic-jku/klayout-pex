@@ -1,0 +1,37 @@
+SUBPROCESS __kpex__:kpex_cli.py:1888 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/nfet_m1_redux.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:954 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_m1_redux__nfet_m1_redux/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2048 Peak memory (resident set size) after preparing the LVSDB: 863.2 MiB
+INFO     __kpex__:kpex_cli.py:2052 (32, 0) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2052 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:2052 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2052 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:kpex_cli.py:2052 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:1485 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:483 LVSDB: found 3pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 863.2 MiB
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 863.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1517 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1517 C1;$3;D.$0.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C2;$3;S.$0.Metal1;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C3;$3;VSUBS;0.073;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C4;$3.$0.Metal1;VSUBS;0.108;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C5;$3.$1.Poly2;VSUBS;0.092;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C6;D;S;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C7;D;VSUBS;0.047;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C8;D.$0.Metal1;S.$0.Metal1;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C9;D.$0.Metal1;S.P0.Nplus;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C10;D.$0.Metal1;VSUBS;0.044;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C11;D.P0.Nplus;S.$0.Metal1;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C12;S;VSUBS;0.047;
+SUBPROCESS __kpex__:kpex_cli.py:1517 C13;S.$0.Metal1;VSUBS;0.044;
+SUBPROCESS __kpex__:kpex_cli.py:1517 R1;$3;$3.$1.Poly2;;12.514
+SUBPROCESS __kpex__:kpex_cli.py:1517 R2;$3.$0.Metal1;$3.$1.Poly2;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1517 R3;D;D.$0.Metal1;;0.208
+SUBPROCESS __kpex__:kpex_cli.py:1517 R4;D.$0.Metal1;D.P0.Nplus;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1517 R5;S;S.$0.Metal1;;0.208
+SUBPROCESS __kpex__:kpex_cli.py:1517 R6;S.$0.Metal1;S.P0.Nplus;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1520 /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_m1_redux__nfet_m1_redux/nfet_m1_redux_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1539 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_m1_redux__nfet_m1_redux/nfet_m1_redux_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1574 Peak memory (resident set size) after the netlist: 863.3 MiB
+INFO     __kpex__:kpex_cli.py:1918 Peak memory (resident set size) after the run: 863.4 MiB
