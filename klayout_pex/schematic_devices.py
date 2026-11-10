@@ -48,6 +48,7 @@ class SchematicDevice:
     lvs_parameters: Dict[str, float] = field(default_factory=dict)
 
     m: float = 1.0  # the multiplier of SPICE
+    nodes: List[str] = field(default_factory=list)  # flattened connections when resolve_nodes is requested
 
 
 @dataclass
@@ -59,6 +60,10 @@ class SchematicDevices:
     # e.g. a device without a model mapping, or a call of a subcircuit the schematic doesn't define
     device_names_by_unknown_model: Dict[str, List[str]] = field(default_factory=dict)
 
+    # Native elements without a model cannot be mapped to an LVS device class.
+    # Totals ignore them, but topology-dependent naming must retain this gap.
+    device_names_without_model: List[str] = field(default_factory=list)
+
     @property
     def device_names_by_class_name(self) -> Dict[LVSDeviceClassName, List[str]]:
         return {c: [d.name for d in devices] for c, devices in self.devices_by_class_name.items()}
@@ -66,10 +71,12 @@ class SchematicDevices:
 
 def schematic_devices(netlist: SpiceNetlist,
                       device_models: DeviceModels,
-                      top_cell_name: str) -> SchematicDevices:
+                      top_cell_name: str,
+                      resolve_nodes: bool = False) -> SchematicDevices:
     """
     :param top_cell_name: the cell of the layout, whose subcircuit in the schematic has the devices,
                           else those of the subcircuits that no element calls, and the elements outside of them
+    :param resolve_nodes: resolve hierarchical node connections for topology comparison
     :raises SpiceEvaluationError: if a value has no number that a device class or the totals of a device depend on
     """
     def parameter_names(element: SpiceElement) -> Set[str]:
@@ -82,13 +89,15 @@ def schematic_devices(netlist: SpiceNetlist,
     hierarchy = SpiceHierarchy(netlist)
     top = hierarchy.subcircuit(top_cell_name)
     if top is not None:
-        elements = hierarchy.flat_elements(top, parameter_names)
+        elements = hierarchy.flat_elements(top, parameter_names, resolve_nodes=resolve_nodes)
     else:
-        elements = chain(*(hierarchy.flat_elements(s, parameter_names) for s in hierarchy.uncalled_subcircuits()),
-                         hierarchy.flat_elements(parameter_names=parameter_names))
+        elements = chain(*(hierarchy.flat_elements(s, parameter_names, resolve_nodes=resolve_nodes)
+                           for s in hierarchy.uncalled_subcircuits()),
+                         hierarchy.flat_elements(parameter_names=parameter_names, resolve_nodes=resolve_nodes))
 
     devices_by_class_name: Dict[LVSDeviceClassName, List[SchematicDevice]] = defaultdict(list)
     device_names_by_unknown_model: Dict[str, List[str]] = defaultdict(list)
+    device_names_without_model: List[str] = []
     for e in elements:
         class_name = device_models.lvs_device_class_name(e.element)
         if class_name is not None:
@@ -96,9 +105,13 @@ def schematic_devices(netlist: SpiceNetlist,
             devices_by_class_name[class_name].append(
                 SchematicDevice(name=e.path,
                                 lvs_parameters=device_models.lvs_parameter_values(mapping, e.element),
-                                m=e.element.parameters.get('m', 1.0)))
+                                m=e.element.parameters.get('m', 1.0),
+                                nodes=e.element.nodes))
         elif e.element.model is not None:
             device_names_by_unknown_model[e.element.model].append(e.path)
+        else:
+            device_names_without_model.append(e.path)
 
     return SchematicDevices(devices_by_class_name=dict(devices_by_class_name),
-                            device_names_by_unknown_model=dict(device_names_by_unknown_model))
+                            device_names_by_unknown_model=dict(device_names_by_unknown_model),
+                            device_names_without_model=device_names_without_model)

@@ -92,10 +92,11 @@ Vg g 0 1
 """
 
 
-def flat_elements(text: str, subcircuit_name: Optional[str] = None) -> Dict[str, SpiceElement]:
+def flat_elements(text: str, subcircuit_name: Optional[str] = None,
+                  resolve_nodes: bool = False) -> Dict[str, SpiceElement]:
     hierarchy = SpiceHierarchy(SpiceReader().parse(text))
     subcircuit = hierarchy.subcircuit(subcircuit_name) if subcircuit_name else None
-    return {e.path: e.element for e in hierarchy.flat_elements(subcircuit)}
+    return {e.path: e.element for e in hierarchy.flat_elements(subcircuit, resolve_nodes=resolve_nodes)}
 
 
 def evaluation_error(text: str) -> str:
@@ -109,6 +110,39 @@ def evaluation_error(text: str) -> str:
 @allure.parent_suite("Unit Tests")
 @allure.tag("Netlist", "SPICE")
 class SpiceHierarchyTest(unittest.TestCase):
+    def test_flattened_nodes_follow_ports_and_keep_internal_nodes_scoped(self):
+        # Repeated cells share their connected pins and globals, never their
+        # unconnected internal nodes. Ground remains global without `.global`.
+        elements = flat_elements('''\
+.global VSS
+.subckt half IN OUT
+R1 IN middle 1k
+R2 middle OUT 2k
+R3 middle vss 3k
+R4 OUT 0 4k
+.ends
+.subckt top a b c
+Xleft a b half
+Xright b c half
+.ends
+''', 'top', resolve_nodes=True)
+        self.assertEqual(['a', 'Xleft.middle'], elements['Xleft.R1'].nodes)
+        self.assertEqual(['Xleft.middle', 'b'], elements['Xleft.R2'].nodes)
+        self.assertEqual(['b', 'Xright.middle'], elements['Xright.R1'].nodes)
+        self.assertEqual(['Xright.middle', 'c'], elements['Xright.R2'].nodes)
+        self.assertEqual(['Xleft.middle', 'VSS'], elements['Xleft.R3'].nodes)
+        self.assertEqual(['c', '0'], elements['Xright.R4'].nodes)
+
+    def test_subcircuit_node_count_must_match_its_ports(self):
+        # Too few and too many connections must not silently truncate `zip`.
+        for nodes in ('a', 'a b c'):
+            with self.subTest(nodes=nodes):
+                source = f'.subckt pair a b\nR1 a b 1k\n.ends\nX1 {nodes} pair\n'
+                with self.assertRaisesRegex(SpiceEvaluationError, 'X1 has'):
+                    flat_elements(source, resolve_nodes=True)
+                # Existing parameter-only callers still accept partial snippets.
+                self.assertEqual(1000.0, flat_elements(source)['X1.R1'].value)
+
     def test_scopes_of_parameters(self):
         elements = flat_elements(SCOPES)
         self.assertEqual(RESISTANCES, {p: e.value for p, e in elements.items() if e.kind == 'R'})

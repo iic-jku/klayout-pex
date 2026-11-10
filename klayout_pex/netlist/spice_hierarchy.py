@@ -80,6 +80,7 @@ class SpiceHierarchy:
         self.netlist = netlist
         self._subcircuit_by_key = {s.name.casefold(): s for s in netlist.subcircuits}
         self._top_scope = ParameterScope(netlist.parameters)
+        self._global_nodes = {name.casefold(): name for name in ('0', *netlist.global_nodes)}
 
     def subcircuit(self, name: str) -> Optional[SpiceSubcircuit]:
         """
@@ -97,7 +98,8 @@ class SpiceHierarchy:
 
     def flat_elements(self,
                       subcircuit: Optional[SpiceSubcircuit] = None,
-                      parameter_names: Optional[Callable[[SpiceElement], Collection[str]]] = None
+                      parameter_names: Optional[Callable[[SpiceElement], Collection[str]]] = None,
+                      resolve_nodes: bool = False
                       ) -> Iterator[HierarchyElement]:
         """
         The elements of the subcircuit (with the defaults of its parameters), or else of the top level,
@@ -106,13 +108,15 @@ class SpiceHierarchy:
         :param parameter_names: the parameters to evaluate of an element, which then has only those, and no value,
                                 as the others may have no number here (e.g. of a .param of a model library
                                 the netlist doesn't include); by default all of them, and its value
+        :param resolve_nodes: follow the ordered port connections of calls and scope internal nodes by
+                              instance path, keeping ground and declared globals shared between instances
         :raises SpiceEvaluationError: if a value has no number (e.g. of a parameter that is not defined),
-                                      or a subcircuit calls itself
+                                      a subcircuit calls itself, or resolving nodes finds a wrong port count
         """
         if subcircuit is None:
-            return self._flat_elements(self.netlist.elements, self._top_scope, '', (), parameter_names)
+            return self._flat_elements(self.netlist.elements, self._top_scope, '', (), parameter_names, {}, resolve_nodes)
         return self._flat_elements(subcircuit.elements, self._call_scope(None, subcircuit, self._top_scope),
-                                   '', (subcircuit.name.casefold(),), parameter_names)
+                                   '', (subcircuit.name.casefold(),), parameter_names, {}, resolve_nodes)
 
     # --------------------------------------------------------------------------------
 
@@ -138,24 +142,36 @@ class SpiceHierarchy:
                        scope: ParameterScope,
                        path: str,
                        calls: Tuple[str, ...],
-                       parameter_names: Optional[Callable[[SpiceElement], Collection[str]]]
+                       parameter_names: Optional[Callable[[SpiceElement], Collection[str]]],
+                       port_nodes: Mapping[str, str],
+                       resolve_nodes: bool
                        ) -> Iterator[HierarchyElement]:
+        def node_name(node: str) -> str:
+            key = node.casefold()
+            return port_nodes.get(key, self._global_nodes.get(key, f"{path}{node}"))
+
         for element in elements:
             name = f"{path}{element.name}"
+            nodes = [node_name(node) for node in element.nodes] if resolve_nodes else element.nodes
             if element.kind != 'X':
-                yield HierarchyElement(path=name, element=self._evaluated(element, scope, name, parameter_names))
+                yield HierarchyElement(path=name,
+                                       element=replace(self._evaluated(element, scope, name, parameter_names), nodes=nodes))
                 continue
             subcircuit = self.subcircuit(element.model) if element.model is not None else None
             call_scope = self._call_scope(element, subcircuit, scope)
             evaluated = self._evaluated(element, call_scope, name, parameter_names)
             if subcircuit is None:
-                yield HierarchyElement(path=name, element=evaluated)
+                yield HierarchyElement(path=name, element=replace(evaluated, nodes=nodes))
                 continue
             key = subcircuit.name.casefold()
             if key in calls:
                 raise SpiceEvaluationError(f"{name} calls the subcircuit {subcircuit.name} within itself")
+            if resolve_nodes and len(nodes) != len(subcircuit.ports):
+                raise SpiceEvaluationError(f"{name} has {len(nodes)} nodes, but {subcircuit.name} has "
+                                           f"{len(subcircuit.ports)} ports")
             yield from self._flat_elements(subcircuit.elements, call_scope, f"{name}.", calls + (key,),
-                                           parameter_names)
+                                           parameter_names, dict(zip((p.casefold() for p in subcircuit.ports), nodes)),
+                                           resolve_nodes)
 
     def _evaluated(self,
                    element: SpiceElement,
