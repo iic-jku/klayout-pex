@@ -60,7 +60,8 @@ def test_reduces_writes_and_returns_the_path(tmp_path):
     input_path = write(str(tmp_path), 'line.spice', LINE_NETLIST)
     output_path = str(tmp_path / 'line_reduced.spice')
 
-    reduction = reduce_spice_netlist(input_path, output_path, ReductionOptions(ticer_tau=1e-12))
+    reduction = reduce_spice_netlist(input_path, output_path,
+                                      reduction_options=ReductionOptions(ticer_tau=1e-12))
 
     assert reduction.output_path == output_path
     assert [s.scope for s in reduction.scopes] == ['.SUBCKT line']
@@ -143,7 +144,8 @@ def test_written_netlist_has_the_response_of_the_reduced_network(tmp_path, seed:
 def test_admittance_check_includes_writer_rounding(tmp_path: Path):
     # The pass itself changes nothing, but the writer rounds C to six significant digits.
     path = write(str(tmp_path), 'precise.spice', '.SUBCKT cell A B\nC1 A B 1.23456789f\n.ENDS cell\n')
-    result = reduce_spice_netlist(path, str(tmp_path / 'reduced.spice'), ReductionOptions(ticer=False),
+    result = reduce_spice_netlist(path, str(tmp_path / 'reduced.spice'),
+                                  reduction_options=ReductionOptions(ticer=False),
                                   check_options=AdmittanceCheckOptions(1e9, 1e-7))
     check, = result.admittance_checks
     assert not check.passed

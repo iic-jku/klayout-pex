@@ -147,13 +147,14 @@ def _describe_options(options: ReductionOptions) -> str:
 
 def reduce_spice_netlist(input_path: str,
                          output_path: str,
-                         options: ReductionOptions,
+                         reduction_options: ReductionOptions,
                          keep: Sequence[str] = (),
                          check_options: Optional[AdmittanceCheckOptions] = None) -> NetlistReduction:
     """
     Reduce the RC network of every scope of a SPICE netlist and write the result
     (creating the output's directory if needed).
 
+    :param reduction_options: passes and thresholds used to reduce each scope
     :param keep: nodes to keep in addition to the protected ones (case-insensitive),
                  each must be a node of at least one network
     :param check_options: compare the written RC admittance with the input at this frequency;
@@ -183,9 +184,9 @@ def reduce_spice_netlist(input_path: str,
             if node is not None:
                 network.protect(node)
         before = NetworkSize.of(network)
-        statistics = reduce_network(network, options)
+        statistics = reduce_network(network, reduction_options)
         after = NetworkSize.of(network)
-        scope.comment_lines.append(f"* netlist reduce ({_describe_options(options)}): "
+        scope.comment_lines.append(f"* netlist reduce ({_describe_options(reduction_options)}): "
                                    f"{before} -> {after}")
         reductions.append(ScopeReduction(scope=scope.title,
                                          resistors_read=scope.resistors_read,

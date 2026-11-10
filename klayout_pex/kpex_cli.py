@@ -1598,7 +1598,7 @@ class KpexCLI:
                 rule('kpex/2.5D netlist reduction')
                 reduction = reduce_spice_netlist(input_path=expanded_netlist_path,
                                                  output_path=reduced_netlist_path(expanded_netlist_path),
-                                                 options=reduction_options,
+                                                 reduction_options=reduction_options,
                                                  check_options=args.admittance_check_options)
                 for scope in reduction.scopes:
                     subproc(scope.describe())

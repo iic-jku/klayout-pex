@@ -181,11 +181,11 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     :return: the exit code (see the epilog)
     """
     try:
-        options = ReductionOptions(ticer=args.ticer,
-                                   ticer_tau=args.ticer_tau,
-                                   ticer_max_degree=args.ticer_max_degree,
-                                   floating=args.floating,
-                                   floating_max_degree=args.floating_max_degree)
+        reduction_options = ReductionOptions(ticer=args.ticer,
+                                             ticer_tau=args.ticer_tau,
+                                             ticer_max_degree=args.ticer_max_degree,
+                                             floating=args.floating,
+                                             floating_max_degree=args.floating_max_degree)
         check_options = admittance_check_options(args)
     except ValueError as e:
         error(f"Invalid reduction options: {e}")
@@ -204,7 +204,7 @@ def run_reduce_subcommand(args: argparse.Namespace) -> ExitCode:
     try:
         reduction = reduce_spice_netlist(input_path=input_path,
                                          output_path=output_path,
-                                         options=options,
+                                         reduction_options=reduction_options,
                                          keep=args.keep_nodes,
                                          check_options=check_options)
     except UnknownNodesError as e:
