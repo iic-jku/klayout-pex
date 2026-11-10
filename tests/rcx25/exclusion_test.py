@@ -35,6 +35,7 @@ import pytest
 from klayout_pex.common.capacitance_matrix import CapacitanceMatrix
 from klayout_pex.pdk_config import PDK
 from klayout_pex.rcx25.capacitance_distributor import CapacitanceDistributor
+from klayout_pex.rcx25.c.capacitance_integrals import EdgeCapacitanceProfile
 from klayout_pex.rcx25.exclusion import (
     BlockKind,
     BlockLabel,
@@ -224,6 +225,34 @@ def test_sidewall_keeps_clipped_part_outside_a_marker():
     kept = r.sidewall_table[key][0]
     assert kept.cap_value == pytest.approx(2.0)
     assert (kept.inside_edge, kept.outside_edge) == (kdb.Edge(-100, 50, 0, 50), kdb.Edge(-100, 60, 0, 60))
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('sidewall', [True, False])
+@pytest.mark.parametrize('keep_geometry', [True, False])
+def test_exclusion_integrates_nonuniform_edge_capacitance(sidewall: bool, keep_geometry: bool):
+    r = results(kdb.Box(0, 0, 100, 100), keep_capacitance_geometry=keep_geometry)
+    profile = EdgeCapacitanceProfile(lambda start, stop: 4.0 * (stop ** 2 - start ** 2))
+    geometry = dict(cap_value=4.0, inside_edge=kdb.Edge(-100, 50, 100, 50),
+                    outside_edge=kdb.Edge(-100, 60, 100, 60), profile=profile)
+    if sidewall:
+        cap = SidewallCap(key=SidewallKey('Metal3', 'A', 'B'), distance=0.1, length=0.2,
+                          tech_spec=None, **geometry)
+        r.add_sidewall_cap(cap)
+        kept, = r.sidewall_table[cap.key]
+    else:
+        cap = SideOverlapCap(key=SideOverlapKey('Metal3', 'A', 'Metal2', 'B'),
+                             near_edge=kdb.Edge(-100, 60, 100, 60), **geometry)
+        r.add_sideoverlap_cap(cap)
+        kept, = r.sideoverlap_table[cap.key]
+    # The marker removes the second half, which carries three quarters of C.
+    assert kept.cap_value == pytest.approx(1.0)
+    assert cap.cap_value == pytest.approx(1.0)
+    if keep_geometry:
+        assert kept.profile.between(0.5, 1.0) == pytest.approx(0.75)
+    else:
+        assert kept.profile is None
 
 
 @allure.parent_suite(parent_suite)

@@ -40,6 +40,7 @@ from typing import *
 
 import klayout.db as kdb
 
+from .c.capacitance_integrals import EdgeCapacitanceProfile
 from ..types import LayerName, NetName
 
 import klayout_pex_protobuf.kpex.layout.location_pb2 as location_pb2
@@ -371,12 +372,14 @@ class CapacitanceDistributor:
 
     def edge_fractions(self,
                        net_a: NetName, layer_a: LayerName, edge_a: Optional[kdb.Edge],
-                       net_b: NetName, layer_b: LayerName, edge_b: Optional[kdb.Edge]) -> Dict[NodePair, float]:
+                       net_b: NetName, layer_b: LayerName, edge_b: Optional[kdb.Edge],
+                       profile: Optional[EdgeCapacitanceProfile] = None) -> Dict[NodePair, float]:
         """
         The fractions of a capacitance between two edges (e.g. a sidewall) by the nodes nearest to their parts
 
         :param edge_a: the edge of net A
         :param edge_b: the edge of net B, its points face the ones of edge A (same direction)
+        :param profile: the nonuniform capacitance along the edges, otherwise uniform
         :return: the fraction by node pair, which sum up to 1
         """
         if edge_a is None or edge_b is None:
@@ -390,7 +393,7 @@ class CapacitanceDistributor:
         i, j, t = 0, 0, 0.0
         while i < len(parts_a) and j < len(parts_b):
             t1 = min(parts_a[i][1], parts_b[j][1])
-            fractions[(parts_a[i][2], parts_b[j][2])] += t1 - t
+            fractions[(parts_a[i][2], parts_b[j][2])] += profile.between(t, t1) if profile is not None else t1 - t
             t = t1
             if parts_a[i][1] <= t1:
                 i += 1

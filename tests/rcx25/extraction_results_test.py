@@ -1,6 +1,6 @@
 #
 # --------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
 # This file is part of KPEX 
@@ -109,6 +109,27 @@ class CellExtractionResultsTest(unittest.TestCase):
             self.assertAlmostEqual(capacitance, summary.capacitances[key], places=12)
         self.assertEqual({'W': 'W', 'W.$1.met1': 'W'}, summary.net_by_node)
 
+
+    def test_summarize_uses_nonuniform_edge_profiles(self):
+        # Equal lengths need not carry equal capacitance beside a slanted edge.
+        # Both sidewall and fringe contributions must use their integrated share.
+        results = CellExtractionResults(cell_name='Cell', keep_capacitance_geometry=True)
+        self.add_wire_network(results, 'W', 'met1', [(0, 500, 'W'), (100000, 500, '$1.met1')])
+        results.add_sidewall_cap(SidewallCap(
+            key=SidewallKey('met1', 'W', 'V'), cap_value=4.0,
+            distance=2.0, length=100.0, tech_spec=None,
+            inside_edge=kdb.Edge(0, 1000, 100000, 1000),
+            outside_edge=kdb.Edge(0, 3000, 100000, 3000),
+            profile=EdgeCapacitanceProfile(lambda start, stop: 4.0 * (stop ** 2 - start ** 2))))
+        results.add_sideoverlap_cap(SideOverlapCap(
+            key=SideOverlapKey('met1', 'W', 'met2', 'V'), cap_value=8.0,
+            inside_edge=kdb.Edge(0, 0, 100000, 0), outside_edge=kdb.Edge(0, -500, 100000, -500),
+            profile=EdgeCapacitanceProfile(lambda start, stop: 8.0 * (stop ** 2 - start ** 2))))
+
+        summary = results.summarize()
+
+        self.assertEqual({NetCoupleKey('V', 'W'): 3.0,
+                          NetCoupleKey('V', 'W.$1.met1'): 9.0}, summary.capacitances)
 
     def test_summarize_keeps_the_capacitance_between_each_pair_of_nets(self):
         # NOTE: the capacitances are distributed onto the nodes, but their sum per pair of nets is the same
