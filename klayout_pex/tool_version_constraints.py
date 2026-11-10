@@ -181,6 +181,14 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
         reason="earlier releases have bugs in resistance extraction",
     ),
     ToolVersionConstraint(
+        id='KLAYOUT_03013_FIXES',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.13',
+        reason="0.30.13 fixes slow terminal lookup, neighborhood-visitor memory leaks "
+               "and resistance-extraction crashes. Upgrading is recommended",
+        severity=Severity.WARNING,
+    ),
+    ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
         specifier='>= 6.2.1',
@@ -208,50 +216,61 @@ def applicable_constraints(tool: Tool,
 
 
 def effective_version_range(tool: Tool,
-                            pdk: Optional[PDK] = None) -> SpecifierSet:
-    """The conjunction of every constraint that applies, as one specifier set."""
-    return SpecifierSet(','.join(c.specifier for c in applicable_constraints(tool, pdk)))
+                            pdk: Optional[PDK] = None,
+                            severity: Optional[Severity] = None) -> SpecifierSet:
+    """The conjunction of applicable constraints, optionally limited to one severity."""
+    return SpecifierSet(','.join(c.specifier for c in applicable_constraints(tool, pdk)
+                                if severity is None or c.severity == severity))
 
 
 def check_tool_versions(exe_path_by_tool: Dict[Tool, str],
                         pdk: Optional[PDK] = None,
-                        mode: VersionCheckMode = VersionCheckMode.ON) -> bool:
+                        mode: VersionCheckMode = VersionCheckMode.ON,
+                        klayout_python_version: Optional[str] = None) -> bool:
     """
     Report the version of every tool a run will use against its constraints.
 
     Returns False when a constraint was violated that the mode treats as an
-    error, so that the caller can refuse the run.
+    error, so that the caller can refuse the run. When supplied, the in-process
+    KLayout Python version is checked independently of the executable.
     """
-    if mode == VersionCheckMode.OFF or not exe_path_by_tool:
+    if mode == VersionCheckMode.OFF or (not exe_path_by_tool and klayout_python_version is None):
         return True
 
     rule('Tool versions')
 
     found_errors = False
-    rows: List[Tuple[str, str, str]] = []
-
+    rows: List[Tuple[str, str, str, str]] = []
+    detected: List[Tuple[Tool, str, Optional[Version], str]] = []
     for tool, exe_path in exe_path_by_tool.items():
+        label = 'KLayout executable' if tool == Tool.KLAYOUT else tool.value
+        detected.append((tool, label, tool.detect_version(exe_path), f'{exe_path} {tool.version_argument}'))
+    if klayout_python_version is not None:
+        try:
+            module_version = Version(klayout_python_version)
+        except InvalidVersion:
+            module_version = None
+        detected.append((Tool.KLAYOUT, 'KLayout Python module', module_version, 'klayout.db.__version__'))
+
+    for tool, label, version, source in detected:
         constraints = applicable_constraints(tool, pdk)
-        version = tool.detect_version(exe_path)
-        rows.append((tool.value,
-                     'unknown' if version is None else str(version),
-                     str(effective_version_range(tool, pdk)) or 'any'))
+        rows.append((label, 'unknown' if version is None else str(version),
+                     str(effective_version_range(tool, pdk, Severity.ERROR)) or 'any',
+                     str(effective_version_range(tool, pdk, Severity.WARNING)) or 'none'))
 
         for constraint in constraints:
-            debug(f"{constraint.id}: {tool.value} {constraint.specifier} — "
-                  f"{constraint.reason}")
+            debug(f"{constraint.id}: {label} {constraint.specifier} — {constraint.reason}")
 
         if version is None:
             if constraints:
-                warning(f"Can't determine the {tool.value} version from "
-                        f"'{exe_path} {tool.version_argument}', "
+                warning(f"Can't determine the {label} version from '{source}', "
                         f"so its version requirements stay unchecked")
             continue
 
         for constraint in constraints:
             if constraint.is_satisfied_by(version):
                 continue
-            message = (f"{tool.value} {version} does not satisfy "
+            message = (f"{label} {version} does not satisfy "
                        f"{constraint.specifier} ({constraint.id}): {constraint.reason}")
             if constraint.severity == Severity.ERROR and mode == VersionCheckMode.ON:
                 error(message)
@@ -259,7 +278,7 @@ def check_tool_versions(exe_path_by_tool: Dict[Tool, str],
             else:
                 warning(message)
 
-    header = ('Tool', 'Found', 'Effective range')
+    header = ('Tool', 'Found', 'Required', 'Recommended')
     widths = [max(len(cell) for cell in column)
               for column in zip(header, *rows)]
     for row in (header, *rows):

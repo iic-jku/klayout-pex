@@ -805,3 +805,17 @@ def test_result_file_of_pex25d_names_its_outputs(tmp_path):
     assert (result['command'], result['engines'], result['stage'], result['exit_code']) == ('pex25d', [], 'done', 0)
     assert [(written['kind'], written['path']) for written in result['files'] if written['kind'] != 'log'] == \
            [('pex25d_file', str(pex25d_path))]
+
+
+@pytest.mark.parametrize('version,expected_warning', [('0.30.12', True), ('0.30.13', False)])
+def test_lvsdb_input_checks_python_module_without_needing_executable(version: str, expected_warning: bool):
+    from klayout_pex.env import Env
+    from klayout_pex.tool_version_constraints import Tool
+    args = KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--2.5D',
+                              '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH)], Env.from_os_environ())
+    with mock.patch.object(kdb, '__version__', version), \
+            mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('LVSDB needs no executable')), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
+        KpexCLI.validate_args(args)
+    messages = [call.args[0] for call in warn.call_args_list]
+    assert any('KLayout Python module' in message and '0.30.13' in message for message in messages) == expected_warning

@@ -1096,7 +1096,8 @@ class KpexCLI:
 
         if not check_tool_versions(exe_path_by_tool=exe_path_by_tool,
                                    pdk=args.pdk,
-                                   mode=args.version_check_mode):
+                                   mode=args.version_check_mode,
+                                   klayout_python_version=kdb.__version__):
             found_errors = True
 
         if found_errors:

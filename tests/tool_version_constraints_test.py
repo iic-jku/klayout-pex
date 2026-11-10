@@ -25,6 +25,10 @@
 from __future__ import annotations
 
 import unittest
+from unittest import mock
+from typing import Optional, Tuple
+
+import pytest
 
 import allure
 from packaging.specifiers import SpecifierSet
@@ -38,6 +42,8 @@ from klayout_pex.tool_version_constraints import (
     ToolVersionConstraint,
     applicable_constraints,
     effective_version_range,
+    check_tool_versions,
+    VersionCheckMode,
 )
 
 
@@ -58,9 +64,11 @@ class Test(unittest.TestCase):
         assert Tool.FASTERCAP.parse_version('FasterCap 6.0.9') == Version('6.0.9')
 
     def test_constraints_compile_to_one_effective_range(self):
-        assert effective_version_range(Tool.KLAYOUT) == SpecifierSet('>=0.30.1,>=0.30.2,>=0.30.3')
-        assert effective_version_range(Tool.KLAYOUT).contains(Version('0.30.4'))
-        assert not effective_version_range(Tool.KLAYOUT).contains(Version('0.30.2'))
+        required = effective_version_range(Tool.KLAYOUT, severity=Severity.ERROR)
+        assert required == SpecifierSet('>=0.30.1,>=0.30.2,>=0.30.3')
+        assert required.contains(Version('0.30.4'))
+        assert not required.contains(Version('0.30.2'))
+        assert effective_version_range(Tool.KLAYOUT, severity=Severity.WARNING) == SpecifierSet('>=0.30.13')
 
     def test_a_pdk_constraint_is_part_of_that_pdk_s_range(self):
         for_sky130a = effective_version_range(Tool.MAGIC, pdk=PDK.SKY130A)
@@ -92,3 +100,63 @@ class Test(unittest.TestCase):
                 assert constraint.reason, "a constraint has to say why it exists"
                 assert constraint.severity in (Severity.ERROR, Severity.WARNING)
                 assert str(constraint.specifier_set) != ''
+
+
+@pytest.mark.parametrize('binary,module,expected_sources', [
+    ('0.30.12', '0.30.13', ('KLayout executable',)),
+    ('0.30.13', '0.30.12', ('KLayout Python module',)),
+    ('0.30.12', '0.30.12', ('KLayout executable', 'KLayout Python module')),
+    ('0.30.13', '0.30.13', ()),
+    ('0.30.14', '0.31.0', ()),
+    (None, '0.30.12', ('KLayout Python module',)),
+    ('0.30.12', None, ('KLayout executable',)),
+    (None, '0.30.13rc1', ('KLayout Python module',)),
+])
+def test_recommended_version_warns_without_rejecting_supported_installations(
+        binary: Optional[str], module: Optional[str], expected_sources: Tuple[str, ...]):
+    # Independently check both components: upgrading the wheel does not update
+    # the executable, and an LVSDB-only run still uses the Python module.
+    with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error, \
+            mock.patch.object(Tool, 'detect_version', return_value=Version(binary) if binary else None):
+        assert check_tool_versions({Tool.KLAYOUT: '/klayout'} if binary else {}, klayout_python_version=module)
+    messages = [call.args[0] for call in warn.call_args_list]
+    assert len(messages) == len(expected_sources)
+    assert all(any(source in message and 'Upgrading is recommended' in message for message in messages)
+               for source in expected_sources)
+    error.assert_not_called()
+
+
+@pytest.mark.parametrize('mode,accepted', [(VersionCheckMode.ON, False), (VersionCheckMode.WARN, True)])
+def test_existing_hard_constraints_keep_their_severity(mode: VersionCheckMode, accepted: bool):
+    with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        assert check_tool_versions({}, mode=mode, klayout_python_version='0.30.2') == accepted
+    assert bool(error.call_count) == (mode == VersionCheckMode.ON)
+    assert any('KLAYOUT_03013_FIXES' in call.args[0] for call in warn.call_args_list)
+
+
+def test_off_disables_both_sources_without_detecting_versions():
+    with mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('must not detect')), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
+        assert check_tool_versions({Tool.KLAYOUT: '/missing'}, mode=VersionCheckMode.OFF,
+                                   klayout_python_version='unknown')
+    warn.assert_not_called()
+
+
+def test_unknown_versions_are_reported_as_unchecked():
+    with mock.patch.object(Tool, 'detect_version', return_value=None), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
+        assert check_tool_versions({Tool.KLAYOUT: '/klayout'}, klayout_python_version='unknown')
+    assert len(warn.call_args_list) == 2
+    assert all('unchecked' in call.args[0] for call in warn.call_args_list)
+    assert any('KLayout executable' in call.args[0] for call in warn.call_args_list)
+    assert any('KLayout Python module' in call.args[0] for call in warn.call_args_list)
+
+
+def test_report_separates_required_and_recommended_ranges():
+    with mock.patch('klayout_pex.tool_version_constraints.subproc') as printed:
+        assert check_tool_versions({}, klayout_python_version='0.30.13')
+    header, row = [call.args[0] for call in printed.call_args_list]
+    assert 'Required' in header and 'Recommended' in header
+    assert '0.30.3' in row and '0.30.13' in row
