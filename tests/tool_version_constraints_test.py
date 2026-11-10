@@ -136,22 +136,43 @@ def test_existing_hard_constraints_keep_their_severity(mode: VersionCheckMode, a
     assert any('KLAYOUT_03013_FIXES' in call.args[0] for call in warn.call_args_list)
 
 
-def test_off_disables_both_sources_without_detecting_versions():
+@pytest.mark.parametrize('tool', [Tool.KLAYOUT, Tool.MAGIC])
+def test_off_disables_tools_and_python_module_without_detecting_versions(tool: Tool):
     with mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('must not detect')), \
             mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
-        assert check_tool_versions({Tool.KLAYOUT: '/missing'}, mode=VersionCheckMode.OFF,
+        assert check_tool_versions({tool: '/missing'}, mode=VersionCheckMode.OFF,
                                    klayout_python_version='unknown')
     warn.assert_not_called()
 
 
-def test_unknown_versions_are_reported_as_unchecked():
+@pytest.mark.parametrize('tool,label', [(Tool.KLAYOUT, 'KLayout executable'), (Tool.MAGIC, 'MAGIC')])
+def test_unknown_versions_are_reported_as_unchecked(tool: Tool, label: str):
     with mock.patch.object(Tool, 'detect_version', return_value=None), \
             mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
-        assert check_tool_versions({Tool.KLAYOUT: '/klayout'}, klayout_python_version='unknown')
+        assert check_tool_versions({tool: '/tool'}, klayout_python_version='unknown')
     assert len(warn.call_args_list) == 2
     assert all('unchecked' in call.args[0] for call in warn.call_args_list)
-    assert any('KLayout executable' in call.args[0] for call in warn.call_args_list)
+    assert any(label in call.args[0] for call in warn.call_args_list)
     assert any('KLayout Python module' in call.args[0] for call in warn.call_args_list)
+
+
+@pytest.mark.parametrize('version,supported', [
+    ('8.3.679', False), ('8.3.692', False), ('8.3.693', True), ('8.3.694', True), ('8.4.0', True),
+])
+@pytest.mark.parametrize('mode', [VersionCheckMode.ON, VersionCheckMode.WARN])
+def test_magic_requires_correct_sidewall_counting(version: str, supported: bool, mode: VersionCheckMode):
+    # The old minimum still halved twice. Check the last affected revision,
+    # the first fixed one, and newer revisions without imposing an upper bound.
+    with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        assert check_tool_versions({Tool.MAGIC: '/magic'}, mode=mode) == \
+               (supported or mode == VersionCheckMode.WARN)
+    assert error.call_count == int(not supported and mode == VersionCheckMode.ON)
+    assert warn.call_count == int(not supported and mode == VersionCheckMode.WARN)
+    messages = [call.args[0] for call in error.call_args_list + warn.call_args_list]
+    assert all(f'MAGIC {version}' in message and '>= 8.3.693' in message and 'sidewall' in message
+               for message in messages)
 
 
 def test_report_separates_required_and_recommended_ranges():

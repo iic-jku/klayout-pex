@@ -816,12 +816,49 @@ def test_lvsdb_input_checks_python_module_without_needing_executable(version: st
     from klayout_pex.tool_version_constraints import Tool
     args = KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--2.5D',
                               '--lvsdb', lvsdb_fixture_path('sky130A', NFET_GDS_PATH)], Env.from_os_environ())
+    args.magic_exe_path = '/nonexistent/magic'
+    args.klayout_exe_path = '/nonexistent/klayout'
     with mock.patch.object(kdb, '__version__', version), \
             mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('LVSDB needs no executable')), \
             mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
         KpexCLI.validate_args(args)
     messages = [call.args[0] for call in warn.call_args_list]
     assert any('KLayout Python module' in message and '0.30.13' in message for message in messages) == expected_warning
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "Tool Versions", "MAGIC")
+@pytest.mark.parametrize('version,mode,accepted', [
+    ('8.3.692', None, False), ('8.3.693', None, True),
+    ('8.3.692', 'warn', True), ('8.3.692', 'off', True),
+])
+def test_magic_version_check_precedes_extraction(
+        version: str, mode: Optional[str], accepted: bool, tmp_path: Path):
+    from packaging.version import Version
+    from klayout_pex.tool_version_constraints import Tool
+
+    # Keep parsing and validation real: the CLI must reject an affected
+    # installation by default, while explicit warning/off overrides still run.
+    executable = tmp_path / 'magic.exe'
+    executable.touch()
+    magicrc = tmp_path / 'magicrc'
+    magicrc.write_text('# test configuration\n', encoding='utf-8')
+    argv = ['kpex', 'extract', '--pdk', 'sky130A', '--magic', '--gds', NFET_GDS_PATH,
+            '--magicrc', str(magicrc), '--out-dir', str(tmp_path / 'output')]
+    if mode is not None:
+        argv.extend(['--tool-version-checks', mode])
+    with mock.patch.dict(os.environ, {'KPEX_MAGIC_EXE': str(executable), 'KPEX_KLAYOUT_EXE': '/nonexistent'}), \
+            mock.patch.object(kdb, '__version__', '0.30.13'), \
+            mock.patch.object(Tool, 'detect_version', autospec=True, return_value=Version(version)) as detect, \
+            mock.patch.object(KpexCLI, 'run_magic_extraction') as extract:
+        code, output = run_cli(KpexCLI().main, argv)
+    assert code == (0 if accepted else 1), output
+    assert extract.call_count == int(accepted), output
+    if mode == 'off':
+        detect.assert_not_called()
+    else:
+        detect.assert_called_once_with(Tool.MAGIC, str(executable))
+    assert ('does not satisfy >= 8.3.693' in output) == (version == '8.3.692' and mode != 'off'), output
 
 
 @allure.parent_suite("Unit Tests")
