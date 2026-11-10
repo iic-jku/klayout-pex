@@ -1,0 +1,21 @@
+SUBPROCESS __kpex__:kpex_cli.py:1905 main extract --pdk gf180mcuD --mode R --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/r_ntap_pair_dnwell_m1_m2.lvsdb.gz --out-dir /tmp/tmpxsj1o2o5 --2.5D --check n
+INFO     __kpex__:kpex_cli.py:957 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: /tmp/tmpxsj1o2o5/r_ntap_pair_dnwell_m1_m2__r_ntap_pair_dnwell_m1_m2/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2065 Peak memory (resident set size) after preparing the LVSDB: 826.1 MiB
+INFO     __kpex__:kpex_cli.py:2069 (12, 0) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:2069 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:2069 (22, 344) -> (ntap_dw)
+INFO     __kpex__:kpex_cli.py:2069 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2069 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:2069 (33, 4406) -> (contact_ntap_dw_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:537 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: $1
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 826.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1520 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1520 R1;$1;$1.$2.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1520 R2;$1;$1.$3.Metal2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1523 /tmp/tmpxsj1o2o5/r_ntap_pair_dnwell_m1_m2__r_ntap_pair_dnwell_m1_m2/r_ntap_pair_dnwell_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1556 Wrote expanded netlist to: /tmp/tmpxsj1o2o5/r_ntap_pair_dnwell_m1_m2__r_ntap_pair_dnwell_m1_m2/r_ntap_pair_dnwell_m1_m2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1591 Peak memory (resident set size) after the netlist: 826.5 MiB
+WARNING  __kpex__:kpex_cli.py:1608 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): $1
+INFO     __kpex__:kpex_cli.py:1935 Peak memory (resident set size) after the run: 826.5 MiB

@@ -1,0 +1,30 @@
+SUBPROCESS __kpex__:kpex_cli.py:1905 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_coil_x2.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_coil_x2.gds.gz --exclusion-markers ignore --cut 'c?il'
+INFO     __kpex__:kpex_cli.py:946 No explicit top cell specified, using top cell 'cut_coil_x2'
+INFO     __kpex__:kpex_cli.py:957 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_x2__cut_coil_x2/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2065 Peak memory (resident set size) after preparing the LVSDB: 708.2 MiB
+INFO     __kpex__:kpex_cli.py:2069 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2069 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2069 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2069 (133, 0) -> (topvia2_drw)
+INFO     __kpex__:kpex_cli.py:2069 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2069 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2069 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2069 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 6pins
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 708.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1520 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1520 R1;OSCN0;coil_0__LB;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1520 R2;OSCN0;OSCN0,OSCP0,VCT0;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1520 R3;OSCN1;coil_1__LB;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1520 R4;OSCN1;OSCN1,OSCP1,VCT1;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1520 R5;OSCP0;coil_0__LA;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1520 R6;OSCP1;coil_1__LA;;0.035
+SUBPROCESS __kpex__:kpex_cli.py:1520 R7;VCT0;coil_0__CT;;0.085
+SUBPROCESS __kpex__:kpex_cli.py:1520 R8;VCT1;coil_1__CT;;0.085
+SUBPROCESS __kpex__:kpex_cli.py:1520 R9;VDD0;coil_0__VDD0_0;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1520 R10;VDD1;coil_1__VDD1_0;;0.04
+SUBPROCESS __kpex__:kpex_cli.py:1523 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_x2__cut_coil_x2/cut_coil_x2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1556 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil_x2__cut_coil_x2/cut_coil_x2_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1591 Peak memory (resident set size) after the netlist: 708.7 MiB
+INFO     __kpex__:kpex_cli.py:1935 Peak memory (resident set size) after the run: 708.8 MiB

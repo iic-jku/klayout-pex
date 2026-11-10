@@ -1,0 +1,23 @@
+SUBPROCESS __kpex__:kpex_cli.py:1905 main extract --pdk sky130A --mode R --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cap_var_lvt_without_ptap_ring.lvsdb.gz --out-dir /tmp/tmp9dauzemg --2.5D --check n
+INFO     __kpex__:kpex_cli.py:957 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: /tmp/tmp9dauzemg/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2065 Peak memory (resident set size) after preparing the LVSDB: 817.7 MiB
+INFO     __kpex__:kpex_cli.py:2069 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2069 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2069 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2069 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2069 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2069 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:2069 (67, 16) -> (li_pin_con)
+INFO     __kpex__:extractor.py:483 LVSDB: found 2pins
+WARNING  __kpex__:lvsdb_extractor.py:979 These device terminals are unconnected in the LVS netlist, so they stay unconnected in the extracted netlist:
+  - sky130_fd_pr__cap_var_lvt terminal W: $1
+INFO     __kpex__:extractor.py:540 Peak memory (resident set size) after the resistance extraction: 817.9 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1520 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1520 R1;A;A.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1520 R2;A.$1.poly;A.P0.poly;;130.863
+SUBPROCESS __kpex__:kpex_cli.py:1520 R3;B;B.$1.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1523 /tmp/tmp9dauzemg/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/cap_var_lvt_without_ptap_ring_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1556 Wrote expanded netlist to: /tmp/tmp9dauzemg/cap_var_lvt_without_ptap_ring__cap_var_lvt_without_ptap_ring/cap_var_lvt_without_ptap_ring_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1591 Peak memory (resident set size) after the netlist: 818.1 MiB
+INFO     __kpex__:kpex_cli.py:1935 Peak memory (resident set size) after the run: 818.1 MiB

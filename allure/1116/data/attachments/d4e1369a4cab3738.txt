@@ -1,0 +1,25 @@
+SUBPROCESS __kpex__:kpex_cli.py:1905 main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\cmomi_w5u_l5u_m1_m5\cmomi_w5u_l5u_m1_m5.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\cmomi_w5u_l5u_m1_m5\cmomi_w5u_l5u_m1_m5.gds.gz' --exclusion-markers tie
+INFO     __kpex__:kpex_cli.py:946 No explicit top cell specified, using top cell 'cmomi_w5u_l5u_m1_m5'
+INFO     __kpex__:kpex_cli.py:957 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:231 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2065 Peak memory (resident set size) after preparing the LVSDB: 717.6 MiB
+INFO     __kpex__:kpex_cli.py:2069 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2069 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:2069 (66, 0) -> (via4_drw)
+INFO     __kpex__:kpex_cli.py:2069 (49, 0) -> (via3_drw)
+INFO     __kpex__:kpex_cli.py:2069 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2069 (67, 0) -> (metal5_mom)
+INFO     __kpex__:kpex_cli.py:2069 (8, 0) -> (metal1_mom)
+INFO     __kpex__:kpex_cli.py:2069 (10, 0) -> (metal2_mom)
+INFO     __kpex__:kpex_cli.py:2069 (30, 0) -> (metal3_mom)
+INFO     __kpex__:kpex_cli.py:2069 (50, 0) -> (metal4_mom)
+INFO     __kpex__:kpex_cli.py:2069 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:extractor.py:242 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I1, $I2
+INFO     __kpex__:kpex_cli.py:1488 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:611 Peak memory (resident set size) after the capacitance extraction: 720.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1520 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1523 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5\cmomi_w5u_l5u_m1_m5_k25d_pex_netlist.csv
+INFO     __kpex__:netlist_expander.py:85 Removing whiteboxed device $1
+SUBPROCESS __kpex__:kpex_cli.py:1556 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cmomi_w5u_l5u_m1_m5__cmomi_w5u_l5u_m1_m5\cmomi_w5u_l5u_m1_m5_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1591 Peak memory (resident set size) after the netlist: 721.3 MiB
+INFO     __kpex__:kpex_cli.py:1935 Peak memory (resident set size) after the run: 721.3 MiB
