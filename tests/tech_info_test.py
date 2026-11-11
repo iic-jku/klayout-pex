@@ -346,6 +346,47 @@ class Test(unittest.TestCase):
         self.assertEqual(4.443, tech.side_overlap_cap_by_layer_names['Poly2']['Metal4'].capacitance)
         self.assertEqual(29.435, tech.side_overlap_cap_by_layer_names['Metal4']['Poly2'].capacitance)
 
+    def test_ihp_sg13g2_nominal_capacitances_include_top_dielectrics(self):
+        # IHP PR #1328 at 14b1ab845696960a0a1881ec8614acba0f7b8eb7 fixes the
+        # omitted top oxide/passivation in the fit. Pin nominal rows so the
+        # earlier proposal and high/low capacitance variants cannot substitute.
+        tech = self.assert_nominal_capacitances('ihp-sg13g2', {
+            'GatPoly': (87.433, 44.372, 11.459, -0.038),
+            'Metal1': (35.015, 39.584, 27.155, 0.031),
+            'Metal2': (18.180, 34.834, 39.268, 0.086),
+            'Metal3': (11.994, 31.416, 46.426, 0.137),
+            'Metal4': (8.948, 29.293, 52.213, 0.180),
+            'Metal5': (7.136, 27.786, 57.155, 0.218),
+            'TopMetal1': (5.649, 38.055, 173.691, 0.383),
+            'TopMetal2': (3.233, 34.371, 252.754, 0.535),
+        }, ('Metal1', ('nSD', 'pSD', 'Activ'), 58.168, 45.427),
+           (('MIM', 'Metal5', 1500.0, 40.0),))
+        for top, bottom in (('Metal2', 'Metal1'), ('Metal3', 'Metal2'),
+                            ('Metal4', 'Metal3'), ('Metal5', 'Metal4')):
+            self.assertEqual(67.225, tech.overlap_cap_by_layer_names[top][bottom].capacitance)
+        # The top pair is most affected, and its two fringe directions differ.
+        self.assertEqual(50.905, tech.side_overlap_cap_by_layer_names['TopMetal2']['TopMetal1'].capacitance)
+        self.assertEqual(33.034, tech.side_overlap_cap_by_layer_names['TopMetal1']['TopMetal2'].capacitance)
+
+    def test_ihp_sg13cmos5l_nominal_capacitances_keep_its_own_fits(self):
+        # The lower conductor dimensions match SG13G2, but the complete stack
+        # above them differs. In particular, TopMetal1 is the top conductor here.
+        tech = self.assert_nominal_capacitances('ihp-sg13cmos5l', {
+            'GatPoly': (87.433, 44.367, 11.472, -0.038),
+            'Metal1': (35.015, 39.549, 27.218, 0.031),
+            'Metal2': (18.180, 34.747, 39.424, 0.087),
+            'Metal3': (11.994, 31.260, 46.673, 0.139),
+            'Metal4': (8.948, 29.037, 52.532, 0.182),
+            'TopMetal1': (6.727, 38.975, 149.394, 0.028),
+        }, ('Metal1', ('nSD', 'pSD', 'Activ'), 58.168, 45.402), ())
+        self.assertEqual({'GatPoly', 'Metal1', 'Metal2', 'Metal3', 'Metal4', 'TopMetal1'},
+                         set(tech.sidewall_cap_by_layer_name))
+        for top, bottom in (('Metal2', 'Metal1'), ('Metal3', 'Metal2'), ('Metal4', 'Metal3')):
+            self.assertEqual(67.225, tech.overlap_cap_by_layer_names[top][bottom].capacitance)
+        self.assertEqual(9.214, tech.overlap_cap_by_layer_names['TopMetal1']['Metal1'].capacitance)
+        self.assertEqual(65.719, tech.side_overlap_cap_by_layer_names['TopMetal1']['Metal4'].capacitance)
+        self.assertEqual(35.256, tech.side_overlap_cap_by_layer_names['Metal4']['TopMetal1'].capacitance)
+
     def test_shipped_tech_definitions_have_the_resistances_of_their_conductors_and_vias(self):
         # The resistance extraction looks them up by their canonical layer name,
         # and stops at a layer without one (e.g. at the top plates of the MIM caps)

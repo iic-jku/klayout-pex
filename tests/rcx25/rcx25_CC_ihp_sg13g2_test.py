@@ -32,9 +32,9 @@ from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 parent_suite = "kpex/2.5D Extraction Tests [PDK ihp-sg13g2 | mode CC]"
 tags = ("PEX", "2.5D")
 
-# Sidewall expectations use the full pair fit (#390). Relative to the former
-# totals, only the old sidewall contribution is added; overlap and fringe stay
-# unchanged. The parallel-wire regression checks the pair fit independently.
+# Nominal IHP coefficients include the corrected top oxide/passivation fits from
+# IHP PR #1328 (14b1ab8), with full sidewall pair counting (#390). Layout geometry
+# and MIM device-model values stay fixed; the parallel-wire test checks the fit independently.
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.IHP_SG13G2), pex_mode=PEXMode.CC, blackbox=False)
@@ -49,8 +49,8 @@ def test_mim_cap__whiteboxed():
     # NOTE: the plates' nets have no labels, so their names ($1, $2, ...) depend on the LVS run
     rows = pex_whiteboxed.written_netlist_rows('sg13g2_pr__cmim', 'cmim.gds.gz')
     caps = [(('VSUBS' in (row['Net1'], row['Net2'])), float(row['Capacitance [fF]'])) for row in rows]
-    assert sorted(cap for to_substrate, cap in caps if not to_substrate) == [74.784]  # between the plates
-    assert sorted(cap for to_substrate, cap in caps if to_substrate) == [0.878, 1.38]  # top and bottom plate
+    assert sorted(cap for to_substrate, cap in caps if not to_substrate) == [74.786]  # between the plates
+    assert sorted(cap for to_substrate, cap in caps if to_substrate) == [0.894, 1.389]  # top and bottom plate
 
 
 @allure.parent_suite(parent_suite)
@@ -61,7 +61,7 @@ def test_rf_mim_cap__whiteboxed():
     # and the plates had 2.7 fF between them
     rows = pex_whiteboxed.written_netlist_rows('sg13g2_pr__rfcmim', 'rfcmim.gds.gz')
     assert [float(row['Capacitance [fF]']) for row in rows
-            if not {'VSUBS', 'sub!'} & {row['Net1'], row['Net2']}] == [75.262]  # between the plates
+            if not {'VSUBS', 'sub!'} & {row['Net1'], row['Net2']}] == [75.266]  # between the plates
 
 
 @allure.parent_suite(parent_suite)
@@ -72,15 +72,15 @@ def test_rf_mim_cap_over_m4_wire__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;D;MINUS;1.252;
-C2;D;PLUS;0.077;
-C3;D;sub!;0.343;
-C4;D;VSUBS;1.359;
-C5;MINUS;PLUS;75.262;
-C6;MINUS;sub!;0.345;
-C7;MINUS;VSUBS;1.499;
-C8;PLUS;sub!;0.254;
-C9;PLUS;VSUBS;1.134;
+C1;D;MINUS;1.255;
+C2;D;PLUS;0.078;
+C3;D;sub!;0.347;
+C4;D;VSUBS;1.367;
+C5;MINUS;PLUS;75.266;
+C6;MINUS;sub!;0.347;
+C7;MINUS;VSUBS;1.508;
+C8;PLUS;sub!;0.26;
+C9;PLUS;VSUBS;1.154;
 C10;VSUBS;sub!;4.878;"""
     )
 
@@ -97,15 +97,15 @@ def test_rf_mim_cap_over_m4_wire__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_rfcmim_w7u_l7u_over_m4_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;D;MINUS;1.252;
-C2;D;PLUS;0.077;
-C3;D;sub!;0.343;
-C4;D;VSUBS;1.359;
-C5;MINUS;PLUS;0.585;
-C6;MINUS;sub!;0.201;
-C7;MINUS;VSUBS;0.22;
-C8;PLUS;sub!;0.254;
-C9;PLUS;VSUBS;1.134;
+C1;D;MINUS;1.255;
+C2;D;PLUS;0.078;
+C3;D;sub!;0.347;
+C4;D;VSUBS;1.367;
+C5;MINUS;PLUS;0.588;
+C6;MINUS;sub!;0.204;
+C7;MINUS;VSUBS;0.222;
+C8;PLUS;sub!;0.26;
+C9;PLUS;VSUBS;1.154;
 C10;VSUBS;sub!;4.878;"""
     )
 
@@ -115,16 +115,16 @@ C10;VSUBS;sub!;4.878;"""
 def test_mim_cap_over_m4_wire__whiteboxed():
     # The device model gives cap_carea 1.5 fF/µm² * 20 µm * 20 µm = 600 fF (MIM over Metal5)
     # plus CJSW 40 aF/µm * 80 µm = 3.2 fF, the fringe to the bottom plate around the top plate
-    # (3.166 fF from MIM to Metal5 here). A–B has the fringe from TopMetal1 to the Metal5 around the MIM too (2.659 fF)
+    # (3.166 fF from MIM to Metal5 here). A–B has the fringe from TopMetal1 to the Metal5 around the MIM too (2.675 fF)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_cmim_20um_x_20um_over_m4_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;605.825;
-C2;A;D;5.343;
-C3;A;VSUBS;6.342;
-C4;B;D;0.084;
-C5;B;VSUBS;2.344;
-C6;D;VSUBS;3.462;"""
+C1;A;B;605.842;
+C2;A;D;5.35;
+C3;A;VSUBS;6.366;
+C4;B;D;0.085;
+C5;B;VSUBS;2.386;
+C6;D;VSUBS;3.481;"""
     )
 
 
@@ -138,12 +138,12 @@ def test_mim_cap_over_m4_wire__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_cmim_20um_x_20um_over_m4_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;2.659;
-C2;A;D;5.343;
-C3;A;VSUBS;6.342;
-C4;B;D;0.084;
-C5;B;VSUBS;2.344;
-C6;D;VSUBS;3.462;"""
+C1;A;B;2.675;
+C2;A;D;5.35;
+C3;A;VSUBS;6.366;
+C4;B;D;0.085;
+C5;B;VSUBS;2.386;
+C6;D;VSUBS;3.481;"""
     )
 
 
@@ -155,12 +155,12 @@ def test_mom_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;MINUS;PLUS;397.857;
-C2;MINUS;VSUBS;6.757;
-C3;MINUS;X;1.716;
-C4;PLUS;VSUBS;6.829;
-C5;PLUS;X;1.786;
-C6;VSUBS;X;1.292;"""
+C1;MINUS;PLUS;235.99;
+C2;MINUS;VSUBS;6.772;
+C3;MINUS;X;1.719;
+C4;PLUS;VSUBS;6.844;
+C5;PLUS;X;1.79;
+C6;VSUBS;X;1.303;"""
     )
 
 
@@ -175,11 +175,11 @@ def test_mom_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_cmomf_w10u_l25u_m2_m4_m5_wire.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;MINUS;VSUBS;6.757;
-C2;MINUS;X;1.716;
-C3;PLUS;VSUBS;6.829;
-C4;PLUS;X;1.786;
-C5;VSUBS;X;1.292;"""
+C1;MINUS;VSUBS;6.772;
+C2;MINUS;X;1.719;
+C3;PLUS;VSUBS;6.844;
+C4;PLUS;X;1.79;
+C5;VSUBS;X;1.303;"""
     )
 
 
