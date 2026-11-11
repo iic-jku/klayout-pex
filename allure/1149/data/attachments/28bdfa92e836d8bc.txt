@@ -1,0 +1,77 @@
+SUBPROCESS __kpex__:kpex_cli.py:2015 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r_ptap_pair_li1_m1.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:999 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_ptap_pair_li1_m1__r_ptap_pair_li1_m1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2180 Peak memory (resident set size) after preparing the LVSDB: 949.4 MiB
+INFO     __kpex__:kpex_cli.py:2184 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:2184 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2184 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:2184 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2184 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1543 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 0pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 949.6 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 949.6 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1627 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1627 C1;$1;$2;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C2;$1;VSUBS;0.076;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C3;$1.$1.li1;$2.$1.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C4;$1.$1.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C5;$1.$2.li1;$2.$2.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C6;$1.$2.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C7;$1.$3.li1;$2.$3.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C8;$1.$3.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C9;$1.$4.li1;$2.$4.li1;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C10;$1.$4.li1;VSUBS;0.076;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C11;$1.$5.met1;$2.$5.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C12;$1.$5.met1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C13;$1.$6.met1;$2.$6.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C14;$1.$6.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C15;$1.$7.met1;$2.$7.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C16;$1.$7.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C17;$1.$8.met1;$2.$8.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C18;$1.$8.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C19;$1.$9.met1;$2.$9.met1;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C20;$1.$9.met1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C21;$2;VSUBS;0.076;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C22;$2.$1.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C23;$2.$2.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C24;$2.$3.li1;VSUBS;0.065;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C25;$2.$4.li1;VSUBS;0.076;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C26;$2.$5.met1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C27;$2.$6.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C28;$2.$7.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C29;$2.$8.met1;VSUBS;0.066;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C30;$2.$9.met1;VSUBS;0.078;
+SUBPROCESS __kpex__:kpex_cli.py:1627 R1;$1;$1.$1.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R2;$1;$1.$5.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R3;$1.$1.li1;$1.$2.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R4;$1.$1.li1;$1.$6.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R5;$1.$2.li1;$1.$3.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R6;$1.$2.li1;$1.$7.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R7;$1.$3.li1;$1.$4.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R8;$1.$3.li1;$1.$8.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R9;$1.$4.li1;$1.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R10;$1.$5.met1;$1.$6.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R11;$1.$6.met1;$1.$7.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R12;$1.$7.met1;$1.$8.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R13;$1.$8.met1;$1.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R14;$2;$2.$1.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R15;$2;$2.$5.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R16;$2.$1.li1;$2.$2.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R17;$2.$1.li1;$2.$6.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R18;$2.$2.li1;$2.$3.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R19;$2.$2.li1;$2.$7.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R20;$2.$3.li1;$2.$4.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1627 R21;$2.$3.li1;$2.$8.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R22;$2.$4.li1;$2.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1627 R23;$2.$5.met1;$2.$6.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R24;$2.$6.met1;$2.$7.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R25;$2.$7.met1;$2.$8.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1627 R26;$2.$8.met1;$2.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1630 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_ptap_pair_li1_m1__r_ptap_pair_li1_m1/r_ptap_pair_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1670 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/r_ptap_pair_li1_m1__r_ptap_pair_li1_m1/r_ptap_pair_li1_m1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1705 Peak memory (resident set size) after the netlist: 949.8 MiB
+WARNING  __kpex__:kpex_cli.py:1711 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $1 (0.734 fF), $2 (0.734 fF)
+INFO     __kpex__:kpex_cli.py:2050 Peak memory (resident set size) after the run: 949.8 MiB
