@@ -219,21 +219,13 @@ def ground_spice_netlist(input_path: str, output_path: str, options: GroundingOp
         element_filter=lambda scope, tokens: same_scope(scope) and _element_selected(scope, tokens, options))
     scope = next(scope for scope in netlist.scopes if same_scope(scope))
     network = scope.network
-    for name in (*scope.ports, *scope.global_names):
+    for name in (*scope.ports, *scope.global_names, *scope.retained_terminals.values()):
         network.protect(network.node(name))
-    other_names = {name.casefold() for name in scope.names_on_other_lines}
-    for label in options.net_by_node.values():
-        if label.casefold() in other_names:
-            network.protect(network.node(label))
     known = sorted(network.name(node) for node in network.nodes())
     for name in (options.reference, *options.keep_nodes):
         node = network.find_node(name)
         if node is None:
-            # A reference may be a port without existing capacitance to it.
-            ports = {port.casefold(): port for port in (*scope.ports, *scope.global_names)}
-            if name.casefold() in ports:
-                node = network.node(ports[name.casefold()])
-            elif name.casefold() in ('0', 'gnd'):
+            if name.casefold() in GROUND_NODE_NAMES:
                 node = network.node(name)
             else:
                 raise ValueError(f'Unknown reference/kept node {name!r}. Valid nodes: {", ".join(known)}')

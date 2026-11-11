@@ -63,7 +63,7 @@ from typing import *
 from ..util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 from .rc_network import RCNetwork
 from .rc_reduction import GROUND_NODE_NAME, TIE_RESISTANCE
-from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines, subcircuit_ports
+from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, element_terminals, spice_lines, subcircuit_ports
 
 REDUCED_CAPACITOR_PREFIX = 'Cred_'
 REDUCED_RESISTOR_PREFIX = 'Rred_'
@@ -90,6 +90,8 @@ class SpiceScope:
     """the case-folded names of the elements that are no network elements"""
     names_on_other_lines: Set[str] = field(default_factory=set)
     """the words of the scope's other lines, which protect the nodes of these names"""
+    retained_terminals: Dict[str, str] = field(default_factory=dict)
+    """known terminals of retained elements, keyed case-insensitively with their first spelling"""
     comment_lines: List[str] = field(default_factory=list)
     """written above the RC elements, e.g. a summary of the reduction"""
     preserve_resistors: bool = False
@@ -252,6 +254,8 @@ class SpiceRCNetlist:
 
             if not keyword.startswith('.'):
                 stack[-1].other_element_names.add(first.casefold())
+                for name in element_terminals(text_line):
+                    stack[-1].retained_terminals.setdefault(name.casefold(), name)
             protect_names_of(text_line)
             items.append(verbatim)
 

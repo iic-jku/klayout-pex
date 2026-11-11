@@ -156,6 +156,76 @@ def test_reference_can_be_declared_without_an_existing_capacitor(tmp_path: Path,
     assert capacitors(grounded, 'dut' if is_subckt else None) == {('A', 'G'): 2e-15, ('B', 'G'): 2e-15}
 
 
+@pytest.mark.parametrize('retained', ['Vbias Ref G DC 0', 'Iload Ref G DC 0',
+                                    'Rintent Ref G {bias_r}', 'Cintent Ref G {bias_c}',
+                                    'Lintent Ref G 1u', 'M1 A Ref G G nmos w=1u',
+                                    'X1 A Ref G wrapper params: width = {2 * unit}',
+                                    'Vbias Ref\n* supply\n+ G DC 0'])
+@pytest.mark.parametrize('reference,keep', [('ref', ()), ('G', ('rEF',))])
+@pytest.mark.parametrize('retained_first', [True, False])
+def test_reference_and_keep_accept_retained_only_terminals(tmp_path: Path, retained: str,
+                                                         reference: str, keep: Tuple[str, ...],
+                                                         retained_first: bool):
+    # A terminal remains a valid boundary even when no selected parasitic uses it.
+    # Inventory must not depend on device order or the case of the CLI spelling.
+    parasitic = 'Cext_1 A B 2f'
+    lines = [retained, parasitic] if retained_first else [parasitic, retained]
+    source = '.subckt dut A B G\n' + '\n'.join(lines) + '\n.ends\n'
+    _, grounded = transform(tmp_path, source, GroundingOptions(reference, keep_nodes=keep))
+    output = grounded.read_text(encoding='utf-8')
+    assert retained in output
+    expected_reference = 'Ref' if reference == 'ref' else 'G'
+    assert capacitors(grounded)[('A', expected_reference)] == 2e-15
+    assert capacitors(grounded)[('B', expected_reference)] == 2e-15
+
+
+@pytest.mark.parametrize('name', ['Vbias', 'DC', 'opaque_model', 'width', 'parameter_value',
+                                'foreign', 'invented', 'simulation_only'])
+@pytest.mark.parametrize('keep', [False, True])
+def test_retained_nonterminals_and_other_scopes_are_not_valid_nodes(tmp_path: Path, name: str, keep: bool):
+    source = ('.subckt other foreign G\nVother foreign G 0\n.ends\n'
+              '.subckt dut A B G\nVbias Ref G DC 0\n'
+              'X1 A Ref opaque_model width = parameter_value\n'
+              '.control\nVtest simulation_only 0 0\n.endc\n'
+              'Cext_1 A B 2f\n.ends\n')
+    options = GroundingOptions('G', keep_nodes=(name,)) if keep else GroundingOptions(name)
+    original = tmp_path / 'in.spice'
+    output = tmp_path / 'out.spice'
+    original.write_text(source, encoding='utf-8')
+    output.write_text('existing output\n', encoding='utf-8')
+    with pytest.raises(ValueError, match='Unknown reference/kept node') as exc:
+        ground_spice_netlist(str(original), str(output), options)
+    assert 'Valid nodes: A, B, G, Ref' in str(exc.value)
+    assert output.read_text(encoding='utf-8') == 'existing output\n'
+
+
+def test_retained_nodes_are_validated_before_explicit_maps(tmp_path: Path):
+    source = '.subckt dut A G\nVbias Ref G DC 0\nCext_1 A1 B1 2f\n.ends\n'
+    options = GroundingOptions('ref', net_by_node={'A1': 'A', 'B1': 'Ref'})
+    _, grounded = transform(tmp_path, source, options)
+    # B1 is part of the reference conductor, so its original endpoint stays intact.
+    assert capacitors(grounded) == {('A1', 'B1'): 2e-15}
+
+
+def test_cli_accepts_retained_reference_and_keep_nodes(tmp_path: Path):
+    original = tmp_path / 'in.spice'
+    original.write_text('.subckt dut A B G\nVbias Ref G DC 0\n'
+                        'X1 spare G opaque_model\nCext_1 A B 2f\n.ends\n', encoding='utf-8')
+    code, output = run_cli(NetlistCLI().main, ['netlist', 'ground', str(original),
+                                             '--reference', 'REF', '--keep', 'spare'])
+    assert code == 0, output
+    assert capacitors(tmp_path / 'in_grounded.spice') == {('A', 'Ref'): 2e-15, ('B', 'Ref'): 2e-15}
+
+
+def test_retained_reference_does_not_create_transform_without_selected_capacitors(tmp_path: Path):
+    original = tmp_path / 'in.spice'
+    original.write_text('.subckt dut A G\nVbias Ref G DC 0\nCintent A G 2f\n.ends\n', encoding='utf-8')
+    output = tmp_path / 'out.spice'
+    with pytest.raises(ValueError, match='found 0'):
+        ground_spice_netlist(str(original), str(output), GroundingOptions('Ref'))
+    assert not output.exists()
+
+
 def test_custom_selectors_are_explicit_and_leave_unselected_devices(tmp_path: Path):
     source = '.subckt dut A B G\nCx_1 A B 2f\nCx_2 A A1 1f\nRw_1 A A1 5\nCext_kept B G 9f\n.ends\n'
     _, grounded = transform(tmp_path, source, GroundingOptions('G', ('CX_*',), ('RW_*',)))
@@ -284,6 +354,24 @@ def test_top_level_selection_preserves_subcircuits(tmp_path: Path):
 SIMULATORS = [pytest.param(ngspice_port_admittance, marks=requires_ngspice, id='ngspice'),
               pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce'),
               pytest.param(vacask_port_admittance, marks=requires_vacask, id='VACASK')]
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize('simulator', SIMULATORS)
+@pytest.mark.parametrize('wrapper', [False, True])
+def test_retained_only_reference_has_expected_grounded_admittance(tmp_path: Path, simulator: Callable,
+                                                                wrapper: bool):
+    reference = 'Xbias Ref G bias' if wrapper else 'Vbias Ref G DC 0'
+    source = f'.subckt dut A B G\n{reference}\nCext_1 A B 2f\n.ends\n'
+    if wrapper:
+        source += '.subckt bias P N\nVbias P N DC 0\n.ends\n'
+    _, grounded = transform(tmp_path, source, GroundingOptions('ref'))
+    frequencies, matrix = simulator(str(grounded), 'dut', ['A', 'B', 'G'], (3, 10), str(tmp_path))
+    # The preserved source ties the new reference to G. Both full loads return
+    # there, with zero direct A-to-B transfer and conserved terminal currents.
+    admittance = 1j * math.tau * frequencies * 2e-15
+    expected = admittance[:, None, None] * np.array([[1, 0, -1], [0, 1, -1], [-1, -1, 2]])
+    np.testing.assert_allclose(matrix, expected, rtol=5e-6, atol=1e-20)
 
 
 @pytest.mark.slow
