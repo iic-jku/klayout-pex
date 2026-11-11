@@ -274,6 +274,14 @@ class KpexCLI:
                                type=PDK.from_string, choices=all_pdk_choices,
                                help=pdk_help, default=default_pdk)
 
+        group_pex.add_argument("--corner", metavar="SCENARIO", default=None,
+                               help="Explicit technology scenario for KPEX engines (default: catalog default). "
+                                    "Bundled catalogs currently provide nominal only; no transistor-model corner "
+                                    "or MAGIC extraction style is inferred")
+        group_pex.add_argument("--tech-catalog", dest="tech_catalog_path", metavar="PATH", default=None,
+                               help="Technology catalog for --pdk (default: bundled catalog). Selects complete "
+                                    "R/C tables, physical stack and device-capacitance references")
+
         add_argument_with_former_name(group_pex, "--out-dir", "--out_dir",
                                       dest="output_dir_base_path", default="output",
                                       help="Run directory path (default is '%(default)s')")
@@ -762,29 +770,38 @@ class KpexCLI:
 
         pdk_config: PDKConfig = args.pdk.config
         args.tech_pbjson_path = pdk_config.tech_pb_json_path
+        explicit_catalog = args.tech_catalog_path is not None
+        if args.tech_catalog_path is None:
+            args.tech_catalog_path = pdk_config.tech_catalog_path
         args.lvs_script_path = pdk_config.pex_lvs_script_path
 
         def input_file_stem(path: str):
             # could be *.gds, or *.gds.gz, so remove all extensions
             return os.path.basename(path).split(sep='.')[0]
 
-        if not os.path.isfile(args.tech_pbjson_path):
-            error(f"Can't read technology file at path {args.tech_pbjson_path}")
+        # Resolve cheap scenario names and capabilities before touching the layout or LVS database.
+        try:
+            if not args.tech_catalog_path:
+                raise TechDefError("--tech-catalog requires a nonempty file path")
+            if args.run_magic and (explicit_catalog or args.corner is not None):
+                raise TechDefError("--corner and --tech-catalog select KPEX data; MAGIC uses its own technology "
+                                   "and cannot be combined with these options")
+            args.tech_info = TechInfo.from_catalog(args.tech_catalog_path, args.dielectric_filter,
+                                                   scenario_id=args.corner, expected_technology=str(args.pdk))
+            selection = args.tech_info.selection
+            if args.command == 'pex25d' or args.run_fastcap or args.run_fastercap:
+                selection.require_physical_stack(args.tech_info.tech.process_stack)
+            if getattr(args, 'device_capacitance_reference_path', None) == '':
+                selection.require_device_references()
+        except TechDefError as exc:
+            error(str(exc))
+            raise ArgumentValidationError(str(exc)) from exc
+        dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
+        unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
+        if unknown_names:
+            error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
+                  f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
             found_errors = True
-        else:
-            # NOTE: before the input is read, as --diel names dielectrics of the tech info
-            try:
-                args.tech_info = TechInfo.from_json(args.tech_pbjson_path, dielectric_filter=args.dielectric_filter)
-            except TechDefError as e:
-                error(str(e))
-                found_errors = True
-            else:
-                dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
-                unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
-                if unknown_names:
-                    error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
-                          f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
-                    found_errors = True
 
         if not os.path.isfile(args.lvs_script_path):
             error(f"Can't locate LVS script path at {args.lvs_script_path}")
@@ -1939,6 +1956,9 @@ class KpexCLI:
         result.inputs = {name: os.path.abspath(path) if path is not None else None
                          for name, path in (('gds', args.gds_path), ('lvsdb', args.lvsdb_path),
                                             ('schematic', args.schematic_path))}
+        tech_info = getattr(args, 'tech_info', None)
+        if tech_info is not None and tech_info.selection is not None:
+            result.technology_selection = tech_info.selection.to_json()
         run_dir = getattr(args, 'output_dir_path', None)
         result.run_dir = os.path.abspath(run_dir) if run_dir is not None else None
         result.out_result_path = args.out_result_path
@@ -2041,6 +2061,7 @@ class KpexCLI:
                 cell_name=args.effective_cell_name,
                 options=BuilderOptions(
                     grid_um=args.pex25d_grid,
+                    process_corner=tech_info.selection.scenario_id if tech_info.selection else None,
                     with_source_refs=args.pex25d_with_source_refs,
                     dielectric_filter=args.dielectric_filter,
                     domain_margin_um=args.pex25d_domain_margin))
