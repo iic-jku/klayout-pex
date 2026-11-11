@@ -1,0 +1,16 @@
+SUBPROCESS __kpex__:kpex_cli.py:2015 kpex extract --pdk sky130A --2.5D --mode C --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cap_mim_m3_20um_x_20um_over_m2_wire.lvsdb.gz' --out-dir 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_c_mode_default_whitebox_r0'
+INFO     __kpex__:kpex_cli.py:999 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_c_mode_default_whitebox_r0\cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2175 Peak memory (resident set size) after preparing the LVSDB: 416.3 MiB
+INFO     __kpex__:kpex_cli.py:2179 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:2179 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:2179 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:2179 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:2179 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (71, 20) -> (met4_ncap)
+ERROR    __kpex__:kpex_cli.py:2041 --coupling grounded cannot approximate white-boxed capacitor devices ($1); use --blackbox y to keep their models and terminal coupling
+INFO     __kpex__:kpex_cli.py:2045 Peak memory (resident set size) after the run: 416.5 MiB

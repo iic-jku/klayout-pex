@@ -1,0 +1,116 @@
+SUBPROCESS __kpex__:kpex_cli.py:2015 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/exclusion_wire_beside_marker_over_nwell.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/exclusion_wire_beside_marker_over_nwell.gds.gz --exclusion-markers tie --exclusion-marker-layer 200/0
+INFO     __kpex__:kpex_cli.py:988 No explicit top cell specified, using top cell 'exclusion_wire_beside_marker_over_nwell'
+INFO     __kpex__:kpex_cli.py:999 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2175 Peak memory (resident set size) after preparing the LVSDB: 775.6 MiB
+INFO     __kpex__:kpex_cli.py:2179 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2179 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:2179 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2179 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2179 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:2179 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1543 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 5pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 775.9 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 775.9 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1627 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1627 C1;D;G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C2;D;S;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C3;D;S.P0.psdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C4;D;VPWR.P0.nwell;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C5;D;VPWR.P0.nwell.excluded;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C6;D;VSUBS;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C7;D.P0.psdm;N;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C8;D.P0.psdm;S;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C9;G;VPWR.P0.nwell;0.038;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C10;G;VPWR.P0.nwell.excluded;0.018;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C11;G;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C12;G.P0.poly;N;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C13;G.P0.poly;S;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C14;G.P0.poly;VPWR.P0.nwell;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C15;G.P0.poly;VPWR.P0.nwell.excluded;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C16;G.P0.poly;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C17;N;S.P0.psdm;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C18;N;VPWR;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C19;N;VPWR.$1.nwell;0.04;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C20;N;VPWR.P0.nwell;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C21;N;VPWR.P0.nwell.excluded;0.169;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C22;N;VSUBS;0.148;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C23;S;VPWR.P0.nwell;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C24;S;VSUBS;0.018;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C25;VPWR;VSUBS;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1627 R1;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R2;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1627 R3;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R4;VPWR;VPWR.$1.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R5;VPWR.$1.nwell;VPWR.P0.nwell.excluded;;2266.667
+SUBPROCESS __kpex__:kpex_cli.py:1627 R6;VPWR.P0.nwell;VPWR.P0.nwell.excluded;;1841.1
+SUBPROCESS __kpex__:kpex_cli.py:1630 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/exclusion_wire_beside_marker_over_nwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1670 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/exclusion_wire_beside_marker_over_nwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1705 Peak memory (resident set size) after the netlist: 776.1 MiB
+INFO     __kpex__:kpex_cli.py:2045 Peak memory (resident set size) after the run: 776.1 MiB
+SUBPROCESS __kpex__:kpex_cli.py:2015 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/exclusion_wire_beside_marker_over_nwell.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/sky130A/test_patterns/exclusion_wire_beside_marker_over_nwell.gds.gz --exclusion-markers ports --exclusion-marker-layer 200/0
+INFO     __kpex__:kpex_cli.py:988 No explicit top cell specified, using top cell 'exclusion_wire_beside_marker_over_nwell'
+INFO     __kpex__:kpex_cli.py:999 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2175 Peak memory (resident set size) after preparing the LVSDB: 776.4 MiB
+INFO     __kpex__:kpex_cli.py:2179 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2179 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:2179 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2179 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2179 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:2179 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:2179 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1543 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 5pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 776.5 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 776.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1627 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1627 C1;D;G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C2;D;S;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C3;D;S.P0.psdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C4;D;VPWR.P0.nwell;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C5;D;VPWR__m0_0;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C6;D;VSUBS;0.012;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C7;D.P0.psdm;N;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C8;D.P0.psdm;S;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C9;G;VPWR.P0.nwell;0.038;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C10;G;VPWR__m0_0;0.018;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C11;G;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C12;G.P0.poly;N;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C13;G.P0.poly;S;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C14;G.P0.poly;VPWR.P0.nwell;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C15;G.P0.poly;VPWR__m0_0;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C16;G.P0.poly;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C17;N;S.P0.psdm;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C18;N;VPWR;0.007;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C19;N;VPWR.$1.nwell;0.04;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C20;N;VPWR.P0.nwell;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C21;N;VPWR__m0_1;0.169;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C22;N;VSUBS;0.148;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C23;S;VPWR.P0.nwell;0.008;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C24;S;VSUBS;0.018;
+SUBPROCESS __kpex__:kpex_cli.py:1627 C25;VPWR;VSUBS;0.019;
+SUBPROCESS __kpex__:kpex_cli.py:1627 R1;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R2;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1627 R3;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R4;VPWR;VPWR.$1.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1627 R5;VPWR.$1.nwell;VPWR__m0_1;;2266.667
+SUBPROCESS __kpex__:kpex_cli.py:1627 R6;VPWR.P0.nwell;VPWR__m0_0;;1841.1
+SUBPROCESS __kpex__:kpex_cli.py:1630 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/exclusion_wire_beside_marker_over_nwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1670 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/exclusion_wire_beside_marker_over_nwell__exclusion_wire_beside_marker_over_nwell/exclusion_wire_beside_marker_over_nwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1705 Peak memory (resident set size) after the netlist: 776.7 MiB
+INFO     __kpex__:kpex_cli.py:2045 Peak memory (resident set size) after the run: 776.7 MiB
