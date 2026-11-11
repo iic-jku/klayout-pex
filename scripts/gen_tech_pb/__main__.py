@@ -40,9 +40,11 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-sys.path.append(str(PROJECT_ROOT))  # for klayout_pex_protobuf
+sys.path.insert(0, str(PROJECT_ROOT))  # use this checkout, not an installed technology writer
 
 import google.protobuf.json_format
+
+from klayout_pex.tech_catalog import write_nominal_catalog
 
 from tech_builder import Technology
 import gf180mcuD
@@ -57,6 +59,10 @@ def write_tech(output_directory: Path, tech: Technology):
                                                          preserving_proto_field_name=True,
                                                          ensure_ascii=False)
     json_pb_path.write_text(json_str, encoding='utf-8')
+    for path in write_nominal_catalog(
+            tech, output_directory / 'tech' / tech.name / 'catalog.pb.json',
+            source='KPEX scripts/gen_tech_pb: legacy nominal technology snapshot'):
+        print(f"Writing technology catalog data to '{path}'.")
 
 
 def main() -> int:

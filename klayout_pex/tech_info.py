@@ -31,6 +31,9 @@ from functools import cached_property
 import math
 import google.protobuf.json_format
 
+if TYPE_CHECKING:
+    from .tech_catalog import TechnologySelection
+
 from .device_models import DeviceModels
 from .types import CanonicalLayerName, GDSPair, LayerName, LVSLayerName
 from .util.multiple_choice import MultipleChoicePattern
@@ -102,6 +105,12 @@ class TechInfo:
             contents = f.read()
             tech = google.protobuf.json_format.Parse(contents, tech_pb2.Technology())
 
+        TechInfo.validate_tech_def(tech, jsonpb_path)
+        return tech
+
+    @staticmethod
+    def validate_tech_def(tech: tech_pb2.Technology, source: str):
+        jsonpb_path = source
         # Checked here rather than where a name is used: by then the collision
         # has already happened, and what it cost is no longer visible.
         problems = TechInfo.duplicate_names(tech)
@@ -128,7 +137,6 @@ class TechInfo:
             raise TechDefError(
                 f"Capacitances have to be finite numbers ≥ 0, but in {jsonpb_path}"
                 + ''.join(f"\n  - {p}" for p in problems))
-        return tech
 
     @staticmethod
     def capacitance_problems(tech: tech_pb2.Technology) -> List[str]:
@@ -167,10 +175,21 @@ class TechInfo:
         return TechInfo(tech=tech,
                         dielectric_filter=dielectric_filter)
 
+    @classmethod
+    def from_catalog(cls, catalog_path: str, dielectric_filter: Optional[MultipleChoicePattern],
+                     scenario_id: Optional[str] = None, expected_technology: Optional[str] = None) -> TechInfo:
+        from pathlib import Path
+        from .tech_catalog import load_technology_catalog
+
+        resolved = load_technology_catalog(Path(catalog_path), scenario_id, expected_technology)
+        return cls(resolved.tech, dielectric_filter, selection=resolved.selection)
+
     def __init__(self,
                  tech: tech_pb2.Technology,
-                 dielectric_filter: Optional[MultipleChoicePattern]):
+                 dielectric_filter: Optional[MultipleChoicePattern],
+                 selection: Optional[TechnologySelection] = None):
         self.tech = tech
+        self.selection = selection
         self.dielectric_filter = dielectric_filter or MultipleChoicePattern(pattern='all')
 
     @cached_property

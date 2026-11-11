@@ -38,6 +38,8 @@ import google.protobuf.json_format
 
 from klayout_pex.tech_info import TechDefError, TechInfo
 from klayout_pex.util.multiple_choice import MultipleChoicePattern
+from tests.common.technology import tech_with_two_metals
+
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 import klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 as parasitics_pb2
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
@@ -96,36 +98,6 @@ def tech_with_metal_on_one_gds_pair(stack_layer_names: Sequence[str],
         tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
                                                                    drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=0)),
                                      process_layer_name=process_layer_name)
-    return tech
-
-
-def tech_with_two_metals() -> tech_pb2.Technology:
-    """
-    met1 (1/0) and met2 (2/0), with the LVS layer met1_con (101/7) derived from met1,
-    in a stack of met1 (with via1 up to met2), its conformal liner, wrapped by the conformal coat,
-    ild, met2 and air
-    """
-    tech = tech_pb2.Technology(name='test')
-    for gds_layer, name in enumerate(('met1', 'met2'), start=1):
-        tech.layers.add(name=name, drw_gds_pair=tech_pb2.GDSPair(layer=gds_layer, datatype=0))
-    tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name='met1_con',
-                                                               drw_gds_pair=tech_pb2.GDSPair(layer=101, datatype=7)),
-                                 original_layer_name='met1')
-    LT = stack_pb2.ProcessStackInfo
-    stack = tech.process_stack
-    met1 = stack.layers.add(name='met1', layer_type=LT.LAYER_TYPE_METAL)
-    met1.metal_layer.z = 1.0
-    met1.metal_layer.thickness = 0.2
-    met1.metal_layer.contact_above.CopyFrom(LT.Contact(name='via1', layer_below='met1', metal_above='met2', width=0.2))
-    for name, reference, k in (('liner', 'met1', 4.0), ('coat', 'liner', 5.0)):
-        film = stack.layers.add(name=name, layer_type=LT.LAYER_TYPE_CONFORMAL_DIELECTRIC)
-        film.conformal_dielectric_layer.reference = reference
-        film.conformal_dielectric_layer.dielectric_k = k
-    stack.layers.add(name='ild', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 3.5
-    met2 = stack.layers.add(name='met2', layer_type=LT.LAYER_TYPE_METAL)
-    met2.metal_layer.z = 2.5
-    met2.metal_layer.thickness = 0.3
-    stack.layers.add(name='air', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 1.0
     return tech
 
 
