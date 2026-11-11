@@ -1,0 +1,22 @@
+SUBPROCESS __kpex__:kpex_cli.py:1988 main extract --pdk sky130A --mode CC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/near_body_shield_li1_m1.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:996 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/near_body_shield_li1_m1__near_body_shield_li1_m1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2149 Peak memory (resident set size) after preparing the LVSDB: 447.1 MiB
+INFO     __kpex__:kpex_cli.py:2153 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2153 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1528 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 447.1 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1586 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1586 C1;BOTTOM;TOPA;220.071;
+SUBPROCESS __kpex__:kpex_cli.py:1586 C2;BOTTOM;TOPB;220.071;
+SUBPROCESS __kpex__:kpex_cli.py:1586 C3;BOTTOM;VSUBS;401.734;
+SUBPROCESS __kpex__:kpex_cli.py:1586 C4;TOPA;TOPB;0.519;
+SUBPROCESS __kpex__:kpex_cli.py:1586 C5;TOPA;VSUBS;0.265;
+SUBPROCESS __kpex__:kpex_cli.py:1586 C6;TOPB;VSUBS;0.265;
+SUBPROCESS __kpex__:kpex_cli.py:1589 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/near_body_shield_li1_m1__near_body_shield_li1_m1/near_body_shield_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1629 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/near_body_shield_li1_m1__near_body_shield_li1_m1/near_body_shield_li1_m1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1664 Peak memory (resident set size) after the netlist: 447.1 MiB
+WARNING  __kpex__:kpex_cli.py:1681 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: BOTTOM (841.875 fF), TOPA (220.855 fF), TOPB (220.855 fF)
+INFO     __kpex__:kpex_cli.py:2018 Peak memory (resident set size) after the run: 447.1 MiB
