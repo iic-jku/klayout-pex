@@ -99,7 +99,11 @@ jobs:
         path: deb-downloads
         key: ${{ runner.os }}-klayout-deb-${{ env.KLAYOUT_DEB }}
 
+    - name: Configure Ubuntu package downloads
+      uses: ./.github/actions/setup-apt
+
     - name: "Install KLayout deb 📦"
+      timeout-minutes: 10
       run: |
         sudo apt-get update
         sudo apt-get install ./deb-downloads/$KLAYOUT_DEB

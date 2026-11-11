@@ -150,8 +150,13 @@ jobs:
         retention-days: 7
         if-no-files-found: error
 
+    - name: Configure Ubuntu package downloads
+      if: runner.os == 'Linux'
+      uses: ./.github/actions/setup-apt
+
     # NOTE: for the tests that simulate with ngspice, skipped without it
     - name: "Install ngspice 📦"
+      timeout-minutes: 5
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
@@ -256,8 +261,13 @@ jobs:
                     "plugins/klayout-pex-plugin-$plugin"
         done
 
+    - name: Configure Ubuntu package downloads
+      if: runner.os == 'Linux'
+      uses: ./.github/actions/setup-apt
+
     # NOTE: the gmsh wheel links against these
     - name: "Install gmsh's system libraries"
+      timeout-minutes: 5
       run: |
         sudo apt-get update
         sudo apt-get install --yes libgl1 libglu1-mesa libgomp1 libxcursor1 libxft2 libxinerama1 libxrender1
@@ -272,6 +282,7 @@ jobs:
           -e plugins/klayout-pex-plugin-elmer
 
     - name: "Install Elmer FEM"
+      timeout-minutes: 5
       if: matrix.plugin == 'elmer'
       run: |
         sudo add-apt-repository --yes ppa:elmer-csc-ubuntu/elmer-csc-ppa
