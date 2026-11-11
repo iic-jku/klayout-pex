@@ -486,7 +486,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         for name in ('oxide', 'nitride', 'air'):
             layer = layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
             layer.simple_dielectric_layer.dielectric_k = 1.0 if name == 'air' else 4.0
-        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+        with mock.patch('klayout_pex.klayout.pex25d_stack.warning') as warning_mock:
             pex25d_file = fixture.build()
         assert pex25d_file.background.name == 'air'
         assert [c.args[0] for c in warning_mock.call_args_list] == [
@@ -498,7 +498,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         # not its top. The nitride's field height must include the oxide below it.
         # Checking both profiles catches an air gap beside `Metal5` or a film that
         # becomes 1.1925 um too thick by counting the metal twice (#470).
-        with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
+        with mock.patch('klayout_pex.klayout.pex25d_stack.warning') as warning_mock:
             file = self.stack(PDK.GF180MCUD)
         warning_mock.assert_not_called()
         scene = resolve(file)
