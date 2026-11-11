@@ -1,0 +1,38 @@
+SUBPROCESS __kpex__:kpex_cli.py:1974 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/r_via_stack_1x1_minsize_poly_to_metal5.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:984 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_via_stack_1x1_minsize_poly_to_metal5__r_via_stack_1x1_minsize_poly_to_metal5/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2138 Peak memory (resident set size) after preparing the LVSDB: 710.3 MiB
+INFO     __kpex__:kpex_cli.py:2142 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:2142 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:2142 (41, 144) -> (via4_n_cap)
+INFO     __kpex__:kpex_cli.py:2142 (81, 0) -> (metal5_con)
+INFO     __kpex__:kpex_cli.py:2142 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2142 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:2142 (42, 0) -> (metal3_con)
+INFO     __kpex__:kpex_cli.py:2142 (38, 144) -> (via2_n_cap)
+INFO     __kpex__:kpex_cli.py:2142 (40, 144) -> (via3_n_cap)
+INFO     __kpex__:kpex_cli.py:2142 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:2142 (46, 0) -> (metal4_n_cap)
+INFO     __kpex__:kpex_cli.py:1516 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 710.3 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 710.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1574 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1574 C1;VSUBS;met1;0.061;
+SUBPROCESS __kpex__:kpex_cli.py:1574 C2;VSUBS;met2;0.052;
+SUBPROCESS __kpex__:kpex_cli.py:1574 C3;VSUBS;met3;0.047;
+SUBPROCESS __kpex__:kpex_cli.py:1574 C4;VSUBS;met4;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1574 C5;VSUBS;met5;0.095;
+SUBPROCESS __kpex__:kpex_cli.py:1574 C6;VSUBS;poly;0.087;
+SUBPROCESS __kpex__:kpex_cli.py:1574 R1;met1;met1,met2,met3,met4,met5,poly;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1574 R2;met1;met2;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1574 R3;met1;poly;;5.9
+SUBPROCESS __kpex__:kpex_cli.py:1574 R4;met2;met3;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1574 R5;met3;met4;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1574 R6;met4;met5;;4.5
+SUBPROCESS __kpex__:kpex_cli.py:1577 /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_via_stack_1x1_minsize_poly_to_metal5__r_via_stack_1x1_minsize_poly_to_metal5/r_via_stack_1x1_minsize_poly_to_metal5_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1617 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/r_via_stack_1x1_minsize_poly_to_metal5__r_via_stack_1x1_minsize_poly_to_metal5/r_via_stack_1x1_minsize_poly_to_metal5_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1652 Peak memory (resident set size) after the netlist: 710.3 MiB
+INFO     __kpex__:kpex_cli.py:2008 Peak memory (resident set size) after the run: 710.3 MiB
