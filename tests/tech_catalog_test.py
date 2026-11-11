@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import re
 from pathlib import Path
 from typing import Callable
 
@@ -142,14 +143,14 @@ def test_a_changed_component_is_not_silently_used_under_its_old_identity(tmp_pat
 def test_invalid_catalog_json_is_a_domain_error_with_its_source(data: bytes, tmp_path: Path):
     path = tmp_path / 'catalog.pb.json'
     path.write_bytes(data)
-    with pytest.raises(TechDefError, match=str(path)) as failure:
+    with pytest.raises(TechDefError, match=re.escape(str(path))) as failure:
         load_technology_catalog(path)
     assert failure.value.__cause__ is not None
 
 
 def test_missing_catalog_is_a_domain_error_with_its_source(tmp_path: Path):
     path = tmp_path / 'missing.pb.json'
-    with pytest.raises(TechDefError, match=str(path)) as failure:
+    with pytest.raises(TechDefError, match=re.escape(str(path))) as failure:
         load_technology_catalog(path)
     assert isinstance(failure.value.__cause__, OSError)
 
