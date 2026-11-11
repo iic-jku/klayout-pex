@@ -444,3 +444,24 @@ def test_continued_statements_use_source_line_ending(newline: str, mixed: bool,
     assert output_path.read_bytes() == expected
     # A second write must neither duplicate blank lines nor introduce mixed endings.
     assert SpiceRCNetlist.read(str(output_path)).format().encode('utf-8') == expected
+
+
+def test_selected_capacitance_rewrites_without_touching_resistor_text():
+    content = '.subckt dut A G\nRwire A B\n+ 1.234567890123456k\nCpar B G 1f\nCdevice A G 2p\n.ends\n'
+    parsed = SpiceRCNetlist.parse(content, recognize_ties=False, preserve_resistors=True,
+                                  element_filter=lambda scope, tokens: tokens[0] in ('Rwire', 'Cpar'))
+    scope = scope_named(parsed, 'dut')
+    assert scope.resistors_read == 1 and scope.capacitors_read == 1
+    assert scope.network.resistor_count() == 1
+    assert 'Rwire A B\n+ 1.234567890123456k\n' in parsed.format()
+    assert 'Cdevice A G 2p\n' in parsed.format()
+    assert protected_names(scope.network) == ['A', 'G']
+
+
+@pytest.mark.parametrize('kwargs', [{'preserve_resistors': 'false'}, {'preserve_resistors': True},
+                                   {'element_filter': 'false'}])
+def test_invalid_selection_options_fail_before_file_io(kwargs: Dict, tmp_path: Path):
+    with pytest.raises(ValueError):
+        SpiceRCNetlist.parse('', **kwargs)
+    with pytest.raises(ValueError):
+        SpiceRCNetlist.read(str(tmp_path / 'missing.spice'), **kwargs)
