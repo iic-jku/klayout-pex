@@ -1,0 +1,55 @@
+SUBPROCESS __kpex__:kpex_cli.py:1968 kpex extract --pdk sky130A --2.5D --mode RC --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/nfet_li1_in_subcell.lvsdb.gz --schematic /tmp/pytest-of-runner/pytest-0/test_device_class_of_the_schem0/nfet_li1_in_subcell.spice --out-dir /tmp/pytest-of-runner/pytest-0/test_device_class_of_the_schem0
+WARNING  __kpex__:kpex_cli.py:922 --schematic supplies matched device names and port order for 2.5D output. --check checks device classes, totals and top pins. Use regular LVS for full verification
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_device_class_of_the_schem0/nfet_li1_in_subcell__nfet_li1_in_subcell/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:284 Ports named after labels in subcells: D, G, S (label them in the top cell to name ports explicitly)
+INFO     __kpex__:kpex_cli.py:2128 Peak memory (resident set size) after preparing the LVSDB: 331.8 MiB
+INFO     __kpex__:kpex_cli.py:2132 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2132 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2132 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2132 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2132 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2132 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:1511 Sidewall halo: 8 µm (tech info of sky130A)
+INFO     __kpex__:extractor.py:491 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 331.8 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 331.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 C1;D;G.$0.li1;0.043;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C2;D;G.$1.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C3;D;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C4;D.$0.li1;G.P0.poly;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C5;D.$0.li1;S.$0.li1;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C6;D.$0.li1;VSUBS;0.014;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C7;D.$1.li1;G.P0.poly;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C8;D.$1.li1;S.$1.li1;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C9;D.$1.li1;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C10;G;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C11;G.$0.li1;VSUBS;0.011;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C12;G.$1.poly;VSUBS;0.056;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C13;G.P0.poly;S.$0.li1;0.006;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C14;G.P0.poly;S.$1.li1;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C15;G.P0.poly;VSUBS;0.023;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C16;S;VSUBS;0.028;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C17;S.$0.li1;VSUBS;0.023;
+SUBPROCESS __kpex__:kpex_cli.py:1569 C18;S.$1.li1;VSUBS;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;D;D.$1.li1;;30.494
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;D.$0.li1;D.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1569 R3;D.$0.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R4;D.$1.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R5;G;G.$0.li1;;6.4
+SUBPROCESS __kpex__:kpex_cli.py:1569 R6;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R7;G.$1.poly;G.P0.poly;;234.381
+SUBPROCESS __kpex__:kpex_cli.py:1569 R8;S;S.$0.li1;;43.294
+SUBPROCESS __kpex__:kpex_cli.py:1569 R9;S.$0.li1;S.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1569 R10;S.$0.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R11;S.$1.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1572 /tmp/pytest-of-runner/pytest-0/test_device_class_of_the_schem0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_k25d_pex_netlist.csv
+WARNING  __kpex__:kpex_cli.py:1608 Schematic device names retained from layout: topology or known device parameters do not match
+SUBPROCESS __kpex__:kpex_cli.py:1612 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_device_class_of_the_schem0/nfet_li1_in_subcell__nfet_li1_in_subcell/nfet_li1_in_subcell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1647 Peak memory (resident set size) after the netlist: 331.8 MiB
+ERROR    __kpex__:kpex_cli.py:1994 The extracted netlist is inconsistent with the LVS netlist (--check n to accept it):
+  - the schematic has devices of class sky130_fd_pr__pfet_01v8 (X1.XM2), the LVS netlist none
+INFO     __kpex__:kpex_cli.py:1998 Peak memory (resident set size) after the run: 331.8 MiB
