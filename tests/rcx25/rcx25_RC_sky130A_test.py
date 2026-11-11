@@ -47,16 +47,16 @@ pex_blackboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.SKY130A), pex_mode=PE
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
 def test_wire_voltage_divider_li1():
-    # NOTE: the capacitance of the wire (0.969 fF in CC mode) goes to the nodes of its resistor network,
+    # NOTE: the capacitance of the wire (0.845 fF in CC mode with the #523 tables) goes to the nodes of its resistor network,
     #       each part of it to the node nearest to it (#211 §8): the T junction A,B,C has the middle half
     #       of the wire from A to B, and the lower half of the stub to C
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'r_wire_voltage_divider_li1.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;VSUBS;0.223;
-C2;A,B,C;VSUBS;0.459;
-C3;B;VSUBS;0.23;
-C4;C;VSUBS;0.056;
+C1;A;VSUBS;0.195;
+C2;A,B,C;VSUBS;0.401;
+C3;B;VSUBS;0.201;
+C4;C;VSUBS;0.049;
 R1;A;A,B,C;;426.667
 R2;A,B,C;B;;413.867
 R3;A,B,C;C;;72.533"""

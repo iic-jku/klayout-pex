@@ -84,9 +84,10 @@ def test_mom_comparison_preserves_the_written_netlist(
     record, = checked.run_result.device_capacitance_checks
     # Independent white-box fixture result; no net-pair subtraction is used by the observer.
     # Exclusions filter the output, not the model's full internal capacitance.
-    # Full pair counting restores the former 192.7094929601 fF sidewall share (#390).
-    assert record['extracted_capacitance_f'] == pytest.approx(397.8574172426e-15, rel=1e-12, abs=0)
-    assert record['ratio'] == pytest.approx(397.8574172426 / 228.75, rel=1e-12)
+    # Corrected nominal IHP fits give 223.4841340660 fF sidewall, 8.9845012020 fF
+    # fringe and 3.52137995 fF overlap; the device-model reference remains unchanged (#390).
+    assert record['extracted_capacitance_f'] == pytest.approx(235.9900152180e-15, rel=1e-12, abs=0)
+    assert record['ratio'] == pytest.approx(235.9900152180 / 228.75, rel=1e-12)
     assert record['status'] == 'informational'
     assert bool(record['reference_source']) == automatic
 
@@ -119,9 +120,9 @@ def test_device_and_reduction_checks_preserve_both_outcomes(
         tmp_path: Path, device_fails: bool, reduction_fails: bool):
     # Check the complete decision table: a passing check must not erase another
     # failure. Aggressive reduction changes the high-frequency routing response.
-    # Full sidewall counting puts this uncalibrated fit near 1.74 times the model
-    # reference (#390). Explicit bands select each outcome without changing the model.
-    min_ratio, max_ratio = (0.8, 1.2) if device_fails else (1.7, 1.8)
+    # Corrected nominal fits put this layout near 1.032 times the model reference
+    # (#390). The bands straddle that result to exercise both outcomes with the same model.
+    min_ratio, max_ratio = (0.8, 1.0) if device_fails else (1.0, 1.05)
     reference = write_references(tmp_path / 'reference.json', reference_document(
         device_class='cap_cmomf', terminals=['mim_top', 'mim_btm'], capacitance='228.75f',
         min_ratio=min_ratio, max_ratio=max_ratio))

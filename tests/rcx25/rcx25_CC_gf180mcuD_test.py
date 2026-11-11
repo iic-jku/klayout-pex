@@ -34,9 +34,10 @@ from tests.rcx25.rcx25_test_helpers import RCX25Extraction
 parent_suite = "kpex/2.5D Extraction Tests [PDK gf180mcuD | mode CC]"
 tags = ("PEX", "2.5D")
 
-# Sidewall expectations use the full pair fit (#390). Relative to the former
-# totals, only the old sidewall contribution is added; overlap and fringe stay
-# unchanged. The parallel-wire regression checks the pair fit independently.
+# Expectations use the pinned nominal OpenPDKs tables in the generator (#523).
+# Overlap follows the area coefficient. Fringe uses its directional coefficient
+# and the overlap-dependent spreading. Sidewall uses the full pair fit (#390)
+# with the updated offset. Geometry and resistance values are unchanged.
 
 
 pex_whiteboxed = RCX25Extraction(pdk=PDKTestConfig(PDKName.GF180MCUD), pex_mode=PEXMode.CC, blackbox=False)
@@ -52,16 +53,16 @@ def test_mim_cap__whiteboxed():
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_mim_m4m5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;BOT1;BOT2;0.265;
+C1;BOT1;BOT2;0.264;
 C2;BOT1;TOP1;54.685;
 C3;BOT1;TOP2;0.034;
-C4;BOT1;VSUBS;0.836;
+C4;BOT1;VSUBS;0.845;
 C5;BOT2;TOP1;0.024;
 C6;BOT2;TOP2;412.805;
-C7;BOT2;VSUBS;3.474;
-C8;TOP1;TOP2;0.365;
-C9;TOP1;VSUBS;0.449;
-C10;TOP2;VSUBS;1.603;"""
+C7;BOT2;VSUBS;3.501;
+C8;TOP1;TOP2;0.304;
+C9;TOP1;VSUBS;0.455;
+C10;TOP2;VSUBS;1.625;"""
     )
 
 
@@ -75,16 +76,16 @@ def test_mim_cap__blackboxed():
     pex_blackboxed.assert_expected_matches_obtained(
         'test_patterns', 'cap_mim_m4m5.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;BOT1;BOT2;0.265;
+C1;BOT1;BOT2;0.264;
 C2;BOT1;TOP1;0.296;
 C3;BOT1;TOP2;0.034;
-C4;BOT1;VSUBS;0.836;
+C4;BOT1;VSUBS;0.845;
 C5;BOT2;TOP1;0.024;
 C6;BOT2;TOP2;0.888;
-C7;BOT2;VSUBS;3.474;
-C8;TOP1;TOP2;0.365;
-C9;TOP1;VSUBS;0.449;
-C10;TOP2;VSUBS;1.603;"""
+C7;BOT2;VSUBS;3.501;
+C8;TOP1;TOP2;0.304;
+C9;TOP1;VSUBS;0.455;
+C10;TOP2;VSUBS;1.625;"""
     )
 
 
@@ -104,19 +105,19 @@ def test_plates_over_isolated_pwell_and_dnwell():
     # The isolated p-well (LVPWELL within DNWELL) is a net of its own, W by its p-tap, and so is the DNWELL
     # around it, D by its n-tap: the plates couple to the wells below them, their fringes to the other well
     # and, beyond the DNWELL, to the substrate (VSUBS). It was the substrate: A–VSUBS 2.402 fF, B–VSUBS 2.172 fF (#337)
-    # The taps of the wells are diffusion of the stack, which couples a bit more: A–W 2.114 fF, D–W 0.014 fF (#475)
+    # The taps of the wells are diffusion of the stack, which couples a bit more: `A`–`W` 2.125 fF, `D`–`W` 0.016 fF (#475)
     pex_whiteboxed.assert_expected_matches_obtained(
         'test_patterns', 'plates_m1_over_isolated_pwell_and_dnwell.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
-C1;A;B;0.11;
-C2;A;D;0.204;
-C3;A;VSUBS;0.086;
-C4;A;W;2.117;
-C5;B;D;1.707;
-C6;B;VSUBS;0.313;
-C7;B;W;0.152;
+C1;A;B;0.089;
+C2;A;D;0.207;
+C3;A;VSUBS;0.087;
+C4;A;W;2.125;
+C5;B;D;1.715;
+C6;B;VSUBS;0.317;
+C7;B;W;0.155;
 C8;D;VSUBS;0.013;
-C9;D;W;0.017;
+C9;D;W;0.016;
 C10;VSUBS;W;0.004;"""
     )
 

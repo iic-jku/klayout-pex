@@ -42,6 +42,7 @@ from klayout_pex.rcx25.extraction_reporter import ExtractionReporter
 from klayout_pex.rcx25.extraction_results import CellExtractionResults
 from klayout_pex.rcx25.types import EdgeNeighborhood
 from klayout_pex.tech_info import TechInfo
+from klayout_pex.pdk_config import PDK
 from klayout_pex_protobuf.kpex.tech.process_parasitics_pb2 import CapacitanceInfo
 import klayout_pex_protobuf.kpex.tech.tech_pb2 as tech_pb2
 
@@ -508,6 +509,32 @@ class FringeCapTest(unittest.TestCase):
 @allure.parent_suite("Unit Tests")
 @allure.tag("RCX25", "Capacitance", "Sidewall")
 class SidewallSeparationTest(unittest.TestCase):
+    def assert_parallel_wire_capacitance(self, tech_info: TechInfo, layer: str,
+                                         gap: int, expected: float):
+        wires = [('A', kdb.Box(0, 0, 50000, 500)),
+                 ('B', kdb.Box(0, 500 + gap, 50000, 1000 + gap))]
+        for rotation, reverse, keep_geometry in ((0, False, False), (0, True, True),
+                                                  (1, False, True), (1, True, False)):
+            with self.subTest(rotation=rotation, reverse=reverse, keep_geometry=keep_geometry):
+                region = kdb.Region()
+                region.enable_properties()
+                for net, box in reversed(wires) if reverse else wires:
+                    polygon = kdb.Polygon(box.transformed(kdb.Trans(rotation, False, 1000, 2000)))
+                    region.insert(kdb.PolygonWithProperties(polygon, {'net': net}))
+                results = CellExtractionResults(cell_name='TOP', keep_capacitance_geometry=keep_geometry)
+                extractor = SidewallAndFringeExtractor(
+                    [layer], {layer: region}, DBU, False, tech_info,
+                    DeviceCapacitorPlates(), kdb.Region(), results, mock.Mock(spec=ExtractionReporter))
+                extractor.extract()
+                contributions = [cap for caps in results.sidewall_table.values() for cap in caps]
+                self.assertEqual({('A', 'B'), ('B', 'A')},
+                                 {(cap.key.net1, cap.key.net2) for cap in contributions})
+                self.assertEqual(2, len(contributions))
+                for cap in contributions:
+                    self.assertAlmostEqual(cap.cap_value, expected / 2, delta=expected * 1e-12)
+                total, = results.summarize().capacitances.values()
+                self.assertAlmostEqual(total, expected, delta=expected * 1e-12)
+
     def test_facing_edges_sum_to_the_full_pair_capacitance(self):
         # Both directed edges contribute half of the pair fit, including after
         # rotation, reordering and discarding geometry for C-only extraction.
@@ -520,30 +547,27 @@ class SidewallSeparationTest(unittest.TestCase):
             tech.process_parasitics.capacitance.sidewalls.add(
                 layer_name='wire', capacitance=coefficient, offset=offset)
             expected = coefficient * 50.0 / max(gap * DBU + offset, gap * DBU / 2) / 1000.0
-            wires = [('A', kdb.Box(0, 0, 50000, 500)),
-                     ('B', kdb.Box(0, 500 + gap, 50000, 1000 + gap))]
-            for rotation, reverse, keep_geometry in ((0, False, False), (0, True, True),
-                                                      (1, False, True), (1, True, False)):
-                with self.subTest(coefficient=coefficient, offset=offset, gap=gap,
-                                  rotation=rotation, reverse=reverse, keep_geometry=keep_geometry):
-                    region = kdb.Region()
-                    region.enable_properties()
-                    for net, box in reversed(wires) if reverse else wires:
-                        polygon = kdb.Polygon(box.transformed(kdb.Trans(rotation, False, 1000, 2000)))
-                        region.insert(kdb.PolygonWithProperties(polygon, {'net': net}))
-                    results = CellExtractionResults(cell_name='TOP', keep_capacitance_geometry=keep_geometry)
-                    extractor = SidewallAndFringeExtractor(
-                        ['wire'], {'wire': region}, DBU, False, TechInfo(tech, None),
-                        DeviceCapacitorPlates(), kdb.Region(), results, mock.Mock(spec=ExtractionReporter))
-                    extractor.extract()
-                    contributions = [cap for caps in results.sidewall_table.values() for cap in caps]
-                    self.assertEqual({('A', 'B'), ('B', 'A')},
-                                     {(cap.key.net1, cap.key.net2) for cap in contributions})
-                    self.assertEqual(2, len(contributions))
-                    for cap in contributions:
-                        self.assertAlmostEqual(cap.cap_value, expected / 2, delta=expected * 1e-12)
-                    total, = results.summarize().capacitances.values()
-                    self.assertAlmostEqual(total, expected, delta=expected * 1e-12)
+            with self.subTest(coefficient=coefficient, offset=offset, gap=gap):
+                self.assert_parallel_wire_capacitance(TechInfo(tech, None), 'wire', gap, expected)
+
+    def test_ihp_parallel_wires_use_corrected_nominal_fits(self):
+        # IHP PR #1328 at 14b1ab8. The two Metal1 spacings reproduce #390;
+        # the top metals exercise the largest correction from the missing
+        # coatings. Multiple spacings distinguish the numerator from its offset,
+        # and GatPoly keeps the valid negative offset. No PDK data is replaced.
+        for pdk, layer, coefficient, offset, gaps in (
+                ('ihp-sg13g2', 'Metal1', 27.155, 0.031, (200, 800)),
+                ('ihp-sg13g2', 'GatPoly', 11.459, -0.038, (180, 1000)),
+                ('ihp-sg13g2', 'TopMetal1', 173.691, 0.383, (1640, 4000)),
+                ('ihp-sg13g2', 'TopMetal2', 252.754, 0.535, (2000, 4000)),
+                ('ihp-sg13cmos5l', 'Metal1', 27.218, 0.031, (200, 800)),
+                ('ihp-sg13cmos5l', 'GatPoly', 11.472, -0.038, (180, 1000)),
+                ('ihp-sg13cmos5l', 'TopMetal1', 149.394, 0.028, (1640, 4000))):
+            tech_info = TechInfo.from_json(PDK.from_string(pdk).config.tech_pb_json_path, None)
+            for gap in gaps:
+                expected = coefficient * 50.0 / (gap * DBU + offset) / 1000.0
+                with self.subTest(pdk=pdk, layer=layer, gap=gap):
+                    self.assert_parallel_wire_capacitance(tech_info, layer, gap, expected)
 
     def test_sloping_sidewall_matches_integrated_separation(self):
         # Include constant separation, both slope signs, and crossings of the
