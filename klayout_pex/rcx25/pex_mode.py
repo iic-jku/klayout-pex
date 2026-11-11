@@ -26,6 +26,7 @@ from enum import StrEnum
 
 
 class PEXMode(StrEnum):
+    C = "C"
     CC = "CC"
     RC = "RC"
     R = "R"
@@ -33,7 +34,7 @@ class PEXMode(StrEnum):
 
     def need_capacitance(self) -> bool:
         match self:
-            case PEXMode.CC | PEXMode.RC | PEXMode.DEFAULT:
+            case PEXMode.C | PEXMode.CC | PEXMode.RC | PEXMode.DEFAULT:
                 return True
             case PEXMode.R:
                 return False
@@ -44,7 +45,7 @@ class PEXMode(StrEnum):
         match self:
             case PEXMode.R | PEXMode.RC:
                 return True
-            case PEXMode.CC | PEXMode.DEFAULT:
+            case PEXMode.C | PEXMode.CC | PEXMode.DEFAULT:
                 return False
             case _:
                 raise NotImplementedError()
