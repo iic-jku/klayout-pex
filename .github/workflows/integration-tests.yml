@@ -109,7 +109,11 @@ jobs:
         path: deb-downloads
         key: ${{ runner.os }}-deb-downloads-${{ env.KLAYOUT_DEB }}-${{ env.FASTERCAP_DEB }}
 
+    - name: Configure Ubuntu package downloads
+      uses: ./.github/actions/setup-apt
+
     - name: "Install deb 📦s"
+      timeout-minutes: 10
       run: |
         pushd deb-downloads
         sudo apt-get update
