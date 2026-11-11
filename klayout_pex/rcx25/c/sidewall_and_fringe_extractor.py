@@ -132,6 +132,10 @@ class SidewallAndFringeExtractor:
                 dout=side_halo_dbu # dout
             )
 
+            # Return ownership to Python, keeping the visitor alive through complex_op.
+            # https://github.com/KLayout/klayout/issues/2542#issuecomment-6778761319
+            en_visitor._manage()
+
             layer_region.complex_op(en_node)
 
     @staticmethod

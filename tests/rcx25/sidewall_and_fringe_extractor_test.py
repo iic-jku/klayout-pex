@@ -71,9 +71,11 @@ def neighborhoods(primary: kdb.Region, secondary: kdb.Region) -> List[str]:
                     recorded.append(f"{edge} {interval} {child} {sorted(str(polygon) for polygon in polygons)}")
 
     visitor = Visitor()
-    primary.complex_op(kdb.CompoundRegionOperationNode.new_edge_neighborhood(
+    node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
         children=[kdb.CompoundRegionOperationNode.new_secondary(secondary)],
-        visitor=visitor, bext=-1, eext=-1, din=-1, dout=200))
+        visitor=visitor, bext=-1, eext=-1, din=-1, dout=200)
+    visitor._manage()
+    primary.complex_op(node)
     return sorted(recorded)
 
 
@@ -201,11 +203,13 @@ class FringeCapTest(unittest.TestCase):
                 secondary.enable_properties()
                 visitor = fringe_visitor(30.0, True, dbu)
                 visitor.report = mock.Mock(spec=ExtractionReporter)
-                primary.complex_op(kdb.CompoundRegionOperationNode.new_edge_neighborhood(
+                node = kdb.CompoundRegionOperationNode.new_edge_neighborhood(
                     children=[kdb.CompoundRegionOperationNode.new_foreign(),
                               kdb.CompoundRegionOperationNode.new_secondary(secondary),
                               kdb.CompoundRegionOperationNode.new_primary()],
-                    visitor=visitor, bext=-1, eext=-1, din=-1, dout=round(SIDE_HALO / dbu) + 1))
+                    visitor=visitor, bext=-1, eext=-1, din=-1, dout=round(SIDE_HALO / dbu) + 1)
+                visitor._manage()
+                primary.complex_op(node)
                 actual = math.fsum(call.kwargs['sideoverlap_cap'].cap_value
                                    for call in visitor.report.output_sideoverlap.call_args_list)
                 self.assertAlmostEqual(actual, expected,

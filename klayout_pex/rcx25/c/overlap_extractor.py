@@ -73,6 +73,10 @@ class OverlapExtractor:
             # We don't use a distance - hence only true overlaps will be considered
             ovl_node = kdb.CompoundRegionOperationNode.new_polygon_neighborhood(ovl_children, ovl_visitor)
 
+            # Return ownership to Python, keeping the visitor alive through complex_op.
+            # https://github.com/KLayout/klayout/issues/2542#issuecomment-6778761319
+            ovl_visitor._manage()
+
             layer_region.complex_op(ovl_node)
 
     class PEXPolygonNeighborhoodVisitor(kdb.PolygonNeighborhoodVisitor):
