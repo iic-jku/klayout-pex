@@ -124,6 +124,92 @@ To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 > The older flat form without a subcommand (`./kpex.sh --pdk sky130A --gds …`) still
 > works and is treated as `kpex extract …`, but it warns and will be removed.
 
+### Preparing calibration patterns
+
+`kpex calibrate prepare` creates finite 3D test patterns from the same physical stack
+used by layout extraction. It needs explicit dimensions, not a layout or an LVS run.
+It prepares cases for inspection and reference-solver export. It does not run a solver,
+qualify numerical accuracy, fit coefficients or change installed technology data.
+
+For example, save this as `patterns.json` for `sky130A`:
+
+```json
+{
+  "schema_version": 1,
+  "grid_um": "0.0001",
+  "domain_margin_um": "10",
+  "cases": [
+    {
+      "id": "plates",
+      "family": "parallel_plates",
+      "lower_layer": "met1",
+      "upper_layer": "met2",
+      "width_um": "20",
+      "length_um": "20",
+      "role": "training"
+    },
+    {
+      "id": "wires",
+      "family": "parallel_wires",
+      "layer": "met1",
+      "width_um": "0.4",
+      "length_um": "40",
+      "gap_um": "0.4",
+      "role": "validation"
+    }
+  ]
+}
+```
+
+```bash
+kpex calibrate prepare --pdk sky130A --patterns patterns.json --out-dir calibration-prepare
+pex25d validate calibration-prepare/case_plates.pex25d --strict
+pex25d export calibration-prepare/case_plates.pex25d.scene.pb --to elmer --out-dir plate-solver-input
+```
+
+The export command needs the corresponding plugin. The dimensions above illustrate the
+input contract; they are not a design-rule recommendation or a complete fitting set.
+
+Pattern contracts:
+
+- Every dimension is in µm and must be a positive, exact integer multiple of `grid_um`
+- `parallel_plates` places two aligned rectangles on distinct metal profiles with a positive vertical gap
+- `parallel_wires` places two finite parallel rectangles on one profile, separated edge to edge by `gap_um`
+- `width_um` is along X and `length_um` along Y, with conductor `A` starting at the origin
+- Profiles use names from the technology's process stack, which may differ from drawing or LVS names
+- The complete dielectric stack is retained, including films above the highest patterned metal
+- `domain_margin_um` expands the finite geometry bounds as in `PEX25D`, with the ground plane as the lower boundary
+- The requested domain and its exterior boundary condition still need numerical qualification before fitting
+- `role` records an explicit `training` or `validation` split and does not certify either set
+- Case identifiers start with a letter or digit, contain 1–64 ASCII letters, digits, underscores or hyphens, and are unique ignoring case
+- A specification contains 1–1000 explicit cases, is at most 2 MiB and rejects unknown or repeated JSON keys
+- Combined geometry and domain bounds must fit KLayout's signed 32-bit XY grid coordinates
+
+The destination must be a new directory under an existing parent. All patterns are
+validated before it is created. Each case gets editable `PEX25D` text and a resolved
+binary scene. `manifest.json` is written last, alongside copies of the input specification
+and resolved technology. Existing output paths are refused, including empty directories
+and broken symlinks.
+
+The manifest records exact grid dimensions, artifact SHA256 hashes and separate identities
+for the physical process stack and complete resolved technology. Changing only fitted
+parasitic coefficients therefore changes the technology identity without changing the
+physical-stack identity or prepared geometry. Dataset and scenario labels do not substitute
+for these content hashes.
+
+Each measurement request is a Maxwell capacitance matrix in farads, in conductor order
+`A`, `B`, relative to the stack's grounded substrate. For each excitation, other measured
+conductors are held at zero potential. There are no floating conductors in these two
+pattern families. The exterior boundary condition is explicitly unspecified until a
+reference solver is configured. The manifest's `stage` is `prepared`, its reference-solution
+list is empty and its fitted-coefficient result is absent.
+
+A later fit must separate numerical error from model error. In particular, dividing one
+finite wire's capacitance by its length mixes distributed capacitance with end effects.
+Use at least three lengths to assess a relation such as `C(L) = cL + C_end`, and retain
+independent validation cases. Mesh or panel refinement and domain enlargement must establish
+reference accuracy before those measurements are used to update coefficients.
+
 ### Result file
 
 Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,
