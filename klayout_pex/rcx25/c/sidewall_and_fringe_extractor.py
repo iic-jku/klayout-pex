@@ -356,16 +356,6 @@ class SidewallAndFringeExtractor:
             length_um = (edge_interval[1] - edge_interval[0]) * self.dbu
             distance_um = (first_um + last_um) / 2.0
 
-            # NOTE: dividing by 2 (like MAGIC this not bidirectional),
-            #       but we count 2 sidewall contributions (one for each side of the cap).
-            #       The second half accounts for the tech file coefficient itself:
-            #       it holds the full value of the field solver, while a
-            #       per-edge value has to be half of that. MAGIC counted the
-            #       full value on every edge until 8.3.679, which redefined the
-            #       tech file value rather than changing every PDK — the
-            #       coefficients stay as the PDK states them, and the factor
-            #       lives here, see
-            #       https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
             cap_femto = sidewall_capacitance(length_um, first_um, last_um,
                                              sidewall_cap_spec.capacitance, sidewall_cap_spec.offset)
             profile = None

@@ -61,12 +61,17 @@ def _log_ratio(first: float, last: float) -> float:
 def sidewall_capacitance(length_um: float, first_um: float, last_um: float,
                          coefficient: float, offset_um: float,
                          start: float = 0.0, stop: float = 1.0) -> float:
-    """Integrate the existing sidewall fit along a linearly varying gap, in fF."""
+    """
+    Integrate one directed edge's half of the full sidewall pair fit, in fF.
+
+    The coefficient is the full pair numerator in aF. Extraction visits both
+    facing edges, so their contributions must sum to that fit exactly once.
+    """
     first = first_um + (last_um - first_um) * start
     last = first_um + (last_um - first_um) * stop
     length = length_um * (stop - start)
     if first == last:
-        return ((length * coefficient) / sidewall_separation(first, offset_um) / 2.0 / 2.0 / 1000.0)
+        return ((length * coefficient) / sidewall_separation(first, offset_um) / 2.0 / 1000.0)
 
     low, high = sorted((first, last))
     boundary = -2.0 * offset_um
@@ -76,7 +81,7 @@ def sidewall_capacitance(length_um: float, first_um: float, last_um: float,
     integral = math.fsum(2.0 * _log_ratio(a, b) if b <= boundary else
                          _log_ratio(a + offset_um, b + offset_um)
                          for a, b in zip(intervals, intervals[1:]))
-    return length * coefficient * (integral / (high - low)) / 2.0 / 2.0 / 1000.0
+    return length * coefficient * (integral / (high - low)) / 2.0 / 1000.0
 
 
 def fringe_alpha(overlap_coefficient: float) -> float:
