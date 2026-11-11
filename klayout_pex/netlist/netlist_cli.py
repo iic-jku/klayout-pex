@@ -51,6 +51,7 @@ from klayout_pex.log import (
     rule
 )
 from klayout_pex.netlist.netlist_convert import add_convert_subcommand, run_convert
+from klayout_pex.netlist.ground_subcommand import add_ground_subcommand, run_ground_subcommand
 from klayout_pex.netlist.reduce_subcommand import add_reduce_subcommand, run_reduce_subcommand
 from klayout_pex.pex25d.diagnostics import ExitCode
 from klayout_pex.util.argparse_helpers import (
@@ -71,7 +72,7 @@ PROGRAM_NAME = "netlist"
 
 SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
     'Inspect': ('svg',),
-    'Transform': ('reduce', 'convert'),
+    'Transform': ('reduce', 'ground', 'convert'),
     'Help': ('help',),
 }
 """How ``netlist --help`` groups the subcommands; every subcommand is in exactly one section."""
@@ -136,6 +137,7 @@ class NetlistCLI:
                                        help="Cell (default is the top cell)")
 
         add_reduce_subcommand(subparsers)
+        add_ground_subcommand(subparsers)
         add_convert_subcommand(subparsers)
         add_help_subcommand(subparsers)
         add_subcommand_sections(main_parser, subparsers, SUBCOMMAND_SECTIONS)
@@ -296,6 +298,8 @@ class NetlistCLI:
                 sys.exit(run_reduce_subcommand(args))
             case 'convert':
                 sys.exit(run_convert(args))
+            case 'ground':
+                sys.exit(run_ground_subcommand(args))
 
 
 if __name__ == "__main__":

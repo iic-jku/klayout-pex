@@ -62,7 +62,8 @@ def read_prn(path: str) -> Dict[str, List[float]]:
     with open(path, encoding='utf-8') as f:
         lines = [line.split() for line in f.read().splitlines()]
     names = lines[0]
-    rows = [row for row in lines[1:] if len(row) == len(names)]
+    # A single-port AC table has four columns, just like the textual footer.
+    rows = [row for row in lines[1:] if len(row) == len(names) and row[:3] != ['End', 'of', 'Xyce(TM)']]
     return {name: [float(row[i]) for row in rows] for i, name in enumerate(names)}
 
 
