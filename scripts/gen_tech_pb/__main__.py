@@ -50,6 +50,7 @@ from tech_builder import Technology
 import gf180mcuD
 import ihp_sg13
 import sky130A
+from provenance import nominal_provenance
 
 
 def write_tech(output_directory: Path, tech: Technology):
@@ -57,11 +58,12 @@ def write_tech(output_directory: Path, tech: Technology):
     print(f"Writing technology protobuf message to file '{json_pb_path}' in JSON format.")
     json_str = google.protobuf.json_format.MessageToJson(tech,
                                                          preserving_proto_field_name=True,
-                                                         ensure_ascii=False)
+                                                         ensure_ascii=False, sort_keys=True)
     json_pb_path.write_text(json_str, encoding='utf-8')
+    catalog_provenance, components = nominal_provenance(tech.name)
     for path in write_nominal_catalog(
             tech, output_directory / 'tech' / tech.name / 'catalog.pb.json',
-            source='KPEX scripts/gen_tech_pb: legacy nominal technology snapshot'):
+            catalog_provenance, f'Nominal extraction scenarios for {tech.name}', components):
         print(f"Writing technology catalog data to '{path}'.")
 
 

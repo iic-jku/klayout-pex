@@ -27,24 +27,29 @@ import "kpex/tech/device_models.proto";
 import "kpex/tech/process_parasitics.proto";
 import "kpex/tech/process_stack.proto";
 
-// A package of explicit scenarios, independent of transistor-model corner names.
-// Technology remains unchanged so older readers can use the nominal legacy file.
+// Field numbers leave gaps for related additions. This schema is under development
+// before KPEX 1.0; field identities become a compatibility contract when stabilized.
+
+// Explicit extraction scenarios, independent of transistor-model corner names.
+// The selected components resolve into Technology, the extractor's complete input.
 message TechnologyCatalog {
-    uint32 schema_version = 1; // Currently 1; reject unknown versions rather than guess.
-    string technology_id = 2;
-    string default_scenario = 3;
-    TechnologyFile shared = 4; // Technology without stack, parasitics or device references.
-    repeated TechnologyDatasetFile datasets = 5;
-    repeated TechnologyScenario scenarios = 6;
+    uint32 schema_version = 1; // Currently 1; reject unsupported versions.
+    string technology_id = 10;
+    string description = 20;
+    TechnologyProvenance provenance = 30;
+    string default_scenario = 40;
+    TechnologyFile shared = 50; // Layer/device interfaces without scenario-dependent data.
+    repeated TechnologyDatasetFile datasets = 60;
+    repeated TechnologyScenario scenarios = 70;
 }
 
 message TechnologyFile {
     string path = 1; // Relative to the catalog, with forward slashes, within its directory.
-    string sha256 = 2; // SHA256 of the exact file bytes, independent of semantic identities.
+    string sha256 = 10; // SHA256 of exact file bytes, not the resolved numerical payload.
 }
 
 message TechnologyDatasetFile {
-    // IDs are scoped by kind, opaque and case-sensitive. No meaning is inferred from names.
+    // IDs are scoped by kind, opaque and case-sensitive.
     string id = 1;
     enum Kind {
         KIND_UNSPECIFIED = 0;
@@ -53,39 +58,72 @@ message TechnologyDatasetFile {
         PROCESS_STACK = 3;
         DEVICE_REFERENCES = 4;
     }
-    Kind kind = 2;
-    TechnologyFile file = 3;
+    Kind kind = 10;
+    TechnologyFile file = 20;
 }
 
 message TechnologyScenario {
     string id = 1;
-    string description = 2;
-    string resistance = 10;
-    string capacitance = 11;
-    string process_stack = 12;
+    string description = 10;
+    string resistance = 20;
+    string capacitance = 30;
+    string process_stack = 40;
     // Empty means unavailable. Never inherit the default scenario's device references.
-    string device_references = 13;
-    // True only when the selected physical recipe represents this scenario, not merely
-    // a nominal structural mapping usable by the analytical extractor.
-    bool physical_stack_matches = 20;
+    string device_references = 50;
+    // True only when this physical recipe represents the scenario, rather than just
+    // supplying conductor ordering/connectivity for analytical extraction.
+    bool physical_stack_matches = 60;
 }
 
 message TechnologyDataset {
     string id = 1;
-    // Traceable source or recipe, and assumptions not encoded in the numerical payload.
-    string source = 2;
-    string description = 3;
+    string description = 10;
+    TechnologyProvenance provenance = 20;
     oneof data {
-        ResistanceInfo resistance = 10;
-        CapacitanceDataset capacitance = 11;
-        ProcessStackInfo process_stack = 12;
-        DeviceReferenceDataset device_references = 13;
+        ResistanceInfo resistance = 100;
+        CapacitanceDataset capacitance = 110;
+        ProcessStackInfo process_stack = 120;
+        DeviceReferenceDataset device_references = 130;
     }
 }
 
+// Maintained data history, separate from schema version and generated-file hashes.
+// Dates and revisions are authored with a reviewed change, never generated from the clock.
+message TechnologyProvenance {
+    string data_revision = 1; // Opaque revision, equal to the last history entry's revision.
+    repeated TechnologySource sources = 10;
+    repeated TechnologyAssumption assumptions = 20;
+    repeated TechnologyRevision history = 30; // Oldest first; dates are nondecreasing.
+}
+
+message TechnologySource {
+    string id = 1; // Unique within this provenance record.
+    string description = 10;
+    string uri = 20; // Absolute URI; recorded as evidence, never fetched by extraction.
+    string revision = 30; // Source's revision, not this dataset's data_revision.
+    string sha256 = 40; // Optional exact source-file digest; lowercase hexadecimal.
+    map<string, string> options = 50; // Source preprocessing/selection, e.g. METAL5=1.
+}
+
+message TechnologyAssumption {
+    string id = 1;
+    string description = 10;
+    string reason = 20;
+    repeated string source_ids = 30; // References sources in the same provenance record.
+}
+
+message TechnologyRevision {
+    string revision = 1;
+    string date = 10; // Calendar date, exactly YYYY-MM-DD.
+    string summary = 20;
+    string reason = 30;
+    repeated string source_ids = 40;
+    repeated string references = 50; // Absolute URIs, e.g. reviewed changes or issue discussions.
+}
+
 message CapacitanceDataset {
-    double side_halo = 1; // µm; belongs to the coefficient model, not to the physical stack.
-    CapacitanceInfo capacitance = 2;
+    double side_halo = 1; // µm; belongs to the coefficient model, not the physical stack.
+    CapacitanceInfo capacitance = 10;
 }
 
 message DeviceReferenceDataset {
@@ -94,5 +132,5 @@ message DeviceReferenceDataset {
 
 message DeviceCapacitanceReferences {
     string lvs_device_class_name = 1;
-    repeated DeviceCapacitanceModel capacitance_references = 2;
+    repeated DeviceCapacitanceModel capacitance_references = 10;
 }

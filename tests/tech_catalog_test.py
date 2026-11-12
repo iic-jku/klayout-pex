@@ -36,11 +36,12 @@ import allure
 import pytest
 
 from klayout_pex.pdk_config import PDK
-from klayout_pex.tech_catalog import load_technology_catalog, write_nominal_catalog
+from klayout_pex.tech_catalog import load_technology_catalog
 from klayout_pex.tech_identity import message_sha256
 from klayout_pex.tech_info import TechDefError, TechInfo
 from tests.common.tech_catalog import (
     add_scenario, edit_dataset, read_catalog, small_catalog, small_technology, write_message,
+    write_test_catalog,
 )
 
 
@@ -48,13 +49,13 @@ pytestmark = allure.parent_suite('Unit Tests')
 
 
 @pytest.mark.parametrize('pdk', list(PDK), ids=str)
-def test_nominal_catalog_preserves_the_complete_legacy_technology(pdk: PDK):
-    legacy = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path)
+def test_nominal_catalog_preserves_the_complete_nominal_technology(pdk: PDK):
+    nominal = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path)
     resolved = load_technology_catalog(Path(pdk.config.tech_catalog_path), expected_technology=str(pdk))
-    assert resolved.tech == legacy
+    assert resolved.tech == nominal
     assert resolved.selection.scenario_id == 'nominal'
-    assert resolved.selection.process_stack.sha256 == message_sha256(legacy.process_stack)
-    assert resolved.selection.resolved_technology_sha256 == message_sha256(legacy)
+    assert resolved.selection.process_stack.sha256 == message_sha256(nominal.process_stack)
+    assert resolved.selection.resolved_technology_sha256 == message_sha256(nominal)
 
 
 def test_dataset_selection_changes_only_the_explicit_components_and_never_a_previous_load(tmp_path: Path):
@@ -163,7 +164,7 @@ def test_catalog_must_match_the_lvs_technology(tmp_path: Path):
 
 @pytest.mark.parametrize('edit, message', [
     (lambda d: setattr(d, 'id', 'wrong'), 'Expected resistance dataset'),
-    (lambda d: setattr(d, 'source', ''), 'needs its source'),
+    (lambda d: d.provenance.sources.clear(), 'needs at least one source'),
     (lambda d: d.process_stack.SetInParent(), 'with process_stack data'),
     (lambda d: d.resistance.layers.add().CopyFrom(d.resistance.layers[0]), 'duplicate row keys'),
     (lambda d: setattr(d.resistance.layers[0], 'layer_name', 'absent'), 'unknown layers: absent'),
@@ -274,7 +275,7 @@ def test_writer_returns_exactly_its_files_and_leaves_unrelated_data_alone(tmp_pa
     leftover = tmp_path / 'old.pb.json'
     leftover.write_text('old', encoding='utf-8')
     path = tmp_path / 'catalog.pb.json'
-    written = write_nominal_catalog(small_technology(), path, 'test recipe')
+    written = write_test_catalog(small_technology(), path)
     assert len(written) == 6
     assert path in written
     assert leftover not in written

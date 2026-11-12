@@ -28,14 +28,14 @@ from __future__ import annotations
 
 import hashlib
 from pathlib import Path
-from typing import Callable
+from typing import Callable, List
 
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.message import Message
 
 from klayout_pex.tech_catalog import COMPONENT_KINDS, write_nominal_catalog
 from klayout_pex_protobuf.kpex.tech.device_models_pb2 import DeviceModelMapping
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyCatalog, TechnologyDataset, TechnologyFile
+from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyCatalog, TechnologyDataset, TechnologyFile, TechnologyProvenance
 from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
 from tests.common.technology import tech_with_two_metals
 
@@ -60,9 +60,26 @@ def small_technology() -> Technology:
     return tech
 
 
+def sample_provenance() -> TechnologyProvenance:
+    evidence = TechnologyProvenance(data_revision='test-1')
+    evidence.sources.add(id='recipe', description='Synthetic two-metal test technology',
+                         uri='urn:kpex:test:two-metals', revision='test-1')
+    evidence.assumptions.add(id='synthetic', description='Coefficients are synthetic, not PDK corner data',
+                             reason='Independent known values make selection effects measurable', source_ids=['recipe'])
+    evidence.history.add(revision='test-1', date='2026-11-12', summary='Define synthetic nominal data',
+                         reason='Exercise explicit scenario selection', source_ids=['recipe'])
+    return evidence
+
+
+def write_test_catalog(tech: Technology, path: Path) -> List[Path]:
+    evidence = sample_provenance()
+    return write_nominal_catalog(tech, path, evidence, 'Synthetic two-metal test technology',
+                                 {kind: evidence for kind in COMPONENT_KINDS})
+
+
 def small_catalog(directory: Path) -> Path:
     path = directory / 'catalog.pb.json'
-    write_nominal_catalog(small_technology(), path, 'synthetic two-metal test technology')
+    write_test_catalog(small_technology(), path)
     return path
 
 

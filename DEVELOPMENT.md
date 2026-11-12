@@ -103,10 +103,10 @@ will create the JSON tech info files:
 `kpex extract` and `kpex pex25d` accept `--corner SCENARIO` and `--tech-catalog PATH`.
 The catalog belongs to the selected `--pdk`; it cannot silently change the LVS deck.
 Without these options, the bundled catalog's explicit default is used. All bundled catalogs
-currently contain only `nominal`, with exactly the data of the legacy `*_tech.pb.json` files.
+currently contain only `nominal`, with the existing nominal numerical data.
 Upstream corner labels do not establish a complete KPEX coefficient set or physical recipe.
 
-A scenario names complete, independent datasets:
+A scenario names separate, complete datasets:
 
 - `resistance`: sheet, contact and via values
 - `capacitance`: all capacitance tables and their fitted `side_halo`
@@ -122,8 +122,37 @@ physical dimensions while preserving that connectivity.
 The schema is `TechnologyCatalog` in `protos/kpex/tech/tech_catalog.proto`. Its `shared`
 reference points to a `Technology` without the variable components. Each dataset reference
 points to a typed `TechnologyDataset` and pins the exact file bytes with SHA256. Paths are
-relative to and within the catalog directory. Every dataset states its source or recipe.
-The generator writes these catalogs beside the unchanged legacy files; both formats are packaged.
+relative to and within the catalog directory. Descriptions and source evidence belong to the
+catalog and dataset contents, while `TechnologyFile` identifies an exact file.
+
+The generator also writes resolved nominal `*_tech.pb.json` snapshots. A resolved `Technology`
+is the complete extraction input and supports inspecting the combined nominal data.
+`ProcessStackInfo.LayerInfo` selects exactly one `parameters` payload, which defines the
+layer kind without a separate, potentially contradictory type enum.
+
+Each catalog and dataset carries structured `TechnologyProvenance`:
+
+- `data_revision`: an authored, opaque revision of this catalog or dataset
+- `sources`: unique source IDs, descriptions, absolute URIs, revisions or SHA256 digests, and source-selection options
+- `assumptions`: descriptions, physical reasons and references to source IDs
+- `history`: dated revisions with a summary, reason, supporting source IDs and review links
+
+History runs from oldest to newest, with the current `data_revision` matching its last entry.
+Multiple revisions on one date are valid. A source needs a revision or exact hash, and every
+source reference must resolve. Extraction records these references without downloading them.
+
+When changing inputs, add new source IDs and append a history entry. Preserve earlier source
+identities and entries. Component histories are independent: updating capacitance does not
+invent a resistance revision. Builds never manufacture revision labels or dates from the clock.
+Stable JSON output preserves file hashes when source data and metadata are unchanged.
+
+`schema_version`, authored `data_revision`, exact-file hashes and numerical payload hashes
+answer different questions. Clarifying an assumption changes file identity without changing
+coefficient identity. Separate component datasets do not imply statistical independence.
+
+The format is still under development before `1.0.0`. Regenerate schemas and JSON together
+after a format change. Field numbers leave gaps for related additions; their identities and
+JSON names will become compatibility contracts when the format is stabilized.
 
 Selection resolves a fresh, complete `Technology` before `TechInfo` builds any lookup caches.
 R/C table keys must match the default scenario's coverage: a missing row is not an explicit
@@ -195,7 +224,7 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
 - `format_version`, `kpex_version`
 - `command`: `extract` or `pex25d`, `arguments`: the command line after `kpex`
 - `pdk`, `cell`, `run_dir`: `null` until known
-- `technology_selection`: resolved scenario, catalog byte hash and path, component IDs, sources
+- `technology_selection`: resolved scenario, catalog byte hash and path, component IDs, structured provenance
   and canonical content hashes, and `physical_stack_matches`; `null` before resolution
 - `technology_selection.resolved_technology_sha256`: hash of the selected input technology,
   before runtime overrides such as `--halo`; the effective halo is recorded separately

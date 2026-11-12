@@ -39,7 +39,6 @@ from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.netlist.spice_rc_netlist import SpiceRCNetlist, SpiceScope
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.reader import read_pex25d_text
-from klayout_pex.tech_catalog import write_nominal_catalog
 from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
 from tests.common.cli_runner import run_cli
@@ -47,7 +46,7 @@ from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import port_admittance
-from tests.common.tech_catalog import add_scenario, edit_dataset
+from tests.common.tech_catalog import add_scenario, edit_dataset, write_test_catalog
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 
 
@@ -66,7 +65,7 @@ def custom_catalog(tmp_path: Path) -> Path:
     for rows in (tech.process_parasitics.capacitance.sidewalls, tech.process_parasitics.capacitance.sideoverlaps):
         for row in rows:
             row.capacitance = 0.0
-    write_nominal_catalog(tech, path, 'synthetic test coefficients, not a PDK corner')
+    write_test_catalog(tech, path)
 
     def scale_resistance(dataset: TechnologyDataset):
         for rows in (dataset.resistance.layers, dataset.resistance.contacts, dataset.resistance.vias):
@@ -160,6 +159,9 @@ def test_selected_r_and_c_datasets_reach_the_written_netlist_and_result(corner_e
     assert before['datasets']['capacitance']['sha256'] != after['datasets']['capacitance']['sha256']
     assert after['datasets']['device_references'] is None
     assert after['physical_stack_matches'] is False
+    assert after['catalog_provenance']['data_revision'] == 'test-1'
+    assert after['datasets']['resistance']['provenance']['sources'][0]['uri'] == 'urn:kpex:test:two-metals'
+    assert after['datasets']['capacitance']['provenance']['assumptions'][0]['id'] == 'synthetic'
     assert before['resolved_technology_sha256'] != after['resolved_technology_sha256']
 
 

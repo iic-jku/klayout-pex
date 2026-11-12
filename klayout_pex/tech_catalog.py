@@ -27,14 +27,17 @@
 from __future__ import annotations
 
 from collections import Counter
+from copy import deepcopy
 from dataclasses import dataclass
+from datetime import date
 import hashlib
 import math
 from pathlib import Path, PurePosixPath
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
+from urllib.parse import urlsplit
 
-from google.protobuf.json_format import MessageToJson, Parse, ParseError
+from google.protobuf.json_format import MessageToDict, MessageToJson, Parse, ParseError
 from google.protobuf.message import Message
 
 from .tech_identity import message_sha256
@@ -43,6 +46,7 @@ from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
 from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
     TechnologyCatalog, TechnologyDataset, TechnologyDatasetFile, TechnologyFile, TechnologyScenario,
+    TechnologyProvenance,
 )
 
 
@@ -59,10 +63,10 @@ COMPONENT_KINDS = {
 class DatasetIdentity:
     id: str
     sha256: str
-    source: str
+    provenance: Dict[str, Any]
 
-    def to_json(self) -> Dict[str, str]:
-        return {'id': self.id, 'sha256': self.sha256, 'source': self.source}
+    def to_json(self) -> Dict[str, Any]:
+        return {'id': self.id, 'sha256': self.sha256, 'provenance': deepcopy(self.provenance)}
 
 
 @dataclass(frozen=True)
@@ -77,6 +81,8 @@ class TechnologySelection:
     process_stack: DatasetIdentity
     device_references: Optional[DatasetIdentity]
     physical_stack_matches: bool
+    catalog_description: str
+    catalog_provenance: Dict[str, Any]
 
     def to_json(self) -> Dict[str, Any]:
         return {
@@ -84,6 +90,8 @@ class TechnologySelection:
             'scenario_id': self.scenario_id,
             'catalog_path': self.catalog_path,
             'catalog_sha256': self.catalog_sha256,
+            'catalog_description': self.catalog_description,
+            'catalog_provenance': deepcopy(self.catalog_provenance),
             'resolved_technology_sha256': self.resolved_technology_sha256,
             'datasets': {name: value.to_json() if value is not None else None
                          for name in COMPONENT_KINDS for value in (getattr(self, name),)},
@@ -154,11 +162,84 @@ def _unique(values: List[str], what: str):
         raise TechDefError(f"Duplicate {what}: {', '.join(repeated)}")
 
 
+def _text(value: str, what: str):
+    if not value.strip():
+        raise TechDefError(f"{what} must not be empty")
+
+
+def _uri(value: str, what: str):
+    try:
+        parsed = urlsplit(value)
+        valid = bool(parsed.scheme and value.split(':', 1)[1]) and not any(c.isspace() for c in value)
+        if parsed.scheme in ('http', 'https'):
+            valid = valid and bool(parsed.hostname)
+    except ValueError:
+        valid = False
+    if not valid:
+        raise TechDefError(f"{what} must be an absolute URI, got {value!r}")
+
+
+def _provenance(provenance: TechnologyProvenance, what: str):
+    """Check authored evidence without fetching sources or inferring physical qualification."""
+    _id(provenance.data_revision, f'{what} data revision')
+    if not provenance.sources:
+        raise TechDefError(f'{what} needs at least one source')
+    _unique([source.id for source in provenance.sources], f'{what} source ID')
+    source_ids = {source.id for source in provenance.sources}
+    for source in provenance.sources:
+        label = f"{what} source '{source.id}'"
+        _text(source.description, f'{label} description')
+        _uri(source.uri, f'{label} URI')
+        if not source.revision.strip() and not source.sha256:
+            raise TechDefError(f'{label} needs a revision or SHA256')
+        if source.sha256 and not re.fullmatch(r'[0-9a-f]{64}', source.sha256):
+            raise TechDefError(f'{label} SHA256 must be 64 lowercase hexadecimal characters')
+        for key in source.options:
+            _id(key, f'{label} option name')
+
+    def references(ids: List[str], label: str):
+        _unique(list(ids), f'{label} source reference')
+        unknown = sorted(set(ids) - source_ids)
+        if unknown:
+            raise TechDefError(f'{label} references unknown sources: {", ".join(unknown)}')
+
+    _unique([assumption.id for assumption in provenance.assumptions], f'{what} assumption ID')
+    for assumption in provenance.assumptions:
+        label = f"{what} assumption '{assumption.id}'"
+        _text(assumption.description, f'{label} description')
+        _text(assumption.reason, f'{label} reason')
+        references(assumption.source_ids, label)
+    if not provenance.history:
+        raise TechDefError(f'{what} needs data-revision history')
+    _unique([entry.revision for entry in provenance.history], f'{what} history revision')
+    previous = None
+    for entry in provenance.history:
+        label = f"{what} revision '{entry.revision}'"
+        try:
+            if not re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}', entry.date):
+                raise ValueError('not YYYY-MM-DD')
+            day = date.fromisoformat(entry.date)
+        except ValueError as exc:
+            raise TechDefError(f'{label} date must be a valid YYYY-MM-DD calendar date') from exc
+        if previous is not None and day < previous:
+            raise TechDefError(f'{what} history dates must be oldest first')
+        previous = day
+        _text(entry.summary, f'{label} summary')
+        _text(entry.reason, f'{label} reason')
+        references(entry.source_ids, label)
+        for reference in entry.references:
+            _uri(reference, f'{label} reference')
+    if provenance.history[-1].revision != provenance.data_revision:
+        raise TechDefError(f'{what} data revision must match its last history entry')
+
+
 def _scenario_catalog(catalog: TechnologyCatalog, scenario_id: Optional[str],
                       expected_technology: Optional[str]) -> TechnologyScenario:
     if catalog.schema_version != 1:
         raise TechDefError(f"Unsupported technology catalog schema version {catalog.schema_version}; supported: 1")
     _id(catalog.technology_id, 'technology ID')
+    _text(catalog.description, 'Technology catalog description')
+    _provenance(catalog.provenance, 'Technology catalog')
     if expected_technology is not None and catalog.technology_id != expected_technology:
         raise TechDefError(f"Technology catalog is for '{catalog.technology_id}', expected '{expected_technology}'")
     _unique([scenario.id for scenario in catalog.scenarios], 'corner ID')
@@ -318,12 +399,13 @@ def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = Non
                 if dataset.id != dataset_id or dataset.WhichOneof('data') != name:
                     raise TechDefError(f"Expected {name} dataset '{dataset_id}', got "
                                        f"'{dataset.id}' with {dataset.WhichOneof('data')} data")
-                if not dataset.source.strip():
-                    raise TechDefError(f"The {name} dataset '{dataset_id}' needs its source or recipe")
+                _text(dataset.description, f"{name} dataset '{dataset_id}' description")
+                _provenance(dataset.provenance, f"{name} dataset '{dataset_id}'")
                 datasets[key] = dataset
             dataset = datasets[key]
             payload = getattr(dataset, name)
-            identities[name] = DatasetIdentity(dataset_id, message_sha256(payload), dataset.source)
+            identities[name] = DatasetIdentity(dataset_id, message_sha256(payload),
+                                               MessageToDict(dataset.provenance, preserving_proto_field_name=True))
             if name == 'resistance':
                 tech.process_parasitics.resistance.CopyFrom(payload)
             elif name == 'capacitance':
@@ -355,19 +437,29 @@ def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = Non
     selection = TechnologySelection(
         technology_id=catalog.technology_id, scenario_id=selected.id, catalog_path=str(catalog_path),
         catalog_sha256=hashlib.sha256(catalog_bytes).hexdigest(), resolved_technology_sha256=message_sha256(tech),
-        physical_stack_matches=selected.physical_stack_matches, **identities)
+        physical_stack_matches=selected.physical_stack_matches,
+        catalog_description=catalog.description,
+        catalog_provenance=MessageToDict(catalog.provenance, preserving_proto_field_name=True), **identities)
     return ResolvedTechnology(tech, selection)
 
 
-def write_nominal_catalog(tech: Technology, catalog_path: Path, source: str) -> List[Path]:
+def write_nominal_catalog(tech: Technology, catalog_path: Path, provenance: TechnologyProvenance,
+                          description: str,
+                          dataset_provenance: Dict[str, TechnologyProvenance]) -> List[Path]:
     """Package existing nominal data losslessly. Return exactly the files written, including the catalog."""
+    _text(description, 'Technology catalog description')
+    _provenance(provenance, 'Technology catalog')
+    if set(dataset_provenance) != set(COMPONENT_KINDS):
+        raise TechDefError(f'Nominal dataset provenance must cover exactly {", ".join(COMPONENT_KINDS)}')
+    for kind, evidence in dataset_provenance.items():
+        _provenance(evidence, f'{kind} dataset')
     catalog_path.parent.mkdir(parents=True, exist_ok=True)
     written: List[Path] = []
 
     def write(relative: str, message: Message) -> TechnologyFile:
         path = catalog_path.parent / relative
         path.parent.mkdir(parents=True, exist_ok=True)
-        data = (MessageToJson(message, preserving_proto_field_name=True, ensure_ascii=False) + '\n').encode('utf-8')
+        data = (MessageToJson(message, preserving_proto_field_name=True, ensure_ascii=False, sort_keys=True) + '\n').encode('utf-8')
         path.write_bytes(data)
         written.append(path)
         return TechnologyFile(path=relative, sha256=hashlib.sha256(data).hexdigest())
@@ -376,7 +468,8 @@ def write_nominal_catalog(tech: Technology, catalog_path: Path, source: str) -> 
     shared.CopyFrom(tech)
     shared.ClearField('process_stack')
     shared.ClearField('process_parasitics')
-    reference_dataset = TechnologyDataset(id='nominal', source=source)
+    reference_dataset = TechnologyDataset(id='nominal', description='Nominal device capacitance references',
+                                          provenance=dataset_provenance['device_references'])
     reference_dataset.device_references.SetInParent()
     for mapping in shared.device_models.device_model_mappings:
         if mapping.capacitance_references:
@@ -384,10 +477,12 @@ def write_nominal_catalog(tech: Technology, catalog_path: Path, source: str) -> 
                 lvs_device_class_name=mapping.lvs_device_class_name,
                 capacitance_references=mapping.capacitance_references)
             mapping.ClearField('capacitance_references')
-    catalog = TechnologyCatalog(schema_version=1, technology_id=tech.name, default_scenario='nominal',
+    catalog = TechnologyCatalog(schema_version=1, technology_id=tech.name, description=description,
+                                provenance=provenance, default_scenario='nominal',
                                 shared=write('shared.pb.json', shared))
     for name, kind in COMPONENT_KINDS.items():
-        dataset = reference_dataset if name == 'device_references' else TechnologyDataset(id='nominal', source=source)
+        dataset = reference_dataset if name == 'device_references' else TechnologyDataset(
+            id='nominal', description=f'Nominal {name.replace("_", " ")} data', provenance=dataset_provenance[name])
         if name == 'resistance':
             dataset.resistance.CopyFrom(tech.process_parasitics.resistance)
         elif name == 'capacitance':
