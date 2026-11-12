@@ -309,7 +309,8 @@ class SpiceRCNetlist:
             if isinstance(item, _ElementsPlaceholder):
                 lines.extend(self.element_lines(item.scope))
             else:
-                lines.append(item)
+                # Verbatim statements join their physical lines with LF internally.
+                lines.extend(item.split('\n'))
         return self.newline.join(lines) + self.newline
 
     def write(self, path: str) -> str:

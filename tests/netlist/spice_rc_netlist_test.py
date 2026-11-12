@@ -26,6 +26,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import textwrap
 from typing import *
 
@@ -314,11 +315,13 @@ def test_write_returns_the_path(tmp_path):
 
 @allure.parent_suite(parent_suite)
 @allure.tag(*tags)
-def test_port_on_continuation_line_survives_the_reduction():
+@pytest.mark.parametrize('newline', ['\n', '\r\n', '\r'], ids=['LF', 'CRLF', 'CR'])
+def test_port_on_continuation_line_survives_the_reduction(newline: str):
     # NOTE: b is reached by capacitors only, through the plate p to ground, which is eliminated (#214)
-    netlist = SpiceRCNetlist.parse(".subckt w a\n+ b\nC1 b p 1e-15\nC2 p 0 1e-15\n.ends\n")
+    text = ".subckt w a\n+ b\nC1 b p 1e-15\nC2 p 0 1e-15\n.ends\n"
+    netlist = SpiceRCNetlist.parse(text.replace('\n', newline))
     reduce_network(scope_named(netlist, 'w').network, ReductionOptions())
-    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 0.5f\n.ends\n"
+    assert netlist.format() == ".subckt w a\n+ b\nCred_1 0 b 0.5f\n.ends\n".replace('\n', newline)
 
 
 @allure.parent_suite(parent_suite)
@@ -396,3 +399,48 @@ def test_line_endings_are_written_back_as_they_were(newline: str, tmp_path):
     SpiceRCNetlist.read(str(input_path)).write(output_path)
     with open(output_path, 'rb') as f:
         assert f.read() == content.encode()
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('newline', ['\n', '\r\n', '\r'], ids=['LF', 'CRLF', 'CR'])
+@pytest.mark.parametrize('mixed', [False, True], ids=['uniform', 'mixed'])
+@pytest.mark.parametrize('final_breaks', [0, 1, 2], ids=['unterminated', 'terminated', 'trailing-blank'])
+def test_continued_statements_use_source_line_ending(newline: str, mixed: bool,
+                                                   final_breaks: int, tmp_path: Path):
+    # The writer uses the first line ending even for mixed input. All physical lines
+    # of untouched statements must follow it, including comments and blank lines
+    # between continuations. An unterminated final line gains the usual terminator.
+    lines = [
+        '.subckt cell a',
+        '+ b params: cap=1f',
+        'X1 a',
+        '* comment between continuations',
+        '',
+        '+ b model',
+        '+ scale=1',
+        'V1 a',
+        '+ 0 DC 1',
+        '.param x=1',
+        '+ y=2',
+        'Rtc a b 1k',
+        '+ tc1=0.01',
+        'Cexpr a b',
+        '+ {cap}',
+        'Cred_1 a b 1f',
+        'Rred_1 a b 1000',
+        '.ends',
+    ]
+    endings = [newline, '\r', '\r\n', '\n'] if mixed else [newline]
+    text = ''.join(line + endings[index % len(endings)] for index, line in enumerate(lines[:-1]))
+    text += lines[-1] + newline * final_breaks
+    expected = (newline.join(lines) + newline * max(1, final_breaks)).encode('utf-8')
+    input_path = tmp_path / 'continued.spice'
+    output_path = tmp_path / 'written.spice'
+    input_path.write_bytes(text.encode('utf-8'))
+
+    SpiceRCNetlist.read(str(input_path)).write(str(output_path))
+
+    assert output_path.read_bytes() == expected
+    # A second write must neither duplicate blank lines nor introduce mixed endings.
+    assert SpiceRCNetlist.read(str(output_path)).format().encode('utf-8') == expected
