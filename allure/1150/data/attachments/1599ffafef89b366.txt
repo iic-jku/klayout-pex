@@ -1,0 +1,89 @@
+SUBPROCESS __kpex__:kpex_cli.py:1968 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa__bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2128 Peak memory (resident set size) after preparing the LVSDB: 507.3 MiB
+INFO     __kpex__:kpex_cli.py:2132 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2132 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:2132 (32, 0) -> (nbulay_drw)
+INFO     __kpex__:kpex_cli.py:2132 (46, 0) -> (pwell pwell_sub npn_sub)
+INFO     __kpex__:kpex_cli.py:2132 (65, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2132 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2132 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2132 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2132 (6, 4404) -> (cont_ntap_con)
+INFO     __kpex__:kpex_cli.py:2132 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2132 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2132 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+WARNING  __kpex__:r_extractor.py:535 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 507.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;$26;$26.$1.Metal2;;1.425
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;$27;$27.$1.Metal1;;0.095
+SUBPROCESS __kpex__:kpex_cli.py:1569 R3;$27;$27.$2.Metal1;;0.078
+SUBPROCESS __kpex__:kpex_cli.py:1569 R4;$27.$0.Metal1;$27.$1.Metal1;;0.173
+SUBPROCESS __kpex__:kpex_cli.py:1569 R5;$27.$0.Metal1;$27.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R6;$27.$1.Metal1;$27.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R7;$27.$2.Metal1;$27.$3.Metal1;;0.173
+SUBPROCESS __kpex__:kpex_cli.py:1569 R8;$27.$2.Metal1;$27.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R9;$27.$3.Metal1;$27.$4.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R10;$7;$7.$25.Metal1;;0.034
+SUBPROCESS __kpex__:kpex_cli.py:1569 R11;$7;$7.$26.Metal1;;0.031
+SUBPROCESS __kpex__:kpex_cli.py:1569 R12;$7.$0.Metal1;$7.$1.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R13;$7.$0.Metal1;$7.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R14;$7.$0.Metal1;$7.$36.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R15;$7.$1.Metal1;$7.$2.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R16;$7.$1.Metal1;$7.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R17;$7.$1.Metal1;$7.$36.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R18;$7.$10.Metal1;$7.$11.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R19;$7.$10.Metal1;$7.$13.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R20;$7.$10.Metal1;$7.$40.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R21;$7.$10.Metal1;$7.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R22;$7.$11.Metal1;$7.$40.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R23;$7.$11.Metal1;$7.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R24;$7.$12.Metal1;$7.$13.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R25;$7.$12.Metal1;$7.$40.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R26;$7.$12.Metal1;$7.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R27;$7.$13.Metal1;$7.$40.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R28;$7.$13.Metal1;$7.$44.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R29;$7.$16.Metal1;$7.$17.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R30;$7.$16.Metal1;$7.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R31;$7.$16.Metal1;$7.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R32;$7.$17.Metal1;$7.$18.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R33;$7.$17.Metal1;$7.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R34;$7.$17.Metal1;$7.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R35;$7.$18.Metal1;$7.$19.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R36;$7.$18.Metal1;$7.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R37;$7.$18.Metal1;$7.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R38;$7.$19.Metal1;$7.$48.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R39;$7.$19.Metal1;$7.$52.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R40;$7.$2.Metal1;$7.$3.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R41;$7.$2.Metal1;$7.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R42;$7.$2.Metal1;$7.$36.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R43;$7.$24.Metal1;$7.$25.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R44;$7.$24.Metal1;$7.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R45;$7.$24.Metal1;$7.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R46;$7.$25.Metal1;$7.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R47;$7.$25.Metal1;$7.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R48;$7.$26.Metal1;$7.$27.Metal1;;0.064
+SUBPROCESS __kpex__:kpex_cli.py:1569 R49;$7.$26.Metal1;$7.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R50;$7.$26.Metal1;$7.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R51;$7.$27.Metal1;$7.$56.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R52;$7.$27.Metal1;$7.$60.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R53;$7.$3.Metal1;$7.$32.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R54;$7.$3.Metal1;$7.$36.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1569 R55;$7.$32.Metal2;$7.$36.Metal2;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1569 R56;$7.$36.Metal2;$7.$40.Metal2;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1569 R57;$7.$40.Metal2;$7.$44.Metal2;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1569 R58;$7.$44.Metal2;$7.$48.Metal2;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1569 R59;$7.$48.Metal2;$7.$52.Metal2;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1569 R60;$7.$52.Metal2;$7.$56.Metal2;;0.081
+SUBPROCESS __kpex__:kpex_cli.py:1569 R61;$7.$56.Metal2;$7.$60.Metal2;;0.023
+SUBPROCESS __kpex__:kpex_cli.py:1572 /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa__bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1612 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa__bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa/bjt_npn13g2_nx4_npn13g2l_npn13g2v_pnpmpa_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1647 Peak memory (resident set size) after the netlist: 507.3 MiB
+WARNING  __kpex__:kpex_cli.py:1664 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): $23
+INFO     __kpex__:kpex_cli.py:1998 Peak memory (resident set size) after the run: 507.3 MiB

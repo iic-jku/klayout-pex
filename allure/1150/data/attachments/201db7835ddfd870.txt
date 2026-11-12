@@ -1,0 +1,37 @@
+SUBPROCESS __kpex__:kpex_cli.py:1968 main extract --pdk sky130A --mode R --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r_ptap_li1_m1_and_floating_m1_m2.lvsdb.gz --out-dir /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpgal5v622 --2.5D --check n
+INFO     __kpex__:kpex_cli.py:979 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:233 Wrote result file to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpgal5v622/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2128 Peak memory (resident set size) after preparing the LVSDB: 700.5 MiB
+INFO     __kpex__:kpex_cli.py:2132 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:2132 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2132 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:2132 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2132 (68, 44) -> (via1_con)
+INFO     __kpex__:kpex_cli.py:2132 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2132 (69, 20) -> (met2_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 0pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 700.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1569 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1569 R1;A;A.$1.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1569 R2;A;A.$6.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R3;A.$1.li1;A.$2.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1569 R4;A.$1.li1;A.$7.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R5;A.$10.met1;A.$4.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R6;A.$10.met1;A.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1569 R7;A.$11.met2;A.$5.met1;;3.955
+SUBPROCESS __kpex__:kpex_cli.py:1569 R8;A.$2.li1;A.$3.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1569 R9;A.$2.li1;A.$8.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R10;A.$3.li1;A.$4.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1569 R11;A.$3.li1;A.$9.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1569 R12;A.$6.met1;A.$7.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1569 R13;A.$7.met1;A.$8.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1569 R14;A.$8.met1;A.$9.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1572 /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpgal5v622/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1612 Wrote expanded netlist to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmpgal5v622/r_ptap_li1_m1_and_floating_m1_m2__r_ptap_li1_m1_and_floating_m1_m2/r_ptap_li1_m1_and_floating_m1_m2_k25d_pex_netlist.spice
+WARNING  __kpex__:kpex_cli.py:1645 The extracted netlist is inconsistent with the LVS netlist:
+  - resistors of the nodes A.$11.met2, A.$5.met1 touch no net
+INFO     __kpex__:kpex_cli.py:1647 Peak memory (resident set size) after the netlist: 700.5 MiB
+WARNING  __kpex__:kpex_cli.py:1664 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): A
+INFO     __kpex__:kpex_cli.py:1998 Peak memory (resident set size) after the run: 700.5 MiB
