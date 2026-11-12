@@ -76,11 +76,11 @@ class TerminalFixture:
         metal.label_gds_pair.layer = 1
         metal.label_gds_pair.datatype = 5
         stack = tech.process_stack
-        substrate = stack.layers.add(name='subs', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE)
+        substrate = stack.layers.add(name='subs', substrate_layer=stack_pb2.ProcessStackInfo.SubstrateLayer())
         substrate.substrate_layer.height = 0.1
         substrate.substrate_layer.thickness = 0.2
         if diffusion:
-            nsd = stack.layers.add(name='nsd', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION)
+            nsd = stack.layers.add(name='nsd', diffusion_layer=stack_pb2.ProcessStackInfo.DiffusionLayer())
             lvs_layers = [('nsd', 2)]
             if contact:
                 nsd.diffusion_layer.contact_above.name = 'cont_nsd'
@@ -92,14 +92,14 @@ class TerminalFixture:
                                                                            drw_gds_pair=tech_pb2.GDSPair(layer=gds_layer)),
                                              process_layer_name=name)
         for name in metal_names:
-            metal = stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
+            metal = stack.layers.add(name=name, metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
             metal.metal_layer.z = 1.0
             metal.metal_layer.thickness = 0.1
             tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
                                                                        drw_gds_pair=tech_pb2.GDSPair(layer=1)),
                                          original_layer_name='met1',
                                          process_layer_name=name)
-        air = stack.layers.add(name='air', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
+        air = stack.layers.add(name='air', simple_dielectric_layer=stack_pb2.ProcessStackInfo.SimpleDielectricLayer())
         air.simple_dielectric_layer.dielectric_k = 1.0
         self.tech = TechInfo(tech, None)
         self.context = SimpleNamespace(
@@ -484,7 +484,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         layers = fixture.tech.tech.process_stack.layers
         del layers[-1]  # Replace the background with two unbounded films followed by air.
         for name in ('oxide', 'nitride', 'air'):
-            layer = layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC)
+            layer = layers.add(name=name, simple_dielectric_layer=stack_pb2.ProcessStackInfo.SimpleDielectricLayer())
             layer.simple_dielectric_layer.dielectric_k = 1.0 if name == 'air' else 4.0
         with mock.patch('klayout_pex.klayout.pex25d_builder.warning') as warning_mock:
             pex25d_file = fixture.build()

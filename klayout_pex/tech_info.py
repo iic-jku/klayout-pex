@@ -118,6 +118,9 @@ class TechInfo:
             raise TechDefError(
                 f"Names have to be unique, but in {jsonpb_path}"
                 + ''.join(f"\n  - {p}" for p in problems))
+        for layer in tech.process_stack.layers:
+            if layer.WhichOneof('parameters') is None:
+                raise TechDefError(f"Process-stack layer '{layer.name}' in {source} needs exactly one parameter payload")
         # NOTE: so are the layers of the process stack, which kpex looks up after reading, where it can't report
         problems = TechInfo.process_layer_problems(tech)
         if problems:
@@ -262,7 +265,7 @@ class TechInfo:
     @cached_property
     def process_substrate_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
         return list(
-            filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE,
+            filter(lambda lyr: lyr.WhichOneof("parameters") == 'substrate_layer',
                    self.tech.process_stack.layers)
         )[0]
 
@@ -273,8 +276,7 @@ class TechInfo:
         """
         gds_pairs: List[GDSPair] = []
         for lyr in self.tech.process_stack.layers:
-            if lyr.layer_type not in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
-                                      process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL):
+            if lyr.WhichOneof("parameters") not in ('diffusion_layer', 'metal_layer'):
                 continue
             gds_pair = self.gds_pair_for_computed_layer_name.get(lyr.name, None) or \
                        self.gds_pair_for_layer_name.get(lyr.name, None)
@@ -309,14 +311,14 @@ class TechInfo:
         """
         stack_layer_names_by_gds_pair: Dict[GDSPair, List[LayerName]] = {}
         for lyr in self.tech.process_stack.layers:
-            match lyr.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION:
+            match lyr.WhichOneof("parameters"):
+                case 'diffusion_layer':
                     layer = lyr.diffusion_layer
                     names = [lyr.name]
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
+                case 'metal_layer':
                     layer = lyr.metal_layer
                     names = [lyr.name]
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_NWELL:
+                case 'nwell_layer':
                     # NOTE: its contact only (e.g. sky130A licon_ntap_con over the n-taps, #475),
                     #       the nwell is no conductor of the capacitance extraction
                     layer = lyr.nwell_layer
@@ -363,14 +365,14 @@ class TechInfo:
     @cached_property
     def process_diffusion_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return list(
-            filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
+            filter(lambda lyr: lyr.WhichOneof("parameters") == 'diffusion_layer',
                    self.tech.process_stack.layers)
         )
 
     @cached_property
     def process_nwell_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return [lyr for lyr in self.tech.process_stack.layers
-                if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_NWELL]
+                if lyr.WhichOneof("parameters") == 'nwell_layer']
 
     @cached_property
     def process_diffusion_layer_names(self) -> List[CanonicalLayerName]:
@@ -415,14 +417,14 @@ class TechInfo:
     @cached_property
     def field_oxide_layer(self) -> process_stack_pb2.ProcessStackInfo.LayerInfo:
         return list(
-            filter(lambda lyr: lyr.layer_type is process_stack_pb2.ProcessStackInfo.LAYER_TYPE_FIELD_OXIDE,
+            filter(lambda lyr: lyr.WhichOneof("parameters") == 'field_oxide_layer',
                    self.tech.process_stack.layers)
         )[0]
 
     @cached_property
     def process_metal_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
         return list(
-            filter(lambda lyr: lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL,
+            filter(lambda lyr: lyr.WhichOneof("parameters") == 'metal_layer',
                    self.tech.process_stack.layers)
         )
 
@@ -432,8 +434,7 @@ class TechInfo:
         The dielectrics that the dielectric filter selects from: the simple and conformal ones, not the field oxide
         """
         return [pl for pl in self.tech.process_stack.layers
-                if pl.layer_type in (process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC,
-                                     process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC)]
+                if pl.WhichOneof("parameters") in ('simple_dielectric_layer', 'conformal_dielectric_layer')]
 
     @cached_property
     def filtered_dielectric_layers(self) -> List[process_stack_pb2.ProcessStackInfo.LayerInfo]:
@@ -443,10 +444,10 @@ class TechInfo:
     def dielectric_by_name(self) -> Dict[str, float]:
         diel_by_name = {}
         for pl in self.filtered_dielectric_layers:
-            match pl.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+            match pl.WhichOneof("parameters"):
+                case 'simple_dielectric_layer':
                     diel_by_name[pl.name] = pl.simple_dielectric_layer.dielectric_k
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+                case 'conformal_dielectric_layer':
                     diel_by_name[pl.name] = pl.conformal_dielectric_layer.dielectric_k
         return diel_by_name
 
@@ -460,8 +461,8 @@ class TechInfo:
         """
         found_layers: List[process_stack_pb2.ProcessStackInfo.LayerInfo] = []
         for lyr in self.filtered_dielectric_layers:
-            match lyr.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
+            match lyr.WhichOneof("parameters"):
+                case 'conformal_dielectric_layer':
                     if lyr.conformal_dielectric_layer.reference == layer_name:
                         found_layers.append(lyr)
                 case _:
@@ -484,12 +485,12 @@ class TechInfo:
             if lyr.name == layer_name:
                 found_layer = lyr
             elif found_layer:
-                if not diel_lyr and lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                if not diel_lyr and lyr.WhichOneof("parameters") == 'simple_dielectric_layer':
                     if not self.dielectric_filter.is_included(lyr.name):
                         return None, 0.0
                     diel_lyr = lyr
                 # search for next metal or end of stack
-                if lyr.layer_type == process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
+                if lyr.WhichOneof("parameters") == 'metal_layer':
                     return diel_lyr, lyr.metal_layer.z - found_layer.metal_layer.z
         return diel_lyr, 5.0   # air TODO
 
@@ -506,14 +507,13 @@ class TechInfo:
     @cached_property
     def contact_by_contact_lvs_layer_name(self) -> Dict[str, process_stack_pb2.ProcessStackInfo.Contact]:
         d = {}
-        LT = process_stack_pb2.ProcessStackInfo.LayerType
         for lyr in self.tech.process_stack.layers:
-            match lyr.layer_type:
-                case LT.LAYER_TYPE_NWELL:
+            match lyr.WhichOneof("parameters"):
+                case 'nwell_layer':
                     layer = lyr.nwell_layer
-                case LT.LAYER_TYPE_DIFFUSION:  # nsdm or psdm
+                case 'diffusion_layer':  # nsdm or psdm
                     layer = lyr.diffusion_layer
-                case LT.LAYER_TYPE_METAL:
+                case 'metal_layer':
                     layer = lyr.metal_layer
                 case _:
                     continue

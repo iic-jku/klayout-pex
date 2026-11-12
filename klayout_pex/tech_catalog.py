@@ -229,9 +229,6 @@ def _validate_values(tech: Technology, source: str):
         for row in getattr(resistance, name):
             if not math.isfinite(row.resistance) or row.resistance < 0:
                 raise TechDefError(f"Resistance in {source} must be finite and >= 0, got {row.resistance:g}")
-    for row in resistance.layers:
-        if not math.isfinite(row.corner_adjustment_fraction):
-            raise TechDefError(f"Resistance corner adjustment of '{row.layer_name}' in {source} must be finite")
     for row in capacitance.sidewalls:
         # A fitted lateral offset can be negative; rejecting it would change existing nominal tables.
         if not math.isfinite(row.offset):

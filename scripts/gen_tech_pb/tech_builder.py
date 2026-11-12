@@ -170,7 +170,6 @@ def add_substrate_layer(psi: ProcessStackInfo,
                         thickness: float,
                         reference: str):
     psi.layers.add(name=layer_name,
-                   layer_type=ProcessStackInfo.LAYER_TYPE_SUBSTRATE,
                    substrate_layer=ProcessStackInfo.SubstrateLayer(height=_um(height),
                                                                    thickness=_um(thickness),
                                                                    reference=reference))
@@ -181,7 +180,6 @@ def add_nwell_layer(psi: ProcessStackInfo,
                     z: float,
                     reference: str) -> ProcessStackInfo.NWellLayer:
     li = psi.layers.add(name=layer_name,
-                        layer_type=ProcessStackInfo.LAYER_TYPE_NWELL,
                         nwell_layer=ProcessStackInfo.NWellLayer(z=_um(z), reference=reference))
     return li.nwell_layer
 
@@ -208,7 +206,6 @@ def add_diffusion_layer(psi: ProcessStackInfo,
                         z: float,
                         reference: str) -> ProcessStackInfo.DiffusionLayer:
     li = psi.layers.add(name=layer_name,
-                        layer_type=ProcessStackInfo.LAYER_TYPE_DIFFUSION,
                         diffusion_layer=ProcessStackInfo.DiffusionLayer(z=_um(z), reference=reference))
     return li.diffusion_layer
 
@@ -217,7 +214,6 @@ def add_field_oxide_layer(psi: ProcessStackInfo,
                           layer_name: str,
                           dielectric_k: float):
     psi.layers.add(name=layer_name,
-                   layer_type=ProcessStackInfo.LAYER_TYPE_FIELD_OXIDE,
                    field_oxide_layer=ProcessStackInfo.FieldOxideLayer(dielectric_k=dielectric_k))
 
 
@@ -226,7 +222,6 @@ def add_metal_layer(psi: ProcessStackInfo,
                     z: float,
                     thickness: float) -> ProcessStackInfo.MetalLayer:
     li = psi.layers.add(name=layer_name,
-                        layer_type=ProcessStackInfo.LAYER_TYPE_METAL,
                         metal_layer=ProcessStackInfo.MetalLayer(z=_um(z), thickness=_um(thickness)))
     return li.metal_layer
 
@@ -236,7 +231,6 @@ def add_simple_dielectric(psi: ProcessStackInfo,
                           dielectric_k: float,
                           reference: str):
     psi.layers.add(name=name,
-                   layer_type=ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC,
                    simple_dielectric_layer=ProcessStackInfo.SimpleDielectricLayer(
                        dielectric_k=dielectric_k,
                        reference=reference))
@@ -250,7 +244,6 @@ def add_conformal_dielectric(psi: ProcessStackInfo,
                              thickness_sidewall: float,
                              reference: str):
     psi.layers.add(name=name,
-                   layer_type=ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC,
                    conformal_dielectric_layer=ProcessStackInfo.ConformalDielectricLayer(
                        dielectric_k=dielectric_k,
                        thickness_over_metal=_um(thickness_over_metal),
@@ -263,11 +256,8 @@ def add_conformal_dielectric(psi: ProcessStackInfo,
 
 def add_layer_resistance(ri: ResistanceInfo,
                          layer_name: str,
-                         resistance: float,
-                         corner_adjustment_fraction: float = 0.0):
-    ri.layers.add(layer_name=layer_name,
-                  resistance=resistance,
-                  corner_adjustment_fraction=corner_adjustment_fraction)
+                         resistance: float):
+    ri.layers.add(layer_name=layer_name, resistance=resistance)
 
 
 def add_contact_resistance(ri: ResistanceInfo,

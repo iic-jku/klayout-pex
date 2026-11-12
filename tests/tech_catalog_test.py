@@ -321,3 +321,10 @@ def test_physical_stack_identity_detects_mutation_but_allows_a_halo_override(tmp
     resolved.tech.process_stack.layers[0].metal_layer.thickness = 0.25
     with pytest.raises(TechDefError, match='Physical stack changed after corner'):
         resolved.selection.require_physical_stack(resolved.tech.process_stack)
+
+
+def test_stack_layer_requires_its_parameter_payload(tmp_path: Path):
+    path = small_catalog(tmp_path)
+    edit_dataset(path, 'process_stack', lambda d: d.process_stack.layers[0].ClearField('parameters'))
+    with pytest.raises(TechDefError, match="layer 'met1'.*exactly one parameter payload"):
+        load_technology_catalog(path)

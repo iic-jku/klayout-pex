@@ -40,17 +40,17 @@ def tech_with_two_metals() -> tech_pb2.Technology:
                                  original_layer_name='met1')
     LT = stack_pb2.ProcessStackInfo
     stack = tech.process_stack
-    met1 = stack.layers.add(name='met1', layer_type=LT.LAYER_TYPE_METAL)
+    met1 = stack.layers.add(name='met1', metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
     met1.metal_layer.z = 1.0
     met1.metal_layer.thickness = 0.2
     met1.metal_layer.contact_above.CopyFrom(LT.Contact(name='via1', layer_below='met1', metal_above='met2', width=0.2))
     for name, reference, k in (('liner', 'met1', 4.0), ('coat', 'liner', 5.0)):
-        film = stack.layers.add(name=name, layer_type=LT.LAYER_TYPE_CONFORMAL_DIELECTRIC)
+        film = stack.layers.add(name=name, conformal_dielectric_layer=stack_pb2.ProcessStackInfo.ConformalDielectricLayer())
         film.conformal_dielectric_layer.reference = reference
         film.conformal_dielectric_layer.dielectric_k = k
-    stack.layers.add(name='ild', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 3.5
-    met2 = stack.layers.add(name='met2', layer_type=LT.LAYER_TYPE_METAL)
+    stack.layers.add(name='ild', simple_dielectric_layer=stack_pb2.ProcessStackInfo.SimpleDielectricLayer()).simple_dielectric_layer.dielectric_k = 3.5
+    met2 = stack.layers.add(name='met2', metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
     met2.metal_layer.z = 2.5
     met2.metal_layer.thickness = 0.3
-    stack.layers.add(name='air', layer_type=LT.LAYER_TYPE_SIMPLE_DIELECTRIC).simple_dielectric_layer.dielectric_k = 1.0
+    stack.layers.add(name='air', simple_dielectric_layer=stack_pb2.ProcessStackInfo.SimpleDielectricLayer()).simple_dielectric_layer.dielectric_k = 1.0
     return tech

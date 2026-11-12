@@ -297,7 +297,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
 
     # https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs_5_1.html
     # resistance values are in mΩ / square
-    #                       layer, resistance, [corner_adjustment_fraction]
+    #                       layer, resistance
     add_layer_resistance(ri, "Poly2",   7300)  # allpolynonres
     add_layer_resistance(ri, "Metal1",   90)
     add_layer_resistance(ri, "Metal2",   90)
