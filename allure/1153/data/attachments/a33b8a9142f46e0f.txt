@@ -1,0 +1,34 @@
+SUBPROCESS __kpex__:kpex_cli.py:2035 main extract --pdk sky130A --mode CC --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/sonosfet_star_w0p45_l0p22.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1016 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p22__sonosfet_star_w0p45_l0p22/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2201 Peak memory (resident set size) after preparing the LVSDB: 524.9 MiB
+INFO     __kpex__:kpex_cli.py:2205 (64, 18) -> (dnwell)
+INFO     __kpex__:kpex_cli.py:2205 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:2205 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2205 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2205 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2205 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:2205 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2205 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2205 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:kpex_cli.py:2205 (93, 44) -> (sonos_nsd)
+INFO     __kpex__:kpex_cli.py:1560 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 524.9 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1644 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1644 C1;B;D;0.035;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C2;B;G;0.075;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C3;B;S;0.035;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C4;B;VSUBS;0.369;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C5;D;G;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C6;D;S;0.064;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C7;D;VSUBS;0.037;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C8;G;S;0.013;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C9;G;VSUBS;0.192;
+SUBPROCESS __kpex__:kpex_cli.py:1644 C10;S;VSUBS;0.037;
+SUBPROCESS __kpex__:kpex_cli.py:1647 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1687 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sonosfet_star_w0p45_l0p22__sonosfet_star_w0p45_l0p22/sonosfet_star_w0p45_l0p22_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1722 Peak memory (resident set size) after the netlist: 524.9 MiB
+WARNING  __kpex__:kpex_cli.py:1728 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: B (0.515 fF)
+INFO     __kpex__:kpex_cli.py:2070 Peak memory (resident set size) after the run: 524.9 MiB
