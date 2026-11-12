@@ -31,6 +31,17 @@ package kpex.tech;
 
 message ProcessStackInfo {
 
+    enum LayerType {
+        LAYER_TYPE_UNSPECIFIED = 0;
+        LAYER_TYPE_SUBSTRATE = 10;
+        LAYER_TYPE_NWELL = 20;
+        LAYER_TYPE_DIFFUSION = 30;
+        LAYER_TYPE_FIELD_OXIDE = 40;
+        LAYER_TYPE_SIMPLE_DIELECTRIC = 50;
+        LAYER_TYPE_CONFORMAL_DIELECTRIC = 60;
+        LAYER_TYPE_METAL = 80;
+    }
+
     message Contact { // Contact/Via
         // because contact name do not uniquely describe
         // the connected layers and the height,
@@ -96,7 +107,8 @@ message ProcessStackInfo {
 
     message LayerInfo {
         string name = 1;
-        // Exactly one payload defines the layer kind.
+        LayerType layer_type = 2;
+        // Exactly one payload must agree with layer_type; validated when loading.
         oneof parameters {
             SubstrateLayer substrate_layer = 10;
             NWellLayer nwell_layer = 20;

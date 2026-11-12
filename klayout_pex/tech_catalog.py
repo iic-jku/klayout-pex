@@ -257,7 +257,7 @@ def _scenario_catalog(catalog: TechnologyCatalog, scenario_id: Optional[str],
         ids = {dataset.id for dataset in datasets}
         for scenario in catalog.scenarios:
             reference = getattr(scenario, name)
-            if name == 'device_references' and not reference:
+            if kind == TechnologyDatasetFile.DEVICE_REFERENCES and not reference:
                 continue
             if reference not in ids:
                 raise TechDefError(f"Corner '{scenario.id}' selects unknown {name} dataset '{reference}'; "
@@ -356,16 +356,32 @@ def _device_references(tech: Technology, dataset: TechnologyDataset):
         mapping.capacitance_references.extend(device.capacitance_references)
 
 
-def _conductor_keys(tech: Technology) -> Set[Tuple[str, ...]]:
-    keys: Set[Tuple[str, ...]] = set()
+def _conductor_keys(tech: Technology) -> Tuple[Set[Tuple[str, ProcessStackInfo.LayerType]],
+                                               Set[Tuple[str, str, str]]]:
+    conductors: Set[Tuple[str, ProcessStackInfo.LayerType]] = set()
+    contacts: Set[Tuple[str, str, str]] = set()
+    LT = ProcessStackInfo.LayerType
     for layer in tech.process_stack.layers:
-        kind = layer.WhichOneof('parameters')
-        if kind in ('substrate_layer', 'nwell_layer', 'diffusion_layer', 'metal_layer'):
-            contact = getattr(getattr(layer, kind), 'contact_above', None)
-            keys.add((layer.name, kind))
-            if contact is not None and contact.name:
-                keys.add((contact.name, 'contact', contact.layer_below, contact.metal_above))
-    return keys
+        match layer.layer_type:
+            case LT.LAYER_TYPE_SUBSTRATE:
+                conductors.add((layer.name, layer.layer_type))
+                continue
+            case LT.LAYER_TYPE_NWELL:
+                contact = layer.nwell_layer.contact_above
+            case LT.LAYER_TYPE_DIFFUSION:
+                contact = layer.diffusion_layer.contact_above
+            case LT.LAYER_TYPE_METAL:
+                contact = layer.metal_layer.contact_above
+            case (LT.LAYER_TYPE_FIELD_OXIDE | LT.LAYER_TYPE_SIMPLE_DIELECTRIC |
+                  LT.LAYER_TYPE_CONFORMAL_DIELECTRIC):
+                continue
+            case _:
+                raise NotImplementedError(f"Corner connectivity comparison for layer type {layer.layer_type} "
+                                          f"of '{layer.name}' is not implemented")
+        conductors.add((layer.name, layer.layer_type))
+        if contact.name:
+            contacts.add((contact.name, contact.layer_below, contact.metal_above))
+    return conductors, contacts
 
 
 def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = None,
@@ -382,7 +398,7 @@ def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = Non
             or any(mapping.capacitance_references for mapping in shared.device_models.device_model_mappings):
         raise TechDefError(f"Shared technology in {catalog_path} contains scenario-dependent data")
     references = {(dataset.kind, dataset.id): dataset.file for dataset in catalog.datasets}
-    datasets: Dict[Tuple[str, str], TechnologyDataset] = {}
+    datasets: Dict[Tuple[TechnologyDatasetFile.Kind, str], TechnologyDataset] = {}
 
     def resolve(scenario: TechnologyScenario) -> Tuple[Technology, Dict[str, Optional[DatasetIdentity]]]:
         tech = Technology()
@@ -390,10 +406,10 @@ def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = Non
         identities: Dict[str, Optional[DatasetIdentity]] = {}
         for name, kind in COMPONENT_KINDS.items():
             dataset_id = getattr(scenario, name)
-            if name == 'device_references' and not dataset_id:
+            if kind == TechnologyDatasetFile.DEVICE_REFERENCES and not dataset_id:
                 identities[name] = None
                 continue
-            key = (name, dataset_id)
+            key = (kind, dataset_id)
             if key not in datasets:
                 dataset = _referenced_message(catalog_path.parent, references[kind, dataset_id], TechnologyDataset())
                 if dataset.id != dataset_id or dataset.WhichOneof('data') != name:
@@ -406,15 +422,18 @@ def load_technology_catalog(catalog_path: Path, scenario_id: Optional[str] = Non
             payload = getattr(dataset, name)
             identities[name] = DatasetIdentity(dataset_id, message_sha256(payload),
                                                MessageToDict(dataset.provenance, preserving_proto_field_name=True))
-            if name == 'resistance':
-                tech.process_parasitics.resistance.CopyFrom(payload)
-            elif name == 'capacitance':
-                tech.process_parasitics.capacitance.CopyFrom(payload.capacitance)
-                tech.process_parasitics.side_halo = payload.side_halo
-            elif name == 'process_stack':
-                tech.process_stack.CopyFrom(payload)
-            else:
-                _device_references(tech, dataset)
+            match kind:
+                case TechnologyDatasetFile.RESISTANCE:
+                    tech.process_parasitics.resistance.CopyFrom(payload)
+                case TechnologyDatasetFile.CAPACITANCE:
+                    tech.process_parasitics.capacitance.CopyFrom(payload.capacitance)
+                    tech.process_parasitics.side_halo = payload.side_halo
+                case TechnologyDatasetFile.PROCESS_STACK:
+                    tech.process_stack.CopyFrom(payload)
+                case TechnologyDatasetFile.DEVICE_REFERENCES:
+                    _device_references(tech, dataset)
+                case _:
+                    raise NotImplementedError(f"Resolving technology dataset kind {kind} is not implemented")
         _validate_values(tech, f"{catalog_path} (corner '{scenario.id}')")
         return tech, identities
 
@@ -481,15 +500,20 @@ def write_nominal_catalog(tech: Technology, catalog_path: Path, provenance: Tech
                                 provenance=provenance, default_scenario='nominal',
                                 shared=write('shared.pb.json', shared))
     for name, kind in COMPONENT_KINDS.items():
-        dataset = reference_dataset if name == 'device_references' else TechnologyDataset(
+        dataset = reference_dataset if kind == TechnologyDatasetFile.DEVICE_REFERENCES else TechnologyDataset(
             id='nominal', description=f'Nominal {name.replace("_", " ")} data', provenance=dataset_provenance[name])
-        if name == 'resistance':
-            dataset.resistance.CopyFrom(tech.process_parasitics.resistance)
-        elif name == 'capacitance':
-            dataset.capacitance.side_halo = tech.process_parasitics.side_halo
-            dataset.capacitance.capacitance.CopyFrom(tech.process_parasitics.capacitance)
-        elif name == 'process_stack':
-            dataset.process_stack.CopyFrom(tech.process_stack)
+        match kind:
+            case TechnologyDatasetFile.RESISTANCE:
+                dataset.resistance.CopyFrom(tech.process_parasitics.resistance)
+            case TechnologyDatasetFile.CAPACITANCE:
+                dataset.capacitance.side_halo = tech.process_parasitics.side_halo
+                dataset.capacitance.capacitance.CopyFrom(tech.process_parasitics.capacitance)
+            case TechnologyDatasetFile.PROCESS_STACK:
+                dataset.process_stack.CopyFrom(tech.process_stack)
+            case TechnologyDatasetFile.DEVICE_REFERENCES:
+                pass  # Collected separately above, before stripping shared device references.
+            case _:
+                raise NotImplementedError(f"Writing technology dataset kind {kind} is not implemented")
         catalog.datasets.add(id='nominal', kind=kind, file=write(f'{name}/nominal.pb.json', dataset))
     catalog.scenarios.add(id='nominal', description='Existing nominal technology data', resistance='nominal',
                           capacitance='nominal', process_stack='nominal', device_references='nominal',

@@ -35,6 +35,8 @@ from urllib.parse import quote
 
 import klayout.db as kdb
 
+import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
+
 from ..log import debug, info, warning, error
 from ..pex25d.format_version import (
     FORMAT_VERSION_MAJOR,
@@ -49,6 +51,8 @@ from .lvsdb_extractor import KLayoutExtractionContext, device_list
 if TYPE_CHECKING:
     from ..tech_info import TechInfo
 
+
+LT = process_stack_pb2.ProcessStackInfo.LayerType
 
 # PEX25D wants every coordinate as an exact integer count of grid units. 0.0001 µm
 # is the coarsest grid on which the sky130A z stack closes (poly sits at 0.3262),
@@ -432,7 +436,7 @@ class PEX25DBuilder:
         All three are measured from the surface of the profile that is wrapped,
         which is what makes a chain of films composable.
         """
-        if layer.WhichOneof("parameters") != 'conformal_dielectric_layer':
+        if layer.layer_type != LT.LAYER_TYPE_CONFORMAL_DIELECTRIC:
             raise BuildError(f"'{layer.name}' is not a film")
 
         conformal = layer.conformal_dielectric_layer
@@ -446,11 +450,11 @@ class PEX25DBuilder:
 
     def build_dielectrics(self, pex25d_file: Any) -> None:
         layers = list(self.tech_info.tech.process_stack.layers)
-        metal_names = [lyr.name for lyr in layers if lyr.WhichOneof("parameters") == 'metal_layer']
+        metal_names = [lyr.name for lyr in layers if lyr.layer_type == LT.LAYER_TYPE_METAL]
 
         def next_metal_after(index: int) -> Optional[str]:
             for lyr in layers[index + 1:]:
-                if lyr.WhichOneof("parameters") == 'metal_layer':
+                if lyr.layer_type == LT.LAYER_TYPE_METAL:
                     return lyr.name
             return None
 
@@ -461,21 +465,24 @@ class PEX25DBuilder:
         # else claims. PEX25D needs one, so --diel never leaves it out.
         # NOTE: the others above the top metal have no extent, as a metal above bounds a simple dielectric
         background_names = [lyr.name for index, lyr in enumerate(layers)
-                            if lyr.WhichOneof("parameters") == 'simple_dielectric_layer'
-                            and next_metal_after(index) is None]
+                            if lyr.layer_type == LT.LAYER_TYPE_SIMPLE_DIELECTRIC and next_metal_after(index) is None]
         background_name = background_names[-1] if background_names else None
 
         for index, layer in enumerate(layers):
-            if layer.WhichOneof("parameters") == 'metal_layer':
+            if layer.layer_type == LT.LAYER_TYPE_METAL:
                 previous_metal = layer.name
                 continue
 
-            is_dielectric = layer.WhichOneof('parameters') in (
-                'field_oxide_layer', 'simple_dielectric_layer', 'conformal_dielectric_layer')
+            is_dielectric = layer.layer_type in (LT.LAYER_TYPE_FIELD_OXIDE,
+                                                 LT.LAYER_TYPE_SIMPLE_DIELECTRIC,
+                                                 LT.LAYER_TYPE_CONFORMAL_DIELECTRIC)
             if not is_dielectric:
-                continue
+                if layer.layer_type in (LT.LAYER_TYPE_SUBSTRATE, LT.LAYER_TYPE_NWELL, LT.LAYER_TYPE_DIFFUSION):
+                    continue
+                raise NotImplementedError(f"PEX25D dielectric export for layer type {layer.layer_type} "
+                                          f"of '{layer.name}' is not implemented")
 
-            if layer.WhichOneof("parameters") != 'field_oxide_layer' and layer.name != background_name \
+            if layer.layer_type != LT.LAYER_TYPE_FIELD_OXIDE and layer.name != background_name \
                     and layer.name not in self.included_dielectric_names:
                 debug(f"Dielectric '{layer.name}' excluded by --diel")
                 continue
@@ -494,8 +501,8 @@ class PEX25DBuilder:
                      f"k={background.permittivity}")
                 continue
 
-            match layer.WhichOneof("parameters"):
-                case 'field_oxide_layer':
+            match layer.layer_type:
+                case LT.LAYER_TYPE_FIELD_OXIDE:
                     self.add_simple_dielectric(
                         pex25d_file,
                         layer=layer,
@@ -504,7 +511,7 @@ class PEX25DBuilder:
                         below=ground_plane_name,
                         above=above or (metal_names[0] if metal_names else None))
 
-                case 'simple_dielectric_layer':
+                case LT.LAYER_TYPE_SIMPLE_DIELECTRIC:
                     below = previous_metal or ground_plane_name
                     self.add_simple_dielectric(
                         pex25d_file,
@@ -514,8 +521,12 @@ class PEX25DBuilder:
                         below=below,
                         above=above)
 
-                case 'conformal_dielectric_layer':
+                case LT.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     self.add_conformal_dielectric(pex25d_file, layer=layer)
+
+                case _:
+                    raise NotImplementedError(f"PEX25D dielectric export for layer type {layer.layer_type} "
+                                              f"of '{layer.name}' is not implemented")
 
     def add_simple_dielectric(self,
                               pex25d_file: Any,

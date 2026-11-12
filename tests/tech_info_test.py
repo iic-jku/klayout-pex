@@ -57,7 +57,7 @@ def tech_with_duplicates() -> tech_pb2.Technology:
     stack = tech.process_stack
     for name in ('met1', 'met2', 'met1'):
         layer = stack.layers.add(name=name,
-                                 metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
+                                 layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
         layer.metal_layer.z = 1.0
         layer.metal_layer.thickness = 0.1
     # A contact shares the namespace with the layers, so this collides too.
@@ -93,7 +93,8 @@ def tech_with_metal_on_one_gds_pair(stack_layer_names: Sequence[str],
     """
     tech = tech_pb2.Technology(name='test')
     for name in stack_layer_names:
-        tech.process_stack.layers.add(name=name, metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
+        tech.process_stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL,
+                                      metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
     for name, process_layer_name in process_layer_name_by_lvs_layer_name.items():
         tech.lvs_computed_layers.add(layer_info=tech_pb2.LayerInfo(name=name,
                                                                    drw_gds_pair=tech_pb2.GDSPair(layer=67, datatype=0)),
@@ -564,13 +565,13 @@ class Test(unittest.TestCase):
     def test_process_conductor_gds_pairs_are_from_the_bottom_up(self):
         tech = tech_pb2.Technology(name='test')
         stack = tech.process_stack
-        for name, parameters in (('subs', 'substrate_layer'),
-                                 ('nsd', 'diffusion_layer'),
-                                 ('fox', 'field_oxide_layer'),
-                                 ('poly', 'metal_layer'),
-                                 ('met1', 'metal_layer'),
-                                 ('met1_cap', 'metal_layer')):
-            getattr(stack.layers.add(name=name), parameters).SetInParent()
+        for name, layer_type in (('subs', stack_pb2.ProcessStackInfo.LAYER_TYPE_SUBSTRATE),
+                                 ('nsd', stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION),
+                                 ('fox', stack_pb2.ProcessStackInfo.LAYER_TYPE_FIELD_OXIDE),
+                                 ('poly', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL),
+                                 ('met1', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL),
+                                 ('met1_cap', stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)):
+            stack.layers.add(name=name, layer_type=layer_type)
         for name, gds_pair in (('nsd', (7, 0)), ('poly', (5, 0)), ('met1', (8, 0))):
             tech.layers.add(name=name, drw_gds_pair=tech_pb2.GDSPair(layer=gds_pair[0], datatype=gds_pair[1]))
         # NOTE: a layer of the stack can be a computed layer, and share the GDS pair of another one
@@ -622,7 +623,7 @@ class Test(unittest.TestCase):
         tech = tech_pb2.Technology(name='test')
         stack = tech.process_stack
         for name in ('met2', 'met3_ncap', 'met3_cap', 'capm'):
-            stack.layers.add(name=name, metal_layer=stack_pb2.ProcessStackInfo.MetalLayer())
+            stack.layers.add(name=name, layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL)
         stack.layers[0].metal_layer.contact_above.name = 'via2_con'
         stack.layers[1].metal_layer.contact_above.name = 'via3_ncap'
         stack.layers[3].metal_layer.contact_above.name = 'via3_cap'

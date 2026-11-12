@@ -127,8 +127,10 @@ catalog and dataset contents, while `TechnologyFile` identifies an exact file.
 
 The generator also writes resolved nominal `*_tech.pb.json` snapshots. A resolved `Technology`
 is the complete extraction input and supports inspecting the combined nominal data.
-`ProcessStackInfo.LayerInfo` selects exactly one `parameters` payload, which defines the
-layer kind without a separate, potentially contradictory type enum.
+`ProcessStackInfo.LayerInfo.layer_type` identifies its kind with generated enum constants.
+Exactly one `parameters` payload must agree with that kind. Loading rejects unspecified or
+unknown types, missing payloads and mismatches before extraction. Consumers report unimplemented
+variants explicitly.
 
 Each catalog and dataset carries structured `TechnologyProvenance`:
 
