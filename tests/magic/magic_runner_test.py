@@ -67,7 +67,8 @@ def test_prune_command_is_optional_and_precedes_extraction(fraction: Optional[fl
 def test_valid_prune_fractions_and_alias(option: str, value: str):
     # Zero disables this pass; the smallest positive float32 and the largest
     # float32 below one exercise both representable boundaries.
-    args = KpexCLI.parse_args(['extract', '--magic', f'{option}={value}'], Env.from_os_environ())
+    args = KpexCLI.parse_args(
+        ['extract', '--pdk', 'sky130A', '--magic', f'{option}={value}'], Env.from_os_environ())
     assert args.magic_prune == float(value)
 
 
@@ -78,9 +79,12 @@ def test_valid_prune_fractions_and_alias(option: str, value: str):
 ])
 def test_invalid_prune_fractions_fail_before_loading_inputs(value: str):
     with mock.patch.object(KpexCLI, 'validate_args', side_effect=AssertionError('must not load inputs')):
-        code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--magic', f'--magic-prune={value}'])
+        code, output = run_cli(
+            KpexCLI().main, ['kpex', 'extract', '--pdk', 'sky130A', '--magic', f'--magic-prune={value}'])
     assert code == ExitCode.USAGE, output
     assert '--magic-prune' in output, output
+    expected_error = 'could not convert string to float' if value == 'invalid' else 'pruning fraction'
+    assert expected_error in output, output
 
 
 @pytest.mark.parametrize('fraction', [float('nan'), 0.99999999])
