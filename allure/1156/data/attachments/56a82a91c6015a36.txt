@@ -1,0 +1,25 @@
+SUBPROCESS __kpex__:kpex_cli.py:2035 main extract --pdk sky130A --mode R --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\cut_wire_with_label_without_pin.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_sky130A' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\sky130A\test_patterns\cut_wire_with_label_without_pin.gds.gz' --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:1005 No explicit top cell specified, using top cell 'cut_wire_with_label_without_pin'
+INFO     __kpex__:kpex_cli.py:1016 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wire_with_label_without_pin__cut_wire_with_label_without_pin\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2201 Peak memory (resident set size) after preparing the LVSDB: 710.5 MiB
+INFO     __kpex__:kpex_cli.py:2205 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2205 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2205 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2205 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2205 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2205 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 710.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1644 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1644 R1;$2;$2.$0.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1644 R2;A;A.$2.met1;;0.734
+SUBPROCESS __kpex__:kpex_cli.py:1644 R3;A;X__A_0;;0.812
+SUBPROCESS __kpex__:kpex_cli.py:1644 R4;A.$0.li1;A.$2.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1644 R5;A.$0.li1;A.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1647 D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wire_with_label_without_pin__cut_wire_with_label_without_pin\cut_wire_with_label_without_pin_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1687 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_sky130A\cut_wire_with_label_without_pin__cut_wire_with_label_without_pin\cut_wire_with_label_without_pin_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1722 Peak memory (resident set size) after the netlist: 710.8 MiB
+INFO     __kpex__:kpex_cli.py:2070 Peak memory (resident set size) after the run: 710.8 MiB
