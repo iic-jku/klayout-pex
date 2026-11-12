@@ -140,6 +140,7 @@ from .rcx25.netlist_checks import (
 )
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
+from .rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
 from .rcx25.r.r_extractor import RExtractionTechError
 from .rcx25.c.device_capacitance_checks import (
     DeviceCapacitanceChecks, describe_device_capacitance_check,
@@ -503,7 +504,16 @@ class KpexCLI:
         group_25d = parser.add_argument_group("2.5D Options")
         group_25d.add_argument("--mode", dest='pex_mode',
                                default=PEXMode.DEFAULT, type=PEXMode, choices=list(PEXMode),
-                               help=render_enum_help(topic='mode', enum_cls=PEXMode))
+                               help='C: capacitance with grounded coupling; CC: coupled capacitance; '
+                                    'RC: resistance and coupled capacitance; R: resistance only. '
+                                    + render_enum_help(topic='mode', enum_cls=PEXMode))
+        group_25d.add_argument('--coupling', dest='coupling_policy', type=CouplingPolicy,
+                               choices=list(CouplingPolicy), default=None,
+                               help='2.5D capacitance output: coupled retains all pairs. Grounded first eliminates '
+                                    'capacitor-only floating conductors exactly, then replaces inter-net pairs '
+                                    'with their full value to the substrate at each endpoint. '
+                                    'Defaults to grounded for C and coupled for CC/RC. '
+                                    'Geometry reports and device-capacitance checks stay coupled')
         group_25d.add_argument("--halo", dest="halo",
                                  type=positive_micrometers, default=None,
                                  help=f"Custom sidewall halo distance (in µm) to override tech info "
@@ -526,7 +536,7 @@ class KpexCLI:
                                nargs='?', const='',
                                help='Compare marker-internal capacitor-plate coupling with nominal tech-info '
                                     'model references. An optional JSON file replaces the selection with explicit '
-                                    'references and ratio bounds. Needs --gds, --2.5D, --blackbox y and --mode CC or RC. '
+                                    'references and ratio bounds. Needs --gds, --2.5D, --blackbox y and --mode C, CC or RC. '
                                     'Reports only referenced device/terminal pairs, without default ratio bounds')
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -732,13 +742,23 @@ class KpexCLI:
             sys.exit(ExitCode.USAGE)
         args.device_capacitance_references = None
         if args.command == 'extract':
+            if args.coupling_policy is not None or args.pex_mode == PEXMode.C:
+                if not args.run_2_5D:
+                    parser_extract.error('--mode C and --coupling apply to the analytical engine and need --2.5D')
+                if not args.pex_mode.need_capacitance():
+                    parser_extract.error('--coupling needs --mode C, CC or RC; R extracts no capacitance')
+                if args.pex_mode == PEXMode.C and args.coupling_policy not in (None, CouplingPolicy.GROUNDED):
+                    parser_extract.error('--mode C means grounded coupling; use --mode CC for other coupling policies')
+            if args.coupling_policy is None:
+                args.coupling_policy = (CouplingPolicy.GROUNDED if args.pex_mode == PEXMode.C
+                                        else CouplingPolicy.COUPLED)
             try:
                 args.admittance_check_options = admittance_check_options(args)
             except ValueError as exc:
                 parser_extract.error(str(exc))
             if args.device_capacitance_reference_path is not None:
                 if not args.run_2_5D or not args.blackbox_devices or not args.pex_mode.need_capacitance() or not args.gds_path:
-                    parser_extract.error('--check-device-caps needs --gds, --2.5D, --blackbox y and --mode CC or RC')
+                    parser_extract.error('--check-device-caps needs --gds, --2.5D, --blackbox y and --mode C, CC or RC')
                 try:
                     if args.device_capacitance_reference_path:
                         args.device_capacitance_references = read_device_capacitance_references(
@@ -1518,6 +1538,18 @@ class KpexCLI:
                              netlist_csv_path: Optional[str],
                              expanded_netlist_path: Optional[str],
                              exclusions: Optional[Exclusions]):
+        # White-boxing removes intentional capacitor models. Their extracted plate
+        # coupling cannot be separated from the remaining parasitics afterward.
+        if args.coupling_policy != CouplingPolicy.COUPLED and not args.blackbox_devices:
+            removed = set(exclusions.removed_device_blocks) if exclusions is not None else set()
+            whiteboxed = [d.name or d.expanded_name() for d in pex_context.top_circuit.each_device()
+                           if d.id() not in removed and
+                           RCX25NetlistExpander.is_whiteboxed(d.device_class(), tech_info.device_models)]
+            if whiteboxed:
+                raise CouplingPolicyError(
+                    f'--coupling {args.coupling_policy} cannot approximate white-boxed capacitor devices '
+                    f'({", ".join(whiteboxed)}); use --blackbox y to keep their models and terminal coupling')
+
         # TODO: make this separatly configurable
         #       for now we use 0
         args.rcx25d_delaunay_amax = 0
@@ -1568,6 +1600,32 @@ class KpexCLI:
         removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
         summary = extraction_results.summarize() \
             if netlist_csv_path is not None or expanded_netlist_path is not None else None
+        capacitance_by_undriven_net = undriven_nets(
+            lvs_netlist=pex_context.lvsdb.netlist(),
+            top_cell_name=pex_context.annotated_top_cell.name,
+            summary=summary,
+            network_net_names={network.net_name
+                               for results in extraction_results.cell_extraction_results.values()
+                               for network in results.r_extraction_result.networks},
+            substrate_net_name=pex_context.substrate_net_name,
+            removed_device_ids=removed_device_ids,
+            floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
+        ) if summary is not None else {}
+        if summary is not None and args.coupling_policy != CouplingPolicy.COUPLED:
+            summary = apply_coupling_policy(summary, args.coupling_policy,
+                                            reference_net_name=tech_info.internal_substrate_layer_name,
+                                            substrate_net_name=pex_context.substrate_net_name,
+                                            floating_net_names=capacitance_by_undriven_net)
+            if capacitance_by_undriven_net:
+                warning(f'Eliminated {len(capacitance_by_undriven_net)} floating capacitance nets before grounding: '
+                        f'{first_names(sorted(capacitance_by_undriven_net))}. '
+                        'Check that these nets intentionally have no port or retained device terminal')
+            info(f'Capacitance output policy: {args.coupling_policy}, '
+                 f'reference: {pex_context.substrate_net_name or tech_info.internal_substrate_layer_name}')
+            warning('Grounded capacitance output removes inter-net transfer admittance after exact '
+                    'floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, '
+                    'not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance '
+                    'checks still describe the coupled extraction')
 
         if netlist_csv_path is not None:
             # TODO: merge this with klayout_pex/klayout/netlist_csv.py
@@ -1666,18 +1724,7 @@ class KpexCLI:
             # NOTE: a warning, not a problem of --check, as fill has such nets too, but they were also defects
             #       that LVS passed (e.g. a rail under a wrong net name), which have to stay visible,
             #       also where --reduce removes them
-            capacitance_by_undriven_net = undriven_nets(
-                lvs_netlist=pex_context.lvsdb.netlist(),
-                top_cell_name=pex_context.annotated_top_cell.name,
-                summary=summary,
-                network_net_names={network.net_name
-                                   for results in extraction_results.cell_extraction_results.values()
-                                   for network in results.r_extraction_result.networks},
-                substrate_net_name=pex_context.substrate_net_name,
-                removed_device_ids=removed_device_ids,
-                floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
-            )
-            if capacitance_by_undriven_net:
+            if capacitance_by_undriven_net and args.coupling_policy == CouplingPolicy.COUPLED:
                 warning(undriven_nets_warning(capacitance_by_undriven_net,
                                               has_capacitances=args.pex_mode.need_capacitance()))
 
@@ -2008,6 +2055,11 @@ class KpexCLI:
                     case _:
                         try:
                             self.run_extraction(args=args, tech_info=tech_info)
+                        except CouplingPolicyError as e:
+                            error(str(e))
+                            error('Use --coupling coupled to retain the coupled network')
+                            error('For floating resistive islands, --mode C extracts ideal-conductor capacitance')
+                            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
                         except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
                                 RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
                                 ExclusionError, DeviceCapacitanceCheckError) as e:

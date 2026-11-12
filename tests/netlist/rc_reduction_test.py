@@ -461,3 +461,24 @@ def test_reduction_is_deterministic(seed: int):
 def test_invalid_options_are_rejected(arguments: Dict[str, Any], message: str):
     with pytest.raises(ValueError, match=message.replace('(', r'\(').replace('.', r'\.')):
         ReductionOptions(**arguments)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('capacitance', [2 * math.nextafter(0, 1), 1e-300, 1e-200, 2e-15, 1e150, 1e200, 1e308])
+def test_exact_capacitor_elimination_avoids_intermediate_overflow_and_underflow(capacitance: float):
+    # Both the product and the sum can leave the numeric range even though
+    # the series result is representable. No absolute tolerance may hide zero.
+    network = build_network([('A', 'F', 0.0, capacitance), ('F', 'G', 0.0, capacitance)], protected=['A', 'G'])
+    eliminate_capacitor_only_node(network, network.find_node('F'))
+    assert value_of(network, 'A', 'G')[1] == pytest.approx(capacitance / 2, rel=1e-15, abs=0)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('reverse', [False, True])
+def test_exact_capacitor_elimination_keeps_highly_unequal_series_values(reverse: bool):
+    values = (1e-300, 1e300) if not reverse else (1e300, 1e-300)
+    network = build_network([('A', 'F', 0.0, values[0]), ('F', 'G', 0.0, values[1])], protected=['A', 'G'])
+    eliminate_capacitor_only_node(network, network.find_node('F'))
+    assert value_of(network, 'A', 'G')[1] == pytest.approx(1e-300, rel=1e-15, abs=0)
