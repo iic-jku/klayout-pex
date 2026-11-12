@@ -22,6 +22,8 @@
 # --------------------------------------------------------------------------------
 #
 from enum import StrEnum
+import math
+import struct
 import time
 from typing import *
 
@@ -76,6 +78,14 @@ class MagicUniqueMode(StrEnum):
             case MagicUniqueMode.IMPLICIT | _:
                 return ""
 
+def validate_prune_fraction(value: float):
+    """MAGIC reads the tolerance into a C float before checking its range."""
+    if not math.isfinite(value) or not 0 <= value < 1:
+        raise ValueError("pruning fraction must be finite and satisfy 0 <= p < 1")
+    if struct.unpack('f', struct.pack('f', value))[0] >= 1:
+        raise ValueError("pruning fraction must remain below 1 in MAGIC's single-precision representation")
+
+
 def prepare_magic_script(gds_path: str,
                          cell_name: str,
                          run_dir_path: str,
@@ -87,10 +97,14 @@ def prepare_magic_script(gds_path: str,
                          threshold: float,
                          min_res: float,
                          min_delay: float,
+                         prune_frac: Optional[float],
                          halo: Optional[float],
                          short_mode: MagicShortMode,
                          merge_mode: MagicMergeMode,
                          unique_mode: MagicUniqueMode):
+    if prune_frac is not None:
+        validate_prune_fraction(prune_frac)
+
     gds_path = os.path.abspath(gds_path)
     run_dir_path = os.path.abspath(run_dir_path)
     output_netlist_path = os.path.abspath(output_netlist_path)
@@ -125,6 +139,7 @@ def prepare_magic_script(gds_path: str,
         f"extresist threshold {threshold}" if threshold is not None else None,
         f"extresist minres {min_res}" if min_res is not None else None,
         f"extresist mindelay {min_delay}" if min_delay is not None else None,
+        f"extresist prune {prune_frac}" if prune_frac is not None else None,
         f"extract path {run_dir_path}",
         f"extract halo {round(halo * halo_scale)}" if halo is not None else None,
         f"extract {ext_cap} capacitance",

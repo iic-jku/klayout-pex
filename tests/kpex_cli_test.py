@@ -828,12 +828,19 @@ def test_lvsdb_input_checks_python_module_without_needing_executable(version: st
 
 @allure.parent_suite("Unit Tests")
 @allure.tag("CLI", "Tool Versions", "MAGIC")
-@pytest.mark.parametrize('version,mode,accepted', [
-    ('8.3.692', None, False), ('8.3.693', None, True),
-    ('8.3.692', 'warn', True), ('8.3.692', 'off', True),
+@pytest.mark.parametrize('version,mode,prune,accepted', [
+    ('8.3.692', None, None, False), ('8.3.693', None, None, True),
+    ('8.3.692', 'warn', None, True), ('8.3.692', 'off', None, True),
+    # An omitted option preserves the baseline. Explicit zero still needs the
+    # command, so test both sides of the introduction revision and overrides.
+    ('8.3.697', None, None, True), ('8.3.697', None, '0', False),
+    ('8.3.697', None, '0.01', False), ('8.3.698', None, '0', True),
+    ('8.3.698', None, '0.01', True), ('8.4.0', None, '0.999', True),
+    ('8.3.697', 'warn', '0', True), ('8.3.697', 'off', '0', True),
+    (None, None, '0', True),
 ])
 def test_magic_version_check_precedes_extraction(
-        version: str, mode: Optional[str], accepted: bool, tmp_path: Path):
+        version: Optional[str], mode: Optional[str], prune: Optional[str], accepted: bool, tmp_path: Path):
     from packaging.version import Version
     from klayout_pex.tool_version_constraints import Tool
 
@@ -845,11 +852,13 @@ def test_magic_version_check_precedes_extraction(
     magicrc.write_text('# test configuration\n', encoding='utf-8')
     argv = ['kpex', 'extract', '--pdk', 'sky130A', '--magic', '--gds', NFET_GDS_PATH,
             '--magicrc', str(magicrc), '--out-dir', str(tmp_path / 'output')]
+    if prune is not None:
+        argv.extend(['--magic-prune', prune])
     if mode is not None:
         argv.extend(['--tool-version-checks', mode])
     with mock.patch.dict(os.environ, {'KPEX_MAGIC_EXE': str(executable), 'KPEX_KLAYOUT_EXE': '/nonexistent'}), \
             mock.patch.object(kdb, '__version__', '0.30.13'), \
-            mock.patch.object(Tool, 'detect_version', autospec=True, return_value=Version(version)) as detect, \
+            mock.patch.object(Tool, 'detect_version', autospec=True, return_value=Version(version) if version else None) as detect, \
             mock.patch.object(KpexCLI, 'run_magic_extraction') as extract:
         code, output = run_cli(KpexCLI().main, argv)
     assert code == (0 if accepted else 1), output
@@ -858,7 +867,12 @@ def test_magic_version_check_precedes_extraction(
         detect.assert_not_called()
     else:
         detect.assert_called_once_with(Tool.MAGIC, str(executable))
-    assert ('does not satisfy >= 8.3.693' in output) == (version == '8.3.692' and mode != 'off'), output
+    minimum = '8.3.698' if prune is not None else '8.3.693'
+    violation = version is not None and Version(version) < Version(minimum) and mode != 'off'
+    assert (f'does not satisfy >= {minimum}' in output) == violation, output
+    assert ('requirements stay unchecked' in output) == (version is None), output
+    if accepted:
+        assert extract.call_args.args[0].magic_prune == (float(prune) if prune is not None else None)
 
 
 @allure.parent_suite("Unit Tests")
