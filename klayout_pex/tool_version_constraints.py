@@ -160,6 +160,16 @@ class ToolVersionConstraint:
         return self.pdk is None or self.pdk == pdk
 
 
+# Opt-in: omitted --magic-prune keeps MAGIC's default and older supported versions.
+MAGIC_EXTRESIST_PRUNE = ToolVersionConstraint(
+    id='MAGIC_EXTRESIST_PRUNE',
+    tool=Tool.MAGIC,
+    specifier='>= 8.3.698',
+    reason="--magic-prune needs the extresist prune command introduced in 8.3.698. "
+           "Older versions ignore the setting after printing Unknown option: prune",
+)
+
+
 TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
         id='KLAYOUT_NEIGHBORHOOD_VISITOR',
@@ -225,13 +235,15 @@ def effective_version_range(tool: Tool,
 def check_tool_versions(exe_path_by_tool: Dict[Tool, str],
                         pdk: Optional[PDK] = None,
                         mode: VersionCheckMode = VersionCheckMode.ON,
-                        klayout_python_version: Optional[str] = None) -> bool:
+                        klayout_python_version: Optional[str] = None,
+                        additional_constraints: Sequence[ToolVersionConstraint] = ()) -> bool:
     """
     Report the version of every tool a run will use against its constraints.
 
     Returns False when a constraint was violated that the mode treats as an
     error, so that the caller can refuse the run. When supplied, the in-process
-    KLayout Python version is checked independently of the executable.
+    KLayout Python version is checked independently of the executable. Additional
+    constraints apply only to the tools used by this run and their matching PDK.
     """
     if mode == VersionCheckMode.OFF or (not exe_path_by_tool and klayout_python_version is None):
         return True
@@ -252,10 +264,12 @@ def check_tool_versions(exe_path_by_tool: Dict[Tool, str],
         detected.append((Tool.KLAYOUT, 'KLayout Python module', module_version, 'klayout.db.__version__'))
 
     for tool, label, version, source in detected:
-        constraints = applicable_constraints(tool, pdk)
+        constraints = applicable_constraints(tool, pdk) + [
+            c for c in additional_constraints if c.tool == tool and c.applies_to(pdk)]
+        required = SpecifierSet(','.join(c.specifier for c in constraints if c.severity == Severity.ERROR))
+        recommended = SpecifierSet(','.join(c.specifier for c in constraints if c.severity == Severity.WARNING))
         rows.append((label, 'unknown' if version is None else str(version),
-                     str(effective_version_range(tool, pdk, Severity.ERROR)) or 'any',
-                     str(effective_version_range(tool, pdk, Severity.WARNING)) or 'none'))
+                     str(required) or 'any', str(recommended) or 'none'))
 
         for constraint in constraints:
             debug(f"{constraint.id}: {label} {constraint.specifier} — {constraint.reason}")

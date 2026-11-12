@@ -86,6 +86,7 @@ from .magic.magic_runner import (
     MagicUniqueMode,
     run_magic,
     prepare_magic_script,
+    validate_prune_fraction,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .netlist.netlist_convert import convert_to_vacask
@@ -154,6 +155,7 @@ from .device_models import DeviceModelError, DeviceModels
 from .tech_info import TechDefError, TechInfo
 from .types import NetName
 from .tool_version_constraints import (
+    MAGIC_EXTRESIST_PRUNE,
     Tool,
     VersionCheckMode,
     check_tool_versions
@@ -224,6 +226,15 @@ def halo_default_help(halo_by_pdk: Mapping[str, float]) -> str:
     if len(set(halo_by_pdk.values())) == 1:
         halos = [f"{next(iter(halo_by_pdk.values())):g} µm in all PDKs"]
     return ', '.join(["the tech info's"] + halos)
+
+
+def _magic_prune_fraction(text: str) -> float:
+    try:
+        value = float(text)
+        validate_prune_fraction(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    return value
 
 
 class KpexCLI:
@@ -467,9 +478,11 @@ class KpexCLI:
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist mindelay <value>)")
         add_argument_with_former_name(group_magic, "--magic-prune", "--magic_prune", dest="magic_prune",
-                                      type=float, default=None,
+                                      type=_magic_prune_fraction, default=None,
                                       help="Minimum threshold (as a fraction in [0, 1.0)) for pruning negligible resistors "
-                                           "after network extraction. "
+                                           "after network extraction. Requires MAGIC >= 8.3.698. "
+                                           "0 disables this pruning pass, not other network simplification. "
+                                           "The fraction must be finite and remain below 1 in single precision. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist prune <value>)")
         add_argument_with_former_name(group_magic, "--magic-halo", "--magic_halo", dest="magic_halo",
@@ -1103,7 +1116,9 @@ class KpexCLI:
         if not check_tool_versions(exe_path_by_tool=exe_path_by_tool,
                                    pdk=args.pdk,
                                    mode=args.version_check_mode,
-                                   klayout_python_version=kdb.__version__):
+                                   klayout_python_version=kdb.__version__,
+                                   additional_constraints=(MAGIC_EXTRESIST_PRUNE,)
+                                   if args.run_magic and args.magic_prune is not None else ()):
             found_errors = True
 
         if found_errors:
