@@ -52,7 +52,7 @@ HELP_COMMANDS: Dict[str, Callable[[], Tuple[int, str]]] = {
     **{f"pex25d {sub}".rstrip(): (lambda sub=sub: run_cli(Pex25DCLI().main, ['pex25d', *sub.split(), '--help']))
        for sub in ('', 'show', 'validate', 'convert', 'resolve', 'import', 'export')},
     **{f"netlist {sub}".rstrip(): (lambda sub=sub: run_cli(NetlistCLI().main, ['netlist', *sub.split(), '--help']))
-       for sub in ('', 'svg', 'reduce', 'convert')},
+       for sub in ('', 'svg', 'reduce', 'ground', 'convert')},
     # NOTE: without --help (add_help=False), its usage error has its options
     'magic log analyzer': lambda: run_cli(magic_log_analyzer._parse_args, []),
 }

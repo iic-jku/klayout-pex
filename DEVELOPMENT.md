@@ -98,6 +98,90 @@ will create the JSON tech info files:
    - `klayout_pex_protobuf/ihp-sg13g2_tech.pb.json`
    - `klayout_pex_protobuf/sky130A_tech.pb.json`
 
+### Technology scenarios and datasets
+
+`kpex extract` and `kpex pex25d` accept `--corner SCENARIO` and `--tech-catalog PATH`.
+The catalog belongs to the selected `--pdk`; it cannot silently change the LVS deck.
+Without these options, the bundled catalog's explicit default is used. All bundled catalogs
+currently contain only `nominal`, with the existing nominal numerical data.
+Upstream corner labels do not establish a complete KPEX coefficient set or physical recipe.
+
+A scenario names separate, complete datasets:
+
+- `resistance`: sheet, contact and via values
+- `capacitance`: all capacitance tables and their fitted `side_halo`
+- `process_stack`: the ordered physical stack, including dielectric geometry and permittivity
+- `device_references`: independent device-capacitance references, or explicitly unavailable
+
+Layer mappings, device interfaces and units, substrate connectivity, exclusion markers and
+device layer definitions are shared. Scenario IDs are opaque and case-sensitive. No `tt`,
+`ff`, `ss`, temperature or transistor-library selection is inferred. A different conductor
+connectivity needs a separate technology catalog. A corner may change dielectric films and
+physical dimensions while preserving that connectivity.
+
+The schema is `TechnologyCatalog` in `protos/kpex/tech/tech_catalog.proto`. Its `shared`
+reference points to a `Technology` without the variable components. Each dataset reference
+points to a typed `TechnologyDataset` and pins the exact file bytes with SHA256. Paths are
+relative to and within the catalog directory. Descriptions and source evidence belong to the
+catalog and dataset contents, while `TechnologyFile` identifies an exact file.
+
+The generator also writes resolved nominal `*_tech.pb.json` snapshots. A resolved `Technology`
+is the complete extraction input and supports inspecting the combined nominal data.
+`ProcessStackInfo.LayerInfo.layer_type` identifies its kind with generated enum constants.
+Exactly one `parameters` payload must agree with that kind. Loading rejects unspecified or
+unknown types, missing payloads and mismatches before extraction. Consumers report unimplemented
+variants explicitly.
+
+Each catalog and dataset carries structured `TechnologyProvenance`:
+
+- `data_revision`: an authored, opaque revision of this catalog or dataset
+- `sources`: unique source IDs, descriptions, absolute URIs, revisions or SHA256 digests, and source-selection options
+- `assumptions`: descriptions, physical reasons and references to source IDs
+- `history`: dated revisions with a summary, reason, supporting source IDs and review links
+
+History runs from oldest to newest, with the current `data_revision` matching its last entry.
+Multiple revisions on one date are valid. A source needs a revision or exact hash, and every
+source reference must resolve. Extraction records these references without downloading them.
+
+When changing inputs, add new source IDs and append a history entry. Preserve earlier source
+identities and entries. Component histories are independent: updating capacitance does not
+invent a resistance revision. Builds never manufacture revision labels or dates from the clock.
+Stable JSON output preserves file hashes when source data and metadata are unchanged.
+
+`schema_version`, authored `data_revision`, exact-file hashes and numerical payload hashes
+answer different questions. Clarifying an assumption changes file identity without changing
+coefficient identity. Separate component datasets do not imply statistical independence.
+
+The format is still under development before `1.0.0`. Regenerate schemas and JSON together
+after a format change. Field numbers leave gaps for related additions; their identities and
+JSON names will become compatibility contracts when the format is stabilized.
+
+Selection resolves a fresh, complete `Technology` before `TechInfo` builds any lookup caches.
+R/C table keys must match the default scenario's coverage: a missing row is not an explicit
+zero. Duplicate rows, unknown layers, mismatched dataset kinds or IDs, nonfinite values and
+negative R/C coefficients are errors. Negative fitted sidewall offsets remain valid.
+No runtime overlays or implicit fallback to nominal values are applied.
+
+`physical_stack_matches` must be true before field-solver extraction or PEX25D export.
+An analytical-only scenario may use the nominal stack for layer identities without claiming
+that its geometry is corner-correct. If `device_references` is empty, `--check-device-caps`
+requires an explicit reference JSON file. Explicit `--corner` or `--tech-catalog` options
+cannot be combined with `--magic`, whose independently installed technology is not selected
+by the KPEX catalog.
+
+For example, a reviewed custom catalog that declares `high-r-low-c` can be used as follows:
+
+```sh
+kpex extract --pdk sky130A --2.5D --mode RC \
+  --tech-catalog path/to/catalog.pb.json --corner high-r-low-c \
+  --lvsdb design.lvsdb --out-dir output/high-r-low-c
+```
+
+The example ID is not a bundled PDK corner. The catalog must supply its complete datasets
+and their provenance. `kpex_result.json` records the scenario, dataset IDs and content hashes.
+PEX25D metadata also records `process_corner`. A separate physical-stack hash lets calibration
+results remain tied to a geometry recipe independently of fitted coefficient tables.
+
 ### Running tests
 
 - `./run_unit_tests.sh`, `./run_integration_tests.sh`: with coverage and an allure report in `build/`
@@ -228,6 +312,10 @@ Keys (`format_version` 1, which goes up when a key is removed or changes its mea
 - `format_version`, `kpex_version`
 - `command`: `extract` or `pex25d`, `arguments`: the command line after `kpex`
 - `pdk`, `cell`, `run_dir`: `null` until known
+- `technology_selection`: resolved scenario, catalog byte hash and path, component IDs, structured provenance
+  and canonical content hashes, and `physical_stack_matches`; `null` before resolution
+- `technology_selection.resolved_technology_sha256`: hash of the selected input technology,
+  before runtime overrides such as `--halo`; the effective halo is recorded separately
 - `engines`: e.g. `["KPEX/2.5D"]`, as the netlists name them, `mode`: the `--mode` of the 2.5D engine
 - `inputs`: `gds`, `lvsdb` and `schematic`, each a path or `null`, and
   `device_capacitance_references` when `--check-device-caps` is requested

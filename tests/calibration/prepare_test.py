@@ -46,6 +46,7 @@ from klayout_pex.tech_identity import message_sha256
 from klayout_pex.tech_info import TechDefError, TechInfo
 from klayout_pex.util.multiple_choice import MultipleChoicePattern
 from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
+from tests.common.tech_catalog import add_scenario, write_test_catalog
 
 pytestmark = allure.parent_suite('Unit Tests')
 
@@ -193,8 +194,10 @@ def test_write_failure_never_leaves_a_success_manifest_or_removes_unrelated_work
 
 
 @pytest.mark.parametrize('pdk', list(PDK))
-def test_all_shipped_stacks_prepare_finite_cases(tmp_path: Path, pattern_data: Dict[str, Any], pdk: PDK):
-    technology = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None)
+@pytest.mark.parametrize('source', ['json', 'catalog'])
+def test_all_shipped_stacks_prepare_finite_cases(tmp_path: Path, pattern_data: Dict[str, Any], pdk: PDK, source: str):
+    technology = (TechInfo.from_catalog(pdk.config.tech_catalog_path, dielectric_filter=None)
+                  if source == 'catalog' else TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=None))
     pattern_data['grid_um'] = '0.0001'
     first, last = technology.process_metal_layers[0].name, technology.process_metal_layers[-1].name
     pattern_data['cases'][0].update(lower_layer=first, upper_layer=last)
@@ -213,26 +216,37 @@ def test_all_shipped_stacks_prepare_finite_cases(tmp_path: Path, pattern_data: D
 
 def test_supplied_corner_selection_is_preserved_and_physically_checked(tmp_path: Path, specification: Path,
                                                                        tech_info: TechInfo):
-    # The corners loader owns scenario resolution; preparation consumes its resolved identity without refitting it.
-    identity = {'technology_id': 'test_stack', 'scenario_id': 'scenario_test',
-                'datasets': {'process_stack': {'id': 'stack_test', 'sha256': message_sha256(tech_info.tech.process_stack)}}}
-    selection = mock.Mock(scenario_id='scenario_test')
-    selection.to_json.return_value = identity
-    tech_info.selection = selection
-    result = prepare_calibration(tech_info, read_patterns(specification), tmp_path / 'prepared')
+    # Load real catalog provenance: the prepared evidence must retain descriptions,
+    # source revisions, assumptions and history, not just a scenario label.
+    path = tmp_path / 'catalog.pb.json'
+    write_test_catalog(tech_info.tech, path)
+    add_scenario(path, name='physical-test', physical_stack_matches=True)
+    selected = TechInfo.from_catalog(str(path), None, scenario_id='physical-test')
+    result = prepare_calibration(selected, read_patterns(specification), tmp_path / 'prepared')
     manifest = json.loads(result.manifest_path.read_text(encoding='utf-8'))
-    assert manifest['technology']['selection'] == identity
-    selection.require_physical_stack.assert_called_once_with(tech_info.tech.process_stack)
+    assert manifest['technology']['selection'] == selected.selection.to_json()
+    assert manifest['technology']['physical_stack_sha256'] == selected.selection.process_stack.sha256
+    assert manifest['technology']['resolved_technology_sha256'] == selected.selection.resolved_technology_sha256
+    assert manifest['technology']['selection']['datasets']['process_stack']['provenance']['sources']
     file = read_pex25d_text((result.manifest_path.parent / 'case_plates.pex25d').read_bytes(), '<prepared>')
-    assert {item.key: item.value for item in file.metadata}['process_corner'] == 'scenario_test'
+    assert {item.key: item.value for item in file.metadata}['process_corner'] == 'physical-test'
 
 
-def test_empirical_only_scenario_cannot_be_presented_as_physical_calibration(tmp_path: Path, specification: Path,
-                                                                          tech_info: TechInfo):
-    selection = mock.Mock()
-    selection.require_physical_stack.side_effect = TechDefError('Scenario has no matching physical stack')
-    tech_info.selection = selection
+@pytest.mark.parametrize('scenario,mutate_stack,error', [
+    ('analytical-only', False, 'no matching physical stack'),
+    ('nominal', True, 'Physical stack changed after corner'),
+])
+def test_unqualified_or_stale_stack_cannot_be_presented_as_physical_calibration(
+        tmp_path: Path, specification: Path, tech_info: TechInfo, scenario: str, mutate_stack: bool, error: str):
+    # A catalog may select valid empirical tables without a matching field recipe.
+    # Even a qualified selection becomes stale if its physical dimensions change.
+    path = tmp_path / 'catalog.pb.json'
+    write_test_catalog(tech_info.tech, path)
+    add_scenario(path, name='analytical-only')
+    selected = TechInfo.from_catalog(str(path), None, scenario_id=scenario)
+    if mutate_stack:
+        selected.process_metal_layers[0].metal_layer.thickness += 0.001
     output = tmp_path / 'invalid'
-    with pytest.raises(TechDefError, match='no matching physical stack'):
-        prepare_calibration(tech_info, read_patterns(specification), output)
+    with pytest.raises(TechDefError, match=error):
+        prepare_calibration(selected, read_patterns(specification), output)
     assert not output.exists()

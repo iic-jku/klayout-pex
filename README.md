@@ -53,6 +53,112 @@ Labels in child cells still name internal nets and ports of excluded device mode
 The default is `auto`. Supply `--gds` alongside `--lvsdb` to identify top-level labels: the LVS database has
 flattened them. With `--lvsdb` alone, `auto` retains hierarchical labels, and `top` reports an error.
 
+## Capacitance output modes
+
+The analytical engine keeps coupled capacitance by default. Select the approximation explicitly:
+
+| Command options | Capacitance written to the netlist |
+| :--- | :--- |
+| `--2.5D --mode CC` | Coupled capacitance, one node per net |
+| `--2.5D --mode C` | Floating capacitance eliminated exactly, then inter-net coupling grounded |
+| `--2.5D --mode CC --coupling grounded` | Same capacitance policy as `C` |
+| `--2.5D --mode RC` | Coupled capacitance distributed onto the resistance networks |
+| `--2.5D --mode RC --coupling grounded` | Floating capacitance eliminated exactly, then inter-net coupling grounded at distributed nodes |
+| `--2.5D --mode R` | Resistance without extracted capacitance |
+
+`--coupling coupled` explicitly selects the existing `CC` or `RC` behavior. `--mode C` requires
+`grounded` if `--coupling` is also specified. No coupling threshold or switching multiplier is applied.
+
+### Floating conductors
+
+Conductors without a port or retained device terminal are electrically floating. For `C`, their
+capacitance is eliminated by an exact capacitive star-mesh reduction before any coupling is grounded.
+For example, `A` ↔ `F` = `2 fF` and `F` ↔ reference = `2 fF`, with floating `F`, produce a `1 fF`
+load from `A` to reference. `F` is removed, rather than held at reference. A floating component
+connected to only one retained node contributes no load there.
+
+The log lists eliminated floating nets so an unintended disconnected rail remains visible. Ports
+created by labels and exclusion blocks remain observable. Explicit exclusion-marker settings retain
+their existing contract, including the treatment of floating metal inside a marker.
+
+For `RC`, capacitor-only floating conductors are also eliminated exactly. A floating island with
+extracted resistance is rejected: its frequency-dependent behavior cannot generally be represented
+by a single capacitance. Use `--coupling coupled` to retain its dynamics, or `--mode C` to use the
+ideal-conductor capacitance model. All retained resistors keep their values and node connections.
+
+Exact elimination uses the shared reduction limit of 64 neighbors per eliminated node to bound
+fill-in. A node still above that limit after other floating nodes are removed produces a diagnostic
+that recommends coupled output. The grounded modes never replace a remaining floating conductor
+with a ground tie.
+
+### Grounded inter-net coupling
+
+After floating-node elimination, each inter-net pair is replaced by its full capacitance to the
+reference at each endpoint. For example, `A` ↔ `B` = `2 fF`, `A` ↔ reference = `1 fF` and
+`B` ↔ reference = `3 fF` become `3 fF` from `A` to reference and `5 fF` from `B` to reference.
+
+This preserves the reduced capacitance matrix's diagonal at each retained node with the other
+nodes clamped to reference. It removes inter-net transfer admittance and does not represent
+switching-dependent Miller effects or preserve arbitrary distributed-RC terminal impedance.
+Capacitance between distributed nodes of the same net stays between those nodes, including
+capacitance created by eliminating a floating conductor, so the internal RC dynamics are retained.
+
+The reference is the layout's substrate net, including its distributed nodes, or `VSUBS` when no
+substrate net is available. It is not implicitly SPICE node `0`. Existing capacitance to reference
+nodes stays on those nodes. New grounded loads use the substrate's ideal net.
+
+The policy changes CSV, SPICE and VACASK netlists after spatial distribution and before reduction.
+Reduction checks compare the approximated network with its reduced version. Geometry reports and
+`--check-device-caps` continue to describe the coupled extraction.
+
+Intentional capacitor models remain unchanged with `--blackbox y`. The default remains `--blackbox n`:
+if the layout contains metal capacitors whose models would be removed, grounded output reports an
+error before capacitance extraction and asks for `--blackbox y`. Bare interconnect layouts work with
+either setting. This prevents grounding the intended terminal coupling of a white-boxed capacitor.
+
+These policies apply to `--2.5D`. They do not change `MAGIC`, FasterCap or FastCap2 output.
+Existing `CC`, `RC` and `R` defaults are unchanged.
+
+### Grounding an existing SPICE netlist
+
+`netlist ground` applies the same floating elimination and grounding policy without a layout or PDK:
+
+```sh
+netlist ground coupled.spice --reference sub! --out-netlist grounded.spice
+```
+
+The reference is required. It must be a node, port or global in the selected scope, or `0`/`gnd`.
+SPICE ground aliases `0` and `gnd` identify the same conductor, including distributed reference nodes.
+By default, the command selects `Cext_*` and `Cgrnd_*` capacitors and uses `Rext_*` resistors to
+identify distributed conductors. Resistor lines stay unchanged. Intentional devices, unselected
+elements, directives and other subcircuits remain in the output.
+
+For another extractor's naming scheme, supply explicit name patterns. Each option may be repeated
+and replaces its respective defaults. Quote patterns to prevent shell expansion:
+
+```sh
+netlist ground extracted.spice --cell amplifier --reference VSS \
+  --capacitor 'Cpar_*' --resistor 'Rwire_*' --keep bias_internal
+```
+
+Ports, global nodes, terminals named by retained devices or sources, and `--keep` nodes retain
+their entire conductors. Other conductors are floating. Selected resistors define connectivity
+within each conductor. If disconnected pieces belong to the same conductor, provide a flat JSON
+node map, for example `{"OUT.1": "OUT", "OUT.2": "OUT"}`, using `--net-map nodes.json`.
+The map supplies conductor identity without shorting or renaming nodes. It cannot assign different
+conductors to nodes connected by selected resistors. SPICE names and patterns are case-insensitive.
+
+Use `--cell NAME` when several subcircuits contain selected capacitors, or `--top-level` to select
+elements outside subcircuits. Selected elements must be numeric two-node primitives. Symbolic
+values, floating resistor islands and excessive floating elimination fail before writing output.
+The default output name is `extracted_grounded.spice`; the input cannot be overwritten.
+
+Use coupled input with intentional capacitance represented by retained devices. After white-box
+extraction has mixed device capacitance with parasitics, postprocessing cannot distinguish them.
+The transformation intentionally removes inter-net transfer, so an equivalence check against the
+coupled input is not expected to pass. A subsequent `netlist reduce` check should use the grounded
+netlist as its reference.
+
 ## VACASK conversion
 
 `netlist convert --to vacask circuit.spice` writes two files:

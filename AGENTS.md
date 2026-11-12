@@ -51,6 +51,15 @@
   don't re-label domain errors. One broken plugin must not break others.
 - Validate option values, not just names (`'false'` ≠ `False`).
 - Return the paths you wrote; never scan a directory for them (leftover files).
+- Prefer enums and named, typed constants for variant dispatch. Do not replace them with
+  string literals from protobuf `WhichOneof`; keep field-name reflection at the
+  serialization and validation boundaries.
+- Dispatch intended to cover all supported variants must fail explicitly for an unhandled
+  case, using `NotImplementedError` with the operation and offending value where appropriate.
+  Name intentionally skipped variants explicitly. Invalid external input gets the domain
+  validation error rather than being treated as an unimplemented operation.
+- Apply these conventions within the current PR's scope. Improvements to older, unrelated
+  dispatch sites belong in a separate PR; do not mix a repository-wide cleanup into a feature.
 - Format-only paths must not import KLayout or generated protobuf: import lazily, and put
   type-only imports under `TYPE_CHECKING`.
 - Text I/O names its encoding, as the locale's is `cp1252` on Windows: `open()`,

@@ -165,12 +165,16 @@ def eliminate_capacitor_only_node(network: RCNetwork, node: int):
     neighbours = list(network.branches(node).items())
     if any(b.conductance != 0.0 for _, b in neighbours):
         raise ValueError(f"Node {network.name(node)} has a resistor, it is not capacitor-only")
-    capacitance = sum(b.capacitance for _, b in neighbours)
-    if capacitance != 0.0:
+    scale = max((b.capacitance for _, b in neighbours), default=0.0)
+    if scale != 0.0:
+        # Normalize before summing or multiplying: c_i*c_j and sum(c) can
+        # overflow/underflow even when the exact series capacitance is finite.
+        scaled_sum = math.fsum(b.capacitance / scale for _, b in neighbours)
         for index, (node_i, branch_i) in enumerate(neighbours):
             for node_j, branch_j in neighbours[index + 1:]:
+                smaller, larger = sorted((branch_i.capacitance, branch_j.capacitance))
                 network.add(node_i, node_j,
-                            capacitance=branch_i.capacitance * branch_j.capacitance / capacitance)
+                            capacitance=smaller * ((larger / scale) / scaled_sum))
     network.remove_node(node)
 
 

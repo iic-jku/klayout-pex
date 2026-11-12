@@ -36,6 +36,7 @@ from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo as
 @pytest.fixture
 def tech_info() -> TechInfo:
     tech = Technology(name='test_stack')
+    tech.process_parasitics.side_halo = 8.0
     layers = tech.process_stack.layers
     substrate = layers.add(name='substrate', layer_type=Stack.LAYER_TYPE_SUBSTRATE)
     substrate.substrate_layer.height = 0.1

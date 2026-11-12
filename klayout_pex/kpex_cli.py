@@ -86,6 +86,7 @@ from .magic.magic_runner import (
     MagicUniqueMode,
     run_magic,
     prepare_magic_script,
+    validate_prune_fraction,
 )
 from .magic.magic_log_analyzer import MagicLogAnalyzer
 from .netlist.netlist_convert import convert_to_vacask
@@ -140,6 +141,7 @@ from .rcx25.netlist_checks import (
 )
 from .rcx25.netlist_expander import RCX25NetlistExpander
 from .rcx25.pex_mode import PEXMode
+from .rcx25.coupling import CouplingPolicy, CouplingPolicyError, apply_coupling_policy
 from .rcx25.r.r_extractor import RExtractionTechError
 from .rcx25.c.device_capacitance_checks import (
     DeviceCapacitanceChecks, describe_device_capacitance_check,
@@ -154,6 +156,7 @@ from .device_models import DeviceModelError, DeviceModels
 from .tech_info import TechDefError, TechInfo
 from .types import NetName
 from .tool_version_constraints import (
+    MAGIC_EXTRESIST_PRUNE,
     Tool,
     VersionCheckMode,
     check_tool_versions
@@ -226,6 +229,15 @@ def halo_default_help(halo_by_pdk: Mapping[str, float]) -> str:
     return ', '.join(["the tech info's"] + halos)
 
 
+def _magic_prune_fraction(text: str) -> float:
+    try:
+        value = float(text)
+        validate_prune_fraction(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    return value
+
+
 class KpexCLI:
     def __init__(self):
         self.run_result = RunResult()  # NOTE: main starts one per run, this one is for methods called without main
@@ -273,6 +285,14 @@ class KpexCLI:
         group_pex.add_argument("--pdk", dest="pdk", required=default_pdk is None,
                                type=PDK.from_string, choices=all_pdk_choices,
                                help=pdk_help, default=default_pdk)
+
+        group_pex.add_argument("--corner", metavar="SCENARIO", default=None,
+                               help="Explicit technology scenario for KPEX engines (default: catalog default). "
+                                    "Bundled catalogs currently provide nominal only; no transistor-model corner "
+                                    "or MAGIC extraction style is inferred")
+        group_pex.add_argument("--tech-catalog", dest="tech_catalog_path", metavar="PATH", default=None,
+                               help="Technology catalog for --pdk (default: bundled catalog). Selects complete "
+                                    "R/C tables, physical stack and device-capacitance references")
 
         add_argument_with_former_name(group_pex, "--out-dir", "--out_dir",
                                       dest="output_dir_base_path", default="output",
@@ -466,6 +486,14 @@ class KpexCLI:
                                       help="Minimum delay threshold (in ps) to trigger network extraction. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist mindelay <value>)")
+        add_argument_with_former_name(group_magic, "--magic-prune", "--magic_prune", dest="magic_prune",
+                                      type=_magic_prune_fraction, default=None,
+                                      help="Minimum threshold (as a fraction in [0, 1.0)) for pruning negligible resistors "
+                                           "after network extraction. Requires MAGIC >= 8.3.698. "
+                                           "0 disables this pruning pass, not other network simplification. "
+                                           "The fraction must be finite and remain below 1 in single precision. "
+                                           "If not supplied, MAGIC's default is implicitly used. "
+                                           "(MAGIC command: extresist prune <value>)")
         add_argument_with_former_name(group_magic, "--magic-halo", "--magic_halo", dest="magic_halo",
                                       type=float, default=None,
                                       help="Custom sidewall halo distance (in µm) "
@@ -495,7 +523,16 @@ class KpexCLI:
         group_25d = parser.add_argument_group("2.5D Options")
         group_25d.add_argument("--mode", dest='pex_mode',
                                default=PEXMode.DEFAULT, type=PEXMode, choices=list(PEXMode),
-                               help=render_enum_help(topic='mode', enum_cls=PEXMode))
+                               help='C: capacitance with grounded coupling; CC: coupled capacitance; '
+                                    'RC: resistance and coupled capacitance; R: resistance only. '
+                                    + render_enum_help(topic='mode', enum_cls=PEXMode))
+        group_25d.add_argument('--coupling', dest='coupling_policy', type=CouplingPolicy,
+                               choices=list(CouplingPolicy), default=None,
+                               help='2.5D capacitance output: coupled retains all pairs. Grounded first eliminates '
+                                    'capacitor-only floating conductors exactly, then replaces inter-net pairs '
+                                    'with their full value to the substrate at each endpoint. '
+                                    'Defaults to grounded for C and coupled for CC/RC. '
+                                    'Geometry reports and device-capacitance checks stay coupled')
         group_25d.add_argument("--halo", dest="halo",
                                  type=positive_micrometers, default=None,
                                  help=f"Custom sidewall halo distance (in µm) to override tech info "
@@ -518,7 +555,7 @@ class KpexCLI:
                                nargs='?', const='',
                                help='Compare marker-internal capacitor-plate coupling with nominal tech-info '
                                     'model references. An optional JSON file replaces the selection with explicit '
-                                    'references and ratio bounds. Needs --gds, --2.5D, --blackbox y and --mode CC or RC. '
+                                    'references and ratio bounds. Needs --gds, --2.5D, --blackbox y and --mode C, CC or RC. '
                                     'Reports only referenced device/terminal pairs, without default ratio bounds')
         group_25d.add_argument("--reduce", dest="reduce_mode",
                                default=ReductionMode.DEFAULT.value, choices=[m.value for m in ReductionMode],
@@ -729,13 +766,23 @@ class KpexCLI:
             return args
         args.device_capacitance_references = None
         if args.command == 'extract':
+            if args.coupling_policy is not None or args.pex_mode == PEXMode.C:
+                if not args.run_2_5D:
+                    parser_extract.error('--mode C and --coupling apply to the analytical engine and need --2.5D')
+                if not args.pex_mode.need_capacitance():
+                    parser_extract.error('--coupling needs --mode C, CC or RC; R extracts no capacitance')
+                if args.pex_mode == PEXMode.C and args.coupling_policy not in (None, CouplingPolicy.GROUNDED):
+                    parser_extract.error('--mode C means grounded coupling; use --mode CC for other coupling policies')
+            if args.coupling_policy is None:
+                args.coupling_policy = (CouplingPolicy.GROUNDED if args.pex_mode == PEXMode.C
+                                        else CouplingPolicy.COUPLED)
             try:
                 args.admittance_check_options = admittance_check_options(args)
             except ValueError as exc:
                 parser_extract.error(str(exc))
             if args.device_capacitance_reference_path is not None:
                 if not args.run_2_5D or not args.blackbox_devices or not args.pex_mode.need_capacitance() or not args.gds_path:
-                    parser_extract.error('--check-device-caps needs --gds, --2.5D, --blackbox y and --mode CC or RC')
+                    parser_extract.error('--check-device-caps needs --gds, --2.5D, --blackbox y and --mode C, CC or RC')
                 try:
                     if args.device_capacitance_reference_path:
                         args.device_capacitance_references = read_device_capacitance_references(
@@ -767,29 +814,38 @@ class KpexCLI:
 
         pdk_config: PDKConfig = args.pdk.config
         args.tech_pbjson_path = pdk_config.tech_pb_json_path
+        explicit_catalog = args.tech_catalog_path is not None
+        if args.tech_catalog_path is None:
+            args.tech_catalog_path = pdk_config.tech_catalog_path
         args.lvs_script_path = pdk_config.pex_lvs_script_path
 
         def input_file_stem(path: str):
             # could be *.gds, or *.gds.gz, so remove all extensions
             return os.path.basename(path).split(sep='.')[0]
 
-        if not os.path.isfile(args.tech_pbjson_path):
-            error(f"Can't read technology file at path {args.tech_pbjson_path}")
+        # Resolve cheap scenario names and capabilities before touching the layout or LVS database.
+        try:
+            if not args.tech_catalog_path:
+                raise TechDefError("--tech-catalog requires a nonempty file path")
+            if args.run_magic and (explicit_catalog or args.corner is not None):
+                raise TechDefError("--corner and --tech-catalog select KPEX data; MAGIC uses its own technology "
+                                   "and cannot be combined with these options")
+            args.tech_info = TechInfo.from_catalog(args.tech_catalog_path, args.dielectric_filter,
+                                                   scenario_id=args.corner, expected_technology=str(args.pdk))
+            selection = args.tech_info.selection
+            if args.command == 'pex25d' or args.run_fastcap or args.run_fastercap:
+                selection.require_physical_stack(args.tech_info.tech.process_stack)
+            if getattr(args, 'device_capacitance_reference_path', None) == '':
+                selection.require_device_references()
+        except TechDefError as exc:
+            error(str(exc))
+            raise ArgumentValidationError(str(exc)) from exc
+        dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
+        unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
+        if unknown_names:
+            error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
+                  f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
             found_errors = True
-        else:
-            # NOTE: before the input is read, as --diel names dielectrics of the tech info
-            try:
-                args.tech_info = TechInfo.from_json(args.tech_pbjson_path, dielectric_filter=args.dielectric_filter)
-            except TechDefError as e:
-                error(str(e))
-                found_errors = True
-            else:
-                dielectric_names = [lyr.name for lyr in args.tech_info.filterable_dielectric_layers]
-                unknown_names = args.dielectric_filter.unknown_choices(dielectric_names)
-                if unknown_names:
-                    error(f"--diel {args.dielectric_filter.pattern}: the tech info of {args.pdk} has no dielectric "
-                          f"to filter named {', '.join(unknown_names)}, only: {', '.join(dielectric_names)}")
-                    found_errors = True
 
         if not os.path.isfile(args.lvs_script_path):
             error(f"Can't locate LVS script path at {args.lvs_script_path}")
@@ -1102,7 +1158,9 @@ class KpexCLI:
         if not check_tool_versions(exe_path_by_tool=exe_path_by_tool,
                                    pdk=args.pdk,
                                    mode=args.version_check_mode,
-                                   klayout_python_version=kdb.__version__):
+                                   klayout_python_version=kdb.__version__,
+                                   additional_constraints=(MAGIC_EXTRESIST_PRUNE,)
+                                   if args.run_magic and args.magic_prune is not None else ()):
             found_errors = True
 
         if found_errors:
@@ -1300,6 +1358,7 @@ class KpexCLI:
                              threshold=args.magic_thresh,
                              min_res=args.magic_minres,
                              min_delay=args.magic_mindel,
+                             prune_frac=args.magic_prune,
                              halo=args.magic_halo,
                              short_mode=args.magic_short_mode,
                              merge_mode=args.magic_merge_mode,
@@ -1506,6 +1565,18 @@ class KpexCLI:
                              netlist_csv_path: Optional[str],
                              expanded_netlist_path: Optional[str],
                              exclusions: Optional[Exclusions]):
+        # White-boxing removes intentional capacitor models. Their extracted plate
+        # coupling cannot be separated from the remaining parasitics afterward.
+        if args.coupling_policy != CouplingPolicy.COUPLED and not args.blackbox_devices:
+            removed = set(exclusions.removed_device_blocks) if exclusions is not None else set()
+            whiteboxed = [d.name or d.expanded_name() for d in pex_context.top_circuit.each_device()
+                           if d.id() not in removed and
+                           RCX25NetlistExpander.is_whiteboxed(d.device_class(), tech_info.device_models)]
+            if whiteboxed:
+                raise CouplingPolicyError(
+                    f'--coupling {args.coupling_policy} cannot approximate white-boxed capacitor devices '
+                    f'({", ".join(whiteboxed)}); use --blackbox y to keep their models and terminal coupling')
+
         # TODO: make this separatly configurable
         #       for now we use 0
         args.rcx25d_delaunay_amax = 0
@@ -1556,6 +1627,32 @@ class KpexCLI:
         removed_device_ids = set(exclusions.removed_device_blocks) if exclusions is not None else set()
         summary = extraction_results.summarize() \
             if netlist_csv_path is not None or expanded_netlist_path is not None else None
+        capacitance_by_undriven_net = undriven_nets(
+            lvs_netlist=pex_context.lvsdb.netlist(),
+            top_cell_name=pex_context.annotated_top_cell.name,
+            summary=summary,
+            network_net_names={network.net_name
+                               for results in extraction_results.cell_extraction_results.values()
+                               for network in results.r_extraction_result.networks},
+            substrate_net_name=pex_context.substrate_net_name,
+            removed_device_ids=removed_device_ids,
+            floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
+        ) if summary is not None else {}
+        if summary is not None and args.coupling_policy != CouplingPolicy.COUPLED:
+            summary = apply_coupling_policy(summary, args.coupling_policy,
+                                            reference_net_name=tech_info.internal_substrate_layer_name,
+                                            substrate_net_name=pex_context.substrate_net_name,
+                                            floating_net_names=capacitance_by_undriven_net)
+            if capacitance_by_undriven_net:
+                warning(f'Eliminated {len(capacitance_by_undriven_net)} floating capacitance nets before grounding: '
+                        f'{first_names(sorted(capacitance_by_undriven_net))}. '
+                        'Check that these nets intentionally have no port or retained device terminal')
+            info(f'Capacitance output policy: {args.coupling_policy}, '
+                 f'reference: {pex_context.substrate_net_name or tech_info.internal_substrate_layer_name}')
+            warning('Grounded capacitance output removes inter-net transfer admittance after exact '
+                    'floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, '
+                    'not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance '
+                    'checks still describe the coupled extraction')
 
         if netlist_csv_path is not None:
             # TODO: merge this with klayout_pex/klayout/netlist_csv.py
@@ -1654,18 +1751,7 @@ class KpexCLI:
             # NOTE: a warning, not a problem of --check, as fill has such nets too, but they were also defects
             #       that LVS passed (e.g. a rail under a wrong net name), which have to stay visible,
             #       also where --reduce removes them
-            capacitance_by_undriven_net = undriven_nets(
-                lvs_netlist=pex_context.lvsdb.netlist(),
-                top_cell_name=pex_context.annotated_top_cell.name,
-                summary=summary,
-                network_net_names={network.net_name
-                                   for results in extraction_results.cell_extraction_results.values()
-                                   for network in results.r_extraction_result.networks},
-                substrate_net_name=pex_context.substrate_net_name,
-                removed_device_ids=removed_device_ids,
-                floating_net_names=exclusions.floating_net_names if exclusions is not None else ()
-            )
-            if capacitance_by_undriven_net:
+            if capacitance_by_undriven_net and args.coupling_policy == CouplingPolicy.COUPLED:
                 warning(undriven_nets_warning(capacitance_by_undriven_net,
                                               has_capacitances=args.pex_mode.need_capacitance()))
 
@@ -1945,6 +2031,9 @@ class KpexCLI:
         result.inputs = {name: os.path.abspath(path) if path is not None else None
                          for name, path in (('gds', args.gds_path), ('lvsdb', args.lvsdb_path),
                                             ('schematic', args.schematic_path))}
+        tech_info = getattr(args, 'tech_info', None)
+        if tech_info is not None and tech_info.selection is not None:
+            result.technology_selection = tech_info.selection.to_json()
         run_dir = getattr(args, 'output_dir_path', None)
         result.run_dir = os.path.abspath(run_dir) if run_dir is not None else None
         result.out_result_path = args.out_result_path
@@ -1998,6 +2087,11 @@ class KpexCLI:
                     case _:
                         try:
                             self.run_extraction(args=args, tech_info=tech_info)
+                        except CouplingPolicyError as e:
+                            error(str(e))
+                            error('Use --coupling coupled to retain the coupled network')
+                            error('For floating resistive islands, --mode C extracts ideal-conductor capacitance')
+                            sys.exit(ExitCode.DIAGNOSTIC_ERRORS)
                         except (LVSDBError, RExtractionTechError, CExtractionTechError, DeviceModelError,
                                 RCNetlistCheckError, SpiceReaderError, VacaskWriterError, FasterCapError,
                                 ExclusionError, DeviceCapacitanceCheckError) as e:
@@ -2051,6 +2145,7 @@ class KpexCLI:
                 cell_name=args.effective_cell_name,
                 options=BuilderOptions(
                     grid_um=args.pex25d_grid,
+                    process_corner=tech_info.selection.scenario_id if tech_info.selection else None,
                     with_source_refs=args.pex25d_with_source_refs,
                     dielectric_filter=args.dielectric_filter,
                     domain_margin_um=args.pex25d_domain_margin))

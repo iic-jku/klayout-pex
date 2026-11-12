@@ -64,6 +64,7 @@ include = [
     "klayout_pex_protobuf/__init__.py",
     # NOTE: explicitly mention generated protobuf files,
     #       otherwise the .gitignore entries would suppress them
+    { path = "klayout_pex_protobuf/tech/**/*.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/gf180mcuD_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/ihp-sg13g2_tech.pb.json", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/ihp-sg13cmos5l_tech.pb.json", format = ["sdist", "wheel"] },
@@ -91,6 +92,7 @@ include = [
     { path = "klayout_pex_protobuf/kpex/r/r_network_pb2.py", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/request/pex_request_pb2.py", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/result/pex_result_pb2.py", format = ["sdist", "wheel"] },
+    { path = "klayout_pex_protobuf/kpex/tech/tech_catalog_pb2.py", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/tech/tech_pb2.py", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/tech/device_models_pb2.py", format = ["sdist", "wheel"] },
     { path = "klayout_pex_protobuf/kpex/tech/process_parasitics_pb2.py", format = ["sdist", "wheel"] },

@@ -137,6 +137,7 @@ class RunResult:
     arguments: List[str] = field(default_factory=list)  # of the command line, after the program name
     pdk: Optional[str] = None
     cell: Optional[str] = None
+    technology_selection: Optional[Dict[str, Any]] = None
     engines: List[ExtractionEngine] = field(default_factory=list)
     mode: Optional[str] = None  # --mode of the 2.5D engine
     inputs: Dict[str, Optional[str]] = field(default_factory=dict)  # e.g. {'gds': …}, absolute paths
@@ -188,6 +189,7 @@ class RunResult:
             'command': self.command,
             'arguments': self.arguments,
             'pdk': self.pdk,
+            'technology_selection': self.technology_selection,
             'cell': self.cell,
             'engines': [engine.value for engine in self.engines],
             'mode': self.mode,

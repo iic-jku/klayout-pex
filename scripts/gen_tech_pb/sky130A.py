@@ -350,7 +350,7 @@ def build_process_parasitics_info(ex: ProcessParasiticsInfo):
     ri = ex.resistance
 
     # resistance values are in mΩ / square
-    #                       layer, resistance, [corner_adjustment_fraction]
+    #                       layer, resistance
     add_layer_resistance(ri, "poly", 48200)  # allpolynonres
     add_layer_resistance(ri, "li1",  12800)
     add_layer_resistance(ri, "met1",   125)

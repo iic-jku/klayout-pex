@@ -28,6 +28,8 @@ import "kpex/tech/process_stack.proto";
 import "kpex/tech/process_parasitics.proto";
 import "kpex/tech/substrate.proto";
 
+// Complete resolved extraction input. Catalog selection assembles this message from
+// shared interfaces and the chosen R/C, physical-stack and device-reference datasets.
 message Technology {
     // name of the technology, e.g. "sky130A"
     string name = 1;
@@ -47,7 +49,7 @@ message Technology {
     // including thicknesses, dielectrics, etc.
     ProcessStackInfo process_stack = 140;
 
-    // Parasistic data for the magic-like PEX engine
+    // Resistance and capacitance data for analytical extraction
     ProcessParasiticsInfo process_parasitics = 200;
 
     // How to write the devices of the LVS netlist into the extracted netlist

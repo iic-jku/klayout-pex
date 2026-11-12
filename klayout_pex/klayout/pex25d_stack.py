@@ -382,7 +382,10 @@ class PEX25DStackBuilder:
                                                  LT.LAYER_TYPE_SIMPLE_DIELECTRIC,
                                                  LT.LAYER_TYPE_CONFORMAL_DIELECTRIC)
             if not is_dielectric:
-                continue
+                if layer.layer_type in (LT.LAYER_TYPE_SUBSTRATE, LT.LAYER_TYPE_NWELL, LT.LAYER_TYPE_DIFFUSION):
+                    continue
+                raise NotImplementedError(f"PEX25D dielectric export for layer type {layer.layer_type} "
+                                          f"of '{layer.name}' is not implemented")
 
             if layer.layer_type != LT.LAYER_TYPE_FIELD_OXIDE and layer.name != background_name \
                     and layer.name not in self.included_dielectric_names:
@@ -425,6 +428,10 @@ class PEX25DStackBuilder:
 
                 case LT.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     self.add_conformal_dielectric(pex25d_file, layer=layer)
+
+                case _:
+                    raise NotImplementedError(f"PEX25D dielectric export for layer type {layer.layer_type} "
+                                              f"of '{layer.name}' is not implemented")
 
     def add_simple_dielectric(self,
                               pex25d_file: Any,

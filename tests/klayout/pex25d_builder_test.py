@@ -80,7 +80,8 @@ class TerminalFixture:
         substrate.substrate_layer.height = 0.1
         substrate.substrate_layer.thickness = 0.2
         if diffusion:
-            nsd = stack.layers.add(name='nsd', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION)
+            nsd = stack.layers.add(name='nsd', layer_type=stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION,
+                                   diffusion_layer=stack_pb2.ProcessStackInfo.DiffusionLayer())
             lvs_layers = [('nsd', 2)]
             if contact:
                 nsd.diffusion_layer.contact_above.name = 'cont_nsd'
@@ -150,6 +151,14 @@ class TerminalFixture:
 @allure.parent_suite('Unit Tests')
 @allure.tag('PEX25D', 'Builder')
 class Pex25DBuilderTerminalTest(unittest.TestCase):
+    def test_unhandled_layer_type_is_not_silently_omitted(self):
+        fixture = TerminalFixture()
+        fixture.tech.tech.process_stack.layers[0].layer_type = 81
+        builder = PEX25DBuilder(fixture.context, fixture.tech, 'test')
+        file = SimpleNamespace(ground_plane=SimpleNamespace(name='subs'))
+        with self.assertRaisesRegex(NotImplementedError, "PEX25D dielectric export.*81.*'subs'"):
+            builder.build_dielectrics(file)
+
     def test_pin_uses_its_label_not_the_whole_pin_polygon(self):
         fixture = TerminalFixture()
         fixture.pin('A', 10, 10)

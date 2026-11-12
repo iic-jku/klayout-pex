@@ -473,7 +473,7 @@ class TechBuilder:
         ri = ex.resistance
 
         # resistance values are in mΩ / square
-        #                       layer, resistance, [corner_adjustment_fraction]
+        #                       layer, resistance
         add_layer_resistance(ri, "GatPoly",  7000)  # TODO: there is no value defined in the process spec!
         add_layer_resistance(ri, "Metal1",    110)
         add_layer_resistance(ri, "Metal2",     88)
