@@ -31,6 +31,9 @@ from functools import cached_property
 import math
 import google.protobuf.json_format
 
+if TYPE_CHECKING:
+    from .tech_catalog import TechnologySelection
+
 from .device_models import DeviceModels
 from .types import CanonicalLayerName, GDSPair, LayerName, LVSLayerName
 from .util.multiple_choice import MultipleChoicePattern
@@ -102,6 +105,12 @@ class TechInfo:
             contents = f.read()
             tech = google.protobuf.json_format.Parse(contents, tech_pb2.Technology())
 
+        TechInfo.validate_tech_def(tech, jsonpb_path)
+        return tech
+
+    @staticmethod
+    def validate_tech_def(tech: tech_pb2.Technology, source: str):
+        jsonpb_path = source
         # Checked here rather than where a name is used: by then the collision
         # has already happened, and what it cost is no longer visible.
         problems = TechInfo.duplicate_names(tech)
@@ -109,6 +118,30 @@ class TechInfo:
             raise TechDefError(
                 f"Names have to be unique, but in {jsonpb_path}"
                 + ''.join(f"\n  - {p}" for p in problems))
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
+        parameter_fields: Dict[process_stack_pb2.ProcessStackInfo.LayerType, str] = {
+            LT.LAYER_TYPE_SUBSTRATE: 'substrate_layer',
+            LT.LAYER_TYPE_NWELL: 'nwell_layer',
+            LT.LAYER_TYPE_DIFFUSION: 'diffusion_layer',
+            LT.LAYER_TYPE_FIELD_OXIDE: 'field_oxide_layer',
+            LT.LAYER_TYPE_SIMPLE_DIELECTRIC: 'simple_dielectric_layer',
+            LT.LAYER_TYPE_CONFORMAL_DIELECTRIC: 'conformal_dielectric_layer',
+            LT.LAYER_TYPE_METAL: 'metal_layer',
+        }
+        for layer in tech.process_stack.layers:
+            if layer.layer_type == LT.LAYER_TYPE_UNSPECIFIED or layer.layer_type not in LT.values():
+                raise TechDefError(f"Process-stack layer '{layer.name}' in {source} has unsupported "
+                                   f"layer_type {layer.layer_type}; specify a declared, non-unspecified LayerType")
+            expected = parameter_fields.get(layer.layer_type)
+            if expected is None:
+                raise NotImplementedError(f"Parameter validation for layer type {LT.Name(layer.layer_type)} "
+                                          f"of '{layer.name}' is not implemented")
+            actual = layer.WhichOneof('parameters')
+            if actual is None:
+                raise TechDefError(f"Process-stack layer '{layer.name}' in {source} needs exactly one parameter payload")
+            if actual != expected:
+                raise TechDefError(f"Process-stack layer '{layer.name}' in {source} declares "
+                                   f"{LT.Name(layer.layer_type)} but has {actual} parameters; expected {expected}")
         # NOTE: so are the layers of the process stack, which kpex looks up after reading, where it can't report
         problems = TechInfo.process_layer_problems(tech)
         if problems:
@@ -128,7 +161,6 @@ class TechInfo:
             raise TechDefError(
                 f"Capacitances have to be finite numbers ≥ 0, but in {jsonpb_path}"
                 + ''.join(f"\n  - {p}" for p in problems))
-        return tech
 
     @staticmethod
     def capacitance_problems(tech: tech_pb2.Technology) -> List[str]:
@@ -167,10 +199,21 @@ class TechInfo:
         return TechInfo(tech=tech,
                         dielectric_filter=dielectric_filter)
 
+    @classmethod
+    def from_catalog(cls, catalog_path: str, dielectric_filter: Optional[MultipleChoicePattern],
+                     scenario_id: Optional[str] = None, expected_technology: Optional[str] = None) -> TechInfo:
+        from pathlib import Path
+        from .tech_catalog import load_technology_catalog
+
+        resolved = load_technology_catalog(Path(catalog_path), scenario_id, expected_technology)
+        return cls(resolved.tech, dielectric_filter, selection=resolved.selection)
+
     def __init__(self,
                  tech: tech_pb2.Technology,
-                 dielectric_filter: Optional[MultipleChoicePattern]):
+                 dielectric_filter: Optional[MultipleChoicePattern],
+                 selection: Optional[TechnologySelection] = None):
         self.tech = tech
+        self.selection = selection
         self.dielectric_filter = dielectric_filter or MultipleChoicePattern(pattern='all')
 
     @cached_property
@@ -288,22 +331,27 @@ class TechInfo:
         """
         :return: lvs_layer_names_by_process_layer_name, and the problems (see process_layer_problems)
         """
+        LT = process_stack_pb2.ProcessStackInfo.LayerType
         stack_layer_names_by_gds_pair: Dict[GDSPair, List[LayerName]] = {}
         for lyr in self.tech.process_stack.layers:
             match lyr.layer_type:
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_DIFFUSION:
+                case LT.LAYER_TYPE_DIFFUSION:
                     layer = lyr.diffusion_layer
                     names = [lyr.name]
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_METAL:
+                case LT.LAYER_TYPE_METAL:
                     layer = lyr.metal_layer
                     names = [lyr.name]
-                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_NWELL:
+                case LT.LAYER_TYPE_NWELL:
                     # NOTE: its contact only (e.g. sky130A licon_ntap_con over the n-taps, #475),
                     #       the nwell is no conductor of the capacitance extraction
                     layer = lyr.nwell_layer
                     names = []
-                case _:
+                case (LT.LAYER_TYPE_SUBSTRATE | LT.LAYER_TYPE_FIELD_OXIDE |
+                      LT.LAYER_TYPE_SIMPLE_DIELECTRIC | LT.LAYER_TYPE_CONFORMAL_DIELECTRIC):
                     continue
+                case _:
+                    raise NotImplementedError(f"LVS layer mapping for layer type {lyr.layer_type} "
+                                              f"of '{lyr.name}' is not implemented")
             if layer.HasField('contact_above'):
                 names.append(layer.contact_above.name)
             for name in names:
@@ -429,6 +477,9 @@ class TechInfo:
                     diel_by_name[pl.name] = pl.simple_dielectric_layer.dielectric_k
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     diel_by_name[pl.name] = pl.conformal_dielectric_layer.dielectric_k
+                case _:
+                    raise NotImplementedError(f"Permittivity lookup for layer type {pl.layer_type} "
+                                              f"of '{pl.name}' is not implemented")
         return diel_by_name
 
     def conformal_dielectric_wrapping(self, layer_name: str) \
@@ -445,8 +496,11 @@ class TechInfo:
                 case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC:
                     if lyr.conformal_dielectric_layer.reference == layer_name:
                         found_layers.append(lyr)
-                case _:
+                case process_stack_pb2.ProcessStackInfo.LAYER_TYPE_SIMPLE_DIELECTRIC:
                     continue
+                case _:
+                    raise NotImplementedError(f"Conformal wrapping for layer type {lyr.layer_type} "
+                                              f"of '{lyr.name}' is not implemented")
 
         if len(found_layers) == 0:
             return None
@@ -496,8 +550,12 @@ class TechInfo:
                     layer = lyr.diffusion_layer
                 case LT.LAYER_TYPE_METAL:
                     layer = lyr.metal_layer
-                case _:
+                case (LT.LAYER_TYPE_SUBSTRATE | LT.LAYER_TYPE_FIELD_OXIDE |
+                      LT.LAYER_TYPE_SIMPLE_DIELECTRIC | LT.LAYER_TYPE_CONFORMAL_DIELECTRIC):
                     continue
+                case _:
+                    raise NotImplementedError(f"Contact lookup for layer type {lyr.layer_type} "
+                                              f"of '{lyr.name}' is not implemented")
             # NOTE: not the unset contact of a layer without one, e.g. a tap, whose name is empty (#469)
             if layer.HasField('contact_above'):
                 d[layer.contact_above.name] = layer.contact_above

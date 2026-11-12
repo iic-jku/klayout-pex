@@ -263,11 +263,8 @@ def add_conformal_dielectric(psi: ProcessStackInfo,
 
 def add_layer_resistance(ri: ResistanceInfo,
                          layer_name: str,
-                         resistance: float,
-                         corner_adjustment_fraction: float = 0.0):
-    ri.layers.add(layer_name=layer_name,
-                  resistance=resistance,
-                  corner_adjustment_fraction=corner_adjustment_fraction)
+                         resistance: float):
+    ri.layers.add(layer_name=layer_name, resistance=resistance)
 
 
 def add_contact_resistance(ri: ResistanceInfo,

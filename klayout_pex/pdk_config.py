@@ -36,6 +36,10 @@ class PDKConfig:
     pex_lvs_script_path: str
     tech_pb_json_path: str
 
+    @property
+    def tech_catalog_path(self) -> str:
+        return os.path.join(os.path.dirname(self.tech_pb_json_path), 'tech', self.name, 'catalog.pb.json')
+
 
 # TODO: this should be externally configurable
 class PDK(StrEnum):

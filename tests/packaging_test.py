@@ -127,3 +127,20 @@ def test_console_script_has_its_entry_point(script: str):
     module_name, function_name = pyproject()['project']['scripts'][script].split(':')
     module = importlib.import_module(module_name)
     assert callable(getattr(module, function_name, None)), f"{script}: no {function_name} in {module_name}"
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('pdk', list(PDK), ids=str)
+def test_technology_catalog_and_its_explicit_components_are_included(pdk: PDK):
+    from google.protobuf.json_format import Parse
+    from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyCatalog
+
+    path = Path(pdk.config.tech_catalog_path)
+    catalog = Parse(path.read_text(encoding='utf-8'), TechnologyCatalog())
+    sources = [path, path.parent / catalog.shared.path]
+    sources.extend(path.parent / dataset.file.path for dataset in catalog.datasets)
+    for source in sources:
+        relative = source.relative_to(REPO_DIR)
+        assert source.is_file(), source
+        assert any(source in Path(REPO_DIR).glob(pattern) for pattern in wheel_includes()), relative
