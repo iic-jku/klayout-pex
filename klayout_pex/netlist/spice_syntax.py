@@ -39,12 +39,16 @@ from dataclasses import dataclass
 import re
 from typing import *
 
+from ..util.unit_formatter import parse_spice_number
+
 
 GROUND_NODE_NAMES = ('0', 'gnd')
 """Ground in SPICE: '0', and 'gnd', which ngspice reads as '0'"""
 
 _END = re.compile(r'\s*\.end\s*$', re.IGNORECASE)
 _END_OF_LINE_COMMENT = re.compile(r'(^|\s)(\$(?!\[|SUB\s*=)|//)|;', re.IGNORECASE)
+_PARAMETER_START = re.compile(r'\s+(?:params:|[^\s=]+\s*=)', re.IGNORECASE)
+_VOLTAGE_NODES = re.compile(r'\bv\s*\(\s*([^\s(),]+)\s*(?:,\s*([^\s(),]+)\s*)?\)', re.IGNORECASE)
 
 
 class SpiceSyntaxError(Exception):
@@ -133,6 +137,61 @@ def subcircuit_ports(tokens: Sequence[str]) -> List[str]:
             break
         ports.append(token)
     return ports
+
+
+def element_terminals(statement: str) -> List[str]:
+    """Known terminals of a retained element, without evaluating its values.
+
+    The caller supplies one uncommented logical statement, outside control blocks.
+    Unknown element syntax stays opaque. In particular, its arbitrary words must
+    not become new nodes merely because reduction conservatively protects them.
+    """
+    positional = _PARAMETER_START.split(statement, maxsplit=1)[0]
+    words = [word for word in re.split(r'[\s(),]+', positional) if word]
+    if not words:
+        return []
+    kind = words[0][0].upper()
+    if kind == 'X':
+        # The final positional word is the called subcircuit, even when parameter
+        # assignments contain spaces around '=' or expressions containing spaces.
+        return words[1:-1]
+    count = {'R': 2, 'C': 2, 'L': 2, 'V': 2, 'I': 2, 'B': 2, 'F': 2, 'H': 2,
+             'W': 2, 'D': 2, 'Q': 3, 'J': 3, 'Z': 3, 'M': 4, 'S': 4,
+             'T': 4, 'O': 4, 'U': 3, 'E': 2, 'G': 2}.get(kind)
+    if count is None or len(words) < count + 1:
+        return []
+    if kind in ('D', 'Q', 'M'):
+        # Optional substrate/thermal nodes precede the model. An area, parameter
+        # or flag after the model is not another terminal (nor is the model).
+        end = next((index for index in range(count + 1, len(words))
+                    if words[index].casefold() in ('off', 'on', 'thermal')
+                    or words[index].startswith(('{', "'"))), len(words))
+        while end > count + 1:
+            try:
+                parse_spice_number(words[end - 1])
+            except ValueError:
+                break
+            end -= 1
+        count = max(count, min(end - 2, {'D': 3, 'Q': 5, 'M': 7}[kind]))
+    terminals = words[1:count + 1]
+    if kind in ('R', 'C', 'L'):
+        substrate = re.search(r'\$sub\s*=\s*([^\s(),=]+)', statement, re.IGNORECASE)
+        if substrate:
+            terminals.append(substrate.group(1))
+    if kind in ('E', 'G') and len(words) >= 6:
+        if words[3].casefold() == 'poly':
+            try:
+                pairs = int(words[4])
+            except ValueError:
+                pairs = 0
+            if 0 < pairs <= (len(words) - 6) // 2:
+                terminals.extend(words[5:5 + 2 * pairs])
+        elif words[3].casefold() not in ('value', 'table', 'vol', 'cur', 'laplace'):
+            terminals.extend(words[3:5])
+    if kind in ('B', 'E', 'G'):
+        for match in _VOLTAGE_NODES.finditer(statement):
+            terminals.extend(name for name in match.groups() if name is not None)
+    return terminals
 
 
 def read_subcircuit_ports(path: str, subcircuit_name: str) -> Optional[List[str]]:

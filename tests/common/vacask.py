@@ -38,6 +38,9 @@ from typing import *
 
 import pytest
 
+if TYPE_CHECKING:
+    import numpy as np
+
 from klayout_pex.netlist.spice_netlist import SpiceNetlist
 
 
@@ -57,13 +60,14 @@ def write_vacaskrc(run_dir: str, models_dir: str):
         f.write(f'[Paths]\nmodule_path_prefix = [ "{models_dir}/osdi" ]\n')
 
 
-def run_vacask(deck_path: str):
+def run_vacask(deck_path: str) -> subprocess.CompletedProcess:
     """
     Runs the deck in its directory, where the analyses write their results (e.g. op1.raw)
     """
     result = subprocess.run([VACASK_EXE, os.path.basename(deck_path)], cwd=os.path.dirname(deck_path),
                             capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=600)
     assert result.returncode == 0, f"vacask failed on {deck_path}:\n{result.stdout}\n{result.stderr}"
+    return result
 
 
 def read_ascii_raw(path: str) -> Dict[str, List[complex]]:
@@ -89,6 +93,43 @@ def read_ascii_raw(path: str) -> Dict[str, List[complex]]:
     point_count = len(values) // len(names)
     return {name: [values[point * len(names) + i] for point in range(point_count)]
             for i, name in enumerate(names)}
+
+
+def vacask_port_admittance(netlist_path: str,
+                           subcircuit: str,
+                           ports: Sequence[str],
+                           decades: Tuple[int, int],
+                           work_dir: str) -> Tuple["np.ndarray", "np.ndarray"]:
+    """Convert SPICE and measure all port admittances, one sample per decade."""
+    import numpy as np
+    from klayout_pex.netlist.netlist_convert import convert_to_vacask
+    from tests.common.port_admittance_bench import port_admittance_from_currents
+
+    name = os.path.splitext(os.path.basename(netlist_path))[0]
+    circuit, options = convert_to_vacask(netlist_path, os.path.join(work_dir, name + '.inc'), ())
+    lines = ['Port admittance', f'include "{circuit}"', 'model voltage vsource']
+    sources = []
+    count = len(ports)
+    for driven in range(count):
+        nodes = [f'p{driven}_{port}' for port in range(count)]
+        lines.append(f'x{driven} ({" ".join(nodes)}) {subcircuit}')
+        for port, node in enumerate(nodes):
+            source = f'v{driven}_{port}'
+            sources.append(source)
+            lines.append(f'{source} ({node} 0) voltage dc=0 mag={int(port == driven)}')
+    frequencies = [10.0 ** exponent for exponent in range(decades[0], decades[1] + 1)]
+    analysis = name + '_ac'
+    lines.extend(['control', f'  include "{options}"', '  options rawfile="ascii"',
+                  f'  analysis {analysis} ac values=[{", ".join(map(str, frequencies))}]', 'endc'])
+    deck = os.path.join(work_dir, name + '_ac.sim')
+    with open(deck, 'w', encoding='utf-8') as stream:
+        stream.write('\n'.join(lines) + '\n')
+    result = run_vacask(deck)
+    raw_path = os.path.join(work_dir, analysis + '.raw')
+    assert os.path.isfile(raw_path), f"vacask produced no AC results:\n{result.stdout}\n{result.stderr}"
+    values = read_ascii_raw(raw_path)
+    currents = np.array([values[f'{source}:flow(br)'] for source in sources]).T
+    return np.array([value.real for value in values['frequency']]), port_admittance_from_currents(currents, count)
 
 
 @dataclass

@@ -34,6 +34,7 @@ import pytest
 from klayout_pex.netlist.spice_syntax import (
     SpiceLine,
     SpiceSyntaxError,
+    element_terminals,
     read_subcircuit_ports,
     spice_lines,
     strip_comment,
@@ -45,6 +46,54 @@ tags = ("Netlist", "SPICE")
 
 def texts(text: str) -> List[Optional[str]]:
     return [line.text for line in spice_lines(text)]
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('statement, terminals', [
+    ('Vbias ref 0 DC 0', ['ref', '0']),
+    ('Iload (ref, 0) PULSE(0 1 2n)', ['ref', '0']),
+    ('R1 a b rmodel w = 1u', ['a', 'b']),
+    ('C1 a b {capacitance}', ['a', 'b']),
+    ('L1 a b 1u $SUB = substrate $[lmodel]', ['a', 'b', 'substrate']),
+    ('D1 a k diode 2', ['a', 'k']),
+    ('D1 a k diode OFF', ['a', 'k']),
+    ('D1 a k sub diode thermal', ['a', 'k', 'sub']),
+    ('Q1 c b e bjt', ['c', 'b', 'e']),
+    ('Q1 c b e bjt 2 off', ['c', 'b', 'e']),
+    ('Q1 c b e 20 bjt 2', ['c', 'b', 'e', '20']),
+    ('Q1 c b e s tj bjt area=2', ['c', 'b', 'e', 's', 'tj']),
+    ('M1 d g s b mos W=1u L=1u', ['d', 'g', 's', 'b']),
+    ('M1 d g s b soi body tj mos off', ['d', 'g', 's', 'b', 'soi', 'body', 'tj']),
+    ('J1 d g s jfet area=2', ['d', 'g', 's']),
+    ('Z1 d g s mesfet', ['d', 'g', 's']),
+    ('S1 a b ctrlp ctrln switch', ['a', 'b', 'ctrlp', 'ctrln']),
+    ('W1 a b Vsense switch', ['a', 'b']),
+    ('T1 a b c d Z0=50 TD=1n', ['a', 'b', 'c', 'd']),
+    ('O1 a b c d line', ['a', 'b', 'c', 'd']),
+    ('U1 a b reference line L=1', ['a', 'b', 'reference']),
+    ('F1 a b Vsense 2', ['a', 'b']),
+    ('H1 a b POLY(1) Vsense 0 2', ['a', 'b']),
+    ('E1 a b ctrlp ctrln 2', ['a', 'b', 'ctrlp', 'ctrln']),
+    ('G1 a b POLY(2) c d e f 0 1 2', ['a', 'b', 'c', 'd', 'e', 'f']),
+    ('E1 a b VALUE={V(c,d)}', ['a', 'b', 'c', 'd']),
+    ('G1 a b TABLE {V(c)} = (0, 0) (1, 1)', ['a', 'b', 'c']),
+    ('B1 a b I=V(c,d)+V(e)+I(Vsense)', ['a', 'b', 'c', 'd', 'e']),
+    ('X1 a b wrapper', ['a', 'b']),
+    ('X1 (a b) wrapper PARAMS: gain = {2 * multiplier}', ['a', 'b']),
+    ('X1 a b wrapper gain = {2 * multiplier}', ['a', 'b']),
+    ('X1 wrapper params: p=1', []),
+    ('K1 L1 L2 0.8', []),
+    ('Aopaque [a b] opaque_model', []),
+    ('.param ref=value', []),
+    ('', []),
+    ('Vbias', []),
+    ('M1 d g s', []),
+])
+def test_known_element_terminals_exclude_models_values_and_parameters(statement: str, terminals: List[str]):
+    # Optional terminals and spaced assignments are the boundaries where a model,
+    # scalar value or controlling element name can be mistaken for a node.
+    assert element_terminals(statement) == terminals
 
 
 @allure.parent_suite(parent_suite)

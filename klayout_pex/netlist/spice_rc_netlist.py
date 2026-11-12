@@ -31,6 +31,9 @@ Reading:
     - the network of a scope has its *plain* R and C elements: exactly two nodes and a number as value
       (e.g. 'Rext_1 A B 426.67', 'Cext_1 A B 223.458a'), resistances > 0, capacitances ≥ 0;
       parallel elements add up
+    - an optional element filter selects R/C per scope before parsing numeric values
+    - unselected elements protect their terminals and stay verbatim
+    - with preserve_resistors, selected R lines also stay verbatim and only C is rewritten
     - every other line stays as it is, in its place: devices, subcircuit instances, sources, directives,
       comments, and R/C elements with other values (models, parameters, expressions, R ≤ 0, C < 0);
       the comment lines between a line and its continuation stay with it
@@ -60,7 +63,7 @@ from typing import *
 from ..util.unit_formatter import format_spice_number, format_spice_resistance, parse_spice_number
 from .rc_network import RCNetwork
 from .rc_reduction import GROUND_NODE_NAME, TIE_RESISTANCE
-from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, spice_lines, subcircuit_ports
+from .spice_syntax import GROUND_NODE_NAMES, SpiceSyntaxError, element_terminals, spice_lines, subcircuit_ports
 
 REDUCED_CAPACITOR_PREFIX = 'Cred_'
 REDUCED_RESISTOR_PREFIX = 'Rred_'
@@ -87,8 +90,14 @@ class SpiceScope:
     """the case-folded names of the elements that are no network elements"""
     names_on_other_lines: Set[str] = field(default_factory=set)
     """the words of the scope's other lines, which protect the nodes of these names"""
+    retained_terminals: Dict[str, str] = field(default_factory=dict)
+    """known terminals of retained elements, keyed case-insensitively with their first spelling"""
     comment_lines: List[str] = field(default_factory=list)
     """written above the RC elements, e.g. a summary of the reduction"""
+    preserve_resistors: bool = False
+    """retain selected resistor lines verbatim while inspecting their connectivity"""
+    capacitor_prefix: str = REDUCED_CAPACITOR_PREFIX
+    global_names: Set[str] = field(default_factory=set)
 
     @property
     def title(self) -> str:
@@ -124,27 +133,45 @@ class SpiceRCNetlist:
 
     # ----------------------------------------------------------------------------------------- reading
 
+    @staticmethod
+    def _validate_read_options(recognize_ties: bool,
+                               element_filter: Optional[Callable[[SpiceScope, Sequence[str]], bool]],
+                               preserve_resistors: bool):
+        if not isinstance(recognize_ties, bool):
+            raise ValueError(f"recognize_ties must be True or False, got {recognize_ties!r}")
+        if not isinstance(preserve_resistors, bool):
+            raise ValueError(f"preserve_resistors must be True or False, got {preserve_resistors!r}")
+        if element_filter is not None and not callable(element_filter):
+            raise ValueError('element_filter must be callable or None')
+        if preserve_resistors and recognize_ties:
+            raise ValueError('preserve_resistors requires recognize_ties=False to retain actual resistor topology')
+
     @classmethod
-    def read(cls, path: str, *, recognize_ties: bool = True) -> SpiceRCNetlist:
+    def read(cls, path: str, *, recognize_ties: bool = True,
+             element_filter: Optional[Callable[[SpiceScope, Sequence[str]], bool]] = None,
+             preserve_resistors: bool = False) -> SpiceRCNetlist:
         """
         :raises OSError: if the file can't be read
         :raises NetlistReadError: if its .SUBCKT and .ENDS don't match
         :param recognize_ties: False reads the actual tie resistors for circuit verification
+        :param element_filter: select numeric R/C by scope and tokens; unselected lines stay verbatim
+        :param preserve_resistors: inspect selected R connectivity without rewriting resistor lines
         """
-        if not isinstance(recognize_ties, bool):
-            raise ValueError(f"recognize_ties must be True or False, got {recognize_ties!r}")
+        cls._validate_read_options(recognize_ties, element_filter, preserve_resistors)
         # NOTE: bytes that are no UTF-8 (e.g. in comments) are written back as they were,
         #       and so are the line endings (newline='')
         with open(path, encoding='utf-8', errors='surrogateescape', newline='') as f:
-            return cls.parse(f.read(), source=path, recognize_ties=recognize_ties)
+            return cls.parse(f.read(), source=path, recognize_ties=recognize_ties,
+                             element_filter=element_filter, preserve_resistors=preserve_resistors)
 
     @classmethod
-    def parse(cls, text: str, source: str = '<text>', *, recognize_ties: bool = True) -> SpiceRCNetlist:
+    def parse(cls, text: str, source: str = '<text>', *, recognize_ties: bool = True,
+              element_filter: Optional[Callable[[SpiceScope, Sequence[str]], bool]] = None,
+              preserve_resistors: bool = False) -> SpiceRCNetlist:
         """
         :raises NetlistReadError: if the .SUBCKT and .ENDS don't match, or ngspice can't read the lines
         """
-        if not isinstance(recognize_ties, bool):
-            raise ValueError(f"recognize_ties must be True or False, got {recognize_ties!r}")
+        cls._validate_read_options(recognize_ties, element_filter, preserve_resistors)
         try:
             lines = spice_lines(text)
         except SpiceSyntaxError as e:
@@ -153,7 +180,7 @@ class SpiceRCNetlist:
         items: List[Union[str, _ElementsPlaceholder]] = []
         scopes: List[SpiceScope] = []
         global_names: Set[str] = set()
-        top_level = SpiceScope(name=None, ports=[])
+        top_level = SpiceScope(name=None, ports=[], preserve_resistors=preserve_resistors)
         stack: List[SpiceScope] = [top_level]
         scopes_with_elements: Set[int] = set()  # by id()
         in_control_block = False
@@ -181,7 +208,8 @@ class SpiceRCNetlist:
             if keyword == '.subckt':
                 if len(tokens) < 2:
                     raise NetlistReadError(f"{source}:{number}: .SUBCKT without name")
-                stack.append(SpiceScope(name=tokens[1], ports=subcircuit_ports(tokens)))
+                stack.append(SpiceScope(name=tokens[1], ports=subcircuit_ports(tokens),
+                                        preserve_resistors=preserve_resistors))
                 items.append(verbatim)
                 continue
 
@@ -200,7 +228,8 @@ class SpiceRCNetlist:
             if keyword == '.control':
                 in_control_block = True
 
-            if keyword[0] in 'rc' and len(tokens) == 4:
+            selected = keyword[0] in 'rc' and (element_filter is None or element_filter(stack[-1], tokens))
+            if selected and len(tokens) == 4:
                 value = cls._element_value(tokens[3], resistor=keyword[0] == 'r')
                 if value is not None:
                     scope = stack[-1]
@@ -214,6 +243,10 @@ class SpiceRCNetlist:
                     else:
                         network.add(network.node(tokens[1]), network.node(tokens[2]), capacitance=value)
                         scope.capacitors_read += 1
+                    if keyword[0] == 'r' and preserve_resistors:
+                        scope.other_element_names.add(first.casefold())
+                        items.append(verbatim)
+                        continue
                     if id(scope) not in scopes_with_elements:
                         scopes_with_elements.add(id(scope))
                         items.append(_ElementsPlaceholder(scope))
@@ -221,6 +254,8 @@ class SpiceRCNetlist:
 
             if not keyword.startswith('.'):
                 stack[-1].other_element_names.add(first.casefold())
+                for name in element_terminals(text_line):
+                    stack[-1].retained_terminals.setdefault(name.casefold(), name)
             protect_names_of(text_line)
             items.append(verbatim)
 
@@ -229,6 +264,7 @@ class SpiceRCNetlist:
         scopes.append(top_level)
 
         for scope in scopes:
+            scope.global_names = global_names.copy()
             network = scope.network
             for name in itertools.chain(scope.ports, GROUND_NODE_NAMES, global_names, scope.names_on_other_lines):
                 node = network.find_node(name)
@@ -278,7 +314,7 @@ class SpiceRCNetlist:
             key = (network.sort_key(node1), network.sort_key(node2))
             if branch.capacitance != 0.0:
                 capacitors.append((key, network.name(node1), network.name(node2), branch.capacitance))
-            if branch.conductance != 0.0:
+            if branch.conductance != 0.0 and not scope.preserve_resistors:
                 resistors.append((key, network.name(node1), network.name(node2), branch.conductance))
         capacitors.sort()
         resistors.sort()
@@ -294,7 +330,7 @@ class SpiceRCNetlist:
                     yield name
 
         lines = list(scope.comment_lines)
-        for name, (_, net1, net2, capacitance) in zip(names(REDUCED_CAPACITOR_PREFIX), capacitors):
+        for name, (_, net1, net2, capacitance) in zip(names(scope.capacitor_prefix), capacitors):
             lines.append(f"{name} {net1} {net2} {format_spice_number(capacitance)}")
         for name, (_, net1, net2, conductance) in zip(names(REDUCED_RESISTOR_PREFIX), resistors):
             lines.append(f"{name} {net1} {net2} {format_spice_resistance(1.0 / conductance)}")
