@@ -1,0 +1,23 @@
+SUBPROCESS __kpex__:kpex_cli.py:2035 kpex pex25d --pdk gf180mcuD --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/nfet_10v0_asym_pair.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --blackbox n --out-file /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair.pex25d
+INFO     __kpex__:kpex_cli.py:1016 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair__nfet_10v0_asym_pair/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2105 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:2105 (32, 0) -> (nsd nd_ldmos)
+INFO     __kpex__:kpex_cli.py:2105 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2105 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:2105 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:2105 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2105 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:2105 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:kpex_cli.py:2105 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:pex25d_builder.py:325 GROUND_PLANE subs: z -3300 … 0
+INFO     __kpex__:pex25d_builder.py:500 DIELECTRIC_BACKGROUND air: k=1.0
+INFO     __kpex__:pex25d_builder.py:625 5 conductor(s), 91 shape record(s)
+INFO     __kpex__:pex25d_builder.py:810 6 terminal record(s)
+INFO     __kpex__:pex25d_builder.py:872 8 metal and 9 via resistance record(s)
+INFO     __kpex__:kpex_cli.py:2124 Wrote /Users/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/nfet_10v0_asym_pair.pex25d (file, text)
+WARNING  __kpex__:diagnostics.py:227 PEX25D-W0265: Profile 'contact_ptap_con' carries geometry but the file states no resistance for it, while stating one for others
+INFO     __kpex__:diagnostics.py:236 0 error(s), 1 warning(s), 1 diagnostic(s) total
+INFO     __kpex__:kpex_cli.py:2070 Peak memory (resident set size) after the run: 417.9 MiB

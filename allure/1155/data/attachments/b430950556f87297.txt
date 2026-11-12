@@ -1,0 +1,20 @@
+SUBPROCESS __kpex__:kpex_cli.py:2035 kpex extract --pdk sky130A --2.5D --mode RC --coupling grounded --blackbox y --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\r_ptap_li1_m1_two_wires.lvsdb.gz' --out-dir 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_floating_resistive_layout0'
+INFO     __kpex__:kpex_cli.py:1016 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:284 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:284 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_floating_resistive_layout0\r_ptap_li1_m1_two_wires__r_ptap_li1_m1_two_wires\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2201 Peak memory (resident set size) after preparing the LVSDB: 393.0 MiB
+INFO     __kpex__:kpex_cli.py:2205 (65, 244) -> (ptap_conn)
+INFO     __kpex__:kpex_cli.py:2205 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2205 (66, 4405) -> (licon_ptap_con)
+INFO     __kpex__:kpex_cli.py:2205 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2205 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:1560 Sidewall halo: 8 µm (tech info of sky130A)
+INFO     __kpex__:extractor.py:491 LVSDB: found 0pins
+WARNING  __kpex__:extractor.py:545 Only the substrate, a well or a tap joins pieces of the metal of these nets, which the resistance network has no resistance for, so the pieces are ideally on their nets: $2
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 393.0 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 393.0 MiB
+ERROR    __kpex__:kpex_cli.py:2059 Grounded RC output cannot eliminate floating resistive nets exactly at every frequency: $2
+ERROR    __kpex__:kpex_cli.py:2060 Use --coupling coupled to retain the coupled network
+ERROR    __kpex__:kpex_cli.py:2061 For floating resistive islands, --mode C extracts ideal-conductor capacitance
+INFO     __kpex__:kpex_cli.py:2070 Peak memory (resident set size) after the run: 393.0 MiB
