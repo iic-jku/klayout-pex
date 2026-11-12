@@ -466,6 +466,12 @@ class KpexCLI:
                                       help="Minimum delay threshold (in ps) to trigger network extraction. "
                                            "If not supplied, MAGIC's default is implicitly used. "
                                            "(MAGIC command: extresist mindelay <value>)")
+        add_argument_with_former_name(group_magic, "--magic-prune", "--magic_prune", dest="magic_prune",
+                                      type=float, default=None,
+                                      help="Minimum threshold (as a fraction in [0, 1.0)) for pruning negligible resistors "
+                                           "after network extraction. "
+                                           "If not supplied, MAGIC's default is implicitly used. "
+                                           "(MAGIC command: extresist prune <value>)")
         add_argument_with_former_name(group_magic, "--magic-halo", "--magic_halo", dest="magic_halo",
                                       type=float, default=None,
                                       help="Custom sidewall halo distance (in µm) "
@@ -1295,6 +1301,7 @@ class KpexCLI:
                              threshold=args.magic_thresh,
                              min_res=args.magic_minres,
                              min_delay=args.magic_mindel,
+                             prune_frac=args.magic_prune,
                              halo=args.magic_halo,
                              short_mode=args.magic_short_mode,
                              merge_mode=args.magic_merge_mode,
