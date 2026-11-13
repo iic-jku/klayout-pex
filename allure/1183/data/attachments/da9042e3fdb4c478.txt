@@ -1,0 +1,28 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\gf180mcuD\test_patterns\exclusion_rail_between_taps.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_gf180mcuD' --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 741.7 MiB
+INFO     __kpex__:kpex_cli.py:2227 (22, 144) -> (ntap)
+INFO     __kpex__:kpex_cli.py:2227 (21, 0) -> (nwell_con)
+INFO     __kpex__:kpex_cli.py:2227 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2227 (33, 4404) -> (contact_ntap_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 742.0 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 742.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;A;VSUBS;14.52;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;A,B;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;A,B.$1.Metal1;VSUBS;0.026;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;B;VSUBS;14.52;
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;A;A,B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;A;B;;44.97
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;A,B;A,B.$2.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R4;A,B.$1.Metal1;A,B.$3.Nwell;;6.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R5;A,B.$1.Metal1;B;;0.015
+SUBPROCESS __kpex__:kpex_cli.py:1669 D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_gf180mcuD\exclusion_rail_between_taps__exclusion_rail_between_taps\exclusion_rail_between_taps_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 742.0 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 742.0 MiB

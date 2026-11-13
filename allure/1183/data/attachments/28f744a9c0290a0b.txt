@@ -1,0 +1,26 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\nfet_li1_redux.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpo33bz7i7' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpo33bz7i7\nfet_li1_redux__nfet_li1_redux\kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - licon (licon1): 4 of 5 shapes are not within licon_nsd_con, licon_psd_con, licon_poly_con, licon_ntap_con, licon_ptap_con
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 629.2 MiB
+INFO     __kpex__:kpex_cli.py:2227 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2227 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 2pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 629.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;$2;$2.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;$3;$3.$0.li1;;209.667
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;G;G.$0.li1;;2.418
+SUBPROCESS __kpex__:kpex_cli.py:1666 R4;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R5;G.$1.poly;G.P0.poly;;316.321
+SUBPROCESS __kpex__:kpex_cli.py:1669 C:\Users\RUNNER~1\AppData\Local\Temp\tmpo33bz7i7\nfet_li1_redux__nfet_li1_redux\nfet_li1_redux_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpo33bz7i7\nfet_li1_redux__nfet_li1_redux\nfet_li1_redux_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 629.2 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 629.2 MiB
