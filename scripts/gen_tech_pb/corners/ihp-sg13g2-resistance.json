@@ -1,0 +1,569 @@
+{
+  "schema_version": 1,
+  "technology_id": "ihp-sg13g2",
+  "resistance": {
+    "gatpoly-low-sheet": {
+      "description": "GatPoly low sheet resistance at fixed layout; every other resistance remains nominal",
+      "provenance": {
+        "data_revision": "2",
+        "sources": [
+          {
+            "id": "recipe",
+            "description": "KPEX source recipe: scripts/gen_tech_pb/ihp_sg13.py",
+            "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/ihp_sg13.py",
+            "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
+            "sha256": "481b497fc70aa0c122a5c85dd2a4ac0eea4bc2f6b0fd0b5d533cdd349e802c34"
+          },
+          {
+            "id": "builder",
+            "description": "KPEX source recipe: scripts/gen_tech_pb/tech_builder.py",
+            "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/tech_builder.py",
+            "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
+            "sha256": "abc23b724eedb8935244a6e15c2ca91b63ba380fabfd321dd87f93d94aac2fcc"
+          },
+          {
+            "id": "gatpoly-itf-min",
+            "description": "Interconnect min GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_min.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "befa8871717b02333e065e913ec148bd5e152f6bc149af925a0ab0c652a6230e"
+          },
+          {
+            "id": "gatpoly-itf-typ",
+            "description": "Interconnect typ GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_typ.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "c73498a236bbc2cea74d992c396a18742f1a1df082afa6f0d46582ac7e6983ab"
+          },
+          {
+            "id": "gatpoly-itf-max",
+            "description": "Interconnect max GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_max.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "7c1f51f6fda3f4f6a024ec383b4011fbea6c047e3ced76f33e5e47d8a6c56007"
+          },
+          {
+            "id": "gatpoly-process-spec",
+            "description": "Salicided n-doped polysilicon material and sheet-resistance specification",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_process_spec.pdf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "974d505886ee62932a50c52c22fbc290db4a70d8a7ce129c0ca8d7934aee160e"
+          },
+          {
+            "id": "gatpoly-layout-rules",
+            "description": "GatPoly width and resistor recognition rules",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_layout_rules.pdf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "66125e97386dd88ed058b50f4f8e8814c9633069e4060c2b19459d3e3e6450a2"
+          },
+          {
+            "id": "gatpoly-device-corners",
+            "description": "Distinct compact-device corner parameters",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/cornerRES.lib",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "e0432415be26b0e530ea1acea44000c42d65904b406955464e4a7f97e95bfa2c"
+          },
+          {
+            "id": "gatpoly-device-model",
+            "description": "Distinct compact-device geometry and contact law",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "poly-sheet",
+            "description": "Use 6.2 Ohm/square for salicided GatPoly from the min interconnect table",
+            "reason": "The interconnect RPSQ law is independent of the compact rsil model parameters",
+            "source_ids": [
+              "gatpoly-itf-min",
+              "gatpoly-process-spec"
+            ]
+          },
+          {
+            "id": "mim-sheet",
+            "description": "Use 13.36 Ohm/square for the MIM plate and TopVia1 resistance for its contact",
+            "reason": "The nominal recipe derives the plate estimate from 0.5 MS/m and 0.1497 um and aliases the contact material",
+            "source_ids": [
+              "recipe"
+            ]
+          },
+          {
+            "id": "gatpoly-only",
+            "description": "Vary only GatPoly sheet resistance; all other sheet/contact/via values remain explicitly nominal",
+            "reason": "Isolate this material sensitivity without claiming a complete process resistance corner",
+            "source_ids": [
+              "recipe",
+              "gatpoly-itf-min"
+            ]
+          },
+          {
+            "id": "fixed-layout",
+            "description": "Apply sheet resistance to the existing extracted polygons without geometry, temperature or mismatch changes",
+            "reason": "These are sheet-resistance sensitivity scenarios. The ITF also varies thickness and the process spec lists linewidth limits; neither defines a scalar correction for arbitrary drawn polygons",
+            "source_ids": [
+              "gatpoly-itf-min",
+              "gatpoly-process-spec",
+              "gatpoly-layout-rules"
+            ]
+          },
+          {
+            "id": "device-ownership",
+            "description": "Recognized rsil/rppd/rhigh devices retain their own compact models; no compact-model width shift or series/contact term is applied to the extracted wire",
+            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact law with the interconnect RPSQ table would double-count device effects",
+            "source_ids": [
+              "recipe",
+              "gatpoly-device-corners",
+              "gatpoly-device-model"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-12",
+            "summary": "Record nominal resistance sources and assumptions",
+            "reason": "Make source choices reproducible without changing the existing nominal numerical data",
+            "source_ids": [
+              "recipe",
+              "builder"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/pull/534"
+            ]
+          },
+          {
+            "revision": "2",
+            "date": "2026-11-13",
+            "summary": "Add low GatPoly sheet-resistance sensitivity",
+            "reason": "Use direct interconnect limits rather than project compact-device corner parameters",
+            "source_ids": [
+              "gatpoly-itf-min",
+              "gatpoly-itf-typ",
+              "gatpoly-itf-max",
+              "gatpoly-process-spec",
+              "gatpoly-layout-rules",
+              "gatpoly-device-corners",
+              "gatpoly-device-model"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/548"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "GatPoly",
+          6200
+        ],
+        [
+          "Metal1",
+          110.0
+        ],
+        [
+          "Metal2",
+          88.0
+        ],
+        [
+          "Metal3",
+          88.0
+        ],
+        [
+          "Metal4",
+          88.0
+        ],
+        [
+          "Metal5",
+          88.0
+        ],
+        [
+          "TopMetal1",
+          18.0
+        ],
+        [
+          "TopMetal2",
+          11.0
+        ],
+        [
+          "MIM",
+          13360.0
+        ]
+      ],
+      "contacts": [
+        [
+          "cont_nsd_con",
+          "nsd_fet",
+          "metal1_n_mom",
+          17000.0
+        ],
+        [
+          "cont_psd_con",
+          "psd_fet",
+          "metal1_n_mom",
+          17000.0
+        ],
+        [
+          "cont_poly_con",
+          "poly_con",
+          "metal1_n_mom",
+          15000.0
+        ]
+      ],
+      "vias": [
+        [
+          "Via1",
+          9000.0
+        ],
+        [
+          "Via2",
+          9000.0
+        ],
+        [
+          "Via3",
+          9000.0
+        ],
+        [
+          "Via4",
+          9000.0
+        ],
+        [
+          "TopVia1",
+          2200.0
+        ],
+        [
+          "TopVia2",
+          1100.0
+        ]
+      ]
+    },
+    "gatpoly-high-sheet": {
+      "description": "GatPoly high sheet resistance at fixed layout; every other resistance remains nominal",
+      "provenance": {
+        "data_revision": "2",
+        "sources": [
+          {
+            "id": "recipe",
+            "description": "KPEX source recipe: scripts/gen_tech_pb/ihp_sg13.py",
+            "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/ihp_sg13.py",
+            "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
+            "sha256": "481b497fc70aa0c122a5c85dd2a4ac0eea4bc2f6b0fd0b5d533cdd349e802c34"
+          },
+          {
+            "id": "builder",
+            "description": "KPEX source recipe: scripts/gen_tech_pb/tech_builder.py",
+            "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/tech_builder.py",
+            "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
+            "sha256": "abc23b724eedb8935244a6e15c2ca91b63ba380fabfd321dd87f93d94aac2fcc"
+          },
+          {
+            "id": "gatpoly-itf-min",
+            "description": "Interconnect min GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_min.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "befa8871717b02333e065e913ec148bd5e152f6bc149af925a0ab0c652a6230e"
+          },
+          {
+            "id": "gatpoly-itf-typ",
+            "description": "Interconnect typ GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_typ.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "c73498a236bbc2cea74d992c396a18742f1a1df082afa6f0d46582ac7e6983ab"
+          },
+          {
+            "id": "gatpoly-itf-max",
+            "description": "Interconnect max GatPoly sheet resistance",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_max.itf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "7c1f51f6fda3f4f6a024ec383b4011fbea6c047e3ced76f33e5e47d8a6c56007"
+          },
+          {
+            "id": "gatpoly-process-spec",
+            "description": "Salicided n-doped polysilicon material and sheet-resistance specification",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_process_spec.pdf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "974d505886ee62932a50c52c22fbc290db4a70d8a7ce129c0ca8d7934aee160e"
+          },
+          {
+            "id": "gatpoly-layout-rules",
+            "description": "GatPoly width and resistor recognition rules",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_layout_rules.pdf",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "66125e97386dd88ed058b50f4f8e8814c9633069e4060c2b19459d3e3e6450a2"
+          },
+          {
+            "id": "gatpoly-device-corners",
+            "description": "Distinct compact-device corner parameters",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/cornerRES.lib",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "e0432415be26b0e530ea1acea44000c42d65904b406955464e4a7f97e95bfa2c"
+          },
+          {
+            "id": "gatpoly-device-model",
+            "description": "Distinct compact-device geometry and contact law",
+            "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
+            "revision": "e73adb4045731ddec21634146d536380057f6a26",
+            "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "poly-sheet",
+            "description": "Use 7.8 Ohm/square for salicided GatPoly from the max interconnect table",
+            "reason": "The interconnect RPSQ law is independent of the compact rsil model parameters",
+            "source_ids": [
+              "gatpoly-itf-max",
+              "gatpoly-process-spec"
+            ]
+          },
+          {
+            "id": "mim-sheet",
+            "description": "Use 13.36 Ohm/square for the MIM plate and TopVia1 resistance for its contact",
+            "reason": "The nominal recipe derives the plate estimate from 0.5 MS/m and 0.1497 um and aliases the contact material",
+            "source_ids": [
+              "recipe"
+            ]
+          },
+          {
+            "id": "gatpoly-only",
+            "description": "Vary only GatPoly sheet resistance; all other sheet/contact/via values remain explicitly nominal",
+            "reason": "Isolate this material sensitivity without claiming a complete process resistance corner",
+            "source_ids": [
+              "recipe",
+              "gatpoly-itf-max"
+            ]
+          },
+          {
+            "id": "fixed-layout",
+            "description": "Apply sheet resistance to the existing extracted polygons without geometry, temperature or mismatch changes",
+            "reason": "These are sheet-resistance sensitivity scenarios. The ITF also varies thickness and the process spec lists linewidth limits; neither defines a scalar correction for arbitrary drawn polygons",
+            "source_ids": [
+              "gatpoly-itf-max",
+              "gatpoly-process-spec",
+              "gatpoly-layout-rules"
+            ]
+          },
+          {
+            "id": "device-ownership",
+            "description": "Recognized rsil/rppd/rhigh devices retain their own compact models; no compact-model width shift or series/contact term is applied to the extracted wire",
+            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact law with the interconnect RPSQ table would double-count device effects",
+            "source_ids": [
+              "recipe",
+              "gatpoly-device-corners",
+              "gatpoly-device-model"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-12",
+            "summary": "Record nominal resistance sources and assumptions",
+            "reason": "Make source choices reproducible without changing the existing nominal numerical data",
+            "source_ids": [
+              "recipe",
+              "builder"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/pull/534"
+            ]
+          },
+          {
+            "revision": "2",
+            "date": "2026-11-13",
+            "summary": "Add high GatPoly sheet-resistance sensitivity",
+            "reason": "Use direct interconnect limits rather than project compact-device corner parameters",
+            "source_ids": [
+              "gatpoly-itf-min",
+              "gatpoly-itf-typ",
+              "gatpoly-itf-max",
+              "gatpoly-process-spec",
+              "gatpoly-layout-rules",
+              "gatpoly-device-corners",
+              "gatpoly-device-model"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/548"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "GatPoly",
+          7800
+        ],
+        [
+          "Metal1",
+          110.0
+        ],
+        [
+          "Metal2",
+          88.0
+        ],
+        [
+          "Metal3",
+          88.0
+        ],
+        [
+          "Metal4",
+          88.0
+        ],
+        [
+          "Metal5",
+          88.0
+        ],
+        [
+          "TopMetal1",
+          18.0
+        ],
+        [
+          "TopMetal2",
+          11.0
+        ],
+        [
+          "MIM",
+          13360.0
+        ]
+      ],
+      "contacts": [
+        [
+          "cont_nsd_con",
+          "nsd_fet",
+          "metal1_n_mom",
+          17000.0
+        ],
+        [
+          "cont_psd_con",
+          "psd_fet",
+          "metal1_n_mom",
+          17000.0
+        ],
+        [
+          "cont_poly_con",
+          "poly_con",
+          "metal1_n_mom",
+          15000.0
+        ]
+      ],
+      "vias": [
+        [
+          "Via1",
+          9000.0
+        ],
+        [
+          "Via2",
+          9000.0
+        ],
+        [
+          "Via3",
+          9000.0
+        ],
+        [
+          "Via4",
+          9000.0
+        ],
+        [
+          "TopVia1",
+          2200.0
+        ],
+        [
+          "TopVia2",
+          1100.0
+        ]
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "id": "gatpoly-low-sheet",
+      "description": "Fixed-layout GatPoly sheet-resistance sensitivity (6.2 Ohm/square); other R and C remain nominal; no compact-model corner selection",
+      "resistance": "gatpoly-low-sheet",
+      "capacitance": "nominal",
+      "process_stack": "nominal",
+      "device_references": "",
+      "physical_stack_matches": false
+    },
+    {
+      "id": "gatpoly-high-sheet",
+      "description": "Fixed-layout GatPoly sheet-resistance sensitivity (7.8 Ohm/square); other R and C remain nominal; no compact-model corner selection",
+      "resistance": "gatpoly-high-sheet",
+      "capacitance": "nominal",
+      "process_stack": "nominal",
+      "device_references": "",
+      "physical_stack_matches": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "gatpoly-itf-min",
+      "description": "Interconnect min GatPoly sheet resistance",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_min.itf",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "befa8871717b02333e065e913ec148bd5e152f6bc149af925a0ab0c652a6230e"
+    },
+    {
+      "id": "gatpoly-itf-typ",
+      "description": "Interconnect typ GatPoly sheet resistance",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_typ.itf",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "c73498a236bbc2cea74d992c396a18742f1a1df082afa6f0d46582ac7e6983ab"
+    },
+    {
+      "id": "gatpoly-itf-max",
+      "description": "Interconnect max GatPoly sheet resistance",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/parasitics/itf/sg13g2_max.itf",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "7c1f51f6fda3f4f6a024ec383b4011fbea6c047e3ced76f33e5e47d8a6c56007"
+    },
+    {
+      "id": "gatpoly-process-spec",
+      "description": "Salicided n-doped polysilicon material and sheet-resistance specification",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_process_spec.pdf",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "974d505886ee62932a50c52c22fbc290db4a70d8a7ce129c0ca8d7934aee160e"
+    },
+    {
+      "id": "gatpoly-layout-rules",
+      "description": "GatPoly width and resistor recognition rules",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.doc/doc/SG13G2_os_layout_rules.pdf",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "66125e97386dd88ed058b50f4f8e8814c9633069e4060c2b19459d3e3e6450a2"
+    },
+    {
+      "id": "gatpoly-device-corners",
+      "description": "Distinct compact-device corner parameters",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/cornerRES.lib",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "e0432415be26b0e530ea1acea44000c42d65904b406955464e4a7f97e95bfa2c"
+    },
+    {
+      "id": "gatpoly-device-model",
+      "description": "Distinct compact-device geometry and contact law",
+      "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
+      "revision": "e73adb4045731ddec21634146d536380057f6a26",
+      "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
+    }
+  ],
+  "catalog_revisions": [
+    {
+      "revision": "3",
+      "date": "2026-11-13",
+      "summary": "Add explicit GatPoly sheet-resistance sensitivity scenarios",
+      "reason": "Expose directly specified interconnect limits independently of compact-device and geometry corners",
+      "source_ids": [
+        "gatpoly-itf-min",
+        "gatpoly-itf-typ",
+        "gatpoly-itf-max",
+        "gatpoly-process-spec",
+        "gatpoly-layout-rules",
+        "gatpoly-device-corners",
+        "gatpoly-device-model"
+      ],
+      "references": [
+        "https://github.com/iic-jku/klayout-pex/issues/548"
+      ]
+    }
+  ]
+}
