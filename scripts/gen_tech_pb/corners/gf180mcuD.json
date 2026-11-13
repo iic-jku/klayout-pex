@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "technology_id": "gf180mcuD",
+  "side_halo": 8.0,
+  "source_variants": {
+    "low": [
+      "hrlc",
+      "lrlc"
+    ],
+    "high": [
+      "hrhc",
+      "lrhc"
+    ]
+  },
+  "provenance": {
+    "data_revision": "1",
+    "sources": [
+      {
+        "id": "extraction-table",
+        "description": "MAGIC empirical extraction coefficients",
+        "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/gf180mcu/magic/gf180mcu-extract.tech",
+        "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+        "sha256": "e8ab78e8f3c61b43d00ef493d247700ff76477ad6e9b84d2aebafde62be61fb8",
+        "options": {
+          "METALS5": "1",
+          "MIM": "1",
+          "THICKMET1P1": "1",
+          "HRPOLY1K": "1",
+          "preprocessed_sha256": "8b29ea04ec6dcf293259494a7715b88f5636c2a4fd8ac3a5ba6b4a5ff74e8c9d",
+          "area_unit": "aF/um2",
+          "edge_unit": "aF/um",
+          "sidewall_numerator_unit": "aF",
+          "sidewall_offset_unit": "um"
+        }
+      },
+      {
+        "id": "mim-model-1",
+        "description": "MIM capacitance corner model input",
+        "uri": "https://github.com/fossi-foundation/globalfoundries-pdk-libs-gf180mcu_fd_pr/blob/5e4be8726e2ae8be099c4131f697a353d6457874/models/ngspice/sm141064.spice",
+        "revision": "5e4be8726e2ae8be099c4131f697a353d6457874"
+      },
+      {
+        "id": "mim-model-2",
+        "description": "MIM capacitance corner model input",
+        "uri": "https://github.com/fossi-foundation/globalfoundries-pdk-libs-gf180mcu_fd_pr/blob/5e4be8726e2ae8be099c4131f697a353d6457874/models/ngspice/sm141064_mim.spice",
+        "revision": "5e4be8726e2ae8be099c4131f697a353d6457874"
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "lv-diffusion",
+        "description": "Project LV diffusion coefficients to Nplus, Pplus and COMP; exclude MV-specific coefficients",
+        "reason": "The current LVS mapping does not select separate MV diffusion rows",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "mim-law",
+        "description": "Use the 2 fF/um2 MIM law with 0.9/1.0/1.1 factors on both area and edge terms",
+        "reason": "The supported stack selects the 2 fF option and its independent device law",
+        "source_ids": [
+          "mim-model-1",
+          "mim-model-2"
+        ]
+      },
+      {
+        "id": "missing-well-fringe",
+        "description": "Derive low-C Metal2-to-Nwell fringe as 32.657 aF/um from same-corner substrate perimeter",
+        "reason": "The source omits this row; substrate and well share the same capacitance plane",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "well-projection",
+        "description": "Project Nwell coupling to LVPWELL",
+        "reason": "Preserve the established nominal layer mapping at each C corner",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "mim-thin-plate",
+        "description": "Use same-corner bottom-plate coefficients for MIM coupling to other conductors",
+        "reason": "The existing thin-plate approximation provides complete non-device coupling rows",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "capability-limits",
+        "description": "No physical-stack, width-bias, transistor-corner or device-reference matching is claimed",
+        "reason": "Empirical C coefficients alone do not establish those independent capabilities",
+        "source_ids": [
+          "extraction-table"
+        ]
+      }
+    ],
+    "history": [
+      {
+        "revision": "1",
+        "date": "2026-11-13",
+        "summary": "Add complete low/high capacitance components with explicit source mappings",
+        "reason": "Make reviewed C data available without inferring missing resistance or physical corner laws",
+        "source_ids": [
+          "extraction-table",
+          "mim-model-1",
+          "mim-model-2"
+        ],
+        "references": [
+          "https://github.com/iic-jku/klayout-pex/issues/518",
+          "https://github.com/iic-jku/klayout-pex/pull/525"
+        ]
+      }
+    ]
+  },
+  "capacitance": {
+    "nominal": {
+      "base": {
+        "substrates": [
+          ["Poly2", 110.67, 50.695],
+          ["Metal1", 29.304, 40.002],
+          ["Metal2", 15.016, 33.938],
+          ["Metal3", 10.094, 30.707],
+          ["Metal4", 7.602, 28.614],
+          ["Metal5", 5.798, 30.791]
+        ],
+        "overlaps": [
+          ["Poly2", "Nwell", 110.67],
+          ["Poly2", "LVPWELL", 110.67],
+          ["Metal1", "Nwell", 29.304],
+          ["Metal1", "LVPWELL", 29.304],
+          ["Metal1", "COMP", 39.502],
+          ["Metal1", "Poly2", 51.434],
+          ["Metal2", "Nwell", 15.016],
+          ["Metal2", "LVPWELL", 15.016],
+          ["Metal2", "COMP", 17.305],
+          ["Metal2", "Poly2", 19.263],
+          ["Metal2", "Metal1", 59.027],
+          ["Metal3", "Nwell", 10.094],
+          ["Metal3", "LVPWELL", 10.094],
+          ["Metal3", "COMP", 11.079],
+          ["Metal3", "Poly2", 11.85],
+          ["Metal3", "Metal1", 20.238],
+          ["Metal3", "Metal2", 59.027],
+          ["Metal4", "Nwell", 7.602],
+          ["Metal4", "LVPWELL", 7.602],
+          ["Metal4", "COMP", 8.148],
+          ["Metal4", "Poly2", 8.557],
+          ["Metal4", "Metal1", 12.212],
+          ["Metal4", "Metal2", 20.238],
+          ["Metal4", "Metal3", 59.027],
+          ["Metal5", "Nwell", 5.798],
+          ["Metal5", "LVPWELL", 5.798],
+          ["Metal5", "COMP", 6.11],
+          ["Metal5", "Poly2", 6.337],
+          ["Metal5", "Metal1", 8.142],
+          ["Metal5", "Metal2", 11.067],
+          ["Metal5", "Metal3", 17.276],
+          ["Metal5", "Metal4", 39.351]
+        ],
+        "sidewalls": [
+          ["Poly2", 11.156, -0.082],
+          ["Metal1", 33.896, 0.034],
+          ["Metal2", 45.79, 0.116],
+          ["Metal3", 54.507, 0.188],
+          ["Metal4", 61.684, 0.25],
+          ["Metal5", 99.669, 0.25]
+        ],
+        "sideoverlaps": [
+          ["Poly2", "Nwell", 50.695],
+          ["Poly2", "LVPWELL", 50.695],
+          ["Metal1", "Nwell", 40.002],
+          ["Metal1", "LVPWELL", 40.002],
+          ["Metal1", "COMP", 43.384],
+          ["Metal1", "Poly2", 46.685],
+          ["Poly2", "Metal1", 17.958],
+          ["Metal2", "Nwell", 33.938],
+          ["Metal2", "LVPWELL", 33.938],
+          ["Metal2", "COMP", 35.189],
+          ["Metal2", "Poly2", 36.179],
+          ["Poly2", "Metal2", 8.801],
+          ["Metal2", "Metal1", 49.021],
+          ["Metal1", "Metal2", 32.918],
+          ["Metal3", "Nwell", 30.707],
+          ["Metal3", "LVPWELL", 30.707],
+          ["Metal3", "COMP", 31.415],
+          ["Metal3", "Poly2", 31.943],
+          ["Poly2", "Metal3", 5.897],
+          ["Metal3", "Metal1", 36.619],
+          ["Metal1", "Metal3", 18.424],
+          ["Metal3", "Metal2", 49.006],
+          ["Metal2", "Metal3", 37.604],
+          ["Metal4", "Nwell", 28.614],
+          ["Metal4", "LVPWELL", 28.614],
+          ["Metal4", "COMP", 29.09],
+          ["Metal4", "Poly2", 29.435],
+          ["Poly2", "Metal4", 4.443],
+          ["Metal4", "Metal1", 32.121],
+          ["Metal1", "Metal4", 13.241],
+          ["Metal4", "Metal2", 36.571],
+          ["Metal2", "Metal4", 22.562],
+          ["Metal4", "Metal3", 48.976],
+          ["Metal3", "Metal4", 40.114],
+          ["Metal5", "Nwell", 30.791],
+          ["Metal5", "LVPWELL", 30.791],
+          ["Metal5", "COMP", 31.213],
+          ["Metal5", "Poly2", 31.513],
+          ["Poly2", "Metal5", 3.393],
+          ["Metal5", "Metal1", 33.682],
+          ["Metal1", "Metal5", 9.878],
+          ["Metal5", "Metal2", 36.632],
+          ["Metal2", "Metal5", 15.854],
+          ["Metal5", "Metal3", 41.531],
+          ["Metal3", "Metal5", 23.133],
+          ["Metal5", "Metal4", 52.667],
+          ["Metal4", "Metal5", 35.678]
+        ]
+      },
+      "diffusion_projection": [
+        "COMP",
+        ["Nplus", "Pplus", "COMP"]
+      ],
+      "mim": [
+        ["FuseTop", "Metal4", 1990, 238.3]
+      ]
+    },
+    "high": {
+      "base": {
+        "substrates": [
+          ["Poly2", 130.21, 53.506],
+          ["Metal1", 33.126, 42.144],
+          ["Metal2", 16.471, 35.327],
+          ["Metal3", 10.961, 31.819],
+          ["Metal4", 8.213, 29.587],
+          ["Metal5", 6.24, 32.324]
+        ],
+        "overlaps": [
+          ["Poly2", "Nwell", 130.21],
+          ["Poly2", "LVPWELL", 130.21],
+          ["Metal1", "Nwell", 33.126],
+          ["Metal1", "LVPWELL", 33.126],
+          ["Metal1", "COMP", 43.987],
+          ["Metal1", "Poly2", 60.319],
+          ["Metal2", "Nwell", 16.471],
+          ["Metal2", "LVPWELL", 16.471],
+          ["Metal2", "COMP", 18.777],
+          ["Metal2", "Poly2", 21.231],
+          ["Metal2", "Metal1", 73.63],
+          ["Metal3", "Nwell", 10.961],
+          ["Metal3", "LVPWELL", 10.961],
+          ["Metal3", "COMP", 11.936],
+          ["Metal3", "Poly2", 12.883],
+          ["Metal3", "Metal1", 22.673],
+          ["Metal3", "Metal2", 73.63],
+          ["Metal4", "Nwell", 8.213],
+          ["Metal4", "LVPWELL", 8.213],
+          ["Metal4", "COMP", 8.749],
+          ["Metal4", "Poly2", 9.247],
+          ["Metal4", "Metal1", 13.4],
+          ["Metal4", "Metal2", 22.673],
+          ["Metal4", "Metal3", 73.63],
+          ["Metal5", "Nwell", 6.24],
+          ["Metal5", "LVPWELL", 6.24],
+          ["Metal5", "COMP", 6.545],
+          ["Metal5", "Poly2", 6.82],
+          ["Metal5", "Metal1", 8.841],
+          ["Metal5", "Metal2", 12.108],
+          ["Metal5", "Metal3", 19.206],
+          ["Metal5", "Metal4", 46.417]
+        ],
+        "sidewalls": [
+          ["Poly2", 10.455, -0.09],
+          ["Metal1", 34.059, 0.021],
+          ["Metal2", 45.828, 0.096],
+          ["Metal3", 54.477, 0.163],
+          ["Metal4", 61.563, 0.22],
+          ["Metal5", 104.126, 0.213]
+        ],
+        "sideoverlaps": [
+          ["Poly2", "Nwell", 53.506],
+          ["Poly2", "LVPWELL", 53.506],
+          ["Metal1", "Nwell", 42.144],
+          ["Metal1", "LVPWELL", 42.144],
+          ["Metal1", "COMP", 45.576],
+          ["Metal1", "Poly2", 49.798],
+          ["Poly2", "Metal1", 19.221],
+          ["Metal2", "Nwell", 35.327],
+          ["Metal2", "LVPWELL", 35.327],
+          ["Metal2", "COMP", 36.551],
+          ["Metal2", "Poly2", 37.755],
+          ["Poly2", "Metal2", 9.086],
+          ["Metal2", "Metal1", 53.167],
+          ["Metal1", "Metal2", 36.404],
+          ["Metal3", "Nwell", 31.819],
+          ["Metal3", "LVPWELL", 31.819],
+          ["Metal3", "COMP", 32.504],
+          ["Metal3", "Poly2", 33.136],
+          ["Poly2", "Metal3", 6.028],
+          ["Metal3", "Metal1", 38.397],
+          ["Metal1", "Metal3", 19.554],
+          ["Metal3", "Metal2", 53.157],
+          ["Metal2", "Metal3", 41.317],
+          ["Metal4", "Nwell", 29.587],
+          ["Metal4", "LVPWELL", 29.587],
+          ["Metal4", "COMP", 30.045],
+          ["Metal4", "Poly2", 30.454],
+          ["Poly2", "Metal4", 4.52],
+          ["Metal4", "Metal1", 33.421],
+          ["Metal1", "Metal4", 13.914],
+          ["Metal4", "Metal2", 38.361],
+          ["Metal2", "Metal4", 23.857],
+          ["Metal4", "Metal3", 53.137],
+          ["Metal3", "Metal4", 43.947],
+          ["Metal5", "Nwell", 32.324],
+          ["Metal5", "LVPWELL", 32.324],
+          ["Metal5", "COMP", 32.737],
+          ["Metal5", "Poly2", 33.1],
+          ["Poly2", "Metal5", 3.439],
+          ["Metal5", "Metal1", 35.526],
+          ["Metal1", "Metal5", 10.324],
+          ["Metal5", "Metal2", 38.793],
+          ["Metal2", "Metal5", 16.584],
+          ["Metal5", "Metal3", 44.284],
+          ["Metal3", "Metal5", 24.338],
+          ["Metal5", "Metal4", 57.18],
+          ["Metal4", "Metal5", 38.327]
+        ]
+      },
+      "diffusion_projection": [
+        "COMP",
+        ["Nplus", "Pplus", "COMP"]
+      ],
+      "mim": [
+        ["FuseTop", "Metal4", 2189, 262.13]
+      ]
+    },
+    "low": {
+      "base": {
+        "substrates": [
+          ["Poly2", 96.239, 48.373],
+          ["Metal1", 26.273, 38.089],
+          ["Metal2", 13.797, 32.657],
+          ["Metal3", 9.354, 29.662],
+          ["Metal4", 7.076, 27.689],
+          ["Metal5", 5.414, 29.818]
+        ],
+        "overlaps": [
+          ["Poly2", "Nwell", 96.239],
+          ["Poly2", "LVPWELL", 96.239],
+          ["Metal1", "Nwell", 26.273],
+          ["Metal1", "LVPWELL", 26.273],
+          ["Metal1", "COMP", 35.846],
+          ["Metal1", "Poly2", 44.83],
+          ["Metal2", "Nwell", 13.797],
+          ["Metal2", "LVPWELL", 13.797],
+          ["Metal2", "COMP", 16.047],
+          ["Metal2", "Poly2", 17.629],
+          ["Metal2", "Metal1", 49.257],
+          ["Metal3", "Nwell", 9.354],
+          ["Metal3", "LVPWELL", 9.354],
+          ["Metal3", "COMP", 10.337],
+          ["Metal3", "Poly2", 10.971],
+          ["Metal3", "Metal1", 18.275],
+          ["Metal3", "Metal2", 49.257],
+          ["Metal4", "Nwell", 7.076],
+          ["Metal4", "LVPWELL", 7.076],
+          ["Metal4", "COMP", 7.625],
+          ["Metal4", "Poly2", 7.964],
+          ["Metal4", "Metal1", 11.218],
+          ["Metal4", "Metal2", 18.275],
+          ["Metal4", "Metal3", 49.257],
+          ["Metal5", "Nwell", 5.414],
+          ["Metal5", "LVPWELL", 5.414],
+          ["Metal5", "COMP", 5.729],
+          ["Metal5", "Poly2", 5.918],
+          ["Metal5", "Metal1", 7.545],
+          ["Metal5", "Metal2", 10.192],
+          ["Metal5", "Metal3", 15.699],
+          ["Metal5", "Metal4", 34.152]
+        ],
+        "sidewalls": [
+          ["Poly2", 11.799, -0.074],
+          ["Metal1", 33.603, 0.047],
+          ["Metal2", 45.641, 0.137],
+          ["Metal3", 54.44, 0.215],
+          ["Metal4", 61.705, 0.282],
+          ["Metal5", 99.225, 0.274]
+        ],
+        "sideoverlaps": [
+          ["Poly2", "Nwell", 48.373],
+          ["Poly2", "LVPWELL", 48.373],
+          ["Metal1", "Nwell", 38.089],
+          ["Metal1", "LVPWELL", 38.089],
+          ["Metal1", "COMP", 41.384],
+          ["Metal1", "Poly2", 43.999],
+          ["Poly2", "Metal1", 16.943],
+          ["Metal2", "COMP", 33.914],
+          ["Metal2", "Poly2", 34.732],
+          ["Poly2", "Metal2", 8.547],
+          ["Metal2", "Metal1", 45.664],
+          ["Metal1", "Metal2", 30.171],
+          ["Metal3", "Nwell", 29.662],
+          ["Metal3", "LVPWELL", 29.662],
+          ["Metal3", "COMP", 30.382],
+          ["Metal3", "Poly2", 30.823],
+          ["Poly2", "Metal3", 5.776],
+          ["Metal3", "Metal1", 35.016],
+          ["Metal1", "Metal3", 17.429],
+          ["Metal3", "Metal2", 45.644],
+          ["Metal2", "Metal3", 34.658],
+          ["Metal4", "Nwell", 27.689],
+          ["Metal4", "LVPWELL", 27.689],
+          ["Metal4", "COMP", 28.177],
+          ["Metal4", "Poly2", 28.467],
+          ["Poly2", "Metal4", 4.37],
+          ["Metal4", "Metal1", 30.915],
+          ["Metal1", "Metal4", 12.63],
+          ["Metal4", "Metal2", 34.956],
+          ["Metal2", "Metal4", 21.42],
+          ["Metal4", "Metal3", 45.614],
+          ["Metal3", "Metal4", 37.061],
+          ["Metal5", "Nwell", 29.818],
+          ["Metal5", "LVPWELL", 29.818],
+          ["Metal5", "COMP", 30.253],
+          ["Metal5", "Poly2", 30.508],
+          ["Poly2", "Metal5", 3.347],
+          ["Metal5", "Metal1", 32.514],
+          ["Metal1", "Metal5", 9.467],
+          ["Metal5", "Metal2", 35.267],
+          ["Metal2", "Metal5", 15.189],
+          ["Metal5", "Metal3", 39.792],
+          ["Metal3", "Metal5", 22.057],
+          ["Metal5", "Metal4", 49.778],
+          ["Metal4", "Metal5", 33.45],
+          ["Metal2", "Nwell", 32.657],
+          ["Metal2", "LVPWELL", 32.657]
+        ]
+      },
+      "diffusion_projection": [
+        "COMP",
+        ["Nplus", "Pplus", "COMP"]
+      ],
+      "mim": [
+        ["FuseTop", "Metal4", 1791, 214.47]
+      ]
+    }
+  }
+}

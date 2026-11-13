@@ -1,0 +1,402 @@
+{
+  "schema_version": 1,
+  "technology_id": "ihp-sg13cmos5l",
+  "side_halo": 8.0,
+  "source_variants": {
+    "low": [
+      "hrlc",
+      "lrlc"
+    ],
+    "high": [
+      "hrhc",
+      "lrhc"
+    ]
+  },
+  "provenance": {
+    "data_revision": "1",
+    "sources": [
+      {
+        "id": "extraction-table",
+        "description": "MAGIC empirical extraction coefficients",
+        "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/14b1ab845696960a0a1881ec8614acba0f7b8eb7/ihp-sg13cmos5l/libs.tech/magic/ihp-sg13cmos5l-extract.tech",
+        "revision": "14b1ab845696960a0a1881ec8614acba0f7b8eb7",
+        "sha256": "15b771532b0701a6c45f6d0a1156e6422d15400a89125d640fbe7e57b44184eb",
+        "options": {
+          "preprocessed_sha256": "15b771532b0701a6c45f6d0a1156e6422d15400a89125d640fbe7e57b44184eb",
+          "area_unit": "aF/um2",
+          "edge_unit": "aF/um",
+          "sidewall_numerator_unit": "aF",
+          "sidewall_offset_unit": "um"
+        }
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "lv-diffusion",
+        "description": "Project LV diffusion coefficients to nSD, pSD and Activ; exclude HV-specific coefficients",
+        "reason": "The current LVS mapping does not select separate HV diffusion rows",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "no-mim",
+        "description": "No MIM top plate is added",
+        "reason": "This supported process variant has no MIM plate in its declared stack",
+        "source_ids": [
+          "extraction-table"
+        ]
+      },
+      {
+        "id": "capability-limits",
+        "description": "No physical-stack, width-bias, transistor-corner or device-reference matching is claimed",
+        "reason": "Empirical C coefficients alone do not establish those independent capabilities",
+        "source_ids": [
+          "extraction-table"
+        ]
+      }
+    ],
+    "history": [
+      {
+        "revision": "1",
+        "date": "2026-11-13",
+        "summary": "Add complete low/high capacitance components with explicit source mappings",
+        "reason": "Make reviewed C data available without inferring missing resistance or physical corner laws",
+        "source_ids": [
+          "extraction-table"
+        ],
+        "references": [
+          "https://github.com/iic-jku/klayout-pex/issues/518",
+          "https://github.com/iic-jku/klayout-pex/pull/525",
+          "https://github.com/IHP-GmbH/IHP-Open-PDK/pull/1328"
+        ]
+      }
+    ]
+  },
+  "capacitance": {
+    "nominal": {
+      "base": {
+        "substrates": [
+          ["GatPoly", 87.433, 44.367],
+          ["Metal1", 35.015, 39.549],
+          ["Metal2", 18.18, 34.747],
+          ["Metal3", 11.994, 31.26],
+          ["Metal4", 8.948, 29.037],
+          ["TopMetal1", 6.727, 38.975]
+        ],
+        "overlaps": [
+          ["GatPoly", "PWell", 87.433],
+          ["GatPoly", "NWell", 87.433],
+          ["Metal1", "PWell", 35.015],
+          ["Metal1", "NWell", 35.015],
+          ["Metal1", "Activ", 58.168],
+          ["Metal1", "GatPoly", 78.653],
+          ["Metal2", "PWell", 18.18],
+          ["Metal2", "NWell", 18.18],
+          ["Metal2", "Activ", 22.916],
+          ["Metal2", "GatPoly", 25.537],
+          ["Metal2", "Metal1", 67.225],
+          ["Metal3", "PWell", 11.994],
+          ["Metal3", "NWell", 11.994],
+          ["Metal3", "Activ", 13.887],
+          ["Metal3", "GatPoly", 14.808],
+          ["Metal3", "Metal1", 23.122],
+          ["Metal3", "Metal2", 67.225],
+          ["Metal4", "PWell", 8.948],
+          ["Metal4", "NWell", 8.948],
+          ["Metal4", "Activ", 9.962],
+          ["Metal4", "GatPoly", 10.427],
+          ["Metal4", "Metal1", 13.962],
+          ["Metal4", "Metal2", 23.122],
+          ["Metal4", "Metal3", 67.225],
+          ["TopMetal1", "PWell", 6.727],
+          ["TopMetal1", "NWell", 6.727],
+          ["TopMetal1", "Activ", 7.284],
+          ["TopMetal1", "GatPoly", 7.529],
+          ["TopMetal1", "Metal1", 9.214],
+          ["TopMetal1", "Metal2", 12.475],
+          ["TopMetal1", "Metal3", 19.309],
+          ["TopMetal1", "Metal4", 42.708]
+        ],
+        "sidewalls": [
+          ["GatPoly", 11.472, -0.038],
+          ["Metal1", 27.218, 0.031],
+          ["Metal2", 39.424, 0.087],
+          ["Metal3", 46.673, 0.139],
+          ["Metal4", 52.532, 0.182],
+          ["TopMetal1", 149.394, 0.028]
+        ],
+        "sideoverlaps": [
+          ["GatPoly", "PWell", 44.367],
+          ["GatPoly", "NWell", 44.367],
+          ["Metal1", "PWell", 39.549],
+          ["Metal1", "NWell", 39.549],
+          ["Metal1", "Activ", 45.402],
+          ["Metal1", "GatPoly", 49.398],
+          ["GatPoly", "Metal1", 23.396],
+          ["Metal2", "PWell", 34.747],
+          ["Metal2", "NWell", 34.747],
+          ["Metal2", "Activ", 36.891],
+          ["Metal2", "GatPoly", 37.959],
+          ["GatPoly", "Metal2", 11.024],
+          ["Metal2", "Metal1", 49.513],
+          ["Metal1", "Metal2", 31.885],
+          ["Metal3", "PWell", 31.26],
+          ["Metal3", "NWell", 31.26],
+          ["Metal3", "Activ", 32.414],
+          ["Metal3", "GatPoly", 32.94],
+          ["GatPoly", "Metal3", 7.179],
+          ["Metal3", "Metal1", 36.945],
+          ["Metal1", "Metal3", 17.645],
+          ["Metal3", "Metal2", 49.498],
+          ["Metal2", "Metal3", 37.785],
+          ["Metal4", "PWell", 29.037],
+          ["Metal4", "NWell", 29.037],
+          ["Metal4", "Activ", 29.796],
+          ["Metal4", "GatPoly", 30.128],
+          ["GatPoly", "Metal4", 5.342],
+          ["Metal4", "Metal1", 32.384],
+          ["Metal1", "Metal4", 12.602],
+          ["Metal4", "Metal2", 36.889],
+          ["Metal2", "Metal4", 22.507],
+          ["Metal4", "Metal3", 49.468],
+          ["Metal3", "Metal4", 40.445],
+          ["TopMetal1", "PWell", 38.975],
+          ["TopMetal1", "NWell", 38.975],
+          ["TopMetal1", "Activ", 39.847],
+          ["TopMetal1", "GatPoly", 40.217],
+          ["GatPoly", "TopMetal1", 4.013],
+          ["TopMetal1", "Metal1", 42.565],
+          ["Metal1", "TopMetal1", 9.279],
+          ["TopMetal1", "Metal2", 46.401],
+          ["Metal2", "TopMetal1", 15.591],
+          ["TopMetal1", "Metal3", 52.587],
+          ["Metal3", "TopMetal1", 22.922],
+          ["TopMetal1", "Metal4", 65.719],
+          ["Metal4", "TopMetal1", 35.256]
+        ]
+      },
+      "diffusion_projection": [
+        "Activ",
+        ["nSD", "pSD", "Activ"]
+      ],
+      "mim": []
+    },
+    "high": {
+      "base": {
+        "substrates": [
+          ["GatPoly", 87.433, 45.957],
+          ["Metal1", 36.926, 42.964],
+          ["Metal2", 19.561, 37.949],
+          ["Metal3", 13.001, 34.167],
+          ["Metal4", 9.736, 31.703],
+          ["TopMetal1", 7.338, 41.957]
+        ],
+        "overlaps": [
+          ["GatPoly", "PWell", 87.433],
+          ["GatPoly", "NWell", 87.433],
+          ["Metal1", "PWell", 36.926],
+          ["Metal1", "NWell", 36.926],
+          ["Metal1", "Activ", 63.637],
+          ["Metal1", "GatPoly", 85.931],
+          ["Metal2", "PWell", 19.561],
+          ["Metal2", "NWell", 19.561],
+          ["Metal2", "Activ", 25.154],
+          ["Metal2", "GatPoly", 28.028],
+          ["Metal2", "Metal1", 73.947],
+          ["Metal3", "PWell", 13.001],
+          ["Metal3", "NWell", 13.001],
+          ["Metal3", "Activ", 15.256],
+          ["Metal3", "GatPoly", 16.267],
+          ["Metal3", "Metal1", 25.434],
+          ["Metal3", "Metal2", 73.947],
+          ["Metal4", "PWell", 9.736],
+          ["Metal4", "NWell", 9.736],
+          ["Metal4", "Activ", 10.948],
+          ["Metal4", "GatPoly", 11.459],
+          ["Metal4", "Metal1", 15.358],
+          ["Metal4", "Metal2", 25.434],
+          ["Metal4", "Metal3", 73.947],
+          ["TopMetal1", "PWell", 7.338],
+          ["TopMetal1", "NWell", 7.338],
+          ["TopMetal1", "Activ", 8.006],
+          ["TopMetal1", "GatPoly", 8.277],
+          ["TopMetal1", "Metal1", 10.135],
+          ["TopMetal1", "Metal2", 13.722],
+          ["TopMetal1", "Metal3", 21.24],
+          ["TopMetal1", "Metal4", 46.978]
+        ],
+        "sidewalls": [
+          ["GatPoly", 12.382, -0.032],
+          ["Metal1", 30.458, 0.034],
+          ["Metal2", 43.855, 0.091],
+          ["Metal3", 51.804, 0.142],
+          ["Metal4", 58.222, 0.185],
+          ["TopMetal1", 159.594, -0.016]
+        ],
+        "sideoverlaps": [
+          ["GatPoly", "PWell", 45.957],
+          ["GatPoly", "NWell", 45.957],
+          ["Metal1", "PWell", 42.964],
+          ["Metal1", "NWell", 42.964],
+          ["Metal1", "Activ", 49.854],
+          ["Metal1", "GatPoly", 54.226],
+          ["GatPoly", "Metal1", 25.483],
+          ["Metal2", "PWell", 37.949],
+          ["Metal2", "NWell", 37.949],
+          ["Metal2", "Activ", 40.514],
+          ["Metal2", "GatPoly", 41.69],
+          ["GatPoly", "Metal2", 12.208],
+          ["Metal2", "Metal1", 54.445],
+          ["Metal1", "Metal2", 35.368],
+          ["Metal3", "PWell", 34.167],
+          ["Metal3", "NWell", 34.167],
+          ["Metal3", "Activ", 35.558],
+          ["Metal3", "GatPoly", 36.139],
+          ["GatPoly", "Metal3", 8.001],
+          ["Metal3", "Metal1", 40.578],
+          ["Metal1", "Metal3", 19.656],
+          ["Metal3", "Metal2", 54.415],
+          ["Metal2", "Metal3", 41.724],
+          ["Metal4", "PWell", 31.703],
+          ["Metal4", "NWell", 31.703],
+          ["Metal4", "Activ", 32.622],
+          ["Metal4", "GatPoly", 32.99],
+          ["GatPoly", "Metal4", 5.973],
+          ["Metal4", "Metal1", 35.5],
+          ["Metal1", "Metal4", 14.07],
+          ["Metal4", "Metal2", 40.485],
+          ["Metal2", "Metal4", 24.91],
+          ["Metal4", "Metal3", 54.365],
+          ["Metal3", "Metal4", 44.585],
+          ["TopMetal1", "PWell", 41.957],
+          ["TopMetal1", "NWell", 41.957],
+          ["TopMetal1", "Activ", 42.999],
+          ["TopMetal1", "GatPoly", 43.403],
+          ["GatPoly", "TopMetal1", 4.499],
+          ["TopMetal1", "Metal1", 45.984],
+          ["Metal1", "TopMetal1", 10.379],
+          ["TopMetal1", "Metal2", 50.183],
+          ["Metal2", "TopMetal1", 17.284],
+          ["TopMetal1", "Metal3", 56.968],
+          ["Metal3", "TopMetal1", 25.314],
+          ["TopMetal1", "Metal4", 71.398],
+          ["Metal4", "TopMetal1", 38.851]
+        ]
+      },
+      "diffusion_projection": [
+        "Activ",
+        ["nSD", "pSD", "Activ"]
+      ],
+      "mim": []
+    },
+    "low": {
+      "base": {
+        "substrates": [
+          ["GatPoly", 87.433, 42.719],
+          ["Metal1", 32.933, 36.059],
+          ["Metal2", 16.737, 31.504],
+          ["Metal3", 10.956, 28.325],
+          ["Metal4", 8.143, 26.348],
+          ["TopMetal1", 6.104, 35.946]
+        ],
+        "overlaps": [
+          ["GatPoly", "PWell", 87.433],
+          ["GatPoly", "NWell", 87.433],
+          ["Metal1", "PWell", 32.933],
+          ["Metal1", "NWell", 32.933],
+          ["Metal1", "Activ", 52.638],
+          ["Metal1", "GatPoly", 71.275],
+          ["Metal2", "PWell", 16.737],
+          ["Metal2", "NWell", 16.737],
+          ["Metal2", "Activ", 20.669],
+          ["Metal2", "GatPoly", 23.034],
+          ["Metal2", "Metal1", 60.502],
+          ["Metal3", "PWell", 10.956],
+          ["Metal3", "NWell", 10.956],
+          ["Metal3", "Activ", 12.514],
+          ["Metal3", "GatPoly", 13.344],
+          ["Metal3", "Metal1", 20.81],
+          ["Metal3", "Metal2", 60.502],
+          ["Metal4", "PWell", 8.143],
+          ["Metal4", "NWell", 8.143],
+          ["Metal4", "Activ", 8.974],
+          ["Metal4", "GatPoly", 9.393],
+          ["Metal4", "Metal1", 12.566],
+          ["Metal4", "Metal2", 20.81],
+          ["Metal4", "Metal3", 60.502],
+          ["TopMetal1", "PWell", 6.104],
+          ["TopMetal1", "NWell", 6.104],
+          ["TopMetal1", "Activ", 6.56],
+          ["TopMetal1", "GatPoly", 6.78],
+          ["TopMetal1", "Metal1", 8.292],
+          ["TopMetal1", "Metal2", 11.227],
+          ["TopMetal1", "Metal3", 17.378],
+          ["TopMetal1", "Metal4", 38.437]
+        ],
+        "sidewalls": [
+          ["GatPoly", 10.562, -0.044],
+          ["Metal1", 24.055, 0.028],
+          ["Metal2", 35.065, 0.084],
+          ["Metal3", 41.605, 0.136],
+          ["Metal4", 46.889, 0.179],
+          ["TopMetal1", 139.088, 0.081]
+        ],
+        "sideoverlaps": [
+          ["GatPoly", "PWell", 42.719],
+          ["GatPoly", "NWell", 42.719],
+          ["Metal1", "PWell", 36.059],
+          ["Metal1", "NWell", 36.059],
+          ["Metal1", "Activ", 40.937],
+          ["Metal1", "GatPoly", 44.558],
+          ["GatPoly", "Metal1", 21.264],
+          ["Metal2", "PWell", 31.504],
+          ["Metal2", "NWell", 31.504],
+          ["Metal2", "Activ", 33.263],
+          ["Metal2", "GatPoly", 34.222],
+          ["GatPoly", "Metal2", 9.846],
+          ["Metal2", "Metal1", 44.58],
+          ["Metal1", "Metal2", 28.443],
+          ["Metal3", "PWell", 28.325],
+          ["Metal3", "NWell", 28.325],
+          ["Metal3", "Activ", 29.264],
+          ["Metal3", "GatPoly", 29.734],
+          ["GatPoly", "Metal3", 6.37],
+          ["Metal3", "Metal1", 33.309],
+          ["Metal1", "Metal3", 15.671],
+          ["Metal3", "Metal2", 44.575],
+          ["Metal2", "Metal3", 33.871],
+          ["Metal4", "PWell", 26.348],
+          ["Metal4", "NWell", 26.348],
+          ["Metal4", "Activ", 26.961],
+          ["Metal4", "GatPoly", 27.256],
+          ["GatPoly", "Metal4", 4.723],
+          ["Metal4", "Metal1", 29.263],
+          ["Metal1", "Metal4", 11.166],
+          ["Metal4", "Metal2", 33.288],
+          ["Metal2", "Metal4", 20.128],
+          ["Metal4", "Metal3", 44.57],
+          ["Metal3", "Metal4", 36.32],
+          ["TopMetal1", "PWell", 35.946],
+          ["TopMetal1", "NWell", 35.946],
+          ["TopMetal1", "Activ", 36.66],
+          ["TopMetal1", "GatPoly", 36.995],
+          ["GatPoly", "TopMetal1", 3.54],
+          ["TopMetal1", "Metal1", 39.114],
+          ["Metal1", "TopMetal1", 8.207],
+          ["TopMetal1", "Metal2", 42.579],
+          ["Metal2", "TopMetal1", 13.92],
+          ["TopMetal1", "Metal3", 48.16],
+          ["Metal3", "TopMetal1", 20.546],
+          ["TopMetal1", "Metal4", 59.997],
+          ["Metal4", "TopMetal1", 31.674]
+        ]
+      },
+      "diffusion_projection": [
+        "Activ",
+        ["nSD", "pSD", "Activ"]
+      ],
+      "mim": []
+    }
+  }
+}
