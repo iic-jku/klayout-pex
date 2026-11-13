@@ -45,7 +45,7 @@ from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 def _scaled_region(region: kdb.Region, scale: kdb.ICplxTrans) -> kdb.Region:
     box = region.bbox()
     if not box.empty() and (min(box.left, box.bottom)*scale.mag < MIN_KLAYOUT_COORDINATE or
-                            max(box.right, box.top)*scale.mag > MAX_KLAYOUT_COORDINATE):
+                            max(box.right, box.top)*scale.mag >= MAX_KLAYOUT_COORDINATE):
         raise FasterCapError('Physical FasterCap geometry exceeds the native KLayout coordinate range')
     return region.transformed(scale)
 
@@ -117,13 +117,16 @@ class _PhysicalInputBuilder(FasterCapInputBuilder):
         self.original = original
         self._physical_dbu = float(Fraction(file.units.grid_numerator, file.units.grid_denominator))
         self._scale = kdb.ICplxTrans(original.dbu/self._physical_dbu)
-        if original.exclusions is not None:
-            self.exclusions = _PhysicalExclusions(original.exclusions, self._scale)
         physical_metals = {layer.name for layer in original.tech_info.process_metal_layers}
         self._profiles = ({metal.name for metal in file.metals} & physical_metals) | {via.name for via in file.vias}
         self._regions: Dict[Tuple[str, str], kdb.Region] = defaultdict(kdb.Region)
         for shape in file.shapes:
             self._regions[shape.layer, shape.conductor] += shape_region(shape)
+        # Validate the final field before exclusion masks can reach native
+        # partitioning. KLayout subtraction cannot use the signed32 upper endpoint.
+        self.top_cell_bbox()
+        if original.exclusions is not None:
+            self.exclusions = _PhysicalExclusions(original.exclusions, self._scale)
 
     @property
     def dbu(self) -> float:
@@ -153,7 +156,7 @@ class _PhysicalInputBuilder(FasterCapInputBuilder):
             box += region.bbox()
         margin = int(8/self.dbu)
         if min(box.left, box.bottom)-margin < MIN_KLAYOUT_COORDINATE or \
-                max(box.right, box.top)+margin > MAX_KLAYOUT_COORDINATE:
+                max(box.right, box.top)+margin >= MAX_KLAYOUT_COORDINATE:
             raise FasterCapError('Physical FasterCap field margin exceeds the native KLayout coordinate range')
         return box
 

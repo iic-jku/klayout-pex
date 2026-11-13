@@ -219,6 +219,65 @@ def test_direct_field_extent_contains_large_growth_and_preserves_drawn_extent_on
         assert box.left < drawn.left-80000  # More than the old 8 um halo.
 
 
+@pytest.mark.parametrize('upper,accepted', [(2147483646, True), (2147483647, False)])
+def test_scaled_exclusion_masks_reject_native_upper_endpoint_before_indexing(upper: int, accepted: bool):
+    original = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 10, 10)))
+    original.blocks[0].region = kdb.Region(kdb.Box(upper-10, 0, upper, 10))
+    before = original.blocks[0].region.bbox()
+    # A distant marker may extend beyond the layout field, so its own boundary
+    # must be validated before the exclusion index can perform native booleans.
+    with patch.object(Exclusions, '__init__', return_value=None) as index:
+        if accepted:
+            _PhysicalExclusions(original, kdb.ICplxTrans(1))
+            index.assert_called_once()
+        else:
+            with pytest.raises(FasterCapError, match='coordinate range'):
+                _PhysicalExclusions(original, kdb.ICplxTrans(1))
+            index.assert_not_called()
+    assert original.blocks[0].region.bbox() == before
+
+
+@pytest.mark.parametrize('axis', ['x', 'y'])
+@pytest.mark.parametrize('side,offset,accepted', [
+    ('upper', -1, True), ('upper', 0, False), ('upper', 1, False),
+    ('lower', -1, False), ('lower', 0, True), ('lower', 1, True),
+])
+def test_field_halo_range_is_checked_before_exclusion_partitioning(
+        axis: str, side: str, offset: int, accepted: bool):
+    from tests.klayout.physical_geometry_test import biased_fixture
+    from klayout_pex.fastercap.physical_input import _PhysicalInputBuilder
+    from klayout_pex.klayout.physical_geometry import MAX_KLAYOUT_COORDINATE, MIN_KLAYOUT_COORDINATE
+
+    fixture = biased_fixture(.002)
+    fixture.context.top_cell_bbox = lambda: kdb.Box(0, 0, 100, 20)
+    physical = PEX25DBuilder(fixture.context, fixture.tech, 'extent', BuilderOptions(include_resistance=False))
+    file = physical.build()
+    margin = 80000  # Existing 8 um field halo on the 0.0001 um physical grid.
+    edge = (MAX_KLAYOUT_COORDINATE-margin if side == 'upper' else
+            MIN_KLAYOUT_COORDINATE+margin) + offset
+    low, high = (edge-10, edge) if side == 'upper' else (edge, edge+10)
+    box = file.shapes[0].box
+    if axis == 'x':
+        box.lower_left.x, box.upper_right.x = low, high
+    else:
+        box.lower_left.y, box.upper_right.y = low, high
+    before = file.SerializeToString(deterministic=True)
+    exclusions = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 20)))
+    original = FasterCapInputBuilder(fixture.context, fixture.tech, 'subs', exclusions=exclusions)
+    # The upper sentinel itself hangs native subtraction, unlike MAX-1. Check
+    # before constructing the mask view, not after conductor partitioning.
+    with patch('klayout_pex.fastercap.physical_input._PhysicalExclusions') as masks:
+        if accepted:
+            _PhysicalInputBuilder(original, physical, file)
+            masks.assert_called_once()
+        else:
+            with pytest.raises(FasterCapError, match='field margin exceeds'):
+                _PhysicalInputBuilder(original, physical, file)
+            masks.assert_not_called()
+    assert file.SerializeToString(deterministic=True) == before
+    assert exclusions.blocks[0].region.bbox() == kdb.Box(0, 0, 100, 20)
+
+
 @pytest.mark.slow
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
