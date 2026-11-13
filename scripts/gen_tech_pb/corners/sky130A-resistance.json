@@ -1,0 +1,898 @@
+{
+  "schema_version": 1,
+  "technology_id": "sky130A",
+  "resistance": {
+    "hrhc-mim-bound": {
+      "description": "Fixed-layout high-R/high-C sensitivity envelope with upper MIM sheet-resistance bound; not a source-correlated process corner",
+      "provenance": {
+        "data_revision": "1",
+        "sources": [
+          {
+            "id": "resistance-extraction-table",
+            "description": "Fixed-layout sheet and cut resistance extraction table",
+            "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/sky130/magic/sky130-extract.tech",
+            "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+            "sha256": "28267a7090be9ace22f7d4876fb4fcf285eefeabab805f00e65923ebf31e90e1",
+            "options": {
+              "METAL5": "1",
+              "MIM": "1",
+              "REDISTRIBUTION": "1",
+              "variants": "hrhc",
+              "sheet_resistance_unit": "mOhm/square",
+              "cut_resistance_unit": "mOhm/cut"
+            }
+          },
+          {
+            "id": "resistance-model-hrhc",
+            "description": "Source res_high__cap_high nwell and via resistance parameters",
+            "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_high__cap_high.spice",
+            "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+            "sha256": "38ec47a4a5fa0d5a23dcab8dee6c43086503204c71ea956e0d78471cadc909a4",
+            "options": {
+              "rnw_unit": "Ohm/square",
+              "rcvia3_unit": "Ohm/cut",
+              "rcvia4_unit": "Ohm/cut"
+            }
+          },
+          {
+            "id": "mim-resistance-specification",
+            "description": "RSCAPM specification limits for both MIM top electrodes",
+            "uri": "https://github.com/google/skywater-pdk/blob/7198cf647113f56041e02abf3eb623692820c5e1/docs/rules/device-details/cap_mim/cap_mim-table0.rst",
+            "revision": "7198cf647113f56041e02abf3eb623692820c5e1",
+            "sha256": "4dcab6b9d0fc9c843828d7c9363603de497edd82589d1a8297e0ea24a32bf37f",
+            "options": {
+              "parameter": "RSCAPM",
+              "bound": "USL",
+              "source_unit": "Ohm/square"
+            }
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "fixed-layout-material-law",
+            "description": "Apply source sheet and per-cut resistances to unchanged extracted polygons and cut counts",
+            "reason": "This sensitivity envelope does not apply compact-model dimension shifts or claim total geometry/process worst-case bounds",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrhc"
+            ]
+          },
+          {
+            "id": "model-overrides",
+            "description": "Use source-style rnw for nwell and rcvia3/rcvia4 for via3/via4, including their MIM contact aliases",
+            "reason": "Preserve the nominal KPEX material mapping while retaining differences between all four source R/C combinations",
+            "source_ids": [
+              "resistance-model-hrhc"
+            ]
+          },
+          {
+            "id": "mim-spec-bound",
+            "description": "Assign the upper published RSCAPM limit to both MIM top plates in this high-R sensitivity envelope",
+            "reason": "This is an engineering combination of published bounds; no source establishes its correlation with the selected R/C style",
+            "source_ids": [
+              "mim-resistance-specification",
+              "resistance-model-hrhc"
+            ]
+          },
+          {
+            "id": "capability-limits",
+            "description": "No correlated physical stack, compact-device reference or transistor process corner is claimed",
+            "reason": "An analytical material sensitivity envelope does not establish those separate capabilities",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrhc",
+              "mim-resistance-specification"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-13",
+            "summary": "Add hrhc resistance values with explicit MIM specification bound",
+            "reason": "Enable fixed-layout sensitivity without silently inventing a correlated MIM corner law",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrhc",
+              "mim-resistance-specification"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/546"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "poly",
+          55800.0
+        ],
+        [
+          "li1",
+          17000.0
+        ],
+        [
+          "met1",
+          145.0
+        ],
+        [
+          "met2",
+          145.0
+        ],
+        [
+          "met3",
+          56.0
+        ],
+        [
+          "met4",
+          56.0
+        ],
+        [
+          "met5",
+          36.0
+        ],
+        [
+          "capm",
+          6800
+        ],
+        [
+          "capm2",
+          6800
+        ],
+        [
+          "nwell",
+          2022000.0
+        ]
+      ],
+      "contacts": [
+        [
+          "licon_nsd_con",
+          "nsdm",
+          "li1",
+          280000.0
+        ],
+        [
+          "licon_psd_con",
+          "psdm",
+          "li1",
+          840000.0
+        ],
+        [
+          "licon_poly_con",
+          "poly",
+          "li1",
+          252000.0
+        ],
+        [
+          "licon_ntap_con",
+          "nwell",
+          "li1",
+          280000.0
+        ]
+      ],
+      "vias": [
+        [
+          "mcon",
+          23000.0
+        ],
+        [
+          "via",
+          15000.0
+        ],
+        [
+          "via2",
+          8000.0
+        ],
+        [
+          "via3",
+          6623.0
+        ],
+        [
+          "via4",
+          737.7
+        ]
+      ]
+    },
+    "hrlc-mim-bound": {
+      "description": "Fixed-layout high-R/low-C sensitivity envelope with upper MIM sheet-resistance bound; not a source-correlated process corner",
+      "provenance": {
+        "data_revision": "1",
+        "sources": [
+          {
+            "id": "resistance-extraction-table",
+            "description": "Fixed-layout sheet and cut resistance extraction table",
+            "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/sky130/magic/sky130-extract.tech",
+            "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+            "sha256": "28267a7090be9ace22f7d4876fb4fcf285eefeabab805f00e65923ebf31e90e1",
+            "options": {
+              "METAL5": "1",
+              "MIM": "1",
+              "REDISTRIBUTION": "1",
+              "variants": "hrlc",
+              "sheet_resistance_unit": "mOhm/square",
+              "cut_resistance_unit": "mOhm/cut"
+            }
+          },
+          {
+            "id": "resistance-model-hrlc",
+            "description": "Source res_high__cap_low nwell and via resistance parameters",
+            "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_high__cap_low.spice",
+            "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+            "sha256": "fa31c9c9a72f46cd4666428ff3c338a2e912578914f77049d7d15980fb546b85",
+            "options": {
+              "rnw_unit": "Ohm/square",
+              "rcvia3_unit": "Ohm/cut",
+              "rcvia4_unit": "Ohm/cut"
+            }
+          },
+          {
+            "id": "mim-resistance-specification",
+            "description": "RSCAPM specification limits for both MIM top electrodes",
+            "uri": "https://github.com/google/skywater-pdk/blob/7198cf647113f56041e02abf3eb623692820c5e1/docs/rules/device-details/cap_mim/cap_mim-table0.rst",
+            "revision": "7198cf647113f56041e02abf3eb623692820c5e1",
+            "sha256": "4dcab6b9d0fc9c843828d7c9363603de497edd82589d1a8297e0ea24a32bf37f",
+            "options": {
+              "parameter": "RSCAPM",
+              "bound": "USL",
+              "source_unit": "Ohm/square"
+            }
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "fixed-layout-material-law",
+            "description": "Apply source sheet and per-cut resistances to unchanged extracted polygons and cut counts",
+            "reason": "This sensitivity envelope does not apply compact-model dimension shifts or claim total geometry/process worst-case bounds",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrlc"
+            ]
+          },
+          {
+            "id": "model-overrides",
+            "description": "Use source-style rnw for nwell and rcvia3/rcvia4 for via3/via4, including their MIM contact aliases",
+            "reason": "Preserve the nominal KPEX material mapping while retaining differences between all four source R/C combinations",
+            "source_ids": [
+              "resistance-model-hrlc"
+            ]
+          },
+          {
+            "id": "mim-spec-bound",
+            "description": "Assign the upper published RSCAPM limit to both MIM top plates in this high-R sensitivity envelope",
+            "reason": "This is an engineering combination of published bounds; no source establishes its correlation with the selected R/C style",
+            "source_ids": [
+              "mim-resistance-specification",
+              "resistance-model-hrlc"
+            ]
+          },
+          {
+            "id": "capability-limits",
+            "description": "No correlated physical stack, compact-device reference or transistor process corner is claimed",
+            "reason": "An analytical material sensitivity envelope does not establish those separate capabilities",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrlc",
+              "mim-resistance-specification"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-13",
+            "summary": "Add hrlc resistance values with explicit MIM specification bound",
+            "reason": "Enable fixed-layout sensitivity without silently inventing a correlated MIM corner law",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-hrlc",
+              "mim-resistance-specification"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/546"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "poly",
+          55800.0
+        ],
+        [
+          "li1",
+          17000.0
+        ],
+        [
+          "met1",
+          145.0
+        ],
+        [
+          "met2",
+          145.0
+        ],
+        [
+          "met3",
+          56.0
+        ],
+        [
+          "met4",
+          56.0
+        ],
+        [
+          "met5",
+          36.0
+        ],
+        [
+          "capm",
+          6800
+        ],
+        [
+          "capm2",
+          6800
+        ],
+        [
+          "nwell",
+          2160000.0
+        ]
+      ],
+      "contacts": [
+        [
+          "licon_nsd_con",
+          "nsdm",
+          "li1",
+          280000.0
+        ],
+        [
+          "licon_psd_con",
+          "psdm",
+          "li1",
+          840000.0
+        ],
+        [
+          "licon_poly_con",
+          "poly",
+          "li1",
+          252000.0
+        ],
+        [
+          "licon_ntap_con",
+          "nwell",
+          "li1",
+          280000.0
+        ]
+      ],
+      "vias": [
+        [
+          "mcon",
+          23000.0
+        ],
+        [
+          "via",
+          15000.0
+        ],
+        [
+          "via2",
+          8000.0
+        ],
+        [
+          "via3",
+          8000.0
+        ],
+        [
+          "via4",
+          891.0
+        ]
+      ]
+    },
+    "lrhc-mim-bound": {
+      "description": "Fixed-layout low-R/high-C sensitivity envelope with lower MIM sheet-resistance bound; not a source-correlated process corner",
+      "provenance": {
+        "data_revision": "1",
+        "sources": [
+          {
+            "id": "resistance-extraction-table",
+            "description": "Fixed-layout sheet and cut resistance extraction table",
+            "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/sky130/magic/sky130-extract.tech",
+            "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+            "sha256": "28267a7090be9ace22f7d4876fb4fcf285eefeabab805f00e65923ebf31e90e1",
+            "options": {
+              "METAL5": "1",
+              "MIM": "1",
+              "REDISTRIBUTION": "1",
+              "variants": "lrhc",
+              "sheet_resistance_unit": "mOhm/square",
+              "cut_resistance_unit": "mOhm/cut"
+            }
+          },
+          {
+            "id": "resistance-model-lrhc",
+            "description": "Source res_low__cap_high nwell and via resistance parameters",
+            "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_low__cap_high.spice",
+            "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+            "sha256": "30bf08f792bb9c569f76b3fe3c81825551f5a0750a65208b49a2010ad9b765c3",
+            "options": {
+              "rnw_unit": "Ohm/square",
+              "rcvia3_unit": "Ohm/cut",
+              "rcvia4_unit": "Ohm/cut"
+            }
+          },
+          {
+            "id": "mim-resistance-specification",
+            "description": "RSCAPM specification limits for both MIM top electrodes",
+            "uri": "https://github.com/google/skywater-pdk/blob/7198cf647113f56041e02abf3eb623692820c5e1/docs/rules/device-details/cap_mim/cap_mim-table0.rst",
+            "revision": "7198cf647113f56041e02abf3eb623692820c5e1",
+            "sha256": "4dcab6b9d0fc9c843828d7c9363603de497edd82589d1a8297e0ea24a32bf37f",
+            "options": {
+              "parameter": "RSCAPM",
+              "bound": "LSL",
+              "source_unit": "Ohm/square"
+            }
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "fixed-layout-material-law",
+            "description": "Apply source sheet and per-cut resistances to unchanged extracted polygons and cut counts",
+            "reason": "This sensitivity envelope does not apply compact-model dimension shifts or claim total geometry/process worst-case bounds",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrhc"
+            ]
+          },
+          {
+            "id": "model-overrides",
+            "description": "Use source-style rnw for nwell and rcvia3/rcvia4 for via3/via4, including their MIM contact aliases",
+            "reason": "Preserve the nominal KPEX material mapping while retaining differences between all four source R/C combinations",
+            "source_ids": [
+              "resistance-model-lrhc"
+            ]
+          },
+          {
+            "id": "mim-spec-bound",
+            "description": "Assign the lower published RSCAPM limit to both MIM top plates in this low-R sensitivity envelope",
+            "reason": "This is an engineering combination of published bounds; no source establishes its correlation with the selected R/C style",
+            "source_ids": [
+              "mim-resistance-specification",
+              "resistance-model-lrhc"
+            ]
+          },
+          {
+            "id": "capability-limits",
+            "description": "No correlated physical stack, compact-device reference or transistor process corner is claimed",
+            "reason": "An analytical material sensitivity envelope does not establish those separate capabilities",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrhc",
+              "mim-resistance-specification"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-13",
+            "summary": "Add lrhc resistance values with explicit MIM specification bound",
+            "reason": "Enable fixed-layout sensitivity without silently inventing a correlated MIM corner law",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrhc",
+              "mim-resistance-specification"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/546"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "poly",
+          42200.0
+        ],
+        [
+          "li1",
+          10500.0
+        ],
+        [
+          "met1",
+          105.0
+        ],
+        [
+          "met2",
+          105.0
+        ],
+        [
+          "met3",
+          38.0
+        ],
+        [
+          "met4",
+          38.0
+        ],
+        [
+          "met5",
+          21.0
+        ],
+        [
+          "capm",
+          4800
+        ],
+        [
+          "capm2",
+          4800
+        ],
+        [
+          "nwell",
+          1240000.0
+        ]
+      ],
+      "contacts": [
+        [
+          "licon_nsd_con",
+          "nsdm",
+          "li1",
+          95000.0
+        ],
+        [
+          "licon_psd_con",
+          "psdm",
+          "li1",
+          345000.0
+        ],
+        [
+          "licon_poly_con",
+          "poly",
+          "li1",
+          52000.0
+        ],
+        [
+          "licon_ntap_con",
+          "nwell",
+          "li1",
+          95000.0
+        ]
+      ],
+      "vias": [
+        [
+          "mcon",
+          1600.0
+        ],
+        [
+          "via",
+          2000.0
+        ],
+        [
+          "via2",
+          500.0
+        ],
+        [
+          "via3",
+          500.0
+        ],
+        [
+          "via4",
+          12.0
+        ]
+      ]
+    },
+    "lrlc-mim-bound": {
+      "description": "Fixed-layout low-R/low-C sensitivity envelope with lower MIM sheet-resistance bound; not a source-correlated process corner",
+      "provenance": {
+        "data_revision": "1",
+        "sources": [
+          {
+            "id": "resistance-extraction-table",
+            "description": "Fixed-layout sheet and cut resistance extraction table",
+            "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/sky130/magic/sky130-extract.tech",
+            "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+            "sha256": "28267a7090be9ace22f7d4876fb4fcf285eefeabab805f00e65923ebf31e90e1",
+            "options": {
+              "METAL5": "1",
+              "MIM": "1",
+              "REDISTRIBUTION": "1",
+              "variants": "lrlc",
+              "sheet_resistance_unit": "mOhm/square",
+              "cut_resistance_unit": "mOhm/cut"
+            }
+          },
+          {
+            "id": "resistance-model-lrlc",
+            "description": "Source res_low__cap_low nwell and via resistance parameters",
+            "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_low__cap_low.spice",
+            "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+            "sha256": "8d8f19bfd7d9728508b0a45bfbfae293fed168b902cb2fc820fb40a7c2627ac0",
+            "options": {
+              "rnw_unit": "Ohm/square",
+              "rcvia3_unit": "Ohm/cut",
+              "rcvia4_unit": "Ohm/cut"
+            }
+          },
+          {
+            "id": "mim-resistance-specification",
+            "description": "RSCAPM specification limits for both MIM top electrodes",
+            "uri": "https://github.com/google/skywater-pdk/blob/7198cf647113f56041e02abf3eb623692820c5e1/docs/rules/device-details/cap_mim/cap_mim-table0.rst",
+            "revision": "7198cf647113f56041e02abf3eb623692820c5e1",
+            "sha256": "4dcab6b9d0fc9c843828d7c9363603de497edd82589d1a8297e0ea24a32bf37f",
+            "options": {
+              "parameter": "RSCAPM",
+              "bound": "LSL",
+              "source_unit": "Ohm/square"
+            }
+          }
+        ],
+        "assumptions": [
+          {
+            "id": "fixed-layout-material-law",
+            "description": "Apply source sheet and per-cut resistances to unchanged extracted polygons and cut counts",
+            "reason": "This sensitivity envelope does not apply compact-model dimension shifts or claim total geometry/process worst-case bounds",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrlc"
+            ]
+          },
+          {
+            "id": "model-overrides",
+            "description": "Use source-style rnw for nwell and rcvia3/rcvia4 for via3/via4, including their MIM contact aliases",
+            "reason": "Preserve the nominal KPEX material mapping while retaining differences between all four source R/C combinations",
+            "source_ids": [
+              "resistance-model-lrlc"
+            ]
+          },
+          {
+            "id": "mim-spec-bound",
+            "description": "Assign the lower published RSCAPM limit to both MIM top plates in this low-R sensitivity envelope",
+            "reason": "This is an engineering combination of published bounds; no source establishes its correlation with the selected R/C style",
+            "source_ids": [
+              "mim-resistance-specification",
+              "resistance-model-lrlc"
+            ]
+          },
+          {
+            "id": "capability-limits",
+            "description": "No correlated physical stack, compact-device reference or transistor process corner is claimed",
+            "reason": "An analytical material sensitivity envelope does not establish those separate capabilities",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrlc",
+              "mim-resistance-specification"
+            ]
+          }
+        ],
+        "history": [
+          {
+            "revision": "1",
+            "date": "2026-11-13",
+            "summary": "Add lrlc resistance values with explicit MIM specification bound",
+            "reason": "Enable fixed-layout sensitivity without silently inventing a correlated MIM corner law",
+            "source_ids": [
+              "resistance-extraction-table",
+              "resistance-model-lrlc",
+              "mim-resistance-specification"
+            ],
+            "references": [
+              "https://github.com/iic-jku/klayout-pex/issues/546"
+            ]
+          }
+        ]
+      },
+      "layers": [
+        [
+          "poly",
+          42200.0
+        ],
+        [
+          "li1",
+          10500.0
+        ],
+        [
+          "met1",
+          105.0
+        ],
+        [
+          "met2",
+          105.0
+        ],
+        [
+          "met3",
+          38.0
+        ],
+        [
+          "met4",
+          38.0
+        ],
+        [
+          "met5",
+          21.0
+        ],
+        [
+          "capm",
+          4800
+        ],
+        [
+          "capm2",
+          4800
+        ],
+        [
+          "nwell",
+          1378000.0
+        ]
+      ],
+      "contacts": [
+        [
+          "licon_nsd_con",
+          "nsdm",
+          "li1",
+          95000.0
+        ],
+        [
+          "licon_psd_con",
+          "psdm",
+          "li1",
+          345000.0
+        ],
+        [
+          "licon_poly_con",
+          "poly",
+          "li1",
+          52000.0
+        ],
+        [
+          "licon_ntap_con",
+          "nwell",
+          "li1",
+          95000.0
+        ]
+      ],
+      "vias": [
+        [
+          "mcon",
+          1600.0
+        ],
+        [
+          "via",
+          2000.0
+        ],
+        [
+          "via2",
+          500.0
+        ],
+        [
+          "via3",
+          1373.0
+        ],
+        [
+          "via4",
+          122.4
+        ]
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "id": "hrhc-mim-bound",
+      "description": "Fixed-layout high-R/high-C sensitivity envelope with upper MIM sheet-resistance bound; not a source-correlated process corner",
+      "resistance": "hrhc-mim-bound",
+      "capacitance": "high",
+      "process_stack": "nominal",
+      "physical_stack_matches": false
+    },
+    {
+      "id": "hrlc-mim-bound",
+      "description": "Fixed-layout high-R/low-C sensitivity envelope with upper MIM sheet-resistance bound; not a source-correlated process corner",
+      "resistance": "hrlc-mim-bound",
+      "capacitance": "low",
+      "process_stack": "nominal",
+      "physical_stack_matches": false
+    },
+    {
+      "id": "lrhc-mim-bound",
+      "description": "Fixed-layout low-R/high-C sensitivity envelope with lower MIM sheet-resistance bound; not a source-correlated process corner",
+      "resistance": "lrhc-mim-bound",
+      "capacitance": "high",
+      "process_stack": "nominal",
+      "physical_stack_matches": false
+    },
+    {
+      "id": "lrlc-mim-bound",
+      "description": "Fixed-layout low-R/low-C sensitivity envelope with lower MIM sheet-resistance bound; not a source-correlated process corner",
+      "resistance": "lrlc-mim-bound",
+      "capacitance": "low",
+      "process_stack": "nominal",
+      "physical_stack_matches": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "resistance-extraction-table",
+      "description": "Fixed-layout sheet and cut resistance extraction table",
+      "uri": "https://github.com/fossi-foundation/open-pdks/blob/5740c4a81c42f9fe4af5ef2ee258a99151053d28/sky130/magic/sky130-extract.tech",
+      "revision": "5740c4a81c42f9fe4af5ef2ee258a99151053d28",
+      "sha256": "28267a7090be9ace22f7d4876fb4fcf285eefeabab805f00e65923ebf31e90e1",
+      "options": {
+        "METAL5": "1",
+        "MIM": "1",
+        "REDISTRIBUTION": "1",
+        "sheet_resistance_unit": "mOhm/square",
+        "cut_resistance_unit": "mOhm/cut"
+      }
+    },
+    {
+      "id": "resistance-model-hrhc",
+      "description": "Source res_high__cap_high nwell and via resistance parameters",
+      "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_high__cap_high.spice",
+      "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+      "sha256": "38ec47a4a5fa0d5a23dcab8dee6c43086503204c71ea956e0d78471cadc909a4",
+      "options": {
+        "rnw_unit": "Ohm/square",
+        "rcvia3_unit": "Ohm/cut",
+        "rcvia4_unit": "Ohm/cut"
+      }
+    },
+    {
+      "id": "mim-resistance-specification",
+      "description": "RSCAPM specification limits for both MIM top electrodes",
+      "uri": "https://github.com/google/skywater-pdk/blob/7198cf647113f56041e02abf3eb623692820c5e1/docs/rules/device-details/cap_mim/cap_mim-table0.rst",
+      "revision": "7198cf647113f56041e02abf3eb623692820c5e1",
+      "sha256": "4dcab6b9d0fc9c843828d7c9363603de497edd82589d1a8297e0ea24a32bf37f",
+      "options": {
+        "parameter": "RSCAPM",
+        "source_unit": "Ohm/square"
+      }
+    },
+    {
+      "id": "resistance-model-hrlc",
+      "description": "Source res_high__cap_low nwell and via resistance parameters",
+      "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_high__cap_low.spice",
+      "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+      "sha256": "fa31c9c9a72f46cd4666428ff3c338a2e912578914f77049d7d15980fb546b85",
+      "options": {
+        "rnw_unit": "Ohm/square",
+        "rcvia3_unit": "Ohm/cut",
+        "rcvia4_unit": "Ohm/cut"
+      }
+    },
+    {
+      "id": "resistance-model-lrhc",
+      "description": "Source res_low__cap_high nwell and via resistance parameters",
+      "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_low__cap_high.spice",
+      "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+      "sha256": "30bf08f792bb9c569f76b3fe3c81825551f5a0750a65208b49a2010ad9b765c3",
+      "options": {
+        "rnw_unit": "Ohm/square",
+        "rcvia3_unit": "Ohm/cut",
+        "rcvia4_unit": "Ohm/cut"
+      }
+    },
+    {
+      "id": "resistance-model-lrlc",
+      "description": "Source res_low__cap_low nwell and via resistance parameters",
+      "uri": "https://github.com/fossi-foundation/skywater-pdk-libs-sky130_fd_pr/blob/29b55153fd9f4badef05a02667184b81789d1f61/models/r%2Bc/res_low__cap_low.spice",
+      "revision": "29b55153fd9f4badef05a02667184b81789d1f61",
+      "sha256": "8d8f19bfd7d9728508b0a45bfbfae293fed168b902cb2fc820fb40a7c2627ac0",
+      "options": {
+        "rnw_unit": "Ohm/square",
+        "rcvia3_unit": "Ohm/cut",
+        "rcvia4_unit": "Ohm/cut"
+      }
+    }
+  ],
+  "catalog_revisions": [
+    {
+      "revision": "3",
+      "date": "2026-11-13",
+      "summary": "Add explicit fixed-layout resistance and MIM-bound sensitivity scenarios",
+      "reason": "Expose available resistance evidence while keeping unverified process correlations explicit",
+      "source_ids": [
+        "resistance-extraction-table",
+        "resistance-model-hrhc",
+        "mim-resistance-specification",
+        "resistance-model-hrlc",
+        "resistance-model-lrhc",
+        "resistance-model-lrlc"
+      ],
+      "references": [
+        "https://github.com/iic-jku/klayout-pex/issues/546"
+      ]
+    }
+  ]
+}
