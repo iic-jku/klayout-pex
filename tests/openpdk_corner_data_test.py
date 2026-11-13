@@ -65,7 +65,8 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
             assert baseline_file.read_bytes() == (path.parent / baseline_file.relative_to(baseline_path.parent)).read_bytes()
     assert catalog.provenance.history[0] == provenance.history[0]
     ihp = pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L)
-    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision == ('3' if ihp else '2')
+    sky130 = pdk == PDK.SKY130A
+    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision == ('3' if ihp or sky130 else '2')
     # Repeated builds must not duplicate records, change bytes or remove unrelated files.
     before = {p: p.read_bytes() for p in written}
     unrelated = path.parent / 'keep.txt'
@@ -75,8 +76,12 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     assert unrelated.read_text(encoding='utf-8') == 'keep'
     # These tables are empirical C data. An R law, matched physical recipe and device
     # reference are separate evidence, so packaging C must not silently authorize them.
-    assert [scenario.id for scenario in catalog.scenarios] == (
-        ['nominal', 'gatpoly-low-sheet', 'gatpoly-high-sheet'] if ihp else ['nominal'])
+    expected_scenarios = ['nominal']
+    if ihp:
+        expected_scenarios += ['gatpoly-low-sheet', 'gatpoly-high-sheet']
+    elif sky130:
+        expected_scenarios += ['hrhc-mim-bound', 'hrlc-mim-bound', 'lrhc-mim-bound', 'lrlc-mim-bound']
+    assert [scenario.id for scenario in catalog.scenarios] == expected_scenarios
     for dataset in catalog.datasets:
         component = path.parent / dataset.file.path
         assert component in written
