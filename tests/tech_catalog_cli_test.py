@@ -94,7 +94,8 @@ def test_unknown_corner_fails_before_loading_layout(command: str, corner: str, t
         code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A', '--corner', corner,
                                                '--lvsdb', '/nonexistent/layout.lvsdb', '--out-dir', str(tmp_path)])
     assert code == 1, output
-    assert 'valid corners: nominal' in output
+    assert ('valid corners: hrhc-mim-bound, hrlc-mim-bound, '
+            'lrhc-mim-bound, lrlc-mim-bound, nominal') in output
 
 
 @pytest.mark.parametrize('options, message', [
