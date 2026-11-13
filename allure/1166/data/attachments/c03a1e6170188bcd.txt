@@ -1,0 +1,31 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk gf180mcuD --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/gf180mcuD/test_patterns/cut_ldmos_pair.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/gf180mcuD/test_patterns/cut_ldmos_pair.gds.gz --exclusion-markers ignore --cut block=X
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_ldmos_pair'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_ldmos_pair__cut_ldmos_pair/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 600.0 MiB
+INFO     __kpex__:kpex_cli.py:2227 (35, 0) -> (via1)
+INFO     __kpex__:kpex_cli.py:2227 (32, 0) -> (nsd nd_ldmos)
+INFO     __kpex__:kpex_cli.py:2227 (22, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (poly2_con)
+INFO     __kpex__:kpex_cli.py:2227 (34, 0) -> (metal1_con)
+INFO     __kpex__:kpex_cli.py:2227 (36, 0) -> (metal2_con)
+INFO     __kpex__:kpex_cli.py:2227 (42, 0) -> (metal3_con)
+INFO     __kpex__:kpex_cli.py:2227 (33, 4403) -> (contact_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (33, 4401) -> (contact_nsd_con)
+INFO     __kpex__:kpex_cli.py:2227 (33, 4405) -> (contact_ptap_con)
+INFO     __kpex__:extractor.py:182 The netlist leaves out the 2 devices of the cut cells
+INFO     __kpex__:extractor.py:243 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I1, $I2, $I3, $I4
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 600.0 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 600.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;$1;SUB;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;$1;VSUBS;0.411;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_ldmos_pair__cut_ldmos_pair/cut_ldmos_pair_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_gf180mcuD/cut_ldmos_pair__cut_ldmos_pair/cut_ldmos_pair_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 600.2 MiB
+WARNING  __kpex__:kpex_cli.py:1750 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $1 (0.431 fF)
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 600.2 MiB
