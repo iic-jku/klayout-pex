@@ -39,6 +39,7 @@ from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
     TechnologyRevision, TechnologyScenario, TechnologySource,
 )
 from scripts.gen_tech_pb.provenance import nominal_provenance
+from scripts.gen_tech_pb.device_reference_corners import load_corner_device_references
 from scripts.gen_tech_pb.resistance_corners import load_corner_resistances
 from scripts.gen_tech_pb.tech_builder import (
     CapacitanceInfo, Technology, add_mim_cap, add_overlap_cap, add_sidewall_cap,
@@ -143,6 +144,7 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
     resistance_path = TABLE_DIRECTORY / f'{technology.name}-resistance.json'
     resistance_datasets = load_corner_resistances(technology, resistance_path) if resistance_path.is_file() else []
     resistance_document = json.loads(resistance_path.read_text(encoding='utf-8')) if resistance_datasets else None
+    device_datasets = load_corner_device_references(technology)
     catalog_provenance, components = nominal_provenance(technology.name)
     for source in datasets[0].provenance.sources:
         copied = catalog_provenance.sources.add()
@@ -164,12 +166,20 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
             revision = ParseDict(record, TechnologyRevision())
             catalog_provenance.history.add().CopyFrom(revision)
             catalog_provenance.data_revision = revision.revision
+    if device_datasets:
+        catalog_provenance.history.add(
+            revision='device-mim-1', date='2026-11-13', summary='Add independent MIM corner references',
+            reason='Keep compact-model device laws distinct from empirical interconnect coefficients',
+            references=['https://github.com/iic-jku/klayout-pex/issues/551'])
+        catalog_provenance.data_revision = 'device-mim-1'
     written = write_nominal_catalog(
         technology, catalog_path, catalog_provenance,
         f'Explicit extraction scenarios and capacitance components for {technology.name}', components)
     catalog = Parse(catalog_path.read_text(encoding='utf-8'), TechnologyCatalog())
     components_to_write = [(TechnologyDatasetFile.CAPACITANCE, 'capacitance', dataset) for dataset in datasets]
     components_to_write.extend((TechnologyDatasetFile.RESISTANCE, 'resistance', dataset) for dataset in resistance_datasets)
+    components_to_write.extend((TechnologyDatasetFile.DEVICE_REFERENCES, 'device_references', dataset)
+                               for dataset in device_datasets)
     for kind, directory, dataset in components_to_write:
         relative = f'{directory}/{dataset.id}.pb.json'
         path = catalog_path.parent / relative

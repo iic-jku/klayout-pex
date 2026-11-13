@@ -65,7 +65,8 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
             assert baseline_file.read_bytes() == (path.parent / baseline_file.relative_to(baseline_path.parent)).read_bytes()
     assert catalog.provenance.history[0] == provenance.history[0]
     ihp = pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L)
-    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision == ('3' if ihp else '2')
+    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision
+    assert any(record.revision == ('3' if ihp else '2') for record in catalog.provenance.history)
     # Repeated builds must not duplicate records, change bytes or remove unrelated files.
     before = {p: p.read_bytes() for p in written}
     unrelated = path.parent / 'keep.txt'
