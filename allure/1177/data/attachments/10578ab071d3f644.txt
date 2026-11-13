@@ -1,0 +1,24 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_stubs.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_stubs__exclusion_stubs/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 1005.0 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 1005.3 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 1005.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;A;VSUBS;0.967;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;S1;VSUBS;0.406;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;S2;VSUBS;0.406;
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;A;A,S1,S2;;0.001
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;A;S1;;1.266
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;A;S2;;1.266
+SUBPROCESS __kpex__:kpex_cli.py:1669 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_stubs__exclusion_stubs/exclusion_stubs_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/exclusion_stubs__exclusion_stubs/exclusion_stubs_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 1005.4 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 1005.4 MiB

@@ -1,0 +1,42 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode CC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_floating_plate_neighbor.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/exclusion_floating_plate_neighbor.gds.gz --exclusion-markers ignore --out-dir /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/CC
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'exclusion_floating_plate_neighbor'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/CC/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 367.5 MiB, largest subprocess 455.2 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 367.5 MiB, largest subprocess 455.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;$3;N;2.125;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;$3;VSUBS;6.711;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;N;VSUBS;3.561;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/CC/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neighbor_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/CC/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neighbor_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 367.5 MiB, largest subprocess 455.2 MiB
+WARNING  __kpex__:kpex_cli.py:1750 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $3 (8.836 fF)
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 367.5 MiB, largest subprocess 455.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode C --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/exclusion_floating_plate_neighbor.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/exclusion_floating_plate_neighbor.gds.gz --exclusion-markers ignore --out-dir /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/C
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'exclusion_floating_plate_neighbor'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/C/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 367.5 MiB, largest subprocess 455.2 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 367.5 MiB, largest subprocess 455.2 MiB
+WARNING  __kpex__:kpex_cli.py:1642 Eliminated 1 floating capacitance nets before grounding: $3. Check that these nets intentionally have no port or retained device terminal
+INFO     __kpex__:kpex_cli.py:1645 Capacitance output policy: grounded, reference: sub!
+WARNING  __kpex__:kpex_cli.py:1647 Grounded capacitance output removes inter-net transfer admittance after exact floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance checks still describe the coupled extraction
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;N;VSUBS;5.175;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/C/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neighbor_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_unnamed_floating_layout_h0/C/exclusion_floating_plate_neighbor__exclusion_floating_plate_neighbor/exclusion_floating_plate_neighbor_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 367.5 MiB, largest subprocess 455.2 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 367.5 MiB, largest subprocess 455.2 MiB
