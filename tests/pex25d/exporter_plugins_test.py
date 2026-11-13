@@ -461,12 +461,27 @@ def test_imports_and_builtin_discovery_need_no_geometry_or_generated_code():
         assert v1.PEX25DImporter is PEX25DImporter
         assert v1.PEX25DSceneExporter is PEX25DSceneExporter
         assert v1.ImporterFactory is not None
+        assert v1.BodyKind.NET.value == 'net'
+        from types import SimpleNamespace
+        ground = SimpleNamespace(ground_plane=SimpleNamespace(name='subs', net='VSS'))
+        assert v1.ground_body(ground) == v1.ElectricalBody(v1.BodyKind.NET, 'VSS')
+        assert callable(v1.retained_ground_region)
+        assert callable(v1.region_of)
+        try:
+            v1.check_native_ground_coordinate(0)
+        except v1.GroundGeometryError as exc:
+            assert 'requires KLayout' in str(exc)
+        else:
+            raise AssertionError('native helpers should require the optional backend')
 
         from klayout_pex import pex25d
         registry = pex25d.exporter_registry()
         exporter = registry.load('klayout-pex:fastercap')
         try:
-            exporter.export(object(), output_dir_path='unused')
+            from types import SimpleNamespace
+            scene = SimpleNamespace(ground_plane=SimpleNamespace(cutouts=(), net='', name='subs'),
+                                    conductors=(), HasField=lambda name: name == 'ground_plane')
+            exporter.export(scene, output_dir_path='unused')
         except pex25d.ExporterUnavailable as exc:
             assert 'needs KLayout' in str(exc)
         else:

@@ -36,7 +36,7 @@ This package imports neither KLayout nor generated protobuf code at runtime.
 from typing import Callable
 
 from .pex25d_importer import ImporterError, ImporterUnavailable, PEX25DImporter
-from .pex25d_scene_exporter import ExportError, ExporterUnavailable, PEX25DSceneExporter
+from .pex25d_scene_exporter import ExportError, ExporterUnavailable, PEX25DSceneExporter, SceneFeature, require_scene_features
 
 
 IMPORTER_ENTRY_POINT_GROUP = 'klayout_pex.importers.v1'
@@ -44,6 +44,13 @@ EXPORTER_ENTRY_POINT_GROUP = 'klayout_pex.exporters.v1'
 
 ImporterFactory = Callable[[], PEX25DImporter]
 ExporterFactory = Callable[[], PEX25DSceneExporter]
+
+from .pex25d_scene_tools import (
+    BodyKind, ElectricalBody, conductor_body, ground_body,
+    solver_body_names, write_solver_body_map, GroundGeometryError,
+    check_native_ground_coordinate, retained_ground_region, region_of,
+)
+
 
 __all__ = [
     'IMPORTER_ENTRY_POINT_GROUP',
@@ -56,4 +63,16 @@ __all__ = [
     'ExportError',
     'ExporterUnavailable',
     'PEX25DSceneExporter',
+    'SceneFeature',
+    'require_scene_features',
+    'BodyKind',
+    'ElectricalBody',
+    'conductor_body',
+    'ground_body',
+    'solver_body_names',
+    'write_solver_body_map',
+    'GroundGeometryError',
+    'check_native_ground_coordinate',
+    'retained_ground_region',
+    'region_of',
 ]

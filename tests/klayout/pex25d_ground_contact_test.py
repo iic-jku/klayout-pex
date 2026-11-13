@@ -59,6 +59,9 @@ def test_real_device_contacts_cannot_export_on_full_ground(
     context = KLayoutExtractionContext.prepare_extraction(
         lvsdb, pattern, technology, blackbox_devices=blackbox_devices)
     scene = pex25d.resolve(PEX25DBuilder(context, technology, pattern).build())
+    # Reconstruct the unsafe full-plane scene; generated openings are covered
+    # by the corresponding real-layout isolation regressions.
+    scene.ground_plane.ClearField('cutouts')
     backend = Mock()
     report = pex25d.DiagnosticsReport()
     output = tmp_path / 'solver-input'

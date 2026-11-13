@@ -201,6 +201,8 @@ class Resolver:
             return
         ground_plane = self.file.ground_plane
         scene.ground_plane.name = ground_plane.name
+        scene.ground_plane.net = ground_plane.net
+        scene.ground_plane.cutouts.extend(ground_plane.cutouts)
         scene.ground_plane.zlow = ground_plane.zlow
         scene.ground_plane.zhigh = ground_plane.zhigh
         if ground_plane.HasField('source'):

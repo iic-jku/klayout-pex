@@ -58,6 +58,7 @@ package kpex.pex25d;
 import "kpex/pex25d/pex25d_source_ref.proto";
 import "kpex/pex25d/pex25d_meta.proto";
 import "kpex/pex25d/pex25d_geometry.proto";
+import "kpex/pex25d/pex25d_ground.proto";
 import "kpex/pex25d/pex25d_units.proto";
 import "kpex/pex25d/pex25d_dielectric.proto";
 import "kpex/pex25d/pex25d_domain.proto";
@@ -146,9 +147,9 @@ message PEX25DFile {
 // Conductive profiles
 // -----------------------------------------------------------------------------
 
-// `GROUND_PLANE <name> Z_OFFSETS <zlow> <zhigh>`
+// `GROUND_PLANE <name> [NET <net>] Z_OFFSETS <zlow> <zhigh>`
 //
-// Infinite in XY, held at 0 V. Exactly one per file. One of only two record
+// Infinite in XY except explicit cutouts, held at 0 V. Exactly one per file. One of only two record
 // kinds that carry absolute z (the other is METAL); everything else is
 // positioned relative to these, so moving a metal or changing its thickness
 // (another process corner) propagates through the stack with no other edit.
@@ -156,6 +157,16 @@ message GroundPlane {
     string name = 1;
     int64 zlow = 2;   // grid units, absolute
     int64 zhigh = 3;  // grid units, absolute; must be > zlow
+
+    // Electrical reference net; distinct from the profile name used by WRAPS.
+    // An empty field means the profile name, for an authored full plane.
+    // FLOATING is invalid: this body is the reference potential.
+    string net = 10;
+
+    // Ground is the plane minus the UNION of these polygons, at the original z.
+    // A polygon hole retains a ground island. Adapters clip the result to their
+    // finite field; they must not discard these openings or silently fill them.
+    repeated GroundCutout cutouts = 20;
 
     SourceRef source = 100;
 }
