@@ -1,0 +1,40 @@
+* Copyright 2026 GlobalFoundries PDK Authors
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     https://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+
+.lib mimcap_typical
+.param mim_corner_1p5ff=1
+.param mim_corner_1p0ff=1
+.param mim_corner_2p0ff=1
+.param mc_c_cox_1p0ff=0
+.param mc_c_cox_1p5ff=0
+.param mc_c_cox_2p0ff=0
+.endl mimcap_typical
+
+.lib mimcap_ss
+.param mim_corner_1p5ff=1.155
+.param mim_corner_1p0ff=1.1
+.param mim_corner_2p0ff=1.1
+.param mc_c_cox_1p0ff=0
+.param mc_c_cox_1p5ff=0
+.param mc_c_cox_2p0ff=0
+.endl mimcap_ss
+
+.lib mimcap_ff
+.param mim_corner_1p5ff=0.845
+.param mim_corner_1p0ff=0.9
+.param mim_corner_2p0ff=0.9
+.param mc_c_cox_1p0ff=0
+.param mc_c_cox_1p5ff=0
+.param mc_c_cox_2p0ff=0
+.endl mimcap_ff

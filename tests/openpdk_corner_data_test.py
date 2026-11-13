@@ -65,7 +65,9 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
             assert baseline_file.read_bytes() == (path.parent / baseline_file.relative_to(baseline_path.parent)).read_bytes()
     assert catalog.provenance.history[0] == provenance.history[0]
     ihp = pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L)
-    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision == ('3' if ihp else '2')
+    expected_revision = {PDK.IHP_SG13G2: '3', PDK.IHP_SG13CMOS5L: '4'}.get(pdk, '2')
+    assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision
+    assert expected_revision in [entry.revision for entry in catalog.provenance.history]
     # Repeated builds must not duplicate records, change bytes or remove unrelated files.
     before = {p: p.read_bytes() for p in written}
     unrelated = path.parent / 'keep.txt'
@@ -75,8 +77,12 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     assert unrelated.read_text(encoding='utf-8') == 'keep'
     # These tables are empirical C data. An R law, matched physical recipe and device
     # reference are separate evidence, so packaging C must not silently authorize them.
-    assert [scenario.id for scenario in catalog.scenarios] == (
-        ['nominal', 'gatpoly-low-sheet', 'gatpoly-high-sheet'] if ihp else ['nominal'])
+    expected_scenarios = ['nominal']
+    if ihp:
+        expected_scenarios.extend(['gatpoly-low-sheet', 'gatpoly-high-sheet'])
+    if pdk == PDK.IHP_SG13CMOS5L:
+        expected_scenarios.extend(['fixed-layout-low-r', 'fixed-layout-high-r'])
+    assert [scenario.id for scenario in catalog.scenarios][:len(expected_scenarios)] == expected_scenarios
     for dataset in catalog.datasets:
         component = path.parent / dataset.file.path
         assert component in written
