@@ -114,6 +114,8 @@ class PEX25DFasterCapModelBuilder:
     # ---------------------------------------------------------------- build
 
     def build(self) -> FasterCapModelGenerator:
+        from ..pex25d.exporters import validate_export_scene
+        validate_export_scene(self.scene)
         background = self.scene.background
         if not self.scene.HasField('background'):
             raise ExportError("The scene declares no background dielectric")

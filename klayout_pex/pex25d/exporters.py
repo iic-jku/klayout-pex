@@ -96,7 +96,8 @@ def export_with_backend(backend: PEX25DSceneExporter,
     """Export with an already loaded backend, which need not be registered.
 
     The scene is validated first, as ``validate`` does without ``strict``: a
-    backend gets only a scene without errors, whoever wrote it. The diagnostics
+    backend gets only a scene without errors, whoever wrote it. Full-ground contacts
+    are also rejected without requiring strict polygon checks. The diagnostics
     go to ``report``; an error raises InvalidSceneError and writes nothing.
 
     ``target`` identifies the backend in error messages. Only an unexpected
@@ -106,15 +107,7 @@ def export_with_backend(backend: PEX25DSceneExporter,
     and OSError pass through unchanged; unexpected exceptions become ExporterExecutionError
     with their original cause. Return paths follow the contract of ``export``.
     """
-    from .diagnostics import DiagnosticsReport
-    from .validator import validate
-
-    report = report if report is not None else DiagnosticsReport()
-    errors_before = report.num_errors
-    validate(scene, report=report)
-    errors = report.num_errors - errors_before
-    if errors:
-        raise InvalidSceneError(f"The scene has {errors} error(s), so it was not exported")
+    validate_export_scene(scene, report=report)
 
     try:
         return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
@@ -129,6 +122,25 @@ def export_with_backend(backend: PEX25DSceneExporter,
             pass  # Metadata failures must not hide the exporter's original crash.
         raise ExporterExecutionError(
             f"Exporter '{provider}' crashed: {type(exc).__name__}: {exc}") from exc
+
+
+def validate_export_scene(scene: PEX25DScene, *, report: Optional[DiagnosticsReport] = None):
+    """Reject invalid or electrically unsafe scenes before any output is written.
+
+    Ground contact is checked even without expensive strict polygon validation.
+    Built-in model builders use this entry point too, so calling one directly
+    cannot bypass the shared export safeguard.
+    """
+    from .diagnostics import DiagnosticsReport
+    from .validator import Validator, validate
+
+    report = report if report is not None else DiagnosticsReport()
+    errors_before = report.num_errors
+    validate(scene, report=report)
+    Validator(report).check_ground_contacts(scene)
+    errors = report.num_errors - errors_before
+    if errors:
+        raise InvalidSceneError(f"The scene has {errors} error(s), so it was not exported")
 
 
 def exporter_registry() -> ExporterRegistry:
