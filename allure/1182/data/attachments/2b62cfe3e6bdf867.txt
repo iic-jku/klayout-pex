@@ -1,0 +1,21 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 kpex pex25d --pdk ihp-sg13g2 --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/internal_child_labels.lvsdb.gz --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/internal_child_labels.gds.gz --port-labels auto --out-file /tmp/pytest-of-runner/pytest-0/test_pex25d_terminals_follow_t0/ports.pex25d --out-dir /tmp/pytest-of-runner/pytest-0/test_pex25d_terminals_follow_t0
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'internal_child_labels'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+DEBUG    __kpex__:tool_version_constraints.py:275 KLAYOUT_NEIGHBORHOOD_VISITOR: KLayout Python module >= 0.30.1 — the KPEX/2.5D engine needs PolygonNeighborhoodVisitor, EdgeNeighborhoodVisitor and the *WithProperties geometry classes
+DEBUG    __kpex__:tool_version_constraints.py:275 KLAYOUT_PEX_MODULE: KLayout Python module >= 0.30.2 — resistance extraction needs the klayout.pex module
+DEBUG    __kpex__:tool_version_constraints.py:275 KLAYOUT_RESISTANCE_FIXES: KLayout Python module >= 0.30.3 — earlier releases have bugs in resistance extraction
+DEBUG    __kpex__:tool_version_constraints.py:275 KLAYOUT_03013_FIXES: KLayout Python module >= 0.30.13 — 0.30.13 fixes slow terminal lookup, neighborhood-visitor memory leaks and resistance-extraction crashes. Upgrading is recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_pex25d_terminals_follow_t0/internal_child_labels__internal_child_labels/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2127 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2127 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2127 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:pex25d_builder.py:327 GROUND_PLANE subs: z -2800 … 0
+INFO     __kpex__:pex25d_builder.py:549 DIELECTRIC_BACKGROUND air: k=1.0
+INFO     __kpex__:pex25d_builder.py:674 3 conductor(s), 3 shape record(s)
+INFO     __kpex__:pex25d_builder.py:859 1 terminal record(s)
+INFO     __kpex__:pex25d_builder.py:921 10 metal and 10 via resistance record(s)
+INFO     __kpex__:kpex_cli.py:2146 Wrote /tmp/pytest-of-runner/pytest-0/test_pex25d_terminals_follow_t0/ports.pex25d (file, text)
+INFO     __kpex__:diagnostics.py:234 No diagnostics.
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 350.2 MiB
