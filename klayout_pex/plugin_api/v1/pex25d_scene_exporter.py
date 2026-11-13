@@ -26,7 +26,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Mapping, Optional, Protocol
+from enum import Enum
+from typing import TYPE_CHECKING, Any, FrozenSet, List, Mapping, Optional, Protocol
 
 if TYPE_CHECKING:
     from klayout_pex_protobuf.kpex.pex25d.pex25d_scene_pb2 import PEX25DScene
@@ -40,6 +41,16 @@ class ExporterUnavailable(ExportError):
     """The backend for a target is not loadable in this installation."""
 
 
+class SceneFeature(Enum):
+    """Scene contracts an exporter must implement before receiving them."""
+
+    GROUND_CUTOUTS = 'ground-cutouts'
+    """Explicit polygon openings through the ground slab and its coatings."""
+
+    ELECTRICAL_IDENTITY = 'electrical-identity'
+    """Ground reference net and FLOATING identity independent of output labels."""
+
+
 class PEX25DSceneExporter(Protocol):
     """Write solver inputs from a resolved ``PEX25DScene`` without running it.
 
@@ -48,6 +59,14 @@ class PEX25DSceneExporter(Protocol):
     NotImplementedError marks what an exporter does not implement yet.
     Geometry libraries and other optional dependencies should be imported only
     when needed, so metadata discovery remains usable without them.
+    """
+
+    scene_features: FrozenSet[SceneFeature] = frozenset()
+    """Required feature contracts understood by this exporter.
+
+    An exporter without this declaration supports only scenes requiring none
+    of these additions. A declaration promises actual geometry and ownership
+    support; accepting an unfamiliar protobuf field is insufficient.
     """
 
     def export(self,
@@ -66,4 +85,29 @@ class PEX25DSceneExporter(Protocol):
         ...
 
 
-__all__ = ['ExportError', 'ExporterUnavailable', 'PEX25DSceneExporter']
+def require_scene_features(exporter: PEX25DSceneExporter, scene: Any, target: str):
+    """Fail before writing if a consumer does not implement required scene semantics."""
+    from ...pex25d.electrical import solver_body_names
+    required = set()
+    if scene.HasField('ground_plane'):
+        ground = scene.ground_plane
+        if ground.cutouts:
+            required.add(SceneFeature.GROUND_CUTOUTS)
+        if ground.net and ground.net != ground.name:
+            required.add(SceneFeature.ELECTRICAL_IDENTITY)
+    if any(body.name != name for body, name in solver_body_names(scene).items()):
+        required.add(SceneFeature.ELECTRICAL_IDENTITY)
+    if not required:
+        return
+    declared = getattr(exporter, 'scene_features', frozenset())
+    # Older Protocol subclasses can inherit placeholders. A stub, None,
+    # Ellipsis, or a similarly spelled string never promises implementation.
+    features = declared if isinstance(declared, (set, frozenset)) else frozenset()
+    missing = required - features
+    if missing:
+        names = ', '.join(sorted(feature.value for feature in missing))
+        raise ExportError(f"Exporter '{target}' does not support required scene features: "
+                          f"{names}; update the exporter before using this scene")
+
+
+__all__ = ['ExportError', 'ExporterUnavailable', 'PEX25DSceneExporter', 'SceneFeature', 'require_scene_features']

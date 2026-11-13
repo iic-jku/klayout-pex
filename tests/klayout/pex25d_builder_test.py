@@ -105,6 +105,7 @@ class TerminalFixture:
         self.tech = TechInfo(tech, None)
         self.context = SimpleNamespace(
             port_label_keys=None,
+            substrate_net_name='subs',
             dbu=0.001, top_circuit=self.circuit,
             shapes_of_net=self.shapes_of_net,
             pins_of_layer=lambda pair: self.pins,
@@ -151,6 +152,72 @@ class TerminalFixture:
 @allure.parent_suite('Unit Tests')
 @allure.tag('PEX25D', 'Builder')
 class Pex25DBuilderTerminalTest(unittest.TestCase):
+    def test_ground_diffusion_clearance_checks_native_bounds_before_sizing(self):
+        # The 1 um clearance is 1000 source DBUs. Test each expanded edge,
+        # including the valid MIN+1 and MAX-1 coordinates, before native sizing.
+        minimum, maximum, margin = -(2 ** 31), 2 ** 31 - 1, 1000
+        cases = [(minimum + margin - 1, False), (minimum + margin, False),
+                 (minimum + margin + 1, True), (maximum - margin - 1, True),
+                 (maximum - margin, False), (maximum - margin + 1, False)]
+        for axis in ('x', 'y'):
+            for edge, accepted in cases:
+                with self.subTest(axis=axis, edge=edge, accepted=accepted):
+                    fixture = TerminalFixture(diffusion=True)
+                    lo, hi = (edge, edge + 10) if edge < 0 else (edge - 10, edge)
+                    box = kdb.Box(lo, 0, hi, 10) if axis == 'x' else kdb.Box(0, lo, 10, hi)
+                    fixture.geometry['nsd'] = kdb.Region(box)
+                    builder = PEX25DBuilder(fixture.context, fixture.tech, 'test')
+                    file = pex25d_file_pb2().PEX25DFile()
+                    builder.build_ground_plane(file)
+                    if accepted:
+                        builder.build_ground_cutouts(file)
+                        assert file.ground_plane.cutouts
+                    else:
+                        with mock.patch.object(kdb.Region, 'sized',
+                                               side_effect=AssertionError('unsafe native sizing')):
+                            with self.assertRaisesRegex(BuildError, 'Ground diffusion clearance'):
+                                builder.build_ground_cutouts(file)
+
+    def test_ground_clearance_bounds_merged_nonrectangular_corners(self):
+        minimum, maximum, margin = -(2 ** 31), 2 ** 31 - 1, 1000
+        diamond = kdb.Region(kdb.Polygon([kdb.Point(-1000, 0), kdb.Point(0, 1000),
+                                         kdb.Point(1000, 0), kdb.Point(0, -1000)]))
+        acute = kdb.Region(kdb.Polygon([kdb.Point(-1000, -1000), kdb.Point(0, 1000),
+                                       kdb.Point(1000, -1000)]))
+        joined_boxes = kdb.Region(kdb.Box(0, 0, 2000, 1000))
+        joined_boxes.insert(kdb.Box(0, 0, 1000, 2000))
+        for label, source in [('diamond', diamond), ('acute', acute), ('joined boxes', joined_boxes)]:
+            merged = source.merged()
+            assert not next(merged.each()).is_box()
+            before, after = merged.bbox(), merged.sized(margin, 2).bbox()
+            growth = (before.left-after.left, before.bottom-after.bottom,
+                      after.right-before.right, after.top-before.top)
+            assert max(growth) <= 2 * margin
+            if label != 'joined boxes':
+                assert max(growth) > margin  # One offset does not bound corners.
+            for axis in ('x', 'y'):
+                for edge, accepted in [(minimum+2*margin, False), (minimum+2*margin+1, True),
+                                       (maximum-2*margin, False), (maximum-2*margin-1, True)]:
+                    with self.subTest(shape=label, axis=axis, edge=edge, accepted=accepted):
+                        low = before.left if axis == 'x' else before.bottom
+                        high = before.right if axis == 'x' else before.top
+                        shift = edge - (low if edge < 0 else high)
+                        translated = source.transformed(kdb.Trans(shift, 0) if axis == 'x'
+                                                        else kdb.Trans(0, shift))
+                        fixture = TerminalFixture(diffusion=True)
+                        fixture.geometry['nsd'] = translated
+                        builder = PEX25DBuilder(fixture.context, fixture.tech, 'test')
+                        file = pex25d_file_pb2().PEX25DFile()
+                        builder.build_ground_plane(file)
+                        if accepted:
+                            builder.build_ground_cutouts(file)
+                            assert file.ground_plane.cutouts
+                        else:
+                            with mock.patch.object(kdb.Region, 'sized',
+                                                   side_effect=AssertionError('unsafe corner sizing')):
+                                with self.assertRaisesRegex(BuildError, 'Ground diffusion clearance'):
+                                    builder.build_ground_cutouts(file)
+
     def test_unhandled_layer_type_is_not_silently_omitted(self):
         fixture = TerminalFixture()
         fixture.tech.tech.process_stack.layers[0].layer_type = 81
@@ -460,7 +527,7 @@ class Pex25DBuilderShippedStacksTest(unittest.TestCase):
         :return: the PEX25D file of the process stack of the PDK, without layout
         """
         tech_info = TechInfo.from_json(pdk.config.tech_pb_json_path, dielectric_filter=dielectric_filter)
-        builder = PEX25DBuilder(SimpleNamespace(dbu=0.001), tech_info, 'stack')
+        builder = PEX25DBuilder(SimpleNamespace(dbu=0.001, substrate_net_name='stack-reference'), tech_info, 'stack')
         pex25d_file = pex25d_file_pb2().PEX25DFile()
         for build_part in (builder.build_units, builder.build_ground_plane,
                            builder.build_layers, builder.build_dielectrics):

@@ -31,6 +31,10 @@ The STL exporter builds its solids with :func:`build_fastercap_model` for now.
 
 from __future__ import annotations
 
+from pathlib import Path
+from ..pex25d.electrical import write_solver_body_map
+from ..plugin_api.v1 import SceneFeature, require_scene_features
+
 from dataclasses import dataclass, field, fields
 import os
 from typing import TYPE_CHECKING, Any, ClassVar, List, Mapping, Optional
@@ -114,6 +118,8 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
     name: ClassVar[str] = 'fastercap'
     default_prefix: ClassVar[str] = 'FasterCap_Input_'
 
+    scene_features = frozenset({SceneFeature.GROUND_CUTOUTS, SceneFeature.ELECTRICAL_IDENTITY})
+
     def export(self,
                scene: PEX25DScene,
                *,
@@ -121,6 +127,7 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
                prefix: str = '',
                options: Optional[Mapping[str, Any]] = None) -> List[str]:
         """Build and write solver inputs, returning the primary list file first."""
+        require_scene_features(self, scene, self.name)
         try:
             settings = FasterCapExporterOptions(**(options or {}))
         except (TypeError, ValueError) as exc:
@@ -135,6 +142,9 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
         if settings.write_stl:
             written.extend(generator.dump_stl(output_dir_path=output_dir_path,
                                               prefix=effective_prefix))
+        body_map = write_solver_body_map(scene, Path(output_dir_path) / (effective_prefix + 'body_names.json'))
+        if body_map is not None:
+            written.append(body_map)
         return written
 
 

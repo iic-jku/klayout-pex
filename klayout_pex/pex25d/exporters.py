@@ -31,15 +31,16 @@ Exporting is the one part of this package that is not pure format work: turning
 a scene into a solver's input needs polygon booleans and meshing, so a backend
 depends on a geometry library. Backends are therefore imported on use, and a
 missing dependency is reported rather than surfacing as an ImportError from an
-unexpected place. Reading, validating, converting and resolving stay
-dependency-free.
+unexpected place. Reading, structural validation, conversion and ordinary
+resolution remain independent of the native geometry library. Strict validation
+of ground openings also uses the native kernel.
 """
 
 from __future__ import annotations
 
 from typing import *
 
-from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter
+from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter, require_scene_features
 
 if TYPE_CHECKING:
     from ..plugin.exporter_registry import ExporterRegistry
@@ -96,7 +97,7 @@ def export_with_backend(backend: PEX25DSceneExporter,
     """Export with an already loaded backend, which need not be registered.
 
     The scene is validated first, as ``validate`` does without ``strict``: a
-    backend gets only a scene without errors, whoever wrote it. Full-ground contacts
+    backend gets only a scene without errors, whoever wrote it. Ground contacts
     are also rejected without requiring strict polygon checks. The diagnostics
     go to ``report``; an error raises InvalidSceneError and writes nothing.
 
@@ -110,6 +111,7 @@ def export_with_backend(backend: PEX25DSceneExporter,
     validate_export_scene(scene, report=report)
 
     try:
+        require_scene_features(backend, scene, target)
         return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
     except (ExportError, NotImplementedError, OSError):
         raise
@@ -137,7 +139,8 @@ def validate_export_scene(scene: PEX25DScene, *, report: Optional[DiagnosticsRep
     report = report if report is not None else DiagnosticsReport()
     errors_before = report.num_errors
     validate(scene, report=report)
-    Validator(report).check_ground_contacts(scene)
+    if report.num_errors == errors_before:
+        Validator(report).check_ground_contacts(scene)
     errors = report.num_errors - errors_before
     if errors:
         raise InvalidSceneError(f"The scene has {errors} error(s), so it was not exported")
