@@ -1,0 +1,80 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode CC --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_cell_of_devices.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_cell_of_devices.gds.gz --exclusion-markers ignore --cut block --out-dir /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/CC
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_cell_of_devices'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/CC/cut_cell_of_devices__cut_cell_of_devices/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 8 of 85 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 468.7 MiB
+INFO     __kpex__:kpex_cli.py:2227 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2227 (31, 0) -> (nwell_drw dpantenna_n)
+INFO     __kpex__:kpex_cli.py:2227 (32, 0) -> (nbulay_drw isolbox_i)
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell iso_pwell pwell_sub rppd_sub isolbox_s isolbox_bn dantenna_p)
+INFO     __kpex__:kpex_cli.py:2227 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2227 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:extractor.py:182 The netlist leaves out the 7 devices of the cut cells
+INFO     __kpex__:extractor.py:243 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I10, $I11, $I12, $I13, $I15, $I4, $I5, $I7, $I8, $I9
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+WARNING  __kpex__:extractor.py:289 --mode CC has one node per net, so the netlist has no ports where nets enter what is left out, use --mode R or RC of the 2.5D engine to connect a model
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 468.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;$2;$I14;0.003;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;$2;$I16;0.001;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;$2;sub!;0.046;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;$2;VSUBS;0.381;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;VSUBS;sub!;0.622;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/CC/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/CC/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 468.8 MiB
+WARNING  __kpex__:kpex_cli.py:1750 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: $2 (0.432 fF), $I14 (0.003 fF), $I16 (0.001 fF)
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 468.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode C --blackbox y --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_cell_of_devices.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /Users/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_cell_of_devices.gds.gz --exclusion-markers ignore --cut block --out-dir /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/C
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_cell_of_devices'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/C/cut_cell_of_devices__cut_cell_of_devices/kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 8 of 85 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 469.5 MiB
+INFO     __kpex__:kpex_cli.py:2227 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2227 (31, 0) -> (nwell_drw dpantenna_n)
+INFO     __kpex__:kpex_cli.py:2227 (32, 0) -> (nbulay_drw isolbox_i)
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell iso_pwell pwell_sub rppd_sub isolbox_s isolbox_bn dantenna_p)
+INFO     __kpex__:kpex_cli.py:2227 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2227 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 2) -> (metal2_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:extractor.py:182 The netlist leaves out the 7 devices of the cut cells
+INFO     __kpex__:extractor.py:243 Nothing connects these nets within exclusion markers to the netlist, so their capacitances to the rest of the layout go to the substrate: $I10, $I11, $I12, $I13, $I15, $I4, $I5, $I7, $I8, $I9
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+WARNING  __kpex__:extractor.py:289 --mode C has one node per net, so the netlist has no ports where nets enter what is left out, use --mode R or RC of the 2.5D engine to connect a model
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 469.6 MiB
+WARNING  __kpex__:kpex_cli.py:1642 Eliminated 3 floating capacitance nets before grounding: $2, $I14, $I16. Check that these nets intentionally have no port or retained device terminal
+INFO     __kpex__:kpex_cli.py:1645 Capacitance output policy: grounded, reference: sub!
+WARNING  __kpex__:kpex_cli.py:1647 Grounded capacitance output removes inter-net transfer admittance after exact floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance checks still describe the coupled extraction
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;VSUBS;sub!;0.663;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/C/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /private/var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/pytest-of-runner/pytest-0/test_replaced_device_block_kee0/C/cut_cell_of_devices__cut_cell_of_devices/cut_cell_of_devices_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 469.6 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 469.6 MiB
