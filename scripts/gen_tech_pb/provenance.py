@@ -155,6 +155,34 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
                     'Keep the oxide and metal thicknesses consistent with the same drawing rather than mix it with the general table',
                     'recipe', 'cross-section')
 
+    if technology_id.startswith('ihp-'):
+        # Preserve the historical recipe record; this correction has its own
+        # source identities and component revision. Other numerical inputs stay
+        # unchanged, including the nominal background dielectric constant.
+        passivation_revision = '85905e8810982bd89966cbf8b7e9d3fd1e922d42'
+        passivation_hashes = {
+            'ihp-sg13g2': 'f7a5ba53bf51b61602d7baf40fb20dffbeed13613482d8c6ab8cc9994345daf6',
+            'ihp-sg13cmos5l': '291c5731174298c993adca376d391bc508800b0bfd709be0cb6e5ff48dcb61dd',
+        }
+        _source(stack, 'passivation-recipe', 'Nominal oxide and nitride coating dimensions',
+                'RTimothyEdwards/capiche', passivation_revision,
+                f'{technology_id}/metal_stack_{technology_id}.py')
+        stack.sources[-1].sha256 = passivation_hashes[technology_id]
+        _source(stack, 'conformal-mapping', 'Cumulative field extent of chained conformal coatings',
+                'RTimothyEdwards/capiche', passivation_revision, 'src/capiche/ordered_stack.py')
+        stack.sources[-1].sha256 = 'ef91dec393e1ac97bc1f491a8c605d1842533bc5a2deff5b53879f9fc8199ea7'
+        _assumption(stack, 'cumulative-field-extent',
+                    'pass2 has 1.9 um cumulative field extent: 1.5 um oxide plus 0.4 um nitride',
+                    'The field extent is measured from the root metal bottom; the incremental top and side coatings remain 0.4 and 0.3 um',
+                    'passivation-recipe', 'conformal-mapping')
+        stack.data_revision = 'passivation-field-1'
+        stack.history.add(
+            revision='passivation-field-1', date='2026-11-13',
+            summary='Restore nominal nitride above the passivation oxide over the field',
+            reason='The former 0.4 um field extent placed the nitride inside the 1.5 um oxide instead of above it',
+            source_ids=['passivation-recipe', 'conformal-mapping'],
+            references=['https://github.com/iic-jku/klayout-pex/issues/556'])
+
     devices = components['device_references']
     if technology_id.startswith('ihp-'):
         for model in ('cap_cmomf', 'cap_cmomi'):
@@ -167,5 +195,6 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
         _assumption(devices, 'no-references', 'No automatic device-capacitance references are defined',
                     'An empty reference dataset must not imply that device capacitances have been checked')
     for evidence in components.values():
-        evidence.history[0].source_ids[:] = [source.id for source in evidence.sources]
+        evidence.history[0].source_ids[:] = [source.id for source in evidence.sources
+                                              if source.id not in ('passivation-recipe', 'conformal-mapping')]
     return catalog, components

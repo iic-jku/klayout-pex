@@ -405,7 +405,8 @@ class TechBuilder:
         # DIELECTRIC (conformal)        name,    dielectric_k, thickness,   thickness,      thickness, ref
         #                                                      over metal,  where no metal, sidewall
         #-----------------------------------------------------------------------------------------------
-        add_conformal_dielectric(psi,   "pass2", 6.6,          0.4,         0.4,            0.3,       "pass1")
+        # The field extent is measured from the root metal, so it includes pass1.
+        add_conformal_dielectric(psi,   "pass2", 6.6,          0.4,         1.9,            0.3,       "pass1")
 
         # DIELECTRIC (simple)        name,    dielectric_k, ref
         #-----------------------------------------------------------------------------------------------
