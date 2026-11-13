@@ -24,6 +24,7 @@
 
 """Corner references use independent device laws, exported dimensions and the same observable."""
 
+import math
 import hashlib
 from pathlib import Path
 from typing import Tuple
@@ -45,10 +46,12 @@ from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 from scripts.gen_tech_pb.device_reference_corners import load_corner_device_references
 from tests.common.cli_runner import run_cli
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
+from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.tech_catalog import add_scenario, edit_dataset, read_catalog, write_test_catalog
 
 
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('TechInfo', 'Device Corner References')]
+MODEL_DIRECTORY = Path(__file__).resolve().parents[1] / 'testdata/spice/device_corner_models'
 SKY_STYLES = {'hrhc': 'res_high__cap_high', 'hrlc': 'res_high__cap_low',
               'lrhc': 'res_low__cap_high', 'lrlc': 'res_low__cap_low'}
 CASES = [(PDK.SKY130A, corner, name) for corner in SKY_STYLES for name in
@@ -209,6 +212,54 @@ def test_bundled_device_components_are_hashed_and_explicitly_selectable(tmp_path
         assert resolved.device_models.mapping_by_lvs_device_class_name
     nominal = TechInfo.from_catalog(str(path), None, 'nominal')
     assert nominal.tech.SerializeToString(deterministic=True) == tech.SerializeToString(deterministic=True)
+
+
+def model_deck(pdk: PDK, corner: str, name: str, width: float, length: float,
+               multiplier: float = 1.0) -> str:
+    def include(filename: str) -> str:
+        return f'.include "{MODEL_DIRECTORY / filename}"'
+    def library(filename: str, section: str) -> str:
+        return f'.lib "{MODEL_DIRECTORY / filename}" {section}'
+    if pdk == PDK.SKY130A:
+        model = 'sky130_fd_pr__cap_mim_m3_2' if name.endswith('_m4') else 'sky130_fd_pr__cap_mim_m3_1'
+        setup = [include(SKY_STYLES[corner]+'.spice'), include(SKY_STYLES[corner]+'__lin.spice'),
+                 include('sky130_mim_common.spice'), include(model+'.model.spice'),
+                 '.param MC_MM_SWITCH=0', '.param tc1rm3=0 tc2rm3=0 tc1rm4=0 tc2rm4=0',
+                 '.param tc1rvia3=0 tc2rvia3=0 tc1rvia4=0 tc2rvia4=0', '.temp 27']
+        # R temperature coefficients cannot affect this 27 C reference, and the
+        # model's drawn dimensions are in micrometres without a global scale option.
+        instance = f'X1 a b {model} w={width:.12g} l={length:.12g}'
+    elif pdk == PDK.GF180MCUD:
+        setup = [library('gf180_mim_corners.spice', 'mimcap_ff' if corner == 'low' else 'mimcap_ss'),
+                 include('gf180_cap_mim_2f0.spice'), '.temp 25']
+        instance = f'X1 a b cap_mim_2f0_m4m5_noshield c_width={width:.12g}u c_length={length:.12g}u'
+    elif pdk == PDK.IHP_SG13G2:
+        setup = [library('ihp_cornerCAP.lib', 'cap_bcs' if corner == 'low' else 'cap_wcs'),
+                 include('ihp_cap_cmim.spice'), '.temp 27']
+        instance = f'X1 a b cap_cmim w={width:.12g}u l={length:.12g}u m={multiplier:.12g}'
+    else:
+        raise NotImplementedError(f'Corner simulation model for {pdk} is not implemented')
+    return '\n'.join(['* Independent upstream compact-model reference', *setup,
+                      '.subckt reference a b', instance, '.ends reference', ''])
+
+
+@pytest.mark.slow
+@requires_ngspice
+@pytest.mark.parametrize('pdk,corner,name,multiplier', [(*case, 1.0) for case in CASES] + [
+    (PDK.IHP_SG13G2, corner, 'cap_cmim', 3.0) for corner in ('low', 'high')])
+@pytest.mark.parametrize('width,length', [(7.0, 7.0), (7.0, 40.0), (40.0, 40.0)])
+def test_corner_reference_matches_upstream_model_mutual_ac_admittance(
+        tmp_path: Path, pdk: PDK, corner: str, name: str, width: float, length: float, multiplier: float):
+    reference = model_reference(pdk, corner, name, width, length, multiplier)
+    path = tmp_path / 'reference.spice'
+    path.write_text(model_deck(pdk, corner, name, width, length, multiplier), encoding='utf-8')
+    (tmp_path / '.spiceinit').write_text('set numdgt=15\n', encoding='utf-8')
+    frequencies, admittance = ngspice_port_admittance(str(path), 'reference', ['a', 'b'], (2, 4), str(tmp_path))
+    for frequency, matrix in zip(frequencies, admittance):
+        # Off-diagonal imaginary Y measures mutual C independently of leakage.
+        # Low frequencies suppress series resistance corrections, retained in the fixtures.
+        capacitance = -matrix[0, 1].imag / (math.tau*frequency)
+        assert capacitance == pytest.approx(reference.capacitance_f, rel=1e-8, abs=0)
 
 
 @pytest.mark.parametrize('corner,reference_corner,area_ff,reference_ff', [
