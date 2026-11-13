@@ -65,7 +65,8 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
             assert baseline_file.read_bytes() == (path.parent / baseline_file.relative_to(baseline_path.parent)).read_bytes()
     assert catalog.provenance.history[0] == provenance.history[0]
     ihp = pdk in (PDK.IHP_SG13G2, PDK.IHP_SG13CMOS5L)
-    expected_revision = {PDK.IHP_SG13G2: '3', PDK.IHP_SG13CMOS5L: '4'}.get(pdk, '2')
+    sky130 = pdk == PDK.SKY130A
+    expected_revision = {PDK.SKY130A: '3', PDK.IHP_SG13G2: '3', PDK.IHP_SG13CMOS5L: '4'}.get(pdk, '2')
     assert catalog.provenance.data_revision == catalog.provenance.history[-1].revision
     assert expected_revision in [entry.revision for entry in catalog.provenance.history]
     # Repeated builds must not duplicate records, change bytes or remove unrelated files.
@@ -80,6 +81,8 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     expected_scenarios = ['nominal']
     if ihp:
         expected_scenarios.extend(['gatpoly-low-sheet', 'gatpoly-high-sheet'])
+    elif sky130:
+        expected_scenarios.extend(['hrhc-mim-bound', 'hrlc-mim-bound', 'lrhc-mim-bound', 'lrlc-mim-bound'])
     if pdk == PDK.IHP_SG13CMOS5L:
         expected_scenarios.extend(['fixed-layout-low-r', 'fixed-layout-high-r'])
     assert [scenario.id for scenario in catalog.scenarios][:len(expected_scenarios)] == expected_scenarios
