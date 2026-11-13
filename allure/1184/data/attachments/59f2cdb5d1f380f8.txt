@@ -1,0 +1,111 @@
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 1 of 5 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:pex25d_builder.py:388 GROUND_PLANE subs: z -2800 … 0
+DEBUG    __kpex__:pex25d_builder.py:448 METAL GatPoly: z 4000 … 5600
+DEBUG    __kpex__:pex25d_builder.py:448 METAL Metal1: z 10400 … 14600
+DEBUG    __kpex__:pex25d_builder.py:448 METAL Metal2: z 20000 … 24900
+DEBUG    __kpex__:pex25d_builder.py:448 METAL Metal3: z 30300 … 35200
+DEBUG    __kpex__:pex25d_builder.py:448 METAL Metal4: z 40600 … 45500
+DEBUG    __kpex__:pex25d_builder.py:448 METAL metal5_n_cap: z 50900 … 55800
+DEBUG    __kpex__:pex25d_builder.py:448 METAL metal5_cap: z 50900 … 55800
+DEBUG    __kpex__:pex25d_builder.py:448 METAL cmim_top: z 56200 … 57700
+DEBUG    __kpex__:pex25d_builder.py:448 METAL TopMetal1: z 64300 … 84300
+DEBUG    __kpex__:pex25d_builder.py:448 METAL TopMetal2: z 112300 … 142300
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_poly_con': no metal layer 'poly_con' in the process stack, using 'GatPoly' for canonical layer 'GatPoly'; candidates were GatPoly
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_poly_con': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:475 VIA cont_poly_con: connects GatPoly → Metal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via1_drw': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via1_drw': no metal layer 'metal2_n_mom' in the process stack, using 'Metal2' for canonical layer 'Metal2'; candidates were Metal2
+DEBUG    __kpex__:pex25d_builder.py:475 VIA via1_drw: connects Metal1 → Metal2
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via2_drw': no metal layer 'metal2_n_mom' in the process stack, using 'Metal2' for canonical layer 'Metal2'; candidates were Metal2
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via2_drw': no metal layer 'metal3_n_mom' in the process stack, using 'Metal3' for canonical layer 'Metal3'; candidates were Metal3
+DEBUG    __kpex__:pex25d_builder.py:475 VIA via2_drw: connects Metal2 → Metal3
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via3_drw': no metal layer 'metal3_n_mom' in the process stack, using 'Metal3' for canonical layer 'Metal3'; candidates were Metal3
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via3_drw': no metal layer 'metal4_n_mom' in the process stack, using 'Metal4' for canonical layer 'Metal4'; candidates were Metal4
+DEBUG    __kpex__:pex25d_builder.py:475 VIA via3_drw: connects Metal3 → Metal4
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'via4_drw': no metal layer 'metal4_n_mom' in the process stack, using 'Metal4' for canonical layer 'Metal4'; candidates were Metal4
+DEBUG    __kpex__:pex25d_builder.py:475 VIA via4_drw: connects Metal4 → metal5_n_cap
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'topvia1_n_cap': no metal layer 'topmetal1_con' in the process stack, using 'TopMetal1' for canonical layer 'TopMetal1'; candidates were TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:475 VIA topvia1_n_cap: connects metal5_n_cap → TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'mim_via': no metal layer 'topmetal1_con' in the process stack, using 'TopMetal1' for canonical layer 'TopMetal1'; candidates were TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:475 VIA mim_via: connects cmim_top → TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'topvia2_drw': no metal layer 'topmetal1_con' in the process stack, using 'TopMetal1' for canonical layer 'TopMetal1'; candidates were TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'topvia2_drw': no metal layer 'topmetal2_con' in the process stack, using 'TopMetal2' for canonical layer 'TopMetal2'; candidates were TopMetal2
+DEBUG    __kpex__:pex25d_builder.py:475 VIA topvia2_drw: connects TopMetal1 → TopMetal2
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_nsd_con': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:504 METAL nSD: z -1 … 0, anchor of cont_nsd_con
+DEBUG    __kpex__:pex25d_builder.py:515 VIA cont_nsd_con: connects nSD → Metal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_psd_con': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:504 METAL pSD: z -1 … 0, anchor of cont_psd_con
+DEBUG    __kpex__:pex25d_builder.py:515 VIA cont_psd_con: connects pSD → Metal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_ntap_con': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:504 METAL ntap: z -1 … 0, anchor of cont_ntap_con
+DEBUG    __kpex__:pex25d_builder.py:515 VIA cont_ntap_con: connects ntap → Metal1
+DEBUG    __kpex__:pex25d_builder.py:246 Contact 'cont_ptap_con': no metal layer 'metal1_n_mom' in the process stack, using 'Metal1' for canonical layer 'Metal1'; candidates were Metal1
+DEBUG    __kpex__:pex25d_builder.py:504 METAL ptap: z -1 … 0, anchor of cont_ptap_con
+DEBUG    __kpex__:pex25d_builder.py:515 VIA cont_ptap_con: connects ptap → Metal1
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE fox: k=3.95 wraps subs between subs GatPoly
+DEBUG    __kpex__:pex25d_builder.py:693 DIELECTRIC_CONFORMAL nitride: k=6.5 wraps GatPoly over=500 beside=500 on_field=500
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ild0: k=4.1 wraps nitride between GatPoly Metal1
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ild1: k=4.1 wraps Metal1 between Metal1 Metal2
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ild2: k=4.1 wraps Metal2 between Metal2 Metal3
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ild3: k=4.1 wraps Metal3 between Metal3 Metal4
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ild4: k=4.1 wraps Metal4 between Metal4 metal5_n_cap
+DEBUG    __kpex__:pex25d_builder.py:693 DIELECTRIC_CONFORMAL ismim: k=6.78 wraps metal5_cap over=400 beside=0 on_field=0
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ildtm1b: k=4.1 wraps ismim between metal5_cap cmim_top
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ildtm1c: k=4.1 wraps cmim_top between cmim_top TopMetal1
+DEBUG    __kpex__:pex25d_builder.py:669 DIELECTRIC_SIMPLE ildtm2: k=4.1 wraps TopMetal1 between TopMetal1 TopMetal2
+DEBUG    __kpex__:pex25d_builder.py:693 DIELECTRIC_CONFORMAL pass1: k=4.1 wraps TopMetal2 over=15000 beside=3000 on_field=15000
+DEBUG    __kpex__:pex25d_builder.py:693 DIELECTRIC_CONFORMAL pass2: k=6.6 wraps pass1 over=4000 beside=3000 on_field=19000
+INFO     __kpex__:pex25d_builder.py:617 DIELECTRIC_BACKGROUND air: k=1.0
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer cont_nsd_con: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer GatPoly: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer cont_poly_con: 2 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer Metal1: 3 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer via1_drw: 3 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer Metal2: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer via2_drw: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VDD, layer Metal3: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer cont_nsd_con: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer Metal1: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer via1_drw: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer Metal2: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer via2_drw: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:740 Conductor VSS, layer Metal3: 1 shape(s)
+DEBUG    __kpex__:pex25d_builder.py:726 Net sub! has no interconnect geometry
+INFO     __kpex__:pex25d_builder.py:742 2 conductor(s), 19 shape record(s)
+INFO     __kpex__:pex25d_builder.py:927 5 terminal record(s)
+DEBUG    __kpex__:pex25d_builder.py:982 No via resistance for 'cont_ntap_con' (canonical 'Cont')
+DEBUG    __kpex__:pex25d_builder.py:982 No via resistance for 'cont_ptap_con' (canonical 'Cont')
+INFO     __kpex__:pex25d_builder.py:989 10 metal and 10 via resistance record(s)
+INFO     __kpex__:fastercap_model_generator.py:121 DBU: 0.0001
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay b: 1
+INFO     __kpex__:fastercap_model_generator.py:123 Delaunay area_max: 0
+INFO     __kpex__:pex25d_model_builder.py:168 Ground plane subs: z=-0.28, height=0.28
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer cont_nsd_con: z=0.0, height=1.04
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer GatPoly: z=0.4, height=0.16
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer cont_poly_con: z=0.56, height=0.48
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer Metal1: z=1.04, height=0.42
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer via1_drw: z=1.46, height=0.54
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer Metal2: z=2.0, height=0.49
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer via2_drw: z=2.49, height=0.54
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VDD, layer Metal3: z=3.03, height=0.49
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer cont_nsd_con: z=0.0, height=1.04
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer Metal1: z=1.04, height=0.42
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer via1_drw: z=1.46, height=0.54
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer Metal2: z=2.0, height=0.49
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer via2_drw: z=2.49, height=0.54
+DEBUG    __kpex__:pex25d_model_builder.py:190 Conductor VSS, layer Metal3: z=3.03, height=0.49
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric fox: z=-0.28, height=0.68
+INFO     __kpex__:pex25d_model_builder.py:243 Conformal dielectric nitride: z=0.4, height=0.21
+INFO     __kpex__:pex25d_model_builder.py:253 Conformal dielectric nitride (on the field): z=0.4, height=0.05
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ild1: z=1.04, height=0.96
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ild2: z=2.0, height=1.03
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ild3: z=3.03, height=1.03
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ild4: z=4.06, height=1.03
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ildtm1c: z=5.62, height=0.81
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ildtm2: z=6.43, height=4.8
+INFO     __kpex__:pex25d_model_builder.py:253 Conformal dielectric pass1 (on the field): z=11.23, height=1.5
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ild0: z=0.4, height=0.64
+INFO     __kpex__:pex25d_model_builder.py:211 Simple dielectric ildtm1b: z=5.09, height=0.53
+INFO     __kpex__:pex25d_model_builder.py:253 Conformal dielectric pass2 (on the field): z=11.23, height=1.9
