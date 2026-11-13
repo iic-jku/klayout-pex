@@ -28,11 +28,12 @@ from pathlib import Path
 import tempfile
 
 import allure
+import numpy as np
 import pytest
 
 from klayout_pex.netlist.netlist_cli import NetlistCLI
 from klayout_pex.netlist.netlist_convert import convert_to_vacask
-from tests.common.vacask import read_ascii_raw, requires_vacask, run_vacask
+from tests.common.vacask import read_ascii_raw, requires_vacask, run_vacask, vacask_port_admittance
 
 
 # NOTE: a low pass of 1 kΩ, 2 x 2 kΩ (a subcircuit call with m=2) and 1 pF, loaded with 2 kΩ,
@@ -164,3 +165,20 @@ endc
         for supply in ('vd:flow(br)', 'vg:flow(br)'):
             assert obtained[analysis][supply][0] == pytest.approx(expected[supply][0], rel=1e-12, abs=1e-22), (
                 analysis, supply, kind, directive)
+
+
+@allure.parent_suite("Simulation Tests")
+@allure.tag("Netlist", "VACASK")
+@pytest.mark.slow
+@requires_vacask
+@pytest.mark.parametrize('filename', ['ordinary.spice', 'via-stack.spice', '123.spice', 'two words.spice'])
+def test_port_admittance_accepts_filenames_that_are_not_analysis_identifiers(tmp_path: Path, filename: str):
+    # Valid filesystem names need not be simulator identifiers. Check ordinary
+    # names and the punctuation, whitespace and leading-digit equivalence classes.
+    source = tmp_path / filename
+    source.write_text('.subckt coupling A B\nR1 A B 100\nC1 A B 1n\n.ends coupling\n', encoding='utf-8')
+    frequencies, measured = vacask_port_admittance(str(source), 'coupling', ['A', 'B'], (0, 2), str(tmp_path))
+    np.testing.assert_array_equal(frequencies, [1.0, 10.0, 100.0])
+    for frequency, matrix in zip(frequencies, measured):
+        expected = np.array([[1, -1], [-1, 1]]) * (1 / 100 + 1j * 2 * math.pi * frequency * 1e-9)
+        np.testing.assert_allclose(matrix, expected, rtol=1e-9, atol=0)
