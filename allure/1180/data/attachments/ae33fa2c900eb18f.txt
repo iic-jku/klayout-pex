@@ -1,0 +1,30 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 kpex extract --pdk ihp-sg13g2 --2.5D --mode CC --blackbox y --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.gds.gz --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cap_cmim_20um_x_20um_over_m4_wire.lvsdb.gz --tech-catalog /tmp/pytest-of-runner/pytest-0/test_real_ihp_mim_keeps_marker3/catalog.pb.json --corner selected-mim --check-device-caps --out-dir /tmp/pytest-of-runner/pytest-0/test_real_ihp_mim_keeps_marker3/output
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cap_cmim_20um_x_20um_over_m4_wire'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_real_ihp_mim_keeps_marker3/output/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 348.5 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2227 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:2227 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:2227 (50, 0) -> (metal4_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:kpex_cli.py:2227 (50, 2) -> (metal4_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 8 µm (tech info of ihp-sg13g2)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 348.5 MiB
+INFO     __kpex__:kpex_cli.py:1619 $1 (cap_cmim), mim_top / mim_btm: marker coupling 660 fF, model reference 543.2 fF, ratio 1.21502 (informational)
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;A;B;3.246;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;A;D;5.994;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;A;VSUBS;6.91;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;B;D;0.091;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;B;VSUBS;1.941;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C6;D;VSUBS;3.81;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /tmp/pytest-of-runner/pytest-0/test_real_ihp_mim_keeps_marker3/output/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_real_ihp_mim_keeps_marker3/output/cap_cmim_20um_x_20um_over_m4_wire__cap_cmim_20um_x_20um_over_m4_wire/cap_cmim_20um_x_20um_over_m4_wire_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 348.5 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 348.5 MiB
