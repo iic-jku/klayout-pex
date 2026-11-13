@@ -1,0 +1,35 @@
+SUBPROCESS __kpex__:kpex_cli.py:2063 kpex extract --pdk sky130A --2.5D --mode RC --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\sky130A\test_patterns\nfet_li1.lvsdb.gz' --mode R --schematic 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\ordered.spice' --reduce floating --netlist-format spice --out-netlist 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\export.spice' --out-dir 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2'
+WARNING  __kpex__:kpex_cli.py:983 --schematic supplies matched device names and port order for 2.5D output. --check checks device classes, totals and top pins. Use regular LVS for full verification
+INFO     __kpex__:kpex_cli.py:1040 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\nfet_li1__nfet_li1\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2233 Peak memory (resident set size) after preparing the LVSDB: 295.3 MiB
+INFO     __kpex__:kpex_cli.py:2237 (93, 44) -> (nsd)
+INFO     __kpex__:kpex_cli.py:2237 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2237 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2237 (66, 4403) -> (licon_poly_con)
+INFO     __kpex__:kpex_cli.py:2237 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2237 (66, 4401) -> (licon_nsd_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 4pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 295.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1671 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1671 R1;D;D.$1.li1;;30.494
+SUBPROCESS __kpex__:kpex_cli.py:1671 R2;D.$0.li1;D.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1671 R3;D.$0.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1671 R4;D.$1.li1;D.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1671 R5;G;G.$0.li1;;6.4
+SUBPROCESS __kpex__:kpex_cli.py:1671 R6;G.$0.li1;G.$1.poly;;152.0
+SUBPROCESS __kpex__:kpex_cli.py:1671 R7;G.$1.poly;G.P0.poly;;234.381
+SUBPROCESS __kpex__:kpex_cli.py:1671 R8;S;S.$0.li1;;43.294
+SUBPROCESS __kpex__:kpex_cli.py:1671 R9;S.$0.li1;S.$1.li1;;25.6
+SUBPROCESS __kpex__:kpex_cli.py:1671 R10;S.$0.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1671 R11;S.$1.li1;S.P0.nsdm;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1674 C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\nfet_li1__nfet_li1\nfet_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1714 Wrote expanded netlist to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\nfet_li1__nfet_li1\nfet_li1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1749 Peak memory (resident set size) after the netlist: 295.3 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1768 .SUBCKT nfet_li1: 11 R, 0 C, 12 nodes → 11 R, 0 C, 12 nodes (TICER eliminated 0 nodes; 0 floating islands merged, 0 nodes less; 0 capacitor-only nodes eliminated, 0 tied)
+INFO     __kpex__:kpex_cli.py:1769 Wrote reduced netlist to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\nfet_li1__nfet_li1\nfet_li1_k25d_pex_netlist_reduced.spice
+INFO     __kpex__:kpex_cli.py:1779 Peak memory (resident set size) after the netlist reduction: 295.3 MiB
+INFO     __kpex__:kpex_cli.py:1805 Copied reduced SPICE netlist to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_schematic_port_order_reac2\export.spice
+INFO     __kpex__:kpex_cli.py:2102 Peak memory (resident set size) after the run: 295.3 MiB
