@@ -44,13 +44,12 @@ sys.path.insert(0, str(PROJECT_ROOT))  # use this checkout, not an installed tec
 
 import google.protobuf.json_format
 
-from klayout_pex.tech_catalog import write_nominal_catalog
+from corner_data import write_bundled_corner_catalog
 
 from tech_builder import Technology
 import gf180mcuD
 import ihp_sg13
 import sky130A
-from provenance import nominal_provenance
 
 
 def write_tech(output_directory: Path, tech: Technology):
@@ -60,10 +59,8 @@ def write_tech(output_directory: Path, tech: Technology):
                                                          preserving_proto_field_name=True,
                                                          ensure_ascii=False, sort_keys=True)
     json_pb_path.write_text(json_str, encoding='utf-8')
-    catalog_provenance, components = nominal_provenance(tech.name)
-    for path in write_nominal_catalog(
-            tech, output_directory / 'tech' / tech.name / 'catalog.pb.json',
-            catalog_provenance, f'Nominal extraction scenarios for {tech.name}', components):
+    for path in write_bundled_corner_catalog(
+            tech, output_directory / 'tech' / tech.name / 'catalog.pb.json'):
         print(f"Writing technology catalog data to '{path}'.")
 
 

@@ -103,7 +103,7 @@ will create the JSON tech info files:
 `kpex extract` and `kpex pex25d` accept `--corner SCENARIO` and `--tech-catalog PATH`.
 The catalog belongs to the selected `--pdk`; it cannot silently change the LVS deck.
 Without these options, the bundled catalog's explicit default is used. All bundled catalogs
-currently contain only `nominal`, with the existing nominal numerical data.
+currently select only the `nominal` scenario, with the existing nominal numerical data.
 Upstream corner labels do not establish a complete KPEX coefficient set or physical recipe.
 
 A scenario names separate, complete datasets:
@@ -181,6 +181,44 @@ The example ID is not a bundled PDK corner. The catalog must supply its complete
 and their provenance. `kpex_result.json` records the scenario, dataset IDs and content hashes.
 PEX25D metadata also records `process_corner`. A separate physical-stack hash lets calibration
 results remain tied to a geometry recipe independently of fitted coefficient tables.
+
+#### Low/high capacitance components
+
+The bundled catalogs for `sky130A`, `gf180mcuD`, `ihp-sg13g2` and `ihp-sg13cmos5l`
+also contain complete `low` and `high` capacitance datasets. They include substrate,
+overlap, fitted sidewall and directed fringe coefficients, with MIM area and edge laws
+where the PDK variant supports them. Nominal datasets remain unchanged.
+
+These are empirical capacitance components, not complete resistance/capacitance scenarios
+or transistor corners. The two upstream resistance prefixes produce the same capacitance
+tables for each capacitance suffix. The source revisions, preprocessing options, layer
+projections and derived rows are recorded in each component's provenance. In particular,
+the missing low-C `gf180mcuD` `Metal2`-to-well fringe uses the same-corner substrate
+perimeter coefficient, and the `ihp-sg13g2` MIM edge law retains its literal coefficient.
+
+To study capacitance variation with nominal resistance, copy the entire generated catalog
+directory and append an explicitly named scenario to its `scenarios` array:
+
+```json
+{
+  "id": "nominal-r-low-c",
+  "description": "Low capacitance with nominal resistance for sensitivity analysis",
+  "resistance": "nominal",
+  "capacitance": "low",
+  "process_stack": "nominal",
+  "physical_stack_matches": false,
+  "device_references": ""
+}
+```
+
+Use `--tech-catalog path/to/catalog.pb.json --corner nominal-r-low-c` with
+`kpex extract --2.5D`. Use `"capacitance": "high"` and a distinct scenario ID for the high-C variant.
+Keep the default scenario and its component references unchanged. Record the custom scenario
+and its intended interpretation in the catalog's provenance history.
+
+This explicit combination does not claim a correlated resistance corner, matching field-solver
+geometry or matching device-capacitance references. The bundled catalogs therefore continue
+to expose `nominal` as their only scenario until those independent data are qualified.
 
 ### Running tests
 
