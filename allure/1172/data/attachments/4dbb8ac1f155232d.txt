@@ -1,0 +1,839 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_coil.gds.gz --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_coil.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_coil'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 FasterCap              6.2.1    any                         >=6.2.1
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 202.8 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2227 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2227 (133, 0) -> (topvia2_drw)
+INFO     __kpex__:kpex_cli.py:2227 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2227 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (134, 2) -> (topmetal2_pin_con)
+INFO     __kpex__:fastercap_model_generator.py:121 DBU: 0.001
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay b: 0.5
+INFO     __kpex__:fastercap_model_generator.py:123 Delaunay area_max: 50
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor VC, metal metal5_n_cap, z=5.09, height=0.49
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor OSCN,OSCP,VCT, metal TopMetal1, z=6.43, height=2.0
+INFO     __kpex__:fastercap_input_builder.py:225 Conductor OSCN,OSCP,VCT, via topvia2_drw, z=8.43, height=2.8
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor OSCN,OSCP,VCT, metal TopMetal2, z=11.23, height=3.0
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor VDD, metal TopMetal1, z=6.43, height=2.0
+INFO     __kpex__:fastercap_input_builder.py:302 Substrate sub!, z=-0.28, height=0.28
+INFO     __kpex__:fastercap_input_builder.py:328 Simple dielectric (field oxide) fox: z=0, height=0.4
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild0: z=0.4, height=0.64
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild1: z=1.04, height=0.96
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild2: z=2.0, height=1.0299999999999998
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild3: z=3.03, height=1.0299999999999998
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild4: z=4.06, height=1.0300000000000002
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm1b: z=5.09, height=0.5300000000000002
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm1c: z=5.62, height=0.8099999999999996
+INFO     __kpex__:fastercap_input_builder.py:404 Simple dielectric (sidewall) ildtm2: z=8.43, height=2.8000000000000007
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm2: z=6.43, height=4.800000000000001
+INFO     __kpex__:fastercap_input_builder.py:372 Conformal dielectric (sidewall) pass1: z=11.23, height=4.5
+INFO     __kpex__:fastercap_input_builder.py:384 Conformal dielectric (where no metal) pass1: z=11.23, height=1.5
+INFO     __kpex__:fastercap_input_builder.py:372 Conformal dielectric (sidewall) pass2: z=11.23, height=4.9
+INFO     __kpex__:fastercap_input_builder.py:384 Conformal dielectric (where no metal) pass2: z=11.23, height=0.4
+INFO     __kpex__:fastercap_input_builder.py:404 Simple dielectric (sidewall) air: z=16.130000000000003, height=0.09999999999999964
+INFO     __kpex__:fastercap_input_builder.py:411 Simple dielectric (no metal) air: z=11.63, height=4.6
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_1_outside=fox_inside=ild0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_2_outside=ild0_inside=ild1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_3_outside=ild1_inside=ild2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_4_outside=ild2_inside=ild3.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_5_outside=ild3_inside=ild4.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_6_outside=ild4_inside=ildtm1b.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_7_outside=ildtm1b_inside=ildtm1c.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_8_outside=ildtm1c_inside=ildtm2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_9_outside=ildtm2_inside=pass1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_10_outside=pass1_inside=pass2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_11_outside=pass1_inside=air.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_12_outside=pass2_inside=air.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_13_outside=air_inside=(void).geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_14_outside=(void)_inside=fox.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_15_outside=(void)_inside=ild0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_16_outside=(void)_inside=ild1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_17_outside=(void)_inside=ild2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_18_outside=(void)_inside=ild3.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_19_outside=(void)_inside=ild4.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_20_outside=(void)_inside=ildtm1b.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_21_outside=(void)_inside=ildtm1c.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_22_outside=(void)_inside=ildtm2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_23_outside=(void)_inside=pass1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_24_outside=(void)_net=sub!.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_25_outside=fox_net=sub!.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_26_outside=ild4_net=VC.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_27_outside=ildtm1b_net=VC.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_28_outside=ildtm1c_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_29_outside=ildtm2_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_30_outside=pass1_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_31_outside=ildtm1c_net=VDD.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_32_outside=ildtm2_net=VDD.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:857 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_fox.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild0.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild1.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild3.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild4.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm1b.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm1c.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_pass1.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_pass2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_air.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_VC.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_OSCN,OSCP,VCT.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_VDD.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_sub!.stl
+INFO     __kpex__:kpex_cli.py:2280 Peak memory (resident set size) after the FasterCap input: 204.7 MiB
+INFO     __kpex__:kpex_cli.py:1229 Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as 16
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 FasterCap -b -i -v -a0.05 -d0.5 -f2 -ap /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst, output file: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Output.txt
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.05
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.5
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1768300
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 4 x 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!  8.67112e-08 -7.33219e-10 -1.01413e-07 5.14103e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -1.34496e-08 -4.89564e-09 -1.55213e-07 1.55947e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT  -7.75829e-08 7.59578e-09 9.8623e-08 -6.34486e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_VDD  1.85365e-08 -2.35563e-09 1.97265e-07 -1.74514e-07 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9041 of which 2604 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1508146
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1777341 (uncompressed 81739681, compression ratio is 97.8%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 27
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000483595
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.209857s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.023033s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.266858s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.263683s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000929s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.214010s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 3621641 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 33626792 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 93480 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2291872 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 1.622831s (0 days, 0 hours, 0 mins, 1 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 38704 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.000341954
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 10328
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 2405192
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 4 x 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!  6.813e-08 -8.72922e-09 -1.93749e-08 -2.46233e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -8.63435e-09 1.66232e-08 -4.0348e-09 -3.57521e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT  -1.84844e-08 -4.02366e-09 3.0411e-08 -4.74408e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_VDD  -2.43594e-08 -3.63641e-09 -4.67561e-09 3.45945e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 4.16521
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9041 of which 2604 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 10328
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 2068312
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 2415520 (uncompressed 106667584, compression ratio is 97.7%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 28
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000341826
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.022063s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.001528s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.194411s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.342213s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.039531s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.249606s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 4137728 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 50414320 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 93480 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2279960 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 268583616 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 1.933974s (0 days, 0 hours, 0 mins, 1 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 317879 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.000241708
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 13005
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 3652326
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 1024 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 4 x 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!  6.73314e-08 -7.0873e-09 -1.9899e-08 -2.46513e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -6.93793e-09 1.35729e-08 -3.23919e-09 -3.21988e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT  -1.90435e-08 -3.01223e-09 3.00488e-08 -4.83965e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_VDD  -2.45027e-08 -3.2188e-09 -5.00476e-09 3.44167e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.0452708
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9041 of which 2604 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9041
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 13005
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 3110217
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 3665331 (uncompressed 169130025, compression ratio is 97.8%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 30
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000241696
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.084400s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.006199s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.473891s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.513051s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.041133s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.350274s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 5211205 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 67212968 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 93480 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2754024 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 268605032 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 3.011173s (0 days, 0 hours, 0 mins, 3 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 335817 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 335817 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 2.815554s (0 days, 0 hours, 0 mins, 2 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 2.856s
+SUBPROCESS __kpex__:kpex_cli.py:1283 Device;Net1;Net2;Capacitance [fF]
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_1;sub!;VC;7.01
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_2;sub!;OSCN,OSCP,VCT;19.47
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_3;sub!;VDD;24.58
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_2;VC;OSCN,OSCP,VCT;3.13
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_3;VC;VDD;3.22
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_1;VC;sub!;0.22
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_2_3;OSCN,OSCP,VCT;VDD;4.92
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_2_2;OSCN,OSCP,VCT;sub!;2.53
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_3_3;VDD;sub!;1.7
+INFO     __kpex__:kpex_cli.py:1286 Wrote expanded netlist CSV to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Expanded_Netlist.csv
+INFO     __kpex__:kpex_cli.py:1291 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Expanded_Netlist.cir
+INFO     __kpex__:kpex_cli.py:1306 Wrote reduced netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Reduced_Netlist.cir
+INFO     __kpex__:kpex_cli.py:2286 Peak memory (resident set size) after FasterCap: 204.7 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 204.7 MiB
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_coil.gds.gz --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_coil.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --fastercap --cut coil=xind --cut-keep-net VDD
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_coil'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 FasterCap              6.2.1    any                         >=6.2.1
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 204.7 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2227 (134, 0) -> (topmetal2_con)
+INFO     __kpex__:kpex_cli.py:2227 (133, 0) -> (topvia2_drw)
+INFO     __kpex__:kpex_cli.py:2227 (67, 0) -> (metal5_n_cap)
+INFO     __kpex__:kpex_cli.py:2227 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (126, 2) -> (topmetal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (134, 2) -> (topmetal2_pin_con)
+WARNING  __kpex__:extractor.py:289 The netlist of a field solver has one node per net, so the netlist has no ports where nets enter what is left out, use --mode R or RC of the 2.5D engine to connect a model
+INFO     __kpex__:fastercap_model_generator.py:121 DBU: 0.001
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay b: 0.5
+INFO     __kpex__:fastercap_model_generator.py:123 Delaunay area_max: 50
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor VC, metal metal5_n_cap, z=5.09, height=0.49
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor OSCN,OSCP,VCT, metal TopMetal1, z=6.43, height=2.0
+INFO     __kpex__:fastercap_input_builder.py:225 Conductor OSCN,OSCP,VCT, via topvia2_drw, z=8.43, height=2.8
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor OSCN,OSCP,VCT, metal TopMetal2, z=11.23, height=3.0
+INFO     __kpex__:fastercap_input_builder.py:212 Conductor VDD, metal TopMetal1, z=6.43, height=2.0
+INFO     __kpex__:fastercap_input_builder.py:302 Substrate sub!, z=-0.28, height=0.28
+INFO     __kpex__:fastercap_input_builder.py:328 Simple dielectric (field oxide) fox: z=0, height=0.4
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild0: z=0.4, height=0.64
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild1: z=1.04, height=0.96
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild2: z=2.0, height=1.0299999999999998
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild3: z=3.03, height=1.0299999999999998
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ild4: z=4.06, height=1.0300000000000002
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm1b: z=5.09, height=0.5300000000000002
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm1c: z=5.62, height=0.8099999999999996
+INFO     __kpex__:fastercap_input_builder.py:404 Simple dielectric (sidewall) ildtm2: z=8.43, height=2.8000000000000007
+INFO     __kpex__:fastercap_input_builder.py:418 Simple dielectric ildtm2: z=6.43, height=4.800000000000001
+INFO     __kpex__:fastercap_input_builder.py:372 Conformal dielectric (sidewall) pass1: z=11.23, height=4.5
+INFO     __kpex__:fastercap_input_builder.py:384 Conformal dielectric (where no metal) pass1: z=11.23, height=1.5
+INFO     __kpex__:fastercap_input_builder.py:372 Conformal dielectric (sidewall) pass2: z=11.23, height=4.9
+INFO     __kpex__:fastercap_input_builder.py:384 Conformal dielectric (where no metal) pass2: z=11.23, height=0.4
+INFO     __kpex__:fastercap_input_builder.py:404 Simple dielectric (sidewall) air: z=16.130000000000003, height=0.09999999999999964
+INFO     __kpex__:fastercap_input_builder.py:411 Simple dielectric (no metal) air: z=11.63, height=4.6
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_1_outside=fox_inside=ild0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_2_outside=ild0_inside=ild1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_3_outside=ild1_inside=ild2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_4_outside=ild2_inside=ild3.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_5_outside=ild3_inside=ild4.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_6_outside=ild4_inside=ildtm1b.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_7_outside=ildtm1b_inside=ildtm1c.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_8_outside=ildtm1c_inside=ildtm2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_9_outside=ildtm2_inside=pass1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_10_outside=pass1_inside=pass2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_11_outside=pass1_inside=air.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_12_outside=pass2_inside=air.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_13_outside=air_inside=(void).geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_14_outside=(void)_inside=fox.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_15_outside=(void)_inside=ild0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_16_outside=(void)_inside=ild1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_17_outside=(void)_inside=ild2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_18_outside=(void)_inside=ild3.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_19_outside=(void)_inside=ild4.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_20_outside=(void)_inside=ildtm1b.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_21_outside=(void)_inside=ildtm1c.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_22_outside=(void)_inside=ildtm2.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_23_outside=(void)_inside=pass1.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_24_outside=(void)_net=sub!#substrate.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_25_outside=fox_net=sub!#substrate.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_26_outside=ild4_net=VC.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_27_outside=ildtm1b_net=VC.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_28_outside=ildtm1c_net=OSCN,OSCP,VCT#x0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_29_outside=ildtm2_net=OSCN,OSCP,VCT#x0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_30_outside=pass1_net=OSCN,OSCP,VCT#x0.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_31_outside=ildtm1c_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_32_outside=ildtm2_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_33_outside=pass1_net=OSCN,OSCP,VCT.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_34_outside=ildtm1c_net=VDD.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_35_outside=ildtm2_net=VDD.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:857 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_fox.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild0.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild1.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild3.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ild4.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm1b.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm1c.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_ildtm2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_pass1.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_pass2.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/diel_air.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_VC.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_OSCN,OSCP,VCT#x0.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_OSCN,OSCP,VCT.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_VDD.stl
+SUBPROCESS __kpex__:fastercap_model_generator.py:1028 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/Geometries/cond_sub!#substrate.stl
+INFO     __kpex__:kpex_cli.py:2280 Peak memory (resident set size) after the FasterCap input: 206.5 MiB
+INFO     __kpex__:kpex_cli.py:1229 Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as 16
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 FasterCap -b -i -v -a0.05 -d0.5 -f2 -ap /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst, output file: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Output.txt
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.05
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.025
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.5
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1769784
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 512 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 5 x 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!#substrate  1.76093e-08 5.95416e-09 -1.87946e-09 -8.25737e-10 -1.40941e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  2.02645e-07 -2.59604e-08 -4.60261e-08 -1.44423e-08 9.01409e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT#x0  -2.67448e-07 2.59608e-08 3.6618e-08 1.75113e-08 3.37017e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_OSCN,OSCP,VCT  -1.06176e-08 8.4566e-10 1.68147e-09 6.11501e-09 -1.33076e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g5_VDD  6.54854e-08 -6.74822e-09 1.44323e-08 -5.89128e-09 -2.63364e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 1 col 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 3 col 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 5 col 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9057 of which 2620 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1515188
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1778841 (uncompressed 82029249, compression ratio is 97.8%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 27
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000640083
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.212541s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.022107s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.256869s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.259800s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000388s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.214549s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 3627857 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 33626920 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 98400 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2078016 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 1.619193s (0 days, 0 hours, 0 mins, 1 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 38507 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 9156, Links # 1884130)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.000452607)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.000319988
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 10741
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 2564382
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 1024 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 5 x 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!#substrate  6.79212e-08 -8.74079e-09 -1.43741e-08 -5.07524e-09 -2.46564e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -8.72488e-09 1.68472e-08 -4.23206e-09 3.07977e-11 -3.6133e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT#x0  -1.38091e-08 -4.22244e-09 2.61034e-08 -1.90389e-09 -4.11092e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_OSCN,OSCP,VCT  -4.55778e-09 1.74671e-11 -1.75608e-09 8.17248e-09 -6.59794e-10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g5_VDD  -2.42461e-08 -3.71043e-09 -4.06149e-09 -6.93355e-10 3.46092e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 2 col 4
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix has a non-negative off-diagonal element at row 4 col 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 3.87202
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9057 of which 2620 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 10741
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 2230876
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 2575123 (uncompressed 115369081, compression ratio is 97.8%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 28
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.00031993
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.014550s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.001653s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.209763s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.370362s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.046849s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.477635s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 4303141 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 50417624 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 98400 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2541304 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 268586920 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 3.056497s (0 days, 0 hours, 0 mins, 3 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 318307 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.000226224
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 13915
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 4055704
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 1024 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 5 x 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!#substrate  6.67144e-08 -7.0979e-09 -1.47918e-08 -4.86136e-09 -2.44892e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -6.98794e-09 1.35475e-08 -3.12794e-09 -6.47111e-12 -3.25771e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT#x0  -1.44956e-08 -2.99675e-09 2.55223e-08 -2.05206e-09 -4.08244e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_OSCN,OSCP,VCT  -4.60367e-09 -7.09971e-12 -1.87463e-09 8.48725e-09 -6.78024e-10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g5_VDD  -2.44051e-08 -3.23548e-09 -4.34686e-09 -8.17127e-10 3.43608e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.0517998
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9057 of which 2620 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 13915
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 3623941
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 4069619 (uncompressed 193627225, compression ratio is 97.9%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 30
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000226211
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.085363s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.006376s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.504190s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.577043s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.279814s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.601697s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 5575915 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 67220248 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 98400 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 2720432 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 268612312 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 4.339359s (0 days, 0 hours, 0 mins, 4 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 336159 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #3 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 3 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 4 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 5 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 6 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 7 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 8 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 9 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: dummy dielectric-dielectric interface found in the input file, skipping
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dummy interface defined at line 10 of the input file "/home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/FasterCap_Input_Files/FasterCap_Input_.lst"
+SUBPROCESS __kpex__:fastercap_runner.py:108          Dielectric constants are: inperm 4.100000-j0.000000, outperm 4.100000-j0.000000; differing less than 0.100000%
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.000159955
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 20276
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 7071722
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Two-levels, two-levels preconditioner dimension (-ps): 1024 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 5 x 5
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_sub!#substrate  6.57971e-08 -6.84727e-09 -1.47878e-08 -4.60713e-09 -2.41816e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_VC  -6.92582e-09 1.34401e-08 -3.05804e-09 -1.92536e-12 -3.1692e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g3_OSCN,OSCP,VCT#x0  -1.45632e-08 -3.04061e-09 2.62019e-08 -2.16441e-09 -4.15944e-09 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g4_OSCN,OSCP,VCT  -4.64327e-09 -1.90535e-12 -2.17682e-09 8.33913e-09 -6.75094e-10 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g5_VDD  -2.43211e-08 -3.22391e-09 -4.30799e-09 -7.12696e-10 3.42274e-08 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.0144691
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 9057 of which 2620 conductors and 6437 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 9057
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 20276
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 6039718
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 7091998 (uncompressed 411116176, compression ratio is 98.3%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 31
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.000159952
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.086134s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.006645s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.741230s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.924214s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.284773s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.930215s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 8126676 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 117602832 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 98400 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 4104064 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 268663200 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 6.658834s (0 days, 0 hours, 0 mins, 6 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 389253 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 389253 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 6.603052s (0 days, 0 hours, 0 mins, 6 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 6.639s
+SUBPROCESS __kpex__:kpex_cli.py:1283 Device;Net1;Net2;Capacitance [fF]
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_1;sub!;VC;6.89
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_2;sub!;OSCN,OSCP,VCT;4.63
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_0_3;sub!;VDD;24.25
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_2;VC;OSCN,OSCP,VCT;3.05
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_3;VC;VDD;3.2
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_1_1;VC;sub!;0.31
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_2_3;OSCN,OSCP,VCT;VDD;4.93
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_2_2;OSCN,OSCP,VCT;sub!;0.85
+SUBPROCESS __kpex__:kpex_cli.py:1283 Cext_3_3;VDD;sub!;1.85
+INFO     __kpex__:kpex_cli.py:1286 Wrote expanded netlist CSV to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Expanded_Netlist.csv
+INFO     __kpex__:kpex_cli.py:1291 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Expanded_Netlist.cir
+INFO     __kpex__:kpex_cli.py:1306 Wrote reduced netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_coil__cut_coil/cut_coil_FasterCap_Reduced_Netlist.cir
+INFO     __kpex__:kpex_cli.py:2286 Peak memory (resident set size) after FasterCap: 206.5 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 206.5 MiB

@@ -1,0 +1,41 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode RC --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/r_nwell_pfet_label_li1.lvsdb.gz --out-dir /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp1k1fs8v9 --2.5D --check n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp1k1fs8v9/r_nwell_pfet_label_li1__r_nwell_pfet_label_li1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 627.4 MiB
+INFO     __kpex__:kpex_cli.py:2227 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2227 (94, 20) -> (psd)
+INFO     __kpex__:kpex_cli.py:2227 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2227 (66, 20) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (66, 16) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (66, 4402) -> (licon_psd_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 8 µm (tech info of sky130A)
+INFO     __kpex__:extractor.py:491 LVSDB: found 4pins
+WARNING  __kpex__:r_extractor.py:1350 The resistance network leaves out the wells of these nets, as no contact joins them to the rest of their net (e.g. a label of the net on the well does), so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets: VPWR
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 627.4 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 627.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;D;G.P0.poly;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;D;S;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;D;S.P0.psdm;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;D;VPWR;0.015;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;D;VSUBS;0.01;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C6;D.P0.psdm;S;0.002;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C7;G;VPWR;0.058;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C8;G;VSUBS;0.025;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C9;G.P0.poly;S;0.004;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C10;G.P0.poly;VPWR;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C11;G.P0.poly;VSUBS;0.005;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C12;S;VPWR;0.009;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C13;S;VSUBS;0.016;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C14;VPWR;VSUBS;0.017;
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;D;D.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;G;G.P0.poly;;363.107
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;S;S.P0.psdm;;585.0
+SUBPROCESS __kpex__:kpex_cli.py:1669 /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp1k1fs8v9/r_nwell_pfet_label_li1__r_nwell_pfet_label_li1/r_nwell_pfet_label_li1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /var/folders/h5/t85nd63d71x27_8gl5gw3l_w0000gn/T/tmp1k1fs8v9/r_nwell_pfet_label_li1__r_nwell_pfet_label_li1/r_nwell_pfet_label_li1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 627.4 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 627.4 MiB
