@@ -1,0 +1,23 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode R --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\single_plate_6um_x_8um_m1_over_isolated_pwell.lvsdb.gz' --out-dir 'C:\Users\RUNNER~1\AppData\Local\Temp\tmpvnqewsum' --2.5D --check n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpvnqewsum\single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 581.5 MiB
+INFO     __kpex__:kpex_cli.py:2227 (31, 0) -> (nwell_drw)
+INFO     __kpex__:kpex_cli.py:2227 (32, 0) -> (nbulay_drw)
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell iso_pwell)
+INFO     __kpex__:kpex_cli.py:2227 (65, 244) -> (ptap)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4405) -> (cont_ptap_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:extractor.py:491 LVSDB: found 2pins
+WARNING  __kpex__:r_extractor.py:535 The resistance network leaves out these wells, as the tech info has no sheet resistance for them, so the device terminals on them (e.g. the PMOS bulks) are ideally on their nets:
+  - NWell (LVS nwell_drw)
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 581.5 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1669 C:\Users\RUNNER~1\AppData\Local\Temp\tmpvnqewsum\single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell\single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: C:\Users\RUNNER~1\AppData\Local\Temp\tmpvnqewsum\single_plate_6um_x_8um_m1_over_isolated_pwell__single_plate_6um_x_8um_m1_over_isolated_pwell\single_plate_6um_x_8um_m1_over_isolated_pwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 581.5 MiB
+WARNING  __kpex__:kpex_cli.py:1750 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill): $3, $4, $5
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 581.5 MiB

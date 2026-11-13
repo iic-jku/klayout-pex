@@ -1,0 +1,21 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode C --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/overlap_plates_100um_x_100um_li1_m1.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n --out-dir /tmp/pytest-of-runner/pytest-0/test_two_plate_written_loads_g0
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_two_plate_written_loads_g0/overlap_plates_100um_x_100um_li1_m1__overlap_plates_100um_x_100um_li1_m1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 604.1 MiB
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 604.1 MiB
+INFO     __kpex__:kpex_cli.py:1645 Capacitance output policy: grounded, reference: sky130_gnd
+WARNING  __kpex__:kpex_cli.py:1647 Grounded capacitance output removes inter-net transfer admittance after exact floating-capacitance elimination. It preserves diagonal capacitance at retained nodes, not arbitrary distributed-RC port impedance. Geometry reports and device-capacitance checks still describe the coupled extraction
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;LOWER;VSUBS;684.225;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;UPPER;VSUBS;507.317;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /tmp/pytest-of-runner/pytest-0/test_two_plate_written_loads_g0/overlap_plates_100um_x_100um_li1_m1__overlap_plates_100um_x_100um_li1_m1/overlap_plates_100um_x_100um_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /tmp/pytest-of-runner/pytest-0/test_two_plate_written_loads_g0/overlap_plates_100um_x_100um_li1_m1__overlap_plates_100um_x_100um_li1_m1/overlap_plates_100um_x_100um_li1_m1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 604.1 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 604.1 MiB
