@@ -118,7 +118,9 @@ def vacask_port_admittance(netlist_path: str,
             sources.append(source)
             lines.append(f'{source} ({node} 0) voltage dc=0 mag={int(port == driven)}')
     frequencies = [10.0 ** exponent for exponent in range(decades[0], decades[1] + 1)]
-    analysis = name + '_ac'
+    # Filenames may contain spaces, hyphens or leading digits, none of which
+    # is a valid unquoted VACASK analysis identifier. Each deck has its own run.
+    analysis = 'port_admittance_ac'
     lines.extend(['control', f'  include "{options}"', '  options rawfile="ascii"',
                   f'  analysis {analysis} ac values=[{", ".join(map(str, frequencies))}]', 'endc'])
     deck = os.path.join(work_dir, name + '_ac.sim')
