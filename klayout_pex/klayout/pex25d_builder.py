@@ -34,6 +34,7 @@ from typing import *
 from urllib.parse import quote
 
 import klayout.db as kdb
+from .physical_geometry import PhysicalGeometryError, apply_width_bias, width_bias_offsets
 
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 
@@ -131,6 +132,10 @@ class PEX25DBuilder:
                 f"placed on the grid. Choose a finer grid."
             )
         self._dbu_scale = int(scale)
+        try:
+            self._width_bias_offsets = width_bias_offsets(tech_info, self._grid)
+        except PhysicalGeometryError as exc:
+            raise BuildError(str(exc)) from exc
 
     # ------------------------------------------------------------ conversions
 
@@ -286,6 +291,10 @@ class PEX25DBuilder:
         if self.options.include_resistance:
             self.build_resistance(pex25d_file)
         self.build_domain(pex25d_file)
+        try:
+            apply_width_bias(pex25d_file, self._width_bias_offsets)
+        except PhysicalGeometryError as exc:
+            raise BuildError(str(exc)) from exc
         return pex25d_file
 
     def build_units(self, pex25d_file: Any) -> None:
