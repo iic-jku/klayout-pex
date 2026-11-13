@@ -1,0 +1,119 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_block_beside_mos.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_block_beside_mos.gds.gz' --exclusion-markers ignore
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_block_beside_mos'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 2 of 10 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 651.7 MiB
+INFO     __kpex__:kpex_cli.py:2227 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2227 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 5pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 652.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;$1.VDD;$1.VDD.$13.Metal3;;2.141
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;$1.VDD.$0.GatPoly;$1.VDD.$4.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;$1.VDD.$0.GatPoly;$1.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R4;$1.VDD.$1.GatPoly;$1.VDD.$5.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R5;$1.VDD.$1.GatPoly;$1.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R6;$1.VDD.$10.Metal2;$1.VDD.$2.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R7;$1.VDD.$10.Metal2;$1.VDD.$9.Metal2;;0.117
+SUBPROCESS __kpex__:kpex_cli.py:1666 R8;$1.VDD.$11.Metal2;$1.VDD.$4.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R9;$1.VDD.$11.Metal2;$1.VDD.$9.Metal2;;0.437
+SUBPROCESS __kpex__:kpex_cli.py:1666 R10;$1.VDD.$12.Metal2;$1.VDD.$5.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R11;$1.VDD.$12.Metal2;$1.VDD.$8.Metal2;;0.244
+SUBPROCESS __kpex__:kpex_cli.py:1666 R12;$1.VDD.$13.Metal3;$1.VDD.$8.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R13;$1.VDD.$2.Metal1;$1.VDD.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R14;$1.VDD.$8.Metal2;$1.VDD.$9.Metal2;;0.193
+SUBPROCESS __kpex__:kpex_cli.py:1666 R15;$1.VSS;$1.VSS.$4.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1666 R16;$1.VSS.$0.Metal1;$1.VSS.$1.Metal1;;0.02
+SUBPROCESS __kpex__:kpex_cli.py:1666 R17;$1.VSS.$0.Metal1;$1.VSS.$3.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R18;$1.VSS.$1.Metal1;$1.VSS.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R19;$1.VSS.$2.Metal2;$1.VSS.$3.Metal2;;2.375
+SUBPROCESS __kpex__:kpex_cli.py:1666 R20;$1.VSS.$2.Metal2;$1.VSS.$4.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R21;$2.VDD;$2.VDD.$13.Metal3;;2.141
+SUBPROCESS __kpex__:kpex_cli.py:1666 R22;$2.VDD.$0.GatPoly;$2.VDD.$4.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R23;$2.VDD.$0.GatPoly;$2.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R24;$2.VDD.$1.GatPoly;$2.VDD.$5.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R25;$2.VDD.$1.GatPoly;$2.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R26;$2.VDD.$10.Metal2;$2.VDD.$2.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R27;$2.VDD.$10.Metal2;$2.VDD.$9.Metal2;;0.117
+SUBPROCESS __kpex__:kpex_cli.py:1666 R28;$2.VDD.$11.Metal2;$2.VDD.$4.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R29;$2.VDD.$11.Metal2;$2.VDD.$9.Metal2;;0.437
+SUBPROCESS __kpex__:kpex_cli.py:1666 R30;$2.VDD.$12.Metal2;$2.VDD.$5.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R31;$2.VDD.$12.Metal2;$2.VDD.$8.Metal2;;0.244
+SUBPROCESS __kpex__:kpex_cli.py:1666 R32;$2.VDD.$13.Metal3;$2.VDD.$8.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R33;$2.VDD.$2.Metal1;$2.VDD.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R34;$2.VDD.$8.Metal2;$2.VDD.$9.Metal2;;0.193
+SUBPROCESS __kpex__:kpex_cli.py:1666 R35;$2.VSS;$2.VSS.$4.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1666 R36;$2.VSS.$0.Metal1;$2.VSS.$1.Metal1;;0.02
+SUBPROCESS __kpex__:kpex_cli.py:1666 R37;$2.VSS.$0.Metal1;$2.VSS.$3.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R38;$2.VSS.$1.Metal1;$2.VSS.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R39;$2.VSS.$2.Metal2;$2.VSS.$3.Metal2;;2.375
+SUBPROCESS __kpex__:kpex_cli.py:1666 R40;$2.VSS.$2.Metal2;$2.VSS.$4.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1669 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\cut_block_beside_mos_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\cut_block_beside_mos_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 652.2 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 652.2 MiB
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\test_patterns\cut_block_beside_mos.lvsdb.gz' --out-dir 'D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2' --2.5D --halo 10000 --scale n --gds 'D:\a\klayout-pex\klayout-pex\testdata\designs\ihp-sg13g2\test_patterns\cut_block_beside_mos.gds.gz' --exclusion-markers ignore --cut block
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_block_beside_mos'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\kpex_result.json
+WARNING  __kpex__:lvsdb_extractor.py:620 The extraction leaves out these LVS layers, as the tech info doesn't know them:
+  - cont_drw (Cont): 2 of 10 shapes are not within cont_nsd_con, cont_psd_con, cont_poly_con, cont_ntap_con, cont_ptap_con, cont_bjt_con, schottcky_p, schottcky_n_con, diodevdd_4kv_te, diodevss_4kv_te
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 652.3 MiB
+INFO     __kpex__:kpex_cli.py:2227 (19, 0) -> (via1_drw)
+INFO     __kpex__:kpex_cli.py:2227 (29, 0) -> (via2_drw)
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (5, 0) -> (poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (7, 0) -> (nsd_fet)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4403) -> (cont_poly_con)
+INFO     __kpex__:kpex_cli.py:2227 (6, 4401) -> (cont_nsd_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 0) -> (metal1_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (10, 0) -> (metal2_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (5, 2) -> (poly_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (8, 2) -> (metal1_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:extractor.py:182 The netlist leaves out the 1 devices of the cut cells
+INFO     __kpex__:extractor.py:491 LVSDB: found 5pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 652.6 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;$2.VDD;$2.VDD.$13.Metal3;;2.141
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;$2.VDD.$0.GatPoly;$2.VDD.$4.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;$2.VDD.$0.GatPoly;$2.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R4;$2.VDD.$1.GatPoly;$2.VDD.$5.Metal1;;15.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R5;$2.VDD.$1.GatPoly;$2.VDD.P0.GatPoly;;23.676
+SUBPROCESS __kpex__:kpex_cli.py:1666 R6;$2.VDD.$10.Metal2;$2.VDD.$2.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R7;$2.VDD.$10.Metal2;$2.VDD.$9.Metal2;;0.117
+SUBPROCESS __kpex__:kpex_cli.py:1666 R8;$2.VDD.$11.Metal2;$2.VDD.$4.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R9;$2.VDD.$11.Metal2;$2.VDD.$9.Metal2;;0.437
+SUBPROCESS __kpex__:kpex_cli.py:1666 R10;$2.VDD.$12.Metal2;$2.VDD.$5.Metal1;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R11;$2.VDD.$12.Metal2;$2.VDD.$8.Metal2;;0.244
+SUBPROCESS __kpex__:kpex_cli.py:1666 R12;$2.VDD.$13.Metal3;$2.VDD.$8.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R13;$2.VDD.$2.Metal1;$2.VDD.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R14;$2.VDD.$8.Metal2;$2.VDD.$9.Metal2;;0.193
+SUBPROCESS __kpex__:kpex_cli.py:1666 R15;$2.VSS;$2.VSS.$4.Metal3;;0.176
+SUBPROCESS __kpex__:kpex_cli.py:1666 R16;$2.VSS.$0.Metal1;$2.VSS.$1.Metal1;;0.02
+SUBPROCESS __kpex__:kpex_cli.py:1666 R17;$2.VSS.$0.Metal1;$2.VSS.$3.Metal2;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R18;$2.VSS.$1.Metal1;$2.VSS.P0.nSD;;17.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R19;$2.VSS.$2.Metal2;$2.VSS.$3.Metal2;;2.375
+SUBPROCESS __kpex__:kpex_cli.py:1666 R20;$2.VSS.$2.Metal2;$2.VSS.$4.Metal3;;9.0
+SUBPROCESS __kpex__:kpex_cli.py:1669 D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\cut_block_beside_mos_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: D:\a\klayout-pex\klayout-pex\output_ihp-sg13g2\cut_block_beside_mos__cut_block_beside_mos\cut_block_beside_mos_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 652.8 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 652.8 MiB
