@@ -46,6 +46,7 @@ syntax = "proto3";
 package kpex.pex25d;
 
 import "kpex/pex25d/pex25d_geometry.proto";
+import "kpex/pex25d/pex25d_ground.proto";
 import "kpex/pex25d/pex25d_units.proto";
 import "kpex/pex25d/pex25d_meta.proto";
 import "kpex/pex25d/pex25d_dielectric.proto";
@@ -108,6 +109,16 @@ message ResolvedGroundPlane {
     string name = 1;
     int64 zlow = 2;   // grid units
     int64 zhigh = 3;  // grid units
+
+    // Electrical reference net; distinct from the profile name used by WRAPS.
+    // An empty field means the profile name, for an authored full plane.
+    // FLOATING is invalid: this body is the reference potential.
+    string net = 10;
+
+    // Ground is the plane minus the UNION of these polygons, at the original z.
+    // A polygon hole retains a ground island. Adapters clip the result to their
+    // finite field; they must not discard these openings or silently fill them.
+    repeated GroundCutout cutouts = 20;
 
     SourceRef source = 100;
 }

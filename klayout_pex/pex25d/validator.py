@@ -99,6 +99,7 @@ class Validator:
             except ResolveError:
                 pass
 
+        self.check_ground_definition(pex25d_file)
         self.check_units(pex25d_file)
         self.check_names(pex25d_file)
         self.check_wrap_anchoring(pex25d_file)
@@ -118,6 +119,7 @@ class Validator:
                 self.check_conductor_overlap(scene)
 
     def validate_scene(self, scene: Any) -> None:
+        self.check_ground_definition(scene)
         self.check_units(scene)
         self.check_scene_layers(scene)
         self.check_scene_profiles(scene)
@@ -133,6 +135,19 @@ class Validator:
             self.check_conductor_overlap(scene)
 
     # -------------------------------------------------------------- semantic
+
+    def check_ground_definition(self, message: Any):
+        if not message.HasField('ground_plane'):
+            return
+        ground = message.ground_plane
+        if ground.net == FLOATING_NET or (ground.cutouts and not ground.net):
+            self.diagnose('PEX25D-E0212',
+                          "Ground cutouts need an explicit non-FLOATING reference net",
+                          source=ground)
+        for cutout in ground.cutouts:
+            self.check_polygon(Shape('ground cutout', ground.name, False,
+                                     cutout.polygon, cutout))
+
 
     def check_units(self, message: Any) -> None:
         units = message.units

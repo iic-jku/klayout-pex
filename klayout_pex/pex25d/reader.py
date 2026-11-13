@@ -60,7 +60,7 @@ LENGTH_UNITS = {'um': 1, 'nm': 2, 'm': 3}
 CLAUSE_KEYWORDS = {
     'WRAPS', 'PERMITTIVITY', 'BETWEEN', 'CONNECTS', 'Z_OFFSETS', 'LAYER',
     'LL', 'UR', 'OUTER', 'HOLE', 'X', 'Y', 'Z', 'SHEET', 'PER_CUT',
-    'TC1', 'TC2', 'KIND', 'TEMPERATURE',
+    'TC1', 'TC2', 'KIND', 'TEMPERATURE', 'NET',
     'THICKNESS_OVER_WRAPPED', 'THICKNESS_BESIDE_WRAPPED', 'THICKNESS_ON_FIELD',
 }
 
@@ -224,6 +224,7 @@ class Pex25DTextReader:
         self.include_stack: List[str] = []
         self.domain_box_record: Optional[Record] = None
         self.domain_margin_record: Optional[Record] = None
+        self.ground_cutouts: List[Tuple[str, Any, Record]] = []
 
     # ---------------------------------------------------------- diagnostics
 
@@ -324,6 +325,17 @@ class Pex25DTextReader:
         if filename != STDIO_NAME:
             self.include_stack.append(os.path.normpath(os.path.abspath(filename)))
         self.consume(data.decode('utf-8'), filename, top_level=True)
+
+        for name, cutout, record in self.ground_cutouts:
+            if name != self.file.ground_plane.name:
+                self.error('PEX25D-E0212',
+                           f"GROUND_CUTOUT references unknown ground '{name}'", record,
+                           tier=Tier.SEMANTIC)
+            else:
+                self.file.ground_plane.cutouts.add().CopyFrom(cutout)
+        if self.ground_cutouts and not self.file.ground_plane.net:
+            self.error('PEX25D-E0212', "GROUND_CUTOUT requires an explicit ground NET",
+                       tier=Tier.SEMANTIC)
 
         if not self.seen_header:
             self.error('PEX25D-E0107', "The file does not start with a PEX25D record")
@@ -485,7 +497,11 @@ class Pex25DTextReader:
     def read_ground_plane(self, record: Record) -> None:
         cursor = Cursor(record, self)
         name = cursor.take('a name')
-        if name is None or cursor.keyword('Z_OFFSETS') is None:
+        net = ''
+        if cursor.peek() == 'NET':
+            cursor.take('NET')
+            net = cursor.take('an electrical net')
+        if name is None or net is None or cursor.keyword('Z_OFFSETS') is None:
             return
         zlow = cursor.grid('GROUND_PLANE zlow')
         zhigh = cursor.grid('GROUND_PLANE zhigh')
@@ -497,8 +513,30 @@ class Pex25DTextReader:
                        tier=Tier.SEMANTIC)
             return
         self.file.ground_plane.name = name
+        self.file.ground_plane.net = net
         self.file.ground_plane.zlow, self.file.ground_plane.zhigh = zlow, zhigh
         self.attach_source(self.file.ground_plane, record)
+
+    def read_ground_cutout(self, record: Record):
+        from klayout_pex_protobuf.kpex.pex25d.pex25d_ground_pb2 import GroundCutout
+        cursor = Cursor(record, self)
+        name = cursor.take('a ground profile name')
+        if name is None or cursor.keyword('OUTER') is None:
+            return
+        outer = self.read_ring(cursor, record, 'OUTER')
+        if outer is None:
+            return
+        cutout = GroundCutout()
+        fill_ring(cutout.polygon.outer, outer)
+        while cursor.peek() == 'HOLE':
+            cursor.take('HOLE')
+            hole = self.read_ring(cursor, record, 'HOLE')
+            if hole is None:
+                return
+            fill_ring(cutout.polygon.holes.add(), hole)
+        cursor.end()
+        self.attach_source(cutout, record)
+        self.ground_cutouts.append((name, cutout, record))
 
     def read_metal(self, record: Record) -> None:
         cursor = Cursor(record, self)
@@ -857,6 +895,7 @@ Pex25DTextReader.HANDLERS = {
     'META': Pex25DTextReader.read_meta,
     'INCLUDE': Pex25DTextReader.read_include,
     'GROUND_PLANE': Pex25DTextReader.read_ground_plane,
+    'GROUND_CUTOUT': Pex25DTextReader.read_ground_cutout,
     'METAL': Pex25DTextReader.read_metal,
     'VIA': Pex25DTextReader.read_via,
     'DIELECTRIC_SIMPLE': Pex25DTextReader.read_dielectric_simple,

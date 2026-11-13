@@ -36,7 +36,7 @@ This package imports neither KLayout nor generated protobuf code at runtime.
 from typing import Callable
 
 from .pex25d_importer import ImporterError, ImporterUnavailable, PEX25DImporter
-from .pex25d_scene_exporter import ExportError, ExporterUnavailable, PEX25DSceneExporter
+from .pex25d_scene_exporter import ExportError, ExporterUnavailable, PEX25DSceneExporter, SceneFeature, require_scene_features
 
 
 IMPORTER_ENTRY_POINT_GROUP = 'klayout_pex.importers.v1'
@@ -56,4 +56,6 @@ __all__ = [
     'ExportError',
     'ExporterUnavailable',
     'PEX25DSceneExporter',
+    'SceneFeature',
+    'require_scene_features',
 ]

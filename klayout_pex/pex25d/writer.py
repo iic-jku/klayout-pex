@@ -229,11 +229,21 @@ class Pex25DTextWriter:
             return
         ground_plane = self.file.ground_plane
         self.section('GROUND PLANE')
-        self.hint("GROUND_PLANE <name> Z_OFFSETS <zlow> <zhigh>",
-                  "An infinite XY conductor at 0 V. There is exactly one.")
-        self.emit(f"GROUND_PLANE {ground_plane.name} "
+        self.hint("GROUND_PLANE <name> [NET <net>] Z_OFFSETS <zlow> <zhigh>",
+                  "The reference conductor spans XY except for explicit GROUND_CUTOUT openings.")
+        # An explicit NET makes old readers reject unsupported cutout files,
+        # instead of skipping their new records and exporting a solid plane.
+        net = ground_plane.net
+        if ground_plane.cutouts and not net:
+            raise WriteError("Ground cutouts require an explicit reference NET")
+        clause = f"NET {net} " if net else ''
+        self.emit(f"GROUND_PLANE {ground_plane.name} {clause}"
                   f"Z_OFFSETS {self.length(ground_plane.zlow)} "
                   f"{self.length(ground_plane.zhigh)}")
+
+        for cutout in ground_plane.cutouts:
+            clauses = self.polygon_clauses(cutout.polygon)
+            self.emit_record(f"GROUND_CUTOUT {ground_plane.name}", clauses, group=2)
 
     def write_layers(self) -> None:
         if not self.file.metals and not self.file.vias:
@@ -400,19 +410,21 @@ class Pex25DTextWriter:
             raise WriteError(f"Shape on conductor '{shape.conductor}', layer "
                              f"'{shape.layer}' has no kind")
 
+        self.emit_record(f"POLYGON CONDUCTOR {shape.conductor} LAYER {shape.layer}",
+                         self.polygon_clauses(shape.polygon), group=2)
+
+    def polygon_clauses(self, polygon: Any) -> List[str]:
         def ring(keyword: str, points: Any) -> str:
             coordinates = ' '.join(f"{self.length(p.x)} {self.length(p.y)}"
                                    for p in points)
             return f"{keyword} {coordinates}"
 
-        polygon = shape.polygon
         # Rings are implicitly closed, so the first vertex is not repeated. Each
         # ring goes on its own continuation line — they are long, and a reader
         # diffing two files wants them to line up.
         clauses = [ring('OUTER', polygon.outer.points)]
         clauses += [ring('HOLE', hole.points) for hole in polygon.holes]
-        self.emit_record(f"POLYGON CONDUCTOR {shape.conductor} LAYER {shape.layer}",
-                         clauses, group=2)
+        return clauses
 
     def write_terminals(self) -> None:
         if not self.file.terminals:
