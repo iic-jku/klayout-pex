@@ -107,6 +107,16 @@ message ProcessStackInfo {
     message MetalLayer { // Metal
         double z = 1;          // z-offset in µm (of the layer bottom), relative to the substrate
         double thickness = 2;  // thickness in µm
+        // Physical export only: manufactured minus drawn line width in µm.
+        // Each XY boundary moves by half this signed amount. Positive grows,
+        // negative erodes. Zero preserves drawn geometry. This is not an
+        // empirical capacitance correction or a resistance corner law.
+        double line_width_bias = 20;
+        // Ordering/interface data only: this physical recipe does not qualify
+        // this conductor or contacts touching it. Geometry export must reject
+        // layouts containing those shapes and omit these profiles otherwise.
+        // The missing law and source evidence belong in dataset provenance.
+        bool physical_geometry_unavailable = 30;
         Contact contact_above = 40;
     }
 
