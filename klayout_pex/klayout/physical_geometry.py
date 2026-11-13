@@ -31,10 +31,10 @@ from typing import Any, Dict, List, Tuple
 import klayout.db as kdb
 
 from klayout_pex.pex25d.protobuf import pex25d_file_pb2
-
-
-MAX_KLAYOUT_COORDINATE = (1 << 31) - 1
-MIN_KLAYOUT_COORDINATE = -(1 << 31)
+from klayout_pex.klayout.native_coordinates import (
+    NATIVE_COORDINATE_MAX,
+    is_supported_native_coordinate,
+)
 
 
 class PhysicalGeometryError(ValueError):
@@ -55,7 +55,7 @@ def width_bias_offsets(tech_info: Any, grid: Fraction) -> Dict[str, int]:
             raise PhysicalGeometryError(
                 f"Physical line-width bias of '{layer.name}' needs an edge displacement of {bias/2:g} um, "
                 f"not representable on the {float(grid):g} um grid. Choose a finer physical grid")
-        if abs(offset) > MAX_KLAYOUT_COORDINATE:
+        if abs(offset) > NATIVE_COORDINATE_MAX:
             raise PhysicalGeometryError(f"Physical line-width bias of '{layer.name}' exceeds the coordinate range")
         offsets[layer.name] = int(offset)
     return offsets
@@ -63,7 +63,7 @@ def width_bias_offsets(tech_info: Any, grid: Fraction) -> Dict[str, int]:
 
 def shape_region(shape: Any) -> kdb.Region:
     def check(points: Any):
-        if any(not MIN_KLAYOUT_COORDINATE <= value <= MAX_KLAYOUT_COORDINATE
+        if any(not is_supported_native_coordinate(value)
                for point in points for value in (point.x, point.y)):
             raise PhysicalGeometryError('Physical geometry exceeds the native KLayout coordinate range')
     kinds = pex25d_file_pb2().ShapeRecord
@@ -88,7 +88,7 @@ def _touches_terminal(region: kdb.Region, terminal: Any) -> bool:
     box = terminal.region
     left, bottom = box.lower_left.x, box.lower_left.y
     right, top = box.upper_right.x, box.upper_right.y
-    if min(left, bottom) < MIN_KLAYOUT_COORDINATE or max(right, top) > MAX_KLAYOUT_COORDINATE:
+    if not all(is_supported_native_coordinate(value) for value in (left, bottom, right, top)):
         raise PhysicalGeometryError(f"Terminal '{terminal.name}' exceeds the native KLayout coordinate range")
     if left == right and bottom == top:
         return any(polygon.inside(kdb.Point(left, bottom)) for polygon in region.each_merged())
@@ -129,8 +129,8 @@ def apply_width_bias(file: Any, offsets: Dict[str, int]):
             # int64. Mode2 clips acute corners at 90 degrees; twice the normal
             # offset bounds its corner excursions. Rectangles need one offset.
             padding = abs(offset)*(1 if polygon.is_box() else 2)
-            if min(box.left, box.bottom)-padding < MIN_KLAYOUT_COORDINATE or \
-                    max(box.right, box.top)+padding > MAX_KLAYOUT_COORDINATE:
+            if not all(is_supported_native_coordinate(value) for value in (
+                    min(box.left, box.bottom)-padding, max(box.right, box.top)+padding)):
                 raise PhysicalGeometryError('Physical width bias exceeds the native KLayout coordinate range')
             # Mode 2 offsets edges normally and clips sharp corners at 90 degrees.
             # Each originally connected polygon must remain connected and nonempty.

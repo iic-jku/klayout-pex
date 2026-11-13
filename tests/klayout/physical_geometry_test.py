@@ -271,21 +271,48 @@ def test_native_coordinate_limits_cannot_wrap_or_leak_kernel_errors(bias: float)
         biased_fixture(bias).build()
 
 
-@pytest.mark.parametrize('room,accepted', [(2, True), (1, True), (0, False)])
-def test_coordinate_plus_offset_boundary_is_atomic(room: int, accepted: bool):
+@pytest.mark.parametrize('axis', ['x', 'y'])
+@pytest.mark.parametrize('side', ['upper', 'lower'])
+@pytest.mark.parametrize('room,accepted', [(2, True), (1, False), (0, False)])
+def test_coordinate_plus_offset_boundary_is_atomic(axis: str, side: str, room: int, accepted: bool):
     file = TerminalFixture().build()
     del file.terminals[:]
     box = file.shapes[0].box
-    box.upper_right.x = (1 << 31)-1-room
-    box.lower_left.x = box.upper_right.x-100
+    edge = (1 << 31)-1-room if side == 'upper' else -(1 << 31)+room
+    lower, upper = (edge-100, edge) if side == 'upper' else (edge, edge+100)
+    setattr(box.lower_left, axis, lower)
+    setattr(box.upper_right, axis, upper)
     before = file.SerializeToString(deterministic=True)
     if accepted:
         apply_width_bias(file, {'met1': 1})
-        assert file.shapes[0].box.upper_right.x == (1 << 31)-room
+        assert getattr(file.shapes[0].box.lower_left, axis) == lower-1
+        assert getattr(file.shapes[0].box.upper_right, axis) == upper+1
     else:
+        # A single polygon can grow onto MAX without raising. Its subsequent
+        # merge/contact checks can hang or silently miss a contact (#2552).
+        with patch.object(kdb.Region, 'sized', side_effect=AssertionError('unsafe native sizing')):
+            with pytest.raises(PhysicalGeometryError, match='coordinate range'):
+                apply_width_bias(file, {'met1': 1})
+        assert file.SerializeToString(deterministic=True) == before
+
+
+@pytest.mark.parametrize('axis', ['x', 'y'])
+@pytest.mark.parametrize('endpoint', [-(1 << 31), (1 << 31)-1])
+def test_source_endpoint_is_rejected_before_native_union(axis: str, endpoint: int):
+    file = TerminalFixture().build()
+    del file.terminals[:]
+    box = file.shapes[0].box
+    lower, upper = (endpoint, endpoint+100) if endpoint < 0 else (endpoint-100, endpoint)
+    setattr(box.lower_left, axis, lower)
+    setattr(box.upper_right, axis, upper)
+    before = file.SerializeToString(deterministic=True)
+    # Patch the native merge boundary so this regression fails safely on the
+    # previous implementation instead of reproducing its hang/internal error.
+    with patch.object(kdb.Region, 'each_merged', side_effect=AssertionError('unsafe native union')):
         with pytest.raises(PhysicalGeometryError, match='coordinate range'):
             apply_width_bias(file, {'met1': 1})
-        assert file.SerializeToString(deterministic=True) == before
+    assert file.SerializeToString(deterministic=True) == before
+
 
 
 def test_erosion_preserves_contact_across_same_conductor_coheight_profiles():
