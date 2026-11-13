@@ -749,6 +749,9 @@ class KpexCLI:
         KpexCLI._add_pex25d_output_arguments(parser_pex25d)
         Pex25DCLI._add_diagnostics_arguments(parser_pex25d)
 
+        from .calibration.cli import add_calibration_subparser
+        add_calibration_subparser(subparsers)
+
         add_help_subcommand(subparsers)
         add_subcommand_sections(main_parser, subparsers, KpexCLI.SUBCOMMAND_SECTIONS)
 
@@ -759,6 +762,8 @@ class KpexCLI:
         if args.command is None:
             main_parser.print_help()
             sys.exit(ExitCode.USAGE)
+        if args.command == 'calibrate':
+            return args
         args.device_capacitance_references = None
         if args.command == 'extract':
             if args.coupling_policy is not None or args.pex_mode == PEXMode.C:
@@ -1951,11 +1956,12 @@ class KpexCLI:
     SUBCOMMAND_SECTIONS: Dict[str, Tuple[str, ...]] = {
         'Extraction': ('extract',),
         'PEX25D': ('pex25d',),
+        'Calibration': ('calibrate',),
         'Help': ('help',),
     }
     """How ``kpex --help`` groups the subcommands; every subcommand is in exactly one section."""
 
-    SUBCOMMANDS = ('extract', 'pex25d', 'help')
+    SUBCOMMANDS = ('extract', 'pex25d', 'calibrate', 'help')
     LEGACY_SUBCOMMAND = 'extract'
 
     @classmethod
@@ -2057,6 +2063,10 @@ class KpexCLI:
                 subproc(' '.join(map(shlex.quote, argv)))
 
             args = self.parse_args(arg_list=argv[1:], env=env)
+            if args.command == 'calibrate':
+                from .calibration.cli import run_calibration_command
+                run_calibration_command(args)
+                return
             self.identify_run(argv, args)
             # NOTE: to --out-result, which so fails before the run, not after it
             if not self.run_result.write(announce=False):
