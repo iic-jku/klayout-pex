@@ -161,6 +161,13 @@ class FasterCapInputBuilder:
                                         group_name=net_name)
 
     def build(self) -> FasterCapModelGenerator:
+        if any(layer.metal_layer.line_width_bias or layer.metal_layer.physical_geometry_unavailable
+               for layer in self.tech_info.process_metal_layers):
+            from .physical_input import build_physical_input
+            return build_physical_input(self)
+        return self.build_layout_input()
+
+    def build_layout_input(self) -> FasterCapModelGenerator:
         lvsdb = self.pex_context.lvsdb
         netlist: kdb.Netlist = lvsdb.netlist()
 
