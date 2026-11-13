@@ -113,7 +113,7 @@ def test_typed_ground_feature_reaches_updated_exporter(tmp_path: Path):
 
 
 def test_disambiguation_cannot_collide_with_other_connected_net():
-    from klayout_pex.pex25d.electrical import conductor_body, solver_body_names
+    from klayout_pex.plugin_api.v1 import conductor_body, solver_body_names
     text = BASE.replace('CONDUCTOR pin signal', 'CONDUCTOR VSS FLOATING').replace('CONDUCTOR pin LAYER', 'CONDUCTOR VSS LAYER')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
     scene.conductors.add(name='another-net', net='FLOATING:VSS')
@@ -124,7 +124,7 @@ def test_disambiguation_cannot_collide_with_other_connected_net():
 
 
 def test_unchanged_labels_write_no_mapping_file(tmp_path: Path):
-    from klayout_pex.pex25d.electrical import write_solver_body_map
+    from klayout_pex.plugin_api.v1 import write_solver_body_map
     scene = pex25d.resolve(pex25d.read_text(BASE.encode('utf-8')))
     path = tmp_path / 'body_names.json'
     assert write_solver_body_map(scene, path) is None
@@ -176,3 +176,25 @@ def test_floating_collision_alone_requires_electrical_identity_support(tmp_path:
     with pytest.raises(pex25d.ExportError, match='electrical-identity'):
         pex25d.export_with_backend(OlderExporter(), scene, 'older', str(tmp_path))
 
+
+def test_strict_cutout_validation_without_native_geometry_reports_diagnostic():
+    import subprocess
+    import sys
+    script = f"""
+import importlib.abc
+import sys
+class BlockNativeGeometry(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] == 'klayout':
+            raise ImportError('native geometry deliberately unavailable')
+sys.meta_path.insert(0, BlockNativeGeometry())
+from klayout_pex import pex25d
+file = pex25d.read_text({BASE.encode('utf-8')!r})
+assert not pex25d.validate(file).num_errors
+report = pex25d.validate(file, strict=True)
+assert {{d.code for d in report.diagnostics}} == {{'PEX25D-E0311'}}, report
+assert 'requires KLayout' in report.diagnostics[0].message
+"""
+    result = subprocess.run([sys.executable, '-c', script], capture_output=True,
+                            text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stdout + '\n' + result.stderr

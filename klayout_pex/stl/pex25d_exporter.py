@@ -32,6 +32,10 @@ exporter uses; it is meant to become independent of it.
 
 from __future__ import annotations
 
+from pathlib import Path
+from ..pex25d.electrical import write_solver_body_map
+from ..plugin_api.v1 import SceneFeature, require_scene_features
+
 from dataclasses import dataclass
 import os
 from typing import TYPE_CHECKING, Any, ClassVar, List, Mapping, Optional
@@ -54,6 +58,8 @@ class STLSceneExporter(PEX25DSceneExporter):
     name: ClassVar[str] = 'stl'
     default_prefix: ClassVar[str] = ''
 
+    scene_features = frozenset({SceneFeature.GROUND_CUTOUTS, SceneFeature.ELECTRICAL_IDENTITY})
+
     def export(self,
                scene: PEX25DScene,
                *,
@@ -61,6 +67,7 @@ class STLSceneExporter(PEX25DSceneExporter):
                prefix: str = '',
                options: Optional[Mapping[str, Any]] = None) -> List[str]:
         """Build the solids and write them; there is no primary file."""
+        require_scene_features(self, scene, self.name)
         try:
             settings = STLExporterOptions(**(options or {}))
         except (TypeError, ValueError) as exc:
@@ -69,5 +76,9 @@ class STLSceneExporter(PEX25DSceneExporter):
         generator = build_fastercap_model(scene, settings, self.name)
 
         os.makedirs(output_dir_path, exist_ok=True)
-        return generator.dump_stl(output_dir_path=output_dir_path,
-                                  prefix=prefix or self.default_prefix)
+        effective_prefix = prefix or self.default_prefix
+        written = generator.dump_stl(output_dir_path=output_dir_path, prefix=effective_prefix)
+        body_map = write_solver_body_map(scene, Path(output_dir_path) / (effective_prefix + 'body_names.json'))
+        if body_map is not None:
+            written.append(body_map)
+        return written

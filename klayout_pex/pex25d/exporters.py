@@ -31,8 +31,9 @@ Exporting is the one part of this package that is not pure format work: turning
 a scene into a solver's input needs polygon booleans and meshing, so a backend
 depends on a geometry library. Backends are therefore imported on use, and a
 missing dependency is reported rather than surfacing as an ImportError from an
-unexpected place. Reading, validating, converting and resolving stay
-dependency-free.
+unexpected place. Reading, structural validation, conversion and ordinary
+resolution remain independent of the native geometry library. Strict validation
+of ground openings also uses the native kernel.
 """
 
 from __future__ import annotations
@@ -138,7 +139,8 @@ def validate_export_scene(scene: PEX25DScene, *, report: Optional[DiagnosticsRep
     report = report if report is not None else DiagnosticsReport()
     errors_before = report.num_errors
     validate(scene, report=report)
-    Validator(report).check_ground_contacts(scene)
+    if report.num_errors == errors_before:
+        Validator(report).check_ground_contacts(scene)
     errors = report.num_errors - errors_before
     if errors:
         raise InvalidSceneError(f"The scene has {errors} error(s), so it was not exported")

@@ -278,6 +278,7 @@ class PEX25DBuilder:
         self.build_units(pex25d_file)
         self.build_meta(pex25d_file)
         self.build_ground_plane(pex25d_file)
+        self.build_ground_cutouts(pex25d_file)
         self.build_layers(pex25d_file)
         self.build_dielectrics(pex25d_file)
         self.build_conductors(pex25d_file)
@@ -317,12 +318,59 @@ class PEX25DBuilder:
 
         ground_plane = pex25d_file.ground_plane
         ground_plane.name = layer.name
+        ground_plane.net = self.pex_context.substrate_net_name
         # `height` is the distance of the substrate top below z=0.
         ground_plane.zhigh = self.to_grid(-substrate.height, f"{layer.name} top")
         ground_plane.zlow = self.to_grid(-(substrate.height + substrate.thickness),
                                          f"{layer.name} bottom")
         self.claim_name(layer.name, 'Ground plane')
         info(f"GROUND_PLANE {layer.name}: z {ground_plane.zlow} … {ground_plane.zhigh}")
+
+    def build_ground_cutouts(self, pex25d_file: Any):
+        # Diffusion is omitted from PEX25D interconnect. Retain the existing
+        # direct-extraction numerical device clearance, without shifting z or
+        # assigning its nearby contacts to the ground's electrical net.
+        circuit = self.pex_context.top_circuit
+        if circuit is None:
+            raise BuildError(f"No extracted circuit for cell '{self.cell_name}'")
+        footprints = kdb.Region()
+        for net in circuit.each_net():
+            for layer in self.tech_info.process_diffusion_layers:
+                region = self.shapes_of_net(layer.name, net)
+                if region is not None:
+                    footprints += region
+        if footprints.is_empty():
+            return
+        margin = int(Fraction(1) // self._dbu)
+        from .pex25d_ground import check_native_ground_coordinate, GroundGeometryError
+        bounds = footprints.bbox()
+        try:
+            # Union itself uses the native kernel. Validate source endpoints
+            # first, then classify the resulting polygons, not the input boxes.
+            for coordinate in (bounds.left, bounds.bottom, bounds.right, bounds.top):
+                check_native_ground_coordinate(coordinate)
+            merged = footprints.merged()
+            for polygon in merged.each():
+                bounds = polygon.bbox()
+                # Mode 2 clips sharp corners at 90 degrees. Two offsets bound
+                # the corner excursions of rotated/nonrectangular contours;
+                # an axis-aligned box needs only the original offset.
+                padding = margin * (1 if polygon.is_box() else 2)
+                for coordinate in (bounds.left - padding, bounds.bottom - padding,
+                                   bounds.right + padding, bounds.top + padding):
+                    check_native_ground_coordinate(coordinate)
+        except GroundGeometryError as exc:
+            raise BuildError(f"Ground diffusion clearance cannot be represented: {exc}") from exc
+        cutouts = merged.sized(margin, 2)
+        for polygon in cutouts.each_merged():
+            cutout = pex25d_file.ground_plane.cutouts.add()
+            self.fill_ring(cutout.polygon.outer, polygon.each_point_hull())
+            for i in range(polygon.holes()):
+                self.fill_ring(cutout.polygon.holes.add(), polygon.each_point_hole(i))
+        meta = pex25d_file.metadata.add()
+        meta.key = 'ground_cutout_policy'
+        meta.value = ('Omitted diffusion footprints expanded by 1 um (rounded down '
+                      'to source DBU): numerical device exclusion, not process geometry')
 
     def build_layers(self, pex25d_file: Any) -> None:
         for layer in self.tech_info.process_metal_layers:

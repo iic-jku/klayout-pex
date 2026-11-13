@@ -41,6 +41,8 @@ from typing import *
 import klayout.db as kdb
 
 from ..log import debug, info, warning
+from ..klayout.pex25d_ground import GroundGeometryError, region_of
+from ..pex25d.electrical import conductor_body, ground_body, solver_body_names
 from ..pex25d.protobuf import pex25d_dielectric_pb2, pex25d_scene_pb2
 from ..plugin_api.v1 import ExportError
 from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
@@ -57,6 +59,7 @@ class PEX25DFasterCapModelBuilder:
     def __init__(self, scene: PEX25DScene, options: FasterCapModelOptions):
         self.scene = scene
         self.options = options
+        self.body_names = solver_body_names(scene)
 
         units = scene.units
         if not units.grid_denominator:
@@ -107,9 +110,24 @@ class PEX25DFasterCapModelBuilder:
                         "there is nothing to bound the unbounded materials with")
                 margin = int(round(self.options.field_margin_um / float(self.grid)))
                 box = grow(box, margin)
+            from ..klayout.pex25d_ground import check_native_ground_coordinate, GroundGeometryError
+            try:
+                for point in (box.lower_left, box.upper_right):
+                    check_native_ground_coordinate(point.x)
+                    check_native_ground_coordinate(point.y)
+            except GroundGeometryError as exc:
+                raise ExportError(f"Ground export field cannot be represented: {exc}") from exc
             self._field = kdb.Region(kdb.Box(box.lower_left.x, box.lower_left.y,
                                              box.upper_right.x, box.upper_right.y))
         return self._field
+
+    @property
+    def ground_region(self) -> kdb.Region:
+        from ..klayout.pex25d_ground import retained_ground_region, GroundGeometryError
+        try:
+            return retained_ground_region(self.scene.ground_plane, self.field)
+        except GroundGeometryError as exc:
+            raise ExportError(f"Ground geometry cannot be represented: {exc}") from exc
 
     # ---------------------------------------------------------------- build
 
@@ -130,9 +148,12 @@ class PEX25DFasterCapModelBuilder:
         for dielectric in self.scene.dielectrics:
             builder.add_material(name=dielectric.name, k=dielectric.permittivity)
 
-        self.add_ground_plane(builder)
-        self.add_conductors(builder)
-        self.add_dielectrics(builder)
+        try:
+            self.add_ground_plane(builder)
+            self.add_conductors(builder)
+            self.add_dielectrics(builder)
+        except GroundGeometryError as exc:
+            raise ExportError(f"Native export geometry cannot be represented: {exc}") from exc
 
         generator = builder.generate()
         if generator is None:
@@ -147,8 +168,11 @@ class PEX25DFasterCapModelBuilder:
         info(f"Ground plane {ground_plane.name}: "
              f"z={self.um(ground_plane.zlow)}, "
              f"height={self.um(ground_plane.zhigh - ground_plane.zlow)}")
-        builder.add_conductor(net_name=ground_plane.name,
-                              layer=self.field,
+        retained = self.ground_region
+        if retained.is_empty():
+            raise ExportError("Ground cutouts remove the complete reference body inside the export field")
+        builder.add_conductor(net_name=self.body_names[ground_body(self.scene)],
+                              layer=retained,
                               z=self.um(ground_plane.zlow),
                               height=self.um(ground_plane.zhigh - ground_plane.zlow))
 
@@ -156,7 +180,7 @@ class PEX25DFasterCapModelBuilder:
         for conductor in self.scene.conductors:
             # A FLOATING conductor belongs to no net and is solved under its own
             # shortname; everything else is reported per net.
-            name = conductor.name if conductor.floating else conductor.net
+            name = self.body_names[conductor_body(conductor)]
             for conductor_region in conductor.regions:
                 layer = self.layers.get(conductor_region.layer)
                 if layer is None:
@@ -237,7 +261,7 @@ class PEX25DFasterCapModelBuilder:
     def root_of(self, dielectric: Any) -> Optional[Tuple[kdb.Region, int, int]]:
         """
         The footprint and z extent of the conductor layer or ground plane at the
-        root of a film's WRAPS chain. The ground plane covers the whole field.
+        root of a film's WRAPS chain. Ground openings also apply to its films.
         """
         layer = self.layers.get(dielectric.root)
         if layer is not None:
@@ -245,7 +269,7 @@ class PEX25DFasterCapModelBuilder:
 
         ground_plane = self.scene.ground_plane
         if self.scene.HasField('ground_plane') and dielectric.root == ground_plane.name:
-            return self.field, ground_plane.zlow, ground_plane.zhigh
+            return self.ground_region, ground_plane.zlow, ground_plane.zhigh
         return None
 
     def chain_extent(self, dielectric: Any, root_zhigh: int) -> Tuple[int, int]:
@@ -273,20 +297,6 @@ class PEX25DFasterCapModelBuilder:
             name = film.wraps
 
         return lateral, root_zhigh + over
-
-
-def region_of(conductor_region: Any) -> kdb.Region:
-    """Build a region from one conductor's shapes on one layer, in grid units."""
-    region = kdb.Region()
-    for box in conductor_region.boxes:
-        region.insert(kdb.Box(box.lower_left.x, box.lower_left.y,
-                              box.upper_right.x, box.upper_right.y))
-    for polygon in conductor_region.polygons:
-        shape = kdb.Polygon([kdb.Point(p.x, p.y) for p in polygon.outer.points])
-        for hole in polygon.holes:
-            shape.insert_hole([kdb.Point(p.x, p.y) for p in hole.points])
-        region.insert(shape)
-    return region
 
 
 def grow(box: Any, margin: int) -> Any:

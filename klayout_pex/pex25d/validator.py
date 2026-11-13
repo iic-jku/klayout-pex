@@ -86,6 +86,7 @@ class Validator:
     def validate_file(self, pex25d_file: Any, scene: Any = None) -> None:
         from .resolver import ResolveError, Resolver
 
+        errors_before = self.report.num_errors
         # The resolver answers every name-resolution question already, and
         # records the same coded diagnostics. Run it for its findings; a file
         # too broken to resolve still gets the checks that do not need one.
@@ -117,8 +118,11 @@ class Validator:
             self.check_shapes(shapes_of_file(pex25d_file))
             if scene is not None:
                 self.check_conductor_overlap(scene)
+                if self.report.num_errors == errors_before:
+                    self.check_ground_contacts(scene)
 
     def validate_scene(self, scene: Any) -> None:
+        errors_before = self.report.num_errors
         self.check_ground_definition(scene)
         self.check_units(scene)
         self.check_scene_layers(scene)
@@ -133,6 +137,8 @@ class Validator:
         if self.strict:
             self.check_shapes(shapes_of_scene(scene))
             self.check_conductor_overlap(scene)
+            if self.report.num_errors == errors_before:
+                self.check_ground_contacts(scene)
 
     # -------------------------------------------------------------- semantic
 
@@ -140,14 +146,13 @@ class Validator:
         if not message.HasField('ground_plane'):
             return
         ground = message.ground_plane
-        if ground.net == FLOATING_NET or (ground.cutouts and not ground.net):
-            self.diagnose('PEX25D-E0212',
-                          "Ground cutouts need an explicit non-FLOATING reference net",
-                          source=ground)
+        if ground.net == FLOATING_NET:
+            self.diagnose('PEX25D-E0212', "Ground reference NET cannot be FLOATING", source=ground)
+        elif ground.cutouts and not ground.net:
+            self.diagnose('PEX25D-E0212', "Ground cutouts require an explicit reference NET", source=ground)
         for cutout in ground.cutouts:
             self.check_polygon(Shape('ground cutout', ground.name, False,
                                      cutout.polygon, cutout))
-
 
     def check_units(self, message: Any) -> None:
         units = message.units
@@ -577,21 +582,33 @@ class Validator:
         return points
 
     def check_ground_contacts(self, scene: Any):
-        """Export cannot place a foreign body on the unbroken ground slab.
+        """Export cannot place a foreign body on retained ground.
 
-        This inexpensive interval check needs no polygon kernel: the current
-        ground occupies every XY position. Empty anchor profiles have no solid,
-        while a closed-z boundary touch already joins two electrical bodies.
+        A full plane needs only an interval check. Explicit openings additionally
+        require XY contact checking. Empty anchor profiles have no
+        solid, while a closed boundary touch already joins electrical bodies.
         """
         if not scene.HasField('ground_plane'):
             return
         ground = scene.ground_plane
+        if ground.cutouts:
+            try:
+                from ..klayout.pex25d_ground import check_native_ground_coordinates, GroundGeometryError
+            except ImportError as exc:
+                self.geometric('PEX25D-E0311',
+                               f"Ground geometry validation requires KLayout: {exc}", ground)
+                return
+            try:
+                check_native_ground_coordinates(ground)
+            except GroundGeometryError as exc:
+                self.geometric('PEX25D-E0311', str(exc), ground)
+                return
         layers = {layer.name: layer for layer in scene.layers}
         contacts = 0
         for conductor in scene.conductors:
             # Consumers group a connected net with the identically named ground
             # body. FLOATING bodies never inherit that electrical ownership.
-            if not conductor.floating and conductor.net == ground.name:
+            if not conductor.floating and conductor.net == (ground.net or ground.name):
                 continue
             for region in conductor.regions:
                 layer = layers.get(region.layer)
@@ -599,12 +616,20 @@ class Validator:
                     continue
                 if layer.zlow > ground.zhigh or layer.zhigh < ground.zlow:
                     continue
+                if ground.cutouts:
+                    from ..klayout.pex25d_ground import region_touches_ground
+                    try:
+                        if not region_touches_ground(ground, region):
+                            continue
+                    except GroundGeometryError as exc:
+                        self.geometric('PEX25D-E0311', str(exc), conductor)
+                        continue
                 contacts += 1
                 if contacts <= MAX_OVERLAP_REPORTS:
                     self.geometric(
                         'PEX25D-E0310',
                         f"Conductor '{conductor.name}' on '{layer.name}' has z extent "
-                        f"[{layer.zlow}, {layer.zhigh}] touching or intersecting full ground "
+                        f"[{layer.zlow}, {layer.zhigh}] touching or intersecting retained ground "
                         f"'{ground.name}' [{ground.zlow}, {ground.zhigh}] (grid units). "
                         "Separate electrical bodies need explicit ground isolation before export",
                         conductor)
