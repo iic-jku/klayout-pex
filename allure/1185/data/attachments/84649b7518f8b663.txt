@@ -1,0 +1,18 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 kpex extract --pdk sky130A --2.5D --coupling grounded --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cap_mim_m3_20um_x_20um_over_m2_wire.lvsdb.gz --out-dir /tmp/pytest-of-runner/pytest-0/test_whiteboxed_capacitor_is_r0
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /tmp/pytest-of-runner/pytest-0/test_whiteboxed_capacitor_is_r0/cap_mim_m3_20um_x_20um_over_m2_wire__cap_mim_m3_20um_x_20um_over_m2_wire/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 618.2 MiB
+INFO     __kpex__:kpex_cli.py:2227 (89, 44) -> (capm)
+INFO     __kpex__:kpex_cli.py:2227 (70, 20) -> (met3_ncap met3_cap)
+INFO     __kpex__:kpex_cli.py:2227 (70, 244) -> (via3_cap)
+INFO     __kpex__:kpex_cli.py:2227 (69, 20) -> (met2_con)
+INFO     __kpex__:kpex_cli.py:2227 (69, 16) -> (met2_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (70, 16) -> (met3_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (71, 16) -> (met4_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (71, 20) -> (met4_ncap)
+ERROR    __kpex__:kpex_cli.py:2081 --coupling grounded cannot approximate white-boxed capacitor devices ($1); use --blackbox y to keep their models and terminal coupling
+ERROR    __kpex__:kpex_cli.py:2082 Use --coupling coupled to retain the coupled network
+ERROR    __kpex__:kpex_cli.py:2083 For floating resistive islands, --mode C extracts ideal-conductor capacitance
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 618.2 MiB

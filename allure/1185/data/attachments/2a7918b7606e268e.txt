@@ -1,0 +1,681 @@
+INFO     __kpex__:fastercap_model_generator.py:121 DBU: 0.001
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay b: 1
+INFO     __kpex__:fastercap_model_generator.py:123 Delaunay area_max: 0
+INFO     __kpex__:pex25d_model_builder.py:168 Ground plane subs: z=-0.1, height=0.1
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_1_outside=(void)_net=VSS.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_2_outside=(void)_net=FLOATING:VSS.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:857 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_.lst
+INFO     __kpex__:fastercap_model_generator.py:121 DBU: 0.001
+INFO     __kpex__:fastercap_model_generator.py:122 Delaunay b: 1
+INFO     __kpex__:fastercap_model_generator.py:123 Delaunay area_max: 0
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_1_outside=(void)_net=VSS.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:870 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_2_outside=(void)_net=FLOATING:VSS.geo
+SUBPROCESS __kpex__:fastercap_model_generator.py:857 /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_.lst
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 /usr/bin/FasterCap -b -i -v -a0.02 -d0.1 -f0 -ap /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_.lst, output file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene-0.02.log
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.02
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.01
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 0
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1294
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  3.99478e-10 -7.85254e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -1.7178e-10 8.3705e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1284
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1942 (uncompressed 419904, compression ratio is 99.5%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 14
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0673106
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004501s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000589s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.000553s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.004238s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000110s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.005144s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 259448 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16782416 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 141560 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.037104s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16790 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 652, Links # 44562)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0475958)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 680, Links # 64032)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0330803)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0232053
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 96922
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87952e-10 -4.85393e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.85297e-11 5.92476e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.565317
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 84570
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 97678 (uncompressed 571536, compression ratio is 82.9%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 23
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.023043
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004147s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000401s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.027322s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.012984s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000101s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.004503s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 302756 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16783280 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 157112 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.162550s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16848 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0162938
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 160344
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87417e-10 -4.87837e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.87278e-11 5.96292e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.00241505
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 147873
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 161256 (uncompressed 831744, compression ratio is 80.6%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 24
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0162591
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004377s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000450s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.055424s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.023384s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000139s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.007194s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 365312 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16784528 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 179576 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.152431s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16932 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 16932 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 0.105931s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 0.1482s
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 /usr/bin/FasterCap -b -i -v -a0.005 -d0.1 -f0 -ap /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_.lst, output file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene-0.005.log
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/scene/FasterCap_Input_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.005
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.0025
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 0
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1294
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  3.97591e-10 -7.7788e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -1.71868e-10 8.38371e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1282
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1942 (uncompressed 419904, compression ratio is 99.5%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 14
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0673106
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004490s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000591s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.000534s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.004217s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000121s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.003652s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 259448 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16782416 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 152064 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.032688s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16800 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 652, Links # 44562)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0475958)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 680, Links # 64032)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0330803)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0232053
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 96922
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.88185e-10 -4.85559e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.86117e-11 5.93027e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.559905
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 85266
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 97678 (uncompressed 571536, compression ratio is 82.9%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 23
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.023043
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004157s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000403s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.036369s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.015908s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000111s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.005242s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 302756 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16783280 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 169344 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.173947s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16860 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0162938
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 160344
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87541e-10 -4.87914e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.88554e-11 5.96962e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.00274273
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 139619
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 161256 (uncompressed 831744, compression ratio is 80.6%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 24
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0162591
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004420s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000402s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.046442s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.020606s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000093s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.005499s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 365312 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16784528 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 201680 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.148864s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16954 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 16954 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 0.103115s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 0.1524s
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 /usr/bin/FasterCap -b -i -v -a0.02 -d0.1 -f0 -ap /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_.lst, output file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference-0.02.log
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.02
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.01
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 0
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1294
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  3.99478e-10 -7.85254e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -1.7178e-10 8.3705e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1245
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1942 (uncompressed 419904, compression ratio is 99.5%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 14
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0673106
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004612s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000602s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.000534s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.001565s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000126s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.001705s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 259448 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16782416 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 141560 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.025765s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16790 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 652, Links # 44562)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0475958)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 680, Links # 64032)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0330803)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0232053
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 96922
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87952e-10 -4.85393e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.85297e-11 5.92476e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.565317
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 86970
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 97678 (uncompressed 571536, compression ratio is 82.9%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 23
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.023043
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004172s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000398s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.027244s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.016235s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000082s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.002419s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 302756 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16783280 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 157112 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.162389s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16848 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0162938
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 160344
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87417e-10 -4.87837e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.87278e-11 5.96292e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.00241505
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 140006
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 161256 (uncompressed 831744, compression ratio is 80.6%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 24
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0162591
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004300s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000417s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.055238s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.021174s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000100s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.005958s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 365312 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16784528 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 179576 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.160181s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16932 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 16932 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 0.098438s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 0.1506s
+INFO     __kpex__:fastercap_runner.py:89 Calling FasterCap
+SUBPROCESS __kpex__:fastercap_runner.py:90 /usr/bin/FasterCap -b -i -v -a0.005 -d0.1 -f0 -ap /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_.lst, output file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference-0.005.log
+SUBPROCESS __kpex__:fastercap_runner.py:108 Running FasterCap version 6.2.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Copyright 2019 FastFieldSolvers S.R.L. http://www.fastfieldsolvers.com, All Rights reserved
+SUBPROCESS __kpex__:fastercap_runner.py:108 Starting capacitance extraction with the following parameters:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Input file: /tmp/pytest-of-runner/pytest-0/test_isolated_contact_capacita1/reference/reference_.lst
+SUBPROCESS __kpex__:fastercap_runner.py:108 Auto calculation with max error: 0.005
+SUBPROCESS __kpex__:fastercap_runner.py:108 Remark: Auto option overrides all other Manual settings
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 3D Solver Engine invoked
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solution scheme (-g): Collocation, GMRES tolerance (-t): 0.0025
+SUBPROCESS __kpex__:fastercap_runner.py:108 Out-of-core free memory to link memory condition (-f): 0
+SUBPROCESS __kpex__:fastercap_runner.py:108 Potential interaction coefficient to mesh refinement ratio (-d): 0.1
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh curvature (-mc): 3
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #0 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refining the geometry.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 1e+32
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 1294
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  3.97591e-10 -7.7788e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -1.71868e-10 8.38371e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Warning: capacitance matrix is not diagonally dominant due to row 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 1274
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 1942 (uncompressed 419904, compression ratio is 99.5%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 14
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0673106
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004466s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000586s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.000534s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.003431s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000127s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.005225s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 259448 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16782416 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 152064 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.034710s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16800 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #1 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 652, Links # 44562)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0475958)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Delta in refined panel and link count w.r.t. previous iteration less than 10%
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Panels # 680, Links # 64032)
+SUBPROCESS __kpex__:fastercap_runner.py:108 (Mesh relative refinement value (-m): 0.0330803)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Automatically increasing the refinement parameters
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0232053
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 96922
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.88185e-10 -4.85559e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.86117e-11 5.93027e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.559905
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 756
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 88054
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 97678 (uncompressed 571536, compression ratio is 82.9%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 23
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.023043
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004142s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000399s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.027305s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.013232s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000097s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.007685s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 302756 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16783280 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 169344 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.169503s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16860 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration number #2 ***************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Increasing the geometric refinement.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Refinement completed
+SUBPROCESS __kpex__:fastercap_runner.py:108 Mesh refinement (-m): 0.0162938
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Computing the links.. 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links to be computed: 160344
+SUBPROCESS __kpex__:fastercap_runner.py:108 Done computing links
+SUBPROCESS __kpex__:fastercap_runner.py:108 ***************************************
+SUBPROCESS __kpex__:fastercap_runner.py:108 Precond Type(s) (-p): Jacobi 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 
+SUBPROCESS __kpex__:fastercap_runner.py:108 GMRES Iteration: 0 1 2 3 4 5 6 7 8 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Capacitance matrix is:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Dimension 2 x 2
+SUBPROCESS __kpex__:fastercap_runner.py:108 g1_VSS  2.87541e-10 -4.87914e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 g2_FLOATING:VSS  -4.88554e-11 5.96962e-11 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Weighted Frobenius norm of the difference between capacitance (auto option): 0.00274273
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Solve statistics:
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels: 648 of which 648 conductors and 0 dielectric
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of input panels to solver engine: 648
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of panels after refinement: 912
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of potential estimates: 138334
+SUBPROCESS __kpex__:fastercap_runner.py:108 Number of links: 161256 (uncompressed 831744, compression ratio is 80.6%)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max recursion level: 24
+SUBPROCESS __kpex__:fastercap_runner.py:108 Max Mesh relative refinement value: 0.0162591
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for reading input file: 0.004341s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building super hierarchy: 0.000405s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for discretization: 0.043343s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for building potential matrix: 0.022982s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for precond calculation: 0.000130s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Time for gmres solving: 0.009981s
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for panel hierarchy: 365312 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for links structure: 16784528 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for conductor list: 9840 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for Gmres: 201680 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for preconditioner: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for charge vectors: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Memory allocated for hierarchical multiplication: 0 bytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration time: 0.151694s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 Iteration allocated memory: 16954 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total allocated memory: 16954 kilobytes
+SUBPROCESS __kpex__:fastercap_runner.py:108 Total time: 0.108281s (0 days, 0 hours, 0 mins, 0 s)
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+SUBPROCESS __kpex__:fastercap_runner.py:108 
+INFO     __kpex__:fastercap_runner.py:117 FasterCap succeeded after 0.1527s

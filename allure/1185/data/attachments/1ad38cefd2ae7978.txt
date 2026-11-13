@@ -1,0 +1,19 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk ihp-sg13g2 --mode R --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/ihp-sg13g2/test_patterns/cut_two_strips.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2 --2.5D --halo 10000 --scale n --gds /home/runner/work/klayout-pex/klayout-pex/testdata/designs/ihp-sg13g2/test_patterns/cut_two_strips.gds.gz --exclusion-markers ignore --cut blk
+INFO     __kpex__:kpex_cli.py:1024 No explicit top cell specified, using top cell 'cut_two_strips'
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_two_strips__cut_two_strips/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 789.6 MiB
+INFO     __kpex__:kpex_cli.py:2227 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2227 (30, 0) -> (metal3_n_mom)
+INFO     __kpex__:kpex_cli.py:2227 (30, 2) -> (metal3_pin_con)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 789.8 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;T;blk_0__T_0;;2.52
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;T;blk_0__X;;2.476
+SUBPROCESS __kpex__:kpex_cli.py:1669 /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_two_strips__cut_two_strips/cut_two_strips_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_ihp-sg13g2/cut_two_strips__cut_two_strips/cut_two_strips_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 789.9 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 789.9 MiB
