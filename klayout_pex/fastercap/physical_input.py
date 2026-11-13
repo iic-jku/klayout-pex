@@ -35,7 +35,9 @@ from .fastercap_error import FasterCapError
 from .fastercap_input_builder import FasterCapInputBuilder
 from .fastercap_model_generator import FasterCapModelGenerator
 from ..klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, BuildError
-from ..klayout.physical_geometry import shape_region, PhysicalGeometryError, MAX_KLAYOUT_COORDINATE, MIN_KLAYOUT_COORDINATE
+from ..klayout.physical_geometry import shape_region, PhysicalGeometryError
+from ..klayout.native_coordinates import (NATIVE_COORDINATE_MIN, NATIVE_COORDINATE_MAX,
+                                          is_supported_native_coordinate)
 from ..rcx25.exclusion import Exclusions, ConductorPart
 from ..tech_info import TechInfo
 from ..types import LayerName
@@ -44,9 +46,16 @@ from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 
 def _scaled_region(region: kdb.Region, scale: kdb.ICplxTrans) -> kdb.Region:
     box = region.bbox()
-    if not box.empty() and (min(box.left, box.bottom)*scale.mag < MIN_KLAYOUT_COORDINATE or
-                            max(box.right, box.top)*scale.mag >= MAX_KLAYOUT_COORDINATE):
-        raise FasterCapError('Physical FasterCap geometry exceeds the native KLayout coordinate range')
+    if not box.empty():
+        if min(box.left, box.bottom)*scale.mag < NATIVE_COORDINATE_MIN or \
+                max(box.right, box.top)*scale.mag > NATIVE_COORDINATE_MAX:
+            raise FasterCapError('Physical FasterCap geometry exceeds the native KLayout coordinate range')
+        # Check the actual integer rounding before any region operation. A
+        # fractional transformed bound inside the range can round onto an endpoint.
+        scaled = box.transformed(scale)
+        if not all(is_supported_native_coordinate(value)
+                   for value in (scaled.left, scaled.bottom, scaled.right, scaled.top)):
+            raise FasterCapError('Physical FasterCap geometry exceeds the native KLayout coordinate range')
     return region.transformed(scale)
 
 
@@ -123,7 +132,7 @@ class _PhysicalInputBuilder(FasterCapInputBuilder):
         for shape in file.shapes:
             self._regions[shape.layer, shape.conductor] += shape_region(shape)
         # Validate the final field before exclusion masks can reach native
-        # partitioning. KLayout subtraction cannot use the signed32 upper endpoint.
+        # partitioning. Native booleans and contact checks cannot use either endpoint.
         self.top_cell_bbox()
         if original.exclusions is not None:
             self.exclusions = _PhysicalExclusions(original.exclusions, self._scale)
@@ -155,8 +164,8 @@ class _PhysicalInputBuilder(FasterCapInputBuilder):
         for region in self._regions.values():
             box += region.bbox()
         margin = int(8/self.dbu)
-        if min(box.left, box.bottom)-margin < MIN_KLAYOUT_COORDINATE or \
-                max(box.right, box.top)+margin >= MAX_KLAYOUT_COORDINATE:
+        if not all(is_supported_native_coordinate(value) for value in (
+                min(box.left, box.bottom)-margin, max(box.right, box.top)+margin)):
             raise FasterCapError('Physical FasterCap field margin exceeds the native KLayout coordinate range')
         return box
 

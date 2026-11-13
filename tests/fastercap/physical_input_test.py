@@ -219,10 +219,12 @@ def test_direct_field_extent_contains_large_growth_and_preserves_drawn_extent_on
         assert box.left < drawn.left-80000  # More than the old 8 um halo.
 
 
-@pytest.mark.parametrize('upper,accepted', [(2147483646, True), (2147483647, False)])
-def test_scaled_exclusion_masks_reject_native_upper_endpoint_before_indexing(upper: int, accepted: bool):
+@pytest.mark.parametrize('edge,accepted', [(2147483646, True), (2147483647, False),
+                                         (-2147483647, True), (-2147483648, False)])
+def test_scaled_exclusion_masks_reject_native_endpoints_before_indexing(edge: int, accepted: bool):
     original = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 10, 10)))
-    original.blocks[0].region = kdb.Region(kdb.Box(upper-10, 0, upper, 10))
+    low, high = (edge, edge+10) if edge < 0 else (edge-10, edge)
+    original.blocks[0].region = kdb.Region(kdb.Box(low, 0, high, 10))
     before = original.blocks[0].region.bbox()
     # A distant marker may extend beyond the layout field, so its own boundary
     # must be validated before the exclusion index can perform native booleans.
@@ -237,24 +239,41 @@ def test_scaled_exclusion_masks_reject_native_upper_endpoint_before_indexing(upp
     assert original.blocks[0].region.bbox() == before
 
 
+@pytest.mark.parametrize('target,accepted', [(2147483646, True), (2147483646.75, False),
+                                           (-2147483647, True), (-2147483647.75, False)])
+def test_scaled_bounds_cannot_round_onto_native_endpoint(target: float, accepted: bool):
+    from klayout_pex.fastercap.physical_input import _scaled_region
+    box = kdb.Box(1, 1, 2, 2) if target > 0 else kdb.Box(-2, -2, -1, -1)
+    region = kdb.Region(box)
+    scale = kdb.ICplxTrans(abs(target)/2)
+    if accepted:
+        scaled = _scaled_region(region, scale).bbox()
+        assert (scaled.right if target > 0 else scaled.left) == target
+    else:
+        with patch.object(kdb.Region, 'transformed', side_effect=AssertionError('unsafe region transform')):
+            with pytest.raises(FasterCapError, match='coordinate range'):
+                _scaled_region(region, scale)
+    assert region.bbox() == box
+
+
 @pytest.mark.parametrize('axis', ['x', 'y'])
 @pytest.mark.parametrize('side,offset,accepted', [
     ('upper', -1, True), ('upper', 0, False), ('upper', 1, False),
-    ('lower', -1, False), ('lower', 0, True), ('lower', 1, True),
+    ('lower', -1, False), ('lower', 0, False), ('lower', 1, True),
 ])
 def test_field_halo_range_is_checked_before_exclusion_partitioning(
         axis: str, side: str, offset: int, accepted: bool):
     from tests.klayout.physical_geometry_test import biased_fixture
     from klayout_pex.fastercap.physical_input import _PhysicalInputBuilder
-    from klayout_pex.klayout.physical_geometry import MAX_KLAYOUT_COORDINATE, MIN_KLAYOUT_COORDINATE
+    from klayout_pex.klayout.native_coordinates import NATIVE_COORDINATE_MAX, NATIVE_COORDINATE_MIN
 
     fixture = biased_fixture(.002)
     fixture.context.top_cell_bbox = lambda: kdb.Box(0, 0, 100, 20)
     physical = PEX25DBuilder(fixture.context, fixture.tech, 'extent', BuilderOptions(include_resistance=False))
     file = physical.build()
     margin = 80000  # Existing 8 um field halo on the 0.0001 um physical grid.
-    edge = (MAX_KLAYOUT_COORDINATE-margin if side == 'upper' else
-            MIN_KLAYOUT_COORDINATE+margin) + offset
+    edge = (NATIVE_COORDINATE_MAX-margin if side == 'upper' else
+            NATIVE_COORDINATE_MIN+margin) + offset
     low, high = (edge-10, edge) if side == 'upper' else (edge, edge+10)
     box = file.shapes[0].box
     if axis == 'x':
@@ -264,7 +283,7 @@ def test_field_halo_range_is_checked_before_exclusion_partitioning(
     before = file.SerializeToString(deterministic=True)
     exclusions = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 20)))
     original = FasterCapInputBuilder(fixture.context, fixture.tech, 'subs', exclusions=exclusions)
-    # The upper sentinel itself hangs native subtraction, unlike MAX-1. Check
+    # Exact endpoints can hang booleans or lose contacts, unlike their neighbors. Check
     # before constructing the mask view, not after conductor partitioning.
     with patch('klayout_pex.fastercap.physical_input._PhysicalExclusions') as masks:
         if accepted:
