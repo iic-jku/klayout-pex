@@ -26,6 +26,8 @@
 
 from collections import defaultdict
 from typing import Any, Dict, Tuple
+from pathlib import Path
+import shutil
 from unittest.mock import patch
 
 import allure
@@ -215,3 +217,28 @@ def test_direct_field_extent_contains_large_growth_and_preserves_drawn_extent_on
         assert box == drawn
     else:
         assert box.left < drawn.left-80000  # More than the old 8 um halo.
+
+
+@pytest.mark.slow
+@pytest.mark.fastercap
+@pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
+def test_direct_solver_preserves_expected_capacitance_order_under_physical_width_bias(tmp_path: Path):
+    from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+
+    context, technology = context_of_layout(PDKName.IHP_SG13G2, 'test_patterns', 'r_single_wire_m1.gds.gz')
+    capacitances = []
+    for bias in (0.0, 0.2, 0.4):
+        technology.process_stack_layer_by_name['Metal1'].metal_layer.line_width_bias = bias
+        model = FasterCapInputBuilder(context, technology, 'SUB', k_void=3.0).build()
+        directory = tmp_path/str(bias)
+        directory.mkdir()
+        paths = model.write_fastcap(str(directory), 'wire')
+        log = str(directory/'solve.log')
+        run_fastercap(shutil.which('FasterCap'), paths[0], log, 0.005, 0.1, 0, True, False, False)
+        matrix = fastercap_parse_capacitance_matrix(log)
+        assert len(matrix.conductor_names) == 2
+        ground = next(i for i, name in enumerate(matrix.conductor_names) if name.endswith('_SUB'))
+        wire = 1-ground
+        assert matrix[wire][ground] == pytest.approx(matrix[ground][wire], rel=.02, abs=0)
+        capacitances.append(-(matrix[wire][ground]+matrix[ground][wire])/2)
+    assert 0 < capacitances[0] < capacitances[1] < capacitances[2]
