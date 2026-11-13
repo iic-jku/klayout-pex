@@ -36,8 +36,10 @@ from google.protobuf.json_format import MessageToJson, Parse, ParseDict
 from klayout_pex.tech_catalog import write_nominal_catalog
 from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
     TechnologyCatalog, TechnologyDataset, TechnologyDatasetFile, TechnologyProvenance,
+    TechnologyRevision, TechnologyScenario, TechnologySource,
 )
 from scripts.gen_tech_pb.provenance import nominal_provenance
+from scripts.gen_tech_pb.resistance_corners import load_corner_resistances
 from scripts.gen_tech_pb.tech_builder import (
     CapacitanceInfo, Technology, add_mim_cap, add_overlap_cap, add_sidewall_cap,
     add_sidewall_overlap_cap, add_substrate_cap, split_layer_capacitances,
@@ -135,9 +137,12 @@ def load_corner_capacitances(technology: Technology, table_path: Path) -> List[T
 
 
 def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> List[Path]:
-    """Write verified components without turning missing resistance laws into selectable corners."""
+    """Write source-backed components and only the explicitly authored scenarios."""
     table_path = TABLE_DIRECTORY / f'{technology.name}.json'
     datasets = load_corner_capacitances(technology, table_path)
+    resistance_path = TABLE_DIRECTORY / f'{technology.name}-resistance.json'
+    resistance_datasets = load_corner_resistances(technology, resistance_path) if resistance_path.is_file() else []
+    resistance_document = json.loads(resistance_path.read_text(encoding='utf-8')) if resistance_datasets else None
     catalog_provenance, components = nominal_provenance(technology.name)
     for source in datasets[0].provenance.sources:
         copied = catalog_provenance.sources.add()
@@ -152,19 +157,32 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
         reason='Expose reviewed empirical C tables while retaining nominal as the only bundled scenario',
         source_ids=[source.id for source in catalog_provenance.sources],
         references=['https://github.com/iic-jku/klayout-pex/issues/518'])
+    if resistance_document:
+        for source in resistance_document['sources']:
+            catalog_provenance.sources.add().CopyFrom(ParseDict(source, TechnologySource()))
+        for record in resistance_document['catalog_revisions']:
+            revision = ParseDict(record, TechnologyRevision())
+            catalog_provenance.history.add().CopyFrom(revision)
+            catalog_provenance.data_revision = revision.revision
     written = write_nominal_catalog(
         technology, catalog_path, catalog_provenance,
-        f'Nominal scenario and low/high capacitance components for {technology.name}', components)
+        f'Explicit extraction scenarios and capacitance components for {technology.name}', components)
     catalog = Parse(catalog_path.read_text(encoding='utf-8'), TechnologyCatalog())
-    for dataset in datasets:
-        relative = f'capacitance/{dataset.id}.pb.json'
+    components_to_write = [(TechnologyDatasetFile.CAPACITANCE, 'capacitance', dataset) for dataset in datasets]
+    components_to_write.extend((TechnologyDatasetFile.RESISTANCE, 'resistance', dataset) for dataset in resistance_datasets)
+    for kind, directory, dataset in components_to_write:
+        relative = f'{directory}/{dataset.id}.pb.json'
         path = catalog_path.parent / relative
         data = (MessageToJson(dataset, preserving_proto_field_name=True, ensure_ascii=False, sort_keys=True) + '\n').encode('utf-8')
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
         written.append(path)
-        record = catalog.datasets.add(id=dataset.id, kind=TechnologyDatasetFile.CAPACITANCE)
+        record = catalog.datasets.add(id=dataset.id, kind=kind)
         record.file.path = relative
         record.file.sha256 = hashlib.sha256(data).hexdigest()
+    if resistance_document:
+        for scenario in resistance_document['scenarios']:
+            catalog.scenarios.add().CopyFrom(ParseDict(scenario, TechnologyScenario()))
     catalog_path.write_text(MessageToJson(catalog, preserving_proto_field_name=True, ensure_ascii=False, sort_keys=True) + '\n',
                             encoding='utf-8')
     return written
