@@ -270,6 +270,7 @@ class PEX25DBuilder:
     # ------------------------------------------------------------------ build
 
     def build(self) -> Any:
+        self.reject_unavailable_geometry()
         pex25d_file = pex25d_file_pb2().PEX25DFile()
         pex25d_file.format_version_major = FORMAT_VERSION_MAJOR
         pex25d_file.format_version_minor = FORMAT_VERSION_MINOR
@@ -310,6 +311,57 @@ class PEX25DBuilder:
         # values, so a consumer handing geometry back to a layout tool would
         # otherwise have to guess this one.
         add('source_dbu', str(self.pex_context.dbu))
+        if self.unavailable_profiles:
+            add('physical_geometry_unavailable', ','.join(sorted(self.unavailable_profiles)))
+
+    @cached_property
+    def unavailable_profiles(self) -> Set[str]:
+        metals = {layer.name for layer in self.tech_info.process_metal_layers
+                  if layer.metal_layer.physical_geometry_unavailable}
+        if not metals:
+            return set()
+        profiles = set(metals)
+        contacts = [(layer.name, layer.metal_layer.contact_above) for layer in self.tech_info.process_metal_layers]
+        contacts.extend((layer.name, layer.diffusion_layer.contact_above)
+                        for layer in self.tech_info.process_diffusion_layers)
+        contacts.extend((layer.name, layer.nwell_layer.contact_above) for layer in self.tech_info.process_nwell_layers)
+        for owner, contact in contacts:
+            if not contact.name:
+                continue
+            above = self.resolve_metal(contact.metal_above, f"Physical restriction on {contact.name}")
+            if above is None:
+                raise BuildError(f"Cannot verify physical contact association of '{contact.name}'")
+            below = self.resolve_metal(contact.layer_below or owner, f"Physical restriction on {contact.name}") \
+                if owner in self.metal_layer_by_name else owner
+            if below is None:
+                raise BuildError(f"Cannot verify physical contact association of '{contact.name}'")
+            if below in metals or above in metals:
+                profiles.add(contact.name)
+        return profiles
+
+    @cached_property
+    def unavailable_dielectrics(self) -> Set[str]:
+        excluded = set(self.unavailable_profiles)
+        while True:
+            dependent = {layer.name for layer in self.tech_info.tech.process_stack.layers
+                         if layer.layer_type == LT.LAYER_TYPE_CONFORMAL_DIELECTRIC
+                         and layer.conformal_dielectric_layer.reference in excluded}
+            added = dependent - excluded
+            if not added:
+                return excluded - self.unavailable_profiles
+            excluded.update(added)
+
+    def reject_unavailable_geometry(self):
+        if not self.unavailable_profiles:
+            return
+        for name in sorted(self.unavailable_profiles):
+            if self.gds_pair(name) is None:
+                raise BuildError(f"Cannot check unavailable physical profile '{name}': no layout layer mapping")
+            for net in self.pex_context.top_circuit.each_net():
+                shapes = self.shapes_of_net(name, net)
+                if shapes is not None and not shapes.is_empty():
+                    raise BuildError(f"Selected physical recipe has no qualified geometry for '{name}', "
+                                     f"present on net '{net.expanded_name()}'")
 
     def build_ground_plane(self, pex25d_file: Any) -> None:
         layer = self.tech_info.process_substrate_layer
@@ -327,6 +379,8 @@ class PEX25DBuilder:
     def build_layers(self, pex25d_file: Any) -> None:
         for layer in self.tech_info.process_metal_layers:
             metal_layer = layer.metal_layer
+            if layer.name in self.unavailable_profiles:
+                continue
             if not self.claim_name(layer.name, 'Metal'):
                 continue
             metal = pex25d_file.metals.add()
@@ -344,6 +398,8 @@ class PEX25DBuilder:
                 continue
             contact = metal_layer.contact_above
             if not contact.name:
+                continue
+            if contact.name in self.unavailable_profiles:
                 continue
 
             context = f"Contact '{contact.name}'"
@@ -373,6 +429,8 @@ class PEX25DBuilder:
                     for layer in self.tech_info.process_nwell_layers]
         for layer, contact, is_device_contact in anchored:
             if not contact.name:
+                continue
+            if contact.name in self.unavailable_profiles:
                 continue
             context = f"Contact '{contact.name}'"
             above = self.resolve_metal(contact.metal_above, context)
@@ -449,7 +507,8 @@ class PEX25DBuilder:
                 self.to_grid(on_field_um, f"{layer.name} thickness on field"))
 
     def build_dielectrics(self, pex25d_file: Any) -> None:
-        layers = list(self.tech_info.tech.process_stack.layers)
+        layers = [layer for layer in self.tech_info.tech.process_stack.layers
+                  if layer.name not in self.unavailable_profiles | self.unavailable_dielectrics]
         metal_names = [lyr.name for lyr in layers if lyr.layer_type == LT.LAYER_TYPE_METAL]
 
         def next_metal_after(index: int) -> Optional[str]:
