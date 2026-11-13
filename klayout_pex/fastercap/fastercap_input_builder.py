@@ -343,52 +343,51 @@ class FasterCapInputBuilder:
             extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name) if self.exclusions is None \
                 else self.conductor_parts_by_layer.get(metal_layer_name, None)
 
-            sidewall_region: Optional[kdb.Region] = None
-            sidewall_height = 0
-
             no_metal_region: Optional[kdb.Region] = None
             no_metal_height = 0
 
             #
             # add the conformal dielectric films anchored on this metal
             #
-            if extracted_shapes:
-                # Films grow incrementally along the chain: each one is measured from
-                # the surface of the film it wraps, so the metal's own thickness is
-                # added once, by the first link, and not again by the ones above it.
-                sidewall_height = metal_layer.thickness
-                sidewall_region = extracted_shapes
-                wrapped = metal_layer_name
+            # A conformal field film remains even when this layout has no metal
+            # on its root layer. Only its raised top and sidewall depend on metal.
+            # Films grow incrementally along the chain: each one is measured from
+            # the surface of the film it wraps, so the metal's own thickness is
+            # added once, by the first link, and not again by the ones above it.
+            sidewall_height = metal_layer.thickness
+            sidewall_region = extracted_shapes if extracted_shapes is not None else kdb.Region()
+            wrapped = metal_layer_name
 
-                while True:
-                    film = self.tech_info.conformal_dielectric_wrapping(wrapped)
-                    if not film:
-                        break
+            while True:
+                film = self.tech_info.conformal_dielectric_wrapping(wrapped)
+                if not film:
+                    break
 
-                    conf_diel = film.conformal_dielectric_layer
-                    d = math.floor(conf_diel.thickness_sidewall / self.dbu)
-                    sidewall_region = sidewall_region.sized(d)
-                    sidewall_height += conf_diel.thickness_over_metal
+                conf_diel = film.conformal_dielectric_layer
+                d = math.floor(conf_diel.thickness_sidewall / self.dbu)
+                sidewall_region = sidewall_region.sized(d)
+                sidewall_height += conf_diel.thickness_over_metal
+                if not sidewall_region.is_empty():
                     info(f"Conformal dielectric (sidewall) {film.name}: "
                          f"z={metal_layer.z}, height={sidewall_height}")
                     model_builder.add_dielectric(material_name=film.name,
                                                  layer=sidewall_region,
                                                  z=metal_layer.z,
                                                  height=sidewall_height)
-                    if conf_diel.thickness_where_no_metal > 0.0:
-                        no_metal_block = enlarged_top_cell_bbox.dup()
-                        no_metal_region = kdb.Region()
-                        no_metal_region.insert(no_metal_block)
-                        no_metal_region -= sidewall_region
-                        no_metal_height = conf_diel.thickness_where_no_metal
-                        info(f"Conformal dielectric (where no metal) {film.name}: "
-                             f"z={metal_layer.z}, height={no_metal_height}")
-                        model_builder.add_dielectric(material_name=film.name,
-                                                     layer=no_metal_region,
-                                                     z=metal_layer.z,
-                                                     height=no_metal_height)
+                if conf_diel.thickness_where_no_metal > 0.0:
+                    no_metal_block = enlarged_top_cell_bbox.dup()
+                    no_metal_region = kdb.Region()
+                    no_metal_region.insert(no_metal_block)
+                    no_metal_region -= sidewall_region
+                    no_metal_height = conf_diel.thickness_where_no_metal
+                    info(f"Conformal dielectric (where no metal) {film.name}: "
+                         f"z={metal_layer.z}, height={no_metal_height}")
+                    model_builder.add_dielectric(material_name=film.name,
+                                                 layer=no_metal_region,
+                                                 z=metal_layer.z,
+                                                 height=no_metal_height)
 
-                    wrapped = film.name
+                wrapped = film.name
 
             #
             # add simple dielectric

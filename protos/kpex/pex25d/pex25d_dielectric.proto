@@ -26,16 +26,14 @@
 //
 // There is no DIELECTRIC_SIDEWALL. A sidewall film is the special case of a
 // conformal with THICKNESS_ON_FIELD 0, so the two statements were folded into
-// one. That also removes the "height above the metal" ambiguity: every
-// conformal thickness is measured from a named face of the WRAPPED object.
+// one. Top and side thicknesses are incremental from the wrapped object;
+// the field extent is cumulative from the bottom of the chain's root conductor.
 //
-// Growth is incremental along a WRAPS chain: each profile is measured from the
-// surface of the profile it wraps, not from the conductor underneath it. The
-// lateral and vertical parameters work the same way, which is what makes a
-// chain composable. A profile's solid is the wrapped object grown by those
-// thicknesses, and so CONTAINS it — profiles are not shells, a writer never
-// subtracts anything, and the occupancy rule decides what is visible where two
-// profiles claim the same point.
+// Top and side growth is incremental along a WRAPS chain, measured from the
+// surface of the immediately wrapped profile. Field extents instead share the
+// root conductor's bottom face as their origin. A profile's solid contains its
+// wrapped object; profiles are not shells, a writer never subtracts anything,
+// and the occupancy rule decides what is visible where profiles overlap.
 //
 // A dielectric's solid *contains* what it wraps — films are not shells, and a
 // writer subtracts nothing. Where two dielectrics claim the same point, the one
@@ -58,8 +56,7 @@ enum DielectricKind {
 }
 
 // There is deliberately no SIDEWALL kind. A sidewall film is a conformal with
-// THICKNESS_ON_FIELD 0, which is what makes every conformal thickness
-// measurable from a named face of the wrapped object
+// THICKNESS_ON_FIELD 0, which leaves the parent material on the field.
 
 // The two DIELECTRIC_* statement kinds.
 message Dielectric {
@@ -110,9 +107,10 @@ message SimpleDielectric {
 //                              THICKNESS_BESIDE_WRAPPED <v>
 //                              THICKNESS_ON_FIELD <v>`
 //
-// A film that follows the profile of the wrapped object. All three thicknesses
-// are relative to that object, none is negative, and the film's absolute z
-// extent is derived.
+// A film that follows the profile of the wrapped object. Top and side
+// thicknesses are incremental from that object. The field extent is cumulative
+// from the bottom of the chain's root conductor. None is negative; the film's
+// absolute z extent is derived.
 //
 // This is also how a pure sidewall film is written: THICKNESS_ON_FIELD 0
 // leaves the parent dielectric in place away from the object, and
@@ -129,9 +127,10 @@ message ConformalDielectric {
     // is what makes two readers of one file produce identical geometry.
     int64 thickness_beside_wrapped = 2;  // grid units
 
-    // Film over the whole XY area where the wrapped object is ABSENT,
-    // measured upward from that object's BOTTOM face. 0 means the film exists
-    // only on the object itself.
+    // Film over the XY field, measured upward from the BOTTOM face of the
+    // chain's root conductor. This cumulative extent includes earlier films,
+    // and exists even when that conductor has no shapes. 0 means the film
+    // exists only on the wrapped object itself.
     int64 thickness_on_field = 3;        // grid units
 }
 
