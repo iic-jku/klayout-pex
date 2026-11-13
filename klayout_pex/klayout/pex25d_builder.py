@@ -433,8 +433,9 @@ class PEX25DBuilder:
         """
         Map a technology film onto the three PEX25D conformal thicknesses.
 
-        All three are measured from the surface of the profile that is wrapped,
-        which is what makes a chain of films composable.
+        Top and side thicknesses are incremental from the wrapped profile.
+        The field extent is cumulative from the bottom of the chain's root
+        conductor, including when that conductor has no shapes.
         """
         if layer.layer_type != LT.LAYER_TYPE_CONFORMAL_DIELECTRIC:
             raise BuildError(f"'{layer.name}' is not a film")
