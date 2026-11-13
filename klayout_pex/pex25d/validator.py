@@ -561,6 +561,43 @@ class Validator:
 
         return points
 
+    def check_ground_contacts(self, scene: Any):
+        """Export cannot place a foreign body on the unbroken ground slab.
+
+        This inexpensive interval check needs no polygon kernel: the current
+        ground occupies every XY position. Empty anchor profiles have no solid,
+        while a closed-z boundary touch already joins two electrical bodies.
+        """
+        if not scene.HasField('ground_plane'):
+            return
+        ground = scene.ground_plane
+        layers = {layer.name: layer for layer in scene.layers}
+        contacts = 0
+        for conductor in scene.conductors:
+            # Consumers group a connected net with the identically named ground
+            # body. FLOATING bodies never inherit that electrical ownership.
+            if not conductor.floating and conductor.net == ground.name:
+                continue
+            for region in conductor.regions:
+                layer = layers.get(region.layer)
+                if layer is None or not (region.boxes or region.polygons):
+                    continue
+                if layer.zlow > ground.zhigh or layer.zhigh < ground.zlow:
+                    continue
+                contacts += 1
+                if contacts <= MAX_OVERLAP_REPORTS:
+                    self.geometric(
+                        'PEX25D-E0310',
+                        f"Conductor '{conductor.name}' on '{layer.name}' has z extent "
+                        f"[{layer.zlow}, {layer.zhigh}] touching or intersecting full ground "
+                        f"'{ground.name}' [{ground.zlow}, {ground.zhigh}] (grid units). "
+                        "Separate electrical bodies need explicit ground isolation before export",
+                        conductor)
+        if contacts > MAX_OVERLAP_REPORTS:
+            self.diagnose('PEX25D-N0003',
+                          f"{contacts - MAX_OVERLAP_REPORTS} further ground contacts were not listed",
+                          tier=Tier.GEOMETRIC, severity=Severity.NOTE)
+
     def check_conductor_overlap(self, scene: Any) -> None:
         """
         Two conductors may not share a point.
