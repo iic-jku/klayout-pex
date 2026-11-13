@@ -93,9 +93,14 @@ message ProcessStackInfo {
     
     message ConformalDielectricLayer { // Conformal dielectric
         double dielectric_k = 10;
+        // Incremental thickness in µm above the surface of the referenced metal or coating.
         double thickness_over_metal = 20;
+        // Cumulative field extent in µm from the bottom of the chain's root metal.
+        // The field film exists even without root-metal shapes; zero means no field slab.
         double thickness_where_no_metal = 21;
+        // Incremental lateral growth in µm from the edge of the referenced metal or coating.
         double thickness_sidewall = 22;
+        // The immediately wrapped metal or conformal coating; follow this chain to its root metal.
         string reference = 30;
     }
 

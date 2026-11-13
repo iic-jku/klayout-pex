@@ -31,6 +31,7 @@ import allure
 import pytest
 
 import klayout.db as kdb
+import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as stack_pb2
 
 from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
 from klayout_pex.fastercap.fastercap_model_generator import FasterCapModelBuilder
@@ -39,7 +40,9 @@ from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.exclusion import Exclusions
 from klayout_pex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
+from tests.common.fastercap_geometry import context_from_shapes, fastercap_input
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
+from tests.common.technology import tech_with_two_metals
 
 
 parent_suite = "kpex/FasterCap Input Tests"
@@ -59,19 +62,6 @@ def context_of_layout(pdk_name: PDKName, *path_components) -> Tuple[KLayoutExtra
                         '--2.5D',
                         '--blackbox', 'n'])
     return run_kpex_2_5d_engine.call_args.kwargs['pex_context'], run_kpex_2_5d_engine.call_args.kwargs['tech_info']
-
-
-def fastercap_input(pex_context: KLayoutExtractionContext,
-                    tech_info: TechInfo,
-                    exclusions: Optional[Exclusions] = None) -> FasterCapModelBuilder:
-    """
-    :return: the conductors and dielectrics of the FasterCap input of the layout, before it has their surfaces
-    """
-    with mock.patch.object(FasterCapModelBuilder, 'generate', autospec=True, side_effect=lambda builder: builder):
-        return FasterCapInputBuilder(pex_context=pex_context,
-                                     tech_info=tech_info,
-                                     substrate_net_name=pex_context.substrate_net_name,
-                                     exclusions=exclusions).build()
 
 
 def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float]:
@@ -213,3 +203,65 @@ def test_taps_without_contact_are_no_layers_without_gds_pair(caplog: pytest.LogC
                                                'single_plate_100um_x_100um_li1_over_substrate.gds.gz')
     fastercap_input(pex_context, tech_info)
     assert [message for message in caplog.messages if "Can't find GDS pair" in message] == []
+
+
+def conformal_field_model(root_shapes: Optional[kdb.Region], field_thickness: float,
+                          with_exclusions: bool) -> FasterCapModelBuilder:
+    """A two-film stack beside a lower metal, with an upper plate fixing the model domain."""
+    tech = tech_with_two_metals()
+    LT = stack_pb2.ProcessStackInfo
+    substrate = LT.LayerInfo(name='substrate', layer_type=LT.LAYER_TYPE_SUBSTRATE)
+    substrate.substrate_layer.height = 0.1
+    substrate.substrate_layer.thickness = 0.1
+    fox = LT.LayerInfo(name='fox', layer_type=LT.LAYER_TYPE_FIELD_OXIDE)
+    fox.field_oxide_layer.dielectric_k = 3.9
+    tech.process_stack.layers.insert(0, substrate)
+    tech.process_stack.layers.insert(1, fox)
+    by_name = {layer.name: layer for layer in tech.process_stack.layers}
+    by_name['met1'].metal_layer.ClearField('contact_above')
+    for name, over, on_field in (('liner', 0.1, field_thickness), ('coat', 0.2, field_thickness + 0.2)):
+        film = by_name[name].conformal_dielectric_layer
+        film.thickness_over_metal = over
+        film.thickness_where_no_metal = on_field
+        film.thickness_sidewall = 0.05
+
+    upper_plate = kdb.Region(kdb.Box(0, 0, 1000, 1000))
+    context = context_from_shapes({(1, 0): root_shapes, (2, 0): upper_plate}, upper_plate.bbox())
+    exclusions = Exclusions.from_region(kdb.Region(kdb.Box(500, -1000, 2000, 2000))) \
+        if with_exclusions else None
+    return fastercap_input(context, TechInfo(tech, dielectric_filter=None), exclusions)
+
+
+@allure.parent_suite(parent_suite)
+@allure.tag(*tags)
+@pytest.mark.parametrize('root_state', ['absent', 'empty', 'present'])
+@pytest.mark.parametrize('with_exclusions', [False, True])
+@pytest.mark.parametrize('field_thickness', [0.0, 0.001, 0.1], ids=['no-field', 'one-grid-step', 'finite-field'])
+def test_conformal_field_survives_missing_root_metal(root_state: str, with_exclusions: bool,
+                                                    field_thickness: float):
+    # Absence and an empty extracted layer must be equivalent. Zero field thickness
+    # removes only that film's field slab, not a nonzero film that wraps it. One grid
+    # step catches an accidentally discarded positive slab. Exclusions use another
+    # geometry lookup, so cover that path and retain the populated-metal control.
+    root_shapes = None if root_state == 'absent' else kdb.Region()
+    if root_state == 'present':
+        root_shapes.insert(kdb.Box(0, 0, 1000, 1000))
+    model = conformal_field_model(root_shapes, field_thickness, with_exclusions)
+    field_point = kdb.Point(-1000, -1000)
+    on_field = {name: [(low, high) for region, low, high in prisms
+                      if any(polygon.inside(field_point) for polygon in region.each_merged())]
+                for name, prisms in model.dlayers.items()}
+    field_height = round(field_thickness / model.dbu)
+    assert on_field.get('liner', []) == ([(1000, 1000 + field_height)] if field_height else [])
+    assert on_field['coat'] == [(1000, 1200 + field_height)]
+    assert on_field['ild'] == [(1200 + field_height, 2500)]
+    assert all(high > low and not region.is_empty()
+               for prisms in model.dlayers.values() for region, low, high in prisms)
+    if root_state == 'present':
+        metal_point = kdb.Point(500, 500)
+        above_metal = {name: [(low, high) for region, low, high in prisms
+                             if any(polygon.inside(metal_point) for polygon in region.each_merged())]
+                       for name, prisms in model.dlayers.items()}
+        assert above_metal['liner'] == [(1000, 1300)]
+        assert above_metal['coat'] == [(1000, 1500)]
+        assert above_metal['ild'] == [(1500, 2500)]
