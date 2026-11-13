@@ -1,0 +1,28 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/sideoverlap_complex_li1_m1.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_complex_li1_m1__sideoverlap_complex_li1_m1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 695.4 MiB
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 695.4 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 695.4 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;Complex_Shape_B;UPPER;1.333;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;Complex_Shape_B;VSUBS;2.922;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;Complex_Shape_L;UPPER;0.237;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;Complex_Shape_L;VSUBS;2.922;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;Complex_Shape_R;UPPER;0.085;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C6;Complex_Shape_R;VSUBS;2.922;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C7;Complex_Shape_T;UPPER;0.061;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C8;Complex_Shape_T;VSUBS;2.922;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C9;UPPER;VSUBS;12.807;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_complex_li1_m1__sideoverlap_complex_li1_m1/sideoverlap_complex_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_complex_li1_m1__sideoverlap_complex_li1_m1/sideoverlap_complex_li1_m1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 695.4 MiB
+WARNING  __kpex__:kpex_cli.py:1750 Nothing drives these nets, as they have no device terminal and no port (e.g. a rail under a wrong net name, or fill), so simulators stop on them: Complex_Shape_B (4.254 fF), Complex_Shape_L (3.158 fF), Complex_Shape_R (3.006 fF), Complex_Shape_T (2.983 fF)
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 695.4 MiB
