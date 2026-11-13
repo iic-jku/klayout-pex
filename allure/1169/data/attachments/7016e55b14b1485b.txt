@@ -1,0 +1,79 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /home/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/cut_ntaps_in_one_nwell.lvsdb.gz --out-dir /home/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_ntaps_in_one_nwell__cut_ntaps_in_one_nwell/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 929.8 MiB
+INFO     __kpex__:kpex_cli.py:2227 (64, 20) -> (nwell)
+INFO     __kpex__:kpex_cli.py:2227 (65, 144) -> (ntap_conn)
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (66, 4404) -> (licon_ntap_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 44) -> (mcon_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 1pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 930.0 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 930.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;VL;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;VL,VR;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;VL,VR.$10.li1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;VL,VR.$12.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;VL,VR.$14.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C6;VL,VR.$16.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C7;VL,VR.$18.li1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C8;VL,VR.$2.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C9;VL,VR.$20.met1;VSUBS;0.033;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C10;VL,VR.$21.met1;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C11;VL,VR.$23.met1;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C12;VL,VR.$24.met1;VSUBS;0.033;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C13;VL,VR.$25.met1;VSUBS;0.033;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C14;VL,VR.$26.met1;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C15;VL,VR.$28.met1;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C16;VL,VR.$29.met1;VSUBS;0.033;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C17;VL,VR.$4.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C18;VL,VR.$6.li1;VSUBS;0.02;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C19;VL,VR.$8.li1;VSUBS;0.027;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C20;VR;VSUBS;0.024;
+SUBPROCESS __kpex__:kpex_cli.py:1666 R1;VL;VL,VR.$21.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R2;VL;VL,VR.$23.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R3;VL;VL,VR.$4.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R4;VL,VR;VL,VR.$2.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R5;VL,VR;VL,VR.$20.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R6;VL,VR;VL,VR.$30.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R7;VL,VR.$10.li1;VL,VR.$12.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R8;VL,VR.$10.li1;VL,VR.$25.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R9;VL,VR.$10.li1;VL,VR.$35.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R10;VL,VR.$12.li1;VL,VR.$14.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R11;VL,VR.$12.li1;VL,VR.$26.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R12;VL,VR.$12.li1;VL,VR.$35.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R13;VL,VR.$14.li1;VL,VR.$16.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R14;VL,VR.$14.li1;VL,VR.$35.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R15;VL,VR.$14.li1;VR;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R16;VL,VR.$16.li1;VL,VR.$18.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R17;VL,VR.$16.li1;VL,VR.$28.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R18;VL,VR.$16.li1;VL,VR.$35.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R19;VL,VR.$18.li1;VL,VR.$29.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R20;VL,VR.$18.li1;VL,VR.$35.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R21;VL,VR.$2.li1;VL,VR.$21.met1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R22;VL,VR.$2.li1;VL,VR.$30.nwell;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R23;VL,VR.$2.li1;VL,VR.$4.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R24;VL,VR.$20.met1;VL,VR.$21.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R25;VL,VR.$23.met1;VL,VR.$24.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R26;VL,VR.$23.met1;VL,VR.$6.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R27;VL,VR.$24.met1;VL,VR.$8.li1;;9.3
+SUBPROCESS __kpex__:kpex_cli.py:1666 R28;VL,VR.$25.met1;VL,VR.$26.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R29;VL,VR.$26.met1;VR;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R30;VL,VR.$28.met1;VL,VR.$29.met1;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R31;VL,VR.$28.met1;VR;;0.368
+SUBPROCESS __kpex__:kpex_cli.py:1666 R32;VL,VR.$30.nwell;VL,VR.$35.nwell;;2428.571
+SUBPROCESS __kpex__:kpex_cli.py:1666 R33;VL,VR.$30.nwell;VL,VR.$4.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R34;VL,VR.$30.nwell;VL,VR.$6.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R35;VL,VR.$30.nwell;VL,VR.$8.li1;;185.0
+SUBPROCESS __kpex__:kpex_cli.py:1666 R36;VL,VR.$4.li1;VL,VR.$6.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1666 R37;VL,VR.$6.li1;VL,VR.$8.li1;;37.647
+SUBPROCESS __kpex__:kpex_cli.py:1669 /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_ntaps_in_one_nwell__cut_ntaps_in_one_nwell/cut_ntaps_in_one_nwell_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /home/runner/work/klayout-pex/klayout-pex/output_sky130A/cut_ntaps_in_one_nwell__cut_ntaps_in_one_nwell/cut_ntaps_in_one_nwell_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 930.2 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 930.2 MiB

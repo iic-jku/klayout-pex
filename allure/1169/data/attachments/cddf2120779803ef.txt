@@ -1,0 +1,38 @@
+SUBPROCESS __kpex__:kpex_cli.py:2057 main extract --pdk sky130A --mode RC --blackbox n --lvsdb /Users/runner/work/klayout-pex/klayout-pex/testdata/lvsdb/sky130A/test_patterns/sideoverlap_plates_li1_m1.lvsdb.gz --out-dir /Users/runner/work/klayout-pex/klayout-pex/output_sky130A --2.5D --halo 10000 --scale n
+INFO     __kpex__:kpex_cli.py:1035 LVSDB input file passed, bypassing LVS
+SUBPROCESS __kpex__:tool_version_constraints.py:298 Tool                   Found    Required                    Recommended
+SUBPROCESS __kpex__:tool_version_constraints.py:298 KLayout Python module  0.30.13  >=0.30.1,>=0.30.2,>=0.30.3  >=0.30.13
+INFO     __kpex__:run_result.py:235 Wrote result file to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_m1__sideoverlap_plates_li1_m1/kpex_result.json
+INFO     __kpex__:kpex_cli.py:2223 Peak memory (resident set size) after preparing the LVSDB: 673.0 MiB
+INFO     __kpex__:kpex_cli.py:2227 (67, 20) -> (li_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 20) -> (met1_con)
+INFO     __kpex__:kpex_cli.py:2227 (67, 16) -> (li_pin_con)
+INFO     __kpex__:kpex_cli.py:2227 (68, 16) -> (met1_pin_con)
+INFO     __kpex__:kpex_cli.py:1582 Sidewall halo: 10000 µm (--halo)
+INFO     __kpex__:extractor.py:491 LVSDB: found 7pins
+INFO     __kpex__:extractor.py:548 Peak memory (resident set size) after the resistance extraction: 673.0 MiB
+INFO     __kpex__:extractor.py:620 Peak memory (resident set size) after the capacitance extraction: 673.0 MiB
+SUBPROCESS __kpex__:kpex_cli.py:1666 Device;Net1;Net2;Capacitance [fF];Resistance [Ω]
+SUBPROCESS __kpex__:kpex_cli.py:1666 C1;LOWER_FullHaloOverlap;LOWER_NoHaloOverlap_InsideTop;0.091;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C2;LOWER_FullHaloOverlap;LOWER_OutsideHalo;0.073;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C3;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_BothSides_separated;0.0;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C4;LOWER_FullHaloOverlap;LOWER_PartialSideHaloOverlap_Separated;0.181;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C5;LOWER_FullHaloOverlap;UPPER;268.816;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C6;LOWER_FullHaloOverlap;VSUBS;175.62;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C7;LOWER_NoHaloOverlap_InsideTop;LOWER_OutsideHalo;0.045;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C8;LOWER_NoHaloOverlap_InsideTop;LOWER_PartialSideHaloOverlap_Touching;0.045;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C9;LOWER_NoHaloOverlap_InsideTop;UPPER;150.468;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C10;LOWER_NoHaloOverlap_InsideTop;VSUBS;51.08;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C11;LOWER_OutsideHalo;UPPER;0.07;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C12;LOWER_OutsideHalo;VSUBS;72.177;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C13;LOWER_PartialSideHaloOverlap_BothSides_separated;UPPER;0.248;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C14;LOWER_PartialSideHaloOverlap_BothSides_separated;VSUBS;7.343;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C15;LOWER_PartialSideHaloOverlap_Separated;UPPER;0.133;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C16;LOWER_PartialSideHaloOverlap_Separated;VSUBS;89.38;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C17;LOWER_PartialSideHaloOverlap_Touching;UPPER;32.879;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C18;LOWER_PartialSideHaloOverlap_Touching;VSUBS;13.012;
+SUBPROCESS __kpex__:kpex_cli.py:1666 C19;UPPER;VSUBS;214.731;
+SUBPROCESS __kpex__:kpex_cli.py:1669 /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.csv
+SUBPROCESS __kpex__:kpex_cli.py:1709 Wrote expanded netlist to: /Users/runner/work/klayout-pex/klayout-pex/output_sky130A/sideoverlap_plates_li1_m1__sideoverlap_plates_li1_m1/sideoverlap_plates_li1_m1_k25d_pex_netlist.spice
+INFO     __kpex__:kpex_cli.py:1744 Peak memory (resident set size) after the netlist: 673.0 MiB
+INFO     __kpex__:kpex_cli.py:2092 Peak memory (resident set size) after the run: 673.0 MiB
