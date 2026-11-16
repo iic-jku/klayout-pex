@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "technology_id": "sky130A",
+  "physical": {
+    "capiche-low": {
+      "source_path": "sky130A_low/metal_stack_sky130A_low.py",
+      "source_sha256": "02eb14faa9767a21ac73a03d365871118f495aa309946900996cbec9f5c99cfd",
+      "substrate": [
+        ["subs", 0.0, 0.1]
+      ],
+      "metals": [
+        ["poly", 0.4293, 0.16, 0.0, false],
+        ["li1", 1.177, 0.08, -0.023, false],
+        ["met1", 1.7295, 0.33, -0.0206, false],
+        ["met2", 2.4895, 0.33, -0.0206, false],
+        ["met3_ncap", 3.4005, 0.765, 0.032, false],
+        ["met3_cap", 3.4005, 0.765, 0.032, true],
+        ["capm", 3.6511, 0.1, 0.0, true],
+        ["met4_ncap", 4.7125, 0.765, 0.032, false],
+        ["met4_cap", 4.7125, 0.765, 0.032, true],
+        ["capm2", 4.8861, 0.1, 0.0, true],
+        ["met5", 6.1395, 1.134, -0.1, false]
+      ],
+      "field_oxide": [
+        ["fox", 3.9]
+      ],
+      "simple": [
+        ["psg", 3.9, "fox"],
+        ["nild2", 3.9, "lint"],
+        ["nild3", 4.5, "nild2"],
+        ["nild4", 3.9, "nild3"],
+        ["nild5", 3.9, "nild4"],
+        ["nild5b", 3.9, "nild4"],
+        ["nild6", 4.0, "nild5"],
+        ["nild6b", 4.0, "nild5"],
+        ["air", 2.94, "topnit"]
+      ],
+      "conformal": [
+        ["iox", 3.9, 0, 0.0, 0.006, "poly"],
+        ["spnit", 7.5, 0.1065, 0.0, 0.0431, "iox"],
+        ["lint", 7.3, 0.0675, 0.0675, 0.0548, "li1"],
+        ["nild3c", 3.3, 0, 0.0, 0.04, "met1"],
+        ["nild4c", 3.3, 0, 0.0, 0.04, "met2"],
+        ["capild3", 4.52, 0.02, 0.0, 0.0, "met3_cap"],
+        ["capild4", 4.52, 0.02, 0.0, 0.0, "met4_cap"],
+        ["topox", 3.9, 0.1031, 0.0, 0.0801, "met5"],
+        ["topnit", 7.5, 0.6482, 0.302, 0.3374, "topox"]
+      ],
+      "removed_conformal": [],
+      "contacts": [
+        ["licon_ntap_con", 1.177],
+        ["licon_nsd_con", 1.177],
+        ["licon_psd_con", 1.177],
+        ["licon_ptap_con", 1.177],
+        ["licon_poly_con", 0.5877],
+        ["mcon_con", 0.4725],
+        ["via1_con", 0.43],
+        ["via2_con", 0.581],
+        ["via3_ncap", 0.547],
+        ["via3_cap", 0.27],
+        ["via4_ncap", 0.662],
+        ["via4_cap", 0.385]
+      ],
+      "empirical_adjustments": {
+        "m1": [47.83, 0.376],
+        "m2": [52.84, 0.433],
+        "m3": [84.96, 0.625],
+        "m4": [93.14, 0.713]
+      }
+    },
+    "capiche-high": {
+      "source_path": "sky130A_high/metal_stack_sky130A_high.py",
+      "source_sha256": "fce8257bc3760cd40305caf44c32f114d6dcb4f161ade10b23d4fee59cdca023",
+      "substrate": [
+        ["subs", 0.0, 0.1]
+      ],
+      "metals": [
+        ["poly", 0.2231, 0.2, 0.0, false],
+        ["li1", 0.6917, 0.115, 0.023, false],
+        ["met1", 1.0137, 0.39, 0.0206, false],
+        ["met2", 1.5137, 0.39, 0.0206, false],
+        ["met3_ncap", 2.1629, 0.925, 0.028, false],
+        ["met3_cap", 2.1629, 0.925, 0.028, true],
+        ["capm", 3.6511, 0.1, 0.0, true],
+        ["met4_ncap", 3.2679, 0.925, 0.028, false],
+        ["met4_cap", 3.2679, 0.925, 0.028, true],
+        ["capm2", 4.8861, 0.1, 0.0, true],
+        ["met5", 4.4889, 1.386, 0.0, false]
+      ],
+      "field_oxide": [
+        ["fox", 3.9]
+      ],
+      "simple": [
+        ["psg", 3.9, "fox"],
+        ["nild2", 3.9, "lint"],
+        ["nild3", 4.3, "nild2"],
+        ["nild4", 4.2, "nild3"],
+        ["nild5", 4.1, "nild4"],
+        ["nild5b", 4.1, "nild4"],
+        ["nild6", 4.1, "nild5"],
+        ["nild6b", 4.1, "nild5"],
+        ["air", 3.5, "topnit"]
+      ],
+      "conformal": [
+        ["iox", 3.9, 0, 0.0, 0.006, "poly"],
+        ["spnit", 7.5, 0.1525, 0.0, 0.0431, "iox"],
+        ["lint", 7.3, 0.0825, 0.0825, 0.0668, "li1"],
+        ["capild3", 4.52, 0.02, 0.0, 0.0, "met3_cap"],
+        ["capild4", 4.52, 0.02, 0.0, 0.0, "met4_cap"],
+        ["topox", 3.9, 0.0769, 0.0, 0.0597, "met5"],
+        ["topnit", 7.5, 0.4318, 0.4534, 0.5065, "topox"]
+      ],
+      "removed_conformal": ["nild3c", "nild4c"],
+      "contacts": [
+        ["licon_ntap_con", 0.6917],
+        ["licon_nsd_con", 0.6917],
+        ["licon_psd_con", 0.6917],
+        ["licon_ptap_con", 0.6917],
+        ["licon_poly_con", 0.2686],
+        ["mcon_con", 0.207],
+        ["via1_con", 0.11],
+        ["via2_con", 0.2592],
+        ["via3_ncap", 0.18],
+        ["via3_cap", 0.27],
+        ["via4_ncap", 0.296],
+        ["via4_cap", 0.385]
+      ],
+      "empirical_adjustments": {
+        "m1": [42.39, 0.165],
+        "m2": [46.72, 0.199],
+        "m3": [82.2, 0.36],
+        "m4": [97.4, 0.473]
+      }
+    }
+  }
+}
