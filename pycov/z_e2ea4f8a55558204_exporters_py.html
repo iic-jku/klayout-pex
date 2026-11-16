@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_e2ea4f8a55558204_format_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -122,7 +122,7 @@
     <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t"><span class="key">from</span> <span class="nam">typing</span> <span class="key">import</span> <span class="op">*</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">plugin_api</span><span class="op">.</span><span class="nam">v1</span> <span class="key">import</span> <span class="nam">ExportError</span><span class="op">,</span> <span class="nam">ExporterUnavailable</span><span class="op">,</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">require_scene_features</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">plugin_api</span><span class="op">.</span><span class="nam">v1</span> <span class="key">import</span> <span class="nam">ExportError</span><span class="op">,</span> <span class="nam">ExporterUnavailable</span><span class="op">,</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">require_scene_capabilities</span>&nbsp;</span><span class="r"></span></p>
     <p class="exc show_exc"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="exc show_exc"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t"><span class="key">if</span> <span class="nam">TYPE_CHECKING</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="exc show_exc"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">    <span class="key">from</span> <span class="op">.</span><span class="op">.</span><span class="nam">plugin</span><span class="op">.</span><span class="nam">exporter_registry</span> <span class="key">import</span> <span class="nam">ExporterRegistry</span>&nbsp;</span><span class="r"></span></p>
@@ -193,7 +193,7 @@
     <p class="run"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">    <span class="nam">validate_export_scene</span><span class="op">(</span><span class="nam">scene</span><span class="op">,</span> <span class="nam">report</span><span class="op">=</span><span class="nam">report</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="nam">require_scene_features</span><span class="op">(</span><span class="nam">backend</span><span class="op">,</span> <span class="nam">scene</span><span class="op">,</span> <span class="nam">target</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="nam">require_scene_capabilities</span><span class="op">(</span><span class="nam">backend</span><span class="op">,</span> <span class="nam">scene</span><span class="op">,</span> <span class="nam">target</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">        <span class="key">return</span> <span class="nam">backend</span><span class="op">.</span><span class="nam">export</span><span class="op">(</span><span class="nam">scene</span><span class="op">,</span> <span class="nam">output_dir_path</span><span class="op">=</span><span class="nam">output_dir_path</span><span class="op">,</span> <span class="nam">prefix</span><span class="op">=</span><span class="nam">prefix</span><span class="op">,</span> <span class="nam">options</span><span class="op">=</span><span class="nam">options</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">    <span class="key">except</span> <span class="op">(</span><span class="nam">ExportError</span><span class="op">,</span> <span class="nam">NotImplementedError</span><span class="op">,</span> <span class="nam">OSError</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><span class="r"></span></p>
@@ -273,7 +273,7 @@
             <a class="nav" href="z_e2ea4f8a55558204_format_version_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
     </div>
 </footer>

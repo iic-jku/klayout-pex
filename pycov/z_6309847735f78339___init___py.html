@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_6309847735f78339_pex25d_importer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -118,7 +118,7 @@
     <p class="run"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t"><span class="key">from</span> <span class="nam">typing</span> <span class="key">import</span> <span class="nam">Callable</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">pex25d_importer</span> <span class="key">import</span> <span class="nam">ImporterError</span><span class="op">,</span> <span class="nam">ImporterUnavailable</span><span class="op">,</span> <span class="nam">PEX25DImporter</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">pex25d_scene_exporter</span> <span class="key">import</span> <span class="nam">ExportError</span><span class="op">,</span> <span class="nam">ExporterUnavailable</span><span class="op">,</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">SceneFeature</span><span class="op">,</span> <span class="nam">require_scene_features</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">pex25d_scene_exporter</span> <span class="key">import</span> <span class="nam">ExportError</span><span class="op">,</span> <span class="nam">ExporterUnavailable</span><span class="op">,</span> <span class="nam">PEX25DSceneExporter</span><span class="op">,</span> <span class="nam">SceneCapability</span><span class="op">,</span> <span class="nam">require_scene_capabilities</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t"><span class="nam">IMPORTER_ENTRY_POINT_GROUP</span> <span class="op">=</span> <span class="str">&#x27;klayout_pex.importers.v1&#x27;</span>&nbsp;</span><span class="r"></span></p>
@@ -145,8 +145,8 @@
     <p class="run run2"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="str">&#x27;ExportError&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">    <span class="str">&#x27;ExporterUnavailable&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="str">&#x27;PEX25DSceneExporter&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">    <span class="str">&#x27;SceneFeature&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">    <span class="str">&#x27;require_scene_features&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">    <span class="str">&#x27;SceneCapability&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">    <span class="str">&#x27;require_scene_capabilities&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">    <span class="str">&#x27;BodyKind&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="str">&#x27;ElectricalBody&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">    <span class="str">&#x27;conductor_body&#x27;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -167,7 +167,7 @@
             <a class="nav" href="z_6309847735f78339_pex25d_importer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
     </div>
 </footer>

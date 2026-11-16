@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/tech_info.py: 97%</title>
+    <title>Coverage for klayout_pex/tech_info.py: 96%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>tech_info.py</b>:
-            <span class="pc_cov">97%</span>
+            <span class="pc_cov">96%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">369 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">357<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">12<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">356<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">13<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">8<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_9c05d59a441cce45_tool_version_constraints_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -608,7 +608,7 @@
     <p class="pln"><span class="n"><a id="t526" href="#t526">526</a></span><span class="t">                <span class="com"># search for next metal or end of stack</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t527" href="#t527">527</a></span><span class="t">                <span class="key">if</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">layer_type</span> <span class="op">==</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">LAYER_TYPE_METAL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t528" href="#t528">528</a></span><span class="t">                    <span class="key">return</span> <span class="nam">diel_lyr</span><span class="op">,</span> <span class="nam">lyr</span><span class="op">.</span><span class="nam">metal_layer</span><span class="op">.</span><span class="nam">z</span> <span class="op">-</span> <span class="nam">found_layer</span><span class="op">.</span><span class="nam">metal_layer</span><span class="op">.</span><span class="nam">z</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t529" href="#t529">529</a></span><span class="t">        <span class="key">return</span> <span class="nam">diel_lyr</span><span class="op">,</span> <span class="num">5.0</span>   <span class="com"># air TODO</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t529" href="#t529">529</a></span><span class="t">        <span class="key">return</span> <span class="nam">diel_lyr</span><span class="op">,</span> <span class="num">5.0</span>   <span class="com"># air TODO</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t530" href="#t530">530</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t531" href="#t531">531</a></span><span class="t">    <span class="op">@</span><span class="nam">cached_property</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t532" href="#t532">532</a></span><span class="t">    <span class="key">def</span> <span class="nam">contact_above_metal_layer_name</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">process_stack_pb2</span><span class="op">.</span><span class="nam">ProcessStackInfo</span><span class="op">.</span><span class="nam">Contact</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -806,7 +806,7 @@
             <a class="nav" href="z_9c05d59a441cce45_tool_version_constraints_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
     </div>
 </footer>

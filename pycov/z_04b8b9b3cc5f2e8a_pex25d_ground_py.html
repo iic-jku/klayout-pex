@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/klayout/pex25d_ground.py: 91%</title>
+    <title>Coverage for klayout_pex/klayout/pex25d_ground.py: 98%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>klayout<span class="sep">/</span>pex25d_ground.py</b>:
-            <span class="pc_cov">91%</span>
+            <span class="pc_cov">98%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,17 +55,17 @@
         </aside>
         <h2>
             <span class="text">66 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">60<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">6<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">65<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_pex25d_builder_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_pex25d_exclusions_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_physical_geometry_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -161,7 +161,7 @@
     <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">                <span class="nam">check_native_ground_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">        <span class="nam">shape</span> <span class="op">=</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Polygon</span><span class="op">(</span><span class="op">[</span><span class="nam">kdb</span><span class="op">.</span><span class="nam">Point</span><span class="op">(</span><span class="nam">p</span><span class="op">.</span><span class="nam">x</span><span class="op">,</span> <span class="nam">p</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span> <span class="key">for</span> <span class="nam">p</span> <span class="key">in</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">outer</span><span class="op">.</span><span class="nam">points</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">        <span class="key">for</span> <span class="nam">hole</span> <span class="key">in</span> <span class="nam">polygon</span><span class="op">.</span><span class="nam">holes</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">            <span class="nam">shape</span><span class="op">.</span><span class="nam">insert_hole</span><span class="op">(</span><span class="op">[</span><span class="nam">kdb</span><span class="op">.</span><span class="nam">Point</span><span class="op">(</span><span class="nam">p</span><span class="op">.</span><span class="nam">x</span><span class="op">,</span> <span class="nam">p</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span> <span class="key">for</span> <span class="nam">p</span> <span class="key">in</span> <span class="nam">hole</span><span class="op">.</span><span class="nam">points</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">            <span class="nam">shape</span><span class="op">.</span><span class="nam">insert_hole</span><span class="op">(</span><span class="op">[</span><span class="nam">kdb</span><span class="op">.</span><span class="nam">Point</span><span class="op">(</span><span class="nam">p</span><span class="op">.</span><span class="nam">x</span><span class="op">,</span> <span class="nam">p</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span> <span class="key">for</span> <span class="nam">p</span> <span class="key">in</span> <span class="nam">hole</span><span class="op">.</span><span class="nam">points</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">        <span class="nam">region</span><span class="op">.</span><span class="nam">insert</span><span class="op">(</span><span class="nam">shape</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">    <span class="key">return</span> <span class="nam">region</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -174,10 +174,10 @@
     <p class="run"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">            <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">            <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">    <span class="key">for</span> <span class="nam">polygon</span> <span class="key">in</span> <span class="nam">conductor_region</span><span class="op">.</span><span class="nam">polygons</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">for</span> <span class="nam">ring</span> <span class="key">in</span> <span class="op">(</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">outer</span><span class="op">,</span> <span class="op">*</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">holes</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="key">for</span> <span class="nam">point</span> <span class="key">in</span> <span class="nam">ring</span><span class="op">.</span><span class="nam">points</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">for</span> <span class="nam">ring</span> <span class="key">in</span> <span class="op">(</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">outer</span><span class="op">,</span> <span class="op">*</span><span class="nam">polygon</span><span class="op">.</span><span class="nam">holes</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="key">for</span> <span class="nam">point</span> <span class="key">in</span> <span class="nam">ring</span><span class="op">.</span><span class="nam">points</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">x</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">_check_envelope_coordinate</span><span class="op">(</span><span class="nam">point</span><span class="op">.</span><span class="nam">y</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="nam">region</span> <span class="op">=</span> <span class="nam">region_of</span><span class="op">(</span><span class="nam">conductor_region</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">    <span class="nam">field</span> <span class="op">=</span> <span class="nam">kdb</span><span class="op">.</span><span class="nam">Region</span><span class="op">(</span><span class="nam">region</span><span class="op">.</span><span class="nam">bbox</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">enlarged</span><span class="op">(</span><span class="num">1</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="nam">retained</span> <span class="op">=</span> <span class="nam">retained_ground_region</span><span class="op">(</span><span class="nam">ground</span><span class="op">,</span> <span class="nam">field</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -203,12 +203,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_04b8b9b3cc5f2e8a_pex25d_builder_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_04b8b9b3cc5f2e8a_pex25d_exclusions_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_04b8b9b3cc5f2e8a_physical_geometry_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
     </div>
 </footer>

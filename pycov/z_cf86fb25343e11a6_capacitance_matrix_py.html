@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/common/capacitance_matrix.py: 100%</title>
+    <title>Coverage for klayout_pex/common/capacitance_matrix.py: 99%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>common<span class="sep">/</span>capacitance_matrix.py</b>:
-            <span class="pc_cov">100%</span>
+            <span class="pc_cov">99%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">49 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">49<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
+            <span class="text">69 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">68<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_cf86fb25343e11a6_path_validation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -165,6 +165,32 @@
     <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">                <span class="nam">c</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span> <span class="op">=</span> <span class="nam">avg</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">                <span class="nam">c</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span> <span class="op">=</span> <span class="nam">avg</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">        <span class="key">return</span> <span class="nam">c</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="key">def</span> <span class="nam">aggregate_capacitance_matrix</span><span class="op">(</span><span class="nam">matrix</span><span class="op">:</span> <span class="nam">CapacitanceMatrix</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">                                 <span class="nam">nets_of_parts</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">                                 <span class="nam">omit_reference</span><span class="op">:</span> <span class="nam">Callable</span><span class="op">[</span><span class="op">[</span><span class="nam">int</span><span class="op">]</span><span class="op">,</span> <span class="nam">bool</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">                                 <span class="nam">omit_pair</span><span class="op">:</span> <span class="nam">Callable</span><span class="op">[</span><span class="op">[</span><span class="nam">int</span><span class="op">,</span> <span class="nam">int</span><span class="op">]</span><span class="op">,</span> <span class="nam">bool</span><span class="op">]</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="nam">CapacitanceMatrix</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Sum charge groups and filter mutual/reference terms before netlist output.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="nam">count</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="nam">nets_of_parts</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">    <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">matrix</span><span class="op">.</span><span class="nam">rows</span><span class="op">)</span> <span class="op">!=</span> <span class="nam">count</span> <span class="key">or</span> <span class="nam">any</span><span class="op">(</span><span class="nam">len</span><span class="op">(</span><span class="nam">row</span><span class="op">)</span> <span class="op">!=</span> <span class="nam">count</span> <span class="key">for</span> <span class="nam">row</span> <span class="key">in</span> <span class="nam">matrix</span><span class="op">.</span><span class="nam">rows</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">&#x27;Capacitance matrix dimensions do not match its charge groups&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">    <span class="nam">names</span> <span class="op">=</span> <span class="nam">list</span><span class="op">(</span><span class="nam">dict</span><span class="op">.</span><span class="nam">fromkeys</span><span class="op">(</span><span class="nam">nets_of_parts</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">    <span class="nam">indexes</span> <span class="op">=</span> <span class="op">{</span><span class="nam">name</span><span class="op">:</span> <span class="nam">index</span> <span class="key">for</span> <span class="nam">index</span><span class="op">,</span> <span class="nam">name</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">names</span><span class="op">)</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">    <span class="nam">rows</span> <span class="op">=</span> <span class="op">[</span><span class="op">[</span><span class="num">0.0</span><span class="op">]</span> <span class="op">*</span> <span class="nam">len</span><span class="op">(</span><span class="nam">names</span><span class="op">)</span> <span class="key">for</span> <span class="nam">_</span> <span class="key">in</span> <span class="nam">names</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="key">for</span> <span class="nam">i</span><span class="op">,</span> <span class="nam">name</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">nets_of_parts</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">        <span class="nam">net_i</span> <span class="op">=</span> <span class="nam">indexes</span><span class="op">[</span><span class="nam">name</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">omit_reference</span><span class="op">(</span><span class="nam">i</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">            <span class="nam">rows</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span> <span class="op">+=</span> <span class="nam">sum</span><span class="op">(</span><span class="nam">matrix</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">        <span class="key">for</span> <span class="nam">j</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="nam">i</span> <span class="op">+</span> <span class="num">1</span><span class="op">,</span> <span class="nam">count</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">            <span class="nam">net_j</span> <span class="op">=</span> <span class="nam">indexes</span><span class="op">[</span><span class="nam">nets_of_parts</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">            <span class="key">if</span> <span class="nam">net_i</span> <span class="op">!=</span> <span class="nam">net_j</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">omit_pair</span><span class="op">(</span><span class="nam">i</span><span class="op">,</span> <span class="nam">j</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">                <span class="nam">value</span> <span class="op">=</span> <span class="nam">matrix</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">                <span class="nam">rows</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span><span class="op">[</span><span class="nam">net_j</span><span class="op">]</span> <span class="op">+=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">                <span class="nam">rows</span><span class="op">[</span><span class="nam">net_j</span><span class="op">]</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span> <span class="op">+=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">                <span class="nam">rows</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span><span class="op">[</span><span class="nam">net_i</span><span class="op">]</span> <span class="op">-=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">                <span class="nam">rows</span><span class="op">[</span><span class="nam">net_j</span><span class="op">]</span><span class="op">[</span><span class="nam">net_j</span><span class="op">]</span> <span class="op">-=</span> <span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">    <span class="key">return</span> <span class="nam">CapacitanceMatrix</span><span class="op">(</span><span class="nam">conductor_names</span><span class="op">=</span><span class="nam">names</span><span class="op">,</span> <span class="nam">rows</span><span class="op">=</span><span class="nam">rows</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -174,7 +200,7 @@
             <a class="nav" href="z_cf86fb25343e11a6_path_validation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-13 22:38 +0000
+            created at 2026-11-16 19:18 +0000
         </p>
     </div>
 </footer>
