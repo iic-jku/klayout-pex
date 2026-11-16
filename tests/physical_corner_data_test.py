@@ -46,16 +46,16 @@ from tests.common.tech_catalog import add_scenario, read_catalog
 pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('Physical Corner Recipes')]
 
 
-def selected_stack(corner: str) -> TechInfo:
-    technology = TechInfo.parse_tech_def(PDK.IHP_SG13CMOS5L.config.tech_pb_json_path)
+def selected_stack(corner: str, pdk: PDK = PDK.IHP_SG13CMOS5L) -> TechInfo:
+    technology = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path)
     dataset = next(dataset for dataset in load_corner_process_stacks(technology) if dataset.id == 'capiche-'+corner)
     technology.process_stack.CopyFrom(dataset.process_stack)
     return TechInfo(technology, None)
 
 
-def physical_file(corner: str):
+def physical_file(corner: str, pdk: PDK = PDK.IHP_SG13CMOS5L):
     builder = PEX25DBuilder(SimpleNamespace(dbu=0.001, substrate_net_name='stack-reference'),
-                            selected_stack(corner), 'physical-corner')
+                            selected_stack(corner, pdk), 'physical-corner')
     file = pex25d_file_pb2().PEX25DFile()
     for step in (builder.build_units, builder.build_ground_plane, builder.build_layers, builder.build_dielectrics):
         step(file)
@@ -161,18 +161,23 @@ def test_physical_component_selection_requires_explicit_scenario_capability(tmp_
 @pytest.mark.slow
 @pytest.mark.fastercap
 @pytest.mark.skipif(shutil.which('FasterCap') is None, reason='FasterCap is not installed')
-def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tmp_path: Path):
+@pytest.mark.parametrize('pdk', list(PDK))
+def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tmp_path: Path, pdk: PDK):
     from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
     from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
 
     results = {}
     for corner in ('low', 'high'):
-        file = physical_file(corner)
-        for net, layer in [('bottom', 'Metal1'), ('top', 'Metal2')]:
+        file = physical_file(corner, pdk)
+        layers = ('met1', 'met2') if pdk == PDK.SKY130A else ('Metal1', 'Metal2')
+        for net, layer in zip(('bottom', 'top'), layers):
             file.conductors.add(name=net, net=net)
             shape = file.shapes.add(conductor=net, layer=layer,
                                     kind=pex25d_file_pb2().ShapeRecord.SHAPE_KIND_BOX)
             shape.box.upper_right.x = shape.box.upper_right.y = 100000  # 10 um square
+        from fractions import Fraction
+        from klayout_pex.klayout.physical_geometry import apply_width_bias, width_bias_offsets
+        apply_width_bias(file, width_bias_offsets(selected_stack(corner, pdk), Fraction('0.0001')))
         scene = resolve(file)
         directory = tmp_path / corner
         outputs = FasterCapSceneExporter().export(scene, output_dir_path=str(directory),
@@ -190,7 +195,21 @@ def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tm
             estimates.append((forward+backward)/2)
         assert estimates[-1] == pytest.approx(estimates[-2], rel=0.02, abs=0)
         results[corner] = estimates[-1]
-    # The geometry is identical. Raising only ILD/passivation permittivity raises
-    # the plate coupling. This is a source-recipe check, not silicon calibration.
+        # Independent infinite-plate area estimates from the pinned source gap,
+        # permittivity and manufactured full width. The finite 10 um plates add
+        # fringe; this comparison exposes unit/gap errors without treating a
+        # field solver as a calibrated reference for the empirical C table.
+        area_inputs = {
+            PDK.GF180MCUD: {'low': (4.0, .719, 10.0), 'high': (4.0, .481, 10.0)},
+            PDK.IHP_SG13G2: {'low': (3.69, .54, 10.0), 'high': (4.51, .54, 10.0)},
+            PDK.IHP_SG13CMOS5L: {'low': (3.69, .54, 10.0), 'high': (4.51, .54, 10.0)},
+            PDK.SKY130A: {'low': (4.5, .43, 9.9794), 'high': (4.3, .11, 10.0206)},
+        }
+        permittivity, gap_um, width_um = area_inputs[pdk][corner]
+        area_only = 8.8541878128e-18 * permittivity * width_um**2 / gap_um
+        assert area_only < estimates[-1] < 1.3*area_only
+        print(pdk, corner, 'area-only [F]', area_only, 'finite-plate excess', estimates[-1]/area_only-1)
+    # These source high-C recipes increase permittivity and/or tighten the
+    # interconnect geometry. This checks the selected recipe, not silicon calibration.
     assert results['high'] > results['low']
     print('Converged physical corner mutual capacitances [F]:', results)

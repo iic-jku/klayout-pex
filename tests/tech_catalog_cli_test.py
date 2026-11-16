@@ -46,7 +46,7 @@ from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import port_admittance
-from tests.common.tech_catalog import add_scenario, edit_dataset, write_test_catalog
+from tests.common.tech_catalog import add_scenario, edit_dataset, read_catalog, write_test_catalog
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 
 
@@ -94,8 +94,11 @@ def test_unknown_corner_fails_before_loading_layout(command: str, corner: str, t
         code, output = run_cli(KpexCLI().main, ['kpex', command, '--pdk', 'sky130A', '--corner', corner,
                                                '--lvsdb', '/nonexistent/layout.lvsdb', '--out-dir', str(tmp_path)])
     assert code == 1, output
-    assert ('valid corners: hrhc-mim-bound, hrlc-mim-bound, '
-            'lrhc-mim-bound, lrlc-mim-bound, nominal') in output
+    # The diagnostic lists authored scenarios, including bundled physical corners,
+    # rather than assuming every catalog contains only its nominal scenario.
+    catalog = read_catalog(Path(PDK.SKY130A.config.tech_catalog_path))
+    choices = ', '.join(sorted(scenario.id for scenario in catalog.scenarios))
+    assert f'valid corners: {choices}' in ' '.join(output.split()), output
 
 
 @pytest.mark.parametrize('options, message', [

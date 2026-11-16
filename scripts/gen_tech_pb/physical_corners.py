@@ -27,7 +27,7 @@ from typing import List
 from pathlib import Path
 
 from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
-from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset
+from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyDataset, TechnologyScenario
 from klayout_pex_protobuf.kpex.tech.tech_pb2 import Technology
 from scripts.gen_tech_pb.provenance import nominal_provenance
 from scripts.gen_tech_pb.source_physical_corners import load_restricted_physical_corners
@@ -116,3 +116,14 @@ def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset
                                references=['https://github.com/iic-jku/klayout-pex/issues/550'])
         datasets.append(dataset)
     return datasets
+
+
+def physical_corner_scenarios(technology: Technology) -> List[TechnologyScenario]:
+    """Author source physical/C pairings independently of the held nominal R law."""
+    if technology.name not in ('sky130A', 'gf180mcuD', 'ihp-sg13g2', 'ihp-sg13cmos5l'):
+        raise NotImplementedError(f'Physical scenarios for {technology.name!r} are not implemented')
+    return [TechnologyScenario(
+        id='capiche-'+corner+'-c', description='Source '+corner+'-C physical interconnect recipe with nominal R; '
+        'layout-dependent MIM restrictions apply. No correlated R or device-reference claim',
+        resistance='nominal', capacitance=corner, process_stack='capiche-'+corner,
+        physical_stack_matches=True) for corner in ('low', 'high')]

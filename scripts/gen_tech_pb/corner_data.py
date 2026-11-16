@@ -40,7 +40,7 @@ from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
 )
 from scripts.gen_tech_pb.provenance import nominal_provenance
 from scripts.gen_tech_pb.device_reference_corners import load_corner_device_references
-from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks
+from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks, physical_corner_scenarios
 from scripts.gen_tech_pb.resistance_corners import load_corner_resistances
 from scripts.gen_tech_pb.tech_builder import (
     CapacitanceInfo, Technology, add_mim_cap, add_overlap_cap, add_sidewall_cap,
@@ -180,6 +180,30 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
             reason='Keep physical interconnect inputs independent of empirical coefficients and resistance laws',
             references=['https://github.com/iic-jku/klayout-pex/issues/550'])
         catalog_provenance.data_revision = 'physical-capiche-1'
+        catalog_provenance.history.add(
+            revision='physical-capiche-2', date='2026-11-13', summary='Declare source physical C-only scenarios',
+            reason='Expose qualified recipes with explicit layout restrictions while holding resistance nominal',
+            references=['https://github.com/iic-jku/klayout-pex/issues/550'])
+        catalog_provenance.data_revision = 'physical-capiche-2'
+        catalog_provenance.sources.add(
+            id='capiche-magic-mapping', description='Explicit process and R/C-style mapping for physical-stack results',
+            uri='https://github.com/RTimothyEdwards/capiche/blob/85905e8810982bd89966cbf8b7e9d3fd1e922d42/src/capiche/merge_extract.py',
+            revision='85905e8810982bd89966cbf8b7e9d3fd1e922d42',
+            sha256='6f40e806634dcdd7c820a3de8f9d083e4ef4f75c89e9ba210dce87e221889a76')
+        catalog_provenance.assumptions.add(
+            id='physical-c-pairing', description='The source maps the selected process stack directories to MAGIC '
+            'hrlc/lrlc low-C and hrhc/lrhc high-C blocks. The authored physical scenarios retain nominal R, '
+            'omit device references and retain layout-dependent MIM restrictions',
+            reason='physical_stack_matches declares the source-related recipe, not identical fitted numbers, '
+            'a correlated R law or silicon calibration', source_ids=['capiche-magic-mapping', 'extraction-table'])
+        catalog_provenance.assumptions.add(
+            id='physical-coefficient-revisions', description='Physical recipes are pinned to Capiche 85905e8. '
+            'IHP coefficient revision 14b1ab8 includes the corrected coatings committed four minutes earlier. '
+            'SKY130/GF180 coefficient files last changed at open_pdks bb8c82e after Capiche bf6bee7 introduced '
+            'the selected physical profiles; later pinned Capiche changes do not alter their geometry/materials',
+            reason='Keep recipe and empirical-table revision identities explicit rather than infer a match from names',
+            source_ids=['capiche-magic-mapping', 'extraction-table'])
+
     written = write_nominal_catalog(
         technology, catalog_path, catalog_provenance,
         f'Explicit extraction scenarios and capacitance components for {technology.name}', components)
@@ -203,6 +227,8 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
     if resistance_document:
         for scenario in resistance_document['scenarios']:
             catalog.scenarios.add().CopyFrom(ParseDict(scenario, TechnologyScenario()))
+    if physical_datasets:
+        catalog.scenarios.extend(physical_corner_scenarios(technology))
     catalog_path.write_text(MessageToJson(catalog, preserving_proto_field_name=True, ensure_ascii=False, sort_keys=True) + '\n',
                             encoding='utf-8')
     return written

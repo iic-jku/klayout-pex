@@ -41,6 +41,7 @@ from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.protobuf import pex25d_file_pb2
 from klayout_pex.pex25d.resolver import resolve
 from klayout_pex.tech_info import TechInfo
+from scripts.gen_tech_pb.corner_data import write_bundled_corner_catalog
 from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks
 from scripts.gen_tech_pb.source_physical_corners import load_restricted_physical_corners
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
@@ -231,3 +232,17 @@ def test_source_tables_fail_closed_for_incomplete_or_invalid_geometry(tmp_path: 
     path.write_text(json.dumps(document), encoding='utf-8')
     with pytest.raises(ValueError):
         load_restricted_physical_corners(technology, path)
+
+
+@pytest.mark.parametrize('pdk', list(PDK))
+def test_authored_source_scenarios_keep_resistance_and_device_capabilities_independent(tmp_path: Path, pdk: PDK):
+    technology = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path)
+    path = tmp_path/'catalog.pb.json'
+    write_bundled_corner_catalog(technology, path)
+    for corner in ('low', 'high'):
+        selected_tech = TechInfo.from_catalog(str(path), None, 'capiche-'+corner+'-c')
+        selected_tech.selection.require_physical_stack()
+        assert selected_tech.selection.resistance.id == 'nominal'
+        assert selected_tech.selection.capacitance.id == corner
+        assert selected_tech.selection.device_references is None
+        assert selected_tech.tech.process_stack == selected(pdk, corner).tech.process_stack
