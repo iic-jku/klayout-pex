@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "technology_id": "ihp-sg13g2",
+  "physical": {
+    "capiche-low": {
+      "source_path": "ihp-sg13g2_low/metal_stack_ihp-sg13g2_low.py",
+      "source_sha256": "2e4b0484c65802f4f4ecd60583572140bf381ac5c9210d5138782c85b122da95",
+      "substrate": [
+        ["subs", 0.0, 0.0]
+      ],
+      "metals": [
+        ["GatPoly", 0.4, 0.16, 0.0, false],
+        ["Metal1", 1.04, 0.42, 0.0, false],
+        ["Metal2", 2.0, 0.49, 0.0, false],
+        ["Metal3", 3.03, 0.49, 0.0, false],
+        ["Metal4", 4.06, 0.49, 0.0, false],
+        ["metal5_n_cap", 5.09, 0.49, 0.0, false],
+        ["metal5_cap", 5.09, 0.49, 0.0, true],
+        ["cmim_top", 5.62, 0.15, 0.0, true],
+        ["TopMetal1", 6.43, 2.0, 0.0, false],
+        ["TopMetal2", 11.23, 3.0, 0.0, false]
+      ],
+      "field_oxide": [
+        ["fox", 3.95]
+      ],
+      "simple": [
+        ["ild0", 3.69, "nitride"],
+        ["ild1", 3.69, "ild0"],
+        ["ild2", 3.69, "ild1"],
+        ["ild3", 3.69, "ild2"],
+        ["ild4", 3.69, "ild3"],
+        ["ildtm1b", 3.69, "ild4"],
+        ["ildtm1c", 3.69, "ild4"],
+        ["ildtm2", 3.69, "ildtm1c"],
+        ["air", 3.0, "pass2"]
+      ],
+      "conformal": [
+        ["nitride", 6.5, 0.05, 0.05, 0.05, "GatPoly"],
+        ["ismim", 6.78, 0.04, 0.0, 0.0, "metal5_cap"],
+        ["pass1", 3.69, 1.5, 1.5, 0.3, "TopMetal2"],
+        ["pass2", 5.9399999999999995, 0.4, 1.9, 0.3, "pass1"]
+      ],
+      "removed_conformal": [],
+      "contacts": [
+        ["cont_nsd_con", 1.04],
+        ["cont_psd_con", 1.04],
+        ["cont_ntap_con", 1.04],
+        ["cont_ptap_con", 1.04],
+        ["cont_poly_con", 0.48],
+        ["via1_drw", 0.54],
+        ["via2_drw", 0.54],
+        ["via3_drw", 0.54],
+        ["via4_drw", 0.54],
+        ["topvia1_n_cap", 0.85],
+        ["mim_via", 0.66],
+        ["topvia2_drw", 2.8]
+      ],
+      "empirical_adjustments": {}
+    },
+    "capiche-high": {
+      "source_path": "ihp-sg13g2_high/metal_stack_ihp-sg13g2_high.py",
+      "source_sha256": "01e82b66060264bb10e5e6e48f2fea90aacd5a1813ce65bcc6a5cfefe3216385",
+      "substrate": [
+        ["subs", 0.0, 0.0]
+      ],
+      "metals": [
+        ["GatPoly", 0.4, 0.16, 0.0, false],
+        ["Metal1", 1.04, 0.42, 0.0, false],
+        ["Metal2", 2.0, 0.49, 0.0, false],
+        ["Metal3", 3.03, 0.49, 0.0, false],
+        ["Metal4", 4.06, 0.49, 0.0, false],
+        ["metal5_n_cap", 5.09, 0.49, 0.0, false],
+        ["metal5_cap", 5.09, 0.49, 0.0, true],
+        ["cmim_top", 5.62, 0.15, 0.0, true],
+        ["TopMetal1", 6.43, 2.0, 0.0, false],
+        ["TopMetal2", 11.23, 3.0, 0.0, false]
+      ],
+      "field_oxide": [
+        ["fox", 3.95]
+      ],
+      "simple": [
+        ["ild0", 4.51, "nitride"],
+        ["ild1", 4.51, "ild0"],
+        ["ild2", 4.51, "ild1"],
+        ["ild3", 4.51, "ild2"],
+        ["ild4", 4.51, "ild3"],
+        ["ildtm1b", 4.51, "ild4"],
+        ["ildtm1c", 4.51, "ild4"],
+        ["ildtm2", 4.51, "ildtm1c"],
+        ["air", 3.0, "pass2"]
+      ],
+      "conformal": [
+        ["nitride", 6.5, 0.05, 0.05, 0.05, "GatPoly"],
+        ["ismim", 6.78, 0.04, 0.0, 0.0, "metal5_cap"],
+        ["pass1", 4.51, 1.5, 1.5, 0.3, "TopMetal2"],
+        ["pass2", 7.26, 0.4, 1.9, 0.3, "pass1"]
+      ],
+      "removed_conformal": [],
+      "contacts": [
+        ["cont_nsd_con", 1.04],
+        ["cont_psd_con", 1.04],
+        ["cont_ntap_con", 1.04],
+        ["cont_ptap_con", 1.04],
+        ["cont_poly_con", 0.48],
+        ["via1_drw", 0.54],
+        ["via2_drw", 0.54],
+        ["via3_drw", 0.54],
+        ["via4_drw", 0.54],
+        ["topvia1_n_cap", 0.85],
+        ["mim_via", 0.66],
+        ["topvia2_drw", 2.8]
+      ],
+      "empirical_adjustments": {}
+    }
+  }
+}

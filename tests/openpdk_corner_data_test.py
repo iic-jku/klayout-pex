@@ -76,8 +76,8 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     assert write_bundled_corner_catalog(technology, path) == written
     assert {p: p.read_bytes() for p in written} == before
     assert unrelated.read_text(encoding='utf-8') == 'keep'
-    # These tables are empirical C data. An R law, matched physical recipe and device
-    # reference are separate evidence, so packaging C must not silently authorize them.
+    # Only authored source pairings gain physical capability. Selecting an
+    # empirical C component alone still does not authorize a physical recipe.
     expected_scenarios = ['nominal']
     if ihp:
         expected_scenarios.extend(['gatpoly-low-sheet', 'gatpoly-high-sheet'])
@@ -86,6 +86,7 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     if pdk == PDK.IHP_SG13CMOS5L:
         expected_scenarios.extend(['fixed-layout-low-r', 'fixed-layout-high-r'])
     assert [scenario.id for scenario in catalog.scenarios][:len(expected_scenarios)] == expected_scenarios
+    assert {'capiche-low-c', 'capiche-high-c'} <= {scenario.id for scenario in catalog.scenarios}
     for dataset in catalog.datasets:
         component = path.parent / dataset.file.path
         assert component in written
