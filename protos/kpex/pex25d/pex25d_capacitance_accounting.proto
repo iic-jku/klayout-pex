@@ -1,0 +1,72 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+
+// Capacitance result accounting. Masks classify geometry without deleting
+// conductors, changing electrical ownership, or removing their shielding.
+syntax = "proto3";
+package kpex.pex25d;
+
+import "kpex/pex25d/pex25d_geometry.proto";
+import "kpex/pex25d/pex25d_source_ref.proto";
+
+// Polygon union on one conductor layer. Holes remain outside the mask.
+message AccountingMask {
+    string layer = 1;
+    repeated Polygon2D polygons = 10;
+}
+
+// Names are artifact-local. Multiple layer masks share one region identity.
+message CapacitanceRegion {
+    string name = 1;
+    repeated AccountingMask masks = 10;
+    SourceRef source = 100;
+}
+
+// Exclude mutual capacitance when both conductor parts belong to the named
+// region and their layers match this policy. For coupling to the physical ground
+// body, only the conductor part needs membership: ground is never partitioned.
+// Ground may be named in LAYER_PAIR; ALL_LAYER_PAIRS includes it implicitly.
+// Geometry and electrical ownership remain unchanged.
+message CapacitanceExclusion {
+    enum Kind {
+        KIND_UNSPECIFIED = 0;
+        KIND_ALL_LAYER_PAIRS = 10;
+        KIND_LAYER_PAIR = 20;
+    }
+    string name = 1;
+    string region = 10;
+    Kind kind = 20;
+    string layer_a = 30;
+    string layer_b = 31;
+    SourceRef source = 100;
+}
+
+// Explicit result exclusions only. This does not infer intrinsic compact-model
+// ownership from terminal masks or from net names.
+message CapacitanceAccounting {
+    repeated CapacitanceRegion regions = 10;
+    repeated CapacitanceExclusion exclusions = 20;
+    // Exclude only coupling to the physical reference body, not to every
+    // conductor sharing its net. The Maxwell row-sum/reference convention
+    // must match the existing netlist result consumer.
+    repeated string excluded_substrate_nets = 30;
+}

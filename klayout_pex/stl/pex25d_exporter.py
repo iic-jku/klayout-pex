@@ -34,11 +34,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from ..pex25d.electrical import write_solver_body_map
-from ..plugin_api.v1 import SceneFeature, require_scene_features
+from ..plugin_api.v1 import SceneCapability, require_scene_capabilities
 
 from dataclasses import dataclass
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, List, Mapping, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, FrozenSet, List, Mapping, Optional
 
 from ..fastercap.pex25d_exporter import FasterCapModelOptions, build_fastercap_model
 from ..plugin_api.v1 import ExportError, PEX25DSceneExporter
@@ -58,7 +58,12 @@ class STLSceneExporter(PEX25DSceneExporter):
     name: ClassVar[str] = 'stl'
     default_prefix: ClassVar[str] = ''
 
-    scene_features = frozenset({SceneFeature.GROUND_CUTOUTS, SceneFeature.ELECTRICAL_IDENTITY})
+    @classmethod
+    def supported_capabilities(cls) -> FrozenSet[SceneCapability]:
+        return frozenset({
+            SceneCapability.GROUND_CUTOUTS,
+            SceneCapability.ELECTRICAL_IDENTITY,
+        })
 
     def export(self,
                scene: PEX25DScene,
@@ -67,7 +72,7 @@ class STLSceneExporter(PEX25DSceneExporter):
                prefix: str = '',
                options: Optional[Mapping[str, Any]] = None) -> List[str]:
         """Build the solids and write them; there is no primary file."""
-        require_scene_features(self, scene, self.name)
+        require_scene_capabilities(self, scene, self.name)
         try:
             settings = STLExporterOptions(**(options or {}))
         except (TypeError, ValueError) as exc:

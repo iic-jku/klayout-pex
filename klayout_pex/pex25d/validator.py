@@ -50,6 +50,8 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import *
 
+from .accounting_validation import validate_capacitance_accounting
+from .capability_validation import validate_required_capabilities
 from .diagnostics import (Diagnostic, DiagnosticsReport, Severity, Tier,
                           source_ref)
 from .protobuf import pex25d_dielectric_pb2, pex25d_file_pb2, pex25d_scene_pb2
@@ -78,6 +80,10 @@ class Validator:
     # ----------------------------------------------------------------- entry
 
     def validate(self, message: Any, scene: Any = None) -> None:
+        if not validate_required_capabilities(message, self.report):
+            return
+        if not validate_capacitance_accounting(message, self.report):
+            return
         if is_scene(message):
             self.validate_scene(message)
         else:

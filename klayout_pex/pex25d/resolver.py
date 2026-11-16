@@ -97,7 +97,14 @@ class Resolver:
     # ---------------------------------------------------------------- entry
 
     def resolve(self) -> Any:
+        from .capability_validation import validate_required_capabilities
+        from .accounting_validation import validate_capacitance_accounting
+        if not validate_required_capabilities(self.file, self.report) or not validate_capacitance_accounting(self.file, self.report):
+            raise ResolveError('Invalid capacitance accounting contract')
         scene = pex25d_scene_pb2().PEX25DScene()
+        scene.required_capabilities.extend(self.file.required_capabilities)
+        if self.file.HasField('capacitance_accounting'):
+            scene.capacitance_accounting.CopyFrom(self.file.capacitance_accounting)
         scene.format_version_major = self.file.format_version_major
         scene.format_version_minor = self.file.format_version_minor
         scene.format_version_suffix = self.file.format_version_suffix
@@ -113,6 +120,14 @@ class Resolver:
         self.resolve_dielectrics(scene)
         self.resolve_conductors(scene)
         self.resolve_domain(scene)
+
+        if not self.errors and scene.capacitance_accounting.regions:
+            try:
+                from ..klayout.pex25d_accounting import partition_accounting
+                partition_accounting(scene)
+            except (ImportError, ValueError, RuntimeError) as exc:
+                self.diagnose('PEX25D-E0285', f'Cannot resolve capacitance accounting geometry: {exc}')
+                raise ResolveError('Cannot resolve capacitance accounting geometry') from exc
 
         if self.strict:
             # The geometric tier lives in the validator; running it from here

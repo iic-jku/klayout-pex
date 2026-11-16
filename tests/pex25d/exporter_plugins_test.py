@@ -476,6 +476,11 @@ def test_imports_and_builtin_discovery_need_no_geometry_or_generated_code():
 
         from klayout_pex import pex25d
         registry = pex25d.exporter_registry()
+        from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter, FastCap2SceneExporter
+        from klayout_pex.stl.pex25d_exporter import STLSceneExporter
+        assert v1.PEX25DSceneExporter.supported_capabilities() == frozenset()
+        for exporter_class in (FasterCapSceneExporter, FastCap2SceneExporter, STLSceneExporter):
+            assert v1.SceneCapability.GROUND_CUTOUTS in exporter_class.supported_capabilities()
         exporter = registry.load('klayout-pex:fastercap')
         try:
             from types import SimpleNamespace

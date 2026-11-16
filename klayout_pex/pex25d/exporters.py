@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from typing import *
 
-from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter, require_scene_features
+from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter, require_scene_capabilities
 
 if TYPE_CHECKING:
     from ..plugin.exporter_registry import ExporterRegistry
@@ -111,7 +111,7 @@ def export_with_backend(backend: PEX25DSceneExporter,
     validate_export_scene(scene, report=report)
 
     try:
-        require_scene_features(backend, scene, target)
+        require_scene_capabilities(backend, scene, target)
         return backend.export(scene, output_dir_path=output_dir_path, prefix=prefix, options=options)
     except (ExportError, NotImplementedError, OSError):
         raise

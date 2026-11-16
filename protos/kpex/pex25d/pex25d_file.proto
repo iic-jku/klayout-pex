@@ -55,6 +55,8 @@ syntax = "proto3";
 
 package kpex.pex25d;
 
+import "kpex/pex25d/pex25d_capabilities.proto";
+import "kpex/pex25d/pex25d_capacitance_accounting.proto";
 import "kpex/pex25d/pex25d_source_ref.proto";
 import "kpex/pex25d/pex25d_meta.proto";
 import "kpex/pex25d/pex25d_geometry.proto";
@@ -76,11 +78,15 @@ message PEX25DFile {
     // Optional pre-release / build suffix: the `rc1` of `PEX25D 1.0-rc1`, stored
     // without the leading '-'. Empty for a plain release version.
     //
-    // It takes no part in compatibility: a reader accepts a file by
-    // major/minor alone and MUST NOT reject one because it does not recognise
-    // the suffix. Carried so that a writer can round-trip it and so that a
-    // generator can tell "1.0" from "1.0-rc1" when reporting provenance.
+    // It takes no part in compatibility: readers check major/minor and required
+    // features, and MUST NOT reject a file for an unrecognised suffix. Carried
+    // so that a writer can round-trip it and a generator can distinguish "1.0"
+    // from "1.0-rc1" when reporting provenance.
     string format_version_suffix = 3;
+
+    // REQUIRED semantics, checked before resolving, exporting or using results.
+    // Unknown enum values must be rejected, not treated as UNSPECIFIED.
+    repeated RequiredCapability required_capabilities = 50;
 
     // `UNITS LENGTH um GRID 0.0001`
     Units units = 5;
@@ -141,6 +147,9 @@ message PEX25DFile {
     ResistanceTemperature resistance_temperature = 40;
     repeated MetalResistance metal_resistances = 41;
     repeated ViaResistance via_resistances = 42;
+
+    // Optional capacitance result policy. Does not delete physical geometry.
+    CapacitanceAccounting capacitance_accounting = 60;
 }
 
 // -----------------------------------------------------------------------------

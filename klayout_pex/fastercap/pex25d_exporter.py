@@ -33,11 +33,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from ..pex25d.electrical import write_solver_body_map
-from ..plugin_api.v1 import SceneFeature, require_scene_features
+from ..plugin_api.v1 import SceneCapability, require_scene_capabilities
 
 from dataclasses import dataclass, field, fields
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, List, Mapping, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, FrozenSet, List, Mapping, Optional
 
 from ..plugin_api.v1 import ExportError, ExporterUnavailable, PEX25DSceneExporter
 from ..util.number_range import DELAUNAY_B, NON_NEGATIVE_MICROMETERS, NON_NEGATIVE_SQUARE_MICROMETERS
@@ -118,7 +118,12 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
     name: ClassVar[str] = 'fastercap'
     default_prefix: ClassVar[str] = 'FasterCap_Input_'
 
-    scene_features = frozenset({SceneFeature.GROUND_CUTOUTS, SceneFeature.ELECTRICAL_IDENTITY})
+    @classmethod
+    def supported_capabilities(cls) -> FrozenSet[SceneCapability]:
+        return frozenset({
+            SceneCapability.GROUND_CUTOUTS,
+            SceneCapability.ELECTRICAL_IDENTITY,
+        })
 
     def export(self,
                scene: PEX25DScene,
@@ -127,7 +132,7 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
                prefix: str = '',
                options: Optional[Mapping[str, Any]] = None) -> List[str]:
         """Build and write solver inputs, returning the primary list file first."""
-        require_scene_features(self, scene, self.name)
+        require_scene_capabilities(self, scene, self.name)
         try:
             settings = FasterCapExporterOptions(**(options or {}))
         except (TypeError, ValueError) as exc:

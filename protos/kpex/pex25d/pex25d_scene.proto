@@ -45,6 +45,8 @@ syntax = "proto3";
 
 package kpex.pex25d;
 
+import "kpex/pex25d/pex25d_capabilities.proto";
+import "kpex/pex25d/pex25d_capacitance_accounting.proto";
 import "kpex/pex25d/pex25d_geometry.proto";
 import "kpex/pex25d/pex25d_ground.proto";
 import "kpex/pex25d/pex25d_units.proto";
@@ -61,6 +63,10 @@ message PEX25DScene {
     uint32 format_version_major = 1;
     uint32 format_version_minor = 2;
     string format_version_suffix = 3;  // the `rc1` of `PEX25D 1.0-rc1`, no '-'
+
+    // REQUIRED semantics, checked before resolving, exporting or using results.
+    // Unknown enum values must be rejected, not treated as UNSPECIFIED.
+    repeated RequiredCapability required_capabilities = 50;
 
     Units units = 5;
     repeated MetaEntry metadata = 6;
@@ -99,6 +105,9 @@ message PEX25DScene {
     // carries T_ref and the per-profile coefficients through and leaves the
     // scaling to whoever knows what temperature is being extracted at.
     ResistanceTemperature resistance_temperature = 40;
+
+    // Optional capacitance result policy. Does not delete physical geometry.
+    CapacitanceAccounting capacitance_accounting = 60;
 }
 
 // -----------------------------------------------------------------------------
@@ -263,6 +272,15 @@ message ConductorLayerRegion {
 
     repeated Box2D boxes = 2;
     repeated Polygon2D polygons = 3;
+
+    // Optional membership in CapacitanceAccounting.regions on this layer.
+    repeated string accounting_regions = 20;
+
+    // Optional for geometry-only scenes and substrate-only result policies.
+    // With accounting masks, every nonempty region needs an artifact-unique ID.
+    // Parts partition the original geometry; they do not create new NETs or
+    // change the common electrical potential of parts sharing a NET.
+    string accounting_part_id = 10;
 }
 
 // -----------------------------------------------------------------------------
