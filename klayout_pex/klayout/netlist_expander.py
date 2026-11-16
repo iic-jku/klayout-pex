@@ -33,7 +33,7 @@ from ..log import (
     warning,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
-from ..device_models import DeviceModels
+from ..device_models import DeviceModelError, DeviceModels
 from klayout_pex.klayout.capacitance_matrix_interpreter import CapacitanceMatrixInterpreter
 from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
@@ -56,6 +56,31 @@ def remove_devices(extracted_circuit: kdb.Circuit, copied_circuit: kdb.Circuit, 
                 copied_circuit.remove_device(device)
 
 
+def check_field_solver_devices(circuit: kdb.Circuit,
+                               device_models: DeviceModels,
+                               blackbox_devices: bool,
+                               exclusions: Optional[Exclusions] = None):
+    """Reject retained metal-capacitor models whose intrinsic C the field matrix also contains.
+
+    Explicit cut cells remove their devices from the netlist. Ordinary exclusion markers do
+    not establish device-owned plate/enclosure geometry, so they cannot make this mode safe.
+    """
+    if not blackbox_devices:
+        return
+    removed = exclusions.removed_device_blocks if exclusions is not None else {}
+    classes = device_models.metal_capacitor_class_names
+    retained = [f"{device.name or device.expanded_name()} ({device.device_class().name})"
+                for device in circuit.each_device()
+                if device.id() not in removed and device.device_class().name in classes]
+    if retained:
+        raise DeviceModelError(
+            'FasterCap/FastCap2 cannot use --blackbox y with retained metal-capacitor models '
+            f'({", ".join(retained)}): the field matrix includes their intrinsic plate capacitance '
+            'and would count it twice. Use --2.5D --blackbox y to retain these models, or '
+            '--blackbox n to replace them with full-geometry field-solver capacitance. '
+            'Exclusion markers alone do not establish intrinsic device ownership')
+
+
 class NetlistExpander:
     @staticmethod
     def expand(extracted_netlist: kdb.Netlist,
@@ -73,6 +98,8 @@ class NetlistExpander:
                                    created if the netlist has no such net, and a port if it has no pin
         :param exclusions: what a model has the parasitics of, whose conductors the matrix has per block
         """
+        check_field_solver_devices(extracted_netlist.circuit_by_name(top_cell_name), device_models,
+                                   blackbox_devices, exclusions)
         expanded_netlist: kdb.Netlist = extracted_netlist.dup()
         top_circuit: kdb.Circuit = expanded_netlist.circuit_by_name(top_cell_name)
 
