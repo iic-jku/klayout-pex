@@ -29,12 +29,15 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 from fractions import Fraction
+from enum import Enum
+import math
 from functools import cached_property
 from typing import *
 from urllib.parse import quote
 
 import klayout.db as kdb
 from .physical_geometry import PhysicalGeometryError, apply_width_bias, width_bias_offsets
+from .native_coordinates import is_supported_native_coordinate
 
 import klayout_pex_protobuf.kpex.tech.process_stack_pb2 as process_stack_pb2
 
@@ -65,12 +68,19 @@ class BuildError(Exception):
     pass
 
 
+class GeometryScope(Enum):
+    """Which extracted conductor geometry belongs in the physical scene."""
+
+    INTERCONNECT = 'interconnect'
+    ELECTROSTATIC = 'electrostatic'
+
+
 @dataclass
 class BuilderOptions:
-    """Options the CLI exposes for PEX25D generation."""
+    """Geometry and material choices for canonical PEX25D generation."""
 
     grid_um: str = DEFAULT_GRID_UM
-    """Coordinate grid, as a decimal string so that it stays an exact rational."""
+    """Coordinate grid as an exact decimal or fraction string."""
 
     with_source_refs: bool = False
     """Populate every ``SourceRef``. Roughly doubles the size of a file."""
@@ -82,10 +92,23 @@ class BuilderOptions:
     """Emit ``RESISTANCE`` records for the layers the technology defines."""
 
     domain_margin_um: Optional[float] = None
-    """Emit ``DOMAIN_MARGIN`` with this clearance. None leaves the domain unset."""
+    """Clearance around geometry; electrostatic scope also retains original cell bounds.
+
+    Interconnect emits ``DOMAIN_MARGIN``; electrostatic extraction emits an
+    explicit ``DOMAIN_BOX``. None leaves the domain unset.
+    """
 
     process_corner: Optional[str] = None
     """Value for ``META process_corner``, if known."""
+
+    geometry_scope: GeometryScope = GeometryScope.INTERCONNECT
+    """Electrostatic extraction also retains extracted diffusion and tap solids."""
+
+    include_terminals: bool = True
+    """Emit circuit/device terminal records independently of conductor geometry."""
+
+    background_permittivity: Optional[float] = None
+    """Override the unbounded medium; None uses the technology's background."""
 
 
 class PEX25DBuilder:
@@ -93,10 +116,9 @@ class PEX25DBuilder:
     Assembles a ``kpex.pex25d.PEX25DFile`` from a technology stack and the
     connectivity of an LVS run.
 
-    Only interconnect is described: device geometry (diffusion, the gate
-    channel) belongs to the compact model and would be double-counted, so it is
-    excluded here and the enclosing PEX flow connects device terminals to the
-    remaining interconnect.
+    The default interconnect scope omits diffusion geometry belonging to compact
+    models. Explicit electrostatic scope retains the extracted silicon solids
+    and the numerical material extents used for a field-solver scene.
     """
 
     def __init__(self,
@@ -108,6 +130,17 @@ class PEX25DBuilder:
         self.tech_info = tech_info
         self.cell_name = cell_name
         self.options = options or BuilderOptions()
+        if not isinstance(self.options.geometry_scope, GeometryScope):
+            raise BuildError(f'Unknown geometry scope {self.options.geometry_scope!r}')
+        for name, value, positive in (
+                ('background permittivity', self.options.background_permittivity, True),
+                ('domain margin', self.options.domain_margin_um, False)):
+            if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float))
+                                      or not math.isfinite(value) or value < 0 or (positive and value == 0)):
+                raise BuildError(f'{name.capitalize()} must be finite and {"positive" if positive else "nonnegative"}')
+        self._surface_anchor_name: Optional[str] = None
+        self._contact_anchor_name: Optional[str] = None
+        self._diffusion_profiles: List[str] = []
 
         self._grid = Fraction(self.options.grid_um)
         self._dbu = Fraction(str(pex_context.dbu))
@@ -275,6 +308,8 @@ class PEX25DBuilder:
     # ------------------------------------------------------------------ build
 
     def build(self) -> Any:
+        if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+            self.electrostatic_layout_bounds()  # Reject unsafe field extents before native geometry operations.
         self.reject_unavailable_geometry()
         pex25d_file = pex25d_file_pb2().PEX25DFile()
         pex25d_file.format_version_major = FORMAT_VERSION_MAJOR
@@ -288,14 +323,15 @@ class PEX25DBuilder:
         self.build_layers(pex25d_file)
         self.build_dielectrics(pex25d_file)
         self.build_conductors(pex25d_file)
-        self.build_terminals(pex25d_file)
+        if self.options.include_terminals:
+            self.build_terminals(pex25d_file)
         if self.options.include_resistance:
             self.build_resistance(pex25d_file)
-        self.build_domain(pex25d_file)
         try:
             apply_width_bias(pex25d_file, self._width_bias_offsets)
         except PhysicalGeometryError as exc:
             raise BuildError(str(exc)) from exc
+        self.build_domain(pex25d_file)
         return pex25d_file
 
     def build_units(self, pex25d_file: Any) -> None:
@@ -420,6 +456,8 @@ class PEX25DBuilder:
                 for coordinate in (bounds.left - padding, bounds.bottom - padding,
                                    bounds.right + padding, bounds.top + padding):
                     check_native_ground_coordinate(coordinate)
+                    if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+                        check_native_ground_coordinate(self.dbu_to_grid(coordinate))
         except GroundGeometryError as exc:
             raise BuildError(f"Ground diffusion clearance cannot be represented: {exc}") from exc
         cutouts = merged.sized(margin, 2)
@@ -430,7 +468,8 @@ class PEX25DBuilder:
                 self.fill_ring(cutout.polygon.holes.add(), polygon.each_point_hole(i))
         meta = pex25d_file.metadata.add()
         meta.key = 'ground_cutout_policy'
-        meta.value = ('Omitted diffusion footprints expanded by 1 um (rounded down '
+        prefix = 'Omitted diffusion' if self.options.geometry_scope == GeometryScope.INTERCONNECT else 'Diffusion'
+        meta.value = (f'{prefix} footprints expanded by 1 um (rounded down '
                       'to source DBU): numerical device exclusion, not process geometry')
 
     def build_layers(self, pex25d_file: Any) -> None:
@@ -446,6 +485,18 @@ class PEX25DBuilder:
             metal.zhigh = self.to_grid(metal_layer.z + metal_layer.thickness,
                                        f"{layer.name} top")
             debug(f"METAL {metal.name}: z {metal.zlow} … {metal.zhigh}")
+
+        if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+            for layer in self.tech_info.process_diffusion_layers:
+                if not self.claim_name(layer.name, 'Diffusion'):
+                    continue
+                profile = pex25d_file.metals.add(name=layer.name, zlow=0,
+                                                zhigh=self.to_grid(0.1, 'diffusion thickness'))
+                self._diffusion_profiles.append(profile.name)
+            # Physical silicon and contacts overlap in z. An empty anchor keeps
+            # a contact's lower face at zero instead of at the silicon's top.
+            self._contact_anchor_name = self.add_empty_anchor(pex25d_file, 'contact_base', 0)
+            self._surface_anchor_name = self.add_empty_anchor(pex25d_file, 'surface', 0, upper=True)
 
         # A via is positioned by what it connects, never by its own z, so a change
         # in metal position or thickness propagates without any other edit.
@@ -491,6 +542,10 @@ class PEX25DBuilder:
                 continue
             context = f"Contact '{contact.name}'"
             above = self.resolve_metal(contact.metal_above, context)
+            if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+                if above:
+                    self.add_electrostatic_contact(pex25d_file, layer, contact, above, is_device_contact)
+                continue
             if not above or not self.claim_name(layer.name, 'Diffusion'):
                 continue
             if not self.claim_name(contact.name, 'Via'):
@@ -513,6 +568,41 @@ class PEX25DBuilder:
             via.connects_below = layer.name
             via.connects_above = above
             debug(f"VIA {via.name}: connects {layer.name} → {above}")
+
+    def unique_profile_name(self, role: str) -> str:
+        reserved = {layer.name for layer in self.tech_info.tech.process_stack.layers} | self._profile_names
+        reserved.update(layer.metal_layer.contact_above.name for layer in self.tech_info.process_metal_layers)
+        reserved.update(layer.diffusion_layer.contact_above.name for layer in self.tech_info.process_diffusion_layers)
+        reserved.update(layer.nwell_layer.contact_above.name for layer in self.tech_info.process_nwell_layers)
+        base = f'__electrostatic_{role}'
+        name, suffix = base, 2
+        while name in reserved:
+            name, suffix = f'{base}_{suffix}', suffix + 1
+        return name
+
+    def add_empty_anchor(self, file: Any, role: str, plane: int, upper: bool = False) -> str:
+        name = self.unique_profile_name(role)
+        self.claim_name(name, 'Empty anchor')
+        file.metals.add(name=name, zlow=plane if upper else plane - 1,
+                        zhigh=plane + 1 if upper else plane)
+        return name
+
+    def add_electrostatic_contact(self, file: Any, layer: Any, contact: Any,
+                                  above: str, is_device_contact: bool):
+        if not self.claim_name(contact.name, 'Via'):
+            return
+        top = self.to_grid(contact.thickness, f'{contact.name} thickness')
+        if top <= 0:
+            raise BuildError(f"Contact '{contact.name}' must have positive thickness")
+        actual_top = self.to_grid(self.metal_layer_by_name[above].metal_layer.z, f'{above} bottom')
+        if actual_top != top:
+            above = self.add_empty_anchor(file, f'{contact.name}_top', top, upper=True)
+        self._via_contacts[contact.name] = contact
+        if is_device_contact:
+            self._device_contact_by_diffusion[layer.name] = contact.name
+        else:
+            self._nwell_contacts.append(contact.name)
+        file.vias.add(name=contact.name, connects_below=self._contact_anchor_name, connects_above=above)
 
     # ------------------------------------------------------------ dielectrics
 
@@ -565,6 +655,9 @@ class PEX25DBuilder:
                 self.to_grid(on_field_um, f"{layer.name} thickness on field"))
 
     def build_dielectrics(self, pex25d_file: Any) -> None:
+        if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+            self.build_electrostatic_dielectrics(pex25d_file)
+            return
         layers = [layer for layer in self.tech_info.tech.process_stack.layers
                   if layer.name not in self.unavailable_profiles | self.unavailable_dielectrics]
         metal_names = [lyr.name for lyr in layers if lyr.layer_type == LT.LAYER_TYPE_METAL]
@@ -613,7 +706,9 @@ class PEX25DBuilder:
                     info(f"Dielectric '{layer.name}' excluded by --diel, but kept as the background")
                 background = pex25d_file.background
                 background.name = layer.name
-                background.permittivity = layer.simple_dielectric_layer.dielectric_k
+                background.permittivity = (self.options.background_permittivity
+                                           if self.options.background_permittivity is not None
+                                           else layer.simple_dielectric_layer.dielectric_k)
                 info(f"DIELECTRIC_BACKGROUND {layer.name}: "
                      f"k={background.permittivity}")
                 continue
@@ -644,6 +739,61 @@ class PEX25DBuilder:
                 case _:
                     raise NotImplementedError(f"PEX25D dielectric export for layer type {layer.layer_type} "
                                               f"of '{layer.name}' is not implemented")
+
+    def build_electrostatic_dielectrics(self, file: Any):
+        available = [layer for layer in self.tech_info.process_metal_layers
+                     if layer.name not in self.unavailable_profiles]
+        background_layers = [layer for layer in self.tech_info.tech.process_stack.layers
+                             if layer.layer_type == LT.LAYER_TYPE_SIMPLE_DIELECTRIC]
+        permittivity = self.options.background_permittivity
+        if permittivity is None:
+            if not background_layers:
+                raise BuildError('Electrostatic geometry needs an explicit background permittivity')
+            permittivity = background_layers[-1].simple_dielectric_layer.dielectric_k
+        background_name = self.unique_profile_name('background')
+        self.claim_name(background_name, 'Background')
+        file.background.name, file.background.permittivity = background_name, permittivity
+        for layer in self.tech_info.tech.process_stack.layers:
+            if layer.layer_type == LT.LAYER_TYPE_FIELD_OXIDE and available:
+                self.add_simple_dielectric(file, layer, layer.field_oxide_layer.dielectric_k,
+                                           self._surface_anchor_name, self._surface_anchor_name,
+                                           available[0].name)
+        for index, metal in enumerate(available):
+            wrapped = metal.name
+            seen_films = {wrapped}
+            while True:
+                try:
+                    film = self.tech_info.conformal_dielectric_wrapping(wrapped)
+                except Exception as exc:
+                    raise BuildError(f"Cannot resolve electrostatic film above '{wrapped}': {exc}") from exc
+                if film is None or film.name in self.unavailable_dielectrics:
+                    break
+                if film.name in seen_films:
+                    raise BuildError(f"Cyclic electrostatic dielectric chain through '{film.name}'")
+                self.add_conformal_dielectric(file, film)
+                wrapped = film.name
+                seen_films.add(wrapped)
+            # Use the first simple band following this metal, exactly as the
+            # extraction stack does. Its finite top band is distinct from k_void.
+            simple = None
+            seen = False
+            for layer in self.tech_info.tech.process_stack.layers:
+                if layer.name == metal.name:
+                    seen = True
+                elif seen and layer.layer_type == LT.LAYER_TYPE_METAL:
+                    if layer.name not in self.unavailable_profiles:
+                        break
+                elif seen and simple is None and layer.layer_type == LT.LAYER_TYPE_SIMPLE_DIELECTRIC:
+                    simple = layer
+            if simple is None or simple.name not in self.included_dielectric_names:
+                continue
+            if index + 1 < len(available):
+                above = available[index + 1].name
+            else:
+                top = self.to_grid(metal.metal_layer.z + 5.0, 'top dielectric extent')
+                above = self.add_empty_anchor(file, 'top_dielectric', top, upper=True)
+            self.add_simple_dielectric(file, simple, simple.simple_dielectric_layer.dielectric_k,
+                                       wrapped, metal.name, above)
 
     def add_simple_dielectric(self,
                               pex25d_file: Any,
@@ -698,7 +848,8 @@ class PEX25DBuilder:
     @cached_property
     def shape_layers(self) -> List[str]:
         """Profiles that may carry drawn geometry: metals and vias, in stack order."""
-        names: List[str] = list(self._device_contact_by_diffusion.values()) + self._nwell_contacts
+        names: List[str] = (list(self._device_contact_by_diffusion.values()) + self._nwell_contacts
+                            + self._diffusion_profiles)
         for layer in self.tech_info.process_metal_layers:
             if layer.name in self._profile_names:
                 names.append(layer.name)
@@ -755,6 +906,11 @@ class PEX25DBuilder:
         """
         kinds = pex25d_file_pb2().ShapeRecord
         count = 0
+        if not region.is_empty():
+            box = region.bbox()
+            for coordinate in (box.left, box.bottom, box.right, box.top):
+                self.check_native_coordinate(coordinate, 'source geometry')
+                self.check_native_coordinate(self.dbu_to_grid(coordinate), 'export geometry')
 
         for polygon in region.each_merged():
             record = pex25d_file.shapes.add()
@@ -1002,10 +1158,64 @@ class PEX25DBuilder:
             return
 
         margin = self.to_grid(self.options.domain_margin_um, 'domain margin')
+        if self.options.geometry_scope == GeometryScope.ELECTROSTATIC:
+            self.build_electrostatic_domain(pex25d_file, margin)
+            return
         pex25d_file.domain_margin.x = margin
         pex25d_file.domain_margin.y = margin
         pex25d_file.domain_margin.z = margin
         info(f"DOMAIN_MARGIN {margin} grid units in x, y and z")
+
+    @staticmethod
+    def check_native_coordinate(coordinate: int, description: str):
+        if not is_supported_native_coordinate(coordinate):
+            raise BuildError(f'{description.capitalize()} exceeds the native KLayout coordinate range')
+
+    def electrostatic_layout_bounds(self) -> Optional[Tuple[int, int, int, int]]:
+        original = self.pex_context.top_cell_bbox()
+        if original.empty():
+            return None
+        coordinates = (original.left, original.bottom, original.right, original.top)
+        for coordinate in coordinates:
+            self.check_native_coordinate(coordinate, 'original cell bounds')
+        bounds = tuple(self.dbu_to_grid(value) for value in coordinates)
+        margin = self.to_grid(self.options.domain_margin_um or 0, 'domain margin')
+        for coordinate in (bounds[0] - margin, bounds[1] - margin, bounds[2] + margin, bounds[3] + margin):
+            self.check_native_coordinate(coordinate, 'electrostatic field margin')
+        return bounds
+
+    def build_electrostatic_domain(self, file: Any, margin: int):
+        bounds = self.electrostatic_layout_bounds()
+        kinds = pex25d_file_pb2().ShapeRecord
+        for shape in file.shapes:
+            match shape.kind:
+                case kinds.SHAPE_KIND_BOX:
+                    points = (shape.box.lower_left, shape.box.upper_right)
+                case kinds.SHAPE_KIND_POLYGON:
+                    points = shape.polygon.outer.points
+                case _:
+                    raise NotImplementedError(f'Electrostatic domain for shape kind {shape.kind} is not implemented')
+            for point in points:
+                if bounds is None:
+                    bounds = (point.x, point.y, point.x, point.y)
+                else:
+                    bounds = (min(bounds[0], point.x), min(bounds[1], point.y),
+                              max(bounds[2], point.x), max(bounds[3], point.y))
+        if bounds is None:
+            raise BuildError('Electrostatic field needs nonempty layout bounds or conductor geometry')
+        left, bottom, right, top = bounds
+        bounds = (left - margin, bottom - margin, right + margin, top + margin)
+        for coordinate in bounds:
+            self.check_native_coordinate(coordinate, 'electrostatic field margin')
+        box = file.domain_box.box
+        box.lower_left.x, box.lower_left.y = bounds[:2]
+        box.upper_right.x, box.upper_right.y = bounds[2:]
+        box.lower_left.z = min(file.ground_plane.zhigh, 0, *(metal.zlow for metal in file.metals))
+        # Empty anchors do not create solids. The generous upper bound includes
+        # the finite top material band and every selected over-metal coating.
+        upper = max((metal.zhigh for metal in file.metals), default=box.lower_left.z + 1)
+        upper += sum(dielectric.conformal.thickness_over_wrapped for dielectric in file.dielectrics)
+        box.upper_right.z = upper + margin
 
 
 def build_pex25d_file(pex_context: KLayoutExtractionContext,
