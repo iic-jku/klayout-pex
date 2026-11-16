@@ -155,7 +155,6 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
             copied.options['variants'] = ','.join(
                 next(item.options['variants'] for item in dataset.provenance.sources
                      if item.id == 'extraction-table') for dataset in datasets)
-    catalog_provenance.data_revision = '2'
     catalog_provenance.history.add(
         revision='2', date='2026-11-13', summary='Add low/high capacitance components',
         reason='Expose reviewed empirical C tables while retaining nominal as the only bundled scenario',
@@ -167,24 +166,20 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
         for record in resistance_document['catalog_revisions']:
             revision = ParseDict(record, TechnologyRevision())
             catalog_provenance.history.add().CopyFrom(revision)
-            catalog_provenance.data_revision = revision.revision
     if device_datasets:
         catalog_provenance.history.add(
             revision='device-mim-1', date='2026-11-13', summary='Add independent MIM corner references',
             reason='Keep compact-model device laws distinct from empirical interconnect coefficients',
             references=['https://github.com/iic-jku/klayout-pex/issues/551'])
-        catalog_provenance.data_revision = 'device-mim-1'
     if physical_datasets:
         catalog_provenance.history.add(
             revision='physical-capiche-1', date='2026-11-13', summary='Add source-specific physical recipes',
             reason='Keep physical interconnect inputs independent of empirical coefficients and resistance laws',
             references=['https://github.com/iic-jku/klayout-pex/issues/550'])
-        catalog_provenance.data_revision = 'physical-capiche-1'
         catalog_provenance.history.add(
             revision='physical-capiche-2', date='2026-11-13', summary='Declare source physical C-only scenarios',
             reason='Expose qualified recipes with explicit layout restrictions while holding resistance nominal',
             references=['https://github.com/iic-jku/klayout-pex/issues/550'])
-        catalog_provenance.data_revision = 'physical-capiche-2'
         catalog_provenance.sources.add(
             id='capiche-magic-mapping', description='Explicit process and R/C-style mapping for physical-stack results',
             uri='https://github.com/RTimothyEdwards/capiche/blob/85905e8810982bd89966cbf8b7e9d3fd1e922d42/src/capiche/merge_extract.py',
@@ -203,6 +198,11 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
             'the selected physical profiles; later pinned Capiche changes do not alter their geometry/materials',
             reason='Keep recipe and empirical-table revision identities explicit rather than infer a match from names',
             source_ids=['capiche-magic-mapping', 'extraction-table'])
+
+    # Independent component updates can have later dates than other groups.
+    # Keep authored ordering within a day, then identify the final revision.
+    catalog_provenance.history.sort(key=lambda entry: entry.date)
+    catalog_provenance.data_revision = catalog_provenance.history[-1].revision
 
     written = write_nominal_catalog(
         technology, catalog_path, catalog_provenance,

@@ -29,6 +29,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import shutil
 from pathlib import Path
 from typing import Callable, List, Tuple
 
@@ -38,6 +39,7 @@ import pytest
 from klayout_pex.pdk_config import PDK
 from klayout_pex.tech_catalog import load_technology_catalog, write_nominal_catalog
 from klayout_pex.tech_info import TechDefError, TechInfo
+from scripts.gen_tech_pb import corner_data
 from scripts.gen_tech_pb.provenance import nominal_provenance
 from scripts.gen_tech_pb.corner_data import (
     TABLE_DIRECTORY, load_corner_capacitances, write_bundled_corner_catalog,
@@ -188,3 +190,57 @@ def test_incomplete_or_invalid_corner_imports_fail_before_writing(edit: Callable
     technology = TechInfo.parse_tech_def(PDK.SKY130A.config.tech_pb_json_path)
     with pytest.raises(ValueError, match=message):
         load_corner_capacitances(technology, path)
+
+
+@pytest.mark.parametrize('revision_date', ['2026-11-12', '2026-11-13', '2026-11-14'])
+def test_catalog_merges_component_revision_dates_without_rewriting_records(
+        revision_date: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # Dates immediately before, at and after the existing physical/device
+    # updates exercise chronological ordering and stable same-day ordering.
+    # SKY130 supplies all component kinds, including resistance and MIM data.
+    technology = TechInfo.parse_tech_def(PDK.SKY130A.config.tech_pb_json_path)
+    baseline_path = tmp_path / 'baseline' / 'catalog.pb.json'
+    before_files = write_bundled_corner_catalog(technology, baseline_path)
+    baseline = read_catalog(baseline_path)
+    source = tmp_path / 'tables'
+    shutil.copytree(TABLE_DIRECTORY, source)
+    table = source / 'sky130A-resistance.json'
+    document = json.loads(table.read_text(encoding='utf-8'))
+    update = {
+        'revision': 'resistance-review', 'date': revision_date,
+        'summary': 'Review resistance sources', 'reason': 'Record an independently dated source review',
+        'source_ids': [], 'references': ['https://github.com/iic-jku/klayout-pex/issues/518'],
+    }
+    document['catalog_revisions'].append(update)
+    table.write_text(json.dumps(document), encoding='utf-8')
+    monkeypatch.setattr(corner_data, 'TABLE_DIRECTORY', source)
+    path = tmp_path / 'updated' / 'catalog.pb.json'
+    after_files = write_bundled_corner_catalog(technology, path)
+    updated = read_catalog(path)
+    assert load_technology_catalog(path).tech == technology
+    revisions = list(updated.provenance.history)
+    dates = [entry.date for entry in revisions]
+    assert dates == sorted(dates)
+    inserted = next(entry for entry in revisions if entry.revision == update['revision'])
+    assert (inserted.date, inserted.summary, inserted.reason) == (
+        update['date'], update['summary'], update['reason'])
+    assert [entry for entry in revisions if entry.revision != update['revision']] == list(baseline.provenance.history)
+    # The authored resistance group precedes device/physical groups on the same
+    # day. Sorting by revision ID or making the most recent component win would
+    # reorder valid history or select the wrong current revision.
+    same_day = [entry.revision for entry in revisions if entry.date == revision_date]
+    if revision_date == '2026-11-13':
+        previous_resistance = document['catalog_revisions'][-2]['revision']
+        assert same_day.index(previous_resistance) < same_day.index(update['revision'])
+        assert same_day.index(update['revision']) < same_day.index('device-mim-1')
+        assert same_day.index('device-mim-1') < same_day.index('physical-capiche-1')
+    expected_revision = update['revision'] if revision_date > '2026-11-13' else 'physical-capiche-2'
+    assert updated.provenance.data_revision == revisions[-1].revision == expected_revision
+    # Every numerical component remains byte-identical, as do scenarios and
+    # non-history catalog metadata. A history merge must not change data.
+    assert {p.relative_to(baseline_path.parent): p.read_bytes() for p in before_files if p != baseline_path} == {
+        p.relative_to(path.parent): p.read_bytes() for p in after_files if p != path}
+    del updated.provenance.history[:]
+    updated.provenance.history.extend(baseline.provenance.history)
+    updated.provenance.data_revision = baseline.provenance.data_revision
+    assert updated == baseline
