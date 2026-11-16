@@ -31,6 +31,11 @@
 - Say in the commit body when behavior changes: CLI validation, return values, exit codes,
   `__all__`.
 - Fix root causes in the shared code, not with special cases.
+- Separate general contracts from feature-specific implementations. Before placing a type,
+  schema, validation rule or helper, consider its meaning and likely consumers, not just the
+  feature introducing it. Shared protocol capabilities belong at the protocol level;
+  feature-specific files contain only that feature's semantics. Do not add abstractions
+  solely for hypothetical reuse, or mix unrelated cleanup into the current change.
 
 ## Domain
 
@@ -51,6 +56,13 @@
   don't re-label domain errors. One broken plugin must not break others.
 - Validate option values, not just names (`'false'` ≠ `False`).
 - Return the paths you wrote; never scan a directory for them (leftover files).
+- In production library and application code, do not use module-level variables or mutable
+  class attributes for runtime state or configuration. This rule does not apply to test cases
+  or self-contained standalone scripts. Keep state on the owning instance or pass it
+  explicitly. Expose behavior, extension hooks and capability declarations through typed
+  methods. Use a class method when the contract is independent of an instance. Immutable named constants and enums
+  may live at module scope. Apply this rule within the current change; unrelated existing
+  sites belong in a separate refactoring.
 - Prefer enums and named, typed constants for variant dispatch. Do not replace them with
   string literals from protobuf `WhichOneof`; keep field-name reflection at the
   serialization and validation boundaries.

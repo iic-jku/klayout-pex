@@ -40,7 +40,7 @@ from klayout_pex.kpex_cli import KpexCLI
 from klayout_pex.rcx25.exclusion import Exclusions
 from klayout_pex.tech_info import TechInfo
 from tests.common.lvsdb_fixtures import lvsdb_fixture_path
-from tests.common.fastercap_geometry import context_from_shapes, fastercap_input
+from tests.common.fastercap_geometry import context_from_shapes, fastercap_input, dielectric_at
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.technology import tech_with_two_metals
 
@@ -72,11 +72,12 @@ def dielectric_areas_um2(pdk_name: PDKName, *path_components) -> Dict[str, float
     pex_context, tech_info = context_of_layout(pdk_name, *path_components)
 
     regions_by_material: Dict[str, kdb.Region] = defaultdict(kdb.Region)
-    for material, layers in fastercap_input(pex_context, tech_info).dlayers.items():
+    model = fastercap_input(pex_context, tech_info)
+    for material, layers in model.dlayers.items():
         for region, _, _ in layers:
             regions_by_material[material] += region
 
-    return {material: round(region.merged().area() * pex_context.dbu ** 2, 4)
+    return {material: round(region.merged().area() * model.dbu ** 2, 4)
             for material, region in regions_by_material.items()}
 
 
@@ -165,18 +166,21 @@ def test_vias_and_contacts_of_a_net_across_a_block_are_conductors_of_its_parts()
     pex_context, tech_info = context_of_layout(PDKName.IHP_SG13G2, 'nmos_diode2', 'nmos_diode2.gds.gz')
     block = kdb.Region(kdb.Box(-500, -700, 500, 700))
     exclusions = Exclusions.from_region(block, substrate_layer_name=tech_info.internal_substrate_layer_name)
-    conductors = fastercap_input(pex_context, tech_info, exclusions).clayers
+    model = fastercap_input(pex_context, tech_info, exclusions)
+    conductors = model.clayers
+    physical_block = block.transformed(kdb.ICplxTrans(pex_context.dbu / model.dbu))
 
     # NOTE: on all layers, the conductors of the parts of the nets within the block are within it, the others outside
     for name, layers in conductors.items():
         part = exclusions.conductor_parts[name]
         if not part.is_substrate:
             for region, _, _ in layers:
-                assert (region - block if part.block_indexes else region & block).is_empty(), name
+                assert (region - physical_block if part.block_indexes else region & physical_block).is_empty(), name
 
     # NOTE: the conductors from z = 0, by their tops in nm: the source and the drain, and the contacts on them,
     #       up to the Metal1
-    assert sorted((name, top) for name, layers in conductors.items() for _, bottom, top in layers if bottom == 0) == \
+    assert sorted((name, round(top * model.dbu * 1000))
+                  for name, layers in conductors.items() for _, bottom, top in layers if bottom == 0) == \
            [('VDD#x0', 100), ('VDD#x0', 1040), ('VSS#x0', 100), ('VSS#x0', 1040)]
 
 
@@ -190,8 +194,9 @@ def test_contacts_of_the_nwell_over_the_ntaps_are_conductors(pdk_name: PDKName, 
                                                             top: int):
     # NOTE: the contact of the nwell, where the resistance network lands it, from the silicon surface (#475)
     pex_context, tech_info = context_of_layout(pdk_name, 'test_patterns', f"{cell_name}.gds.gz")
-    conductors = fastercap_input(pex_context, tech_info).clayers
-    assert [(bottom, upper) for _, bottom, upper in conductors[net_name] if bottom == 0] == [(0, 100), (0, top)]
+    model = fastercap_input(pex_context, tech_info)
+    assert sorted((0, round(upper * model.dbu * 1000))
+                  for _, bottom, upper in model.clayers[net_name] if bottom == 0) == [(0, 100), (0, top)]
 
 
 @allure.parent_suite(parent_suite)
@@ -247,21 +252,27 @@ def test_conformal_field_survives_missing_root_metal(root_state: str, with_exclu
     if root_state == 'present':
         root_shapes.insert(kdb.Box(0, 0, 1000, 1000))
     model = conformal_field_model(root_shapes, field_thickness, with_exclusions)
-    field_point = kdb.Point(-1000, -1000)
-    on_field = {name: [(low, high) for region, low, high in prisms
+    field_point = kdb.Point(round(-1.0 / model.dbu), round(-1.0 / model.dbu))
+    on_field = {name: [(round(low * model.dbu, 9), round(high * model.dbu, 9)) for region, low, high in prisms
                       if any(polygon.inside(field_point) for polygon in region.each_merged())]
                 for name, prisms in model.dlayers.items()}
-    field_height = round(field_thickness / model.dbu)
-    assert on_field.get('liner', []) == ([(1000, 1000 + field_height)] if field_height else [])
-    assert on_field['coat'] == [(1000, 1200 + field_height)]
-    assert on_field['ild'] == [(1200 + field_height, 2500)]
+    assert on_field.get('liner', []) == ([(1.0, round(1.0 + field_thickness, 9))] if field_thickness else [])
+    assert on_field['coat'] == [(1.0, round(1.2 + field_thickness, 9))]
+    # The canonical scene may express ILD as an overlapping background prism.
+    # Its effective interface still starts exactly above the outer coating.
+    field_top = round(1.2 + field_thickness, 9)
+    for z, expected in ((round(field_top - model.dbu, 9), 'coat'), (field_top, 'ild'),
+                        (round(field_top + model.dbu, 9), 'ild'), (2.5 - model.dbu, 'ild')):
+        assert dielectric_at(model, kdb.DPoint(-1.0, -1.0), z) == expected, z
     assert all(high > low and not region.is_empty()
                for prisms in model.dlayers.values() for region, low, high in prisms)
     if root_state == 'present':
-        metal_point = kdb.Point(500, 500)
-        above_metal = {name: [(low, high) for region, low, high in prisms
+        metal_point = kdb.Point(round(0.5 / model.dbu), round(0.5 / model.dbu))
+        above_metal = {name: [(round(low * model.dbu, 9), round(high * model.dbu, 9)) for region, low, high in prisms
                              if any(polygon.inside(metal_point) for polygon in region.each_merged())]
                        for name, prisms in model.dlayers.items()}
-        assert above_metal['liner'] == [(1000, 1300)]
-        assert above_metal['coat'] == [(1000, 1500)]
-        assert above_metal['ild'] == [(1500, 2500)]
+        assert above_metal['liner'] == [(1.0, 1.3)]
+        assert above_metal['coat'] == [(1.0, 1.5)]
+        for z, expected in ((1.5 - model.dbu, 'coat'), (1.5, 'ild'),
+                            (1.5 + model.dbu, 'ild'), (2.5 - model.dbu, 'ild')):
+            assert dielectric_at(model, kdb.DPoint(0.5, 0.5), z) == expected, z

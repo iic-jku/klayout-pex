@@ -59,7 +59,9 @@ class PEX25DFasterCapModelBuilder:
     def __init__(self, scene: PEX25DScene, options: FasterCapModelOptions):
         self.scene = scene
         self.options = options
-        self.body_names = solver_body_names(scene)
+        from ..pex25d.accounting import SceneCapacitanceMap
+        self.accounting = SceneCapacitanceMap(scene)
+        self.body_names = self.accounting.body_names
 
         units = scene.units
         if not units.grid_denominator:
@@ -134,6 +136,12 @@ class PEX25DFasterCapModelBuilder:
     def build(self) -> FasterCapModelGenerator:
         from ..pex25d.exporters import validate_export_scene
         validate_export_scene(self.scene)
+        if self.scene.capacitance_accounting.regions:
+            from ..klayout.pex25d_accounting import validate_accounting_geometry
+            try:
+                validate_accounting_geometry(self.scene)
+            except (ValueError, GroundGeometryError) as exc:
+                raise ExportError(f'Invalid capacitance accounting geometry: {exc}') from exc
         background = self.scene.background
         if not self.scene.HasField('background'):
             raise ExportError("The scene declares no background dielectric")
@@ -171,17 +179,19 @@ class PEX25DFasterCapModelBuilder:
         retained = self.ground_region
         if retained.is_empty():
             raise ExportError("Ground cutouts remove the complete reference body inside the export field")
-        builder.add_conductor(net_name=self.body_names[ground_body(self.scene)],
+        builder.add_conductor(net_name=self.accounting.reference_name,
                               layer=retained,
                               z=self.um(ground_plane.zlow),
-                              height=self.um(ground_plane.zhigh - ground_plane.zlow))
+                              height=self.um(ground_plane.zhigh - ground_plane.zlow),
+                              group_name=self.body_names[ground_body(self.scene)])
 
     def add_conductors(self, builder: FasterCapModelBuilder):
         for conductor in self.scene.conductors:
             # A FLOATING conductor belongs to no net and is solved under its own
             # shortname; everything else is reported per net.
-            name = self.body_names[conductor_body(conductor)]
+            body_name = self.body_names[conductor_body(conductor)]
             for conductor_region in conductor.regions:
+                name = self.accounting.conductor_name(conductor, conductor_region)
                 layer = self.layers.get(conductor_region.layer)
                 if layer is None:
                     raise ExportError(f"Conductor '{conductor.name}' has geometry on "
@@ -193,7 +203,8 @@ class PEX25DFasterCapModelBuilder:
                 builder.add_conductor(net_name=name,
                                       layer=region_of(conductor_region),
                                       z=self.um(layer.zlow),
-                                      height=self.um(layer.zhigh - layer.zlow))
+                                      height=self.um(layer.zhigh - layer.zlow),
+                                      group_name=body_name)
 
     def add_dielectrics(self, builder: FasterCapModelBuilder):
         kinds = pex25d_dielectric_pb2()

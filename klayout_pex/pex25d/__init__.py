@@ -49,11 +49,12 @@ classes behind the verbs (``resolver.Resolver``, ``validator.Validator``).
 Dependency rule
 ~~~~~~~~~~~~~~~
 
-This package depends on ``protobuf`` only — no ``klayout`` import, directly or
-transitively. That is what lets the standalone ``pex25d`` tool be installed and
-run by other groups as a reference validator, without dragging in the whole LVS
-machinery. Generating PEX25D from a layout does need that machinery, and lives
-in :mod:`klayout_pex.klayout.pex25d_builder` instead.
+Format I/O and structural validation need only ``protobuf``. Ordinary geometry
+resolution also stays independent of KLayout. Resolving capacitance accounting
+masks loads the KLayout geometry backend lazily to partition polygons exactly;
+consuming the resulting charge-group map does not need that backend. Generating
+PEX25D from a layout additionally needs LVS connectivity and lives in
+:mod:`klayout_pex.klayout.pex25d_builder`.
 
 The generated ``*_pb2`` modules are build output, so nothing here imports one
 while this module is imported: :data:`proto` and the verbs reach them on demand

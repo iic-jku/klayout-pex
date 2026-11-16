@@ -30,3 +30,7 @@ FORMAT_VERSION_MINOR = 0
 # The `rc1` of `PEX25D 1.0-rc1`, without the leading '-'. Takes no part in
 # compatibility: readers select behaviour from MAJOR.MINOR alone.
 FORMAT_VERSION_SUFFIX = 'rc1'
+
+# Informational suffix for newly generated accounting artifacts. Compatibility
+# is enforced by required_capabilities, never by a pre-release suffix.
+ACCOUNTING_FORMAT_VERSION_SUFFIX = 'rc2'

@@ -39,6 +39,7 @@ from .parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from ..util.unit_formatter import format_spice_number
 
 if TYPE_CHECKING:
+    from ..pex25d.accounting import SceneCapacitanceMap
     from ..rcx25.exclusion import Exclusions
 
 
@@ -64,7 +65,8 @@ class NetlistExpander:
                blackbox_devices: bool,
                device_models: DeviceModels,
                substrate_net_name: str,
-               exclusions: Optional[Exclusions] = None) -> kdb.Netlist:
+               exclusions: Optional[Exclusions] = None,
+               scene_accounting: Optional[SceneCapacitanceMap] = None) -> kdb.Netlist:
         """
         :param device_models: the device models of the tech info, whose metal capacitors white-box mode removes
         :param substrate_net_name: the conductor of the substrate (see FasterCapInputBuilder),
@@ -104,7 +106,12 @@ class NetlistExpander:
         signal_names = [cap_matrix_interpreter.signal_name_from_conductor_name(nc)
                         for nc in cap_matrix.conductor_names]
 
-        if exclusions is not None:
+        if scene_accounting is not None:
+            net_name = (lambda name: exclusions.net_of_capacitance(name, substrate_net_name)) \
+                if exclusions is not None else None
+            cap_matrix = scene_accounting.matrix_of_bodies(cap_matrix, signal_names, net_name)
+            signal_names = cap_matrix.conductor_names
+        elif exclusions is not None:
             cap_matrix = exclusions.capacitance_matrix_of_nets(cap_matrix, signal_names, substrate_net_name)
             signal_names = cap_matrix.conductor_names
 

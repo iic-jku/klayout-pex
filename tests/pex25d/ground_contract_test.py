@@ -25,7 +25,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any, Callable, FrozenSet, List
 
 import pytest
 
@@ -90,21 +90,24 @@ def test_text_writer_does_not_invent_missing_ground_ownership():
 
 
 
-def test_exporter_without_feature_support_receives_no_cutout_scene(tmp_path: Path):
+def test_exporter_without_capability_support_receives_no_cutout_scene(tmp_path: Path):
     class OlderExporter:
         def export(self, scene: Any, **kwargs: Any) -> List[str]:
             pytest.fail('Old exporter must not receive unknown ground semantics')
     scene = pex25d.resolve(pex25d.read_text(CLEAR_GROUND_TEXT.encode('utf-8')))
-    with pytest.raises(pex25d.ExportError, match='does not support required scene features'):
+    with pytest.raises(pex25d.ExportError, match='does not support required scene capabilities'):
         pex25d.export_with_backend(OlderExporter(), scene, 'older-exporter', str(tmp_path / 'output'))
     assert not (tmp_path / 'output').exists()
 
 
 
-def test_typed_ground_feature_reaches_updated_exporter(tmp_path: Path):
-    from klayout_pex.plugin_api.v1 import SceneFeature
+def test_typed_ground_capability_reaches_updated_exporter(tmp_path: Path):
+    from klayout_pex.plugin_api.v1 import SceneCapability
     class UpdatedExporter:
-        scene_features = frozenset({SceneFeature.GROUND_CUTOUTS, SceneFeature.ELECTRICAL_IDENTITY})
+        @classmethod
+        def supported_capabilities(cls) -> FrozenSet[SceneCapability]:
+            return frozenset({SceneCapability.GROUND_CUTOUTS, SceneCapability.ELECTRICAL_IDENTITY})
+
         def export(self, scene: Any, **kwargs: Any) -> List[str]:
             return ['supported']
     scene = pex25d.resolve(pex25d.read_text(CLEAR_GROUND_TEXT.encode('utf-8')))
@@ -136,11 +139,14 @@ def test_unchanged_labels_write_no_mapping_file(tmp_path: Path):
 def test_unimplemented_protocol_capability_is_not_support(capability: Any, tmp_path: Path):
     from klayout_pex.plugin_api.v1 import PEX25DSceneExporter
     class OldSubclass(PEX25DSceneExporter):
-        scene_features = capability
+        @classmethod
+        def supported_capabilities(cls) -> Any:
+            return capability
+
         def export(self, scene: Any, **kwargs: Any) -> List[str]:
             pytest.fail('Inherited placeholders cannot authorize export')
     scene = pex25d.resolve(pex25d.read_text(CLEAR_GROUND_TEXT.encode('utf-8')))
-    with pytest.raises(pex25d.ExportError, match='does not support required scene features'):
+    with pytest.raises(pex25d.ExportError, match='must return a frozenset of SceneCapability'):
         pex25d.export_with_backend(OldSubclass(), scene, 'old-subclass', str(tmp_path))
 
 
@@ -158,7 +164,7 @@ def test_each_ground_contract_independently_requires_consumer_support(feature: s
         text = text.replace('GROUND_CUTOUT subs OUTER -1 -1 2 -1 2 2 -1 2\n', '')
         text = text.replace('Z_OFFSETS 0 0.2', 'Z_OFFSETS 0.001 0.2')
     scene = pex25d.resolve(pex25d.read_text(text.encode('utf-8')))
-    with pytest.raises(pex25d.ExportError, match='does not support required scene features'):
+    with pytest.raises(pex25d.ExportError, match='does not support required scene capabilities'):
         pex25d.export_with_backend(OldSubclass(), scene, 'old-subclass', str(tmp_path))
 
 

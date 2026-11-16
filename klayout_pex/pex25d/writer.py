@@ -31,12 +31,16 @@ from typing import *
 
 from ..log import warning
 
+from .accounting_validation import validate_capacitance_accounting
+from .capability_validation import validate_required_capabilities
+from .diagnostics import DiagnosticsReport
 from .format_version import (
     FORMAT_VERSION_MAJOR,
     FORMAT_VERSION_MINOR,
     FORMAT_VERSION_SUFFIX,
 )
-from .protobuf import pex25d_dielectric_pb2, pex25d_file_pb2, pex25d_terminal_pb2
+from .protobuf import (pex25d_capabilities_pb2, pex25d_capacitance_accounting_pb2, pex25d_dielectric_pb2,
+                       pex25d_file_pb2, pex25d_terminal_pb2)
 
 
 # Wrap a record onto continuation lines beyond this width, counting the
@@ -102,6 +106,13 @@ def quote(value: str) -> str:
         warning(f"META value contains a quote character, which PEX25D does not "
                 f"define an escape for: {value!r}")
     return f'"{value}"'
+
+
+def accounting_token(value: str) -> str:
+    """Preserve names with whitespace or comment characters without invented escapes."""
+    if any(character in value for character in ('"', '\n', '\r')):
+        raise WriteError(f"Accounting identifier cannot be represented in PEX25D text: {value!r}")
+    return f'"{value}"' if any(c in value for c in '#\\') or any(c.isspace() for c in value) else value
 
 
 class Pex25DTextWriter:
@@ -175,6 +186,11 @@ class Pex25DTextWriter:
     # --------------------------------------------------------------- sections
 
     def write(self) -> str:
+        report = DiagnosticsReport()
+        validate_required_capabilities(self.file, report)
+        validate_capacitance_accounting(self.file, report)
+        if report.num_errors:
+            raise WriteError('; '.join(d.message for d in report.diagnostics))
         self.write_header()
         self.write_ground_plane()
         self.write_layers()
@@ -183,6 +199,7 @@ class Pex25DTextWriter:
         self.write_conductors()
         self.write_terminals()
         self.write_domain()
+        self.write_capacitance_accounting()
         return '\n'.join(self.lines).lstrip('\n') + '\n'
 
     def write_header(self) -> None:
@@ -195,8 +212,14 @@ class Pex25DTextWriter:
                     f"{FORMAT_VERSION_MAJOR}.{FORMAT_VERSION_MINOR}")
 
         self.section('HEADER')
-        self.hint("PEX25D <major>.<minor>[-<suffix>]")
-        self.emit(f"PEX25D {version}")
+        self.hint("PEX25D <major>.<minor>[-<suffix>] [REQUIRES CAPABILITIES <capability>[, ...]]")
+        header = f"PEX25D {version}"
+        if self.file.required_capabilities:
+            # Validated above; enum dispatch must not silently drop a capability.
+            names = {pex25d_capabilities_pb2().REQUIRED_CAPABILITY_CAPACITANCE_ACCOUNTING:
+                     'CAPACITANCE_ACCOUNTING'}
+            header += ' REQUIRES CAPABILITIES ' + ', '.join(names[capability] for capability in self.file.required_capabilities)
+        self.emit(header)
 
         units = self.file.units
         unit_name = LENGTH_UNIT_NAMES.get(units.length)
@@ -425,6 +448,39 @@ class Pex25DTextWriter:
         clauses = [ring('OUTER', polygon.outer.points)]
         clauses += [ring('HOLE', hole.points) for hole in polygon.holes]
         return clauses
+
+    def write_capacitance_accounting(self):
+        if not self.file.HasField('capacitance_accounting'):
+            return
+        policy = self.file.capacitance_accounting
+        kinds = pex25d_capacitance_accounting_pb2().CapacitanceExclusion
+        self.section('CAPACITANCE ACCOUNTING')
+        self.hint('Result policies retain physical geometry and shielding.',
+                  'CAP_REGION <name> LAYER <layer> OUTER <xy...> [HOLE <xy...>]',
+                  'CAP_EXCLUDE <name> WITHIN <region> ALL_LAYER_PAIRS',
+                  'CAP_EXCLUDE <name> WITHIN <region> LAYER_PAIR <a> <b>',
+                  'CAP_EXCLUDE_SUBSTRATE <net>')
+        for region in policy.regions:
+            for mask in region.masks:
+                for polygon in mask.polygons:
+                    self.emit_record(
+                        f'CAP_REGION {accounting_token(region.name)} LAYER {accounting_token(mask.layer)}',
+                        self.polygon_clauses(polygon), group=2)
+        for exclusion in policy.exclusions:
+            head = f'CAP_EXCLUDE {accounting_token(exclusion.name)}'
+            clauses = [f'WITHIN {accounting_token(exclusion.region)}']
+            match exclusion.kind:
+                case kinds.KIND_ALL_LAYER_PAIRS:
+                    clauses.append('ALL_LAYER_PAIRS')
+                case kinds.KIND_LAYER_PAIR:
+                    clauses.append(f'LAYER_PAIR {accounting_token(exclusion.layer_a)} '
+                                   f'{accounting_token(exclusion.layer_b)}')
+                case _:
+                    raise WriteError(f'Unsupported capacitance exclusion kind {exclusion.kind}')
+            # Keep quoted identifiers intact: wrapping inside one changes its value.
+            self.emit(head + ' ' + ' '.join(clauses))
+        for net in policy.excluded_substrate_nets:
+            self.emit(f'CAP_EXCLUDE_SUBSTRATE {accounting_token(net)}')
 
     def write_terminals(self) -> None:
         if not self.file.terminals:

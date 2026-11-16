@@ -23,6 +23,7 @@
 #
 import allure
 import os
+import pytest
 from typing import *
 from unittest import mock
 
@@ -153,3 +154,35 @@ def test_geometry_check_takes_the_conductors_of_a_group_as_one_surface():
     with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as error_mock:
         touching_conductors('N').check()
     assert [c.args[0] for c in error_mock.call_args_list] == []
+
+
+@pytest.mark.parametrize('start', [0.0, 1.0])
+@pytest.mark.parametrize('middle_width', [0, 500, 1000])
+def test_ending_inner_dielectric_reveals_only_first_surviving_material(start: float, middle_width: int):
+    # Full, partial and absent middle coverage exercise a hidden outer film
+    # becoming visible. The inner film either exists from the first plane or
+    # starts inside the other two, covering both entry and exit transitions.
+    builder = FasterCapModelBuilder(dbu=0.001, k_void=1, delaunay_b=0.5)
+    for name, permittivity in (('inner', 4), ('middle', 7), ('outer', 2)):
+        builder.add_material(name, permittivity)
+    field = kdb.Region(kdb.Box(0, 0, 1000, 1000))
+    builder.add_dielectric('inner', field, start, 1.0)
+    if middle_width:
+        builder.add_dielectric('middle', kdb.Region(kdb.Box(0, 0, middle_width, 1000)), 0, 3.0)
+    builder.add_dielectric('outer', field, 0, 4.0)
+    generator = builder.generate()
+    top_areas = {'middle': 0.0, 'outer': 0.0}
+    for key, triangles in generator.diel_data.items():
+        for triangle in triangles:
+            if not all(point.z == start + 1.0 for point in triangle):
+                continue
+            if 'inner' not in (key.inside, key.outside):
+                continue
+            adjacent = key.inside if key.outside == 'inner' else key.outside
+            assert adjacent in top_areas
+            a, b, c = triangle
+            top_areas[adjacent] += abs((b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x))/2
+    assert top_areas == pytest.approx({'middle': middle_width/1000, 'outer': 1-middle_width/1000})
+    with mock.patch('klayout_pex.fastercap.fastercap_model_generator.error') as errors:
+        generator.check()
+    assert not errors.call_args_list

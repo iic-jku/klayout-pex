@@ -24,6 +24,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from fractions import Fraction
 from typing import Any, Dict, Optional
 from unittest import mock
 
@@ -52,6 +53,7 @@ def context_from_shapes(shapes_by_gds: Dict[GDSPair, Optional[kdb.Region]], bbox
     context = mock.Mock(spec=KLayoutExtractionContext)
     context.dbu = dbu
     context.substrate_net_name = 'sub'
+    context.top_circuit = circuit
     context.annotated_top_cell = SimpleNamespace(name='plate')
     context.lvsdb = mock.Mock(spec=kdb.LayoutVsSchematic)
     context.lvsdb.netlist.return_value = netlist
@@ -69,3 +71,20 @@ def fastercap_input(pex_context: KLayoutExtractionContext, tech_info: TechInfo,
                                      tech_info=tech_info,
                                      substrate_net_name=pex_context.substrate_net_name,
                                      exclusions=exclusions).build()
+
+
+def dielectric_at(model: FasterCapModelBuilder, point_um: kdb.DPoint, z_um: float) -> Optional[str]:
+    """Sample physical material precedence independently of generated boundary meshes."""
+    point = point_um.to_itype(model.dbu)
+    z = Fraction(str(z_um)) / Fraction(str(model.dbu))
+
+    def contains(prisms: Any) -> bool:
+        return any(low <= z < high and any(polygon.inside(point) for polygon in region.each_merged())
+                   for region, low, high in prisms)
+
+    if any(contains(prisms) for prisms in model.clayers.values()):
+        return None
+    # Conductors have priority, then dielectric declarations in their order.
+    # Overlapping input prisms and already-trimmed prisms must give the same
+    # physical material at every sampled interior point and interface.
+    return next((name for name in model.materials if contains(model.dlayers.get(name, ()))), None)

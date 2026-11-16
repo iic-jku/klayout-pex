@@ -438,7 +438,6 @@ class FasterCapModelGenerator:
                 # compute merged events
                 if mk not in self.current:
                     self.current[mk] = []
-                current_before = self.current[mk][0].dup() if len(self.current[mk]) >= 1 else kdb.Region()
                 lin, lout, current = self._merge_events(pyra=self.current[mk],
                                                         lin=self.layers_in.get(mk, None),
                                                         lout=self.layers_out.get(mk, None))
@@ -450,19 +449,14 @@ class FasterCapModelGenerator:
                 if mk not in self.state:
                     self.state[mk] = kdb.Region()
 
-                # legalize in and out events
-                lin_org = lin.dup()
-                lout_org = lout.dup()
-                lout &= self.state[mk]
-                lin -= all
-                lout += current & all_in
-                lin += current_before & all_out
-                lin -= lout_org
-                lout -= lin_org
-
-                # tracks the legalized horizontal cuts
-                self.state[mk] += lin
-                self.state[mk] -= lout
+                # Visibility follows conductor/material priority at this plane.
+                # Deriving transitions from visible states also handles several
+                # overlapping films revealed by the end of an inner film: only
+                # the first surviving material owns the newly exposed region.
+                visible = current - all
+                lin = visible - self.state[mk]
+                lout = self.state[mk] - visible
+                self.state[mk] = visible
 
                 din[mk] = lin
                 dout[mk] = lout

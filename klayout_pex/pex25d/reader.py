@@ -32,9 +32,12 @@ from dataclasses import dataclass, field
 from fractions import Fraction
 from typing import *
 
+from .capability_validation import validate_required_capabilities
 from .diagnostics import Diagnostic, DiagnosticsReport, Severity, SourceRef, Tier
 from .format_version import FORMAT_VERSION_MAJOR
 from .protobuf import (
+    pex25d_capacitance_accounting_pb2,
+    pex25d_capabilities_pb2,
     pex25d_dielectric_pb2,
     pex25d_file_pb2,
     pex25d_terminal_pb2,
@@ -61,6 +64,7 @@ CLAUSE_KEYWORDS = {
     'WRAPS', 'PERMITTIVITY', 'BETWEEN', 'CONNECTS', 'Z_OFFSETS', 'LAYER',
     'LL', 'UR', 'OUTER', 'HOLE', 'X', 'Y', 'Z', 'SHEET', 'PER_CUT',
     'TC1', 'TC2', 'KIND', 'TEMPERATURE', 'NET',
+    'REQUIRES', 'CAPABILITIES', 'WITHIN', 'ALL_LAYER_PAIRS', 'LAYER_PAIR',
     'THICKNESS_OVER_WRAPPED', 'THICKNESS_BESIDE_WRAPPED', 'THICKNESS_ON_FIELD',
 }
 
@@ -339,6 +343,9 @@ class Pex25DTextReader:
 
         if not self.seen_header:
             self.error('PEX25D-E0107', "The file does not start with a PEX25D record")
+        before = self.report.num_errors
+        validate_required_capabilities(self.file, self.report)
+        self.errors += self.report.num_errors - before
         if self.errors:
             raise ReadError(f"{self.errors} error(s) while reading the file")
         return self.file
@@ -407,6 +414,30 @@ class Pex25DTextReader:
 
         cursor = Cursor(record, self)
         version = cursor.take('a version')
+        if not cursor.exhausted:
+            if cursor.keyword('REQUIRES') is None or cursor.keyword('CAPABILITIES') is None:
+                return
+            names = {
+                'CAPACITANCE_ACCOUNTING':
+                    pex25d_capabilities_pb2().REQUIRED_CAPABILITY_CAPACITANCE_ACCOUNTING,
+            }
+            tokens = []
+            while not cursor.exhausted:
+                tokens.append(cursor.take('a capability or comma'))
+            # Commas separate symbolic capability names; surrounding whitespace
+            # is optional. Empty entries must not silently weaken the contract.
+            for item in ' '.join(tokens).split(','):
+                capability = item.strip()
+                if not capability:
+                    self.error('PEX25D-E0280', 'Required capability list contains an empty entry', record)
+                elif any(character.isspace() for character in capability):
+                    self.error('PEX25D-E0280', 'Required capabilities must be comma-separated', record)
+                elif capability not in names:
+                    self.error('PEX25D-E0280',
+                               f"Unsupported required capability '{capability}'; supported: "
+                               f"{', '.join(names)}", record, tier=Tier.SEMANTIC)
+                else:
+                    self.file.required_capabilities.append(names[capability])
         cursor.end()
         if version is None:
             return
@@ -733,6 +764,70 @@ class Pex25DTextReader:
             return None
         return points
 
+    def read_cap_region(self, record: Record):
+        cursor = Cursor(record, self)
+        name = cursor.take('a region name')
+        if name is None or cursor.keyword('LAYER') is None:
+            return
+        layer = cursor.take('a conductor layer')
+        if layer is None or cursor.keyword('OUTER') is None:
+            return
+        outer = self.read_ring(cursor, record, 'OUTER')
+        if outer is None:
+            return
+        holes = []
+        while cursor.peek() == 'HOLE':
+            cursor.take('HOLE')
+            hole = self.read_ring(cursor, record, 'HOLE')
+            if hole is None:
+                return
+            holes.append(hole)
+        cursor.end()
+        policy = self.file.capacitance_accounting
+        region = next((region for region in policy.regions if region.name == name), None)
+        if region is None:
+            region = policy.regions.add(name=name)
+            self.attach_source(region, record)
+        mask = next((mask for mask in region.masks if mask.layer == layer), None)
+        if mask is None:
+            mask = region.masks.add(layer=layer)
+        polygon = mask.polygons.add()
+        fill_ring(polygon.outer, outer)
+        for hole in holes:
+            fill_ring(polygon.holes.add(), hole)
+
+    def read_cap_exclude(self, record: Record):
+        cursor = Cursor(record, self)
+        name = cursor.take('an exclusion name')
+        if name is None or cursor.keyword('WITHIN') is None:
+            return
+        region = cursor.take('a capacitance region')
+        if region is None:
+            return
+        kind = cursor.keyword('ALL_LAYER_PAIRS', 'LAYER_PAIR')
+        if kind is None:
+            return
+        kinds = pex25d_capacitance_accounting_pb2().CapacitanceExclusion
+        layer_a = layer_b = ''
+        if kind == 'LAYER_PAIR':
+            layer_a = cursor.take('the first layer')
+            layer_b = cursor.take('the second layer')
+            if layer_a is None or layer_b is None:
+                return
+        cursor.end()
+        exclusion = self.file.capacitance_accounting.exclusions.add(
+            name=name, region=region,
+            kind=kinds.KIND_ALL_LAYER_PAIRS if kind == 'ALL_LAYER_PAIRS' else kinds.KIND_LAYER_PAIR,
+            layer_a=layer_a, layer_b=layer_b)
+        self.attach_source(exclusion, record)
+
+    def read_cap_exclude_substrate(self, record: Record):
+        cursor = Cursor(record, self)
+        net = cursor.take('an electrical net')
+        cursor.end()
+        if net is not None:
+            self.file.capacitance_accounting.excluded_substrate_nets.append(net)
+
     def read_terminal(self, record: Record) -> None:
         cursor = Cursor(record, self)
         name = cursor.take('a name')
@@ -893,6 +988,9 @@ Pex25DTextReader.HANDLERS = {
     'PEX25D': Pex25DTextReader.read_header,
     'UNITS': Pex25DTextReader.read_units,
     'META': Pex25DTextReader.read_meta,
+    'CAP_REGION': Pex25DTextReader.read_cap_region,
+    'CAP_EXCLUDE': Pex25DTextReader.read_cap_exclude,
+    'CAP_EXCLUDE_SUBSTRATE': Pex25DTextReader.read_cap_exclude_substrate,
     'INCLUDE': Pex25DTextReader.read_include,
     'GROUND_PLANE': Pex25DTextReader.read_ground_plane,
     'GROUND_CUTOUT': Pex25DTextReader.read_ground_cutout,

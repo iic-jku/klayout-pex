@@ -112,6 +112,16 @@ def pex25d_dielectric_pb2() -> Any:
 
 
 @functools.cache
+def pex25d_capabilities_pb2() -> Any:
+    return _import('klayout_pex_protobuf.kpex.pex25d.pex25d_capabilities_pb2')
+
+
+@functools.cache
+def pex25d_capacitance_accounting_pb2() -> Any:
+    return _import('klayout_pex_protobuf.kpex.pex25d.pex25d_capacitance_accounting_pb2')
+
+
+@functools.cache
 def pex25d_geometry_pb2() -> Any:
     return _import('klayout_pex_protobuf.kpex.pex25d.pex25d_geometry_pb2')
 

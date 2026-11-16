@@ -34,6 +34,7 @@ from __future__ import annotations
 
 from typing import *
 
+from .capability_validation import validate_required_capabilities
 from .artifact import (
     CANONICAL_SUFFIX,
     ArtifactFormat,
@@ -75,6 +76,7 @@ def load_artifact(spec: ArtifactSpec,
             # NOTE: the fields of the other kind are unknown fields here, rather than an error
             if _unknown_field_count(message) and _holds_the_other_kind(spec, lambda m: m.ParseFromString(data)):
                 raise _other_kind_error(spec)
+            _check_required_capabilities(message, report)
             return message
 
         case ArtifactFormat.TEXTPB:
@@ -87,6 +89,7 @@ def load_artifact(spec: ArtifactSpec,
                 if _holds_the_other_kind(spec, lambda m: text_format.Parse(text, m)):
                     raise _other_kind_error(spec) from e
                 raise ValueError(f"Not a PEX25D {spec.kind.value} in protobuf text format: {e}") from e
+            _check_required_capabilities(message, report)
             return message
 
         case ArtifactFormat.TEXT:
@@ -100,6 +103,13 @@ def load_artifact(spec: ArtifactSpec,
 
         case _:
             raise ValueError(f"Unknown artifact format {spec.format}")
+
+
+def _check_required_capabilities(message: Any, report: Optional[DiagnosticsReport]):
+    report = report if report is not None else DiagnosticsReport()
+    before = len(report.diagnostics)
+    if not validate_required_capabilities(message, report):
+        raise ValueError('; '.join(d.message for d in report.diagnostics[before:]))
 
 
 def _unknown_field_count(message: Any) -> int:
