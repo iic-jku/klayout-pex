@@ -930,22 +930,12 @@ class Exclusions:
         """
         parts = [self.conductor_parts[name] for name in conductor_names]
         nets_of_parts = [self.net_of_capacitance(part.net_name, substrate_net_name) for part in parts]
-        net_names = list(dict.fromkeys(nets_of_parts))
-        index_of_net = {net_name: index for index, net_name in enumerate(net_names)}
-        rows = [[0.0] * len(net_names) for _ in net_names]
+        from ..common.capacitance_matrix import aggregate_capacitance_matrix
+        return aggregate_capacitance_matrix(
+            matrix, nets_of_parts,
+            lambda i: not parts[i].is_substrate and self.leaves_out_to_substrate(parts[i]),
+            lambda i, j: self.leaves_out_between(parts[i], parts[j]))
 
-        for i, part in enumerate(parts):
-            row, net_i = matrix[i], index_of_net[nets_of_parts[i]]
-            if part.is_substrate or not self.leaves_out_to_substrate(part):
-                rows[net_i][net_i] += sum(row)  # NOTE: the capacitance to infinity, the rest of the row
-            for j in range(i + 1, len(parts)):
-                net_j = index_of_net[nets_of_parts[j]]
-                if net_i != net_j and not self.leaves_out_between(part, parts[j]):
-                    rows[net_i][net_j] += row[j]
-                    rows[net_j][net_i] += row[j]
-                    rows[net_i][net_i] -= row[j]
-                    rows[net_j][net_j] -= row[j]
-        return CapacitanceMatrix(conductor_names=net_names, rows=rows)
 
     def leaves_out_capacitance_of_net(self, net_name: NetName, other_net_name: NetName) -> bool:
         """

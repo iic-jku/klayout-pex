@@ -64,6 +64,12 @@ def test_class_query_does_not_require_construction_and_subclasses_can_extend():
     assert PEX25DSceneExporter.supported_capabilities() == frozenset()
 
 
+def test_builtin_classes_declare_only_implemented_contracts():
+    ground = frozenset({SceneCapability.GROUND_CUTOUTS, SceneCapability.ELECTRICAL_IDENTITY})
+    assert STLSceneExporter.supported_capabilities() == ground
+    assert FasterCapSceneExporter.supported_capabilities() == ground | frozenset({
+        SceneCapability.CAPACITANCE_ACCOUNTING})
+    assert FastCap2SceneExporter.supported_capabilities() == FasterCapSceneExporter.supported_capabilities()
 
 
 @pytest.mark.parametrize('supported', [

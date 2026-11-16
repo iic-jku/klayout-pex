@@ -123,6 +123,7 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
         return frozenset({
             SceneCapability.GROUND_CUTOUTS,
             SceneCapability.ELECTRICAL_IDENTITY,
+            SceneCapability.CAPACITANCE_ACCOUNTING,
         })
 
     def export(self,
@@ -150,6 +151,10 @@ class FasterCapSceneExporter(PEX25DSceneExporter):
         body_map = write_solver_body_map(scene, Path(output_dir_path) / (effective_prefix + 'body_names.json'))
         if body_map is not None:
             written.append(body_map)
+        if scene.HasField('capacitance_accounting'):
+            from ..pex25d.accounting import SceneCapacitanceMap
+            written.append(SceneCapacitanceMap(scene).write(
+                Path(output_dir_path) / (effective_prefix + 'accounting.json')))
         return written
 
 

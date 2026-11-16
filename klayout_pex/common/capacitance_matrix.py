@@ -83,3 +83,29 @@ class CapacitanceMatrix:
                 c[i][j] = avg
                 c[j][i] = avg
         return c
+
+
+def aggregate_capacitance_matrix(matrix: CapacitanceMatrix,
+                                 nets_of_parts: List[str],
+                                 omit_reference: Callable[[int], bool],
+                                 omit_pair: Callable[[int, int], bool]) -> CapacitanceMatrix:
+    """Sum charge groups and filter mutual/reference terms before netlist output."""
+    count = len(nets_of_parts)
+    if len(matrix.rows) != count or any(len(row) != count for row in matrix.rows):
+        raise ValueError('Capacitance matrix dimensions do not match its charge groups')
+    names = list(dict.fromkeys(nets_of_parts))
+    indexes = {name: index for index, name in enumerate(names)}
+    rows = [[0.0] * len(names) for _ in names]
+    for i, name in enumerate(nets_of_parts):
+        net_i = indexes[name]
+        if not omit_reference(i):
+            rows[net_i][net_i] += sum(matrix[i])
+        for j in range(i + 1, count):
+            net_j = indexes[nets_of_parts[j]]
+            if net_i != net_j and not omit_pair(i, j):
+                value = matrix[i][j]
+                rows[net_i][net_j] += value
+                rows[net_j][net_i] += value
+                rows[net_i][net_i] -= value
+                rows[net_j][net_j] -= value
+    return CapacitanceMatrix(conductor_names=names, rows=rows)
