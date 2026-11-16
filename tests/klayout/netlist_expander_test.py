@@ -30,11 +30,12 @@ import unittest
 
 import klayout.db as kdb
 
-from klayout_pex.device_models import DeviceModels
+from klayout_pex.device_models import DeviceModelError, DeviceModels
 from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
 from klayout_pex.klayout.lvsdb_extractor import KLayoutExtractionContext
 from klayout_pex.fastcap.output_interpreter import FastCapOutputInterpreter
 from klayout_pex.klayout.netlist_expander import NetlistExpander, remove_devices
+from klayout_pex.klayout.parasitic_device_classes import PARASITIC_CAPACITOR_CLASS_NAME
 from klayout_pex.rcx25.exclusion import ConductorPart, ExcludedBlock, Exclusions
 from klayout_pex.log import (
     debug,
@@ -197,6 +198,96 @@ class WhiteboxTest(unittest.TestCase):
                                           device_models=device_models('mim'), substrate_net_name='B')
         self.assertEqual(['M1'], [d.name for d in expanded.circuit_by_name('chip').each_device()
                                   if d.device_class().name in ('mim', 'nmos')])
+
+    def test_blackbox_rejects_mapped_metal_caps_before_adding_parallel_capacitance(self):
+        # A VPP can be represented by MOS4 in LVS. Ownership follows the tech mapping,
+        # not the KLayout device type or the number/state of connected terminals.
+        for device_type in (kdb.DeviceClassCapacitor, kdb.DeviceClassMOS4Transistor):
+            for connection in ('distinct', 'shorted', 'unconnected'):
+                with self.subTest(device_type=device_type.__name__, connection=connection):
+                    netlist = substrate_test_netlist()
+                    circuit = netlist.circuit_by_name('chip')
+                    device_class = device_type()
+                    device_class.name = 'metal_cap'
+                    netlist.add(device_class)
+                    device = circuit.create_device(device_class, 'Cintentional')
+                    if connection != 'unconnected':
+                        for index, terminal in enumerate(device_class.terminal_definitions()):
+                            net = 'D' if connection == 'shorted' or index % 2 == 0 else 'B'
+                            device.connect_terminal(terminal.id(), circuit.net_by_name(net))
+                    before = netlist.to_s()
+                    with self.assertRaisesRegex(DeviceModelError, r'Cintentional.*metal_cap'):
+                        NetlistExpander.expand(netlist, 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
+                                               FasterCapOutputInterpreter(), blackbox_devices=True,
+                                               device_models=device_models('metal_cap'), substrate_net_name='B')
+                    self.assertEqual(before, netlist.to_s())
+
+    def test_blackbox_keeps_nonmetal_devices_and_empty_layouts_supported(self):
+        for device_type in (None, kdb.DeviceClassMOS4Transistor, kdb.DeviceClassCapacitor,
+                            kdb.DeviceClassResistor):
+            with self.subTest(device_type=device_type):
+                netlist = substrate_test_netlist()
+                circuit = netlist.circuit_by_name('chip')
+                if device_type is not None:
+                    device_class = device_type()
+                    device_class.name = 'nonmetal_device'  # e.g. a MOS, varactor or resistor
+                    netlist.add(device_class)
+                    circuit.create_device(device_class, 'original')
+                expanded = NetlistExpander.expand(netlist, 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
+                                                   FasterCapOutputInterpreter(), blackbox_devices=True,
+                                                   device_models=device_models('metal_cap'), substrate_net_name='B')
+                originals = [device.name for device in expanded.circuit_by_name('chip').each_device()
+                             if device.device_class().name == 'nonmetal_device']
+                self.assertEqual(['original'] if device_type is not None else [], originals)
+                parasitics = [device for device in expanded.circuit_by_name('chip').each_device()
+                              if device.device_class().name == PARASITIC_CAPACITOR_CLASS_NAME]
+                self.assertEqual(2, len(parasitics))
+                self.assertAlmostEqual(1.75e-15, sum(device.parameter('C') for device in parasitics), delta=1e-25)
+
+    def test_cut_devices_do_not_block_field_extraction_but_retained_devices_do(self):
+        netlist = substrate_test_netlist()
+        circuit = netlist.circuit_by_name('chip')
+        device_class = kdb.DeviceClassCapacitor()
+        device_class.name = 'metal_cap'
+        netlist.add(device_class)
+        removed = circuit.create_device(device_class, 'already_deleted')
+        first = circuit.create_device(device_class, 'cut_device')
+        second = circuit.create_device(device_class, 'retained_device')
+        circuit.remove_device(removed)  # Copying renumbers IDs; use the original IDs.
+        exclusions = Exclusions([])
+        exclusions.removed_device_blocks = {first.id(): 0}
+        with self.assertRaisesRegex(DeviceModelError, 'retained_device'):
+            NetlistExpander.expand(netlist, 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
+                                   FasterCapOutputInterpreter(), blackbox_devices=True,
+                                   device_models=device_models('metal_cap'), substrate_net_name='B',
+                                   exclusions=exclusions)
+        exclusions.removed_device_blocks[second.id()] = 0
+        names = [exclusions.conductor_name(ConductorPart(name, is_substrate=name == 'B'))
+                 for name in ('B', 'D')]
+        matrix = CapacitanceMatrix(conductor_names=[f'g{index + 1}_{name}' for index, name in enumerate(names)],
+                                    rows=CAP_MATRIX_SUBSTRATE_ON_B.rows)
+        # No retained model remains to double count. The existing cut flow still expands the matrix.
+        expanded = NetlistExpander.expand(netlist, 'chip', matrix,
+                                           FasterCapOutputInterpreter(), blackbox_devices=True,
+                                           device_models=device_models('metal_cap'), substrate_net_name='B',
+                                           exclusions=exclusions)
+        self.assertFalse(any(device.device_class().name == 'metal_cap'
+                             for device in expanded.circuit_by_name('chip').each_device()))
+        self.assertTrue(capacitances_by_net_pair(expanded))
+
+    def test_marker_presence_is_not_a_device_ownership_proof(self):
+        netlist = substrate_test_netlist()
+        circuit = netlist.circuit_by_name('chip')
+        device_class = kdb.DeviceClassCapacitor()
+        device_class.name = 'metal_cap'
+        netlist.add(device_class)
+        circuit.create_device(device_class, 'retained_device')
+        exclusions = Exclusions.from_region(kdb.Region(kdb.Box(0, 0, 100, 100)))
+        with self.assertRaisesRegex(DeviceModelError, 'Exclusion markers alone'):
+            NetlistExpander.expand(netlist, 'chip', CAP_MATRIX_SUBSTRATE_ON_B,
+                                   FasterCapOutputInterpreter(), blackbox_devices=True,
+                                   device_models=device_models('metal_cap'), substrate_net_name='B',
+                                   exclusions=exclusions)
 
     def test_remove_devices_goes_by_the_ids_of_the_extracted_circuit(self):
         # NOTE: the copy numbers its devices anew, which closes the gaps of the IDs

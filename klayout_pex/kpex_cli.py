@@ -63,7 +63,7 @@ from .fastcap.output_interpreter import FastCapOutputInterpreter
 from .klayout.lvs_cache import LVSCacheEntry, LVSInputFingerprint, lvs_input_fingerprint
 from .klayout.lvs_runner import LVSError, LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError, PORT_LABEL_MODES
-from .klayout.netlist_expander import NetlistExpander
+from .klayout.netlist_expander import NetlistExpander, check_field_solver_devices
 from .klayout.netlist_csv import NetlistCSVWriter
 from .klayout.netlist_printer import NetlistHeader, NetlistPrinter
 from .klayout.netlist_reducer import NetlistReducer
@@ -2282,6 +2282,8 @@ class KpexCLI:
 
         if args.run_fastcap or args.run_fastercap:
             self.run_result.enter(Stage.FASTERCAP if args.run_fastercap else Stage.FASTCAP2)
+            check_field_solver_devices(pex_context.top_circuit, tech_info.device_models,
+                                       args.blackbox_devices, exclusions)
             if exclusions is not None:
                 warn_of_ports_without_nodes(exclusions, "The netlist of a field solver")
             lst_file, scene_accounting = self.build_fastercap_input(args=args,

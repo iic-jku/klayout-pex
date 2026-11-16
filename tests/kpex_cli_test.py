@@ -33,6 +33,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import sys
 from typing import *
 from unittest import mock
 
@@ -402,6 +403,34 @@ def test_klayout_writes_no_gzip_files(tmp_path):
     assert sorted(p.name for p in (tmp_path / 'nfet_li1__nfet_li1').glob('*.gz')) == \
            ['nfet_li1_k25d_pex_report.rdb.gz', 'nfet_li1_nonempty_LVS_layers.gds.gz',
             'nfet_li1_unnamed_LVS_layers.gds.gz']
+
+
+@allure.parent_suite("Unit Tests")
+@allure.tag("CLI", "FasterCap", "FastCap2")
+@pytest.mark.parametrize('engine', ['--fastercap', '--fastcap'])
+def test_field_solver_blackbox_mim_fails_before_geometry_or_solver(engine: str, tmp_path: Path):
+    pdk = PDKTestConfig(PDKName.IHP_SG13G2)
+    gds = pdk.gds_path('sg13g2_pr__cmim', 'cmim.gds.gz')
+    cli = KpexCLI()
+    with mock.patch.dict(os.environ, {'KPEX_FASTCAP_EXE': sys.executable, 'KPEX_FASTERCAP_EXE': sys.executable}), \
+         mock.patch('klayout_pex.kpex_cli.check_tool_versions', return_value=True), \
+         mock.patch.object(KpexCLI, 'build_fastercap_input', side_effect=AssertionError('must not build geometry')), \
+         mock.patch('klayout_pex.kpex_cli.run_fastercap') as fastercap, \
+         mock.patch('klayout_pex.kpex_cli.run_fastcap') as fastcap:
+        code, output = run_cli(cli.main, ['kpex', 'extract', '--pdk', pdk.name,
+                                                '--lvsdb', lvsdb_fixture_path(pdk.name, gds),
+                                                engine, '--blackbox', 'y', '--out-dir', str(tmp_path)])
+    assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+    assert 'cap_cmim' in output
+    assert 'count it twice' in output
+    assert '--2.5D --blackbox y' in output
+    assert '--blackbox n' in output
+    assert 'Traceback' not in output
+    fastercap.assert_not_called()
+    fastcap.assert_not_called()
+    assert not list(tmp_path.rglob('*Netlist.cir'))
+    result = json.loads((Path(cli.run_result.run_dir) / RESULT_FILE_NAME).read_text(encoding='utf-8'))
+    assert result['exit_code'] == ExitCode.DIAGNOSTIC_ERRORS
 
 
 @allure.parent_suite("Unit Tests")

@@ -119,6 +119,18 @@ either setting. This prevents grounding the intended terminal coupling of a whit
 These policies apply to `--2.5D`. They do not change `MAGIC`, FasterCap or FastCap2 output.
 Existing `CC`, `RC` and `R` defaults are unchanged.
 
+### Metal-capacitor models with field solvers
+
+`FasterCap` and `FastCap2` reject `--blackbox y` when the extracted netlist would retain a mapped
+metal-capacitor model. Their field matrix contains the intrinsic plate capacitance, which would
+otherwise be added in parallel with the model. Exclusion markers alone do not establish which
+plate and enclosure geometry belongs to that intrinsic capacitance.
+
+Use `--2.5D --blackbox y` to retain the compact models and extract their external coupling.
+Use `--blackbox n` with a field solver when the intended result replaces those models with
+full-geometry capacitance. Field-solver runs without retained metal-capacitor models remain
+supported, including devices explicitly removed by `--cut`.
+
 ### Grounding an existing SPICE netlist
 
 `netlist ground` applies the same floating elimination and grounding policy without a layout or PDK:
