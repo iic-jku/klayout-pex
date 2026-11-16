@@ -45,6 +45,7 @@ from tests.common.lvsdb_fixtures import lvsdb_fixture_path
 from tests.common.ngspice import ngspice_port_admittance, requires_ngspice
 from tests.common.pdk_test_config import PDKName, PDKTestConfig
 from tests.common.rc_networks import build_network, port_admittance, spice_subcircuit
+from tests.common.resistance_patterns import extracted_strip
 from tests.common.vacask import vacask_port_admittance, requires_vacask
 from tests.common.xyce import xyce_port_admittance, requires_xyce
 
@@ -117,21 +118,6 @@ def test_sensitivity_selection_exposes_assumption_and_rejects_unqualified_capabi
     assert load_technology_catalog(catalog).selection.scenario_id == 'nominal'
     with pytest.raises(TechDefError, match='valid corners'):
         load_technology_catalog(catalog, style)
-
-
-def extracted_strip(tech: TechInfo, layer: str, width: int, length: int) -> RCNetwork:
-    rex = klp.RExtractorTech()
-    conductor = klp.RExtractorTechConductor()
-    conductor.layer = 0
-    conductor.algorithm = klp.Algorithm.SquareCounting
-    conductor.resistance = tech.milliohm_to_ohm(tech.layer_resistance_by_layer_name[layer].resistance)
-    rex.add_conductor(conductor)
-    network = klp.RNetExtractor(0.001).extract(
-        rex, {0: kdb.Region(kdb.Box(0, 0, length, width))},
-        {0: [kdb.Point(0, width // 2), kdb.Point(length, width // 2)]}, {})
-    names = {node.object_id(): ('A' if node.port_index() == 0 else 'B') for node in network.each_node()}
-    return build_network([(names[edge.a().object_id()], names[edge.b().object_id()],
-                           1.0 / edge.resistance(), 0.0) for edge in network.each_element()], ['A', 'B'])
 
 
 @pytest.mark.parametrize('style', STYLES)

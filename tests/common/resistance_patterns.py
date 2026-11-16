@@ -29,8 +29,12 @@ from pathlib import Path
 from typing import Tuple
 
 import klayout.db as kdb
+import klayout.pex as klp
 
+from klayout_pex.netlist.rc_network import RCNetwork
+from klayout_pex.tech_info import TechInfo
 from klayout_pex_protobuf.kpex.tech.tech_pb2 import LayerInfo
+from tests.common.rc_networks import build_network
 
 
 def write_strip_lvsdb(path: Path, layer: LayerInfo, lvs_names: Tuple[str, str, str],
@@ -48,7 +52,7 @@ def write_strip_lvsdb(path: Path, layer: LayerInfo, lvs_names: Tuple[str, str, s
         top.shapes(labels).insert(kdb.Text(name, kdb.Trans(x, width_dbu // 2)))
     lvsdb = kdb.LayoutVsSchematic(kdb.RecursiveShapeIterator(layout, top, []))
     conductor = lvsdb.make_layer(drawing, lvs_names[0])
-    pin_shapes = lvsdb.make_layer(pins, lvs_names[1])
+    pin_shapes = conductor if pins == drawing else lvsdb.make_layer(pins, lvs_names[1])
     texts = lvsdb.make_text_layer(labels, lvs_names[2])
     lvsdb.connect(conductor)
     lvsdb.connect(conductor, pin_shapes)
@@ -92,7 +96,7 @@ def write_contact_array_lvsdb(path: Path,
     conductors = []
     for drawing, pins, labels, lvs_names in names:
         conductor = lvsdb.make_layer(drawing, lvs_names[0])
-        pin_shapes = lvsdb.make_layer(pins, lvs_names[1])
+        pin_shapes = conductor if pins == drawing else lvsdb.make_layer(pins, lvs_names[1])
         texts = lvsdb.make_text_layer(labels, lvs_names[2])
         lvsdb.connect(conductor)
         lvsdb.connect(conductor, pin_shapes)
@@ -105,3 +109,18 @@ def write_contact_array_lvsdb(path: Path,
     lvsdb.netlist().make_top_level_pins()
     lvsdb.write(str(path))
     return path
+
+
+def extracted_strip(tech: TechInfo, layer: str, width: int, length: int) -> RCNetwork:
+    rex = klp.RExtractorTech()
+    conductor = klp.RExtractorTechConductor()
+    conductor.layer = 0
+    conductor.algorithm = klp.Algorithm.SquareCounting
+    conductor.resistance = tech.milliohm_to_ohm(tech.layer_resistance_by_layer_name[layer].resistance)
+    rex.add_conductor(conductor)
+    network = klp.RNetExtractor(0.001).extract(
+        rex, {0: kdb.Region(kdb.Box(0, 0, length, width))},
+        {0: [kdb.Point(0, width // 2), kdb.Point(length, width // 2)]}, {})
+    names = {node.object_id(): ('A' if node.port_index() == 0 else 'B') for node in network.each_node()}
+    return build_network([(names[edge.a().object_id()], names[edge.b().object_id()],
+                           1.0 / edge.resistance(), 0.0) for edge in network.each_element()], ['A', 'B'])
