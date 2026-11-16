@@ -1,10 +1,9 @@
-#! /usr/bin/env python3
 #
 # --------------------------------------------------------------------------------
-# SPDX-FileCopyrightText: 2024-2025 Martin Jan Köhler and Harald Pretl
+# SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
 # Johannes Kepler University, Institute for Integrated Circuits.
 #
-# This file is part of KPEX 
+# This file is part of KPEX
 # (see https://github.com/iic-jku/klayout-pex).
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,49 +22,26 @@
 # --------------------------------------------------------------------------------
 #
 
+"""Build direct field-solver input through the common resolved PEX25D scene."""
 
-#
-# Protocol Buffer Schema for FasterCap Input Files
-# https://www.fastfieldsolvers.com/software.htm#fastercap
-#
+from __future__ import annotations
 
-from collections import defaultdict
-from typing import *
-from functools import cached_property
-import math
+from typing import Any, Optional
 
-import klayout.db as kdb
-
+from ..rcx25.exclusion import Exclusions, ConductorPart
 from ..klayout.lvsdb_extractor import KLayoutExtractionContext
-from .fastercap_model_generator import FasterCapModelBuilder, FasterCapModelGenerator
-from ..log import (
-    console,
-    debug,
-    info,
-    warning,
-    error
-)
-from ..rcx25.exclusion import ConductorPart, Exclusions
 from ..tech_info import TechInfo
-from ..types import GDSPair, LayerName
-
+from .fastercap_error import FasterCapError
+from .fastercap_model_generator import FasterCapModelGenerator
 
 
 class FasterCapInputBuilder:
-    def __init__(self,
-                 pex_context: KLayoutExtractionContext,
-                 tech_info: TechInfo,
-                 substrate_net_name: str,
-                 k_void: float = 3.5,
-                 delaunay_amax: float = 0.0,
-                 delaunay_b: float = 1.0,
+    """Layout-side preparation; geometry export is shared with standalone scenes."""
+
+    def __init__(self, pex_context: KLayoutExtractionContext, tech_info: TechInfo,
+                 substrate_net_name: str, k_void: float = 3.5,
+                 delaunay_amax: float = 0.0, delaunay_b: float = 1.0,
                  exclusions: Optional[Exclusions] = None):
-        """
-        :param substrate_net_name: the conductor of the substrate block, the substrate net (e.g. VSS),
-                                   whose metal is then the same conductor, or a name for a port of its own
-        :param exclusions: what a model has the parasitics of, so the nets have conductors per block
-                           (see Exclusions.capacitance_matrix_of_nets)
-        """
         self.pex_context = pex_context
         self.tech_info = tech_info
         self.substrate_net_name = substrate_net_name
@@ -73,353 +49,63 @@ class FasterCapInputBuilder:
         self.delaunay_amax = delaunay_amax
         self.delaunay_b = delaunay_b
         self.exclusions = exclusions
-        self.conductor_parts_by_layer: Dict[str, kdb.Region] = defaultdict(kdb.Region)
 
-    @cached_property
-    def dbu(self) -> float:
-        return self.pex_context.dbu
-
-    def gds_pair(self, layer_name) -> Optional[GDSPair]:
-        gds_pair = self.tech_info.gds_pair_for_computed_layer_name.get(layer_name, None)
-        if not gds_pair:
-            gds_pair = self.tech_info.gds_pair_for_layer_name.get(layer_name, None)
-        if not gds_pair:
-            warning(f"Can't find GDS pair for layer {layer_name}")
-            return None
-        return gds_pair
-
-    # NOTE: layers of the process stack can share a GDS pair (e.g. a metal without and with a MIM cap above),
-    #       so each of them has the shapes of its own LVS layers only
-    def shapes_of_net(self, layer_name: str, net: kdb.Net) -> Optional[kdb.Region]:
-        gds_pair = self.gds_pair(layer_name=layer_name)
-        if not gds_pair:
-            return None
-
-        lvs_layer_names = self.tech_info.lvs_layer_names_by_process_layer_name.get(layer_name, [])
-        shapes = self.pex_context.shapes_of_net(gds_pair=gds_pair, net=net, lvs_layer_names=lvs_layer_names)
-        if not shapes:
-            debug(f"Nothing extracted for layer {layer_name}")
-        return shapes
-
-    def shapes_of_layer(self, layer_name: str) -> Optional[kdb.Region]:
-        gds_pair = self.gds_pair(layer_name=layer_name)
-        if not gds_pair:
-            return None
-
-        lvs_layer_names = self.tech_info.lvs_layer_names_by_process_layer_name.get(layer_name, [])
-        shapes = self.pex_context.shapes_of_layer(gds_pair=gds_pair, lvs_layer_names=lvs_layer_names)
-        if not shapes:
-            debug(f"Nothing extracted for layer {layer_name}")
-        return shapes
-
-    def top_cell_bbox(self) -> kdb.Box:
-        return self.pex_context.top_cell_bbox()
-
-    def canonical_layer_name(self, layer_name: str) -> LayerName:
-        """
-        :return: the name of the layer of the stack by the one of the process stack, the masks go by these
-        """
-        return self.tech_info.canonical_layer_name_by_gds_pair.get(self.gds_pair(layer_name=layer_name), layer_name)
-
-    def add_conductor(self,
-                      model_builder: FasterCapModelBuilder,
-                      net_name: str,
-                      layer_name: str,
-                      shapes: kdb.Region,
-                      z: float,
-                      height: float):
-        """
-        :param layer_name: the layer of the process stack
-        """
-        if self.exclusions is None:
-            model_builder.add_conductor(net_name=net_name, layer=shapes, z=z, height=height)
-            return
-        for part, conductor_name in self.exclusions.conductor_parts_of_shapes(shapes, net_name,
-                                                                              self.canonical_layer_name(layer_name)):
-            model_builder.add_conductor(net_name=conductor_name, layer=part, z=z, height=height, group_name=net_name)
-            self.conductor_parts_by_layer[layer_name] += part
-
-    def add_via(self,
-                model_builder: FasterCapModelBuilder,
-                net_name: str,
-                layer_below_name: str,
-                contact: Any,
-                shapes: kdb.Region,
-                z: float):
-        """
-        :param layer_below_name: the layer of the process stack that has the contact above it
-        :param contact: the contact, of the process stack
-        """
-        if self.exclusions is None:
-            model_builder.add_conductor(net_name=net_name, layer=shapes, z=z, height=contact.thickness)
-            return
-        for part, conductor_name in self.exclusions.conductor_parts_of_vias(
-                shapes, net_name,
-                self.canonical_layer_name(layer_below_name),
-                self.canonical_layer_name(contact.metal_above or layer_below_name)):
-            model_builder.add_conductor(net_name=conductor_name, layer=part, z=z, height=contact.thickness,
-                                        group_name=net_name)
+    def build_scene(self) -> Any:
+        from ..klayout.pex25d_builder import PEX25DBuilder, BuilderOptions, GeometryScope, BuildError
+        from ..klayout.pex25d_exclusions import attach_layout_accounting
+        from ..pex25d import resolve, ResolveError
+        from ..klayout.physical_geometry import PhysicalGeometryError
+        from ..klayout.pex25d_ground import GroundGeometryError
+        from ..pex25d.accounting import SceneCapacitanceMap
+        from fractions import Fraction
+        from ..klayout.pex25d_accounting import AccountingGridError
+        from ..klayout.pex25d_builder import DEFAULT_GRID_UM
+        grid = Fraction(DEFAULT_GRID_UM)
+        try:
+            while True:
+                builder = PEX25DBuilder(
+                    self.pex_context, self.tech_info, self.pex_context.top_circuit.name,
+                    BuilderOptions(grid_um=str(grid), geometry_scope=GeometryScope.ELECTROSTATIC,
+                                   include_terminals=False, include_resistance=False,
+                                   background_permittivity=self.k_void, domain_margin_um=8.0))
+                file = builder.build()
+                file.ground_plane.net = self.substrate_net_name
+                if self.exclusions is not None:
+                    attach_layout_accounting(file, builder, self.exclusions)
+                try:
+                    scene = resolve(file)
+                    break
+                except ResolveError as exc:
+                    cause = exc.__cause__
+                    if not isinstance(cause, AccountingGridError):
+                        raise
+                    # Rebuild from the original source grid; repeated rescaling
+                    # of rounded geometry would change via ownership and corners.
+                    grid /= cause.refinement_factor
+        except (ValueError, BuildError, ResolveError, PhysicalGeometryError, GroundGeometryError) as exc:
+            raise FasterCapError(f'Cannot build physical FasterCap scene: {exc}') from exc
+        self.scene = scene
+        self.accounting = SceneCapacitanceMap(scene)
+        if self.exclusions is not None:
+            # Preserve the existing enclosing netlist API for callers that still
+            # pass Exclusions. Geometry/export itself uses only the scene map.
+            for name, part in self.accounting.parts.items():
+                indexes = frozenset(int(r.removeprefix('block')) for r in part.regions)
+                layer = part.layer
+                if layer is not None:
+                    pair = self.tech_info.gds_pair(layer)
+                    layer = self.tech_info.canonical_layer_name_by_gds_pair.get(pair, layer)
+                original = ConductorPart(part.body.name, indexes, layer, part.is_reference)
+                self.exclusions.conductor_parts[name] = original
+                self.exclusions.conductor_names[original] = name
+        return scene
 
     def build(self) -> FasterCapModelGenerator:
-        lvsdb = self.pex_context.lvsdb
-        netlist: kdb.Netlist = lvsdb.netlist()
-
-        def format_terminal(t: kdb.NetTerminalRef) -> str:
-            td = t.terminal_def()
-            d = t.device()
-            return f"{d.expanded_name()}/{td.name}/{td.description}"
-
-        model_builder = FasterCapModelBuilder(
-            dbu=self.dbu,
-            k_void=self.k_void,
-            delaunay_amax=self.delaunay_amax,   # test/compare with smaller, e.g. 0.05 => more triangles
-            delaunay_b=self.delaunay_b          # test/compare with 1.0 => more triangles at edges
-        )
-
-        fox_layer = self.tech_info.field_oxide_layer
-
-        model_builder.add_material(name=fox_layer.name, k=fox_layer.field_oxide_layer.dielectric_k)
-        for diel_name, diel_k in self.tech_info.dielectric_by_name.items():
-            model_builder.add_material(name=diel_name, k=diel_k)
-
-        circuit = netlist.circuit_by_name(self.pex_context.annotated_top_cell.name)
-        # https://www.klayout.de/doc-qt5/code/class_Circuit.html
-        if not circuit:
-            circuits = [c.name for c in netlist.each_circuit()]
-            raise Exception(f"Expected circuit called {self.pex_context.annotated_top_cell.name} in extracted netlist, "
-                            f"only available circuits are: {circuits}")
-
-        diffusion_regions: List[kdb.Region] = []
-
-        for net in circuit.each_net():
-            # https://www.klayout.de/doc-qt5/code/class_Net.html
-            debug(f"Net name={net.name}, expanded_name={net.expanded_name()}, pin_count={net.pin_count()}, "
-                  f"is_floating={net.is_floating()}, is_passive={net.is_passive()}, "
-                  f"terminals={list(map(lambda t: format_terminal(t), net.each_terminal()))}")
-
-            net_name = net.expanded_name()
-
-            for metal_layer in self.tech_info.process_metal_layers:
-                metal_layer_name = metal_layer.name
-                metal_layer = metal_layer.metal_layer
-
-                metal_z_bottom = metal_layer.z
-                metal_z_top = metal_z_bottom + metal_layer.thickness
-
-                shapes = self.shapes_of_net(layer_name=metal_layer_name, net=net)
-                if shapes:
-                    if shapes.count() >= 1:
-                        info(f"Conductor {net_name}, metal {metal_layer_name}, "
-                             f"z={metal_layer.z}, height={metal_layer.thickness}")
-                        self.add_conductor(model_builder,
-                                           net_name=net_name,
-                                           layer_name=metal_layer_name,
-                                           shapes=shapes,
-                                           z=metal_layer.z,
-                                           height=metal_layer.thickness)
-
-                if metal_layer.HasField('contact_above'):
-                    contact = metal_layer.contact_above
-                    shapes = self.shapes_of_net(layer_name=contact.name, net=net)
-                    if shapes and not shapes.is_empty():
-                        info(f"Conductor {net_name}, via {contact.name}, "
-                             f"z={metal_z_top}, height={contact.thickness}")
-                        self.add_via(model_builder,
-                                     net_name=net_name,
-                                     layer_below_name=metal_layer_name,
-                                     contact=contact,
-                                     shapes=shapes,
-                                     z=metal_z_top)
-
-                # diel_above = self.tech_info.process_stack_layer_by_name.get(metal_layer.reference_above, None)
-                # if diel_above:
-                #     #model_builder.add_dielectric(material_name=metal_layer.reference_above,
-                #     #                             layer=kdb.Region().)
-                #     pass
-                # TODO: add stuff
-
-            # DIFF / TAP
-            for diffusion_layer in self.tech_info.process_diffusion_layers:
-                diffusion_layer_name = diffusion_layer.name
-                diffusion_layer = diffusion_layer.diffusion_layer
-                shapes = self.shapes_of_net(layer_name=diffusion_layer_name, net=net)
-                if shapes and not shapes.is_empty():
-                    diffusion_regions.append(shapes)
-                    info(f"Diffusion {net_name}, layer {diffusion_layer_name}, "
-                         f"z={0}, height={0.1}")
-                    self.add_conductor(model_builder,
-                                       net_name=net_name,
-                                       layer_name=diffusion_layer_name,
-                                       shapes=shapes,
-                                       z=0,  # TODO
-                                       height=0.1)  # TODO: diffusion_layer.z
-
-                # NOTE: the taps have no contact in the process stack (#460)
-                if diffusion_layer.HasField('contact_above'):
-                    contact = diffusion_layer.contact_above
-                    shapes = self.shapes_of_net(layer_name=contact.name, net=net)
-                    if shapes and not shapes.is_empty():
-                        info(f"Diffusion {net_name}, contact {contact.name}, "
-                             f"z={0}, height={contact.thickness}")
-                        self.add_via(model_builder,
-                                     net_name=net_name,
-                                     layer_below_name=diffusion_layer_name,
-                                     contact=contact,
-                                     shapes=shapes,
-                                     z=0.0)
-
-            # NWELL: no conductor, but its contact, over the n-taps (e.g. sky130A licon_ntap_con, #475),
-            #        from the silicon surface as those of the diffusions
-            for nwell_layer in self.tech_info.process_nwell_layers:
-                if not nwell_layer.nwell_layer.HasField('contact_above'):
-                    continue
-                contact = nwell_layer.nwell_layer.contact_above
-                shapes = self.shapes_of_net(layer_name=contact.name, net=net)
-                if shapes and not shapes.is_empty():
-                    info(f"NWell {net_name}, contact {contact.name}, z={0}, height={contact.thickness}")
-                    self.add_via(model_builder,
-                                 net_name=net_name,
-                                 layer_below_name=nwell_layer.name,
-                                 contact=contact,
-                                 shapes=shapes,
-                                 z=0.0)
-
-        enlarged_top_cell_bbox = self.top_cell_bbox().enlarged(math.floor(8 / self.dbu))  # 8µm fringe halo
-
-        #
-        # global substrate block below everything, a conductor of the substrate net
-        #
-
-        substrate_layer = self.tech_info.process_substrate_layer.substrate_layer
-        substrate_region = kdb.Region()
-
-        substrate_block = enlarged_top_cell_bbox.dup()
-        substrate_region.insert(substrate_block)
-
-        diffusion_margin = math.floor(1 / self.dbu)  # 1 µm
-        for d in diffusion_regions:
-            substrate_region -= d.sized(diffusion_margin)
-        info(f"Substrate {self.substrate_net_name}, "
-             f"z={0 - substrate_layer.height - substrate_layer.thickness}, height={substrate_layer.thickness}")
-        # NOTE: with exclusions, the substrate is apart from the metal of its net (e.g. VSS),
-        #       which can be within a block
-        substrate_conductor_name = self.substrate_net_name
-        if self.exclusions is not None:
-            substrate_conductor_name = self.exclusions.conductor_name(ConductorPart(self.substrate_net_name,
-                                                                                    is_substrate=True))
-        model_builder.add_conductor(net_name=substrate_conductor_name,
-                                    layer=substrate_region,
-                                    z=0 - substrate_layer.height - substrate_layer.thickness,
-                                    height=substrate_layer.thickness,
-                                    group_name=self.substrate_net_name)
-
-        #
-        # add dielectrics
-        #
-
-        fox_region = kdb.Region()
-        fox_block = enlarged_top_cell_bbox.dup()
-        fox_region.insert(fox_block)
-
-        # field oxide goes from substrate/diff/well up to below the gate-poly
-        gate_poly_height = self.tech_info.gate_poly_layer.metal_layer.z
-        fox_z = 0
-        fox_height = gate_poly_height - fox_z
-        info(f"Simple dielectric (field oxide) {fox_layer.name}: "
-             f"z={fox_z}, height={fox_height}")
-        model_builder.add_dielectric(material_name=fox_layer.name,
-                                     layer=fox_region,
-                                     z=fox_z,
-                                     height=fox_height)
-
-        for metal_layer in self.tech_info.process_metal_layers:
-            metal_layer_name = metal_layer.name
-            metal_layer = metal_layer.metal_layer
-
-            metal_z_bottom = metal_layer.z
-
-            # NOTE: as the conductors have them with exclusions, any-angle edges have the cuts as vertices then,
-            #       which would leave slivers between these conductors and dielectrics of the shapes as they are
-            extracted_shapes = self.shapes_of_layer(layer_name=metal_layer_name) if self.exclusions is None \
-                else self.conductor_parts_by_layer.get(metal_layer_name, None)
-
-            no_metal_region: Optional[kdb.Region] = None
-            no_metal_height = 0
-
-            #
-            # add the conformal dielectric films anchored on this metal
-            #
-            # A conformal field film remains even when this layout has no metal
-            # on its root layer. Only its raised top and sidewall depend on metal.
-            # Films grow incrementally along the chain: each one is measured from
-            # the surface of the film it wraps, so the metal's own thickness is
-            # added once, by the first link, and not again by the ones above it.
-            sidewall_height = metal_layer.thickness
-            sidewall_region = extracted_shapes if extracted_shapes is not None else kdb.Region()
-            wrapped = metal_layer_name
-
-            while True:
-                film = self.tech_info.conformal_dielectric_wrapping(wrapped)
-                if not film:
-                    break
-
-                conf_diel = film.conformal_dielectric_layer
-                d = math.floor(conf_diel.thickness_sidewall / self.dbu)
-                sidewall_region = sidewall_region.sized(d)
-                sidewall_height += conf_diel.thickness_over_metal
-                if not sidewall_region.is_empty():
-                    info(f"Conformal dielectric (sidewall) {film.name}: "
-                         f"z={metal_layer.z}, height={sidewall_height}")
-                    model_builder.add_dielectric(material_name=film.name,
-                                                 layer=sidewall_region,
-                                                 z=metal_layer.z,
-                                                 height=sidewall_height)
-                if conf_diel.thickness_where_no_metal > 0.0:
-                    no_metal_block = enlarged_top_cell_bbox.dup()
-                    no_metal_region = kdb.Region()
-                    no_metal_region.insert(no_metal_block)
-                    no_metal_region -= sidewall_region
-                    no_metal_height = conf_diel.thickness_where_no_metal
-                    info(f"Conformal dielectric (where no metal) {film.name}: "
-                         f"z={metal_layer.z}, height={no_metal_height}")
-                    model_builder.add_dielectric(material_name=film.name,
-                                                 layer=no_metal_region,
-                                                 z=metal_layer.z,
-                                                 height=no_metal_height)
-
-                wrapped = film.name
-
-            #
-            # add simple dielectric
-            #
-            simple_dielectric, diel_height = self.tech_info.simple_dielectric_above_metal(metal_layer_name)
-            if simple_dielectric:
-                diel_block = enlarged_top_cell_bbox.dup()
-                diel_region = kdb.Region()
-                diel_region.insert(diel_block)
-                if sidewall_region:
-                    assert sidewall_height >= 0.0
-                    diel_region -= sidewall_region
-                    info(f"Simple dielectric (sidewall) {simple_dielectric.name}: "
-                         f"z={metal_z_bottom + sidewall_height}, height={diel_height - sidewall_height}")
-                    model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                                 layer=sidewall_region,
-                                                 z=metal_z_bottom + sidewall_height,
-                                                 height=diel_height - sidewall_height)
-                if no_metal_region:
-                    info(f"Simple dielectric (no metal) {simple_dielectric.name}: "
-                         f"z={metal_z_bottom + no_metal_height}, height={diel_height - no_metal_height}")
-                    model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                                 layer=diel_region,
-                                                 z=metal_z_bottom + no_metal_height,
-                                                 height=diel_height - no_metal_height)
-                else:
-                    info(f"Simple dielectric {simple_dielectric.name}: "
-                         f"z={metal_z_bottom}, height={diel_height}")
-                    model_builder.add_dielectric(material_name=simple_dielectric.name,
-                                                 layer=diel_region,
-                                                 z=metal_z_bottom,
-                                                 height=diel_height)
-
-        gen = model_builder.generate()
-        return gen
+        from .pex25d_exporter import build_fastercap_model, FasterCapModelOptions
+        from ..plugin_api.v1 import ExportError
+        try:
+            return build_fastercap_model(self.build_scene(),
+                                        FasterCapModelOptions(delaunay_amax=self.delaunay_amax,
+                                                              delaunay_b=self.delaunay_b), 'FasterCap')
+        except ExportError as exc:
+            raise FasterCapError(f'Cannot export physical FasterCap scene: {exc}') from exc

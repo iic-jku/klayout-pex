@@ -157,8 +157,40 @@ def test_result_labels_cannot_silently_alias_unknown_charge_groups(duplicate: bo
         mapping.matrix_of_bodies(CapacitanceMatrix(labels, [[0.] * len(labels) for _ in labels]), labels)
 
 
+def test_direct_cli_persists_exact_replay_scene_and_keeps_geometry_location(tmp_path: Path):
+    from types import SimpleNamespace
+    from klayout_pex.kpex_cli import KpexCLI
+    from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+    scene = accounting_scene()
+    args = SimpleNamespace(output_dir_path=str(tmp_path), k_void=3.5, delaunay_amax=1.,
+                           delaunay_b=.5, geometry_check=False)
+    context = SimpleNamespace(substrate_net_name='subs')
+    with patch.object(FasterCapInputBuilder, 'build_scene', return_value=scene):
+        deck, accounting = KpexCLI().build_fastercap_input(args, context, None, None)
+    assert Path(deck).is_file()
+    directory = tmp_path/'FasterCap_Input_Files'
+    replay = pex25d.read(str(directory/'FasterCap_Input.pex25d.scene.pb'))
+    assert replay == scene
+    assert accounting.parts == SceneCapacitanceMap(replay).parts
+    assert list((tmp_path/'Geometries').glob('*.stl'))
+    assert not list((tmp_path/'Geometries').glob('FasterCap_Input_*'))
+    assert not list(directory.glob('*.stl'))
+    assert (directory/'FasterCap_Input_accounting.json').is_file()
 
 
+def test_direct_cli_reports_export_failure_as_field_solver_error(tmp_path: Path):
+    from types import SimpleNamespace
+    from klayout_pex.kpex_cli import KpexCLI
+    from klayout_pex.fastercap.fastercap_input_builder import FasterCapInputBuilder
+    from klayout_pex.fastercap.fastercap_error import FasterCapError
+    args = SimpleNamespace(output_dir_path=str(tmp_path), k_void=3.5, delaunay_amax=1.,
+                           delaunay_b=.5, geometry_check=False)
+    failure = ExportError('invalid physical scene')
+    with patch.object(FasterCapInputBuilder, 'build_scene', return_value=accounting_scene()), \
+         patch.object(FasterCapSceneExporter, 'export', side_effect=failure):
+        with pytest.raises(FasterCapError, match='invalid physical scene') as caught:
+            KpexCLI().build_fastercap_input(args, SimpleNamespace(substrate_net_name='subs'), None, None)
+    assert caught.value.__cause__ is failure
 
 
 def test_substrate_exclusion_keeps_coupling_to_routing_on_reference_net():

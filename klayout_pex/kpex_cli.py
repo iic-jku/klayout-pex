@@ -23,6 +23,8 @@
 # --------------------------------------------------------------------------------
 #
 
+from __future__ import annotations
+
 import argparse
 import contextlib
 from datetime import datetime
@@ -42,6 +44,9 @@ import shutil
 import sys
 from typing import *
 
+if TYPE_CHECKING:
+    from .pex25d.accounting import SceneCapacitanceMap
+
 import klayout.db as kdb
 import klayout.rdb as rdb
 
@@ -50,7 +55,6 @@ from .common.path_validation import validate_files, FileValidationResult
 from .env import EnvVar, Env
 from .extraction_engine import ExtractionEngine
 from .fastercap.fastercap_input_builder import FasterCapInputBuilder
-from .fastercap.fastercap_model_generator import FasterCapModelGenerator
 from .fastercap.fastercap_error import FasterCapError
 from .fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
 from .fastercap.output_interpreter import FasterCapOutputInterpreter
@@ -1191,40 +1195,44 @@ class KpexCLI:
                               args: argparse.Namespace,
                               pex_context: KLayoutExtractionContext,
                               tech_info: TechInfo,
-                              exclusions: Optional[Exclusions]) -> str:
+                              exclusions: Optional[Exclusions]) -> Tuple[str, SceneCapacitanceMap]:
+        from .fastercap.pex25d_exporter import FasterCapSceneExporter
+        from .plugin_api.v1 import ExportError
+        from .pex25d.accounting import SceneCapacitanceMap
+        from .pex25d import write
+
         rule('Process stackup')
-        fastercap_input_builder = FasterCapInputBuilder(pex_context=pex_context,
-                                                        tech_info=tech_info,
-                                                        substrate_net_name=pex_context.substrate_net_name,
-                                                        k_void=args.k_void,
-                                                        delaunay_amax=args.delaunay_amax,
-                                                        delaunay_b=args.delaunay_b,
-                                                        exclusions=exclusions)
-        gen: FasterCapModelGenerator = fastercap_input_builder.build()
-
+        builder = FasterCapInputBuilder(pex_context, tech_info, pex_context.substrate_net_name,
+                                        args.k_void, args.delaunay_amax, args.delaunay_b, exclusions)
+        scene = builder.build_scene()
+        directory = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
         rule('FasterCap Input File Generation')
-        faster_cap_input_dir_path = os.path.join(args.output_dir_path, 'FasterCap_Input_Files')
-        os.makedirs(faster_cap_input_dir_path, exist_ok=True)
-
-        written = gen.write_fastcap(output_dir_path=faster_cap_input_dir_path, prefix='FasterCap_Input_')
-
-        rule('STL File Generation')
-        geometry_dir_path = os.path.join(args.output_dir_path, 'Geometries')
-        os.makedirs(geometry_dir_path, exist_ok=True)
-        gen.dump_stl(output_dir_path=geometry_dir_path, prefix='')
-
-        if args.geometry_check:
-            rule('Geometry Validation')
-            gen.check()
-
-        return written[0]
+        try:
+            written = FasterCapSceneExporter().export(
+                scene, output_dir_path=directory, prefix='FasterCap_Input_',
+                options=dict(delaunay_amax=args.delaunay_amax, delaunay_b=args.delaunay_b,
+                             geometry_check=args.geometry_check, write_stl=True))
+        except ExportError as exc:
+            raise FasterCapError(f'Cannot export physical FasterCap scene: {exc}') from exc
+        scene_path = os.path.join(directory, 'FasterCap_Input.pex25d.scene.pb')
+        write(scene, scene_path)
+        self.run_result.add_file(FileKind.PEX25D_SCENE, scene_path)
+        # Preserve the existing location of the geometry preview artifacts.
+        geometry_directory = os.path.join(args.output_dir_path, 'Geometries')
+        os.makedirs(geometry_directory, exist_ok=True)
+        for path in written:
+            if path.endswith('.stl'):
+                name = os.path.basename(path).removeprefix('FasterCap_Input_')
+                os.replace(path, os.path.join(geometry_directory, name))
+        return written[0], SceneCapacitanceMap(scene)
 
 
     def run_fastercap_extraction(self,
                                  args: argparse.Namespace,
                                  pex_context: KLayoutExtractionContext,
                                  lst_file: str,
-                                 exclusions: Optional[Exclusions]):
+                                 exclusions: Optional[Exclusions],
+                                 scene_accounting: Optional[SceneCapacitanceMap] = None):
         rule('FasterCap Execution')
         info(f"Configure number of OpenMP threads (environmental variable OMP_NUM_THREADS) as {args.num_threads}")
         os.environ['OMP_NUM_THREADS'] = f"{args.num_threads}"
@@ -1268,7 +1276,8 @@ class KpexCLI:
             blackbox_devices=args.blackbox_devices,
             device_models=pex_context.tech.device_models,
             substrate_net_name=pex_context.substrate_net_name,
-            exclusions=exclusions
+            exclusions=exclusions,
+            scene_accounting=scene_accounting
         )
 
         # create a nice CSV for reports, useful for spreadsheets
@@ -1398,7 +1407,8 @@ class KpexCLI:
                                args: argparse.Namespace,
                                pex_context: KLayoutExtractionContext,
                                lst_file: str,
-                               exclusions: Optional[Exclusions]):
+                               exclusions: Optional[Exclusions],
+                               scene_accounting: Optional[SceneCapacitanceMap] = None):
         rule('FastCap2 Execution')
 
         log_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FastCap2_Output.txt")
@@ -1433,7 +1443,8 @@ class KpexCLI:
             blackbox_devices=args.blackbox_devices,
             device_models=pex_context.tech.device_models,
             substrate_net_name=pex_context.substrate_net_name,
-            exclusions=exclusions
+            exclusions=exclusions,
+            scene_accounting=scene_accounting
         )
 
         netlist_printer = self.create_netlist_printer(args, ExtractionEngine.FASTCAP2, pex_context.tech)
@@ -2273,7 +2284,7 @@ class KpexCLI:
             self.run_result.enter(Stage.FASTERCAP if args.run_fastercap else Stage.FASTCAP2)
             if exclusions is not None:
                 warn_of_ports_without_nodes(exclusions, "The netlist of a field solver")
-            lst_file = self.build_fastercap_input(args=args,
+            lst_file, scene_accounting = self.build_fastercap_input(args=args,
                                                   pex_context=pex_context,
                                                   tech_info=tech_info,
                                                   exclusions=exclusions)
@@ -2282,14 +2293,16 @@ class KpexCLI:
                 self.run_fastercap_extraction(args=args,
                                               pex_context=pex_context,
                                               lst_file=lst_file,
-                                              exclusions=exclusions)
+                                              exclusions=exclusions,
+                                            scene_accounting=scene_accounting)
                 log_peak_memory('FasterCap')
             if args.run_fastcap:
                 self.run_result.enter(Stage.FASTCAP2)
                 self.run_fastcap_extraction(args=args,
                                             pex_context=pex_context,
                                             lst_file=lst_file,
-                                            exclusions=exclusions)
+                                            exclusions=exclusions,
+                                            scene_accounting=scene_accounting)
                 log_peak_memory('FastCap2')
 
         if args.run_2_5D:
