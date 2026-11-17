@@ -1591,20 +1591,26 @@ poly_res_generic = poly_res_init.not(rpm).not(urpm)
 # 300 ohm Poly resistor
 poly_res_300     = poly_res_init.and(psdm).and(rpm).not(urpm)
 
-poly_high_0p35   = poly_res_300.interacting(poly_res_300.edges.with_length(0.34.um, 0.36.um))
-poly_high_0p69   = poly_res_300.interacting(poly_res_300.edges.with_length(0.68.um, 0.7.um ))
-poly_high_1p41   = poly_res_300.interacting(poly_res_300.edges.with_length(1.4.um , 1.42.um))
-poly_high_2p85   = poly_res_300.interacting(poly_res_300.edges.with_length(2.84.um, 2.86.um))
-poly_high_5p73   = poly_res_300.interacting(poly_res_300.edges.with_length(5.72.um, 5.74.um))
+# Only the edges shared with the terminal conductors measure width. A long
+# side can also match another fixed width, including when length < width.
+poly_res_300_ends = poly_res_300.edges.and(poly_con.edges)
+
+poly_high_0p35   = poly_res_300.interacting(poly_res_300_ends.with_length(0.34.um, 0.36.um))
+poly_high_0p69   = poly_res_300.interacting(poly_res_300_ends.with_length(0.68.um, 0.7.um ))
+poly_high_1p41   = poly_res_300.interacting(poly_res_300_ends.with_length(1.4.um , 1.42.um))
+poly_high_2p85   = poly_res_300.interacting(poly_res_300_ends.with_length(2.84.um, 2.86.um))
+poly_high_5p73   = poly_res_300.interacting(poly_res_300_ends.with_length(5.72.um, 5.74.um))
 
 # 2K ohm Poly resistor
 poly_res_2k      = poly_res_init.and(psdm).not(rpm).and(urpm)
 
-poly_xhigh_0p35  = poly_res_2k.interacting(poly_res_2k.edges.with_length(0.34.um, 0.36.um))
-poly_xhigh_0p69  = poly_res_2k.interacting(poly_res_2k.edges.with_length(0.68.um, 0.7.um ))
-poly_xhigh_1p41  = poly_res_2k.interacting(poly_res_2k.edges.with_length(1.4.um , 1.42.um))
-poly_xhigh_2p85  = poly_res_2k.interacting(poly_res_2k.edges.with_length(2.84.um, 2.86.um))
-poly_xhigh_5p73  = poly_res_2k.interacting(poly_res_2k.edges.with_length(5.72.um, 5.74.um))
+poly_res_2k_ends = poly_res_2k.edges.and(poly_con.edges)
+
+poly_xhigh_0p35  = poly_res_2k.interacting(poly_res_2k_ends.with_length(0.34.um, 0.36.um))
+poly_xhigh_0p69  = poly_res_2k.interacting(poly_res_2k_ends.with_length(0.68.um, 0.7.um ))
+poly_xhigh_1p41  = poly_res_2k.interacting(poly_res_2k_ends.with_length(1.4.um , 1.42.um))
+poly_xhigh_2p85  = poly_res_2k.interacting(poly_res_2k_ends.with_length(2.84.um, 2.86.um))
+poly_xhigh_5p73  = poly_res_2k.interacting(poly_res_2k_ends.with_length(5.72.um, 5.74.um))
 
 # ===============
 # ---- METAL ----
