@@ -1,0 +1,20 @@
+INFO     __kpex__:pex25d_builder.py:424 GROUND_PLANE subs: z -3300 … 0
+DEBUG    __kpex__:pex25d_builder.py:487 METAL Poly2: z 3200 … 5200
+DEBUG    __kpex__:pex25d_builder.py:487 METAL Metal1: z 12300 … 17800
+DEBUG    __kpex__:pex25d_builder.py:487 METAL Metal2: z 23800 … 29300
+DEBUG    __kpex__:pex25d_builder.py:487 METAL Metal3: z 35300 … 40800
+DEBUG    __kpex__:pex25d_builder.py:487 METAL metal4_n_cap: z 46800 … 52300
+DEBUG    __kpex__:pex25d_builder.py:487 METAL metal4_cap: z 46800 … 52300
+DEBUG    __kpex__:pex25d_builder.py:487 METAL FuseTop: z 52720 … 55670
+DEBUG    __kpex__:pex25d_builder.py:487 METAL Metal5: z 61300 … 73225
+DEBUG    __kpex__:pex25d_builder.py:526 VIA contact_poly_con: connects Poly2 → Metal1
+DEBUG    __kpex__:pex25d_builder.py:526 VIA via1: connects Metal1 → Metal2
+DEBUG    __kpex__:pex25d_builder.py:526 VIA via2_n_cap: connects Metal2 → Metal3
+DEBUG    __kpex__:pex25d_builder.py:279 Contact 'via3_n_cap': no metal layer 'Metal4' in the process stack, using 'metal4_n_cap' for canonical layer 'Metal4'; candidates were metal4_n_cap, metal4_cap
+DEBUG    __kpex__:pex25d_builder.py:526 VIA via3_n_cap: connects Metal3 → metal4_n_cap
+DEBUG    __kpex__:pex25d_builder.py:279 Contact 'via4_n_cap': no metal layer 'Metal4' in the process stack, using 'metal4_n_cap' for canonical layer 'Metal4'; candidates were metal4_n_cap, metal4_cap
+DEBUG    __kpex__:pex25d_builder.py:526 VIA via4_n_cap: connects metal4_n_cap → Metal5
+DEBUG    __kpex__:pex25d_builder.py:526 VIA top_via_cap: connects FuseTop → Metal5
+DEBUG    __kpex__:pex25d_builder.py:819 DIELECTRIC_SIMPLE fox: k=4.0 wraps __electrostatic_surface between __electrostatic_surface Poly2
+DEBUG    __kpex__:pex25d_builder.py:877 Net wire has no interconnect geometry
+INFO     __kpex__:pex25d_builder.py:893 0 conductor(s), 0 shape record(s)
