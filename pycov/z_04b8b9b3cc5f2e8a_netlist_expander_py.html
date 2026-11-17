@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/klayout/netlist_expander.py: 98%</title>
+    <title>Coverage for klayout_pex/klayout/netlist_expander.py: 94%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>klayout<span class="sep">/</span>netlist_expander.py</b>:
-            <span class="pc_cov">98%</span>
+            <span class="pc_cov">94%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">89 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">87<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">84<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">5<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">4<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_04b8b9b3cc5f2e8a_netlist_printer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-17 20:58 +0000
+            created at 2026-11-17 22:10 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -216,10 +216,10 @@
     <p class="run run2"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">                        <span class="key">for</span> <span class="nam">nc</span> <span class="key">in</span> <span class="nam">cap_matrix</span><span class="op">.</span><span class="nam">conductor_names</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">        <span class="key">if</span> <span class="nam">scene_accounting</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="nam">net_name</span> <span class="op">=</span> <span class="op">(</span><span class="key">lambda</span> <span class="nam">name</span><span class="op">:</span> <span class="nam">exclusions</span><span class="op">.</span><span class="nam">net_of_capacitance</span><span class="op">(</span><span class="nam">name</span><span class="op">,</span> <span class="nam">substrate_net_name</span><span class="op">)</span><span class="op">)</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">                <span class="key">if</span> <span class="nam">exclusions</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">            <span class="nam">cap_matrix</span> <span class="op">=</span> <span class="nam">scene_accounting</span><span class="op">.</span><span class="nam">matrix_of_bodies</span><span class="op">(</span><span class="nam">cap_matrix</span><span class="op">,</span> <span class="nam">signal_names</span><span class="op">,</span> <span class="nam">net_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">            <span class="nam">signal_names</span> <span class="op">=</span> <span class="nam">cap_matrix</span><span class="op">.</span><span class="nam">conductor_names</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">            <span class="nam">net_name</span> <span class="op">=</span> <span class="op">(</span><span class="key">lambda</span> <span class="nam">name</span><span class="op">:</span> <span class="nam">exclusions</span><span class="op">.</span><span class="nam">net_of_capacitance</span><span class="op">(</span><span class="nam">name</span><span class="op">,</span> <span class="nam">substrate_net_name</span><span class="op">)</span><span class="op">)</span> <span class="xx">\</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">                <span class="key">if</span> <span class="nam">exclusions</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">else</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">            <span class="nam">cap_matrix</span> <span class="op">=</span> <span class="nam">scene_accounting</span><span class="op">.</span><span class="nam">matrix_of_bodies</span><span class="op">(</span><span class="nam">cap_matrix</span><span class="op">,</span> <span class="nam">signal_names</span><span class="op">,</span> <span class="nam">net_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">            <span class="nam">signal_names</span> <span class="op">=</span> <span class="nam">cap_matrix</span><span class="op">.</span><span class="nam">conductor_names</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">        <span class="key">elif</span> <span class="nam">exclusions</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">            <span class="nam">cap_matrix</span> <span class="op">=</span> <span class="nam">exclusions</span><span class="op">.</span><span class="nam">capacitance_matrix_of_nets</span><span class="op">(</span><span class="nam">cap_matrix</span><span class="op">,</span> <span class="nam">signal_names</span><span class="op">,</span> <span class="nam">substrate_net_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">            <span class="nam">signal_names</span> <span class="op">=</span> <span class="nam">cap_matrix</span><span class="op">.</span><span class="nam">conductor_names</span>&nbsp;</span><span class="r"></span></p>
@@ -303,7 +303,7 @@
             <a class="nav" href="z_04b8b9b3cc5f2e8a_netlist_printer_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-17 20:58 +0000
+            created at 2026-11-17 22:10 +0000
         </p>
     </div>
 </footer>
