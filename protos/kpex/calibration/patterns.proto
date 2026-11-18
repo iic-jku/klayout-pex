@@ -1,0 +1,98 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.calibration;
+
+import "kpex/calibration/targets.proto";
+
+// Decimal strings are intentional: never pass geometry through a binary float.
+// Positive finite values must be exact multiples of grid_um. The reader checks
+// these physical constraints after protobuf JSON parsing.
+message PatternSetSpecification {
+    uint32 schema_version = 1; // Currently 1; other versions are rejected.
+    string grid_um = 10;
+    string domain_margin_um = 20;
+    repeated PatternSpecification patterns = 30; // 1..1000, with case-insensitively unique IDs.
+    repeated CalibrationTarget targets = 40; // Optional preparation-only declarations, not fit qualification.
+    // Required when targets are declared. Untargeted preparation defaults to HALO_NORMALIZED.
+    optional FringeScaleMode fringe_scale_mode = 50;
+}
+
+enum CalibrationPatternRole {
+    ROLE_UNSPECIFIED = 0;
+    TRAINING = 1;
+    VALIDATION = 2;
+}
+
+enum CalibrationPatternFamily {
+    FAMILY_UNSPECIFIED = 0;
+    PARALLEL_PLATES = 1;
+    PARALLEL_WIRES = 2;
+    SUBSTRATE = 3;
+    DIRECTIONAL_FRINGE = 4;
+}
+
+message PatternSpecification {
+    string id = 1; // 1..64 ASCII letters/digits/_/-, beginning with a letter/digit.
+    CalibrationPatternRole role = 10; // TRAINING or VALIDATION; unspecified is invalid.
+    string width_um = 20;
+    string length_um = 30;
+    // Case-sensitive references to CalibrationTarget.id in the enclosing pattern set
+    // (PatternSetSpecification.targets). Each reference must be unique within this pattern
+    // and compatible with its geometry and layers. Empty allows geometry-only preparation.
+    // These associations declare intended calibration use, not fit identifiability or quality.
+    repeated string target_ids = 40;
+    // Exactly one geometry is required. Width applies to A; directional_fringe overrides B's width.
+    // Length applies to every conductor. Other two-conductor families use equal widths.
+    oneof geometry {
+        ParallelPlates parallel_plates = 100;
+        ParallelWires parallel_wires = 110;
+        SubstratePattern substrate = 120;
+        DirectionalFringe directional_fringe = 130;
+    }
+}
+
+message ParallelPlates {
+    string lower_layer = 1;
+    string upper_layer = 10; // Must be strictly above lower_layer, with a gap.
+}
+
+message ParallelWires {
+    string layer = 1;
+    string gap_um = 10; // Positive edge-to-edge separation.
+}
+
+// One conductor A above the common substrate reference.
+message SubstratePattern {
+    string layer = 1;
+}
+
+// A is the edge conductor, B is the receiver. Both have length_um in Y.
+// A spans X=[0,width_um]; B spans X=[width_um+offset,width_um+offset+receiver_width_um].
+// A positive offset is a lateral gap, zero aligns the facing edges, negative overlaps them.
+message DirectionalFringe {
+    string edge_layer = 1;
+    string receiver_layer = 10;
+    string receiver_width_um = 20;
+    string lateral_offset_um = 30; // Exact signed decimal; zero is valid.
+}
