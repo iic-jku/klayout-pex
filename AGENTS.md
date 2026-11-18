@@ -28,6 +28,11 @@
 - No public API (protocols, entry-point groups, options, modules) without a caller and a
   test. Plugin API `v1` is provisional (colleagues are testing it) and may still change;
   once Martin declares it stable, breaking changes need a `v2`.
+- Settle public terminology before expanding a contract. Use full, descriptive names
+  such as `Specification` rather than abbreviations such as `Spec`. Distinguish requested
+  input specifications from generated cases and results. Keep that vocabulary consistent
+  across schema types and fields, APIs, CLI examples, tests, documentation and PR text.
+  When terminology changes, audit all of these surfaces together.
 - Say in the commit body when behavior changes: CLI validation, return values, exit codes,
   `__all__`.
 - Fix root causes in the shared code, not with special cases.
@@ -78,6 +83,15 @@
   `Path.read_text()`, `logging.FileHandler`, `subprocess` with `text=True`. `utf-8`, also for
   the output of other tools, with `errors='replace'` where it is only shown.
 - Docs describe contracts, not file layout.
+- Define every project-owned structured JSON file or interchange format in a protobuf
+  schema first. JSON remains a supported human-readable encoding, using protobuf's JSON
+  parser and serializer with generated message types. Do not invent independent formats
+  through dictionary literals, hand-written field lists or ad hoc JSON validators.
+  Reuse appropriate existing messages and keep shared contracts outside feature-specific
+  schemas. Reject schema violations when reading input, and separately validate semantic
+  constraints such as required values, supported enums, units and physical bounds.
+  Apply this to new or changed contracts; migrate unrelated existing formats separately.
+  Third-party JSON contracts remain defined by their external owner.
 - Don't duplicate code, test helpers included: share it in a module (e.g. `tests/common/`)
   rather than copying it, and extend the shared code rather than adding a variant.
 
@@ -166,4 +180,9 @@
   `Co-Authored-By` trailer or "Generated with …" line.
 - Don't name proprietary solvers or protected company and product names, in code, docs,
   commit, PR and issue texts or comments: write "commercial tool A", "commercial tool B".
+- Verify reported blockers before attributing a cause. Distinguish the observed error
+  from a diagnosis and state uncertainty when the cause is not established. An open task
+  registration is not proof of running work or a separate user chat. Check actual ownership
+  and lifecycle state before claiming that another chat blocks worktree cleanup, and do not
+  bypass an ownership guard merely because a registration appears stale.
 - Before handing over, re-read your diff against `main` and check it against this file.
