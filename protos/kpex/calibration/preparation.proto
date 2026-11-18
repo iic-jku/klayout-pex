@@ -1,0 +1,120 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.calibration;
+
+import "kpex/calibration/patterns.proto";
+import "kpex/calibration/targets.proto";
+import "kpex/pex25d/pex25d_units.proto";
+import "kpex/pex25d/pex25d_diagnostics.proto";
+import "kpex/tech/tech_selection.proto";
+
+// Preparation evidence only. Solver results and fitted coefficients need their
+// own contracts when those stages are implemented; no untyped placeholders.
+message CalibrationManifest {
+    uint32 schema_version = 1; // Currently 1.
+    uint32 pattern_generator_version = 10;
+    enum CalibrationPreparationStage {
+        STAGE_UNSPECIFIED = 0;
+        PREPARED = 1;
+    }
+    CalibrationPreparationStage stage = 20;
+    string kpex_version = 30;
+    CalibratedTechnology technology = 40;
+    string source_specification_sha256 = 50; // Exact original specification bytes.
+    kpex.pex25d.Units units = 60; // Normalized rational grid, length in um.
+    int64 domain_margin_grid = 70;
+    repeated CalibrationCase cases = 80;
+    repeated CalibrationArtifactReference artifacts = 90; // Excludes this manifest itself.
+    repeated CalibrationTarget targets = 100; // Validated row/profile bindings, not fitted results.
+    double technology_side_halo_um = 110; // Actual selected technology value; not the scene margin.
+    FringeScaleMode fringe_scale_mode = 120;
+}
+
+// Technology selected for calibration; this record does not imply a completed fit.
+message CalibratedTechnology {
+    string name = 1;
+    string resolved_technology_sha256 = 10;
+    string physical_stack_sha256 = 20;
+    // Absent for a Technology supplied directly instead of a catalog selection.
+    kpex.tech.TechnologySelectionRecord selection = 30;
+}
+
+message CalibrationCase {
+    string id = 1;
+    CalibrationPatternFamily family = 10;
+    CalibrationPatternRole role = 20;
+    repeated string layers = 30; // Conductor A then B; repeated for same-layer wires.
+    GridDimensions dimensions_grid = 40;
+    string file = 50; // Relative PEX25D path within the preparation directory.
+    string scene = 60; // Relative resolved scene path within that directory.
+    CapacitanceMeasurement measurement = 70;
+    repeated kpex.pex25d.Diagnostic diagnostics = 80;
+    repeated string target_ids = 90;
+}
+
+message GridDimensions {
+    int64 width = 1;
+    int64 length = 10;
+    int64 gap = 20; // Zero except for parallel wires.
+    int64 receiver_width = 30; // Directional fringe only.
+    int64 lateral_offset = 40; // Directional fringe only, signed relative to A's right edge.
+}
+
+// Measurement requested of a later solver stage, not a measured result.
+message CapacitanceMeasurement {
+    enum CalibrationMeasurementKind {
+        KIND_UNSPECIFIED = 0;
+        MAXWELL_CAPACITANCE_MATRIX = 1;
+    }
+    CalibrationMeasurementKind kind = 1;
+    repeated string conductor_order = 10;
+    GroundPlaneReference reference = 20;
+    repeated string floating_conductors = 30;
+    enum CalibrationCapacitanceUnit {
+        CAPACITANCE_UNIT_UNSPECIFIED = 0;
+        FARAD = 1;
+    }
+    CalibrationCapacitanceUnit capacitance_unit = 40;
+    enum CalibrationExcitationConvention {
+        EXCITATION_UNSPECIFIED = 0;
+        // Q_i = sum_j C_ij V_j; unexcited nonfloating conductors are held at 0 V.
+        MAXWELL_GROUNDED_UNEXCITED = 1;
+    }
+    CalibrationExcitationConvention convention = 50;
+    enum CalibrationExteriorBoundaryCondition {
+        // Preparation does not qualify a solver's exterior boundary condition.
+        EXTERIOR_UNSPECIFIED = 0;
+    }
+    CalibrationExteriorBoundaryCondition exterior_boundary_condition = 60;
+}
+
+message GroundPlaneReference {
+    string profile = 1;
+    double potential_v = 10; // Exactly zero for the preparation stage.
+}
+
+message CalibrationArtifactReference {
+    string path = 1; // Relative path within output directory, with forward slashes.
+    string sha256 = 10; // Exact file bytes, not normalized protobuf contents.
+}

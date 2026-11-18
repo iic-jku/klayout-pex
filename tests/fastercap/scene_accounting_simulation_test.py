@@ -27,15 +27,14 @@
 from pathlib import Path
 from typing import Any, Dict
 import shutil
-import subprocess
 
 import pytest
 
 from klayout_pex import pex25d
 from klayout_pex.fastercap.output_interpreter import FasterCapOutputInterpreter
-from klayout_pex.fastercap.fastercap_runner import fastercap_parse_capacitance_matrix
 from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
 from klayout_pex.pex25d.accounting import SceneCapacitanceMap
+from tests.common.fastercap_simulation import solve_fastercap
 
 
 def scene_text(case: str, partitioned: bool) -> str:
@@ -85,13 +84,7 @@ def solve(scene: Any, directory: Path, mesh: float) -> Dict[str, Dict[str, float
     loaded = pex25d.read(str(artifact))
     deck = FasterCapSceneExporter().export(loaded, output_dir_path=str(directory))[0]
     log = directory/'solver.log'
-    args = [shutil.which('FasterCap'), '-b', '-v', f'-m{mesh}', '-t1e-7', '-d0.1', '-f0', '-ap', deck]
-    # Automatic -a overrides GMRES tolerance and is a global matrix criterion.
-    # Fixed mesh + tight GMRES separates mesh error from charge-group aggregation.
-    with log.open('w', encoding='utf-8') as output:
-        result = subprocess.run(args, stdout=output, stderr=subprocess.STDOUT, timeout=180)
-    assert result.returncode == 0, log.read_text(encoding='utf-8', errors='replace')
-    matrix = fastercap_parse_capacitance_matrix(str(log))
+    matrix = solve_fastercap(deck, log, mesh)
     interpreter = FasterCapOutputInterpreter()
     labels = [interpreter.signal_name_from_conductor_name(name) for name in matrix.conductor_names]
     mapping = SceneCapacitanceMap(loaded)

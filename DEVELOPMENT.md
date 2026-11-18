@@ -246,6 +246,206 @@ To quickly run a PEX example with the KPEX/2.5D and KPEX/FasterCap engines:
 > The older flat form without a subcommand (`./kpex.sh --pdk sky130A --gds …`) still
 > works and is treated as `kpex extract …`, but it warns and will be removed.
 
+### Preparing calibration patterns
+
+`kpex calibrate prepare` creates finite 3D test patterns from the same physical stack
+used by layout extraction. It needs explicit dimensions, not a layout or an LVS run.
+It prepares cases for inspection and reference-solver export. It does not run a solver,
+qualify numerical accuracy, fit coefficients or change installed technology data.
+
+The input specification is the protobuf JSON encoding of `kpex.calibration.PatternSetSpecification`.
+Its `oneof` selects exactly one pattern geometry. Dimensions are quoted decimal strings
+so readers can preserve their exact value without a binary floating-point conversion.
+
+For example, save this as `patterns.json` for `sky130A`:
+
+```json
+{
+  "schema_version": 1,
+  "grid_um": "0.0001",
+  "domain_margin_um": "2",
+  "patterns": [
+    {
+      "id": "plates",
+      "width_um": "2",
+      "length_um": "4",
+      "role": "TRAINING",
+      "parallel_plates": {
+        "lower_layer": "met1",
+        "upper_layer": "met2"
+      }
+    },
+    {
+      "id": "wires",
+      "width_um": "0.4",
+      "length_um": "8",
+      "role": "VALIDATION",
+      "parallel_wires": {
+        "layer": "met2",
+        "gap_um": "0.2"
+      }
+    }
+  ]
+}
+```
+
+```bash
+kpex calibrate prepare --pdk sky130A --patterns patterns.json --out-dir calibration-cases-sky130A
+pex25d validate calibration-cases-sky130A/case_plates.pex25d --strict
+pex25d export calibration-cases-sky130A/case_plates.pex25d.scene.pb --to fastercap --out-dir plates-fastercap
+```
+
+The built-in FasterCap exporter writes solver input files without running the solver.
+The dimensions above illustrate the input contract. A fitting campaign needs a separately
+chosen range of geometries and independent validation cases.
+
+Pattern contracts:
+
+- Every dimension is a decimal string in µm and must be an exact integer multiple of `grid_um`
+- Widths, lengths, gaps and the domain margin are positive; `directional_fringe.lateral_offset_um` is signed and permits zero
+- `parallel_plates` places two aligned rectangles on distinct metal profiles with a positive vertical gap
+- `parallel_wires` places two finite parallel rectangles on one profile, separated edge to edge by `gap_um`
+- `substrate` places one finite rectangular conductor `A` above the substrate reference
+- `directional_fringe` places edge conductor `A` and receiver `B` on distinct profiles with a positive vertical gap, in either vertical direction
+- For `directional_fringe`, `A` spans `[0, width_um]` and `B` spans `[width_um + lateral_offset_um, width_um + lateral_offset_um + receiver_width_um]` along X
+- A positive offset leaves a lateral gap, zero aligns the facing edges, and a negative offset permits overlap or overhang
+- Both fringe conductors have the explicit `length_um` along Y; the receiving width is independently specified
+- `width_um` is along X and `length_um` along Y, with conductor `A` starting at the origin
+- Profiles use names from the technology's process stack, which may differ from drawing or LVS names
+- The complete dielectric stack is retained, including films above the highest patterned metal
+- Pattern materials use the `PEX25D` interconnect conventions
+- `domain_margin_um` expands the finite geometry bounds as in `PEX25D`, with the ground plane as the lower boundary
+- The requested domain and its exterior boundary condition still need numerical qualification before fitting
+- `role` records an explicit `TRAINING` or `VALIDATION` split and does not certify either set
+- Pattern identifiers start with a letter or digit, contain 1–64 ASCII letters, digits, underscores or hyphens, and are unique ignoring case
+- A specification contains 1–1000 explicit patterns and is at most 2 MiB
+- Protobuf parsing rejects unknown fields, incompatible types and conflicting pattern variants
+- Repeated keys or field aliases, boolean enums and fractional integer/enum tokens are rejected
+- Missing required values and unsupported enum values are rejected before technology loading
+- Combined geometry, coatings and domain bounds must remain strictly inside KLayout's signed 32-bit XY interval
+
+Targets and patterns describe separate parts of a preparation campaign. A target names an
+actual row of the selected capacitance table. A pattern supplies finite physical geometry
+and refers to one or more declared `target_ids`. The four target variants are:
+
+| Target | Explicit parameters | Table key |
+| --- | --- | --- |
+| `substrate` | `AREA`, `PERIMETER`, or both | Canonical layer |
+| `overlap` | Area coefficient | Top and bottom canonical layers |
+| `sidewall` | `COEFFICIENT`, `OFFSET`, or both | Canonical layer |
+| `sideoverlap` | Directed fringe coefficient | Edge and receiver canonical layers |
+
+Each layer binding supplies both `canonical_layer` and `process_profile`. The computed-layer
+mapping in the technology must prove that relationship. Equal spelling, similar names or
+an arbitrary shared GDS pair are not substitutes. For example, `SKY130A` table rows use
+`met3`, while a particular physical sample can use `met3_ncap`. The selected profile must
+have available metal geometry. Diffusion, wells and contact/via resistance targets remain
+outside this preparation flow.
+
+A targeted `SKY130A` input can use a single-conductor substrate case and an asymmetric
+fringe case. The same fringe geometry refers to its directed fringe and overlap targets:
+
+```json
+{
+  "schema_version": 1,
+  "grid_um": "0.0001",
+  "domain_margin_um": "2",
+  "fringe_scale_mode": "HALO_NORMALIZED",
+  "targets": [
+    {
+      "id": "met3-substrate",
+      "substrate": {
+        "layer": {"canonical_layer": "met3", "process_profile": "met3_ncap"},
+        "parameters": ["AREA", "PERIMETER"]
+      }
+    },
+    {
+      "id": "met3-met2-area",
+      "overlap": {
+        "top": {"canonical_layer": "met3", "process_profile": "met3_ncap"},
+        "bottom": {"canonical_layer": "met2", "process_profile": "met2"}
+      }
+    },
+    {
+      "id": "met3-to-met2-fringe",
+      "sideoverlap": {
+        "edge": {"canonical_layer": "met3", "process_profile": "met3_ncap"},
+        "receiver": {"canonical_layer": "met2", "process_profile": "met2"}
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "id": "met3-substrate",
+      "width_um": "2",
+      "length_um": "4",
+      "role": "TRAINING",
+      "target_ids": ["met3-substrate"],
+      "substrate": {"layer": "met3_ncap"}
+    },
+    {
+      "id": "met3-to-met2-overhang",
+      "width_um": "2",
+      "length_um": "4",
+      "role": "VALIDATION",
+      "target_ids": ["met3-met2-area", "met3-to-met2-fringe"],
+      "directional_fringe": {
+        "edge_layer": "met3_ncap",
+        "receiver_layer": "met2",
+        "receiver_width_um": "4",
+        "lateral_offset_um": "-3"
+      }
+    }
+  ]
+}
+```
+
+Declare each canonical table row once, combining its selected parameters. Every target must
+have a referring pattern. Unknown IDs, duplicate IDs or rows, absent rows, ambiguous rows,
+unproven profile bindings and unrelated pattern references are rejected. Directed fringe
+references preserve which profile carries the edge and which receives its field.
+
+Targeted inputs explicitly select `fringe_scale_mode`. `HALO_NORMALIZED` matches
+`kpex extract --scale true`; `UNSCALED` matches `--scale false`. The manifest records this
+mode and the selected technology's actual `side_halo` independently of the finite scene's
+`domain_margin_um`. Untargeted preparation remains available and defaults to
+`HALO_NORMALIZED`; it makes no claim to cover a parasitic table. Naming targets also does
+not establish coverage, parameter identifiability, numerical accuracy or a successful fit.
+
+The destination must be a new directory under an existing parent. All patterns are
+validated before it is created. Each case gets editable `PEX25D` text and a resolved
+binary scene. `manifest.json` is written last, alongside copies of the input specification
+and resolved technology. Existing output paths are refused, including empty directories
+and broken symlinks.
+
+The CLI explicitly selects the bundled catalog's `nominal` scenario. It retains the catalog
+and component provenance, including source revisions, assumptions and data history.
+Nonnominal corner selection remains outside this preparation command.
+
+`manifest.json` is the protobuf JSON encoding of `kpex.calibration.CalibrationManifest`.
+It reuses the `PEX25D` units and diagnostic messages and the technology selection/provenance
+schemas. Its exact grid coordinates use protobuf JSON's string encoding of 64-bit integers.
+
+The manifest records target definitions and case references, the actual fringe halo and scale
+mode, exact grid dimensions, artifact SHA256 hashes and separate identities for the physical
+process stack and complete resolved technology. Changing only fitted
+parasitic coefficients therefore changes the technology identity without changing the
+physical-stack identity or prepared geometry. Dataset and scenario labels do not substitute
+for these content hashes.
+
+Each measurement request is a Maxwell capacitance matrix in farads, relative to the stack's
+grounded substrate. Its conductor order is `A` for a substrate pattern and `A`, `B` for the
+other families. For each excitation, other measured conductors are held at zero potential.
+These prepared patterns contain no floating conductors. The exterior boundary condition is explicitly unspecified until a
+reference solver is configured. The manifest's `stage` is `PREPARED`. Solver results and
+fitted coefficients require their own contracts when those stages are added.
+
+A later fit must separate numerical error from model error. In particular, dividing one
+finite wire's capacitance by its length mixes distributed capacitance with end effects.
+Use at least three lengths to assess a relation such as `C(L) = cL + C_end`, and retain
+independent validation cases. Mesh or panel refinement and domain enlargement must establish
+reference accuracy before those measurements are used to update coefficients.
+
 ### Result file
 
 Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,

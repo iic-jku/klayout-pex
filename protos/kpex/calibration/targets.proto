@@ -1,0 +1,78 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.calibration;
+
+// Explicitly bind a canonical parasitic-table key to a physical process profile.
+// The technology's validated computed-layer mapping must prove this relationship.
+message LayerProfileBinding {
+    string canonical_layer = 1;
+    string process_profile = 10;
+}
+
+message CalibrationTarget {
+    string id = 1;
+    // One declaration per table row. Parameters identify which entries are targets.
+    oneof quantity {
+        SubstrateTarget substrate = 100;
+        OverlapTarget overlap = 110;
+        SidewallTarget sidewall = 120;
+        SideOverlapTarget sideoverlap = 130;
+    }
+}
+
+message SubstrateTarget {
+    LayerProfileBinding layer = 1;
+    enum Parameter {
+        PARAMETER_UNSPECIFIED = 0;
+        AREA = 1;
+        PERIMETER = 2;
+    }
+    repeated Parameter parameters = 10; // Nonempty and unique.
+}
+
+message OverlapTarget {
+    LayerProfileBinding top = 1;
+    LayerProfileBinding bottom = 10;
+}
+
+message SidewallTarget {
+    LayerProfileBinding layer = 1;
+    enum Parameter {
+        PARAMETER_UNSPECIFIED = 0;
+        COEFFICIENT = 1;
+        OFFSET = 2;
+    }
+    repeated Parameter parameters = 10; // Nonempty and unique.
+}
+
+message SideOverlapTarget {
+    LayerProfileBinding edge = 1; // in_layer_name: the conductor carrying the edge.
+    LayerProfileBinding receiver = 10; // out_layer_name: the receiving conductor.
+}
+
+enum FringeScaleMode {
+    FRINGE_SCALE_UNSPECIFIED = 0;
+    HALO_NORMALIZED = 1; // KPEX --scale true: normalize the fringe integral at side_halo.
+    UNSCALED = 2; // KPEX --scale false: retain the natural fringe integral.
+}

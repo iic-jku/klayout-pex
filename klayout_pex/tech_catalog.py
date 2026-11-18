@@ -37,7 +37,7 @@ import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlsplit
 
-from google.protobuf.json_format import MessageToDict, MessageToJson, Parse, ParseError
+from google.protobuf.json_format import MessageToDict, MessageToJson, Parse, ParseDict, ParseError
 from google.protobuf.message import Message
 
 from .tech_identity import message_sha256
@@ -47,6 +47,9 @@ from klayout_pex_protobuf.kpex.tech.process_stack_pb2 import ProcessStackInfo
 from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import (
     TechnologyCatalog, TechnologyDataset, TechnologyDatasetFile, TechnologyFile, TechnologyScenario,
     TechnologyProvenance,
+)
+from klayout_pex_protobuf.kpex.tech.tech_selection_pb2 import (
+    SelectedDatasetIdentity, SelectedTechnologyDatasets, TechnologySelectionRecord,
 )
 
 
@@ -67,6 +70,11 @@ class DatasetIdentity:
 
     def to_json(self) -> Dict[str, Any]:
         return {'id': self.id, 'sha256': self.sha256, 'provenance': deepcopy(self.provenance)}
+
+    def to_proto(self) -> SelectedDatasetIdentity:
+        return SelectedDatasetIdentity(
+            id=self.id, sha256=self.sha256,
+            provenance=ParseDict(self.provenance, TechnologyProvenance()))
 
 
 @dataclass(frozen=True)
@@ -97,6 +105,20 @@ class TechnologySelection:
                          for name in COMPONENT_KINDS for value in (getattr(self, name),)},
             'physical_stack_matches': self.physical_stack_matches,
         }
+
+    def to_proto(self) -> TechnologySelectionRecord:
+        datasets = SelectedTechnologyDatasets(
+            resistance=self.resistance.to_proto(), capacitance=self.capacitance.to_proto(),
+            process_stack=self.process_stack.to_proto())
+        if self.device_references is not None:
+            datasets.device_references.CopyFrom(self.device_references.to_proto())
+        return TechnologySelectionRecord(
+            technology_id=self.technology_id, scenario_id=self.scenario_id,
+            catalog_path=self.catalog_path, catalog_sha256=self.catalog_sha256,
+            catalog_description=self.catalog_description,
+            catalog_provenance=ParseDict(self.catalog_provenance, TechnologyProvenance()),
+            resolved_technology_sha256=self.resolved_technology_sha256,
+            datasets=datasets, physical_stack_matches=self.physical_stack_matches)
 
     def require_physical_stack(self, process_stack: Optional[ProcessStackInfo] = None):
         if not self.physical_stack_matches:
