@@ -1,0 +1,54 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+
+package kpex.tech;
+
+import "kpex/tech/tech_catalog.proto";
+
+// Evidence for a resolved catalog selection. Independent of any particular
+// exporter or calibration workflow; catalog/dataset provenance is preserved.
+message TechnologySelectionRecord {
+    string technology_id = 1;
+    string scenario_id = 10;
+    string catalog_path = 20; // Origin for audit only; consumers must not fetch it.
+    string catalog_sha256 = 30; // SHA256 of exact catalog bytes.
+    string catalog_description = 40;
+    TechnologyProvenance catalog_provenance = 50;
+    string resolved_technology_sha256 = 60; // Deterministic Technology payload.
+    SelectedTechnologyDatasets datasets = 70;
+    bool physical_stack_matches = 80;
+}
+
+message SelectedTechnologyDatasets {
+    SelectedDatasetIdentity resistance = 1;
+    SelectedDatasetIdentity capacitance = 10;
+    SelectedDatasetIdentity process_stack = 20;
+    // Absent means unavailable, never inherited from another scenario.
+    SelectedDatasetIdentity device_references = 30;
+}
+
+message SelectedDatasetIdentity {
+    string id = 1;
+    string sha256 = 10; // Deterministic dataset payload, excluding provenance.
+    TechnologyProvenance provenance = 20;
+}

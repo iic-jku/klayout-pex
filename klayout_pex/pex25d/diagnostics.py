@@ -32,7 +32,7 @@ outputs here, not a debugging afterthought.
 Diagnostics are modelled as a plain dataclass rather than as the generated protobuf message, for two reasons:
     1) rendering must work on a checkout where the ``*_pb2`` modules have not been generated yet, and
     2) the human renderer wants to group and sort in ways the wire format has no opinion about.
-    The conversion to``kpex.pex25d.Diagnostic`` happens only for ``--diagnostics pb``.
+    Conversion to ``kpex.pex25d.Diagnostic`` is lazy, for binary output or typed artifact records.
 """
 
 from __future__ import annotations
@@ -52,6 +52,10 @@ from ..log import (
     info,
     subproc,
 )
+
+
+if TYPE_CHECKING:
+    from klayout_pex_protobuf.kpex.pex25d.pex25d_diagnostics_pb2 import Diagnostic as DiagnosticMessage
 
 
 class ExitCode(IntEnum):
@@ -153,6 +157,18 @@ class Diagnostic:
     source: Optional[SourceRef] = None
     related: Sequence[SourceRef] = ()
 
+    def to_proto(self) -> DiagnosticMessage:
+        from .protobuf import pex25d_diagnostics_pb2
+
+        pb2 = pex25d_diagnostics_pb2()
+        message = pb2.Diagnostic(code=self.code, severity=int(self.severity), tier=int(self.tier),
+                                 message=self.message)
+        if self.source is not None:
+            _fill_source_ref(message.source, self.source)
+        for related in self.related:
+            _fill_source_ref(message.related.add(), related)
+        return message
+
     def as_json_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {
             'code': self.code,
@@ -250,16 +266,7 @@ class DiagnosticsReport:
 
         pb2 = pex25d_diagnostics_pb2()
         diagnostic_list = pb2.DiagnosticList()
-        for d in self.diagnostics:
-            pb = diagnostic_list.diagnostics.add()
-            pb.code = d.code
-            pb.severity = pb2.Diagnostic.Severity.Value(d.severity.proto_name)
-            pb.tier = pb2.Diagnostic.Tier.Value(d.tier.proto_name)
-            pb.message = d.message
-            if d.source is not None:
-                _fill_source_ref(pb.source, d.source)
-            for r in d.related:
-                _fill_source_ref(pb.related.add(), r)
+        diagnostic_list.diagnostics.extend(d.to_proto() for d in self.diagnostics)
 
         out = stream if stream is not None else sys.stdout.buffer
         out = getattr(out, 'buffer', out)
