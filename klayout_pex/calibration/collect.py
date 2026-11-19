@@ -156,7 +156,8 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
             raise CalibrationError('Run case IDs must be unique ignoring case')
         identities.add(case.case_id.casefold())
         if (case.checkpoint_path != f'cases/{case.case_id}/checkpoint.pb.json'
-                or case.log_path != f'cases/{case.case_id}/solver.log'):
+                or case.log_path != f'cases/{case.case_id}/solver.log'
+                or case.numerical_report_path not in ('', f'cases/{case.case_id}/numerical-report.json')):
             raise CalibrationError('Run case paths do not match their case identity')
         signals = list(preparation.measurement.conductor_order)
         measurement = preparation.measurement
@@ -196,6 +197,16 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
             log = artifact_path(root, case.log_path, required=False)
             if log.is_file():
                 remember(log)  # Snapshot partial output, but never promote it to a successful result.
+        if checkpoint.HasField('numerical_report'):
+            if not case.numerical_report_path or checkpoint.numerical_report.path != case.numerical_report_path:
+                raise CalibrationError('Checkpoint numerical report does not belong to this case')
+            verify_artifacts(root, [checkpoint.numerical_report])
+            remember(root / case.numerical_report_path, checkpoint.numerical_report.sha256)
+        elif case.numerical_report_path and checkpoint.execution.status in (
+                SolverExecution.RUNNING, SolverExecution.NOT_STARTED):
+            report = artifact_path(root, case.numerical_report_path, required=False)
+            if report.is_file():
+                remember(report)  # Preserve partial evidence without accepting a result.
         checkpoints.append(checkpoint)
     if sha256_file(run_manifest) != manifest_hash:
         raise CalibrationError('Run manifest changed during collection')
@@ -217,8 +228,17 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
             elif status == SolverExecution.SUCCEEDED:
                 log = output / 'runs' / case.log_path
                 try:
+                    numerical_report = None
+                    expected_input = None
+                    if case.numerical_report_path:
+                        if not checkpoint.HasField('numerical_report') or not checkpoint.execution.arguments:
+                            raise FasterCapError('Requested numerical report or recorded solver arguments are missing')
+                        numerical_report = output / 'runs' / case.numerical_report_path
+                        expected_input = checkpoint.execution.arguments[-1]
                     native, measured = collect_fastercap_matrix(
-                        log, list(preparation.measurement.conductor_order), preparation.measurement.reference.profile)
+                        log, list(preparation.measurement.conductor_order), preparation.measurement.reference.profile,
+                        numerical_report=numerical_report, expected_input=expected_input,
+                        expected_version=manifest.solver.version)
                     record.native_matrix.CopyFrom(native)
                     record.measured_matrix.CopyFrom(measured)
                     record.status = CalibrationCaseResult.COLLECTED

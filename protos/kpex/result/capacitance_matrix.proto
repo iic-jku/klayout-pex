@@ -29,7 +29,8 @@ message MaxwellCapacitanceMatrix {
         FARAD = 1;
     }
     CapacitanceUnit unit = 1;
-    // Q_i = sum_j C_ij V_j. Unexcited listed conductors are held at zero volts.
+    // The index convention below determines which axis represents charge/excitation.
+    // Unexcited listed conductors are held at zero volts.
     repeated string conductor_ids = 10;
     message Row { repeated double values = 1; }
     repeated Row rows = 20;
@@ -45,6 +46,14 @@ message MaxwellCapacitanceMatrix {
     // This is not floating-conductor elimination or a change of reference.
     repeated string grounded_conductor_ids = 50;
     double reference_potential_v = 60;
-    // Present for backend values converted to SI, with original bytes retained in the log.
+    // Present for backend values converted to SI; original log/report bytes are retained.
     optional double source_value_scale_to_farads = 70;
+    enum IndexConvention {
+        INDEX_CONVENTION_UNSPECIFIED = 0;
+        CHARGE_ROWS = 1; // Q_i = sum_j C_ij V_j
+        EXCITATION_ROWS = 2; // Q_i = sum_j C_ji V_j, FasterCap's native row order
+    }
+    // Explicit for new collections, including a principal selection. No transposition,
+    // symmetrization or clipping is implicit in collection.
+    IndexConvention index_convention = 80;
 }

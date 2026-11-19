@@ -237,6 +237,7 @@ def _execute(case: CalibrationRunCase, manifest: CalibrationRunManifest, output:
     write_message(path, checkpoint, replace=True)
     result = None
     log = output / case.log_path
+    numerical_report = output / case.numerical_report_path if case.numerical_report_path else None
     try:
         verify_artifacts(output, case.inputs)
         if sha256_file(Path(manifest.solver.executable_path)) != manifest.solver.executable_sha256:
@@ -246,7 +247,8 @@ def _execute(case: CalibrationRunCase, manifest: CalibrationRunManifest, output:
             manifest.solver.executable_path, str(primary), str(log), options.automatic_tolerance,
             options.interaction_ratio, 0, True, False, False, timeout_seconds=options.solver_timeout_seconds,
             cwd=str(primary.parent), env=env, mesh_refinement=options.mesh_refinement,
-            gmres_tolerance=options.gmres_tolerance, cancel_event=cancelled)
+            gmres_tolerance=options.gmres_tolerance, cancel_event=cancelled,
+            report_path=str(numerical_report) if numerical_report is not None else None)
         verify_artifacts(output, case.inputs)
         if sha256_file(Path(manifest.solver.executable_path)) != manifest.solver.executable_sha256:
             raise CalibrationError('FasterCap executable changed during execution')
@@ -265,6 +267,8 @@ def _execute(case: CalibrationRunCase, manifest: CalibrationRunManifest, output:
         checkpoint.execution.duration_seconds = result.duration_seconds
     if log.is_file():
         checkpoint.log.CopyFrom(reference(log, output))
+    if numerical_report is not None and numerical_report.is_file():
+        checkpoint.numerical_report.CopyFrom(reference(numerical_report, output))
     write_message(path, checkpoint, replace=True)
 
 
@@ -283,6 +287,9 @@ def solve_calibration(prepared_path: Path, output_dir: Path, *, executable: str 
     prepared = read_preparation(prepared_path)
     scenes = validated_scenes(prepared)
     solver = _solver_identity(executable)
+    from ..tool_version_constraints import FASTERCAP_NUMERICAL_REPORT
+    from packaging.version import Version
+    numerical_reports = FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version(solver.version))
     output = output_dir.absolute()
     cancelled = threading.Event() if cancel_event is None else cancel_event
     try:
@@ -297,7 +304,9 @@ def solve_calibration(prepared_path: Path, output_dir: Path, *, executable: str 
             directory.mkdir(parents=True)
             case = manifest.cases.add(case_id=record.id,
                                       checkpoint_path=f'cases/{record.id}/checkpoint.pb.json',
-                                      log_path=f'cases/{record.id}/solver.log')
+                                      log_path=f'cases/{record.id}/solver.log',
+                                      numerical_report_path=(f'cases/{record.id}/numerical-report.json'
+                                                             if numerical_reports else ''))
             checkpoint = CalibrationRunCheckpoint(schema_version=1, case_id=record.id)
             checkpoint.execution.status = SolverExecution.NOT_STARTED
             try:
@@ -333,6 +342,8 @@ def solve_calibration(prepared_path: Path, output_dir: Path, *, executable: str 
             checkpoint = read_message(output / case.checkpoint_path, CalibrationRunCheckpoint())
             if checkpoint.HasField('log'):
                 written.append(output / checkpoint.log.path)
+            if checkpoint.HasField('numerical_report'):
+                written.append(output / checkpoint.numerical_report.path)
         collected = collect_calibration(manifest_path, output / 'collection')
         written.extend(collected.written_paths)
         return CalibrationSolveResult(manifest_path, collected.manifest_path, tuple(written),

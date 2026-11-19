@@ -1251,18 +1251,43 @@ class KpexCLI:
                                                  f"{args.effective_cell_name}_FasterCap_Expanded_Netlist.csv")
         reduced_netlist_path = os.path.join(args.output_dir_path, f"{args.effective_cell_name}_FasterCap_Reduced_Netlist.cir")
 
-        run_fastercap(exe_path=args.fastercap_exe_path,
-                      lst_file_path=lst_file,
-                      log_path=log_path,
-                      tolerance=args.fastercap_tolerance,
-                      d_coeff=args.fastercap_d_coeff,
-                      ooc_condition=args.fastercap_ooc_condition,
-                      auto_preconditioner=args.fastercap_auto_preconditioner,
-                      galerkin_scheme=args.fastercap_galerkin_scheme,
-                      jacobi_preconditioner=args.fastercap_jacobi_preconditioner)
+        from .tool_version_constraints import FASTERCAP_NUMERICAL_REPORT
+        from .fastercap.numerical_report import read_numerical_report
+        from .fastercap.fastercap_error import FasterCapExecutionError
+        version = Tool.FASTERCAP.detect_version(args.fastercap_exe_path)
+        report_path = (os.path.join(args.output_dir_path,
+                                   f"{args.effective_cell_name}_FasterCap_Report.json")
+                       if version is not None and FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(version) else None)
+        if report_path is not None:
+            # Extraction replaces its named outputs on rerun, like the log and CSV.
+            # Unlink the name, never follow a previous report's symlink.
+            try:
+                os.unlink(report_path)
+            except FileNotFoundError:
+                pass
+        try:
+            solver_result = run_fastercap(exe_path=args.fastercap_exe_path,
+                                          lst_file_path=lst_file,
+                                          log_path=log_path,
+                                          tolerance=args.fastercap_tolerance,
+                                          d_coeff=args.fastercap_d_coeff,
+                                          ooc_condition=args.fastercap_ooc_condition,
+                                          auto_preconditioner=args.fastercap_auto_preconditioner,
+                                          galerkin_scheme=args.fastercap_galerkin_scheme,
+                                          jacobi_preconditioner=args.fastercap_jacobi_preconditioner,
+                                          report_path=report_path)
+        except FasterCapExecutionError as exc:
+            if exc.result.report_path is not None:
+                self.run_result.add_file(FileKind.LOG, exc.result.report_path, engine=ExtractionEngine.FASTERCAP)
+            raise
         self.run_result.add_file(FileKind.LOG, log_path, engine=ExtractionEngine.FASTERCAP)
-
-        cap_matrix = fastercap_parse_capacitance_matrix(log_path)
+        if report_path is not None:
+            if solver_result.report_path is not None:
+                self.run_result.add_file(FileKind.LOG, solver_result.report_path, engine=ExtractionEngine.FASTERCAP)
+            cap_matrix = read_numerical_report(Path(report_path), expected_input=lst_file,
+                                               expected_version=str(version))
+        else:
+            cap_matrix = fastercap_parse_capacitance_matrix(log_path)
         cap_matrix.write_csv(raw_csv_path)
 
         cap_matrix = cap_matrix.averaged_off_diagonals()

@@ -25,11 +25,12 @@
 """External report boundaries: precision, provenance, failures and unsupported physics."""
 
 import copy
+from argparse import Namespace
 import io
 import json
 import math
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from unittest import mock
 
 import allure
@@ -45,23 +46,11 @@ pytestmark = allure.parent_suite('Unit Tests')
 
 @pytest.fixture
 def report_data() -> Dict[str, Any]:
-    # This is FasterCap's third-party JSON contract, not a project-owned format.
-    # Keep asymmetric entries and signed zero: collection must preserve evidence.
-    return {
-        'schema_version': 1, 'input_file': 'geometry.lst',
-        'build': {'version': 'FasterCap version 6.3.0'},
-        'status': {'exit_code': 0, 'name': 'FC_NORMAL_END'},
-        'last_completed_iteration': 0,
-        'iterations': [{
-            'iteration': 0, 'solve_status': {'exit_code': 0, 'name': 'FC_NORMAL_END'}, 'finite': True,
-            'panels': 24, 'links': 576,
-            'matrix': {'units': 'F', 'reference_column': None,
-                       'row_conductors': ['g1_A', 'g2_B'], 'column_conductors': ['g1_A', 'g2_B'],
-                       'real': [[math.nextafter(1e-9, math.inf), -1.2345678901234567e-10],
-                                [-1.25e-10, -0.0]],
-                       'imaginary': [[0.0, -0.0], [0.0, 0.0]]},
-        }],
-    }
+    from tests.common.fastercap_report import numerical_report
+    # Asymmetry and signed zero are evidence, not values for collection to repair.
+    return numerical_report(['g1_A', 'g2_B'],
+                            [[math.nextafter(1e-9, math.inf), -1.2345678901234567e-10],
+                             [-1.25e-10, -0.0]])
 
 
 def read_data(tmp_path: Path, data: Dict[str, Any]) -> CapacitanceMatrix:
@@ -195,3 +184,87 @@ def test_runner_rejects_unsafe_report_path_before_starting_or_truncating_log(tmp
     assert not log.exists()
     if invalid == 'existing':
         assert report.read_text(encoding='utf-8') == 'keep report'
+
+
+@pytest.fixture
+def extraction_args(tmp_path: Path) -> Namespace:
+    return Namespace(num_threads=1, output_dir_path=str(tmp_path), effective_cell_name='test',
+                     fastercap_exe_path='FasterCap', fastercap_tolerance=0.05, fastercap_d_coeff=0.5,
+                     fastercap_ooc_condition=0, fastercap_auto_preconditioner=True,
+                     fastercap_galerkin_scheme=False, fastercap_jacobi_preconditioner=False)
+
+
+@pytest.mark.parametrize('version', [None, '6.2.1', '6.3.0'])
+def test_extraction_selects_report_by_version_and_replaces_previous_output(
+        tmp_path: Path, report_data: Dict[str, Any], extraction_args: Namespace, version: Optional[str]):
+    from packaging.version import Version
+    from klayout_pex.kpex_cli import KpexCLI
+    from klayout_pex.tool_version_constraints import Tool
+    from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
+    raw = tmp_path / 'test_FasterCap_Result_Matrix_Raw.csv'
+    report = tmp_path / 'test_FasterCap_Report.json'
+    report.write_text('stale report', encoding='utf-8')
+
+    def run(**kwargs: Any) -> FasterCapRunResult:
+        Path(kwargs['log_path']).write_text('Capacitance matrix is:\nDimension 2 x 2\n'
+                                           'g1_A 9e-9 -2e-9\ng2_B -3e-9 8e-9\n', encoding='utf-8')
+        if version == '6.3.0':
+            assert kwargs['report_path'] == str(report)
+            assert not report.exists()
+            report.write_text(json.dumps(report_data), encoding='utf-8')
+        else:
+            assert kwargs['report_path'] is None
+        return FasterCapRunResult(('FasterCap', 'geometry.lst'), 0, 0.1,
+                                   str(report) if version == '6.3.0' else None)
+
+    class MatrixObserved(Exception):
+        pass
+
+    def observe(matrix: CapacitanceMatrix) -> CapacitanceMatrix:
+        if version == '6.3.0':
+            assert matrix.rows == [[value / 1e6 for value in row]
+                                   for row in report_data['iterations'][0]['matrix']['real']]
+        else:
+            assert matrix.rows[0] == [9e-9 / 1e6, -2e-9 / 1e6]
+        assert raw.is_file()
+        raise MatrixObserved  # Stop at the existing netlist-processing boundary.
+
+    cli = KpexCLI()
+    cli.run_result = mock.Mock()
+    with mock.patch.object(Tool, 'detect_version', return_value=Version(version) if version else None), \
+         mock.patch('klayout_pex.kpex_cli.run_fastercap', side_effect=run), \
+         mock.patch.object(CapacitanceMatrix, 'averaged_off_diagonals', observe), \
+         mock.patch.dict('os.environ', {}):
+        for _ in range(2):
+            with pytest.raises(MatrixObserved):
+                cli.run_fastercap_extraction(extraction_args, mock.Mock(), 'geometry.lst', None)
+
+
+@pytest.mark.parametrize('failed_exit', [False, True])
+def test_extraction_keeps_failure_report_without_writing_matrix(
+        tmp_path: Path, extraction_args: Namespace, failed_exit: bool):
+    from packaging.version import Version
+    from klayout_pex.kpex_cli import KpexCLI
+    from klayout_pex.tool_version_constraints import Tool
+    from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
+
+    def run(**kwargs: Any) -> FasterCapRunResult:
+        report = Path(kwargs['report_path'])
+        report.write_text('{"schema_version":1,', encoding='utf-8')
+        Path(kwargs['log_path']).write_text('Capacitance matrix is:\nDimension 1 x 1\ng1_A 1e-9\n', encoding='utf-8')
+        result = FasterCapRunResult(('FasterCap', 'geometry.lst'), 75 if failed_exit else 0, 0.1, str(report))
+        if failed_exit:
+            raise FasterCapExecutionError('GMRES failed', result=result)
+        return result
+
+    cli = KpexCLI()
+    cli.run_result = mock.Mock()
+    with mock.patch.object(Tool, 'detect_version', return_value=Version('6.3.0')), \
+         mock.patch('klayout_pex.kpex_cli.run_fastercap', side_effect=run), \
+         mock.patch.dict('os.environ', {}):
+        with pytest.raises(FasterCapError):
+            cli.run_fastercap_extraction(extraction_args, mock.Mock(), 'geometry.lst', None)
+    report = tmp_path / 'test_FasterCap_Report.json'
+    assert report.is_file()
+    assert any(call.args[1] == str(report) for call in cli.run_result.add_file.call_args_list)
+    assert not (tmp_path / 'test_FasterCap_Result_Matrix_Raw.csv').exists()

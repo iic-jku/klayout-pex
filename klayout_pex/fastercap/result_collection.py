@@ -26,17 +26,25 @@
 
 from pathlib import Path
 import re
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from .fastercap_error import FasterCapError
 from .fastercap_runner import fastercap_parse_capacitance_matrix
 from klayout_pex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
 
 
-def collect_fastercap_matrix(log: Path, signals: List[str], ground: str) -> Tuple[Matrix, Matrix]:
+def collect_fastercap_matrix(log: Path, signals: List[str], ground: str, *,
+                             numerical_report: Optional[Path] = None,
+                             expected_input: Optional[str] = None,
+                             expected_version: Optional[str] = None) -> Tuple[Matrix, Matrix]:
     if not signals or len(set(signals)) != len(signals) or ground in signals or not ground:
         raise FasterCapError('Measured conductors and ground must be distinct nonempty identities')
-    parsed = fastercap_parse_capacitance_matrix(str(log))
+    if numerical_report is None:
+        parsed = fastercap_parse_capacitance_matrix(str(log))
+    else:
+        from .numerical_report import read_numerical_report
+        parsed = read_numerical_report(numerical_report, expected_input=expected_input,
+                                       expected_version=expected_version)
     names = []
     for label in parsed.conductor_names:
         match = re.fullmatch(r'g[0-9]+_(.+)', label)
@@ -46,12 +54,13 @@ def collect_fastercap_matrix(log: Path, signals: List[str], ground: str) -> Tupl
     if len(set(names)) != len(names) or set(names) != {*signals, ground}:
         raise FasterCapError('Native matrix does not identify exactly the prepared conductors and finite ground')
     native = Matrix(unit=Matrix.FARAD, conductor_ids=names, native_labels=parsed.conductor_names,
-                    reference_convention=Matrix.POTENTIAL_AT_INFINITY, source_value_scale_to_farads=1e-6)
+                    reference_convention=Matrix.POTENTIAL_AT_INFINITY, source_value_scale_to_farads=1e-6,
+                    index_convention=Matrix.EXCITATION_ROWS)
     for row in parsed.rows:
         native.rows.add(values=row)
     measured = Matrix(unit=Matrix.FARAD, conductor_ids=signals,
                       reference_convention=Matrix.GROUNDED_PRINCIPAL_SUBMATRIX,
-                      grounded_conductor_ids=[ground])
+                      grounded_conductor_ids=[ground], index_convention=Matrix.EXCITATION_ROWS)
     positions = [names.index(name) for name in signals]
     for i in positions:
         measured.rows.add(values=[parsed.rows[i][j] for j in positions])
