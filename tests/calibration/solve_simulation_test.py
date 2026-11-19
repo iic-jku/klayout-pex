@@ -61,7 +61,7 @@ def test_all_pattern_families_solve_and_recollect(tmp_path: Path, tech_info: Tec
     source.write_text(json.dumps(pattern_data), encoding='utf-8')
     preparation = prepare_calibration(tech_info, read_patterns(source), tmp_path / 'patterns')
     result = solve_calibration(preparation.manifest_path, tmp_path / 'runs', options=SolveOptions(
-        jobs=1, mesh_refinement=0.05, gmres_tolerance=1e-7, timeout_seconds=180))
+        jobs=1, mesh_refinement=0.05, gmres_tolerance=1e-7, solver_timeout_seconds=180))
     data = read_message(result.collection_path, CalibrationCollection())
     assert result.successful_cases == 5, data
     for case in data.cases:

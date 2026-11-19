@@ -25,20 +25,22 @@
 """Run lifecycle, reproducible evidence and schema boundaries."""
 
 import json
+import math
 from pathlib import Path
 import sys
 from unittest import mock
 
 import allure
 import pytest
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 from klayout_pex.tech_info import TechInfo
 
 from klayout_pex.calibration.artifacts import read_message, write_message, sha256_file
 from klayout_pex.calibration.patterns import read_patterns
 from klayout_pex.calibration.prepare import prepare_calibration
 from klayout_pex.calibration.prepared_input import read_preparation, validated_scenes
-from klayout_pex.calibration.solve import solve_calibration, SolveOptions
+from klayout_pex.calibration.solve import (solve_calibration, SolveOptions, MAX_MESH_MIN_ANGLE_DEG,
+                                           options_message, validate_options_message)
 from klayout_pex.calibration.collect import collect_calibration
 from klayout_pex.calibration.validation import CalibrationError
 from klayout_pex.fastercap.fastercap_runner import FasterCapRunResult
@@ -94,16 +96,16 @@ def test_solve_and_offline_recollection(preparation: Path, fake_solver: Callable
     assert read_message(again.manifest_path, CalibrationCollection()) == collection
 
 
-@pytest.mark.parametrize('changes', [dict(jobs=0), dict(jobs=33), dict(threads=0), dict(threads=257),
-                                    dict(timeout_seconds=0), dict(timeout_seconds=float('nan')),
-                                    dict(tolerance=0), dict(mesh_refinement=1),
-                                    dict(tolerance=0.1, mesh_refinement=1, gmres_tolerance=1e-7)])
+@pytest.mark.parametrize('changes', [dict(jobs=0), dict(jobs=33), dict(threads_per_job=0), dict(threads_per_job=257),
+                                    dict(solver_timeout_seconds=0), dict(solver_timeout_seconds=float('nan')),
+                                    dict(automatic_tolerance=0), dict(mesh_refinement=1),
+                                    dict(automatic_tolerance=0.1, mesh_refinement=1, gmres_tolerance=1e-7)])
 def test_options_fail_before_solver(changes: Dict[str, Any]):
     with pytest.raises(CalibrationError):
         SolveOptions(**changes)
 
 
-@pytest.mark.parametrize('changes', [dict(jobs=1), dict(jobs=32), dict(threads=1), dict(threads=256),
+@pytest.mark.parametrize('changes', [dict(jobs=1), dict(jobs=32), dict(threads_per_job=1), dict(threads_per_job=256),
                                     dict(mesh_refinement=0.1, gmres_tolerance=1e-7)])
 def test_option_boundaries(changes: Dict[str, Any]):
     SolveOptions(**changes)
@@ -221,10 +223,12 @@ collect_calibration(Path(sys.argv[1]), Path(sys.argv[2]))
 def test_cli_commands_and_validation_before_loading(tmp_path: Path):
     from tests.common.cli_runner import run_cli
     from klayout_pex.kpex_cli import KpexCLI
-    for command, source in [('solve', '--prepared'), ('collect', '--runs')]:
+    code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', '--help'])
+    assert code == 0 and '{prepare,solve,collect}' in output, output
+    for command, manifest_type in [('solve', 'CalibrationManifest'), ('collect', 'CalibrationRunManifest')]:
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', command, '--help'])
-        assert code == 0 and source in output, output
-    code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--prepared', 'missing.json',
+        assert code == 0 and '--manifest FILE' in output and manifest_type in output, output
+    code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', 'missing.json',
                                           '--jobs', '0', '--out-dir', str(tmp_path / 'out')])
     assert code == 2 and 'jobs must be an integer' in output, output
 
@@ -232,8 +236,8 @@ def test_cli_commands_and_validation_before_loading(tmp_path: Path):
 def test_cli_solve_and_collect(preparation: Path, fake_solver: Callable, tmp_path: Path):
     from tests.common.cli_runner import run_cli
     from klayout_pex.kpex_cli import KpexCLI
-    for args in [['solve', '--prepared', str(preparation), '--out-dir', str(tmp_path / 'runs')],
-                 ['collect', '--runs', str(tmp_path / 'runs/manifest.json'), '--out-dir', str(tmp_path / 'copy')]]:
+    for args in [['solve', '--manifest', str(preparation), '--out-dir', str(tmp_path / 'runs')],
+                 ['collect', '--manifest', str(tmp_path / 'runs/manifest.json'), '--out-dir', str(tmp_path / 'copy')]]:
         code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', *args])
         assert code == 0, output
         assert 'Numerical qualification and coefficient fitting have not run' in output
@@ -300,7 +304,7 @@ def test_parallel_results_keep_specification_order_and_thread_limits(preparation
             with lock:
                 active -= 1
     monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
-    result = solve_calibration(preparation, tmp_path / 'runs', options=SolveOptions(jobs=2, threads=2))
+    result = solve_calibration(preparation, tmp_path / 'runs', options=SolveOptions(jobs=2, threads_per_job=2))
     assert maximum == 2 and dict(os.environ) == original
     collection = read_message(result.collection_path, CalibrationCollection())
     assert [case.case_id for case in collection.cases] == ['plates', 'wires']
@@ -344,3 +348,109 @@ def test_stale_catalog_selection_is_rejected(preparation: Path):
     write_message(preparation, manifest, replace=True)
     with pytest.raises(CalibrationError, match='catalog selection'):
         read_preparation(preparation)
+
+
+@pytest.mark.parametrize('field', ['automatic_tolerance', 'gmres_tolerance'])
+@pytest.mark.parametrize('value', [-1.0, 0.0, 1.0, math.nextafter(1.0, math.inf),
+                                   math.nan, math.inf, -math.inf])
+def test_relative_tolerances_reject_invalid_bounds(field: str, value: float):
+    # A fraction of one or larger was accepted by KPEX but rejected by FasterCap.
+    # Check both numerical modes, including the representable value above one.
+    values = {field: value}
+    if field == 'gmres_tolerance':
+        values['mesh_refinement'] = 0.05
+    with pytest.raises(CalibrationError, match=field):
+        SolveOptions(**values)
+
+
+@pytest.mark.parametrize('field', ['automatic_tolerance', 'gmres_tolerance'])
+@pytest.mark.parametrize('value', [sys.float_info.min, 0.05, math.nextafter(1.0, 0.0)])
+def test_relative_tolerances_accept_valid_bounds(field: str, value: float):
+    values = {field: value}
+    if field == 'gmres_tolerance':
+        values['mesh_refinement'] = 0.05
+    options = SolveOptions(**values)
+    assert validate_options_message(options_message(options)) == options
+
+
+@pytest.mark.parametrize('angle', [0.0, 30.0, MAX_MESH_MIN_ANGLE_DEG])
+def test_mesh_angle_keeps_existing_exporter_bounds(
+        angle: float, preparation: Path, fake_solver: Callable, tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch):
+    from klayout_pex.fastercap.pex25d_exporter import FasterCapSceneExporter
+    from klayout_pex.util.number_range import DELAUNAY_B_MAX
+    export = FasterCapSceneExporter.export
+    observed = []
+    def record(self: Any, *args: Any, **kwargs: Any) -> Any:
+        observed.append(kwargs['options']['delaunay_b'])
+        return export(self, *args, **kwargs)
+    monkeypatch.setattr(FasterCapSceneExporter, 'export', record)
+    result = solve_calibration(preparation, tmp_path / 'runs',
+                               options=SolveOptions(mesh_min_angle_deg=angle))
+    assert result.successful_cases == 2
+    expected = {0.0: 0.0, 30.0: 1.0, MAX_MESH_MIN_ANGLE_DEG: DELAUNAY_B_MAX}[angle]
+    assert observed == pytest.approx([expected, expected])
+    assert all(0 <= value <= DELAUNAY_B_MAX for value in observed)
+
+
+@pytest.mark.parametrize('angle', [math.nextafter(0.0, -math.inf),
+                                   math.nextafter(MAX_MESH_MIN_ANGLE_DEG, math.inf), math.nan, math.inf])
+def test_mesh_angle_rejects_values_outside_mesher_limit(angle: float):
+    with pytest.raises(CalibrationError, match='mesh_min_angle_deg'):
+        SolveOptions(mesh_min_angle_deg=angle)
+
+
+@pytest.mark.parametrize('arguments', [
+    ['--jobs', '0'], ['--threads-per-job', '0'], ['--solver-timeout-seconds', '0'],
+    ['--fastercap-auto-tolerance', '1'],
+    ['--fastercap-mesh-refinement', '0.05', '--fastercap-gmres-tolerance', '1'],
+    ['--fastercap-interaction-ratio', 'nan'], ['--mesh-max-area-um2', '-1'],
+    ['--mesh-min-angle-deg', '34'], ['--solver', 'unavailable'],
+    ['--fastercap-mesh-refinement', '0.05'], ['--fastercap-gmres-tolerance', '1e-7'],
+    ['--fastercap-auto-tolerance', '0.05', '--fastercap-mesh-refinement', '0.05',
+     '--fastercap-gmres-tolerance', '1e-7'],
+])
+def test_cli_invalid_controls_fail_before_reading_manifest(arguments: List[str], tmp_path: Path):
+    from tests.common.cli_runner import run_cli
+    from klayout_pex.kpex_cli import KpexCLI
+    with mock.patch('klayout_pex.calibration.solve.read_preparation',
+                    side_effect=AssertionError('validate controls before loading the manifest')):
+        code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', 'missing.json',
+                                              '--out-dir', str(tmp_path / 'out'), *arguments])
+    assert code == 2, output
+    assert not (tmp_path / 'out').exists()
+
+
+@pytest.mark.parametrize('option', ['--prepared', '--runs', '--threads', '--timeout-seconds',
+                                    '--fastercap-tolerance', '--fastercap-d-coeff',
+                                    '--delaunay-amax-um2', '--delaunay-b', '--mesh-min-angle'])
+def test_cli_rejects_removed_names_and_partial_options(option: str, tmp_path: Path):
+    from tests.common.cli_runner import run_cli
+    from klayout_pex.kpex_cli import KpexCLI
+    code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', 'missing.json',
+                                          '--out-dir', str(tmp_path / 'out'), option, '1'])
+    assert code == 2 and 'unrecognized arguments' in output, output
+
+
+@pytest.mark.parametrize('controls,automatic', [([], 0.05),
+    (['--fastercap-auto-tolerance', '0.1'], 0.1),
+    (['--fastercap-mesh-refinement', '0.05', '--fastercap-gmres-tolerance', '1e-7'], None)])
+def test_cli_records_explicit_controls_and_refinement_mode(
+        controls: List[str], automatic: Any, preparation: Path, fake_solver: Callable, tmp_path: Path):
+    from tests.common.cli_runner import run_cli
+    from klayout_pex.kpex_cli import KpexCLI
+    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
+    run_dir = tmp_path / 'CLI run with spaces'
+    code, output = run_cli(KpexCLI().main, ['kpex', 'calibrate', 'solve', '--manifest', str(preparation),
+        '--solver', 'fastercap', '--fastercap-exe', sys.executable, '--out-dir', str(run_dir),
+        '--jobs', '2', '--threads-per-job', '3', '--solver-timeout-seconds', '20',
+        '--fastercap-interaction-ratio', '0.4', '--mesh-max-area-um2', '2',
+        '--mesh-min-angle-deg', '25', *controls])
+    assert code == 0, output
+    assert f'Run manifest: {run_dir / "manifest.json"}' in output
+    manifest = read_message(run_dir / 'manifest.json', CalibrationRunManifest())
+    options = validate_options_message(manifest.options)
+    assert options == SolveOptions(jobs=2, threads_per_job=3, solver_timeout_seconds=20,
+        interaction_ratio=0.4, mesh_max_area_um2=2, mesh_min_angle_deg=25,
+        automatic_tolerance=automatic, mesh_refinement=0.05 if automatic is None else None,
+        gmres_tolerance=1e-7 if automatic is None else None)

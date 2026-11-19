@@ -22,7 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 
-"""Command-line preparation of finite 3D calibration patterns."""
+"""Command-line preparation, solving and collection of calibration patterns."""
 
 import argparse
 from pathlib import Path
@@ -44,12 +44,11 @@ from ..util.argparse_helpers import add_log_level_argument
 
 def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
-        'calibrate', help='Prepare finite 3D cases for parasitic-table calibration',
+        'calibrate', help='Prepare calibration patterns, run field solves and collect raw matrices',
         description='Prepare patterns, run bounded field solves and collect raw matrices. '
                     'Numerical qualification and coefficient fitting are separate stages.', formatter_class=RichHelpFormatter)
     commands = parser.add_subparsers(dest='calibration_command', required=True)
     from .solve_cli import add_execution_subparsers
-    add_execution_subparsers(commands)
     prepare = commands.add_parser(
         'prepare', help='Write validated PEX25D patterns and a preparation manifest',
         description='Create finite substrate, parallel-plate, parallel-wire and directional-fringe patterns '
@@ -63,6 +62,7 @@ def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     prepare.add_argument('--out-dir', required=True, type=Path, metavar='PATH',
                          help='New output directory under an existing parent; existing paths are refused')
     add_log_level_argument(prepare)
+    add_execution_subparsers(commands)
 
 
 def run_calibration_command(args: argparse.Namespace):

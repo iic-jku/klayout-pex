@@ -42,6 +42,7 @@ from .artifacts import (artifact_path, copy_artifact, read_message, sha256_file,
 from .validation import CalibrationError
 from .prepared_input import PreparedInput, read_preparation, validated_scenes
 from ..version import __version__
+from ..util.number_range import DELAUNAY_B_MAX, RELATIVE_ERROR
 from klayout_pex_protobuf.kpex.calibration.solving_pb2 import (
     CalibrationRunManifest, CalibrationRunCase, CalibrationRunCheckpoint,
     CalibrationRunCompletion, CalibrationSolveOptions, FasterCapControls,
@@ -50,7 +51,8 @@ from klayout_pex_protobuf.kpex.calibration.preparation_pb2 import CalibrationArt
 from klayout_pex_protobuf.kpex.result.solver_execution_pb2 import SolverExecution, SolverIdentity
 
 MAX_JOBS = 32
-MAX_THREADS = 256
+MAX_THREADS_PER_JOB = 256
+MAX_MESH_MIN_ANGLE_DEG = math.degrees(math.asin(DELAUNAY_B_MAX / 2))
 THREAD_ENVIRONMENT_KEYS = ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS',
                            'VECLIB_MAXIMUM_THREADS', 'NUMEXPR_NUM_THREADS')
 
@@ -72,61 +74,65 @@ def _number(value: Any, name: str, minimum: float, maximum: Optional[float] = No
 @dataclass(frozen=True)
 class SolveOptions:
     jobs: int = 1
-    timeout_seconds: float = 600.0
-    threads: int = 1
-    tolerance: Optional[float] = None
+    solver_timeout_seconds: float = 600.0
+    threads_per_job: int = 1
+    automatic_tolerance: Optional[float] = None
     mesh_refinement: Optional[float] = None
     gmres_tolerance: Optional[float] = None
-    delaunay_amax_um2: float = 0.0
-    delaunay_b: float = 1.0
-    d_coeff: float = 0.5
+    mesh_max_area_um2: float = 0.0
+    mesh_min_angle_deg: float = 30.0
+    interaction_ratio: float = 0.5
 
     def __post_init__(self):
-        for name, maximum in (('jobs', MAX_JOBS), ('threads', MAX_THREADS)):
+        for name, maximum in (('jobs', MAX_JOBS), ('threads_per_job', MAX_THREADS_PER_JOB)):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= maximum:
                 raise CalibrationError(f'{name} must be an integer from 1 to {maximum}')
-        _number(self.timeout_seconds, 'timeout_seconds', 0, threading.TIMEOUT_MAX)
-        _number(self.delaunay_amax_um2, 'delaunay_amax_um2', 0, inclusive=True)
-        _number(self.delaunay_b, 'delaunay_b', 0, 1.1, inclusive=True)
-        _number(self.d_coeff, 'd_coeff', 0)
+        _number(self.solver_timeout_seconds, 'solver_timeout_seconds', 0, threading.TIMEOUT_MAX)
+        _number(self.mesh_max_area_um2, 'mesh_max_area_um2', 0, inclusive=True)
+        _number(self.mesh_min_angle_deg, 'mesh_min_angle_deg', 0, MAX_MESH_MIN_ANGLE_DEG, inclusive=True)
+        _number(self.interaction_ratio, 'interaction_ratio', 0)
         manual = self.mesh_refinement is not None or self.gmres_tolerance is not None
-        if manual and self.tolerance is not None:
+        if manual and self.automatic_tolerance is not None:
             raise CalibrationError('Automatic tolerance cannot be combined with manual mesh/GMRES controls')
         if manual and (self.mesh_refinement is None or self.gmres_tolerance is None):
             raise CalibrationError('Manual refinement requires both mesh_refinement and gmres_tolerance')
         if manual:
             _number(self.mesh_refinement, 'mesh_refinement', 0)
-            _number(self.gmres_tolerance, 'gmres_tolerance', 0)
-        elif self.tolerance is None:
-            object.__setattr__(self, 'tolerance', 0.05)
-        else:
-            _number(self.tolerance, 'tolerance', 0)
+        elif self.automatic_tolerance is None:
+            object.__setattr__(self, 'automatic_tolerance', 0.05)
+        for name in ('automatic_tolerance', 'gmres_tolerance'):
+            value = getattr(self, name)
+            if value is not None:
+                _number(value, name, 0)
+                if value not in RELATIVE_ERROR:
+                    raise CalibrationError(f'{name} {RELATIVE_ERROR.error_message(str(value))}')
 
 
 def options_message(options: SolveOptions) -> CalibrationSolveOptions:
-    controls = FasterCapControls(direct_interaction_coefficient=options.d_coeff,
-                                 delaunay_max_area_um2=options.delaunay_amax_um2,
-                                 delaunay_quality=options.delaunay_b)
-    if options.tolerance is not None:
-        controls.automatic_tolerance = options.tolerance
+    controls = FasterCapControls(interaction_ratio=options.interaction_ratio,
+                                 mesh_max_area_um2=options.mesh_max_area_um2,
+                                 mesh_min_angle_deg=options.mesh_min_angle_deg)
+    if options.automatic_tolerance is not None:
+        controls.automatic_tolerance = options.automatic_tolerance
     else:
         controls.mesh_refinement = options.mesh_refinement
         controls.gmres_tolerance = options.gmres_tolerance
-    return CalibrationSolveOptions(jobs=options.jobs, threads=options.threads,
-                                   timeout_seconds=options.timeout_seconds, fastercap=controls)
+    return CalibrationSolveOptions(jobs=options.jobs, threads_per_job=options.threads_per_job,
+                                   solver_timeout_seconds=options.solver_timeout_seconds, fastercap=controls)
 
 
 def validate_options_message(message: CalibrationSolveOptions) -> SolveOptions:
     controls = message.fastercap
     if not controls.HasField('automatic_tolerance') and not controls.HasField('mesh_refinement'):
         raise CalibrationError('Saved solver options need an explicit refinement mode')
-    return SolveOptions(jobs=message.jobs, threads=message.threads, timeout_seconds=message.timeout_seconds,
-                        tolerance=controls.automatic_tolerance if controls.HasField('automatic_tolerance') else None,
+    return SolveOptions(jobs=message.jobs, threads_per_job=message.threads_per_job,
+                        solver_timeout_seconds=message.solver_timeout_seconds,
+                        automatic_tolerance=controls.automatic_tolerance if controls.HasField('automatic_tolerance') else None,
                         mesh_refinement=controls.mesh_refinement if controls.HasField('mesh_refinement') else None,
                         gmres_tolerance=controls.gmres_tolerance if controls.HasField('gmres_tolerance') else None,
-                        d_coeff=controls.direct_interaction_coefficient,
-                        delaunay_amax_um2=controls.delaunay_max_area_um2, delaunay_b=controls.delaunay_quality)
+                        interaction_ratio=controls.interaction_ratio,
+                        mesh_max_area_um2=controls.mesh_max_area_um2, mesh_min_angle_deg=controls.mesh_min_angle_deg)
 
 
 def reference(path: Path, root: Path) -> CalibrationArtifactReference:
@@ -173,9 +179,11 @@ def _export(scene: Any, directory: Path, options: SolveOptions) -> List[Path]:
     # KLayout geometry/export runs serially. A private staging directory contains partial exports.
     with TemporaryDirectory(prefix='kpex-calibration-export-') as temporary:
         staging = Path(temporary)
+        # Preserve the existing b limit even if the degree conversion rounds upward.
+        quality = min(DELAUNAY_B_MAX, 2 * math.sin(math.radians(options.mesh_min_angle_deg)))
         written = FasterCapSceneExporter().export(
             scene, output_dir_path=str(staging), prefix='geometry',
-            options={'delaunay_amax': options.delaunay_amax_um2, 'delaunay_b': options.delaunay_b})
+            options={'delaunay_amax': options.mesh_max_area_um2, 'delaunay_b': quality})
         if not written:
             raise CalibrationError('FasterCap exporter returned no solver input')
         sources = []
@@ -220,7 +228,7 @@ def _execute(case: CalibrationRunCase, manifest: CalibrationRunManifest, output:
     checkpoint.execution.status = SolverExecution.RUNNING
     path = output / case.checkpoint_path
     env = os.environ.copy()
-    env.update({key: str(options.threads) for key in THREAD_ENVIRONMENT_KEYS})
+    env.update({key: str(options.threads_per_job) for key in THREAD_ENVIRONMENT_KEYS})
     checkpoint.execution.controlled_environment.update({key: env[key] for key in THREAD_ENVIRONMENT_KEYS})
     if cancelled.is_set():
         checkpoint.execution.status = SolverExecution.CANCELLED
@@ -235,8 +243,8 @@ def _execute(case: CalibrationRunCase, manifest: CalibrationRunManifest, output:
             raise CalibrationError('FasterCap executable changed before execution')
         primary = artifact_path(output, case.primary_input_path)
         result = run_fastercap(
-            manifest.solver.executable_path, str(primary), str(log), options.tolerance,
-            options.d_coeff, 0, True, False, False, timeout_seconds=options.timeout_seconds,
+            manifest.solver.executable_path, str(primary), str(log), options.automatic_tolerance,
+            options.interaction_ratio, 0, True, False, False, timeout_seconds=options.solver_timeout_seconds,
             cwd=str(primary.parent), env=env, mesh_refinement=options.mesh_refinement,
             gmres_tolerance=options.gmres_tolerance, cancel_event=cancelled)
         verify_artifacts(output, case.inputs)
