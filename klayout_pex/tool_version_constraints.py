@@ -170,6 +170,14 @@ MAGIC_EXTRESIST_PRUNE = ToolVersionConstraint(
 )
 
 
+FASTERCAP_NUMERICAL_REPORT = ToolVersionConstraint(
+    id='FASTERCAP_NUMERICAL_REPORT',
+    tool=Tool.FASTERCAP,
+    specifier='>= 6.3.0',
+    reason="full-precision numerical reports require FasterCap 6.3.0",
+)
+
+
 TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
         id='KLAYOUT_NEIGHBORHOOD_VISITOR',
@@ -201,8 +209,9 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
-        specifier='>= 6.2.1',
-        reason="the version the integration tests are run against",
+        specifier=FASTERCAP_NUMERICAL_REPORT.specifier,
+        reason="6.3.0 verifies actual GMRES residuals, corrects explicit preconditioner selection "
+               "and supplies full-precision reports. Upgrading is recommended",
         severity=Severity.WARNING,
     ),
     ToolVersionConstraint(

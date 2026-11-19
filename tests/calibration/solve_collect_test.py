@@ -243,7 +243,7 @@ def test_cli_solve_and_collect(preparation: Path, fake_solver: Callable, tmp_pat
         assert 'Numerical qualification and coefficient fitting have not run' in output
 
 
-@pytest.mark.parametrize('mutation', ['enum', 'unknown', 'version', 'case', 'log', 'duplicate'])
+@pytest.mark.parametrize('mutation', ['enum', 'unknown', 'version', 'case', 'log', 'report', 'duplicate'])
 def test_invalid_saved_contracts_fail_before_output(preparation: Path, fake_solver: Callable, tmp_path: Path, mutation: str):
     from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunCheckpoint, CalibrationRunManifest
     result = solve_calibration(preparation, tmp_path / 'runs')
@@ -267,6 +267,8 @@ def test_invalid_saved_contracts_fail_before_output(preparation: Path, fake_solv
             checkpoint.case_id = 'other'
         elif mutation == 'log':
             checkpoint.log.path = '../outside.log'
+        elif mutation == 'report':
+            checkpoint.numerical_report.path = '../outside.json'
         write_message(path, checkpoint, replace=True)
     with pytest.raises(CalibrationError):
         collect_calibration(result.manifest_path, tmp_path / 'collected')
@@ -470,3 +472,101 @@ def test_cli_records_explicit_controls_and_refinement_mode(
         interaction_ratio=0.4, mesh_max_area_um2=2, mesh_min_angle_deg=25,
         automatic_tolerance=automatic, mesh_refinement=0.05 if automatic is None else None,
         gmres_tolerance=1e-7 if automatic is None else None)
+
+
+@pytest.fixture
+def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch) -> Callable:
+    from tests.common.fastercap_report import numerical_report
+    from klayout_pex.calibration.solve import _solver_identity
+    identity = _solver_identity('unused')
+    identity.version = '6.3.0'
+
+    def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
+        result = fake_solver(exe, deck, log, *args, **kwargs)
+        # Report values differ below the console's precision and are deliberately
+        # asymmetric. Replacing them with rounded or averaged values loses evidence.
+        data = numerical_report(['g1_B', 'g2_substrate', 'g3_A'],
+                                [[5.000000000123456e-9, -2e-9, -1.000000000123456e-9],
+                                 [-2e-9, 6e-9, -3e-9], [-1.01e-9, -3e-9, 7.000000000123456e-9]], deck)
+        Path(kwargs['report_path']).write_text(json.dumps(data), encoding='utf-8')
+        return result
+    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    return run
+
+
+def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
+        preparation: Path, report_solver: Callable, tmp_path: Path):
+    import shutil
+    from klayout_pex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
+    result = solve_calibration(preparation, tmp_path / 'runs')
+    assert result.successful_cases == 2
+    assert set(result.written_paths) == {p for p in (tmp_path / 'runs').rglob('*') if p.is_file()}
+    data = read_message(result.collection_path, CalibrationCollection())
+    case = data.cases[0]
+    assert case.measured_matrix.index_convention == Matrix.EXCITATION_ROWS
+    assert case.native_matrix.index_convention == Matrix.EXCITATION_ROWS
+    assert list(case.measured_matrix.rows[0].values) == [7.000000000123456e-9 / 1e6, -1.01e-9 / 1e6]
+    assert case.measured_matrix.rows[1].values[0] == -1.000000000123456e-9 / 1e6
+    # Report and console counts have different link conventions. Keep each source intact.
+    assert case.refined_panels == 123
+    raw = tmp_path / 'runs/cases/plates/numerical-report.json'
+    assert (tmp_path / 'runs/collection/runs/cases/plates/numerical-report.json').read_bytes() == raw.read_bytes()
+    shutil.move(tmp_path / 'runs', tmp_path / 'relocated')
+    with mock.patch('subprocess.Popen', side_effect=AssertionError('collection must never execute')):
+        again = collect_calibration(tmp_path / 'relocated/manifest.json', tmp_path / 'again')
+    assert read_message(again.manifest_path, CalibrationCollection()) == data
+
+
+@pytest.mark.parametrize('failure', ['missing', 'truncated', 'status', 'identity', 'exit', 'timeout'])
+def test_report_failure_never_uses_successful_console_matrix(
+        preparation: Path, report_solver: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str):
+    from klayout_pex.fastercap.fastercap_error import FasterCapExecutionError, FasterCapTimeoutError
+    def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
+        result = report_solver(exe, deck, log, *args, **kwargs)
+        report = Path(kwargs['report_path'])
+        if failure == 'missing':
+            report.unlink()
+        elif failure in ('truncated', 'timeout'):
+            report.write_text('{"schema_version":1,', encoding='utf-8')
+        else:
+            data = json.loads(report.read_text(encoding='utf-8'))
+            if failure == 'identity':
+                data['input_file'] = 'another.lst'
+            else:
+                data['status'] = {'exit_code': 75, 'name': 'FC_CANNOT_CONVERGE'}
+            report.write_text(json.dumps(data), encoding='utf-8')
+        if failure in ('exit', 'timeout'):
+            error = FasterCapTimeoutError if failure == 'timeout' else FasterCapExecutionError
+            raise error('solver failed', result=FasterCapRunResult(result.arguments, 75, 0.1))
+        return result
+    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
+    result = solve_calibration(preparation, tmp_path / 'runs')
+    assert result.successful_cases == 0 and result.failed_cases == 2
+    data = read_message(result.collection_path, CalibrationCollection())
+    expected = (CalibrationCaseResult.EXECUTION_FAILED if failure in ('exit', 'timeout')
+                else CalibrationCaseResult.INVALID_RESULT)
+    assert all(case.status == expected and not case.HasField('native_matrix') for case in data.cases)
+    if failure != 'missing':
+        assert (tmp_path / 'runs/collection/runs/cases/plates/numerical-report.json').read_bytes() == (
+            tmp_path / 'runs/cases/plates/numerical-report.json').read_bytes()
+
+
+def test_changed_numerical_report_is_rejected(preparation: Path, report_solver: Callable, tmp_path: Path):
+    result = solve_calibration(preparation, tmp_path / 'runs')
+    (tmp_path / 'runs/cases/plates/numerical-report.json').write_text('{}', encoding='utf-8')
+    with pytest.raises(CalibrationError, match='changed'):
+        collect_calibration(result.manifest_path, tmp_path / 'collected')
+    assert not (tmp_path / 'collected').exists()
+
+
+@pytest.mark.parametrize('version,accepted', [('6.2.1', False), ('6.2.99', False), ('6.3.0', True), ('6.3.1', True)])
+def test_calibration_requires_report_capable_solver(version: str, accepted: bool, monkeypatch: pytest.MonkeyPatch):
+    from packaging.version import Version
+    from klayout_pex.calibration.solve import _solver_identity
+    from klayout_pex.tool_version_constraints import Tool
+    monkeypatch.setattr(Tool, 'detect_version', lambda *_: Version(version))
+    if accepted:
+        assert _solver_identity(sys.executable).version == version
+    else:
+        with pytest.raises(CalibrationError, match='6.3.0'):
+            _solver_identity(sys.executable)

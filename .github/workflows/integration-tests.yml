@@ -35,8 +35,9 @@ on:
 env:
   KLAYOUT_DEB: "klayout_0.30.13-1_amd64.deb"
   KLAYOUT_URL: "https://www.klayout.org/downloads/Ubuntu-24/klayout_0.30.13-1_amd64.deb"
-  FASTERCAP_URL: "https://github.com/iic-jku/FasterCap/releases/download/v6.2.1/FasterCap_6.2.1_amd64_ubuntu-24.04.deb"
-  FASTERCAP_DEB: "FasterCap_6.2.1_amd64_ubuntu-24.04.deb"
+  FASTERCAP_URL: "https://github.com/iic-jku/FasterCap/releases/download/v6.3.0/FasterCap_6.3.0_amd64_ubuntu-24.04.deb"
+  FASTERCAP_DEB: "FasterCap_6.3.0_amd64_ubuntu-24.04.deb"
+  FASTERCAP_SHA256: "c6cb936e9314792124cb642703d36d82c5fdc5ee28e64b8d644cc5f5fc342a2c"
 
 jobs:
   run-tests:
@@ -102,8 +103,12 @@ jobs:
         wget "$FASTERCAP_URL"
         popd
 
+    - name: Verify FasterCap package checksum
+      id: verify-fastercap-package
+      run: echo "$FASTERCAP_SHA256  deb-downloads/$FASTERCAP_DEB" | sha256sum --check --strict
+
     - name: "Save cached deb 📦 downloads"
-      if: success() || failure()
+      if: steps.verify-fastercap-package.outcome == 'success'
       uses: actions/cache/save@v6
       with:
         path: deb-downloads

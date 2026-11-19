@@ -68,12 +68,16 @@ message CalibrationRunCase {
     string log_path = 20;
     string primary_input_path = 30;
     repeated CalibrationArtifactReference inputs = 40;
+    // Empty for console-only saved runs. A requested report must never fall back to the log.
+    string numerical_report_path = 50;
 }
 message CalibrationRunCheckpoint {
     uint32 schema_version = 1;
     string case_id = 10;
     kpex.result.SolverExecution execution = 20;
     CalibrationArtifactReference log = 30;
+    // Native FasterCap JSON, including failed/partial output, retained byte-for-byte.
+    CalibrationArtifactReference numerical_report = 40;
 }
 // Present only after every scheduled process has reached a terminal state.
 // A finished batch may still contain failed processes or invalid matrices.
@@ -88,7 +92,7 @@ message CalibrationCollection {
     CalibrationArtifactReference run_manifest = 10;
     bool execution_complete = 20;
     repeated CalibrationCaseResult cases = 30;
-    // Includes copied input/provenance, checkpoints and raw logs, excluding this file.
+    // Includes copied input/provenance, checkpoints, raw logs and native reports, excluding this file.
     repeated CalibrationArtifactReference artifacts = 40;
 }
 message CalibrationCaseResult {

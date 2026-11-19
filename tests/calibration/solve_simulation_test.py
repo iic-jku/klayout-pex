@@ -60,11 +60,15 @@ def test_all_pattern_families_solve_and_recollect(tmp_path: Path, tech_info: Tec
     source = tmp_path / 'patterns.json'
     source.write_text(json.dumps(pattern_data), encoding='utf-8')
     preparation = prepare_calibration(tech_info, read_patterns(source), tmp_path / 'patterns')
-    result = solve_calibration(preparation.manifest_path, tmp_path / 'runs', options=SolveOptions(
+    result = solve_calibration(preparation.manifest_path, tmp_path / 'runs with spaces', options=SolveOptions(
         jobs=1, mesh_refinement=0.05, gmres_tolerance=1e-7, solver_timeout_seconds=180))
     data = read_message(result.collection_path, CalibrationCollection())
     assert result.successful_cases == 5, data
+    from klayout_pex.fastercap.numerical_report import read_numerical_report
     for case in data.cases:
+        report = tmp_path / 'runs with spaces/cases' / case.case_id / 'numerical-report.json'
+        parsed = read_numerical_report(report)
+        assert [list(row.values) for row in case.native_matrix.rows] == parsed.rows
         values = np.array([row.values for row in case.native_matrix.rows])
         assert np.isfinite(values).all()
         assert np.all(np.diag(values) > 0)
@@ -83,7 +87,8 @@ def test_all_pattern_families_solve_and_recollect(tmp_path: Path, tech_info: Tec
                                      pytest.param(xyce_port_admittance, marks=requires_xyce, id='Xyce'),
                                      pytest.param(vacask_port_admittance, marks=requires_vacask, id='VACASK')])
 @pytest.mark.parametrize('single', [False, True])
-def test_collected_grounded_matrix_matches_circuit(tmp_path: Path, simulator: Callable, single: bool):
+@pytest.mark.parametrize('report', [False, True], ids=['console', 'report'])
+def test_collected_grounded_matrix_matches_circuit(tmp_path: Path, simulator: Callable, single: bool, report: bool):
     log = tmp_path / 'solver.log'
     if single:
         log.write_text('Capacitance matrix is:\nDimension 2 x 2\n'
@@ -96,7 +101,15 @@ def test_collected_grounded_matrix_matches_circuit(tmp_path: Path, simulator: Ca
         circuit = ('.subckt dut A B\nCag A 0 3f\nCbg B 0 2f\nCab A B 1f\n'
                    'Ca_exterior A 0 3f\nCb_exterior B 0 2f\n.ends\n')
         signals = ['A', 'B']
-    native, measured = collect_fastercap_matrix(log, signals, 'G')
+    numerical_report_path = None
+    if report:
+        from tests.common.fastercap_report import numerical_report
+        rows = ([[6e-9, -3e-9], [-3e-9, 7e-9]] if single else
+                [[5e-9, -2e-9, -1e-9], [-2e-9, 6e-9, -3e-9], [-1e-9, -3e-9, 7e-9]])
+        names = ['g1_G', 'g2_A'] if single else ['g1_B', 'g2_G', 'g3_A']
+        numerical_report_path = tmp_path / 'report.json'
+        numerical_report_path.write_text(json.dumps(numerical_report(names, rows)), encoding='utf-8')
+    native, measured = collect_fastercap_matrix(log, signals, 'G', numerical_report=numerical_report_path)
     netlist = tmp_path / 'known-circuit.spice'
     netlist.write_text(circuit, encoding='utf-8')
     frequencies, actual = simulator(str(netlist), 'dut', signals, (3, 10), str(tmp_path))

@@ -446,6 +446,53 @@ Use at least three lengths to assess a relation such as `C(L) = cL + C_end`, and
 independent validation cases. Mesh or panel refinement and domain enlargement must establish
 reference accuracy before those measurements are used to update coefficients.
 
+### Running calibration and collecting numerical reports
+
+`kpex calibrate solve` requires `FasterCap >= 6.3.0` and collects its full-precision
+numerical report. For a preparation in `calibration-cases-sky130A`:
+
+```bash
+kpex calibrate solve \
+  --manifest calibration-cases-sky130A/manifest.json \
+  --solver fastercap --jobs 1 --threads-per-job 1 \
+  --solver-timeout-seconds 600 \
+  --fastercap-mesh-refinement 0.05 --fastercap-gmres-tolerance 1e-7 \
+  --out-dir calibration-runs-sky130A
+
+kpex calibrate collect \
+  --manifest calibration-runs-sky130A/manifest.json \
+  --out-dir calibration-results-sky130A
+```
+
+These controls illustrate a small manual solve, not qualified accuracy settings.
+Both commands require a new output directory. `collect` runs offline, verifies the
+recorded hashes and copies the declared evidence, including the native reports.
+Earlier console-only saved runs remain collectable at their original precision.
+A requested report that is missing, malformed or records failure cannot fall back
+to a rounded console matrix, even when the process exited zero.
+
+The report is FasterCap's external JSON contract. KPEX's run, checkpoint and result
+contracts use protobuf schemas. Reports retain all solver iterations, diagnostics
+and build information byte-for-byte, including partial reports from failed runs.
+Only a successful final real 3D matrix is collected. Complex and 2D matrices need
+different result contracts and are rejected. Execution success does not establish
+numerical qualification or produce fitted coefficients.
+
+The result's `index_convention` is `EXCITATION_ROWS`: entry `(i, j)` records charge
+on conductor `j` when conductor `i` is excited. Values are converted from the
+micrometre-coordinate solver scale to farads by division by `1e6`, without
+transposition, symmetrization or clipping. The measured matrix selects the signal
+principal submatrix while holding the explicit finite ground conductor at zero.
+Console panel/link counts remain identified by their original source; the report's
+link count excludes diagonal panel terms counted by the console.
+
+Normal `kpex extract --fastercap` also uses reports with `FasterCap >= 6.3.0`, while
+older or unrecognized installations retain console parsing and the version warning.
+The native report is listed with the run's log artifacts. Raw and averaged CSV files
+remain distinct, and netlist generation retains its existing off-diagonal averaging.
+Reusing an extraction output directory replaces its named report, log and CSV outputs.
+The integration workflow pins the `6.3.0` package and verifies its SHA256 checksum.
+
 ### Result file
 
 Each run of `kpex extract` and `kpex pex25d` writes `kpex_result.json` into its run directory,
