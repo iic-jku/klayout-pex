@@ -21,8 +21,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
+from dataclasses import dataclass
+import math
+import os
+import signal
+from numbers import Real
 import re
 import subprocess
+import threading
 import time
 from typing import *
 
@@ -33,7 +39,7 @@ from ..log import (
     subproc,
 )
 from ..common.capacitance_matrix import CapacitanceMatrix
-from .fastercap_error import FasterCapError
+from .fastercap_error import FasterCapError, FasterCapExecutionError, FasterCapTimeoutError, FasterCapCancelledError
 
 
 # NOTE: the exit codes of FasterCap 6.2 (see the README of iic-jku/FasterCap), earlier versions exit 0 or 1.
@@ -52,23 +58,98 @@ FASTERCAP_EXIT_CODE_MEANINGS: Dict[int, str] = {
 }
 
 
+@dataclass(frozen=True)
+class FasterCapRunResult:
+    arguments: Tuple[str, ...]
+    returncode: Optional[int]
+    duration_seconds: float
+
+
+def _stop_process(proc: subprocess.Popen, *, include_exited_group: bool = False):
+    """Stop the owned process group, including non-detached solver children."""
+    if proc.poll() is not None and not include_exited_group:
+        proc.wait()
+        return
+    if os.name == 'posix':
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+            try:
+                proc.wait(timeout=0.2)
+            except subprocess.TimeoutExpired:
+                pass
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    elif proc.poll() is None:
+        # Windows has no POSIX process groups. taskkill /T terminates descendants.
+        subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=5, check=False)
+        if proc.poll() is None:
+            proc.kill()
+    proc.wait()
+
+
+def _positive_finite(value: float, name: str):
+    try:
+        valid = (not isinstance(value, bool) and isinstance(value, Real)
+                 and math.isfinite(value) and value > 0)
+    except OverflowError:
+        valid = False
+    if not valid:
+        raise FasterCapError(f'{name} must be finite and greater than zero')
+
+
 def run_fastercap(exe_path: str,
                   lst_file_path: str,
                   log_path: str,
-                  tolerance: float,
+                  tolerance: Optional[float],
                   d_coeff: float,
                   ooc_condition: Optional[int],
                   auto_preconditioner: bool,
                   galerkin_scheme: bool,
-                  jacobi_preconditioner: bool):
+                  jacobi_preconditioner: bool,
+                  *,
+                  timeout_seconds: Optional[float] = None,
+                  cwd: Optional[str] = None,
+                  env: Optional[Mapping[str, str]] = None,
+                  mesh_refinement: Optional[float] = None,
+                  gmres_tolerance: Optional[float] = None,
+                  cancel_event: Optional[threading.Event] = None) -> FasterCapRunResult:
+    """Run and stream FasterCap, retaining the log on errors and timeouts.
+
+    ``env`` is a complete child environment, as for ``subprocess.Popen``. A
+    caller can copy its environment and set per-run thread limits without
+    modifying other concurrent runs. Cancellation and deadlines stop the owned
+    process tree. ``exe_path`` must not detach children into separate sessions.
+
+    Automatic refinement uses ``tolerance`` and couples mesh and GMRES settings.
+    To control them independently, pass ``tolerance=None`` and set both
+    ``mesh_refinement`` and ``gmres_tolerance``. Mixing the modes is an error:
+    FasterCap silently overrides manual controls when ``-a`` is present.
+    """
+    if timeout_seconds is not None:
+        _positive_finite(timeout_seconds, 'timeout_seconds')
+        if timeout_seconds > threading.TIMEOUT_MAX:
+            raise FasterCapError(f'timeout_seconds must not exceed {threading.TIMEOUT_MAX:g} on this platform')
+    if tolerance is None:
+        if mesh_refinement is None or gmres_tolerance is None:
+            raise FasterCapError('Manual refinement requires both mesh_refinement and gmres_tolerance')
+        _positive_finite(mesh_refinement, 'mesh_refinement')
+        _positive_finite(gmres_tolerance, 'gmres_tolerance')
+        refinement_args = [f'-m{mesh_refinement}', f'-t{gmres_tolerance}']
+    else:
+        if mesh_refinement is not None or gmres_tolerance is not None:
+            raise FasterCapError('Automatic tolerance cannot be combined with manual refinement controls')
+        _positive_finite(tolerance, 'tolerance')
+        refinement_args = [f'-a{tolerance}']
     args = [
         exe_path,
         '-b',                          # console mode, without GUI
         '-i',                          # Dump detailed time and memory information
         '-v',                          # Verbose output
-        f"-a{tolerance}",              # stop when relative error lower than threshold
+        *refinement_args,
         f"-d{d_coeff}",                # Direct potential interaction coefficient to mesh refinement ratio
-        # NOTE: no -m (mesh relative refinement value), the automatic refinement (-a) overrides it
     ]
 
     if ooc_condition is not None:
@@ -90,60 +171,124 @@ def run_fastercap(exe_path: str,
     subproc(f"{' '.join(args)}, output file: {log_path}")
 
     rule('FasterCap Output')
-    start = time.time()
+    start = time.monotonic()
+    timed_out = threading.Event()
+    cancelled = threading.Event()
+    finished = threading.Event()
+    watchdog: Optional[threading.Thread] = None
 
-    proc = subprocess.Popen(args,
-                            stdin=subprocess.DEVNULL,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT,
-                            universal_newlines=True,
-                            text=True,
-                            encoding='utf-8',
-                            errors='replace')
-    with open(log_path, 'w', encoding='utf-8') as f:
-        while True:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            subproc(line[:-1])  # remove newline
-            f.writelines([line])
-    proc.wait()
+    # Open the log first: an unwritable log must not leave a running solver.
+    try:
+        log_file = open(log_path, 'w', encoding='utf-8')
+    except OSError as exc:
+        result = FasterCapRunResult(tuple(args), None, time.monotonic() - start)
+        raise FasterCapExecutionError(f'Could not open FasterCap log: {exc}', result=result) from exc
+    proc: Optional[subprocess.Popen] = None
+    try:
+        with log_file as f:
+            try:
+                proc = subprocess.Popen(args,
+                                        stdin=subprocess.DEVNULL,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.STDOUT,
+                                        text=True,
+                                        encoding='utf-8',
+                                        errors='replace',
+                                        cwd=cwd,
+                                        env=env,
+                                        start_new_session=os.name == 'posix')
+            except OSError as exc:
+                result = FasterCapRunResult(tuple(args), None, time.monotonic() - start)
+                raise FasterCapExecutionError(f'Could not start FasterCap: {exc}', result=result) from exc
 
-    duration = time.time() - start
+            def watch_process():
+                while not finished.wait(0.02):
+                    if cancel_event is not None and cancel_event.is_set():
+                        cancelled.set()
+                        _stop_process(proc, include_exited_group=True)
+                        return
+                    if timeout_seconds is not None and time.monotonic() - start >= timeout_seconds:
+                        timed_out.set()
+                        _stop_process(proc, include_exited_group=True)
+                        return
+
+            try:
+                if timeout_seconds is not None or cancel_event is not None:
+                    watchdog = threading.Thread(target=watch_process, daemon=True)
+                    watchdog.start()
+                while True:
+                    line = proc.stdout.readline()
+                    if not line:
+                        break
+                    f.write(line)
+                    f.flush()
+                    subproc(line.rstrip('\r\n'))
+                proc.wait()
+            finally:
+                finished.set()
+                if watchdog is not None and watchdog.ident is not None:
+                    watchdog.join()
+                try:
+                    _stop_process(proc)
+                finally:
+                    proc.stdout.close()
+    except OSError as exc:
+        result = FasterCapRunResult(tuple(args), proc.returncode if proc is not None else None,
+                                    time.monotonic() - start)
+        raise FasterCapExecutionError(f'Could not capture FasterCap output: {exc}', result=result) from exc
+
+    duration = time.monotonic() - start
+    result = FasterCapRunResult(tuple(args), proc.returncode, duration)
 
     rule()
 
+    if cancelled.is_set():
+        raise FasterCapCancelledError(f'FasterCap cancelled, see log file: {log_path}', result=result)
+    if timed_out.is_set():
+        raise FasterCapTimeoutError(
+            f'FasterCap exceeded timeout of {timeout_seconds:g}s after {duration:.4g}s, '
+            f'see log file: {log_path}', result=result)
     if proc.returncode == 0:
         info(f"FasterCap succeeded after {'%.4g' % duration}s")
     else:
         meaning = FASTERCAP_EXIT_CODE_MEANINGS.get(proc.returncode, None)
-        raise FasterCapError(f"FasterCap failed with exit code {proc.returncode}"
-                             f"{f' ({meaning})' if meaning else ''} after {'%.4g' % duration}s, "
-                             f"see log file: {log_path}")
+        raise FasterCapExecutionError(f"FasterCap failed with exit code {proc.returncode}"
+                                      f"{f' ({meaning})' if meaning else ''} after {'%.4g' % duration}s, "
+                                      f"see log file: {log_path}", result=result)
+    return result
 
 
 def fastercap_parse_capacitance_matrix(log_path: str) -> CapacitanceMatrix:
-    with open(log_path, 'r', encoding='utf-8') as f:
-        rlines = f.readlines()
-        rlines.reverse()
-
-        # multiple iterations possible, find the last matrix
-        for idx, line in enumerate(rlines):
-            if line.strip() == "Capacitance matrix is:":
-                m = re.match(r'^Dimension (\d+) x (\d+)$', rlines[idx-1])
-                if not m:
-                    raise FasterCapError(f"Could not parse capacitor matrix dimensions")
-                dim = int(m.group(1))
-                conductor_names: List[str] = []
-                rows: List[List[float]] = []
-                for i in reversed(range(idx-1-dim, idx-1)):
-                    line = rlines[i].strip()
-                    cells = [cell.strip() for cell in line.split(' ')]
-                    cells = list(filter(lambda c: len(c) >= 1, cells))
-                    conductor_names.append(cells[0])
-                    row = [float(cell)/1e6 for cell in cells[1:]]
-                    rows.append(row)
-                cm = CapacitanceMatrix(conductor_names=conductor_names, rows=rows)
-                return cm
-
-        raise FasterCapError(f"Could not extract capacitance matrix from FasterCap log file {log_path}")
+    """Read the final complete square matrix; preserve native labels and signs."""
+    try:
+        with open(log_path, 'r', encoding='utf-8') as stream:
+            lines = stream.read().splitlines()
+        starts = [i for i, line in enumerate(lines) if line.strip() == 'Capacitance matrix is:']
+        if not starts:
+            raise ValueError('no capacitance matrix')
+        start = starts[-1]
+        dimensions = re.fullmatch(r'Dimension (\d+) x (\d+)', lines[start + 1].strip())
+        if dimensions is None:
+            raise ValueError('invalid matrix dimensions')
+        count, columns = map(int, dimensions.groups())
+        if count <= 0 or count != columns or start + count + 2 > len(lines):
+            raise ValueError('incomplete or nonsquare matrix')
+        names: List[str] = []
+        rows: List[List[float]] = []
+        for line in lines[start + 2:start + 2 + count]:
+            cells = line.split()
+            if len(cells) != count + 1 or cells[0] in names:
+                raise ValueError('invalid matrix row or repeated conductor label')
+            names.append(cells[0])
+            raw = [float(value) for value in cells[1:]]
+            values = [value / 1e6 for value in raw]
+            if any(value != 0 and scaled == 0 for value, scaled in zip(raw, values)):
+                raise ValueError('matrix unit conversion underflows')
+            if any(not math.isfinite(value) for value in values):
+                raise ValueError('nonfinite matrix entry')
+            rows.append(values)
+        if any(line.startswith('Iteration number #') for line in lines[start + 2 + count:]):
+            raise ValueError('unfinished iteration after final matrix')
+        return CapacitanceMatrix(conductor_names=names, rows=rows)
+    except (OSError, ValueError, IndexError) as exc:
+        raise FasterCapError(f"Could not extract capacitance matrix from FasterCap log '{log_path}': {exc}") from exc
