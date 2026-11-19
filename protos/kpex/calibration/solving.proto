@@ -1,0 +1,103 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+package kpex.calibration;
+
+import "kpex/calibration/preparation.proto";
+import "kpex/result/capacitance_matrix.proto";
+import "kpex/result/solver_execution.proto";
+
+// FasterCap controls are backend-specific, not universal accuracy settings.
+message FasterCapControls {
+    optional double automatic_tolerance = 1;
+    optional double mesh_refinement = 10;
+    optional double gmres_tolerance = 20;
+    double direct_interaction_coefficient = 30;
+    double delaunay_max_area_um2 = 40;
+    double delaunay_quality = 50;
+}
+message CalibrationSolveOptions {
+    uint32 jobs = 1;
+    uint32 threads = 10;
+    double timeout_seconds = 20;
+    FasterCapControls fastercap = 30;
+}
+
+// Immutable index written before execution. Each case checkpoint is durable
+// independently, so collection does not depend on a successful batch ending.
+message CalibrationRunManifest {
+    uint32 schema_version = 1;
+    string kpex_version = 10;
+    CalibrationArtifactReference preparation = 20;
+    kpex.result.SolverIdentity solver = 30;
+    CalibrationSolveOptions options = 40;
+    repeated CalibrationRunCase cases = 50;
+}
+message CalibrationRunCase {
+    string case_id = 1;
+    string checkpoint_path = 10;
+    string log_path = 20;
+    string primary_input_path = 30;
+    repeated CalibrationArtifactReference inputs = 40;
+}
+message CalibrationRunCheckpoint {
+    uint32 schema_version = 1;
+    string case_id = 10;
+    kpex.result.SolverExecution execution = 20;
+    CalibrationArtifactReference log = 30;
+}
+// Present only after every scheduled process has reached a terminal state.
+// A finished batch may still contain failed processes or invalid matrices.
+message CalibrationRunCompletion {
+    uint32 schema_version = 1;
+    CalibrationArtifactReference manifest = 10;
+    repeated CalibrationArtifactReference checkpoints = 20;
+}
+
+message CalibrationCollection {
+    uint32 schema_version = 1;
+    CalibrationArtifactReference run_manifest = 10;
+    bool execution_complete = 20;
+    repeated CalibrationCaseResult cases = 30;
+    // Includes copied input/provenance, checkpoints and raw logs, excluding this file.
+    repeated CalibrationArtifactReference artifacts = 40;
+}
+message CalibrationCaseResult {
+    string case_id = 1;
+    enum CollectionStatus {
+        STATUS_UNSPECIFIED = 0;
+        COLLECTED = 1; // Parsed raw evidence only; numerical qualification has not run.
+        INCOMPLETE = 2;
+        EXECUTION_FAILED = 3;
+        INVALID_RESULT = 4;
+    }
+    CollectionStatus status = 10;
+    kpex.result.SolverExecution execution = 20;
+    kpex.result.MaxwellCapacitanceMatrix native_matrix = 30;
+    kpex.result.MaxwellCapacitanceMatrix measured_matrix = 40;
+    repeated string diagnostics = 50;
+    // Missing native statistics stay absent, rather than becoming zero counts.
+    optional uint64 input_panels = 60;
+    optional uint64 refined_panels = 70;
+    optional uint64 potential_estimates = 80;
+    optional uint64 links = 90;
+}

@@ -1,0 +1,50 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+package kpex.result;
+
+// Electrical data shared by field solvers and saved-result consumers.
+message MaxwellCapacitanceMatrix {
+    enum CapacitanceUnit {
+        UNIT_UNSPECIFIED = 0;
+        FARAD = 1;
+    }
+    CapacitanceUnit unit = 1;
+    // Q_i = sum_j C_ij V_j. Unexcited listed conductors are held at zero volts.
+    repeated string conductor_ids = 10;
+    message Row { repeated double values = 1; }
+    repeated Row rows = 20;
+    // Empty for a derived matrix; otherwise the backend labels in native order.
+    repeated string native_labels = 30;
+    enum ReferenceConvention {
+        REFERENCE_UNSPECIFIED = 0;
+        POTENTIAL_AT_INFINITY = 1;
+        GROUNDED_PRINCIPAL_SUBMATRIX = 2;
+    }
+    ReferenceConvention reference_convention = 40;
+    // Explicitly grounded finite bodies omitted from a principal submatrix.
+    // This is not floating-conductor elimination or a change of reference.
+    repeated string grounded_conductor_ids = 50;
+    double reference_potential_v = 60;
+    // Present for backend values converted to SI, with original bytes retained in the log.
+    optional double source_value_scale_to_farads = 70;
+}

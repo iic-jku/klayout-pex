@@ -45,9 +45,11 @@ from ..util.argparse_helpers import add_log_level_argument
 def add_calibration_subparser(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
         'calibrate', help='Prepare finite 3D cases for parasitic-table calibration',
-        description='Prepare physical test patterns and provenance. Reference solving and coefficient '
-                    'fitting are not performed by this command.', formatter_class=RichHelpFormatter)
+        description='Prepare patterns, run bounded field solves and collect raw matrices. '
+                    'Numerical qualification and coefficient fitting are separate stages.', formatter_class=RichHelpFormatter)
     commands = parser.add_subparsers(dest='calibration_command', required=True)
+    from .solve_cli import add_execution_subparsers
+    add_execution_subparsers(commands)
     prepare = commands.add_parser(
         'prepare', help='Write validated PEX25D patterns and a preparation manifest',
         description='Create finite substrate, parallel-plate, parallel-wire and directional-fringe patterns '
@@ -65,6 +67,11 @@ def add_calibration_subparser(subparsers: argparse._SubParsersAction):
 
 def run_calibration_command(args: argparse.Namespace):
     set_log_level(args.log_level)
+    if args.calibration_command in ('solve', 'collect'):
+        from .solve_cli import run_execution_command
+        return run_execution_command(args)
+    if args.calibration_command != 'prepare':
+        raise NotImplementedError(f'Calibration command {args.calibration_command!r}')
     try:
         spec = read_patterns(args.patterns)
         validate_output_directory(args.out_dir)
