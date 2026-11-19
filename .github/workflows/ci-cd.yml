@@ -204,7 +204,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: [gmsh, palace, elmer]
+        plugin: [gmsh, palace, elmer, kqcircuits]
 
     env:
       ALLURE_RESULTS_PATH: build/allure-results
@@ -256,7 +256,7 @@ jobs:
     #       the sources for the coverage report
     - name: "Checkout plugins"
       run: |
-        for plugin in gmsh palace elmer; do
+        for plugin in gmsh palace elmer kqcircuits; do
           git clone --depth 1 "https://github.com/iic-jku/klayout-pex-plugin-$plugin.git" \
                     "plugins/klayout-pex-plugin-$plugin"
         done
@@ -279,7 +279,8 @@ jobs:
         poetry run pip install --no-deps \
           -e plugins/klayout-pex-plugin-gmsh \
           -e plugins/klayout-pex-plugin-palace \
-          -e plugins/klayout-pex-plugin-elmer
+          -e plugins/klayout-pex-plugin-elmer \
+          -e plugins/klayout-pex-plugin-kqcircuits
 
     - name: "Install Elmer FEM"
       timeout-minutes: 5

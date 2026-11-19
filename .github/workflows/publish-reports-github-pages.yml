@@ -135,7 +135,7 @@ jobs:
       #       a plugin that can't be cloned did not run its tests either
       - name: "Checkout plugins"
         run: |
-          for plugin in gmsh palace elmer; do
+          for plugin in gmsh palace elmer kqcircuits; do
             git clone --depth 1 "https://github.com/iic-jku/klayout-pex-plugin-$plugin.git" \
                       "plugins/klayout-pex-plugin-$plugin" \
               || echo "::warning::Could not clone klayout-pex-plugin-$plugin"
