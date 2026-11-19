@@ -1,0 +1,51 @@
+// --------------------------------------------------------------------------------
+// SPDX-FileCopyrightText: 2024-2026 Martin Jan Köhler and Harald Pretl
+// Johannes Kepler University, Institute for Integrated Circuits.
+//
+// This file is part of KPEX
+// (see https://github.com/iic-jku/klayout-pex).
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// --------------------------------------------------------------------------------
+syntax = "proto3";
+package kpex.result;
+
+message SolverIdentity {
+    string name = 1;
+    string version = 10;
+    string executable_sha256 = 20;
+    string executable_path = 30; // Informational only; never executed by a saved-result reader.
+    string operating_system = 40;
+    string architecture = 50;
+    string operating_system_release = 60;
+}
+
+message SolverExecution {
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        NOT_STARTED = 1;
+        RUNNING = 2;
+        SUCCEEDED = 3; // Process exited zero; does not imply valid or converged results.
+        FAILED = 4;
+        TIMED_OUT = 5;
+        CANCELLED = 6;
+    }
+    Status status = 1;
+    repeated string arguments = 10;
+    optional int32 return_code = 20;
+    double duration_seconds = 30;
+    map<string, string> controlled_environment = 40;
+    string diagnostic = 50;
+}

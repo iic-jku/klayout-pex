@@ -21,7 +21,18 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-from .lvsdb_extractor import (
-    KLayoutExtractedLayerInfo,
-    KLayoutExtractionContext
-)
+from typing import Any, TYPE_CHECKING
+
+__all__ = ('KLayoutExtractedLayerInfo', 'KLayoutExtractionContext')
+
+if TYPE_CHECKING:
+    from .lvsdb_extractor import KLayoutExtractedLayerInfo, KLayoutExtractionContext
+
+
+def __getattr__(name: str) -> Any:
+    # Reading saved calibration dimensions needs native coordinate bounds, not
+    # the layout database bindings. Preserve the existing public imports lazily.
+    if name in ('KLayoutExtractedLayerInfo', 'KLayoutExtractionContext'):
+        from . import lvsdb_extractor
+        return getattr(lvsdb_extractor, name)
+    raise AttributeError(f'{__name__} has no attribute {name!r}')

@@ -23,9 +23,30 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .fastercap_runner import FasterCapRunResult
+
 
 class FasterCapError(Exception):
     """
     FasterCap failed, or its log has no capacitance matrix
     """
     pass
+
+
+class FasterCapExecutionError(FasterCapError):
+    """A failed process, with the command and outcome kept for run provenance."""
+
+    def __init__(self, message: str, *, result: FasterCapRunResult):
+        super().__init__(message)
+        self.result = result
+
+
+class FasterCapTimeoutError(FasterCapExecutionError):
+    """The owned FasterCap process exceeded its deadline and was stopped."""
+
+
+class FasterCapCancelledError(FasterCapExecutionError):
+    """The caller cancelled this owned solver process."""
