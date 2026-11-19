@@ -286,26 +286,42 @@ def test_solver_identity_is_checked_before_output(preparation: Path, tmp_path: P
 def test_parallel_results_keep_specification_order_and_thread_limits(preparation: Path, fake_solver: Callable, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     import os
     import threading
-    import time
     lock = threading.Lock()
+    both_started = threading.Barrier(2, timeout=30)
+    wires_finished = threading.Event()
+    completed = []
     active = 0
     maximum = 0
     original = dict(os.environ)
     def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
         nonlocal active, maximum
+        case_id = 'plates' if 'plates' in deck else 'wires'
         with lock:
             active += 1
             maximum = max(maximum, active)
         try:
             assert kwargs['env']['OMP_NUM_THREADS'] == '2'
-            time.sleep(0.1 if 'plates' in deck else 0.01)
-            return fake_solver(exe, deck, log, *args, **kwargs)
+            # Synchronize overlap and reverse completion instead of assuming how
+            # quickly a loaded CI runner schedules the second worker. Timeouts
+            # bound failures if execution accidentally becomes serial.
+            both_started.wait()
+            if case_id == 'plates':
+                assert wires_finished.wait(timeout=30), 'The wires solver did not finish'
+            result = fake_solver(exe, deck, log, *args, **kwargs)
+            with lock:
+                completed.append(case_id)
+            return result
         finally:
             with lock:
                 active -= 1
+            if case_id == 'wires':
+                wires_finished.set()
     monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
     result = solve_calibration(preparation, tmp_path / 'runs', options=SolveOptions(jobs=2, threads_per_job=2))
-    assert maximum == 2 and dict(os.environ) == original
+    assert result.successful_cases == 2 and result.failed_cases == 0
+    assert maximum == 2
+    assert completed == ['wires', 'plates']
+    assert dict(os.environ) == original
     collection = read_message(result.collection_path, CalibrationCollection())
     assert [case.case_id for case in collection.cases] == ['plates', 'wires']
 
