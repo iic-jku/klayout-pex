@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for klayout_pex/fastercap/fastercap_runner.py: 83%</title>
+    <title>Coverage for klayout_pex/fastercap/fastercap_runner.py: 86%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>klayout_pex<span class="sep">/</span>fastercap<span class="sep">/</span>fastercap_runner.py</b>:
-            <span class="pc_cov">83%</span>
+            <span class="pc_cov">86%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">168 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">139<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">29<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">144<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">24<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_875d58d22143ae30_output_interpreter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-19 21:38 +0000
+            created at 2026-11-19 22:12 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -223,11 +223,11 @@
     <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">        <span class="key">if</span> <span class="nam">timeout_seconds</span> <span class="op">&gt;</span> <span class="nam">threading</span><span class="op">.</span><span class="nam">TIMEOUT_MAX</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">            <span class="key">raise</span> <span class="nam">FasterCapError</span><span class="op">(</span><span class="fst">f&#x27;</span><span class="fst">timeout_seconds must not exceed </span><span class="op">{</span><span class="nam">threading</span><span class="op">.</span><span class="nam">TIMEOUT_MAX</span><span class="op">:</span><span class="fst">g</span><span class="op">}</span><span class="fst"> on this platform</span><span class="fst">&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">    <span class="key">if</span> <span class="nam">tolerance</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">        <span class="key">if</span> <span class="nam">mesh_refinement</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">gmres_tolerance</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">        <span class="key">if</span> <span class="nam">mesh_refinement</span> <span class="key">is</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">gmres_tolerance</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">            <span class="key">raise</span> <span class="nam">FasterCapError</span><span class="op">(</span><span class="str">&#x27;Manual refinement requires both mesh_refinement and gmres_tolerance&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="nam">_positive_finite</span><span class="op">(</span><span class="nam">mesh_refinement</span><span class="op">,</span> <span class="str">&#x27;mesh_refinement&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">        <span class="nam">_positive_finite</span><span class="op">(</span><span class="nam">gmres_tolerance</span><span class="op">,</span> <span class="str">&#x27;gmres_tolerance&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="nam">refinement_args</span> <span class="op">=</span> <span class="op">[</span><span class="fst">f&#x27;</span><span class="fst">-m</span><span class="op">{</span><span class="nam">mesh_refinement</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">,</span> <span class="fst">f&#x27;</span><span class="fst">-t</span><span class="op">{</span><span class="nam">gmres_tolerance</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="nam">_positive_finite</span><span class="op">(</span><span class="nam">mesh_refinement</span><span class="op">,</span> <span class="str">&#x27;mesh_refinement&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">        <span class="nam">_positive_finite</span><span class="op">(</span><span class="nam">gmres_tolerance</span><span class="op">,</span> <span class="str">&#x27;gmres_tolerance&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">        <span class="nam">refinement_args</span> <span class="op">=</span> <span class="op">[</span><span class="fst">f&#x27;</span><span class="fst">-m</span><span class="op">{</span><span class="nam">mesh_refinement</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">,</span> <span class="fst">f&#x27;</span><span class="fst">-t</span><span class="op">{</span><span class="nam">gmres_tolerance</span><span class="op">}</span><span class="fst">&#x27;</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">        <span class="key">if</span> <span class="nam">mesh_refinement</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">or</span> <span class="nam">gmres_tolerance</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t151" href="#t151">151</a></span><span class="t">            <span class="key">raise</span> <span class="nam">FasterCapError</span><span class="op">(</span><span class="str">&#x27;Automatic tolerance cannot be combined with manual refinement controls&#x27;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -252,7 +252,7 @@
     <p class="mis show_mis"><span class="n"><a id="t170" href="#t170">170</a></span><span class="t">        <span class="nam">args</span> <span class="op">+=</span> <span class="op">[</span><span class="str">&#x27;-g&#x27;</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t171" href="#t171">171</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t172" href="#t172">172</a></span><span class="t">    <span class="key">if</span> <span class="nam">jacobi_preconditioner</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">        <span class="nam">args</span> <span class="op">+=</span> <span class="op">[</span><span class="str">&#x27;-pj&#x27;</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t173" href="#t173">173</a></span><span class="t">        <span class="nam">args</span> <span class="op">+=</span> <span class="op">[</span><span class="str">&#x27;-pj&#x27;</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t174" href="#t174">174</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t">    <span class="nam">args</span> <span class="op">+=</span> <span class="op">[</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t">        <span class="nam">lst_file_path</span>&nbsp;</span><span class="r"></span></p>
@@ -391,7 +391,7 @@
             <a class="nav" href="z_875d58d22143ae30_output_interpreter_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-19 21:38 +0000
+            created at 2026-11-19 22:12 +0000
         </p>
     </div>
 </footer>
