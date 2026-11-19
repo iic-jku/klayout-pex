@@ -64,6 +64,7 @@ class FasterCapRunResult:
     arguments: Tuple[str, ...]
     returncode: Optional[int]
     duration_seconds: float
+    report_path: Optional[str] = None
 
 
 def _stop_process(proc: subprocess.Popen, *, include_exited_group: bool = False):
@@ -123,7 +124,8 @@ def run_fastercap(exe_path: str,
                   env: Optional[Mapping[str, str]] = None,
                   mesh_refinement: Optional[float] = None,
                   gmres_tolerance: Optional[float] = None,
-                  cancel_event: Optional[threading.Event] = None) -> FasterCapRunResult:
+                  cancel_event: Optional[threading.Event] = None,
+                  report_path: Optional[str] = None) -> FasterCapRunResult:
     """Run and stream FasterCap, retaining the log on errors and timeouts.
 
     ``env`` is a complete child environment, as for ``subprocess.Popen``. A
@@ -136,6 +138,14 @@ def run_fastercap(exe_path: str,
     ``mesh_refinement`` and ``gmres_tolerance``. Mixing the modes is an error:
     FasterCap silently overrides manual controls when ``-a`` is present.
     """
+    if report_path is not None:
+        if not isinstance(report_path, str) or not report_path or '"' in report_path:
+            raise FasterCapError('report_path must be a nonempty path without double quotes')
+        report_path = os.path.abspath(os.path.join(cwd or os.getcwd(), report_path))
+        if os.path.lexists(report_path):
+            raise FasterCapError(f"Numerical report already exists: {report_path}")
+        if report_path == os.path.abspath(log_path):
+            raise FasterCapError('Numerical report and console log must have different paths')
     if timeout_seconds is not None:
         _positive_finite(timeout_seconds, 'timeout_seconds')
         if timeout_seconds > threading.TIMEOUT_MAX:
@@ -172,9 +182,9 @@ def run_fastercap(exe_path: str,
     if jacobi_preconditioner:
         args += ['-pj']
 
-    args += [
-        lst_file_path
-    ]
+    if report_path is not None:
+        args += [f'--report={report_path}']
+    args += [lst_file_path]
     info(f"Calling FasterCap")
     subproc(f"{' '.join(args)}, output file: {log_path}")
 
@@ -189,7 +199,8 @@ def run_fastercap(exe_path: str,
     try:
         log_file = open(log_path, 'w', encoding='utf-8')
     except OSError as exc:
-        result = FasterCapRunResult(tuple(args), None, time.monotonic() - start)
+        result = FasterCapRunResult(tuple(args), None, time.monotonic() - start,
+                                        report_path if report_path and os.path.isfile(report_path) else None)
         raise FasterCapExecutionError(f'Could not open FasterCap log: {exc}', result=result) from exc
     proc: Optional[subprocess.Popen] = None
     try:
@@ -206,7 +217,8 @@ def run_fastercap(exe_path: str,
                                         env=env,
                                         start_new_session=os.name == 'posix')
             except OSError as exc:
-                result = FasterCapRunResult(tuple(args), None, time.monotonic() - start)
+                result = FasterCapRunResult(tuple(args), None, time.monotonic() - start,
+                                        report_path if report_path and os.path.isfile(report_path) else None)
                 raise FasterCapExecutionError(f'Could not start FasterCap: {exc}', result=result) from exc
 
             def watch_process():
@@ -242,11 +254,13 @@ def run_fastercap(exe_path: str,
                     proc.stdout.close()
     except OSError as exc:
         result = FasterCapRunResult(tuple(args), proc.returncode if proc is not None else None,
-                                    time.monotonic() - start)
+                                    time.monotonic() - start,
+                                    report_path if report_path and os.path.isfile(report_path) else None)
         raise FasterCapExecutionError(f'Could not capture FasterCap output: {exc}', result=result) from exc
 
     duration = time.monotonic() - start
-    result = FasterCapRunResult(tuple(args), proc.returncode, duration)
+    result = FasterCapRunResult(tuple(args), proc.returncode, duration,
+                                report_path if report_path and os.path.isfile(report_path) else None)
 
     rule()
 
