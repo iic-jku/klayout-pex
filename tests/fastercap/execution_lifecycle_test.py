@@ -24,28 +24,32 @@
 
 """Timeouts, cancellation and failure evidence use real child processes."""
 
+import errno
 import os
+import signal
 from pathlib import Path
 import subprocess
 import sys
 import threading
 from typing import Any, Callable
+from unittest import mock
 
 import allure
 import pytest
 
-from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix
+from klayout_pex.fastercap.fastercap_runner import run_fastercap, fastercap_parse_capacitance_matrix, _stop_process, FasterCapRunResult
 from klayout_pex.fastercap.fastercap_error import (FasterCapError, FasterCapExecutionError,
                                                  FasterCapTimeoutError, FasterCapCancelledError)
 
-pytestmark = allure.parent_suite('Unit Tests')
+pytestmark = [allure.parent_suite('Unit Tests'),
+              pytest.mark.filterwarnings('error::pytest.PytestUnhandledThreadExceptionWarning')]
 
 
 @pytest.fixture
 def child_runner(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Callable:
     popen = subprocess.Popen
     script = tmp_path / 'child.py'
-    def start(source: str, **options: Any):
+    def start(source: str, **options: Any) -> FasterCapRunResult:
         script.write_text(source, encoding='utf-8')
         # Use Python as a portable stand-in executable; exercise the real process,
         # pipes, deadline and environment rather than mock its lifecycle.
@@ -119,3 +123,44 @@ def test_malformed_final_matrix_is_not_replaced_by_earlier_one(tmp_path: Path, t
                     'Capacitance matrix is:\n' + tail, encoding='utf-8')
     with pytest.raises(FasterCapError):
         fastercap_parse_capacitance_matrix(str(path))
+
+
+@pytest.mark.skipif(os.name != 'posix', reason='POSIX group signals')
+@pytest.mark.parametrize('denied_signal_name', ['SIGTERM', 'SIGKILL'])
+@pytest.mark.parametrize('platform_name,returncode,allowed', [
+    ('darwin', 0, True), ('darwin', -15, True),
+    ('darwin', None, False), ('linux', 0, False),
+])
+def test_group_permission_error_is_only_ignored_after_darwin_exit(
+        monkeypatch: pytest.MonkeyPatch, denied_signal_name: str, platform_name: str,
+        returncode: Any, allowed: bool):
+    # Darwin skips zombies while counting signalable group members. Both TERM
+    # and the follow-up KILL can race with reaping; real permission errors for
+    # a live leader and other kernels must remain visible.
+    denied_signal = getattr(signal, denied_signal_name)
+    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.sys.platform', platform_name)
+    process = mock.Mock(pid=12345, poll=mock.Mock(return_value=returncode))
+
+    def signal_group(pid: int, sig: int):
+        assert pid == process.pid
+        if sig == denied_signal:
+            raise PermissionError(errno.EPERM, 'Operation not permitted')
+
+    monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.os.killpg', signal_group)
+    if allowed:
+        _stop_process(process, include_exited_group=True)
+        process.wait.assert_called()
+    else:
+        with pytest.raises(PermissionError):
+            _stop_process(process, include_exited_group=True)
+
+
+def test_lifecycle_tests_import_without_posix_signal_constants():
+    # Skip markers are evaluated after decorators: POSIX constants must only
+    # be read inside a skipped test, or Windows cannot collect any test here.
+    source = ("import pytest, signal; "
+              "hasattr(signal, 'SIGKILL') and delattr(signal, 'SIGKILL'); "
+              "import tests.fastercap.execution_lifecycle_test")
+    result = subprocess.run([sys.executable, '-c', source], capture_output=True,
+                            text=True, encoding='utf-8', errors='replace', timeout=30)
+    assert result.returncode == 0, result.stderr

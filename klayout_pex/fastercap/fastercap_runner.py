@@ -28,6 +28,7 @@ import signal
 from numbers import Real
 import re
 import subprocess
+import sys
 import threading
 import time
 from typing import *
@@ -80,6 +81,13 @@ def _stop_process(proc: subprocess.Popen, *, include_exited_group: bool = False)
             os.killpg(proc.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
+        except PermissionError:
+            # Darwin's killpg excludes zombies and can return EPERM when only
+            # exited members remain (xnu/bsd/kern/kern_sig.c, killpg1). The
+            # group belongs to this child; never suppress denial for a live
+            # leader, or apply this Darwin teardown rule on other platforms.
+            if sys.platform != 'darwin' or proc.poll() is None:
+                raise
     elif proc.poll() is None:
         # Windows has no POSIX process groups. taskkill /T terminates descendants.
         subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
