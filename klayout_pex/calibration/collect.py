@@ -235,6 +235,10 @@ def collect_calibration(run_manifest: Path, output_dir: Path) -> CalibrationColl
                             raise FasterCapError('Requested numerical report or recorded solver arguments are missing')
                         numerical_report = output / 'runs' / case.numerical_report_path
                         expected_input = checkpoint.execution.arguments[-1]
+                        # The recorded argv retains quotes for FasterCap's second
+                        # tokenizer; its report identifies the unquoted input path.
+                        if expected_input.startswith('"') and expected_input.endswith('"'):
+                            expected_input = expected_input[1:-1]
                     native, measured = collect_fastercap_matrix(
                         log, list(preparation.measurement.conductor_order), preparation.measurement.reference.profile,
                         numerical_report=numerical_report, expected_input=expected_input,

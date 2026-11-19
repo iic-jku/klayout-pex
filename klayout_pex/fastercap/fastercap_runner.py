@@ -138,6 +138,8 @@ def run_fastercap(exe_path: str,
     ``mesh_refinement`` and ``gmres_tolerance``. Mixing the modes is an error:
     FasterCap silently overrides manual controls when ``-a`` is present.
     """
+    if '"' in lst_file_path:
+        raise FasterCapError('Input path cannot contain double quotes')
     if report_path is not None:
         if not isinstance(report_path, str) or not report_path or '"' in report_path:
             raise FasterCapError('report_path must be a nonempty path without double quotes')
@@ -184,7 +186,10 @@ def run_fastercap(exe_path: str,
 
     if report_path is not None:
         args += [f'--report={report_path}']
-    args += [lst_file_path]
+    # FasterCap joins argv and tokenizes it again. Literal quotes are required
+    # inside this argument to preserve whitespace; subprocess still uses no shell.
+    input_argument = f'"{lst_file_path}"' if any(c.isspace() for c in lst_file_path) else lst_file_path
+    args += [input_argument]
     info(f"Calling FasterCap")
     subproc(f"{' '.join(args)}, output file: {log_path}")
 

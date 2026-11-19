@@ -268,3 +268,24 @@ def test_extraction_keeps_failure_report_without_writing_matrix(
     assert report.is_file()
     assert any(call.args[1] == str(report) for call in cli.run_result.add_file.call_args_list)
     assert not (tmp_path / 'test_FasterCap_Result_Matrix_Raw.csv').exists()
+
+
+@pytest.mark.parametrize('input_path', ['plain.lst', 'directory with spaces/geometry.lst', 'tab\tname.lst'])
+def test_input_argument_survives_fastercap_tokenizer(tmp_path: Path, input_path: str):
+    process = mock.Mock(returncode=0, stdout=io.StringIO(''))
+    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen', return_value=process) as launch:
+        result = run_fastercap('FasterCap', input_path, str(tmp_path / 'solver.log'),
+                               0.05, 0.5, 0, True, False, False)
+    argument = result.arguments[-1]
+    assert argument == (f'"{input_path}"' if any(c.isspace() for c in input_path) else input_path)
+    assert tuple(launch.call_args.args[0]) == result.arguments
+    assert not launch.call_args.kwargs.get('shell', False)
+
+
+def test_literal_quote_in_input_is_rejected_before_creating_log(tmp_path: Path):
+    with mock.patch('klayout_pex.fastercap.fastercap_runner.subprocess.Popen') as launch:
+        with pytest.raises(FasterCapError, match='double quotes'):
+            run_fastercap('FasterCap', 'a"b.lst', str(tmp_path / 'solver.log'),
+                          0.05, 0.5, 0, True, False, False)
+    launch.assert_not_called()
+    assert not (tmp_path / 'solver.log').exists()
