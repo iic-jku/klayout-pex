@@ -157,10 +157,24 @@
   `bug`, `enhancement`, `documentation` or `breaking-change`. The labeler adds the PDK.
 - Every PR references an issue: `Fixes #N` when it resolves the issue (GitHub closes it on
   merge), `Part of #N` when it covers only part of it. Without an issue, file one first.
+- Before creating an issue or PR in any repository outside the `iic-jku` GitHub
+  organization, prepare the complete title and body locally and show Martin the draft
+  and target repository. For a PR, also provide the proposed code diff for review.
+  Create it only after Martin has reviewed and explicitly approved that specific item.
+  General permission to investigate, fix a problem or coordinate upstream is not approval
+  to publish an external issue or PR. The requirement to file verified defects does not
+  override this review requirement.
 - A PR is ready when its CI is green on its final commits: after each push, check the CI
   and report every red job with its cause.
 - After rewriting a pushed branch, say that it must be pushed before the merge.
 - Merge only green PRs: `main` stays green, as a red baseline hides new failures.
+- After a successful merge, remove the fully merged local and remaining remote feature
+  branches and their dedicated worktree without waiting for another request. Fetch the
+  merge target and verify that every branch change is included; a deleted upstream or
+  closed PR is not proof. Preserve all uncommitted, untracked and needed ignored work.
+  Return a primary checkout to the merge target instead of deleting it. Use managed
+  worktree archiving where applicable, respect ownership and protection guards, and
+  report any retained branch or worktree with the verified reason.
 - Issues end with the versions used, e.g. `klayout-pex 0.4.4, KLayout 0.30.12,
   IIC-OSIC-TOOLS image 83ae1840458f`, plus the versions of the plugins involved. Give both
   KLayout versions when the binary and the Python module differ.
