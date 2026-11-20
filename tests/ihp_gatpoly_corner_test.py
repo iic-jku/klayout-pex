@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""IHP interconnect sheet limits remain separate from compact-device width laws."""
+"""IHP interconnect sheet limits remain separate from compact-model effective-width corrections."""
 
 from __future__ import annotations
 
@@ -93,5 +93,5 @@ def test_selected_sheet_corner_preserves_recognized_resistor_devices(tmp_path: P
         assert len(selected) == 3
         devices.append(selected)
     # Each recognized device stays one compact-model instance with identical terminals
-    # and dimensions. Extracted wire corners do not rewrite the device's model law.
+    # and dimensions. Extracted wire corners do not rewrite the device's compact model.
     assert devices[0] == devices[1] == devices[2]

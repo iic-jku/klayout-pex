@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Extracted GatPoly strips obey the independently specified sheet law in circuit simulators."""
+"""Extracted GatPoly strips obey the independently specified sheet-resistance model in circuit simulators."""
 
 from __future__ import annotations
 

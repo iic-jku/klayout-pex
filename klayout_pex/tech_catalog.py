@@ -202,7 +202,7 @@ def _uri(value: str, what: str):
 
 
 def _provenance(provenance: TechnologyProvenance, what: str):
-    """Check authored evidence without fetching sources or inferring physical qualification."""
+    """Validate evidence structure, not source applicability or agreement with measurements."""
     _id(provenance.data_revision, f'{what} data revision')
     if not provenance.sources:
         raise TechDefError(f'{what} needs at least one source')

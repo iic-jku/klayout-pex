@@ -22,7 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 
-"""Source-sheet and per-cut laws survive CMOS5L catalog selection and real extraction."""
+"""Source sheet-resistance and per-cut contact-resistance values survive CMOS5L catalog selection and real extraction."""
 
 from __future__ import annotations
 

@@ -56,9 +56,9 @@
         ]
       },
       {
-        "id": "mim-law",
-        "description": "Use the 2 fF/um2 MIM law with 0.9/1.0/1.1 factors on both area and edge terms",
-        "reason": "The supported stack selects the 2 fF option and its independent device law",
+        "id": "mim-capacitance-model",
+        "description": "Use the 2 fF/um2 MIM capacitance model with 0.9/1.0/1.1 factors on both area and edge terms",
+        "reason": "The supported stack selects the 2 fF option and its independent device capacitance model",
         "source_ids": [
           "mim-model-1",
           "mim-model-2"
@@ -102,7 +102,7 @@
         "revision": "1",
         "date": "2026-11-13",
         "summary": "Add complete low/high capacitance components with explicit source mappings",
-        "reason": "Make reviewed C data available without inferring missing resistance or physical corner laws",
+        "reason": "Make reviewed C data available without inferring missing resistance or process-stack parameters",
         "source_ids": [
           "extraction-table",
           "mim-model-1",

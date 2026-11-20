@@ -22,7 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 
-"""Corner references use independent device laws, exported dimensions and the same observable."""
+"""Corner references use independent device capacitance models, exported dimensions and the same observable."""
 
 import math
 import hashlib
@@ -200,7 +200,7 @@ def test_bundled_device_components_are_hashed_and_explicitly_selectable(tmp_path
     records = [record for record in catalog.datasets
                if record.kind == TechnologyDatasetFile.DEVICE_REFERENCES and record.id != 'nominal']
     assert {record.id for record in records} == {dataset.id for dataset in load_corner_device_references(tech)}
-    # Device components alone must not invent correlation with a physical stack or R law.
+    # Device components alone must not invent correlation with a physical stack or resistance parameters.
     assert all(not scenario.device_references or scenario.device_references == 'nominal'
                for scenario in catalog.scenarios)
     for record in records:

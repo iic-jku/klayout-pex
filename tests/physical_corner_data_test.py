@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Physical corner recipes preserve source profiles and independently select their capability."""
+"""Process-stack corners preserve source profiles and independently select their capability."""
 
 import hashlib
 import shutil
@@ -43,7 +43,7 @@ from scripts.gen_tech_pb.physical_corners import load_corner_process_stacks
 from tests.common.tech_catalog import add_scenario, read_catalog
 
 
-pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('Physical Corner Recipes')]
+pytestmark = [allure.parent_suite('Unit Tests'), allure.tag('Process-Stack Corners')]
 
 
 def selected_stack(corner: str, pdk: PDK = PDK.IHP_SG13CMOS5L) -> TechInfo:
@@ -63,7 +63,7 @@ def physical_file(corner: str, pdk: PDK = PDK.IHP_SG13CMOS5L):
 
 
 @pytest.mark.parametrize('pdk', list(PDK))
-def test_physical_recipe_generation_preserves_nominal_and_has_explicit_coverage(pdk: PDK):
+def test_process_stack_generation_preserves_nominal_and_has_explicit_coverage(pdk: PDK):
     technology = TechInfo.parse_tech_def(pdk.config.tech_pb_json_path)
     before = technology.SerializeToString(deterministic=True)
     datasets = load_corner_process_stacks(technology)
@@ -83,7 +83,7 @@ def test_unknown_physical_process_is_not_treated_as_an_audited_gap():
 
 
 @pytest.mark.parametrize('corner,oxide,nitride', [('low', 3.69, 5.94), ('high', 4.51, 7.26)])
-def test_resolved_recipe_keeps_corrected_coatings_and_source_materials(corner: str, oxide: float, nitride: float):
+def test_resolved_process_stack_keeps_corrected_coatings_and_source_materials(corner: str, oxide: float, nitride: float):
     scene = resolve(physical_file(corner))
     metals = {layer.name: layer for layer in scene.layers}
     for name, bounds in {'GatPoly': (4000, 5600), 'Metal1': (10400, 14600), 'Metal2': (20000, 24900),
@@ -209,7 +209,7 @@ def test_physical_corner_parallel_plates_converge_and_preserve_expected_order(tm
         area_only = 8.8541878128e-18 * permittivity * width_um**2 / gap_um
         assert area_only < estimates[-1] < 1.3*area_only
         print(pdk, corner, 'area-only [F]', area_only, 'finite-plate excess', estimates[-1]/area_only-1)
-    # These source high-C recipes increase permittivity and/or tighten the
-    # interconnect geometry. This checks the selected recipe, not silicon calibration.
+    # These source high-C process stacks increase permittivity and/or tighten the
+    # interconnect geometry. This checks the selected process stack, not agreement with silicon measurements.
     assert results['high'] > results['low']
     print('Converged physical corner mutual capacitances [F]:', results)

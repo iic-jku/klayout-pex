@@ -54,7 +54,7 @@
         ]
       },
       {
-        "id": "mim-law",
+        "id": "mim-capacitance-model",
         "description": "Use cap_carea 1350/1500/1650 aF/um2 while retaining cmim_core CJSW at 40 aF/um",
         "reason": "The separate cap_cpara multiplier belongs to another parasitic device and must not scale this edge term",
         "source_ids": [
@@ -65,7 +65,7 @@
       {
         "id": "mim-thin-plate",
         "description": "Use same-corner bottom-plate coefficients for MIM coupling to other conductors",
-        "reason": "Preserve the existing thin-plate construction independently of the plate-to-plate device law",
+        "reason": "Preserve the existing thin-plate construction independently of the plate-to-plate capacitance model",
         "source_ids": [
           "extraction-table"
         ]
@@ -84,7 +84,7 @@
         "revision": "1",
         "date": "2026-11-13",
         "summary": "Add complete low/high capacitance components with explicit source mappings",
-        "reason": "Make reviewed C data available without inferring missing resistance or physical corner laws",
+        "reason": "Make reviewed C data available without inferring missing resistance or process-stack parameters",
         "source_ids": [
           "extraction-table",
           "mim-model-1",

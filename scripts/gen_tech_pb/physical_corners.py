@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Source-specific physical interconnect recipes, independent of empirical coefficients."""
+"""Source-specific interconnect process stacks, independent of empirical coefficients."""
 
 from typing import List
 from pathlib import Path
@@ -37,15 +37,15 @@ CAPICHE_REVISION = '85905e8810982bd89966cbf8b7e9d3fd1e922d42'
 
 
 def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset]:
-    """Return complete supported interconnect recipes without changing nominal data."""
+    """Return complete supported interconnect process stacks without changing nominal data."""
     if technology.name in ('sky130A', 'gf180mcuD', 'ihp-sg13g2'):
         return load_restricted_physical_corners(
             technology, Path(__file__).with_name('corners') / f'{technology.name}-physical.json')
     if technology.name != 'ihp-sg13cmos5l':
-        raise NotImplementedError(f'Physical corner recipes for {technology.name!r} are not implemented')
+        raise NotImplementedError(f'Process-stack corners for {technology.name!r} are not implemented')
     datasets = []
     # The source fixes these profiles in both corners. Checking the interface prevents
-    # silently retaining newly added metal/device profiles without a source recipe.
+    # silently retaining newly added metal/device profiles without a source process stack.
     metals = {'GatPoly': (0.4, 0.16), 'Metal1': (1.04, 0.42), 'Metal2': (2.0, 0.49),
               'Metal3': (3.03, 0.49), 'Metal4': (4.06, 0.49), 'TopMetal1': (5.4, 2.0)}
     simple = {'ild0': 'nitride', 'ild1': 'ild0', 'ild2': 'ild1', 'ild3': 'ild2',
@@ -54,17 +54,17 @@ def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset
               'high': 'ffdd791b2a897d62614de2ca5d03d0274f7ff14cba7c79c9e11a2b43d0c9b977'}
     for corner, oxide, nitride in [('low', 3.69, 5.94), ('high', 4.51, 7.26)]:
         dataset = TechnologyDataset(id='capiche-'+corner,
-                                    description=f'Capiche {corner}-C interconnect physical recipe')
+                                    description=f'Capiche {corner}-C interconnect process stack')
         dataset.process_stack.CopyFrom(technology.process_stack)
         layers = {layer.name: layer for layer in dataset.process_stack.layers}
         expected_names = {'subs', 'nwell_drw', 'nSD', 'pSD', 'ntap', 'ptap', 'fox',
                           'nitride', 'pass1', 'pass2', 'air', *metals, *simple}
         if set(layers) != expected_names:
-            raise ValueError('SG13CMOS5L physical recipe does not cover the process-stack interface')
+            raise ValueError('SG13CMOS5L corner data does not cover the process-stack interface')
         for name, (z, thickness) in metals.items():
             layer = layers[name]
             if layer.layer_type != ProcessStackInfo.LAYER_TYPE_METAL:
-                raise ValueError(f'{name} is not a conductor in the physical recipe')
+                raise ValueError(f'{name} is not a conductor in the process stack')
             layer.metal_layer.z = z
             layer.metal_layer.thickness = thickness
         layers['fox'].field_oxide_layer.dielectric_k = 3.95
@@ -89,7 +89,7 @@ def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset
         _, nominal_components = nominal_provenance(technology.name)
         provenance.sources.extend(nominal_components['process_stack'].sources)
         source_path = f'ihp-sg13cmos5l_{corner}/metal_stack_ihp-sg13cmos5l_{corner}.py'
-        provenance.sources.add(id='capiche-physical', description=f'Capiche {corner}-C physical recipe',
+        provenance.sources.add(id='capiche-physical', description=f'Capiche {corner}-C process stack',
                                uri=f'https://github.com/RTimothyEdwards/capiche/blob/{CAPICHE_REVISION}/{source_path}',
                                revision=CAPICHE_REVISION, sha256=hashes[corner])
         provenance.assumptions.add(
@@ -98,19 +98,19 @@ def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset
             reason='Capiche accumulates field thickness along the coating chain; KPEX stores the extent from the root',
             source_ids=['capiche-physical'])
         provenance.assumptions.add(
-            id='source-recipe', description='Interconnect geometry and dielectric recipe from Capiche; '
-            'not process calibration or a correlation with IHP ITF resistance corners',
+            id='source-recipe', description='Interconnect geometry and dielectric parameters from Capiche; '
+            'not validation against silicon measurements or a correlation with IHP ITF resistance corners',
             reason='Empirical coefficients and physical inputs are independently identified',
             source_ids=['capiche-physical'])
         provenance.assumptions.add(
-            id='device-geometry', description='The source qualifies interconnect geometry and materials. Existing '
+            id='device-geometry', description='The source specifies interconnect geometry and materials. Existing '
             'device/contact anchors, cut widths and layout connectivity are retained',
-            reason='Capiche diffusion levels are alternative 2D ground planes, not an active-device physical corner law', source_ids=['recipe', 'capiche-physical'])
+            reason='Capiche diffusion levels are alternative 2D ground planes, not an active-device process-stack specification', source_ids=['recipe', 'capiche-physical'])
         provenance.assumptions.add(
             id='source-background', description='The source top background has relative permittivity 3; '
             'this is not vacuum and differs from the nominal KPEX background',
             reason='Do not silently replace the selected source material', source_ids=['capiche-physical'])
-        provenance.history.add(revision='1', date='2026-11-13', summary='Add supported Capiche interconnect recipes',
+        provenance.history.add(revision='1', date='2026-11-13', summary='Add supported Capiche interconnect process stacks',
                                reason='Enable explicit nonnominal physical inputs with corrected coating anchors',
                                source_ids=[source.id for source in provenance.sources],
                                references=['https://github.com/iic-jku/klayout-pex/issues/550'])
@@ -119,11 +119,11 @@ def load_corner_process_stacks(technology: Technology) -> List[TechnologyDataset
 
 
 def physical_corner_scenarios(technology: Technology) -> List[TechnologyScenario]:
-    """Author source physical/C pairings independently of the held nominal R law."""
+    """Author source physical/C pairings independently of the held nominal resistance parameters."""
     if technology.name not in ('sky130A', 'gf180mcuD', 'ihp-sg13g2', 'ihp-sg13cmos5l'):
         raise NotImplementedError(f'Physical scenarios for {technology.name!r} are not implemented')
     return [TechnologyScenario(
-        id='capiche-'+corner+'-c', description='Source '+corner+'-C physical interconnect recipe with nominal R; '
+        id='capiche-'+corner+'-c', description='Source '+corner+'-C interconnect process stack with nominal R; '
         'layout-dependent MIM restrictions apply. No correlated R or device-reference claim',
         resistance='nominal', capacitance=corner, process_stack='capiche-'+corner,
         physical_stack_matches=True) for corner in ('low', 'high')]

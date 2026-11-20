@@ -22,7 +22,7 @@
 # --------------------------------------------------------------------------------
 #
 
-"""Direct physical recipes preserve the existing solver's options and device geometry."""
+"""Direct process-stack inputs preserve the existing solver's options and device geometry."""
 
 from collections import defaultdict
 from typing import Any, Dict, Tuple
@@ -132,7 +132,7 @@ def test_unavailable_mim_geometry_fails_before_direct_model_generation():
                                             'cap_cmim_20um_x_20um_over_m4_wire.gds.gz')
     technology.process_stack_layer_by_name['cmim_top'].metal_layer.physical_geometry_unavailable = True
     with patch.object(FasterCapModelBuilder, 'generate', side_effect=AssertionError('partial output')):
-        with pytest.raises(FasterCapError, match='no qualified geometry'):
+        with pytest.raises(FasterCapError, match='no supported geometry'):
             FasterCapInputBuilder(context, technology, 'VSS').build()
 
 

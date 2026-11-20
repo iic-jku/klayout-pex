@@ -120,7 +120,7 @@ def test_ideal_contact_zeros_have_explicit_extraction_rows_not_missing_primary_d
         assert row.resistance == contacts[aliases[row.contact_name]] == 0
     for row, alias in zip(resistance.vias, ('m2c', 'm3c', 'via3', 'via4')):
         assert row.resistance == contacts[alias] == 0
-    assert contacts['mimcc'] == 0  # The MIM top landing shares the Via4 law.
+    assert contacts['mimcc'] == 0  # The MIM top landing uses the same contact resistance as Via4.
     evidence = selected.selection.resistance.provenance
     assumption = next(a for a in evidence['assumptions'] if a['id'] == 'ideal-low-contacts')
     assert assumption['source_ids'] == ['contact-limits', 'magic-ideal-contact']
