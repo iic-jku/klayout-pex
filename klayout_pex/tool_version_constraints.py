@@ -74,6 +74,12 @@ class Tool(StrEnum):
                 m = re.search(r'(?:Magic\s+)?(\d+)\.(\d+)(?:\s+revision\s+|\.)(\d+)',
                               text, flags=re.IGNORECASE)
                 candidate = None if m is None else '.'.join(m.groups())
+            case Tool.FASTERCAP:
+                # Preserve the complete version token. Dropping rc/dev suffixes
+                # would let prereleases satisfy a stable calibration minimum.
+                m = re.search(r'\bv?(\d+\.\d+(?:\.\d+)?[A-Za-z0-9.+_-]*)', text,
+                              flags=re.IGNORECASE)
+                candidate = None if m is None else m.group(1)
             case _:
                 # A packaging release ('0.30.4-1' from the KLayout .deb) is not
                 # part of the tool's own version and is left out.
