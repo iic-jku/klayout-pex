@@ -598,6 +598,43 @@ def rc_run_from_lvsdb(gds_path: str, tmp_path: Path, *args: str) -> Tuple[int, s
                                     '--out-dir', str(tmp_path)])
 
 
+@allure.parent_suite('Unit Tests')
+@allure.tag('CLI', 'Device Models')
+def test_unmapped_device_policy_is_validated_before_loading_input(tmp_path: Path):
+    code, output = run_cli(KpexCLI().main, ['kpex', 'extract', '--2.5D', '--gds', 'missing.gds',
+                                            '--unmapped-devices', 'ignore', '--out-dir', str(tmp_path)])
+    assert code == 2, output
+    assert '--unmapped-devices' in output and 'error' in output and 'keep' in output
+    assert not (tmp_path / RESULT_FILE_NAME).exists()
+
+
+@allure.parent_suite('Unit Tests')
+@allure.tag('CLI', 'Device Models')
+@pytest.mark.parametrize('mode', ['C', 'CC', 'RC'])
+@pytest.mark.parametrize('policy', [None, 'error', 'keep'])
+def test_unmapped_devices_need_explicit_keep_policy(mode: str, policy: Optional[str], tmp_path: Path):
+    # Reuse a real LVS database but remove its model mapping: the missing model
+    # must not change extraction, terminal connectivity or parasitic writing.
+    path = tmp_path / 'netlist.spice'
+    arguments = ['--mode', mode, '--out-netlist', str(path)]
+    if policy is not None:
+        arguments += ['--unmapped-devices', policy]
+    with mock.patch.object(TechInfo, 'device_models', new_callable=mock.PropertyMock, return_value=device_models()):
+        code, output = rc_run_from_lvsdb(NFET_GDS_PATH, tmp_path, *arguments)
+    result = run_result(tmp_path / 'nfet_li1__nfet_li1')
+    if policy == 'keep':
+        assert code == 0, output
+        lines = path.read_text(encoding='utf-8').splitlines()
+        assert any(line.startswith('M') and 'sky130_fd_pr__nfet_01v8 ' in line for line in lines)
+        assert any(line.startswith('C') for line in lines)
+        assert any('Keeping unmapped devices' in warning for warning in result['warnings'])
+        assert not result['errors']
+    else:
+        assert code == ExitCode.DIAGNOSTIC_ERRORS, output
+        assert 'sky130_fd_pr__nfet_01v8 (1 devices): no mapping' in output
+        assert not path.exists()
+
+
 def edited_schematic_path(gds_path: str, tmp_path: Path, old: str, new: str) -> str:
     """
     :return: the path of a copy of the schematic of the design (next to its layout), with old replaced by new
