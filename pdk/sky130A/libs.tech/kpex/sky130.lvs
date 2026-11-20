@@ -649,9 +649,10 @@ class FixBJT4Transistor < RBA::GenericDeviceExtractor
     t_bulk       = layer_geometry[4]
   
     bjt.each_merged do |c|
-      dev_c = t_collector & c
-      dev_b = t_base & c
-      dev_e = t_emitter & c
+      device_region = RBA::Region::new(c)
+      dev_c = t_collector & device_region
+      dev_b = t_base & device_region
+      dev_e = t_emitter & device_region
       
       dev_c.each_merged do |cc|
         dev_b.each_merged do |b|
@@ -1325,21 +1326,9 @@ ntap_bjt  = tap.and(nsdm).not(diff_res).not(diff_cut)
 poly_con  = poly.not(poly_res).not(vpp).not(npnid)
 li_con    = li.not( li_res ).not(vpp)
 
-# [PEX] NOTE: this was missing in the original sky130A LVS script!
-#       we want to split mcon into mcon_con and mcon_vpp
-#       (might not cause an issue in regular LVS, but in PEX context necessary)
-licon_poly_con = licon.and(poly)
-# NOTE: licon_nsd_con and licon_psd_con follow the SONOS and diffusion resistor derivations,
-#       as they include their source/drain and terminals
-
-# [PEX] the licon over the n-taps, which joins li1 to the nwell below them
-#       (NOTE: a regular LVS would not do this, we need it for PEX)
-licon_ntap_con = licon.and(ntap_conn)
-
-# [PEX] the licon over the p-taps, which joins li1 to the substrate below them,
-#       so that PEX knows all of licon (NOTE: a regular LVS would not do this, we need it for PEX)
-licon_ptap_con = licon.and(ptap_conn)
-
+# [PEX] The poly/tap contacts follow the BJT derivations; diffusion contacts
+#       follow the SONOS and diffusion resistor derivations, including their terminals.
+#       Split mcon into ordinary wiring and VPP capacitor contacts.
 mcon_con  = mcon.not(vpp)
 via1_con  = via1.not(vpp)
 # [PEX] the via2 within the RF inductors, which join the met2 and met3 of their coils, left out like these
@@ -1479,6 +1468,24 @@ pnp_5v0_3p4x3p4_e = pnp_e.with_area(10.24.um, 12.96.um).interacting(pnp_e.edges.
 pnp_5v0_3p4x3p4_b = pnp_b.interacting(pnp_b.extents.interacting(pnp_5v0_3p4x3p4_e))
 pnp_5v0_3p4x3p4_c = pnp_c.interacting(pnp_c.extents.interacting(pnp_5v0_3p4x3p4_e))  
 
+
+# [PEX] The fixed-size BJT models include their terminal resistances (rb, re, rc).
+#       Their diffusion/tap contacts and the emitter-tied poly gate of the 11 V NPN
+#       belong to the device, not to ordinary poly or well wiring. Keep complete
+#       contact cuts, including those crossing the marker edge, and retain li1/met1.
+bjt_terminals = npn_5v0_1x1_e.join(npn_5v0_1x1_b).join(npn_5v0_1x1_c)
+    .join(npn_5v0_1x2_e).join(npn_5v0_1x2_b).join(npn_5v0_1x2_c)
+    .join(npn_11v0_1x1_e).join(npn_11v0_1x1_b).join(npn_11v0_1x1_c)
+    .join(pnp_5v0_0p68x0p68_e).join(pnp_5v0_0p68x0p68_b).join(pnp_5v0_0p68x0p68_c)
+    .join(pnp_5v0_3p4x3p4_e).join(pnp_5v0_3p4x3p4_b).join(pnp_5v0_3p4x3p4_c)
+tap_bjt_con = tap.and(bjt_terminals)
+bjt_poly_gate = poly.and(npnid).interacting(npn_11v0_1x1_c.extents)
+licon_bjt_con = licon.overlapping(bjt_terminals.join(bjt_poly_gate))
+ntap_conn = ntap_conn.not(tap_bjt_con)
+ptap_conn = ptap_conn.not(tap_bjt_con)
+licon_poly_con = licon.and(poly).not(licon_bjt_con)
+licon_ntap_con = licon.and(ntap_conn).not(licon_bjt_con)
+licon_ptap_con = licon.and(ptap_conn).not(licon_bjt_con)
 
 #================================
 # ----- DIODE DERIVATIONS -------
@@ -2096,6 +2103,9 @@ connect(licon_nsd_con,    licon)
 connect(licon_psd_con,    licon)
 connect(licon_ntap_con,   licon)
 connect(licon_ptap_con,   licon)
+connect(licon_bjt_con,    licon)
+connect(tap_bjt_con,      tap)
+connect(tap_bjt_con,      licon)
 
 # [PEX] Attaching pins (NOTE: a regular LVS would not do this, we need it for PEX)
 connect(poly_con    ,      poly_pin_con)
@@ -2122,6 +2132,14 @@ connect_implicit("*")
 #================================
 
 logger.info("Starting LVS BJT CONNECTIONS")
+
+# The intrinsic collector/base well stays on its device net when the terminal
+# taps are removed from ordinary well wiring for PEX. Otherwise it floats.
+connect(npn_c, tap_bjt_con)
+connect(npn_c, nwell)
+connect(npn_c, dnwell)
+connect(pnp_b, tap_bjt_con)
+connect(pnp_b, nwell)
 
 # ==============
 # ---- npn ----
