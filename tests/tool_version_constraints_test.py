@@ -37,6 +37,7 @@ from packaging.version import Version
 from klayout_pex.pdk_config import PDK
 from klayout_pex.tool_version_constraints import (
     TOOL_VERSION_CONSTRAINTS,
+    FASTERCAP_NUMERICAL_REPORT,
     Severity,
     Tool,
     ToolVersionConstraint,
@@ -82,6 +83,31 @@ class Test(unittest.TestCase):
         assert constraint.is_satisfied_by(Version('0.30.4'))
         assert not constraint.is_satisfied_by(Version('0.30.5'))
         assert constraint.is_satisfied_by(Version('0.30.6'))
+
+    def test_a_prerelease_banner_keeps_its_suffix(self):
+        assert Tool.FASTERCAP.parse_version('FasterCap version 6.3.0rc1') == Version('6.3.0rc1')
+        assert Tool.FASTERCAP.parse_version('FasterCap version 6.3.0.dev1') == Version('6.3.0.dev1')
+        assert Tool.FASTERCAP.parse_version('FasterCap version 6.3.0') == Version('6.3.0')
+
+    def test_a_prerelease_cannot_satisfy_a_stable_version_constraint(self):
+        constraint = ToolVersionConstraint(
+            id='TEST_PRERELEASE', tool=Tool.FASTERCAP, specifier='>= 6.3.0',
+            reason="a hypothetical calibration requirement")
+        assert not constraint.is_satisfied_by(Version('6.3.0rc1'))
+        assert not constraint.is_satisfied_by(Version('6.3.0.dev1'))
+        assert constraint.is_satisfied_by(Version('6.3.0'))
+
+    def test_a_fastercap_prerelease_fails_numerical_report_calibration(self):
+        assert not FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.3.0rc1'))
+        assert not FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.3.0.dev1'))
+        assert FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.3.0'))
+
+    def test_a_fastercap_prerelease_warns_at_the_stable_version_boundary(self):
+        with mock.patch('klayout_pex.tool_version_constraints.warning') as warning, \
+                mock.patch.object(Tool, 'detect_version', return_value=Version('6.3.0rc1')):
+            assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'})
+        assert any('Upgrading is recommended' in call.args[0]
+                   for call in warning.call_args_list)
 
     def test_a_pdk_constraint_applies_only_to_that_pdk(self):
         constraint = ToolVersionConstraint(

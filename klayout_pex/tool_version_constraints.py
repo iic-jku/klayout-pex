@@ -76,8 +76,12 @@ class Tool(StrEnum):
                 candidate = None if m is None else '.'.join(m.groups())
             case _:
                 # A packaging release ('0.30.4-1' from the KLayout .deb) is not
-                # part of the tool's own version and is left out.
-                m = re.search(rf'(?:{re.escape(self.value)}\s+)?v?(\d+\.\d+(?:\.\d+)?)',
+                # part of the tool's own version and is left out. A PEP 440
+                # prerelease/dev/post suffix (6.3.0rc1, 6.3.0.dev1) is part of
+                # the reported version and must be kept, so a prerelease cannot
+                # satisfy a stable-version constraint.
+                m = re.search(rf'(?:{re.escape(self.value)}\s+)?v?(\d+\.\d+(?:\.\d+)?'
+                              rf'(?:[._]?(?:dev|alpha|a|beta|b|rc|pre|preview|post)[._]?\d+)?)',
                               text, flags=re.IGNORECASE)
                 candidate = None if m is None else m.group(1)
 
