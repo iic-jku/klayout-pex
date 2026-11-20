@@ -207,3 +207,46 @@ def test_report_separates_required_and_recommended_ranges():
     header, row = [call.args[0] for call in printed.call_args_list]
     assert 'Required' in header and 'Recommended' in header
     assert '0.30.3' in row and '0.30.13' in row
+
+
+@pytest.mark.parametrize('version', [
+    '6.3.0-rc1', '6.3.0_rc_1', '6.3.0rc', '6.3.0preview1', '6.3.0c1',
+    '6.3.0.dev', '6.3.0.post1.dev1', '6.3.0rc1.post2.dev3', '6.3.0+local.1',
+])
+def test_fastercap_keeps_complete_version_token(version: str):
+    # PEP 440 allows separators, aliases, implicit zeroes and combined suffixes.
+    # Keeping only the first suffix can change ordering and solver provenance.
+    assert Tool.FASTERCAP.parse_version(f'FasterCap version {version}') == Version(version)
+
+
+@pytest.mark.parametrize('version', ['6.3.0-rc1', '6.3.0rc', '6.3.0.dev'])
+def test_calibration_rejects_banners_below_stable_minimum(version: str):
+    import subprocess
+    import sys
+    from klayout_pex.calibration.solve import _solver_identity
+    from klayout_pex.calibration.validation import CalibrationError
+
+    # Exercise detection and the actual calibration gate, not a pre-parsed mock.
+    # FasterCap may report its version while returning an unsupported-option code.
+    response = subprocess.CompletedProcess([], 64, f'FasterCap version {version}', '')
+    with mock.patch('klayout_pex.tool_version_constraints.subprocess.run', return_value=response):
+        with pytest.raises(CalibrationError, match='Calibration requires FasterCap'):
+            _solver_identity(sys.executable)
+
+
+@pytest.mark.parametrize('version,accepted', [
+    ('6.3.0.post1.dev1', False), ('6.3.0.post1', True), ('6.3.0.post2', True),
+])
+def test_development_suffix_keeps_postrelease_boundary(version: str, accepted: bool):
+    # post1.dev1 is newer than 6.3.0, but must not pass a post1 minimum.
+    constraint = ToolVersionConstraint(
+        id='TEST_POSTRELEASE', tool=Tool.FASTERCAP, specifier='>= 6.3.0.post1',
+        reason='a hypothetical fix first available in a postrelease')
+    detected = Tool.FASTERCAP.parse_version(f'FasterCap version {version}')
+    assert detected is not None
+    assert constraint.is_satisfied_by(detected) == accepted
+
+
+@pytest.mark.parametrize('version', ['6.3.0rcgarbage', '6.3.0.post1.devgarbage'])
+def test_invalid_fastercap_suffix_is_not_silently_truncated(version: str):
+    assert Tool.FASTERCAP.parse_version(f'FasterCap version {version}') is None
