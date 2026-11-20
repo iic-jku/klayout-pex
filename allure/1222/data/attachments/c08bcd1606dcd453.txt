@@ -1,0 +1,13 @@
+SUBPROCESS __kpex__:kpex_cli.py:2099 kpex extract --pdk ihp-sg13g2 --lvsdb 'D:\a\klayout-pex\klayout-pex\testdata\lvsdb\ihp-sg13g2\sg13g2_pr__cmim\cmim.lvsdb.gz' --fastcap --blackbox y --out-dir 'C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_field_solver_blackbox_mim1'
+INFO     __kpex__:kpex_cli.py:1044 LVSDB input file passed, bypassing LVS
+INFO     __kpex__:run_result.py:235 Wrote result file to: C:\Users\runneradmin\AppData\Local\Temp\pytest-of-runneradmin\pytest-0\test_field_solver_blackbox_mim1\cmim__cmim\kpex_result.json
+INFO     __kpex__:kpex_cli.py:2269 Peak memory (resident set size) after preparing the LVSDB: 316.6 MiB
+INFO     __kpex__:kpex_cli.py:2273 (46, 0) -> (pwell pwell_sub)
+INFO     __kpex__:kpex_cli.py:2273 (126, 0) -> (topmetal1_con)
+INFO     __kpex__:kpex_cli.py:2273 (125, 10) -> (mim_via)
+INFO     __kpex__:kpex_cli.py:2273 (36, 0) -> (cmim_top)
+INFO     __kpex__:kpex_cli.py:2273 (67, 0) -> (metal5_n_cap metal5_cap)
+INFO     __kpex__:kpex_cli.py:2273 (67, 2) -> (metal5_pin_con)
+INFO     __kpex__:kpex_cli.py:2273 (126, 2) -> (topmetal1_pin_con)
+ERROR    __kpex__:kpex_cli.py:2134 FasterCap/FastCap2 cannot use --blackbox y with retained metal-capacitor models ($1 (cap_cmim)): the field matrix includes their intrinsic plate capacitance and would count it twice. Use --2.5D --blackbox y to retain these models, or --blackbox n to replace them with full-geometry field-solver capacitance. Exclusion markers alone do not establish intrinsic device ownership
+INFO     __kpex__:kpex_cli.py:2138 Peak memory (resident set size) after the run: 316.6 MiB
