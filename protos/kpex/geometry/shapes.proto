@@ -40,6 +40,9 @@ message Box {
 }
 
 message Polygon {
+    // One contour, including holes joined to the outer hull by retraced,
+    // zero-width cutlines (KLayout Polygon.resolved_holes). Readers must honor
+    // the contour winding; filling only its outer boundary changes geometry.
     repeated Point hull_points = 1;
 
     string net = 10; // property
