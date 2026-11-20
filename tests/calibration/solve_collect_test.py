@@ -474,12 +474,17 @@ def test_cli_records_explicit_controls_and_refinement_mode(
         gmres_tolerance=1e-7 if automatic is None else None)
 
 
+@pytest.fixture(params=['6.3.0', '6.4.0'])
+def report_version(request: pytest.FixtureRequest) -> str:
+    return request.param
+
+
 @pytest.fixture
-def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch) -> Callable:
+def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch, report_version: str) -> Callable:
     from tests.common.fastercap_report import numerical_report
     from klayout_pex.calibration.solve import _solver_identity
     identity = _solver_identity('unused')
-    identity.version = '6.3.0'
+    identity.version = report_version
 
     def run(exe: str, deck: str, log: str, *args: Any, **kwargs: Any) -> FasterCapRunResult:
         result = fake_solver(exe, deck, log, *args, **kwargs)
@@ -488,6 +493,7 @@ def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch) -> Cal
         data = numerical_report(['g1_B', 'g2_substrate', 'g3_A'],
                                 [[5.000000000123456e-9, -2e-9, -1.000000000123456e-9],
                                  [-2e-9, 6e-9, -3e-9], [-1.01e-9, -3e-9, 7.000000000123456e-9]], deck)
+        data['build']['version'] = f'FasterCap version {report_version}'
         Path(kwargs['report_path']).write_text(json.dumps(data), encoding='utf-8')
         return result
     monkeypatch.setattr('klayout_pex.fastercap.fastercap_runner.run_fastercap', run)
@@ -495,14 +501,18 @@ def report_solver(fake_solver: Callable, monkeypatch: pytest.MonkeyPatch) -> Cal
 
 
 def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
-        preparation: Path, report_solver: Callable, tmp_path: Path):
+        preparation: Path, report_solver: Callable, report_version: str, tmp_path: Path):
     import shutil
+    from klayout_pex_protobuf.kpex.calibration.solving_pb2 import CalibrationRunManifest
     from klayout_pex_protobuf.kpex.result.capacitance_matrix_pb2 import MaxwellCapacitanceMatrix as Matrix
     result = solve_calibration(preparation, tmp_path / 'runs')
     assert result.successful_cases == 2
     assert set(result.written_paths) == {p for p in (tmp_path / 'runs').rglob('*') if p.is_file()}
     data = read_message(result.collection_path, CalibrationCollection())
     case = data.cases[0]
+    # Raising the minimum for new solves must not relabel or reject saved runs
+    # from the earlier report-capable solver during offline collection.
+    assert read_message(result.manifest_path, CalibrationRunManifest()).solver.version == report_version
     assert case.measured_matrix.index_convention == Matrix.EXCITATION_ROWS
     assert case.native_matrix.index_convention == Matrix.EXCITATION_ROWS
     assert list(case.measured_matrix.rows[0].values) == [7.000000000123456e-9 / 1e6, -1.01e-9 / 1e6]
@@ -512,7 +522,9 @@ def test_numerical_report_precision_artifacts_and_relocated_offline_collection(
     raw = tmp_path / 'runs/cases/plates/numerical-report.json'
     assert (tmp_path / 'runs/collection/runs/cases/plates/numerical-report.json').read_bytes() == raw.read_bytes()
     shutil.move(tmp_path / 'runs', tmp_path / 'relocated')
-    with mock.patch('subprocess.Popen', side_effect=AssertionError('collection must never execute')):
+    with mock.patch('subprocess.Popen', side_effect=AssertionError('collection must never execute')), \
+            mock.patch('klayout_pex.calibration.solve._solver_identity',
+                       side_effect=AssertionError('collection must not require an installed solver')):
         again = collect_calibration(tmp_path / 'relocated/manifest.json', tmp_path / 'again')
     assert read_message(again.manifest_path, CalibrationCollection()) == data
 
@@ -559,14 +571,16 @@ def test_changed_numerical_report_is_rejected(preparation: Path, report_solver: 
     assert not (tmp_path / 'collected').exists()
 
 
-@pytest.mark.parametrize('version,accepted', [('6.2.1', False), ('6.2.99', False), ('6.3.0', True), ('6.3.1', True)])
-def test_calibration_requires_report_capable_solver(version: str, accepted: bool, monkeypatch: pytest.MonkeyPatch):
-    from packaging.version import Version
+@pytest.mark.parametrize('version,accepted', [
+    ('6.2.1', False), ('6.3.0', False), ('6.3.99', False), ('6.4.0.dev1', False), ('6.4.0rc1', False),
+    ('6.4.0', True), ('6.4.1', True),
+])
+def test_calibration_requires_corrected_solver(version: str, accepted: bool, monkeypatch: pytest.MonkeyPatch):
     from klayout_pex.calibration.solve import _solver_identity
     from klayout_pex.tool_version_constraints import Tool
-    monkeypatch.setattr(Tool, 'detect_version', lambda *_: Version(version))
+    monkeypatch.setattr(Tool, 'detect_version', lambda *_: Tool.FASTERCAP.parse_version(f'FasterCap version {version}'))
     if accepted:
         assert _solver_identity(sys.executable).version == version
     else:
-        with pytest.raises(CalibrationError, match='6.3.0'):
+        with pytest.raises(CalibrationError, match='6.4.0'):
             _solver_identity(sys.executable)

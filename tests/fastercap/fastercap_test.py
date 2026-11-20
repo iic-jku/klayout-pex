@@ -87,22 +87,18 @@ def test_single_plate_scene_preserves_subnanometre_source_heights():
 @pytest.mark.slow
 @pytest.mark.fastercap
 def test_single_plate_100um_x_100um_li1_over_substrate():
-    #_______________________________ NOTE: with halo=8µm __________________________________
-    # C0 PLATE VSUBS 0.38618p
-    #
     # NOTE: the substrate is the port sky130_gnd, as the pattern has no substrate net (no transistor)
-    #
-    # NOTE: the values of FasterCap 6.2.1, on x86-64 and arm64 alike: it builds without FMA, which made arm64
-    #       builds differ (396.78, 3.33 vs. 390.83 on x86-64), and refines the links of dielectric interfaces
-    #       near super panels
     # Canonical input retains the 0.1 nm source grid instead of flooring heights
-    # to the layout's 1 nm grid. The resulting mesh changes this default 5% run
-    # from 393.04/3.99 fF to the values below. Independent 0.5% Jacobi controls
-    # differ by only 0.045% between old/new input; this exact CSV is a regression
-    # for the default settings, not a claim of 0.01 fF physical accuracy.
+    # to the layout's 1 nm grid. FasterCap 6.4 corrects conductor hierarchy bounds
+    # and algebraic accuracy, changing the previous 392.14/3.97 fF default result.
+    # The released macOS arm64 and Ubuntu amd64 packages give the same CSV below.
+    # Independent -pj -d0.1 controls at -a0.005 and -a0.0025 give 372.42 fF mutual
+    # capacitance, 0.65% below the default result. This exact CSV checks default
+    # extraction and netlist conversion, not 0.01 fF physical accuracy.
+    # Numerical corrections: https://github.com/iic-jku/FasterCap/releases/tag/v6.4.0
     assert_expected_matches_obtained(
         'test_patterns', 'single_plate_100um_x_100um_li1_over_substrate.gds.gz',
         expected_csv_content="""Device;Net1;Net2;Capacitance [fF]
-Cext_0_1;sky130_gnd;PLATE;392.14
-Cext_1_1;PLATE;sky130_gnd;3.97"""
+Cext_0_1;sky130_gnd;PLATE;374.82
+Cext_1_1;PLATE;sky130_gnd;4.26"""
         )

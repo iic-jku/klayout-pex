@@ -43,6 +43,11 @@ Check out the [documentation website](https://iic-jku.github.io/klayout-pex-webs
 
 After that, you should be able to run `kpex --help`.
 
+New calibration runs require `FasterCap 6.4.0` or later for its numerical corrections.
+Ordinary extraction warns when an older version is used. Existing `6.3` numerical reports
+remain collectable with their recorded solver version and original precision. Recompute
+calibration measurements with the corrected solver before using them to fit coefficients.
+
 ## Port labels
 
 `kpex extract --port-labels auto` uses top-level labels for ports when the top cell has a label on a pin shape.

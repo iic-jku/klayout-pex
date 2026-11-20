@@ -448,7 +448,7 @@ reference accuracy before those measurements are used to update coefficients.
 
 ### Running calibration and collecting numerical reports
 
-`kpex calibrate solve` requires `FasterCap >= 6.3.0` and collects its full-precision
+`kpex calibrate solve` requires `FasterCap >= 6.4.0` and collects its full-precision
 numerical report. For a preparation in `calibration-cases-sky130A`:
 
 ```bash
@@ -491,7 +491,10 @@ older or unrecognized installations retain console parsing and the version warni
 The native report is listed with the run's log artifacts. Raw and averaged CSV files
 remain distinct, and netlist generation retains its existing off-diagonal averaging.
 Reusing an extraction output directory replaces its named report, log and CSV outputs.
-The integration workflow pins the `6.3.0` package and verifies its SHA256 checksum.
+The integration workflow pins the `6.4.0` package and verifies its SHA256 checksum.
+Saved `6.3` reports remain collectable offline with their original precision and
+solver identity. Recompute earlier calibration measurements with the corrected
+solver before fitting coefficients.
 
 ### Result file
 

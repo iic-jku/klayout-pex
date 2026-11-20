@@ -194,7 +194,7 @@ def extraction_args(tmp_path: Path) -> Namespace:
                      fastercap_galerkin_scheme=False, fastercap_jacobi_preconditioner=False)
 
 
-@pytest.mark.parametrize('version', [None, '6.2.1', '6.3.0'])
+@pytest.mark.parametrize('version', [None, '6.2.1', '6.3.0', '6.4.0'])
 def test_extraction_selects_report_by_version_and_replaces_previous_output(
         tmp_path: Path, report_data: Dict[str, Any], extraction_args: Namespace, version: Optional[str]):
     from packaging.version import Version
@@ -204,24 +204,27 @@ def test_extraction_selects_report_by_version_and_replaces_previous_output(
     raw = tmp_path / 'test_FasterCap_Result_Matrix_Raw.csv'
     report = tmp_path / 'test_FasterCap_Report.json'
     report.write_text('stale report', encoding='utf-8')
+    reports_supported = version in ('6.3.0', '6.4.0')
+    if reports_supported:
+        report_data['build']['version'] = f'FasterCap version {version}'
 
     def run(**kwargs: Any) -> FasterCapRunResult:
         Path(kwargs['log_path']).write_text('Capacitance matrix is:\nDimension 2 x 2\n'
                                            'g1_A 9e-9 -2e-9\ng2_B -3e-9 8e-9\n', encoding='utf-8')
-        if version == '6.3.0':
+        if reports_supported:
             assert kwargs['report_path'] == str(report)
             assert not report.exists()
             report.write_text(json.dumps(report_data), encoding='utf-8')
         else:
             assert kwargs['report_path'] is None
         return FasterCapRunResult(('FasterCap', 'geometry.lst'), 0, 0.1,
-                                   str(report) if version == '6.3.0' else None)
+                                   str(report) if reports_supported else None)
 
     class MatrixObserved(Exception):
         pass
 
     def observe(matrix: CapacitanceMatrix) -> CapacitanceMatrix:
-        if version == '6.3.0':
+        if reports_supported:
             assert matrix.rows == [[value / 1e6 for value in row]
                                    for row in report_data['iterations'][0]['matrix']['real']]
         else:
