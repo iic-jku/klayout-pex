@@ -74,10 +74,13 @@ class ShapesConverter:
                               polygon_kly: kdb.Polygon,
                               shape_pb: shapes_pb2.Shape):
         shape_pb.kind = shapes_pb2.Shape.Kind.SHAPE_KIND_POLYGON
-        net_name = polygon_kly.property('net')
+        net_name = polygon_kly.property('net') if isinstance(polygon_kly, kdb.PolygonWithProperties) else None
         if net_name:
             shape_pb.polygon.net = net_name
-        for p_kly in polygon_kly.each_point_hull():
+        # The protobuf stores one contour. KLayout represents holes in that
+        # contour with retraced cutlines, preserving occupied area without
+        # changing the input polygon or adding filled bridges across holes.
+        for p_kly in polygon_kly.resolved_holes().each_point_hull():
             self.klayout_point_to_pb(p_kly, shape_pb.polygon.hull_points.add())
 
     def klayout_shape(self, shape: shapes_pb2.Shape) -> kdb.Shape:

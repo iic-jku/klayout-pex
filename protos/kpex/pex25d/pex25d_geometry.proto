@@ -28,11 +28,11 @@
 // file by kpex.pex25d.Units, in pex25d_units.proto.
 //
 // These deliberately do not reuse kpex.geometry.{Box,Polygon}:
-//   * kpex.geometry.Polygon has only `hull_points` and cannot express the
-//     HOLE rings that PEX25D POLYGON records carry;
+//   * kpex.geometry.Polygon stores holes as retraced cutlines in `hull_points`,
+//     rather than the independent HOLE rings that PEX25D POLYGON records carry;
 //   * kpex.geometry.Box/Polygon carry a `net` property, whereas in PEX25D the
 //     net lives on the CONDUCTOR the shape belongs to, never on the shape.
-// If holes are added to kpex.geometry.Polygon later, Polygon2D can be
+// If independent hole rings are added to kpex.geometry.Polygon later, Polygon2D can be
 // replaced by it; the conversion is mechanical.
 //
 syntax = "proto3";
