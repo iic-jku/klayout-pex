@@ -53,6 +53,35 @@
 - MAGIC: `extract do resistance` already runs extresist; `extresist all` doesn't fix
   multi-port nets. Compare R with 2.5D effective resistances.
 
+### Technical terminology
+
+- Use established terminology for physical quantities, device models, extraction methods
+  and process variation. Do not invent alternative names or use vague umbrella terms when
+  a precise technical term exists
+- Prefer maintained PDK specifications for process-specific meanings and open technical
+  documentation for extraction concepts. Useful references include
+  [OpenRCX documentation](https://openroad.readthedocs.io/en/latest/main/src/rcx/README.html),
+  [SKY130 process criteria](https://skywater-pdk.readthedocs.io/en/main/rules/assumptions.html) and
+  [GF180MCU electrical specifications](https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs.html)
+- Verify unfamiliar or ambiguous terminology against a relevant primary source before
+  introducing it. Record the reference near the definition when the interpretation is
+  non-obvious. Do not call terminology "official" or "standard" without an applicable
+  authoritative definition
+- Name the actual concept: for example, sheet resistance, contact resistance, capacitance
+  model, process-stack parameters or dimensional bias. Reserve "law" for an identified
+  physical law or explicitly defined mathematical relationship, not an unspecified
+  collection of parameters or assumptions
+- Preserve distinctions between source data, assumptions, empirical models and physical
+  equations. State what "validated", "calibrated" or "qualified" means and what evidence
+  supports it. Agreement with a source table or numerical solver does not establish
+  agreement with silicon measurements
+- When a project-specific concept needs a new name, explain why existing terminology is
+  insufficient, define its meaning and scope, and settle the name before expanding the
+  interface. Do not present project-specific vocabulary as an industry convention
+- Apply the chosen terminology consistently across schemas, APIs, CLI help, comments,
+  tests, documentation, issues and PRs. Preserve historical quotations and source
+  identifiers, explaining their terminology where necessary
+
 ## Code
 
 - Validate cheap inputs (CLI args, names) before loading or resolving; error messages list

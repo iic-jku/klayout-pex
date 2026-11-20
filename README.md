@@ -191,6 +191,29 @@ The transformation intentionally removes inter-net transfer, so an equivalence c
 coupled input is not expected to pass. A subsequent `netlist reduce` check should use the grounded
 netlist as its reference.
 
+## Technology and corner terminology
+
+The technology catalog separates independently sourced inputs. Their combination is
+explicit; a matching name alone does not establish correlated process variation.
+
+| Term | Meaning in KPEX |
+| --- | --- |
+| Process stack | Conductor and dielectric geometry and material parameters used to construct the field-solver model |
+| Resistance parameters | Sheet-resistance and per-contact/per-cut values, with any explicitly specified dimensional corrections |
+| Capacitance model | Equations or coefficient tables relating geometry to capacitance, with their stated assumptions and range of validity |
+| Extraction corner | An identified set of extraction parameters representing a specified process condition |
+| Sensitivity analysis | Deliberately varying selected parameters while holding others fixed, without assuming a correlated process corner |
+| Technology scenario | The KPEX catalog's explicit selection of resistance, capacitance, process-stack and optional device-reference datasets |
+
+Source review establishes where parameters came from and whether they apply to the
+selected process option. Numerical checks assess the implemented calculation under
+their test conditions. Neither alone establishes agreement with silicon measurements.
+The catalog records remaining assumptions and unsupported geometry explicitly.
+
+Terminology references: [OpenRCX extraction and process corners](https://openroad.readthedocs.io/en/latest/main/src/rcx/README.html),
+[SKY130 material dimensions](https://skywater-pdk.readthedocs.io/en/main/rules/assumptions.html),
+and [GF180MCU electrical parameters](https://gf180mcu-pdk.readthedocs.io/en/latest/analog/spice/elec_specs/elec_specs.html).
+
 ## VACASK conversion
 
 `netlist convert --to vacask circuit.spice` writes two files:
