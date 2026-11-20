@@ -408,7 +408,8 @@ class SubcircuitModelsReader < RBA::NetlistSpiceReaderDelegate
   # [PEX] varactors (see VarCap), also as subcircuit calls, as xschem and Magic write them
   #       (e.g. XC1 c0 c1 b sky130_fd_pr__cap_var_lvt W=1 L=2 m=1)
   def varactor?(model)
-    model.include?('SKY130') && model.include?('CAP_VAR')
+    # [PEX] match device models, not user cells such as sky130_cap_var_hvt (#587).
+    ["SKY130_FD_PR__CAP_VAR_LVT", "SKY130_FD_PR__CAP_VAR_HVT"].include?(model)
   end
 
   def wants_subcircuit(name)
