@@ -65,7 +65,7 @@ from .klayout.lvs_runner import LVSError, LVSRunner
 from .klayout.lvsdb_extractor import KLayoutExtractionContext, KLayoutExtractedLayerInfo, LVSDBError, PORT_LABEL_MODES
 from .klayout.netlist_expander import NetlistExpander, check_field_solver_devices
 from .klayout.netlist_csv import NetlistCSVWriter
-from .klayout.netlist_printer import NetlistHeader, NetlistPrinter
+from .klayout.netlist_printer import NetlistHeader, NetlistPrinter, UnmappedDevicePolicy
 from .klayout.netlist_reducer import NetlistReducer
 from .klayout.output_files import write_output_file
 from .klayout.repair_rdb import repair_rdb
@@ -309,6 +309,12 @@ class KpexCLI:
                                     f"(see 'Result file' in DEVELOPMENT.md) (default is none)")
 
         if include_spice_output:
+            group_pex.add_argument('--unmapped-devices', choices=list(UnmappedDevicePolicy),
+                                   type=UnmappedDevicePolicy, default=UnmappedDevicePolicy.ERROR,
+                                   help='Devices without a technology model mapping: error stops netlist export; '
+                                        'keep uses KLayout native LVS output with class names and a '
+                                        'warning. Supply compatible simulation models yourself. Invalid existing '
+                                        'mappings remain errors (default is %(default)s)')
             add_argument_with_former_name(group_pex, "--out-netlist", "--out_netlist", "-o",
                                           dest="output_netlist_path", default=None,
                                           help="Optional additional output path of the netlist, of one engine only, "
@@ -1179,7 +1185,8 @@ class KpexCLI:
                                tech=args.pdk.name.lower(),
                                date=datetime.now())
         return NetlistPrinter(header=header,
-                              device_models=tech_info.device_models)
+                              device_models=tech_info.device_models,
+                              unmapped_devices=args.unmapped_devices)
 
     def add_netlist(self,
                     kind: FileKind,
