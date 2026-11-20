@@ -68,7 +68,7 @@ def test_reviewed_metadata_changes_identity_of_file_but_not_numerical_payload(tm
         dataset.description = 'Reviewed description with µm and Ω'
         dataset.provenance.data_revision = 'test-2'
         dataset.provenance.history.add(revision='test-2', date='2026-11-12',
-                                       summary='Clarify source assumptions', reason='Explain the existing recipe',
+                                       summary='Clarify source assumptions', reason='Explain the existing process stack',
                                        source_ids=['recipe'], references=['https://example.org/review/2'])
         dataset.provenance.assumptions[0].reason = 'Document the existing synthetic coefficients more precisely'
 
@@ -149,7 +149,7 @@ def test_history_date_boundaries_allow_same_day_revisions_without_sorting_ids(
             load_technology_catalog(path)
 
 
-def test_exact_source_hash_can_identify_an_unversioned_local_recipe(tmp_path: Path):
+def test_exact_source_hash_can_identify_an_unversioned_local_generator(tmp_path: Path):
     path = small_catalog(tmp_path)
     catalog = read_catalog(path)
     catalog.provenance.sources[0].revision = ''
@@ -165,7 +165,7 @@ def test_scenario_records_the_selected_components_own_revision(tmp_path: Path):
 
     def revise(dataset: TechnologyDataset):
         dataset.provenance.data_revision = 'r-2'
-        dataset.provenance.history.add(revision='r-2', date='2026-11-13', summary='Replace resistance law',
+        dataset.provenance.history.add(revision='r-2', date='2026-11-13', summary='Replace sheet-resistance parameters',
                                        reason='Use a separately reviewed synthetic scenario')
         dataset.resistance.layers[0].resistance = 200
 
@@ -184,7 +184,7 @@ def test_writer_checks_evidence_before_creating_output(tmp_path: Path):
     assert not path.parent.exists()
 
 @pytest.mark.parametrize('pdk', list(PDK), ids=str)
-def test_bundled_sources_keep_corrected_capacitance_separate_from_nominal_recipes(pdk: PDK):
+def test_bundled_sources_keep_corrected_capacitance_separate_from_nominal_generators(pdk: PDK):
     selected = load_technology_catalog(Path(pdk.config.tech_catalog_path)).selection
     sources = {source['id']: source for source in selected.capacitance.provenance['sources']}
     # The corrected IHP fit is on the reviewed PR revision, not its older upstream main.
@@ -193,7 +193,7 @@ def test_bundled_sources_keep_corrected_capacitance_separate_from_nominal_recipe
     assert sources['extraction-table']['revision'] == expected
     assert expected in sources['extraction-table']['uri']
     assert len(sources['extraction-table']['sha256']) == 64
-    # A build must not rewrite the identity of the existing numerical recipe.
+    # A build must not rewrite the identity of the existing numerical generator input.
     assert sources['recipe']['revision'] == '1b923ea54d8d9b1028de1043afd654c9e1838049'
     assert 'extraction-table' not in {source['id'] for source in selected.resistance.provenance['sources']}
     if str(pdk).startswith('ihp-'):

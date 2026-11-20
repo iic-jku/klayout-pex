@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Independent compact-model references for the supported nonnominal MIM laws."""
+"""Independent compact-model references for the supported nonnominal MIM capacitance models."""
 
 from typing import Dict, List, Tuple
 
@@ -42,7 +42,7 @@ def _source(identifier: str, repository: str, revision: str, path: str) -> Techn
 
 def _mim_reference(terminals: List[str], width: str, length: str, area: float, edge: float,
                    source: str, description: str) -> DeviceCapacitanceModel:
-    # Dimensions below are micrometres; area and edge terms retain their separate laws.
+    # Dimensions below are micrometres; area and edge terms retain their separate capacitance coefficients.
     return DeviceCapacitanceModel(
         terminal_names=terminals,
         capacitance='area_density*width*length + edge_density*2*(width+length)',
@@ -67,7 +67,7 @@ def _dataset(technology: Technology, identifier: str, sources: List[TechnologySo
     provenance.assumptions.add(
         id='partial-device-coverage', description='Only the listed MIM devices have corner references; '
         'unlisted MOM, RF and other capacitor models remain unchecked',
-        reason='Interconnect corner coefficients do not establish those devices\' independent reference laws',
+        reason='Interconnect corner coefficients do not establish those devices\' independent capacitance models',
         source_ids=[source.id for source in sources])
     provenance.history.add(revision='1', date='2026-11-13', summary='Add compact-model MIM corner references',
                            reason='Check the same corner without scaling nominal MOM estimates',

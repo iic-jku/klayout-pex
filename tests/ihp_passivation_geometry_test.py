@@ -114,10 +114,10 @@ def test_ihp_nominal_stack_records_passivation_correction_and_preserves_source_h
     assert revision['date'] == '2026-11-13'
     assert 'https://github.com/iic-jku/klayout-pex/issues/556' in revision['references']
     sources = {source['id']: source for source in evidence['sources']}
-    expected_recipe_hash = ('f7a5ba53bf51b61602d7baf40fb20dffbeed13613482d8c6ab8cc9994345daf6'
+    expected_stack_hash = ('f7a5ba53bf51b61602d7baf40fb20dffbeed13613482d8c6ab8cc9994345daf6'
                             if pdk == PDK.IHP_SG13G2 else
                             '291c5731174298c993adca376d391bc508800b0bfd709be0cb6e5ff48dcb61dd')
-    assert sources['passivation-recipe']['sha256'] == expected_recipe_hash
+    assert sources['passivation-recipe']['sha256'] == expected_stack_hash
     assert sources['conformal-mapping']['sha256'] == 'ef91dec393e1ac97bc1f491a8c605d1842533bc5a2deff5b53879f9fc8199ea7'
     for identity in ('passivation-recipe', 'conformal-mapping'):
         assert sources[identity]['revision'] == '85905e8810982bd89966cbf8b7e9d3fd1e922d42'

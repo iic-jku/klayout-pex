@@ -186,7 +186,7 @@ class PEX25DBuilder(PEX25DStackBuilder):
             for net in self.pex_context.top_circuit.each_net():
                 shapes = self.shapes_of_net(name, net)
                 if shapes is not None and not shapes.is_empty():
-                    raise BuildError(f"Selected physical recipe has no qualified geometry for '{name}', "
+                    raise BuildError(f"Selected process stack has no supported geometry for '{name}', "
                                      f"present on net '{net.expanded_name()}'")
 
     def build_ground_plane(self, pex25d_file: Any):

@@ -271,10 +271,10 @@ def test_supplied_corner_selection_is_preserved_and_physically_checked(tmp_path:
     ('analytical-only', False, 'no matching physical stack'),
     ('nominal', True, 'Physical stack changed after corner'),
 ])
-def test_unqualified_or_stale_stack_cannot_be_presented_as_physical_calibration(
+def test_unmatched_or_stale_stack_cannot_be_presented_as_physical_calibration(
         tmp_path: Path, specification: Path, tech_info: TechInfo, scenario: str, mutate_stack: bool, error: str):
-    # A catalog may select valid empirical tables without a matching field recipe.
-    # Even a qualified selection becomes stale if its physical dimensions change.
+    # A catalog may select valid empirical tables without a matching field-solver process stack.
+    # Even a matching selection becomes stale if its physical dimensions change.
     path = tmp_path / 'catalog.pb.json'
     write_test_catalog(tech_info.tech, path)
     add_scenario(path, name='analytical-only')
@@ -317,7 +317,7 @@ def test_finite_coating_and_margin_cannot_reach_native_endpoint(
 def test_unavailable_requested_profile_is_rejected_before_preparing_geometry(
         tmp_path: Path, specification: Path, tech_info: TechInfo):
     tech_info.process_metal_layers[0].metal_layer.physical_geometry_unavailable = True
-    with pytest.raises(CalibrationError, match="no qualified physical geometry for 'M1'"):
+    with pytest.raises(CalibrationError, match="no supported physical geometry for 'M1'"):
         prepare_calibration(tech_info, read_patterns(specification), tmp_path / 'prepared')
     assert not (tmp_path / 'prepared').exists()
 

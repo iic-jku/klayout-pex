@@ -56,17 +56,17 @@ def _rows(rows: List[List[Any]], expected: Set[str], size: int) -> Dict[str, Lis
     result = {}
     for row in rows:
         if not isinstance(row, list) or len(row) != size or not isinstance(row[0], str) or row[0] in result:
-            raise ValueError(f'Invalid or duplicate physical recipe row: {row}')
+            raise ValueError(f'Invalid or duplicate process-stack row: {row}')
         result[row[0]] = row[1:]
     if set(result) != expected:
-        raise ValueError(f'Incomplete physical recipe coverage: expected {sorted(expected)}, found {sorted(result)}')
+        raise ValueError(f'Incomplete process-stack coverage: expected {sorted(expected)}, found {sorted(result)}')
     return result
 
 
 def _number(value: Any, positive: bool = False, nonnegative: bool = False) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) \
             or (positive and value <= 0) or (nonnegative and value < 0):
-        raise ValueError(f'Invalid physical recipe number: {value}')
+        raise ValueError(f'Invalid process-stack parameter: {value}')
     return value
 
 
@@ -74,12 +74,12 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
     document = json.loads(table_path.read_text(encoding='utf-8'))
     if type(document['schema_version']) is not int or document['schema_version'] != 1 \
             or document['technology_id'] != technology.name:
-        raise ValueError('Unexpected physical recipe table')
+        raise ValueError('Unexpected process-stack table')
     if set(document['physical']) != {'capiche-low', 'capiche-high'}:
-        raise ValueError('Physical recipe table needs explicit low/high components')
+        raise ValueError('Process-stack table needs explicit low/high components')
     datasets = []
     for identity, table in document['physical'].items():
-        dataset = TechnologyDataset(id=identity, description=f'{identity} interconnect recipe; MIM geometry unavailable')
+        dataset = TechnologyDataset(id=identity, description=f'{identity} interconnect process stack; MIM geometry unavailable')
         dataset.process_stack.CopyFrom(technology.process_stack)
         layers = {layer.name: layer for layer in dataset.process_stack.layers}
         def names_by_type(kind: int) -> Set[str]:
@@ -108,7 +108,7 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
         removed = set(table['removed_conformal'])
         conformal_names = names_by_type(ProcessStackInfo.LAYER_TYPE_CONFORMAL_DIELECTRIC)
         if len(removed) != len(table['removed_conformal']) or not removed <= conformal_names:
-            raise ValueError('Only declared conformal dielectric profiles may be omitted by the source recipe')
+            raise ValueError('Only declared conformal dielectric profiles may be omitted by the source process stack')
         for name, (permittivity, over, field, side, reference) in _rows(
                 table['conformal'], conformal_names-removed, 6).items():
             layer = layers[name].conformal_dielectric_layer
@@ -130,13 +130,13 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
         provenance.data_revision = '1'
         _, nominal_components = nominal_provenance(technology.name)
         provenance.sources.extend(nominal_components['process_stack'].sources)
-        provenance.sources.add(id='capiche-physical', description='Pinned Capiche physical interconnect recipe',
+        provenance.sources.add(id='capiche-physical', description='Pinned Capiche interconnect process stack',
                                uri=f'https://github.com/RTimothyEdwards/capiche/blob/{CAPICHE_REVISION}/'+table['source_path'],
                                revision=CAPICHE_REVISION, sha256=table['source_sha256'])
         restricted = [name for name, layer in layers.items()
                       if layer.layer_type == ProcessStackInfo.LAYER_TYPE_METAL and layer.metal_layer.physical_geometry_unavailable]
         provenance.assumptions.add(
-            id='unavailable-mim', description='No source physical MIM corner law for profiles '+', '.join(restricted),
+            id='unavailable-mim', description='No source MIM process-stack parameters for nonnominal profiles '+', '.join(restricted),
             reason='Their retained values serve ordering only. Physical export rejects their extracted shapes or contacts '
             'and omits the profiles and dependent coatings otherwise', source_ids=['recipe', 'capiche-physical'])
         provenance.assumptions.add(
@@ -150,8 +150,8 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
         provenance.assumptions.add(
             id='contact-geometry', description='Cut widths and device-contact anchors retain the nominal KPEX contract; '
             'vertical interconnect contacts follow the selected conductor faces',
-            reason='The source qualifies interconnect geometry/materials, not new via-cut masks or an active-device '
-            'physical corner law',
+            reason='The source specifies interconnect geometry/materials, not new via-cut masks or an active-device '
+            'process-stack specification',
             source_ids=['recipe', 'capiche-physical'])
         provenance.assumptions.add(
             id='field-convention', description='Coating top/side offsets are incremental; field extents are cumulative '
@@ -159,8 +159,8 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
             reason='This maps the Capiche coating chain and planar boundaries into KPEX physical geometry',
             source_ids=['capiche-physical'])
         provenance.assumptions.add(
-            id='independent-physical-law', description='Physical interconnect recipe only; not a correlated resistance '
-            'corner, device reference law or silicon calibration',
+            id='independent-process-stack', description='Interconnect process stack only; not a correlated resistance '
+            'corner, device capacitance model or validation against silicon measurements',
             reason='Empirical tables and physical inputs have separate identities and validation',
             source_ids=['capiche-physical'])
         if table['empirical_adjustments']:
@@ -169,8 +169,8 @@ def load_restricted_physical_corners(technology: Technology, table_path: Path) -
                 json.dumps(table['empirical_adjustments'], sort_keys=True),
                 reason='These are coefficient-fit adjustments, not physical geometry or material changes',
                 source_ids=['capiche-physical'])
-        provenance.history.add(revision='1', date='2026-11-13', summary='Import reviewed physical corner recipe',
-                               reason='Support source-backed interconnect geometry while rejecting missing MIM laws',
+        provenance.history.add(revision='1', date='2026-11-13', summary='Import reviewed process-stack corner data',
+                               reason='Support source-backed interconnect geometry while rejecting missing MIM process-stack parameters',
                                source_ids=[source.id for source in provenance.sources],
                                references=['https://github.com/iic-jku/klayout-pex/issues/550',
                                            'https://github.com/iic-jku/klayout-pex/issues/559'])

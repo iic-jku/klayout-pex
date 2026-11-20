@@ -169,16 +169,16 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
     if device_datasets:
         catalog_provenance.history.add(
             revision='device-mim-1', date='2026-11-13', summary='Add independent MIM corner references',
-            reason='Keep compact-model device laws distinct from empirical interconnect coefficients',
+            reason='Keep compact-device capacitance models distinct from empirical interconnect coefficients',
             references=['https://github.com/iic-jku/klayout-pex/issues/551'])
     if physical_datasets:
         catalog_provenance.history.add(
-            revision='physical-capiche-1', date='2026-11-13', summary='Add source-specific physical recipes',
-            reason='Keep physical interconnect inputs independent of empirical coefficients and resistance laws',
+            revision='physical-capiche-1', date='2026-11-13', summary='Add source-specific process stacks',
+            reason='Keep physical interconnect inputs independent of empirical coefficients and resistance parameters',
             references=['https://github.com/iic-jku/klayout-pex/issues/550'])
         catalog_provenance.history.add(
             revision='physical-capiche-2', date='2026-11-13', summary='Declare source physical C-only scenarios',
-            reason='Expose qualified recipes with explicit layout restrictions while holding resistance nominal',
+            reason='Expose process stacks with reviewed source applicability and explicit layout restrictions while holding resistance nominal',
             references=['https://github.com/iic-jku/klayout-pex/issues/550'])
         catalog_provenance.sources.add(
             id='capiche-magic-mapping', description='Explicit process and R/C-style mapping for physical-stack results',
@@ -189,14 +189,14 @@ def write_bundled_corner_catalog(technology: Technology, catalog_path: Path) -> 
             id='physical-c-pairing', description='The source maps the selected process stack directories to MAGIC '
             'hrlc/lrlc low-C and hrhc/lrhc high-C blocks. The authored physical scenarios retain nominal R, '
             'omit device references and retain layout-dependent MIM restrictions',
-            reason='physical_stack_matches declares the source-related recipe, not identical fitted numbers, '
-            'a correlated R law or silicon calibration', source_ids=['capiche-magic-mapping', 'extraction-table'])
+            reason='physical_stack_matches declares the process-stack correspondence, not identical fitted numbers, '
+            'correlated resistance parameters or validation against silicon measurements', source_ids=['capiche-magic-mapping', 'extraction-table'])
         catalog_provenance.assumptions.add(
-            id='physical-coefficient-revisions', description='Physical recipes are pinned to Capiche 85905e8. '
+            id='physical-coefficient-revisions', description='Process stacks are pinned to Capiche 85905e8. '
             'IHP coefficient revision 14b1ab8 includes the corrected coatings committed four minutes earlier. '
             'SKY130/GF180 coefficient files last changed at open_pdks bb8c82e after Capiche bf6bee7 introduced '
             'the selected physical profiles; later pinned Capiche changes do not alter their geometry/materials',
-            reason='Keep recipe and empirical-table revision identities explicit rather than infer a match from names',
+            reason='Keep process-stack and empirical-table revision identities explicit rather than infer a match from names',
             source_ids=['capiche-magic-mapping', 'extraction-table'])
 
     # Independent component updates can have later dates than other groups.

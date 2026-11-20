@@ -79,7 +79,7 @@ def test_imported_components_preserve_nominal_and_have_complete_corner_coverage(
     assert {p: p.read_bytes() for p in written} == before
     assert unrelated.read_text(encoding='utf-8') == 'keep'
     # Only authored source pairings gain physical capability. Selecting an
-    # empirical C component alone still does not authorize a physical recipe.
+    # empirical C component alone still does not establish a matching process stack.
     expected_scenarios = ['nominal']
     if ihp:
         expected_scenarios.extend(['gatpoly-low-sheet', 'gatpoly-high-sheet'])
@@ -166,7 +166,7 @@ def test_fitted_sidewall_numerator_is_not_mistaken_for_monotonic_capacitance():
         row = next(row for row in dataset.capacitance.capacitance.sidewalls if row.layer_name == 'Poly2')
         values.append((row.capacitance, row.offset))
     # A fit changes numerator and spacing offset together. Sorting/scaling coefficients
-    # by a presumed high >= low rule would corrupt a valid upstream corner law.
+    # by a presumed high >= low rule would corrupt a valid upstream corner model.
     assert values == [(11.799, -0.074), (10.455, -0.090)]
 
 

@@ -39,10 +39,10 @@ from klayout_pex_protobuf.kpex.tech.tech_catalog_pb2 import TechnologyProvenance
 OPEN_PDKS_REVISION = '5740c4a81c42f9fe4af5ef2ee258a99151053d28'
 IHP_CAPACITANCE_REVISION = '14b1ab845696960a0a1881ec8614acba0f7b8eb7'
 IHP_DEVICE_REVISION = '5e6d592e4002946a4616f798c357f0f3c06cf3b6'
-NOMINAL_RECIPE_REVISION = '1b923ea54d8d9b1028de1043afd654c9e1838049'
+NOMINAL_GENERATOR_REVISION = '1b923ea54d8d9b1028de1043afd654c9e1838049'
 # Immutable numerical-source snapshot from KPEX 0.9.0. Keep past source records
 # unchanged when appending a data revision; a new input receives a new source ID.
-RECIPE_SHA256 = {
+GENERATOR_SHA256 = {
     'sky130A.py': '409b021a9ee4b4ec03b9528c5be81335292cace0eba7ae1a527584d4b35d0d72',
     'gf180mcuD.py': '1cdbdd6b6350b56e5ba76a3df4c8fc1781eec4dd835f76e8dbc7aeb60fc560d2',
     'ihp_sg13.py': '481b497fc70aa0c122a5c85dd2a4ac0eea4bc2f6b0fd0b5d533cdd349e802c34',
@@ -73,11 +73,11 @@ CAPACITANCE_INPUTS = {
 }
 
 
-def _recipe_source(filename: str, identity: str) -> TechnologySource:
+def _generator_source(filename: str, identity: str) -> TechnologySource:
     return TechnologySource(
-        id=identity, description=f'KPEX source recipe: scripts/gen_tech_pb/{filename}',
-        uri=f'https://github.com/iic-jku/klayout-pex/blob/{NOMINAL_RECIPE_REVISION}/scripts/gen_tech_pb/{filename}',
-        revision=NOMINAL_RECIPE_REVISION, sha256=RECIPE_SHA256[filename])
+        id=identity, description=f'KPEX technology generator: scripts/gen_tech_pb/{filename}',
+        uri=f'https://github.com/iic-jku/klayout-pex/blob/{NOMINAL_GENERATOR_REVISION}/scripts/gen_tech_pb/{filename}',
+        revision=NOMINAL_GENERATOR_REVISION, sha256=GENERATOR_SHA256[filename])
 
 
 def _source(evidence: TechnologyProvenance, identity: str, description: str,
@@ -96,7 +96,7 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
     filename, repository, revision, source_path, digest, defines = CAPACITANCE_INPUTS[technology_id]
     catalog = TechnologyProvenance(data_revision='1')
     for name, identity in ((filename, 'recipe'), ('tech_builder.py', 'builder')):
-        catalog.sources.add().CopyFrom(_recipe_source(name, identity))
+        catalog.sources.add().CopyFrom(_generator_source(name, identity))
     catalog.history.add(
         revision='1', date='2026-11-12', summary='Describe the nominal technology scenario and its component sources',
         reason='Make source choices reproducible without changing the existing nominal numerical data',
@@ -130,24 +130,24 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
     resistance = components['resistance']
     if technology_id.startswith('ihp-'):
         _assumption(resistance, 'poly-sheet', 'Use 7 Ohm/square for GatPoly',
-                    'This is the existing nominal recipe value; it does not define an interconnect corner law')
+                    'This is the existing nominal generator value; it does not specify interconnect sheet-resistance limits')
         if technology_id == 'ihp-sg13g2':
             _assumption(resistance, 'mim-sheet', 'Use 13.36 Ohm/square for the MIM plate and TopVia1 resistance for its contact',
-                        'The nominal recipe derives the plate estimate from 0.5 MS/m and 0.1497 um and aliases the contact material')
+                        'The nominal generator derives the plate estimate from 0.5 MS/m and 0.1497 um and aliases the contact material')
     elif technology_id == 'gf180mcuD':
         _assumption(resistance, 'mim-sheet', 'Use 500 mOhm/square for FuseTop',
                     'Retain the nominal estimate from the 1/1.5 fF MIM option; a range for the 2 fF option is not established')
     else:
         _assumption(resistance, 'model-overrides',
-                    'Keep the independent nominal nwell, MIM plate and MIM via values from the KPEX recipe',
+                    'Keep the independent nominal nwell, MIM plate and MIM via values from the KPEX technology generator',
                     'Replacing them with all MAGIC rows would lose the device-model and cut-geometry distinctions')
 
     stack = components['process_stack']
-    _assumption(stack, 'nominal-geometry', 'The physical stack is the declared nominal KPEX geometry recipe',
+    _assumption(stack, 'nominal-geometry', 'Use the declared nominal KPEX process-stack parameters',
                 'A matching nominal scenario does not establish foundry qualification or numerical agreement with every analytical fit')
     if technology_id == 'sky130A':
         _assumption(stack, 'substrate-dielectric', 'The dielectric constant below local interconnect includes the existing nominal adjustment',
-                    'The recipe matches the single-plate substrate-capacitance reference')
+                    'The process stack matches the single-plate substrate-capacitance reference')
     elif technology_id == 'gf180mcuD':
         _source(stack, 'cross-section', 'Detailed five-metal cross-section', 'fossi-foundation/gf180mcu-pdk',
                 '25ed9c64b64b8e1b93cc4d2d5cade4cd82383a9a', 'docs/analog/layout/inter_specs/images/2_cross_section_43.png')
@@ -156,7 +156,7 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
                     'recipe', 'cross-section')
 
     if technology_id.startswith('ihp-'):
-        # Preserve the historical recipe record; this correction has its own
+        # Preserve the historical generator source record; this correction has its own
         # source identities and component revision. Other numerical inputs stay
         # unchanged, including the nominal background dielectric constant.
         passivation_revision = '85905e8810982bd89966cbf8b7e9d3fd1e922d42'
@@ -189,7 +189,7 @@ def nominal_provenance(technology_id: str) -> Tuple[TechnologyProvenance, Dict[s
             _source(devices, model, f'Independent nominal {model} reference', 'IHP-GmbH/IHP-Open-PDK',
                     IHP_DEVICE_REVISION, f'{technology_id}/libs.tech/verilog-a/{model}/{model}.va')
         _assumption(devices, 'nominal-model', 'MOM references are low-frequency engineering estimates without corner or mismatch variation',
-                    'They provide independent nominal checks rather than silicon-qualified corner limits',
+                    'They provide independent nominal checks rather than corner limits validated against silicon measurements',
                     'cap_cmomf', 'cap_cmomi')
     else:
         _assumption(devices, 'no-references', 'No automatic device-capacitance references are defined',

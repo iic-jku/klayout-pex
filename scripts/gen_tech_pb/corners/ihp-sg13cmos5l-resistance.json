@@ -9,14 +9,14 @@
         "sources": [
           {
             "id": "recipe",
-            "description": "KPEX source recipe: scripts/gen_tech_pb/ihp_sg13.py",
+            "description": "KPEX technology generator: scripts/gen_tech_pb/ihp_sg13.py",
             "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/ihp_sg13.py",
             "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
             "sha256": "481b497fc70aa0c122a5c85dd2a4ac0eea4bc2f6b0fd0b5d533cdd349e802c34"
           },
           {
             "id": "builder",
-            "description": "KPEX source recipe: scripts/gen_tech_pb/tech_builder.py",
+            "description": "KPEX technology generator: scripts/gen_tech_pb/tech_builder.py",
             "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/tech_builder.py",
             "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
             "sha256": "abc23b724eedb8935244a6e15c2ca91b63ba380fabfd321dd87f93d94aac2fcc"
@@ -65,7 +65,7 @@
           },
           {
             "id": "gatpoly-device-model",
-            "description": "Distinct compact-device geometry and contact law",
+            "description": "Distinct compact-model geometry and contact-resistance parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
@@ -75,7 +75,7 @@
           {
             "id": "poly-sheet",
             "description": "Use 6.2 Ohm/square for salicided GatPoly from the min interconnect table",
-            "reason": "The interconnect RPSQ law is independent of the compact rsil model parameters",
+            "reason": "The interconnect RPSQ sheet resistance is independent of the compact rsil model parameters",
             "source_ids": [
               "gatpoly-itf-min",
               "gatpoly-process-spec"
@@ -103,7 +103,7 @@
           {
             "id": "device-ownership",
             "description": "Recognized rsil/rppd/rhigh devices retain their own compact models; no compact-model width shift or series/contact term is applied to the extracted wire",
-            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact law with the interconnect RPSQ table would double-count device effects",
+            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact-model resistance parameters with the interconnect RPSQ table would double-count device effects",
             "source_ids": [
               "recipe",
               "gatpoly-device-corners",
@@ -217,14 +217,14 @@
         "sources": [
           {
             "id": "recipe",
-            "description": "KPEX source recipe: scripts/gen_tech_pb/ihp_sg13.py",
+            "description": "KPEX technology generator: scripts/gen_tech_pb/ihp_sg13.py",
             "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/ihp_sg13.py",
             "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
             "sha256": "481b497fc70aa0c122a5c85dd2a4ac0eea4bc2f6b0fd0b5d533cdd349e802c34"
           },
           {
             "id": "builder",
-            "description": "KPEX source recipe: scripts/gen_tech_pb/tech_builder.py",
+            "description": "KPEX technology generator: scripts/gen_tech_pb/tech_builder.py",
             "uri": "https://github.com/iic-jku/klayout-pex/blob/1b923ea54d8d9b1028de1043afd654c9e1838049/scripts/gen_tech_pb/tech_builder.py",
             "revision": "1b923ea54d8d9b1028de1043afd654c9e1838049",
             "sha256": "abc23b724eedb8935244a6e15c2ca91b63ba380fabfd321dd87f93d94aac2fcc"
@@ -273,7 +273,7 @@
           },
           {
             "id": "gatpoly-device-model",
-            "description": "Distinct compact-device geometry and contact law",
+            "description": "Distinct compact-model geometry and contact-resistance parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
@@ -283,7 +283,7 @@
           {
             "id": "poly-sheet",
             "description": "Use 7.8 Ohm/square for salicided GatPoly from the max interconnect table",
-            "reason": "The interconnect RPSQ law is independent of the compact rsil model parameters",
+            "reason": "The interconnect RPSQ sheet resistance is independent of the compact rsil model parameters",
             "source_ids": [
               "gatpoly-itf-max",
               "gatpoly-process-spec"
@@ -311,7 +311,7 @@
           {
             "id": "device-ownership",
             "description": "Recognized rsil/rppd/rhigh devices retain their own compact models; no compact-model width shift or series/contact term is applied to the extracted wire",
-            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact law with the interconnect RPSQ table would double-count device effects",
+            "reason": "The LVS device boundary separates modeled resistor bodies from interconnect. Mixing the compact-model resistance parameters with the interconnect RPSQ table would double-count device effects",
             "source_ids": [
               "recipe",
               "gatpoly-device-corners",
@@ -425,7 +425,7 @@
         "sources": [
           {
             "id": "itf-min",
-            "description": "IHP CMOS5L min interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L min interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_min.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "ad16a5ade248c7d87c7a6789887e5a99cf9431f639358c6c104643527f879e73",
@@ -437,7 +437,7 @@
           },
           {
             "id": "itf-typ",
-            "description": "IHP CMOS5L typ interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L typ interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_typ.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "08d0de3413256b996b7b6c5a1816e02f8dae4151e0df12c7a8f081ccee415cea",
@@ -449,7 +449,7 @@
           },
           {
             "id": "itf-max",
-            "description": "IHP CMOS5L max interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L max interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_max.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "969f391818c63d3057bf4554067626f2ec65c4949bb9a3820cc05ba74e67cb86",
@@ -480,7 +480,7 @@
           },
           {
             "id": "device-ownership",
-            "description": "Keep compact-device models and their internal resistance laws unchanged",
+            "description": "Keep compact-device models, including their internal resistance, unchanged",
             "reason": "Interconnect sheet resistance and per-cut contacts apply only to regions owned by extraction, independently of compact-model process corners",
             "source_ids": [
               "itf-min",
@@ -630,7 +630,7 @@
         "sources": [
           {
             "id": "itf-min",
-            "description": "IHP CMOS5L min interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L min interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_min.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "ad16a5ade248c7d87c7a6789887e5a99cf9431f639358c6c104643527f879e73",
@@ -642,7 +642,7 @@
           },
           {
             "id": "itf-typ",
-            "description": "IHP CMOS5L typ interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L typ interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_typ.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "08d0de3413256b996b7b6c5a1816e02f8dae4151e0df12c7a8f081ccee415cea",
@@ -654,7 +654,7 @@
           },
           {
             "id": "itf-max",
-            "description": "IHP CMOS5L max interconnect resistance and physical-stack recipe",
+            "description": "IHP CMOS5L max interconnect resistance and process-stack parameters",
             "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_max.itf",
             "revision": "e73adb4045731ddec21634146d536380057f6a26",
             "sha256": "969f391818c63d3057bf4554067626f2ec65c4949bb9a3820cc05ba74e67cb86",
@@ -685,7 +685,7 @@
           },
           {
             "id": "device-ownership",
-            "description": "Keep compact-device models and their internal resistance laws unchanged",
+            "description": "Keep compact-device models, including their internal resistance, unchanged",
             "reason": "Interconnect sheet resistance and per-cut contacts apply only to regions owned by extraction, independently of compact-model process corners",
             "source_ids": [
               "itf-min",
@@ -910,14 +910,14 @@
     },
     {
       "id": "gatpoly-device-model",
-      "description": "Distinct compact-device geometry and contact law",
+      "description": "Distinct compact-model geometry and contact-resistance parameters",
       "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13g2/libs.tech/ngspice/models/resistors_mod.lib",
       "revision": "e73adb4045731ddec21634146d536380057f6a26",
       "sha256": "b79812f31c7b757013a872fe419ad8c1cea3416f77f82826ac3ba34a4506e60d"
     },
     {
       "id": "itf-min",
-      "description": "IHP CMOS5L min interconnect resistance and physical-stack recipe",
+      "description": "IHP CMOS5L min interconnect resistance and process-stack parameters",
       "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_min.itf",
       "revision": "e73adb4045731ddec21634146d536380057f6a26",
       "sha256": "ad16a5ade248c7d87c7a6789887e5a99cf9431f639358c6c104643527f879e73",
@@ -929,7 +929,7 @@
     },
     {
       "id": "itf-typ",
-      "description": "IHP CMOS5L typ interconnect resistance and physical-stack recipe",
+      "description": "IHP CMOS5L typ interconnect resistance and process-stack parameters",
       "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_typ.itf",
       "revision": "e73adb4045731ddec21634146d536380057f6a26",
       "sha256": "08d0de3413256b996b7b6c5a1816e02f8dae4151e0df12c7a8f081ccee415cea",
@@ -941,7 +941,7 @@
     },
     {
       "id": "itf-max",
-      "description": "IHP CMOS5L max interconnect resistance and physical-stack recipe",
+      "description": "IHP CMOS5L max interconnect resistance and process-stack parameters",
       "uri": "https://github.com/IHP-GmbH/IHP-Open-PDK/blob/e73adb4045731ddec21634146d536380057f6a26/ihp-sg13cmos5l/libs.tech/parasitics/itf/sg13cmos5l_max.itf",
       "revision": "e73adb4045731ddec21634146d536380057f6a26",
       "sha256": "969f391818c63d3057bf4554067626f2ec65c4949bb9a3820cc05ba74e67cb86",

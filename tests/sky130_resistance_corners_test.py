@@ -108,7 +108,7 @@ def test_sensitivity_selection_exposes_assumption_and_rejects_unqualified_capabi
     assert resolved.selection.capacitance.id == ('high' if style.endswith('hc') else 'low')
     assumptions = {a['id']: a for a in resolved.selection.resistance.provenance['assumptions']}
     assert 'engineering combination' in assumptions['mim-spec-bound']['reason']
-    assert 'dimension shifts' in assumptions['fixed-layout-material-law']['reason']
+    assert 'dimension shifts' in assumptions['fixed-layout-resistance-parameters']['reason']
     with pytest.raises(TechDefError, match='no matching physical stack'):
         resolved.selection.require_physical_stack()
     with pytest.raises(TechDefError, match='no device-capacitance reference'):
@@ -126,7 +126,7 @@ def test_sensitivity_selection_exposes_assumption_and_rejects_unqualified_capabi
 def test_mim_sheet_bounds_keep_square_counting_geometry(catalog: Path, style: str, layer: str,
                                                        width: int, length: int):
     # One square, a long strip, and double width expose unit errors and hidden
-    # application of the compact model's dimension bias to this fixed-layout law.
+    # application of the compact model's dimension bias to this fixed-layout resistance model.
     network = extracted_strip(selected(catalog, style), layer, width, length)
     resistance = (6.8 if style.startswith('hr') else 4.8) * length / width
     expected = np.array([[1, -1], [-1, 1]]) / resistance
@@ -152,7 +152,7 @@ def extracted_mim_cuts(tech: TechInfo, via_name: str, count: int) -> RCNetwork:
     contact = tech.contact_by_contact_lvs_layer_name[via_name + '_cap']
     width = round(contact.width / 0.001)
     rex = klp.RExtractorTech()
-    # Ideal landing pads isolate the per-cut law from the separately tested sheet
+    # Ideal landing pads isolate the per-cut contact resistance from the separately tested sheet
     # resistance. Both MIM cut sizes must yield the source Ohm/cut, not Ohm/um2.
     for layer in (0, 1):
         conductor = klp.RExtractorTechConductor()

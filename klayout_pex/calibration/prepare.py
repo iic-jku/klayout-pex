@@ -78,7 +78,7 @@ def _stack(tech_info: TechInfo, spec: CalibrationPatternSpec) -> Any:
                 raise CalibrationError(f"Pattern '{case.case_id}' names unknown metal profile '{name}'; "
                                        f"valid profiles: {', '.join(sorted(names))}")
             if profiles[name].metal_layer.physical_geometry_unavailable:
-                raise CalibrationError(f"Pattern '{case.case_id}' has no qualified physical geometry for '{name}'")
+                raise CalibrationError(f"Pattern '{case.case_id}' has no supported physical geometry for '{name}'")
     selection = getattr(tech_info, 'selection', None)
     if selection is not None:
         selection.require_physical_stack(tech_info.tech.process_stack)

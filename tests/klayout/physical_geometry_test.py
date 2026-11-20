@@ -215,7 +215,7 @@ def restricted_fixture() -> TerminalFixture:
 def test_present_unavailable_metal_or_contact_is_rejected_before_profiles(present_layer: str):
     fixture = restricted_fixture()
     fixture.geometry[present_layer] = kdb.Region(kdb.Box(20, 5, 30, 15))
-    with pytest.raises(BuildError, match='no qualified geometry'):
+    with pytest.raises(BuildError, match='no supported geometry'):
         fixture.build()
 
 

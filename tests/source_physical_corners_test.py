@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # --------------------------------------------------------------------------------
 #
-"""Source physical recipes export only layouts covered by their explicit profile laws."""
+"""Process-stack corners export only layouts covered by their specified geometry and material parameters."""
 
 import json
 from pathlib import Path
@@ -174,7 +174,7 @@ def test_pinned_source_geometry_is_not_nominal_geometry_with_global_c_scaling(
 
 
 @pytest.mark.parametrize('corner', ['low', 'high'])
-def test_sky130_high_recipe_omits_only_the_source_absent_low_k_sidewall_films(corner: str):
+def test_sky130_high_process_stack_omits_only_the_source_absent_low_k_sidewall_films(corner: str):
     scene = resolve(empty_physical_file(PDK.SKY130A, corner)[0])
     names = {film.name for film in scene.dielectrics}
     assert ('nild3c' in names) == (corner == 'low')
@@ -197,9 +197,9 @@ def test_real_mim_layout_is_rejected_before_either_physical_exporter_builds_outp
     lvsdb = kdb.LayoutVsSchematic()
     lvsdb.read(lvsdb_fixture_path(pdk.value, gds))
     context = KLayoutExtractionContext.prepare_extraction(lvsdb, pattern, technology, blackbox_devices=blackbox)
-    with pytest.raises(BuildError, match='no qualified geometry'):
+    with pytest.raises(BuildError, match='no supported geometry'):
         PEX25DBuilder(context, technology, pattern).build()
-    with pytest.raises(FasterCapError, match='no qualified geometry'):
+    with pytest.raises(FasterCapError, match='no supported geometry'):
         FasterCapInputBuilder(context, technology, 'VSUBS').build()
 
 

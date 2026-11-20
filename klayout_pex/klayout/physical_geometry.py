@@ -38,7 +38,7 @@ from klayout_pex.klayout.native_coordinates import (
 
 
 class PhysicalGeometryError(ValueError):
-    """A physical recipe cannot preserve the extracted topology on the chosen grid."""
+    """A process stack cannot preserve the extracted topology on the chosen grid."""
 
 
 def width_bias_offsets(tech_info: Any, grid: Fraction) -> Dict[str, int]:
