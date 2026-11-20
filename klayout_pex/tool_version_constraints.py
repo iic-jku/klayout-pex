@@ -215,9 +215,9 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
-        specifier=FASTERCAP_NUMERICAL_REPORT.specifier,
-        reason="6.3.0 verifies actual GMRES residuals, corrects explicit preconditioner selection "
-               "and supplies full-precision reports. Upgrading is recommended",
+        specifier='>= 6.4.0',
+        reason="6.4.0 corrects dielectric flux, conductor hierarchy bounds and solver reductions. "
+               "These affect extracted capacitances and calibration results. Upgrading is recommended",
         severity=Severity.WARNING,
     ),
     ToolVersionConstraint(

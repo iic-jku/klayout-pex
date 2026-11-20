@@ -250,3 +250,34 @@ def test_development_suffix_keeps_postrelease_boundary(version: str, accepted: b
 @pytest.mark.parametrize('version', ['6.3.0rcgarbage', '6.3.0.post1.devgarbage'])
 def test_invalid_fastercap_suffix_is_not_silently_truncated(version: str):
     assert Tool.FASTERCAP.parse_version(f'FasterCap version {version}') is None
+
+
+@pytest.mark.parametrize('version,upgrade', [
+    ('6.3.0', True), ('6.3.99', True), ('6.4.0.dev1', True), ('6.4.0rc1', True),
+    ('6.4.0', False), ('6.4.1', False),
+])
+@pytest.mark.parametrize('mode', [VersionCheckMode.ON, VersionCheckMode.WARN])
+def test_fastercap_corrected_solver_is_recommended_without_blocking_extraction(
+        version: str, upgrade: bool, mode: VersionCheckMode):
+    # Report support starts earlier than the corrected numerical baseline. Keep
+    # ordinary extraction available, but never present a prerelease as final 6.4.
+    parsed = Tool.FASTERCAP.parse_version(f'FasterCap version {version}')
+    assert parsed == Version(version)
+    with mock.patch.object(Tool, 'detect_version', return_value=parsed), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        assert check_tool_versions({Tool.FASTERCAP: '/fastercap'}, mode=mode)
+    error.assert_not_called()
+    assert warn.call_count == int(upgrade)
+    if upgrade:
+        message = warn.call_args.args[0]
+        assert '6.4.0' in message and 'Upgrading is recommended' in message
+
+
+def test_fastercap_report_contract_remains_independent_of_recommended_solver():
+    # Saved 6.3 reports remain evidence at their original version and precision.
+    assert FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.3.0'))
+    assert not FASTERCAP_NUMERICAL_REPORT.is_satisfied_by(Version('6.2.99'))
+    supported = effective_version_range(Tool.FASTERCAP)
+    assert Version('6.3.99') not in supported
+    assert Version('6.4.0') in supported
