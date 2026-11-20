@@ -53,6 +53,26 @@ Labels in child cells still name internal nets and ports of excluded device mode
 The default is `auto`. Supply `--gds` alongside `--lvsdb` to identify top-level labels: the LVS database has
 flattened them. With `--lvsdb` alone, `auto` retains hierarchical labels, and `top` reports an error.
 
+## Devices without simulation mappings
+
+Netlist export stops by default when a retained LVS device has no model mapping in the technology
+data. To extract parasitics while keeping these devices for later model integration, opt in explicitly:
+
+```sh
+kpex extract --pdk sky130A --gds design.gds --2.5D --mode CC --unmapped-devices keep
+```
+
+`keep` uses KLayout's native LVS representation, including the class name as the model name,
+terminal connections and the parameters emitted by its native writer. For native resistors and
+capacitors, this includes their primary resistance or capacitance but can omit secondary geometry
+parameters. Custom device classes become subcircuit calls. The log and netlist warn about unmapped
+devices. Supply compatible models yourself, checking the device type, terminal
+order, parameters and units: the retained representation is not necessarily directly simulatable.
+
+Existing valid mappings still apply. Invalid existing mappings remain errors, and the option does not
+bypass extraction or connectivity checks. `--unmapped-devices error` explicitly selects the default.
+This controls netlists written by KPEX, not MAGIC's own netlist writer.
+
 ## Capacitance output modes
 
 The analytical engine keeps coupled capacitance by default. Select the approximation explicitly:
