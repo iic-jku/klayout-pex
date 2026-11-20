@@ -87,6 +87,10 @@ def build_lvs_computed_layers(tech: Technology):
     add_computed_layer(tech, CONT,    KREG, "licon_ntap_con", (66, 4404), "licon1", "licon_ntap_con", "Computed layer for contact from ntap (the nwell below) to li1")
     # NOTE: part of the p-tap, as the substrate below is no conductor of the resistance network (it's ideal)
     add_computed_layer(tech, PTAP,    KREG, "licon_ptap_con", (66, 4405), "licon1", "licon_ptap_con", "Computed layer for contact from ptap (the substrate below) to li1")
+    # The BJT models include their diffusion/tap contacts, including the 11 V emitter-tied poly gate.
+    # Their terminals attach to li1 above the contacts; external li1/met1 routing remains extracted.
+    add_computed_layer(tech, CONT,    KDEV, "licon_bjt_con", (66, 4406), "licon1", None, "Contacts within the fixed-size BJT models")
+    add_computed_layer(tech, N_P_TAP, KDEV, "tap_bjt_con", (65, 344), "tap", None, "Taps within the fixed-size BJT models")
     add_computed_layer(tech, VIA,     KREG, "mcon_con",  (67, 44),    "mcon",      "mcon_con",       "Computed layer for contact between li1 and met1")
     add_computed_layer(tech, VIA,     KREG, "via1_con",  (68, 44),    "via",       "via1_con",       "Computed layer for contact between met1 and met2")
     add_computed_layer(tech, VIA,     KREG, "via2_con",  (69, 44),    "via2",      "via2_con",       "Computed layer for contact between met2 and met3")
