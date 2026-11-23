@@ -212,6 +212,33 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
                "and resistance-extraction crashes. Upgrading is recommended",
         severity=Severity.WARNING,
     ),
+    # Earlier integration-test baselines were overwritten as this list evolved.
+    # Keep their milestones: b1c3734a165 introduced 6.0.9; 85334f6540e raised
+    # the tested version to 6.2.1. These are recommendations, not correctness claims.
+    ToolVersionConstraint(
+        id='FASTERCAP_0609_TEST_BASELINE',
+        tool=Tool.FASTERCAP,
+        specifier='>= 6.0.9',
+        reason="integration tests used 6.0.9 when tool-version checks were introduced",
+        severity=Severity.WARNING,
+    ),
+    ToolVersionConstraint(
+        id='FASTERCAP_0621_TEST_BASELINE',
+        tool=Tool.FASTERCAP,
+        specifier='>= 6.2.1',
+        reason="6.2.1 became the integration-test baseline in November 2026",
+        severity=Severity.WARNING,
+    ),
+    # Introduced by 8abf309779d; overwritten by b2af849a2e0.
+    # https://github.com/iic-jku/FasterCap/releases/tag/v6.3.0
+    ToolVersionConstraint(
+        id='FASTERCAP_0630_FIXES',
+        tool=Tool.FASTERCAP,
+        specifier='>= 6.3.0',
+        reason="6.3.0 verifies actual GMRES residuals, corrects explicit preconditioner selection "
+               "and supplies full-precision reports. Upgrading is recommended",
+        severity=Severity.WARNING,
+    ),
     ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
@@ -220,6 +247,22 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
                "These affect extracted capacitances and calibration results. Upgrading is recommended",
         severity=Severity.WARNING,
     ),
+    # Original comparison baseline from b1c3734a165, replaced in 07e2130ff3e.
+    ToolVersionConstraint(
+        id='MAGIC_REFERENCE_REVISION',
+        tool=Tool.MAGIC,
+        specifier='>= 8.3.486',
+        reason="the revision the comparison results in the documentation were "
+               "recorded against; an older one reports different parasitics",
+        severity=Severity.WARNING,
+    ),
+    # MAGIC_SIDEWALL_DEFINITION originally required >=8.3.679 (ERROR), based on
+    # the explanation that older versions double-counted sidewall coefficients:
+    # https://github.com/martinjankoehler/magic/issues/6#issuecomment-5371056429
+    # That interpretation was superseded: the parser already accounted for both
+    # directed edge visits, and 8.3.679 added an extra halving. Preserve the old
+    # rationale as history, not as a current claim. Commit fb502de4c86 raised the
+    # minimum to the 8.3.693 correction linked below.
     ToolVersionConstraint(
         id='MAGIC_SIDEWALL_DEFINITION',
         tool=Tool.MAGIC,

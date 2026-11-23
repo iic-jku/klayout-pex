@@ -201,6 +201,44 @@ def test_magic_requires_correct_sidewall_counting(version: str, supported: bool,
                for message in messages)
 
 
+@pytest.mark.parametrize('version,expected_ids', [
+    ('6.0.8', ('FASTERCAP_0609_TEST_BASELINE', 'FASTERCAP_0621_TEST_BASELINE',
+               'FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.0.9', ('FASTERCAP_0621_TEST_BASELINE', 'FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.0.10', ('FASTERCAP_0621_TEST_BASELINE', 'FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.2.0', ('FASTERCAP_0621_TEST_BASELINE', 'FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.2.1', ('FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.2.2', ('FASTERCAP_0630_FIXES', 'FASTERCAP_BASELINE')),
+    ('6.3.0', ('FASTERCAP_BASELINE',)),
+    ('6.3.1', ('FASTERCAP_BASELINE',)),
+    ('6.4.0', ()),
+])
+def test_fastercap_history_retains_separate_warning_reasons(version: str, expected_ids: Tuple[str, ...]):
+    # Old baselines remain recommendations; preserving them must not turn
+    # formerly accepted extraction into an error or erase intermediate fixes.
+    with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'})
+    error.assert_not_called()
+    messages = [call.args[0] for call in warn.call_args_list]
+    assert len(messages) == len(expected_ids)
+    assert all(any(f'({constraint_id})' in message for message in messages) for constraint_id in expected_ids)
+
+
+@pytest.mark.parametrize('version,comparison_warning', [('8.3.485', True), ('8.3.486', False), ('8.3.487', False)])
+def test_magic_comparison_baseline_keeps_warning_severity(version: str, comparison_warning: bool):
+    # The old comparison baseline does not replace the later correctness fix.
+    with mock.patch.object(Tool, 'detect_version', return_value=Version(version)), \
+            mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        assert not check_tool_versions({Tool.MAGIC: '/magic'})
+    assert warn.call_count == int(comparison_warning)
+    assert all('MAGIC_REFERENCE_REVISION' in call.args[0] for call in warn.call_args_list)
+    assert error.call_count == 1
+    assert '>= 8.3.693' in error.call_args.args[0]
+
+
 def test_report_separates_required_and_recommended_ranges():
     with mock.patch('klayout_pex.tool_version_constraints.subproc') as printed:
         assert check_tool_versions({}, klayout_python_version='0.30.13')
