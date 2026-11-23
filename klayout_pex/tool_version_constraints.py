@@ -213,6 +213,14 @@ TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
         severity=Severity.WARNING,
     ),
     ToolVersionConstraint(
+        id='KLAYOUT_TERMINAL_POLYGONS',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.14',
+        reason="0.30.14 preserves every polygon of a device terminal. Older versions can "
+               "lose terminal geometry and produce incorrect interconnect resistance. "
+               "Regenerate existing LVS databases with 0.30.14 or later",
+    ),
+    ToolVersionConstraint(
         id='FASTERCAP_BASELINE',
         tool=Tool.FASTERCAP,
         specifier='>= 6.4.0',

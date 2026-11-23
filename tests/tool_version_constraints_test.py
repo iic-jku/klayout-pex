@@ -66,9 +66,9 @@ class Test(unittest.TestCase):
 
     def test_constraints_compile_to_one_effective_range(self):
         required = effective_version_range(Tool.KLAYOUT, severity=Severity.ERROR)
-        assert required == SpecifierSet('>=0.30.1,>=0.30.2,>=0.30.3')
-        assert required.contains(Version('0.30.4'))
-        assert not required.contains(Version('0.30.2'))
+        assert required == SpecifierSet('>=0.30.1,>=0.30.2,>=0.30.3,>=0.30.14')
+        assert required.contains(Version('0.30.14'))
+        assert not required.contains(Version('0.30.13'))
         assert effective_version_range(Tool.KLAYOUT, severity=Severity.WARNING) == SpecifierSet('>=0.30.13')
 
     def test_a_pdk_constraint_is_part_of_that_pdk_s_range(self):
@@ -129,37 +129,71 @@ class Test(unittest.TestCase):
 
 
 @pytest.mark.parametrize('binary,module,expected_sources', [
-    ('0.30.12', '0.30.13', ('KLayout executable',)),
-    ('0.30.13', '0.30.12', ('KLayout Python module',)),
-    ('0.30.12', '0.30.12', ('KLayout executable', 'KLayout Python module')),
-    ('0.30.13', '0.30.13', ()),
-    ('0.30.14', '0.31.0', ()),
-    (None, '0.30.12', ('KLayout Python module',)),
-    ('0.30.12', None, ('KLayout executable',)),
-    (None, '0.30.13rc1', ('KLayout Python module',)),
+    ('0.30.12', '0.30.14', ('KLayout executable',)),
+    ('0.30.14', '0.30.12', ('KLayout Python module',)),
+    ('0.30.13', '0.30.14', ('KLayout executable',)),
+    ('0.30.14', '0.30.13', ('KLayout Python module',)),
+    ('0.30.13', '0.30.13', ('KLayout executable', 'KLayout Python module')),
+    ('0.30.14', '0.30.14', ()),
+    ('0.30.15', '0.31.0', ()),
+    (None, '0.30.13', ('KLayout Python module',)),
+    ('0.30.13', None, ('KLayout executable',)),
+    (None, '0.30.14rc1', ('KLayout Python module',)),
 ])
-def test_recommended_version_warns_without_rejecting_supported_installations(
-        binary: Optional[str], module: Optional[str], expected_sources: Tuple[str, ...]):
-    # Independently check both components: upgrading the wheel does not update
-    # the executable, and an LVSDB-only run still uses the Python module.
+@pytest.mark.parametrize('mode', [VersionCheckMode.ON, VersionCheckMode.WARN])
+def test_terminal_polygon_minimum_checks_executable_and_module_independently(
+        binary: Optional[str], module: Optional[str], expected_sources: Tuple[str, ...], mode: VersionCheckMode):
+    # Below/at/above the fixed release, for each component independently:
+    # upgrading the wheel does not update the executable, and an LVSDB-only
+    # run still uses the Python module. Warn is an explicit override.
     with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
             mock.patch('klayout_pex.tool_version_constraints.error') as error, \
             mock.patch.object(Tool, 'detect_version', return_value=Version(binary) if binary else None):
-        assert check_tool_versions({Tool.KLAYOUT: '/klayout'} if binary else {}, klayout_python_version=module)
-    messages = [call.args[0] for call in warn.call_args_list]
+        accepted = check_tool_versions({Tool.KLAYOUT: '/klayout'} if binary else {},
+                                       klayout_python_version=module, mode=mode)
+    assert accepted == (not expected_sources or mode == VersionCheckMode.WARN)
+    report = error if mode == VersionCheckMode.ON else warn
+    messages = [call.args[0] for call in report.call_args_list
+                if 'KLAYOUT_TERMINAL_POLYGONS' in call.args[0]]
     assert len(messages) == len(expected_sources)
-    assert all(any(source in message and 'Upgrading is recommended' in message for message in messages)
-               for source in expected_sources)
-    error.assert_not_called()
+    assert all(any(source in message for message in messages) for source in expected_sources)
+    assert all('KLAYOUT_TERMINAL_POLYGONS' in message and 'terminal geometry' in message
+               and 'Regenerate existing LVS databases' in message for message in messages)
+    if mode == VersionCheckMode.WARN:
+        error.assert_not_called()
 
 
-@pytest.mark.parametrize('mode,accepted', [(VersionCheckMode.ON, False), (VersionCheckMode.WARN, True)])
-def test_existing_hard_constraints_keep_their_severity(mode: VersionCheckMode, accepted: bool):
+@pytest.mark.parametrize('version,missing_features', [
+    ('0.30.0', ('KLAYOUT_NEIGHBORHOOD_VISITOR', 'KLAYOUT_PEX_MODULE', 'KLAYOUT_RESISTANCE_FIXES')),
+    ('0.30.1', ('KLAYOUT_PEX_MODULE', 'KLAYOUT_RESISTANCE_FIXES')),
+    ('0.30.2', ('KLAYOUT_RESISTANCE_FIXES',)),
+    ('0.30.3', ()),
+    ('0.30.12', ()),
+    ('0.30.13', ()),
+    ('0.30.14', ()),
+])
+@pytest.mark.parametrize('mode', [VersionCheckMode.ON, VersionCheckMode.WARN])
+def test_older_requirements_keep_their_individual_diagnostics(
+        version: str, missing_features: Tuple[str, ...], mode: VersionCheckMode):
+    # New minima must not erase why earlier releases were insufficient.
+    # Cross each historical boundary and retain the recommendation's severity.
     with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
             mock.patch('klayout_pex.tool_version_constraints.error') as error:
-        assert check_tool_versions({}, mode=mode, klayout_python_version='0.30.2') == accepted
-    assert bool(error.call_count) == (mode == VersionCheckMode.ON)
-    assert any('KLAYOUT_03013_FIXES' in call.args[0] for call in warn.call_args_list)
+        accepted = check_tool_versions({}, mode=mode, klayout_python_version=version)
+    unsupported = Version(version) < Version('0.30.14')
+    assert accepted == (not unsupported or mode == VersionCheckMode.WARN)
+    expected_errors = set(missing_features)
+    if unsupported:
+        expected_errors.add('KLAYOUT_TERMINAL_POLYGONS')
+    expected_warnings = {'KLAYOUT_03013_FIXES'} if Version(version) < Version('0.30.13') else set()
+    if mode == VersionCheckMode.WARN:
+        expected_warnings |= expected_errors
+        expected_errors = set()
+    for logger, expected in ((error, expected_errors), (warn, expected_warnings)):
+        messages = [call.args[0] for call in logger.call_args_list]
+        assert len(messages) == len(expected)
+        assert all(any(f'({constraint_id})' in message for message in messages)
+                   for constraint_id in expected)
 
 
 @pytest.mark.parametrize('tool', [Tool.KLAYOUT, Tool.MAGIC])
@@ -202,11 +236,13 @@ def test_magic_requires_correct_sidewall_counting(version: str, supported: bool,
 
 
 def test_report_separates_required_and_recommended_ranges():
-    with mock.patch('klayout_pex.tool_version_constraints.subproc') as printed:
-        assert check_tool_versions({}, klayout_python_version='0.30.13')
-    header, row = [call.args[0] for call in printed.call_args_list]
+    with mock.patch('klayout_pex.tool_version_constraints.subproc') as printed, \
+            mock.patch.object(Tool, 'detect_version', return_value=Version('6.4.0')):
+        assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'}, klayout_python_version='0.30.14')
+    header, *rows = [call.args[0] for call in printed.call_args_list]
     assert 'Required' in header and 'Recommended' in header
-    assert '0.30.3' in row and '0.30.13' in row
+    assert any('KLayout Python module' in row and '>=0.30.14' in row and '>=0.30.13' in row for row in rows)
+    assert any('FasterCap' in row and '>=6.4.0' in row for row in rows)
 
 
 @pytest.mark.parametrize('version', [
