@@ -97,6 +97,7 @@ def build_lvs_computed_layers(tech: Technology):
     #       (rt1, rt2: e.g. 6 Ω·µm over the width of nplus_s, whose contact abuts its body),
     #       so their terminals are on the Metal1 over them
     add_computed_layer(tech, CONT,    KDEV, "contact_res_con",     (33, 4408), "Contact", None,               "Computed layer for contact from the terminals of the diffusion resistors to Metal1")
+    add_computed_layer(tech, CONT,    KDEV, "contact_sc_diode_con", (33, 4409), "Contact", None, "Contacts within the Schottky diode, whose model includes series resistance")
     add_computed_layer(tech, VIA,     KREG, "via1",        (35, 0),     "Via1",      "via1",             "Computed layer for via1")
     add_computed_layer(tech, VIA,     KREG, "via2_n_cap",  (38, 144),   "Via2",      "via2_n_cap",       "Computed layer for via2 (no MIM cap)")
     add_computed_layer(tech, VIA,     KREG, "via3_n_cap",  (40, 144),   "Via3",      "via3_n_cap",       "Computed layer for via3 (no MIM cap)")

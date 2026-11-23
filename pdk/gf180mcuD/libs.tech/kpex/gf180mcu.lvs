@@ -381,14 +381,14 @@ contact_poly_con = contact.and(poly2_con)
 
 # [PEX] the contacts over the n-taps, which join Metal1 to the nwell below them
 #       (NOTE: a regular LVS would not do this, we need it for PEX)
-contact_ntap_con = contact.and(ntap)
+contact_ntap_con = contact.and(ntap).not(schottky_diode)
 
 # [PEX] the contacts over the taps of the substrate (ptap), of the deep nwell (ntap_dw)
 #       and of the isolated p-wells within it (their p-diffusion, also the well diodes' P terminals,
 #       which ptap_dw leaves out), which are no conductors of the resistance network,
 #       so that PEX knows all of the contacts (NOTE: a regular LVS would not do this, we need it for PEX)
 contact_ptap_con    = contact.and(ptap)
-contact_ntap_dw_con = contact.and(ntap_dw)
+contact_ntap_dw_con = contact.and(ntap_dw).not(schottky_diode)
 contact_ptap_dw_con = contact.and(pcomp.and(lvpwell_con).and(dnwell))
 
 # [PEX] the contacts over the terminals of the diffusion resistors, which their models have (rt1, rt2),
