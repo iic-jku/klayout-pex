@@ -44,7 +44,7 @@ import klayout.db as kdb
 import klayout.rdb as rdb
 
 from klayout_pex.fastercap.fastercap_error import FasterCapError
-from klayout_pex.kpex_cli import KpexCLI, halo_default_help, side_halo_by_pdk
+from klayout_pex.kpex_cli import ArgumentValidationError, KpexCLI, halo_default_help, side_halo_by_pdk
 from klayout_pex.netlist.spice_reader import SpiceReader
 from klayout_pex.pdk_config import PDK
 from klayout_pex.pex25d.diagnostics import ExitCode
@@ -876,8 +876,8 @@ def test_result_file_of_pex25d_names_its_outputs(tmp_path):
            [('pex25d_file', str(pex25d_path))]
 
 
-@pytest.mark.parametrize('version,expected_warning', [('0.30.12', True), ('0.30.13', False)])
-def test_lvsdb_input_checks_python_module_without_needing_executable(version: str, expected_warning: bool):
+@pytest.mark.parametrize('version,accepted', [('0.30.13', False), ('0.30.14', True), ('0.30.15', True)])
+def test_lvsdb_input_checks_python_module_without_needing_executable(version: str, accepted: bool):
     from klayout_pex.env import Env
     from klayout_pex.tool_version_constraints import Tool
     args = KpexCLI.parse_args(['extract', '--pdk', 'sky130A', '--2.5D',
@@ -886,10 +886,14 @@ def test_lvsdb_input_checks_python_module_without_needing_executable(version: st
     args.klayout_exe_path = '/nonexistent/klayout'
     with mock.patch.object(kdb, '__version__', version), \
             mock.patch.object(Tool, 'detect_version', side_effect=AssertionError('LVSDB needs no executable')), \
-            mock.patch('klayout_pex.tool_version_constraints.warning') as warn:
-        KpexCLI.validate_args(args)
-    messages = [call.args[0] for call in warn.call_args_list]
-    assert any('KLayout Python module' in message and '0.30.13' in message for message in messages) == expected_warning
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        if accepted:
+            KpexCLI.validate_args(args)
+        else:
+            with pytest.raises(ArgumentValidationError):
+                KpexCLI.validate_args(args)
+    messages = [call.args[0] for call in error.call_args_list]
+    assert any('KLayout Python module' in message and '0.30.14' in message for message in messages) == (not accepted)
 
 
 @allure.parent_suite("Unit Tests")
@@ -923,7 +927,7 @@ def test_magic_version_check_precedes_extraction(
     if mode is not None:
         argv.extend(['--tool-version-checks', mode])
     with mock.patch.dict(os.environ, {'KPEX_MAGIC_EXE': str(executable), 'KPEX_KLAYOUT_EXE': '/nonexistent'}), \
-            mock.patch.object(kdb, '__version__', '0.30.13'), \
+            mock.patch.object(kdb, '__version__', '0.30.14'), \
             mock.patch.object(Tool, 'detect_version', autospec=True, return_value=Version(version) if version else None) as detect, \
             mock.patch.object(KpexCLI, 'run_magic_extraction') as extract:
         code, output = run_cli(KpexCLI().main, argv)
