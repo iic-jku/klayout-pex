@@ -1,0 +1,60 @@
+# frozen_string_literal: true
+
+################################################################################################
+# Copyright 2026 Martin Jan Köhler and Harald Pretl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+################################################################################################
+
+# The planar diode extractor places both terminals on the N/P overlap. For a
+# Schottky diode the metal-semiconductor anode contact is beside the n+ cathode,
+# so retain the existing area/perimeter calculation but attach each terminal to
+# its own contact footprint. The model includes the resistance below Metal1.
+class SchottkyDiodeExtractor < RBA::GenericDeviceExtractor
+  def initialize
+    self.name = 'sc_diode'
+  end
+
+  def setup
+    define_layer('MK', 'Schottky recognition marker')
+    define_layer('N', 'Cathode diffusion used for area and perimeter')
+    define_layer('A', 'Anode contact footprints')
+    define_layer('C', 'Cathode contact footprints')
+    define_layer('M', 'Metal1 terminal output')
+    @device_class = RBA::DeviceClassDiode.new
+    @device_class.name = name
+    register_device_class(@device_class)
+  end
+
+  def get_connectivity(_layout, layers)
+    connectivity = RBA::Connectivity.new
+    layers[0..3].each { |layer| connectivity.connect(layers[0], layer) }
+    connectivity
+  end
+
+  def extract_devices(layer_geometry)
+    marker, cathodes, anode_contacts, cathode_contacts = layer_geometry
+    marker.merged.each do |polygon|
+      marker_region = RBA::Region.new(polygon)
+      anode = anode_contacts & marker_region
+      (cathodes & marker_region).merged.each do |cathode|
+        cathode_region = RBA::Region.new(cathode)
+        device = create_device
+        device.set_parameter('A', cathode.area * dbu * dbu)
+        device.set_parameter('P', cathode.perimeter * dbu)
+        anode.each { |contact| define_terminal(device, 'A', 'M', contact) }
+        (cathode_contacts & cathode_region).each { |contact| define_terminal(device, 'C', 'M', contact) }
+      end
+    end
+  end
+end

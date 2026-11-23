@@ -531,7 +531,51 @@ def cut_taps_with_labels(name: str, label_of_cell: str, label_of_top: str) -> Pa
     return p
 
 
+def r_schottky_diode(name: str, contacts_per_terminal: int, routed: bool,
+                     lead_extension: int = 0, port_suffix: str = '') -> Pattern:
+    """Two cathode stripes beside an anode, with optional Metal1 leads outside the marker.
+
+    This reproduces the topology of gf180_sc_diode.gds from #590 without a PCell
+    installation. One/multiple contact cuts exercise the intrinsic device boundary.
+    """
+    p = pattern(name)
+    p.box(DNWELL, -1430, -1400, 3330, 2400)
+    p.box((241, 0), -190, -190, 2090, 1190)
+    for x1, x2 in ((0, 360), (640, 1260), (1540, 1900)):
+        p.box(COMP, x1, 0, x2, 1000)
+        p.box(METAL1, x1, 0, x2, 1000)
+        if x1 != 640:
+            p.box(NPLUS, x1 - 30, -30, x2 + 30, 1030)
+        cx = (x1 + x2) // 2
+        for cy in ([500] if contacts_per_terminal == 1 else [250, 750]):
+            p.box(CONT, cx - 110, cy - 110, cx + 110, cy + 110)
+    # Cathode fingers are one electrode, joined below the anode pad.
+    p.path(METAL1, [(180, 180), (180, -500), (1720, -500), (1720, 180)], 360)
+    if routed:
+        p.box(METAL1, 640, 1000, 1260, 10000 + lead_extension)
+        p.box(METAL1, 0, -10000 - lead_extension, 360, -500)
+        p.label(METAL1, 'A' + port_suffix, 950, 9800 + lead_extension)
+        p.label(METAL1, 'C' + port_suffix, 180, -9800 - lead_extension)
+    else:
+        p.label(METAL1, 'A' + port_suffix, 950, 500)
+        p.label(METAL1, 'C' + port_suffix, 180, 500)
+    return p
+
+
+def r_schottky_diode_pair() -> Pattern:
+    """Two disjoint markers with separate ports, one rotated and reflected."""
+    p = r_schottky_diode('r_schottky_diode_pair', 2, True)
+    other = r_schottky_diode('second', 2, True, port_suffix='2')
+    other.top.transform(kdb.Trans(1, True, 30000, 0))
+    p.top.copy_tree(other.top)
+    return p
+
+
 PATTERNS: Dict[str, Callable[[], Pattern]] = {
+    'r_schottky_diode_pair': r_schottky_diode_pair,
+    'r_schottky_diode_long': lambda: r_schottky_diode('r_schottky_diode_long', 2, True, lead_extension=10000),
+    'r_schottky_diode_contact': lambda: r_schottky_diode('r_schottky_diode_contact', 1, False),
+    'r_schottky_diode_routed': lambda: r_schottky_diode('r_schottky_diode_routed', 2, True),
     'cut_taps_with_labels_a_b': lambda: cut_taps_with_labels('cut_taps_with_labels_a_b', 'A', 'B'),
     'cut_taps_with_labels_b_a': lambda: cut_taps_with_labels('cut_taps_with_labels_b_a', 'B', 'A'),
     'cut_diffusion_resistors_wire_on_pad': cut_diffusion_resistors_wire_on_pad,

@@ -216,9 +216,22 @@ sc_diode_exclude = dualgate.join(pplus).join(diode_mk)
 sc_diode_terminal_n = ncomp.and(dnwell).and(schottky_diode).not(sc_diode_exclude)
 sc_diode_terminal_p = comp.not(nplus).and(dnwell).and(schottky_diode).not(sc_diode_exclude)
 
-# As P and N are on top of each other, we need some tricks to not merge both terminals.
-# This is made slightly more difficult by the fact that sc diodes do not use pcomp, simply comp.
-extract_devices(diode('sc_diode'),
-                { 'N' => sc_diode_terminal_n, 'P' => schottky_diode, 'tA' => schottky_diode, 'tC' => ntap })
-connect(schottky_diode, sc_diode_terminal_p)
-connect(sc_diode_terminal_p, contact)
+# [PEX] Keep the recognition marker out of electrical connectivity. Terminal
+# footprints are the contacts of each electrode, rather than the marker or the
+# N/P overlap, which lies on the cathode even for the anode terminal.
+sc_diode_anode_port = contact.and(sc_diode_terminal_p).and(metal1_con)
+sc_diode_cathode_port = contact.and(sc_diode_terminal_n).and(metal1_con)
+
+
+# %include custom_schottky_extractor.lvs
+extract_devices(SchottkyDiodeExtractor.new,
+                { 'MK' => schottky_diode, 'N' => sc_diode_terminal_n,
+                  'A' => sc_diode_anode_port, 'C' => sc_diode_cathode_port,
+                  'M' => metal1_con })
+connect(sc_diode_anode_port, contact)
+connect(sc_diode_cathode_port, contact)
+
+# [PEX] The Schottky model includes the contact/series resistance.
+contact_sc_diode_con = sc_diode_anode_port.or(sc_diode_cathode_port)
+name(contact_sc_diode_con, 'contact_sc_diode_con')
+connect(contact_sc_diode_con, contact)
