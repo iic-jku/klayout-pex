@@ -84,6 +84,13 @@
 
 ## Code
 
+- Preserve tool-version constraints as documentation of required upstream fixes and
+  capabilities. Add an independently named constraint for each new requirement instead
+  of replacing or deleting earlier entries, even when a newer minimum subsumes them.
+  Retain their version bounds, reasons, severities, scopes and source references. If an
+  earlier rationale proves incorrect, document the correction and its evidence explicitly
+  rather than silently erasing the history or retaining an incorrect claim as current fact.
+  Review the file history when changing existing constraints to catch earlier lost context
 - Validate cheap inputs (CLI args, names) before loading or resolving; error messages list
   the valid values.
 - Wrap third-party/plugin exceptions in the domain error (`from exc`, naming the source);

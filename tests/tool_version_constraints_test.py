@@ -66,10 +66,10 @@ class Test(unittest.TestCase):
 
     def test_constraints_compile_to_one_effective_range(self):
         required = effective_version_range(Tool.KLAYOUT, severity=Severity.ERROR)
-        assert required == SpecifierSet('>=0.30.14')
+        assert required == SpecifierSet('>=0.30.1,>=0.30.2,>=0.30.3,>=0.30.14')
         assert required.contains(Version('0.30.14'))
         assert not required.contains(Version('0.30.13'))
-        assert effective_version_range(Tool.KLAYOUT, severity=Severity.WARNING) == SpecifierSet('')
+        assert effective_version_range(Tool.KLAYOUT, severity=Severity.WARNING) == SpecifierSet('>=0.30.13')
 
     def test_a_pdk_constraint_is_part_of_that_pdk_s_range(self):
         for_sky130a = effective_version_range(Tool.MAGIC, pdk=PDK.SKY130A)
@@ -152,13 +152,48 @@ def test_terminal_polygon_minimum_checks_executable_and_module_independently(
         accepted = check_tool_versions({Tool.KLAYOUT: '/klayout'} if binary else {},
                                        klayout_python_version=module, mode=mode)
     assert accepted == (not expected_sources or mode == VersionCheckMode.WARN)
-    report, unused = (error, warn) if mode == VersionCheckMode.ON else (warn, error)
-    messages = [call.args[0] for call in report.call_args_list]
+    report = error if mode == VersionCheckMode.ON else warn
+    messages = [call.args[0] for call in report.call_args_list
+                if 'KLAYOUT_TERMINAL_POLYGONS' in call.args[0]]
     assert len(messages) == len(expected_sources)
     assert all(any(source in message for message in messages) for source in expected_sources)
     assert all('KLAYOUT_TERMINAL_POLYGONS' in message and 'terminal geometry' in message
                and 'Regenerate existing LVS databases' in message for message in messages)
-    unused.assert_not_called()
+    if mode == VersionCheckMode.WARN:
+        error.assert_not_called()
+
+
+@pytest.mark.parametrize('version,missing_features', [
+    ('0.30.0', ('KLAYOUT_NEIGHBORHOOD_VISITOR', 'KLAYOUT_PEX_MODULE', 'KLAYOUT_RESISTANCE_FIXES')),
+    ('0.30.1', ('KLAYOUT_PEX_MODULE', 'KLAYOUT_RESISTANCE_FIXES')),
+    ('0.30.2', ('KLAYOUT_RESISTANCE_FIXES',)),
+    ('0.30.3', ()),
+    ('0.30.12', ()),
+    ('0.30.13', ()),
+    ('0.30.14', ()),
+])
+@pytest.mark.parametrize('mode', [VersionCheckMode.ON, VersionCheckMode.WARN])
+def test_older_requirements_keep_their_individual_diagnostics(
+        version: str, missing_features: Tuple[str, ...], mode: VersionCheckMode):
+    # New minima must not erase why earlier releases were insufficient.
+    # Cross each historical boundary and retain the recommendation's severity.
+    with mock.patch('klayout_pex.tool_version_constraints.warning') as warn, \
+            mock.patch('klayout_pex.tool_version_constraints.error') as error:
+        accepted = check_tool_versions({}, mode=mode, klayout_python_version=version)
+    unsupported = Version(version) < Version('0.30.14')
+    assert accepted == (not unsupported or mode == VersionCheckMode.WARN)
+    expected_errors = set(missing_features)
+    if unsupported:
+        expected_errors.add('KLAYOUT_TERMINAL_POLYGONS')
+    expected_warnings = {'KLAYOUT_03013_FIXES'} if Version(version) < Version('0.30.13') else set()
+    if mode == VersionCheckMode.WARN:
+        expected_warnings |= expected_errors
+        expected_errors = set()
+    for logger, expected in ((error, expected_errors), (warn, expected_warnings)):
+        messages = [call.args[0] for call in logger.call_args_list]
+        assert len(messages) == len(expected)
+        assert all(any(f'({constraint_id})' in message for message in messages)
+                   for constraint_id in expected)
 
 
 @pytest.mark.parametrize('tool', [Tool.KLAYOUT, Tool.MAGIC])
@@ -206,7 +241,7 @@ def test_report_separates_required_and_recommended_ranges():
         assert check_tool_versions({Tool.FASTERCAP: '/FasterCap'}, klayout_python_version='0.30.14')
     header, *rows = [call.args[0] for call in printed.call_args_list]
     assert 'Required' in header and 'Recommended' in header
-    assert any('KLayout Python module' in row and '>=0.30.14' in row for row in rows)
+    assert any('KLayout Python module' in row and '>=0.30.14' in row and '>=0.30.13' in row for row in rows)
     assert any('FasterCap' in row and '>=6.4.0' in row for row in rows)
 
 

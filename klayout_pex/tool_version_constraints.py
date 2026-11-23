@@ -186,6 +186,33 @@ FASTERCAP_NUMERICAL_REPORT = ToolVersionConstraint(
 
 TOOL_VERSION_CONSTRAINTS: Tuple[ToolVersionConstraint, ...] = (
     ToolVersionConstraint(
+        id='KLAYOUT_NEIGHBORHOOD_VISITOR',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.1',
+        reason="the KPEX/2.5D engine needs PolygonNeighborhoodVisitor, "
+               "EdgeNeighborhoodVisitor and the *WithProperties geometry classes",
+    ),
+    ToolVersionConstraint(
+        id='KLAYOUT_PEX_MODULE',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.2',
+        reason="resistance extraction needs the klayout.pex module",
+    ),
+    ToolVersionConstraint(
+        id='KLAYOUT_RESISTANCE_FIXES',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.3',
+        reason="earlier releases have bugs in resistance extraction",
+    ),
+    ToolVersionConstraint(
+        id='KLAYOUT_03013_FIXES',
+        tool=Tool.KLAYOUT,
+        specifier='>= 0.30.13',
+        reason="0.30.13 fixes slow terminal lookup, neighborhood-visitor memory leaks "
+               "and resistance-extraction crashes. Upgrading is recommended",
+        severity=Severity.WARNING,
+    ),
+    ToolVersionConstraint(
         id='KLAYOUT_TERMINAL_POLYGONS',
         tool=Tool.KLAYOUT,
         specifier='>= 0.30.14',
